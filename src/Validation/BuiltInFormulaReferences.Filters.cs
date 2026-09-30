@@ -12,36 +12,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersAdaptiveLaguerreFilter:
                 return new("Ealf", new[] { "Ealf" }, bars => Outputs(("Ealf", AdaptiveLaguerreValues(bars, Integer(options, "Length", 14)))));
             case IndicatorName.EdgePreservingFilter:
-                var edgeLength = Integer(options, "Length", 200);
-                var edgeKind = AverageKind(options, 1);
-                if (edgeKind == 0) return null;
-                return new("Epf", new[] { "Epf" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var means = Average(prices, edgeLength, edgeKind);
-                    var offsets = prices.Select((p, i) => p - means[i]).ToArray();
-                    var fitted = RegressionEndpoints(offsets.Select(Math.Abs).ToArray(), 50);
-                    var peaks = fitted.Select((v, i) =>
-                    {
-                        var peak = Window(fitted, i, edgeLength).Max();
-                        return peak != 0 && Math.Abs(v - peak) <= 1e-12 * Math.Abs(peak);
-                    }).ToArray();
-                    var segmentStart = 0;
-                    var seeded = true;
-                    var line = new double[prices.Length];
-                    for (var i = 0; i < line.Length; i++)
-                    {
-                        if (peaks[i] && (i == 0 || !peaks[i - 1]) && offsets[i] != 0)
-                        {
-                            segmentStart = i;
-                            seeded = false;
-                        }
-                        // Before the first edge, the published filter includes a seed observation of price[0].
-                        var observations = prices.Skip(segmentStart).Take(i - segmentStart + 1);
-                        line[i] = seeded ? observations.Append(prices[0]).Average() : observations.Average();
-                    }
-                    return Outputs(("Epf", line));
-                });
+                return AverageKind(options, 1) == 0 ? null : new("Epf", new[] { "Epf" }, bars => EdgePreservingOutputs(bars, indicator));
             case IndicatorName.EhlersAllPassPhaseShifter:
                 var phaseLength = Integer(options, "Length", 20);
                 return new("Eapps", new[] { "Eapps" }, bars =>

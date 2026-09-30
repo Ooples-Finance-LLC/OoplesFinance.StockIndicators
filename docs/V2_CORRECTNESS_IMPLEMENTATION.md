@@ -3697,3 +3697,12 @@ The corrected isolated campaigns `615ra` and `615rb` passed their baselines and 
 Source snapshot SHA256: `3078d3dfe2a372eb8980f016c5f134eb3542136c45b68457d624e46ec7b00a51`. Archive SHA256: `cb0c1b7ec774df95f2726d0731b9dd1547e92662eb333bbcc24da33f4f24e9f1` and `cb0c1b7ec774df95f2726d0731b9dd1547e92662eb333bbcc24da33f4f24e9f1`.
 
 This is evidence for the isolated batch-615 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 616 through 628 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 629, Edge Preserving Filter
+
+Edge Preserving Filter now retains rounded extended offsets and regression endpoints, lazy observed-history windows, exact segment means and residual signals across batch, fast, native, forced-streaming and core routes. The core now computes the public segment-average formula instead of a volatility-threshold EMA. Period one uses a one-observation peak window consistently. The startup seed and `1e-12` rounded-ratio peak tolerance are documented as library conventions in `V2_FORMULA_VARIANTS.md`.
+
+The independent reference scans windows, derives the regression from centered covariance/scatter, and reconstructs each segment. **48/48 focused tests passed** (`edge-preserving-629.trx`), including five configurations across five routes, numerical enrollment, selected inputs, hand reset/seed cases, all four primary smoothing kinds, subnormal and overflowing intermediates, extreme periods, core in-place spans, callback slots, invalid candles, and preview/reset behavior. The first focused run passed without a production or test correction.
+
+**Mutation qualification remains pending** for 34 prepared behavioral faults; all **6,580 retained anchors** passed preflight. Candidate/frozen snapshots match on 2,123 files. Prepared inventory is **6,110/7,131 enrollments**, with **1,021 omissions across 148 types**. This is the 394th prepared numerical batch, covering 3,284 configurations across 597 types. Built DLL SHA256: `CB2462ABE4FAA48BD6906B99D3BED9403790C10915DC3336BFCD240A34E9965A`. Full coverage and final hosted/package/release/performance gates remain incomplete.

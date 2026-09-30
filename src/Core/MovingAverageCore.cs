@@ -2800,41 +2800,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EdgePreservingFilter(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var prevEpf = i >= 1 ? output[i - 1] : currentValue;
-                var stdDev = stdDevBuffer[i];
-
-                // Edge detection based on deviation from previous value
-                var edge = Math.Abs(currentValue - prevEpf);
-                var threshold = 2 * stdDev;
-
-                if (edge > threshold)
-                {
-                    // Preserve edge - use current value directly
-                    output[i] = currentValue;
-                }
-                else
-                {
-                    // Smooth
-                    var alpha = 2.0 / (length + 1);
-                    output[i] = prevEpf + (alpha * (currentValue - prevEpf));
-                }
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EdgePreservingWindow(MovingAvgType.SimpleMovingAverage, length, 50);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>

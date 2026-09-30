@@ -56021,5 +56021,311 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.InvalidCandlesCannotAdvanceDeviationOrAdaptiveHistory"
+  },
+  {
+    "id": "edge-preserving-wide-mean-ready",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_prices.Count < _length - 1",
+    "after": "_prices.Count < _length",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "sum.Add(_prices.Peek(), -1)",
+    "after": "sum.Add(_prices.Peek(), 1)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Add(0);",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 2L) / 2",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-offset",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "Units(price) - ExactVarianceWindow.Units(mean)",
+    "after": "Units(price) + ExactVarianceWindow.Units(mean)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "Fit(BigInteger.Abs(offset), final)",
+    "after": "Fit(offset, final)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-regression-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "var expired = full ? _offsets.Peek() : BigInteger.Zero;",
+    "after": "var expired = full ? BigInteger.Zero : BigInteger.Zero;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-regression-shift",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_offsetWeighted - _offsetSum + expired",
+    "after": "_offsetWeighted + _offsetSum + expired",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-regression-position",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_offsetWeighted + (n - 1) * offset",
+    "after": "_offsetWeighted + n * offset",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-regression-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "2 * weighted + (n - 1) * sum",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-regression-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "3 * covariance * (n - 1)",
+    "after": "3 * covariance * (n + 1)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-regression-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "n * spread);",
+    "after": "(n + 1) * spread);",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-peak-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_index - _length + 1L",
+    "after": "_index - _length + 2L",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-peak-direction",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "BigInteger.Max(endpoint, first.Value.Value)",
+    "after": "BigInteger.Min(endpoint, first.Value.Value)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-peak-zero",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "if (peak.IsZero) return false;",
+    "after": "if (peak.IsZero) return true;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.PeakToleranceUsesRoundedRatioAndRejectsZeroPeaks"
+  },
+  {
+    "id": "edge-preserving-wide-peak-tolerance",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "Math.Abs(ratio - 1) <= 1e-12",
+    "after": "Math.Abs(ratio - 1) <= 1e-14",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.PeakToleranceUsesRoundedRatioAndRejectsZeroPeaks"
+  },
+  {
+    "id": "edge-preserving-wide-peak-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "(value * peak.Sign) << 1074",
+    "after": "value << 1074",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.PeakToleranceUsesRoundedRatioAndRejectsZeroPeaks"
+  },
+  {
+    "id": "edge-preserving-wide-entry",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "atPeak && !_previousPeak && !offset.IsZero",
+    "after": "atPeak && _previousPeak && !offset.IsZero",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-peak-memory",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_previousPeak = atPeak;",
+    "after": "_previousPeak = !atPeak;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-seed-count",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "(_index == 0 ? 1 : _runCount) + 1",
+    "after": "(_index == 0 ? 0 : _runCount) + 1",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-seed-sum",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "(_index == 0 ? ExactVarianceWindow.Units(price) : _runSum)",
+    "after": "(_index == 0 ? BigInteger.Zero : _runSum)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "var sum = restart ? ExactVarianceWindow.Units(price)",
+    "after": "var sum = restart ? _runSum",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-output-count",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "new BigInteger(count));",
+    "after": "new BigInteger(count + 1));",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-signal-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "Units(price) - ExactVarianceWindow.Units(value)",
+    "after": "Units(value) - ExactVarianceWindow.Units(price)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_previousResidual = residual;",
+    "after": "_previousResidual = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "if (final)\n        {\n            while (_peaks.First",
+    "after": "if (!final)\n        {\n            while (_peaks.First",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.HandSegmentsKeepSeedAndOnlyRestartOnNewPeakEntries"
+  },
+  {
+    "id": "edge-preserving-wide-deque-order",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "last.Value.Value <= endpoint",
+    "after": "last.Value.Value >= endpoint",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-reset-price-history",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_prices.Clear();",
+    "after": "_priceSum = default;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-reset-fit-history",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_offsets.Clear();",
+    "after": "_offsetSum = default;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-reset-peaks",
+    "module": "numerical",
+    "file": "src/Helpers/EdgePreservingWindow.cs",
+    "scope": "internal sealed class EdgePreservingWindow",
+    "before": "_peaks.Clear();",
+    "after": "_previousPeak = false;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.WideRoundedOffsetsAndRegressionRecoverAcrossAllMeans"
+  },
+  {
+    "id": "edge-preserving-wide-core",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EdgePreservingFilter(",
+    "before": "window.Next(input[i], true).Value",
+    "after": "window.Next(input[i], false).Value",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.CoreUsesPublicSegmentsAndSupportsInPlace"
+  },
+  {
+    "id": "edge-preserving-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEdgePreservingFilterFast(",
+    "before": "window.Next(inputList[i], true, external?[i])",
+    "after": "window.Next(data.ClosePrices[i], true, external?[i])",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.SelectedInputsAndLegacyAverageKindsAgree"
+  },
+  {
+    "id": "edge-preserving-wide-fast-override",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEdgePreservingFilterFast(",
+    "before": "window.Next(inputList[i], true, external?[i])",
+    "after": "window.Next(inputList[i], true, external is null ? null : 0d)",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.CustomMeanConsumesOneFastSlotAndNoBatchSlots"
+  },
+  {
+    "id": "edge-preserving-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class EdgePreservingFilterState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~EdgePreservingNumericalTests.InvalidCandlesCannotAdvanceAnyState"
   }
 ]

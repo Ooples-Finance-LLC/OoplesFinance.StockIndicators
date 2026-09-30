@@ -11917,55 +11917,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEdgePreservingFilterFast(StockData data, ComputeContext context,
         int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int smoothLength = 50)
     {
-        // CalculateEdgePreservingFilter averages the input over a run that restarts whenever the regressed
-        // distance from the moving average reaches a new high on the side the input is not on. The output is
-        // that running mean, so the edge is preserved by the restart rather than by any weighting.
         var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var averageBuffer = context.Rent(count);
-        MovingAverage(data, maType, length, input, averageBuffer.WritableSpan);
-        var average = averageBuffer.Span;
-
-        using var offsetBuffer = context.Rent(count);
-        using var regressedBuffer = context.Rent(count);
-        var offset = offsetBuffer.WritableSpan;
-        var regressed = regressedBuffer.WritableSpan;
-        using var leastSquares = new ExactLinearFitWindow(smoothLength);
-
-        for (var i = 0; i < count; i++)
+        double[]? external = null;
+        if (!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides)
         {
-            offset[i] = input[i] - average[i];
-            regressed[i] = leastSquares.Next(Math.Abs(offset[i]), isFinal: true).Last;
+            using var means = context.Rent(inputList.Count); MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(inputList), means.WritableSpan); external = means.Span.ToArray();
         }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var window = new RollingMinMax(Math.Max(length, 2));
-        double previousRatio = 0;
-        double runLength = 0;
-        double runSum = 0;
-
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(regressed[i]);
-
-            var ratio = window.Max != 0 ? regressed[i] / window.Max : 0;
-            var restart = Math.Abs(ratio - 1) <= 1e-12 && Math.Abs(previousRatio - 1) > 1e-12 && offset[i] != 0;
-            previousRatio = ratio;
-
-            // The run is one bar long before the first bar, and the sum is seeded with that bar's own
-            // value, so a bar that does not restart the run counts itself twice - as the batch does.
-            var previousRunLength = i >= 1 ? runLength : 1;
-            var previousRunSum = i >= 1 ? runSum : input[i];
-            runLength = restart ? 1 : previousRunLength + 1;
-            runSum = runLength == 1 ? input[i] : previousRunSum + input[i];
-
-            output[i] = runLength != 0 ? runSum / runLength : 0;
-        }
-
-        return buffer;
+        using var window = new EdgePreservingWindow(maType, length, smoothLength); var output = context.Rent(inputList.Count);
+        for (var i = 0; i < inputList.Count; i++) output.WritableSpan[i] = window.Next(inputList[i], true, external?[i]).Value;
+        return output;
     }
 
     /// <summary>

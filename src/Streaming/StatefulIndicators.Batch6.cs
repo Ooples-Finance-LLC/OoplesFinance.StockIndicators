@@ -686,88 +686,17 @@ public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorSta
 [PrimaryOutput("Epf")]
 public sealed class EdgePreservingFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _sma;
-    private readonly LinearRegressionState _regression;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly StreamingInputResolver _input;
-    private double _regressionInput;
-    private double _prevA;
-    private double _prevB;
-    private double _prevH;
-    private bool _hasPrev;
-
-    public EdgePreservingFilterState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200,
-        int smoothLength = 50)
-    {
-        _sma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _regression = new LinearRegressionState(Math.Max(1, smoothLength), _ => _regressionInput);
-        _maxWindow = new RollingWindowMax(Math.Max(2, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EdgePreservingWindow _window;
+    public EdgePreservingFilterState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200, int smoothLength = 50)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.EdgePreservingFilter;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _regression.Reset();
-        _maxWindow.Reset();
-        _prevA = 0;
-        _prevB = 0;
-        _prevH = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var currentValue = _input.GetValue(bar);
-        var sma = _sma.Next(currentValue, isFinal);
-        var os = currentValue - sma;
-        var absOs = Math.Abs(os);
-
-        _regressionInput = absOs;
-        var p = _regression.Update(bar, isFinal, includeOutputs: false).Value;
-        var highest = isFinal ? _maxWindow.Add(p, out _) : _maxWindow.Preview(p, out _);
-
-        var prevH = _hasPrev ? _prevH : 0;
-        var h = highest != 0 ? p / highest : 0;
-        // A numerically flat regression peak must not create new reset edges.
-        double cnd = Math.Abs(h - 1) <= 1e-12 && Math.Abs(prevH - 1) > 1e-12 ? 1 : 0;
-        double sign = cnd == 1 && os < 0 ? 1 : cnd == 1 && os > 0 ? -1 : 0;
-        var condition = sign != 0;
-
-        var prevA = _hasPrev ? _prevA : 1;
-        var a = condition ? 1 : prevA + 1;
-        var prevB = _hasPrev ? _prevB : currentValue;
-        var b = a == 1 ? currentValue : prevB + currentValue;
-        var c = a != 0 ? b / a : 0;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _prevB = b;
-            _prevH = h;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Epf", c }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(c, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Epf", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _regression.Dispose();
-        _maxWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eal")]

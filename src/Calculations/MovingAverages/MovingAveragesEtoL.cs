@@ -1353,72 +1353,17 @@ public static partial class Calculations
     public static StockData CalculateEdgePreservingFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200, 
         int smoothLength = 50)
     {
-        List<double> osList = new(stockData.Count);
-        List<double> absOsList = new(stockData.Count);
-        List<double> hList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> cList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var line = new List<double>(input.Count); var trades = CreateSignalsList(stockData, input.Count);
+        double[]? external = null;
+        if (!StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-
-            var os = currentValue - sma;
-            osList.Add(os);
-
-            var absOs = Math.Abs(os);
-            absOsList.Add(absOs);
+            var caller = stockData.CaptureInputSeries(); external = GetMovingAverageList(stockData, maType, Math.Max(1, length), input).ToArray(); stockData.RestoreInputSeries(caller);
         }
-
-        stockData.SetCustomValues(absOsList);
-        var pList = CalculateLinearRegression(stockData, smoothLength).ChainedValues;
-        var (highestList, _) = GetMaxAndMinValuesList(pList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var p = pList[i];
-            var highest = highestList[i];
-            var os = osList[i];
-
-            var prevH = GetLastOrDefault(hList);
-            var h = highest != 0 ? p / highest : 0;
-            hList.Add(h);
-
-            // A numerically flat regression peak must not create new reset edges.
-            double cnd = Math.Abs(h - 1) <= 1e-12 && Math.Abs(prevH - 1) > 1e-12 ? 1 : 0;
-            double sign = cnd == 1 && os < 0 ? 1 : cnd == 1 && os > 0 ? -1 : 0;
-            var condition = sign != 0;
-
-            var prevA = i >= 1 ? aList[i - 1] : 1;
-            var a = condition ? 1 : prevA + 1;
-            aList.Add(a);
-
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var b = a == 1 ? currentValue : prevB + currentValue;
-            bList.Add(b);
-
-            var prevC = GetLastOrDefault(cList);
-            var c = a != 0 ? b / a : 0;
-            cList.Add(c);
-
-            var signal = GetCompareSignal(currentValue - c, prevValue - prevC);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Epf", cList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(cList);
-        stockData.IndicatorName = IndicatorName.EdgePreservingFilter;
-
+        using var window = new EdgePreservingWindow(maType, length, smoothLength);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, external?[i]); line.Add(point.Value); trades?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Epf", line } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EdgePreservingFilter;
         return stockData;
     }
 }
