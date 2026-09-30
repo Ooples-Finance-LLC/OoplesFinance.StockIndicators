@@ -1038,65 +1038,11 @@ public static partial class Calculations
     public static StockData CalculateFisherLeastSquaresMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100)
     {
-        List<double> bList = new(stockData.Count);
-        List<double> indexList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum absDiffSum = new();
-        RollingSum diffSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var stdDevSrcList = GetStandardDeviationList(inputList, length);
-        var smaSrcList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            double index = i;
-            indexList.Add(index);
-        }
-
-        stockData.SetCustomValues(indexList);
-        var indexStdDevList = GetStandardDeviationList(indexList, length);
-        var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stdDevSrc = stdDevSrcList[i];
-            var indexStdDev = indexStdDevList[i];
-            var currentValue = inputList[i];
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var indexSma = indexSmaList[i];
-            var sma = smaSrcList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var diff = currentValue - prevB;
-            diffList.Add(diff);
-            diffSum.Add(diff);
-
-            var absDiff = Math.Abs(diff);
-            absDiffList.Add(absDiff);
-            absDiffSum.Add(absDiff);
-
-            var e = absDiffSum.Average(length);
-            var z = e != 0 ? diffSum.Average(length) / e : 0;
-            var r = Exp(2 * z) + 1 != 0 ? (Exp(2 * z) - 1) / (Exp(2 * z) + 1) : 0;
-            var a = indexStdDev != 0 && r != 0 ? (i - indexSma) / indexStdDev * r : 0;
-
-            var b = sma + (a * stdDevSrc);
-            bList.Add(b);
-
-            var signal = GetCompareSignal(currentValue - b, prevValue - prevB);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Flsma", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bList);
-        stockData.IndicatorName = IndicatorName.FisherLeastSquaresMovingAverage;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = FisherLeastSquaresWindow.Calculate(stockData, input, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Flsma", result.Line.ToList() } });
+        stockData.SetSignals(result.Trades.ToList()); stockData.SetCustomValues(result.Line.ToList());
+        stockData.IndicatorName = IndicatorName.FisherLeastSquaresMovingAverage; return stockData;
     }
 
 

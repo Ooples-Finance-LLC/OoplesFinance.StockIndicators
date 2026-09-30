@@ -166,99 +166,16 @@ public sealed class FireflyOscillatorState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Flsma")]
 public sealed class FisherLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly IMovingAverageSmoother _indexSma;
-    private readonly RollingStandardDeviation _stdDevSrc;
-    private readonly RollingStandardDeviation _indexStdDev;
-    private readonly RollingWindowSum _diffSum;
-    private readonly RollingWindowSum _absDiffSum;
-    private readonly StreamingInputResolver _input;
-    private double _indexValue;
-    private double _prevB;
-    private bool _hasPrev;
-    private int _index;
-
-    public FisherLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 100)
-    {
-        _length = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _indexSma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDevSrc = new RollingStandardDeviation(_length);
-        _indexStdDev = new RollingStandardDeviation(_length);
-        _diffSum = new RollingWindowSum(_length);
-        _absDiffSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FisherLeastSquaresWindow _window;
+    public FisherLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.FisherLeastSquaresMovingAverage;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _indexSma.Reset();
-        _stdDevSrc.Reset();
-        _indexStdDev.Reset();
-        _diffSum.Reset();
-        _absDiffSum.Reset();
-        _indexValue = 0;
-        _prevB = 0;
-        _hasPrev = false;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevB = _hasPrev ? _prevB : value;
-        var diff = value - prevB;
-        var absDiff = Math.Abs(diff);
-
-        var diffSum = isFinal ? _diffSum.Add(diff, out var diffCount) : _diffSum.Preview(diff, out diffCount);
-        var absDiffSum = isFinal ? _absDiffSum.Add(absDiff, out var absCount) : _absDiffSum.Preview(absDiff, out absCount);
-        var diffAvg = diffCount > 0 ? diffSum / diffCount : 0;
-        var absDiffAvg = absCount > 0 ? absDiffSum / absCount : 0;
-        var z = absDiffAvg != 0 ? diffAvg / absDiffAvg : 0;
-        var expValue = MathHelper.Exp(2 * z);
-        var r = expValue + 1 != 0 ? (expValue - 1) / (expValue + 1) : 0;
-
-        _indexValue = _index;
-        var sma = _sma.Next(value, isFinal);
-        var indexSma = _indexSma.Next(_indexValue, isFinal);
-        var stdDevSrc = _stdDevSrc.Next(value, isFinal);
-        var indexStdDev = _indexStdDev.Next(_indexValue, isFinal);
-        var a = indexStdDev != 0 && r != 0 ? (_indexValue - indexSma) / indexStdDev * r : 0;
-        var b = sma + (a * stdDevSrc);
-
-        if (isFinal)
-        {
-            _prevB = b;
-            _hasPrev = true;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Flsma", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(b, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Flsma", point.Line } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _indexSma.Dispose();
-        _stdDevSrc.Dispose();
-        _indexStdDev.Dispose();
-        _diffSum.Dispose();
-        _absDiffSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ftso")]

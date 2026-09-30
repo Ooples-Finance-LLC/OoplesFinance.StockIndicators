@@ -12001,54 +12001,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFisherLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateFisherLeastSquaresMovingAverage steps its own previous value towards the moving average of the
-        // chained series: the Fisher transform of the average signed change over the average absolute change
-        // scales how far the bar index sits from its own average, in standard deviations, and that scales the
-        // deviation of the series itself. MovingAverageCore.FisherLeastSquaresMovingAverage computed none of it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var window = Math.Max(length, 1);
-
-        using var index = context.Rent(count);
-        var indexValues = index.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            indexValues[i] = i;
-        }
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, window);
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        using var indexDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(index.Span, indexDeviation.WritableSpan, window);
-        using var indexAverage = context.Rent(count);
-        MovingAverage(data, maType, length, index.Span, indexAverage.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var changeSum = new RollingSum();
-        var absoluteChangeSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            // The first bar has no previous value of its own, so it steps from the series itself.
-            var previous = i >= 1 ? output[i - 1] : input[i];
-            var change = input[i] - previous;
-            changeSum.Add(change);
-            absoluteChangeSum.Add(Math.Abs(change));
-
-            var absoluteAverage = absoluteChangeSum.Average(length);
-            var z = absoluteAverage != 0 ? changeSum.Average(length) / absoluteAverage : 0;
-            var exponential = MathHelper.Exp(2 * z);
-            var r = exponential + 1 != 0 ? (exponential - 1) / (exponential + 1) : 0;
-            var a = indexDeviation.Span[i] != 0 && r != 0 ? (i - indexAverage.Span[i]) / indexDeviation.Span[i] * r : 0;
-
-            output[i] = average.Span[i] + (a * deviation.Span[i]);
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var result = FisherLeastSquaresWindow.Calculate(data, input, maType, length, true); var buffer = context.Rent(input.Count);
+        result.Line.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>
