@@ -392,29 +392,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.SuperTrend:
                 return new("Trend", new[] { "Trend" }, bars => Outputs(("Trend", SuperTrendOutputs(bars, indicator))));
             case IndicatorName.FXSniperIndicator:
-                return new("FXSniper", new[] { "FXSniper" }, bars =>
-                {
-                    var period = Integer(options, "CciLength", 14);
-                    var prices = bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray();
-                    var cci = kind != 1 ? SmoothedChannelIndex(prices, period, kind, .015) : prices.Select((v, i) =>
-                    {
-                        if (i + 1 < period) return 0;
-                        var sample = Window(prices, i, period).ToArray(); var mean = sample.Average();
-                        var deviation = sample.Average(p => Math.Abs(p - mean));
-                        return deviation == 0 ? 0 : (v - mean) / (.015 * deviation);
-                    }).ToArray();
-                    var gain = 4d / (Integer(options, "T3Length", 5) + 3); var b = Number(options, .618, "B");
-                    // H^3[(1+b)-bH]^3: repeated poles have negative-binomial impulse weights.
-                    double Cascade(int depth, int i) => Enumerable.Range(0, i + 1).Sum(j =>
-                    {
-                        var lag = i - j; double combinations = 1;
-                        for (var k = 1; k < depth; k++) combinations *= (lag + k) / (double)k;
-                        return cci[j] * combinations * Math.Pow(gain, depth) * Math.Pow(1 - gain, lag);
-                    });
-                    return Outputs(("FXSniper", prices.Select((_, i) => Math.Pow(1 + b, 3) * Cascade(3, i)
-                        - 3 * b * Math.Pow(1 + b, 2) * Cascade(4, i) + 3 * b * b * (1 + b) * Cascade(5, i)
-                        - b * b * b * Cascade(6, i)).ToArray()));
-                });
+                return new("FXSniper", new[] { "FXSniper" }, bars => FxSniperOutputs(bars, indicator));
             case IndicatorName.LBRPaintBars:
                 return new("Aatr", new[] { "UpperBand", "LowerBand", "Aatr" }, bars =>
                 {

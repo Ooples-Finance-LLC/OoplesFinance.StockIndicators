@@ -1589,71 +1589,13 @@ public static partial class Calculations
     public static StockData CalculateFXSniperIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int cciLength = 14, int t3Length = 5, double b = MathHelper.InversePhi)
     {
-        List<double> e1List = new(stockData.Count);
-        List<double> e2List = new(stockData.Count);
-        List<double> e3List = new(stockData.Count);
-        List<double> e4List = new(stockData.Count);
-        List<double> e5List = new(stockData.Count);
-        List<double> e6List = new(stockData.Count);
-        List<double> fxSniperList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var b2 = b * b;
-        var b3 = b2 * b;
-        var c1 = -b3;
-        var c2 = 3 * (b2 + b3);
-        var c3 = -3 * ((2 * b2) + b + b3);
-        var c4 = 1 + (3 * b) + b3 + (3 * b2);
-        var nr = 1 + (0.5 * (t3Length - 1));
-        var w1 = 2 / (nr + 1);
-        var w2 = 1 - w1;
-
-        var cciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: cciLength).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var cci = cciList[i];
-
-            var prevE1 = GetLastOrDefault(e1List);
-            var e1 = (w1 * cci) + (w2 * prevE1);
-            e1List.Add(e1);
-
-            var prevE2 = GetLastOrDefault(e2List);
-            var e2 = (w1 * e1) + (w2 * prevE2);
-            e2List.Add(e2);
-
-            var prevE3 = GetLastOrDefault(e3List);
-            var e3 = (w1 * e2) + (w2 * prevE3);
-            e3List.Add(e3);
-
-            var prevE4 = GetLastOrDefault(e4List);
-            var e4 = (w1 * e3) + (w2 * prevE4);
-            e4List.Add(e4);
-
-            var prevE5 = GetLastOrDefault(e5List);
-            var e5 = (w1 * e4) + (w2 * prevE5);
-            e5List.Add(e5);
-
-            var prevE6 = GetLastOrDefault(e6List);
-            var e6 = (w1 * e5) + (w2 * prevE6);
-            e6List.Add(e6);
-
-            var prevFxSniper = GetLastOrDefault(fxSniperList);
-            var fxsniper = (c1 * e6) + (c2 * e5) + (c3 * e4) + (c4 * e3);
-            fxSniperList.Add(fxsniper);
-
-            var signal = GetCompareSignal(fxsniper, prevFxSniper);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "FXSniper", fxSniperList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(fxSniperList);
-        stockData.IndicatorName = IndicatorName.FXSniperIndicator;
-
-        return stockData;
+        var prices = CommodityIndexWindow.Prices(stockData); var external = !StrengthWindow.Supports(maType);
+        using var window = new FxSniperWindow(maType, cciLength, t3Length, b, external);
+        var components = external ? FxSniperWindow.Components(stockData, prices, maType, cciLength, false) : default;
+        var values = new List<double>(prices.Count); var trades = CreateSignalsList(stockData);
+        for (var i = 0; i < prices.Count; i++) { var point = window.Next(prices[i], true, external ? components.Mean[i] : null, external ? components.Deviation[i] : null); values.Add(point.Line); trades?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "FXSniper", values } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.FXSniperIndicator; return stockData;
     }
 
 

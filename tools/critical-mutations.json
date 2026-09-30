@@ -58199,5 +58199,347 @@
     "before": "signal ? point.SignalLine : point.Line",
     "after": "point.Line",
     "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions"
+  },
+  {
+    "id": "fx-sniper-wide-cci-period",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "_cciLength = Math.Max(1, cciLength)",
+    "after": "_cciLength = Math.Max(2, cciLength)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-t3-period",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "_t3Length = Math.Max(1, t3Length)",
+    "after": "_t3Length = Math.Max(2, t3Length)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-factor-sum",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "var plus = Unit + b",
+    "after": "var plus = Unit - b",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-fourth-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "-3 * b * plus * plus",
+    "after": "-2 * b * plus * plus",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-fifth-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "3 * b * b * plus",
+    "after": "2 * b * b * plus",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-sixth-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "-b * b * b",
+    "after": "b * b * b",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-constant",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "ExactVarianceWindow.Units(.015)",
+    "after": "ExactVarianceWindow.Units(.03)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "sum = _sum + current - (full ? _history.Peek()",
+    "after": "sum = _sum + current + (full ? _history.Peek()",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "_history.Count >= _cciLength - 1",
+    "after": "_history.Count >= _cciLength",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-residual",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "var residual = n * current - sum",
+    "after": "var residual = n * current + sum",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-deviation-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "if (!full || index != 0)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-cci-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "n * residual * Unit * Unit",
+    "after": "residual * Unit * Unit",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-mean-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "current - Units(mean)",
+    "after": "current + Units(mean)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-deviation-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "Value(BigInteger.Abs(difference))",
+    "after": "Value(difference)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "4 * value +",
+    "after": "2 * value +",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-carry",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "(_t3Length - 1L) * _stages[stage]",
+    "after": "(_t3Length - 2L) * _stages[stage]",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "new BigInteger(_t3Length + 3L)",
+    "after": "new BigInteger(_t3Length + 4L)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-integer-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "new BigInteger(_t3Length + 3L)",
+    "after": "new BigInteger(_t3Length + 3)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "fx-sniper-wide-six-stages",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "stage < 6",
+    "after": "stage < 5",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-stage-sum",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "total += _coefficients[stage - 2] * value",
+    "after": "total -= _coefficients[stage - 2] * value",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "var value = Cci(price, final, externalMean, externalDeviation)",
+    "after": "var value = ExactVarianceWindow.Units(Value(Cci(price, final, externalMean, externalDeviation)).Publish())",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.ExtendedCustomCciCanRecoverBeforePublication"
+  },
+  {
+    "id": "fx-sniper-wide-buy-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "line > _previous",
+    "after": "line > 0",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-sell-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "line < _previous",
+    "after": "line < 0",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "if (final) _stages[stage] = value",
+    "after": "if (true) _stages[stage] = value",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-cci-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "if (final) { if (full) _history.Dequeue()",
+    "after": "if (true) { if (full) _history.Dequeue()",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-reset-stages",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "Array.Clear(_stages, 0, _stages.Length)",
+    "after": "Array.Clear(_stages, 0, _stages.Length - 1)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "_history.Clear(); _sum = _previous",
+    "after": "_history.ToString(); _sum = _previous",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "_mean?.Reset()",
+    "after": "_mean?.ToString()",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-reset-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "_deviation?.Reset()",
+    "after": "_deviation?.ToString()",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Subtract(default)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.WidePricesResidualsAndPolynomialProductsMatchFractions"
+  },
+  {
+    "id": "fx-sniper-wide-callback-source",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "var deviation = Mean(residual)",
+    "after": "var deviation = Mean(prices)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.SelectedInputAndComponentMeansKeepBatchAndFastContracts"
+  },
+  {
+    "id": "fx-sniper-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/FxSniperWindow.cs",
+    "scope": "internal sealed class FxSniperWindow",
+    "before": "AsReadOnlySpan(values), length)",
+    "after": "AsReadOnlySpan(values), length + 1)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.SelectedInputAndComponentMeansKeepBatchAndFastContracts"
+  },
+  {
+    "id": "fx-sniper-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FXSniperIndicatorState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* omitted candle validation */",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "fx-sniper-wide-native-selected",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FXSniperIndicatorState :",
+    "before": "_readClose ? bar.Close",
+    "after": "false ? bar.Close",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.SelectedInputAndComponentMeansKeepBatchAndFastContracts"
+  },
+  {
+    "id": "fx-sniper-wide-fast-factor",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFXSniperFast(",
+    "before": "new FxSniperWindow(maType, cciLength, t3Length, b, external)",
+    "after": "new FxSniperWindow(maType, cciLength, t3Length, 0, external)",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.HandIdentityAndThirdOrSixthPoleOpeningValues"
+  },
+  {
+    "id": "fx-sniper-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "scope": "public static StockData CalculateFXSniperIndicator(",
+    "before": "CommodityIndexWindow.Prices(stockData)",
+    "after": "stockData.ClosePrices",
+    "filter": "FullyQualifiedName~FxSniperNumericalTests.SelectedInputAndComponentMeansKeepBatchAndFastContracts"
   }
 ]

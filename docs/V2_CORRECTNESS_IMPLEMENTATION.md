@@ -3823,3 +3823,12 @@ The isolated campaigns `622a` and `622b` passed their baselines and caught **32/
 Source snapshot SHA256: `a94a60951cec48a97571d8f97481824b0e243cf20fcfb80a56df83abded8b870`. Archive SHA256: `cc04e5f638e8fa7a9fd9b1dff07d7ff3fb76ffcb97e8d30335236046d31d7e92` and `cc04e5f638e8fa7a9fd9b1dff07d7ff3fb76ffcb97e8d30335236046d31d7e92`.
 
 This is evidence for the isolated batch-622 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 623 through 635 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 636, FX Sniper
+
+FX Sniper now retains the complete CCI quotient through six zero-seeded recursive stages and evaluates the Tillson coefficient polynomial exactly before final rounding. Each stage uses the normalized quotient (4*input+(L-1)*previous)/(L+3), avoiding independently rounded gain/complement weights. The local CCI histories grow with observations, including extreme periods; shared CCI helpers were not changed. Typical-price versus selected-input behavior, batch zero-override and fast two-override non-SMA contracts, native candle guards and reset are covered. The documented formula is the explicit library CCI/Tillson variant, without a claim of authenticated original-author provenance.
+
+**82/82 focused tests passed** in fx-sniper-636.trx: 80 numerical cases and two existing hand/route regressions. Initial compilation stopped because the reference fraction type does not implement unary negation; the reference expression was corrected to supported subtraction before tests ran. Production code was unchanged after its first implementation. Hand checks establish period-one identity even at b=+/-double.MaxValue, third/sixth-pole opening values for b=0/-1, and finite recovery from an extended custom CCI. Nine configurations cover five routes, numerical classes, signed/wide/subnormal data, exact coefficient cancellation, extreme periods, callbacks, legacy averages, input rejection, preview and reset.
+
+**38 prepared mutation faults remain pending**; all **6,826 anchors** pass preflight. Candidate/frozen snapshots match on **2,144 files**. Prepared enrollment is **6,168/7,131**, with **963 omissions across 141 types** and no construction failures. Built DLL SHA256: B2942C07241BFD9A2470B6EC103B0E3223CEFA1F2EC3BC44245EF3B23F6B8CBC. Mutation qualification and all remaining coverage, hosted/package/release/performance gates remain incomplete.

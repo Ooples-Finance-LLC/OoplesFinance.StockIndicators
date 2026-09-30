@@ -1155,94 +1155,19 @@ public sealed class FunctionToCandlesState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("FXSniper")]
 public sealed class FXSniperIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly CommodityChannelIndexState _cciState;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly double _c4;
-    private readonly double _w1;
-    private readonly double _w2;
-    private double _e1;
-    private double _e2;
-    private double _e3;
-    private double _e4;
-    private double _e5;
-    private double _e6;
-
-    public FXSniperIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int cciLength = 14, int t3Length = 5, double b = MathHelper.InversePhi)
-    {
-        _cciState = new CommodityChannelIndexState(maType, Math.Max(1, cciLength), 0.015);
-        var b2 = b * b;
-        var b3 = b2 * b;
-        _c1 = -b3;
-        _c2 = 3 * (b2 + b3);
-        _c3 = -3 * ((2 * b2) + b + b3);
-        _c4 = 1 + (3 * b) + b3 + (3 * b2);
-        var nr = 1 + (0.5 * (t3Length - 1));
-        _w1 = 2 / (nr + 1);
-        _w2 = 1 - _w1;
-    }
-
+    private readonly FxSniperWindow _window; private bool _readClose;
+    public FXSniperIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int cciLength = 14, int t3Length = 5, double b = MathHelper.InversePhi)
+        => _window = new(maType, cciLength, t3Length, b);
     public IndicatorName Name => IndicatorName.FXSniperIndicator;
-
-    // No resolver of its own: the input was handed to these inner states, so they are the
-    // ones that must switch to reading the close.
-    void ICustomInputConsumer.ReadCloseAsInput()
-    {
-        ((ICustomInputConsumer)_cciState).ReadCloseAsInput();
-    }
-
-    public void Reset()
-    {
-        _cciState.Reset();
-        _e1 = 0;
-        _e2 = 0;
-        _e3 = 0;
-        _e4 = 0;
-        _e5 = 0;
-        _e6 = 0;
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _readClose = true;
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var cci = _cciState.Update(bar, isFinal, includeOutputs: false).Value;
-
-        var e1 = (_w1 * cci) + (_w2 * _e1);
-        var e2 = (_w1 * e1) + (_w2 * _e2);
-        var e3 = (_w1 * e2) + (_w2 * _e3);
-        var e4 = (_w1 * e3) + (_w2 * _e4);
-        var e5 = (_w1 * e4) + (_w2 * _e5);
-        var e6 = (_w1 * e5) + (_w2 * _e6);
-        var fxsniper = (_c1 * e6) + (_c2 * e5) + (_c3 * e4) + (_c4 * e3);
-
-        if (isFinal)
-        {
-            _e1 = e1;
-            _e2 = e2;
-            _e3 = e3;
-            _e4 = e4;
-            _e5 = e5;
-            _e6 = e6;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "FXSniper", fxsniper }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fxsniper, outputs);
+        StreamingInputValidation.Validate(bar); var price = _readClose ? bar.Close : CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close);
+        var point = _window.Next(price, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "FXSniper", point.Line } } : null);
     }
-
-    public void Dispose()
-    {
-        _cciState.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Glma")]

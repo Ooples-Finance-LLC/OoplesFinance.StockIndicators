@@ -19270,45 +19270,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFXSniperFast(StockData data, ComputeContext context, int cciLength = 14, int t3Length = 5,
         double b = MathHelper.InversePhi, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateFXSniperIndicator runs Tim Tillson's T3 over the commodity channel index: six exponential
-        // passes recombined by the four coefficients b builds. The arm reuses the verified commodity channel
-        // index rather than re-deriving it.
-        var count = data.Count;
-
-        var b2 = b * b;
-        var b3 = b2 * b;
-        var c1 = -b3;
-        var c2 = 3 * (b2 + b3);
-        var c3 = -3 * ((2 * b2) + b + b3);
-        var c4 = 1 + (3 * b) + b3 + (3 * b2);
-        var nr = 1 + (0.5 * (t3Length - 1));
-        var w1 = 2 / (nr + 1);
-        var w2 = 1 - w1;
-
-        using var channelIndex = ComputeCciFast(data, context, cciLength, maType);
-        var cci = channelIndex.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double e1 = 0;
-        double e2 = 0;
-        double e3 = 0;
-        double e4 = 0;
-        double e5 = 0;
-        double e6 = 0;
-        for (var i = 0; i < count; i++)
-        {
-            e1 = (w1 * cci[i]) + (w2 * e1);
-            e2 = (w1 * e1) + (w2 * e2);
-            e3 = (w1 * e2) + (w2 * e3);
-            e4 = (w1 * e3) + (w2 * e4);
-            e5 = (w1 * e4) + (w2 * e5);
-            e6 = (w1 * e5) + (w2 * e6);
-
-            output[i] = (c1 * e6) + (c2 * e5) + (c3 * e4) + (c4 * e3);
-        }
-
+        var prices = CommodityIndexWindow.Prices(data);
+        var external = maType != MovingAvgType.SimpleMovingAverage && (!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides);
+        using var window = new FxSniperWindow(maType, cciLength, t3Length, b, external);
+        var components = external ? FxSniperWindow.Components(data, prices, maType, cciLength, true) : default;
+        var buffer = context.Rent(prices.Count);
+        for (var i = 0; i < prices.Count; i++) buffer.WritableSpan[i] = window.Next(prices[i], true, external ? components.Mean[i] : null, external ? components.Deviation[i] : null).Line;
         return buffer;
     }
 
