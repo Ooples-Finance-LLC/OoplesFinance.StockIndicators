@@ -60296,5 +60296,383 @@
     "before": "FisherLeastSquaresMovingAverageSpecOptions or ",
     "after": "",
     "filter": "FullyQualifiedName~FisherLeastSquaresNumericalTests.SelectedSourcePreservesCandles"
+  },
+  {
+    "id": "fisher-stoch-wide-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_range = Math.Max(1, range);",
+    "after": "_range = 1;",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-sum-period",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_smooth = Math.Max(1, smooth);",
+    "after": "_smooth = 1;",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-native-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "new Average(kind, Math.Max(1, length))",
+    "after": "new Average(kind, 1)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.WideRainbowRangesAndTenMeansMatchFractions"
+  },
+  {
+    "id": "fisher-stoch-wide-rainbow-weights",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "stages[i].AddTo(ref sum, Math.Max(1, 5 - i))",
+    "after": "stages[i].AddTo(ref sum, Math.Max(1, 4 - i))",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-native-weights",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "stage.AddTo(ref sum, Math.Max(1, 5 - i))",
+    "after": "stage.AddTo(ref sum, Math.Max(1, 4 - i))",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-rainbow-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "return RocBankValue.Round(sum, count: 20);",
+    "after": "return RocBankValue.Round(sum, count: 10);",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-native-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "Finish(RocBankValue.Round(sum, count: 20), final)",
+    "after": "Finish(RocBankValue.Round(sum, count: 10), final)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-native-stage-chain",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_means![i].Next(stage, final)",
+    "after": "_means![i].Next(new RocBankValue(price), final)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.WideRainbowRangesAndTenMeansMatchFractions"
+  },
+  {
+    "id": "fisher-stoch-wide-batch-stage-chain",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "previous = stages[depth];",
+    "after": "previous = input.Select(v => new RocBankValue(v)).ToArray();",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.TenCallbackSlotsPreserveStageInputsAndSelectedPrices"
+  },
+  {
+    "id": "fisher-stoch-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_index - _range + 1",
+    "after": "_index - _range",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-high-select",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "BigInteger.Max(value, high.Value.Value)",
+    "after": "BigInteger.Min(value, high.Value.Value)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-low-select",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "BigInteger.Min(value, low.Value.Value)",
+    "after": "BigInteger.Max(value, low.Value.Value)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "RoundUnits(value - lowest, BigInteger.One)",
+    "after": "RoundUnits(highest - value, BigInteger.One)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "RoundUnits(highest - lowest, BigInteger.One)",
+    "after": "RoundUnits(highest - lowest, new BigInteger(2))",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-num-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "numeratorSum -= _terms.Peek().Numerator",
+    "after": "numeratorSum += _terms.Peek().Numerator",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-den-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "denominatorSum -= _terms.Peek().Denominator",
+    "after": "denominatorSum += _terms.Peek().Denominator",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-regularizer",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "ExactVarianceWindow.Units(.0001)",
+    "after": "ExactVarianceWindow.Units(.0002)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-percent",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "100 * numeratorSum * Unit",
+    "after": "50 * numeratorSum * Unit",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-center",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "exponent.Add(50);",
+    "after": "exponent.Add(40);",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-inverse-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "exponent.Add(stochastic, -1)",
+    "after": "exponent.Add(stochastic, 1)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-inverse-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "exponent.Mean(5)",
+    "after": "exponent.Mean(10)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-logistic-one",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "logisticDenominator.Add(1)",
+    "after": "logisticDenominator.Add(2)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-logistic-hundred",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "hundred.Add(100)",
+    "after": "hundred.Add(50)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-slope",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "current - _previousLine",
+    "after": "_previousLine - current",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-line-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_previousLine = current;",
+    "after": "_previousLine = default;",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-slope-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-numerator-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_numerator = numeratorSum;",
+    "after": "_numerator = default;",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-denominator-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_denominator = denominatorSum;",
+    "after": "_denominator = default;",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "if (final)\n        {",
+    "after": "if (!final)\n        {",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-high-tail",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "highTail.Value.Value <= value",
+    "after": "highTail.Value.Value >= value",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-low-tail",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "lowTail.Value.Value >= value",
+    "after": "lowTail.Value.Value <= value",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-reset-high",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_high.Clear(); _low.Clear();",
+    "after": "_low.Clear();",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-reset-terms",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_terms.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.RangeExpirySumExpiryAndTiesKeepSeparateHistories"
+  },
+  {
+    "id": "fisher-stoch-wide-reset-means",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "foreach (var mean in _means) mean.Reset();",
+    "after": "foreach (var mean in _means.Take(1)) mean.Reset();",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.WideRainbowRangesAndTenMeansMatchFractions"
+  },
+  {
+    "id": "fisher-stoch-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.WideRainbowRangesAndTenMeansMatchFractions"
+  },
+  {
+    "id": "fisher-stoch-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Add(0);",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.WideRainbowRangesAndTenMeansMatchFractions"
+  },
+  {
+    "id": "fisher-stoch-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 2L) / 2",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.WideRainbowRangesAndTenMeansMatchFractions"
+  },
+  {
+    "id": "fisher-stoch-wide-sma-start",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "_history.Count + 1L < _length ? default",
+    "after": "_history.Count + 1L <= _length ? default",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.WideRainbowRangesAndTenMeansMatchFractions"
+  },
+  {
+    "id": "fisher-stoch-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/FisherStochasticWindow.cs",
+    "scope": "internal sealed class FisherStochasticWindow",
+    "before": "ComponentAverage.Take(published!, length)",
+    "after": "ComponentAverage.Take(published!, length + 1)",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.TenCallbackSlotsPreserveStageInputsAndSelectedPrices"
+  },
+  {
+    "id": "fisher-stoch-wide-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FisherTransformStochasticOscillatorState",
+    "before": "{ \"Ftso\", point.Line }",
+    "after": "{ \"Wrong\", point.Line }",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.HandRegularizationMidpointAndFlatEndpoint"
+  },
+  {
+    "id": "fisher-stoch-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FisherTransformStochasticOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "fisher-stoch-wide-live-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(",
+    "before": "FisherTransformStochasticOscillatorSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~FisherStochasticNumericalTests.SelectedSourcePreservesCandles"
   }
 ]

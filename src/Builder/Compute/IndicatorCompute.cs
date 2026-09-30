@@ -7905,65 +7905,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFisherTransformStochasticOscillatorFast(StockData data, ComputeContext context, int length = 2,
         int stochLength = 30, int smoothLength = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // CalculateFisherTransformStochasticOscillator builds a rainbow average from ten successive moving
-        // averages of the chained series, weighted 5, 4, 3, 2 and then one apiece, stochastically scales it
-        // over stochLength with the numerator and denominator each summed over smoothLength, and publishes
-        // the Fisher transform of that. The core call it replaced read the high, low and close instead.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var stage = context.Rent(count);
-        using var scratch = context.Rent(count);
-        using var rainbow = context.Rent(count);
-        var rbw = rainbow.WritableSpan;
-
-        MovingAverage(data, maType, length, input, stage.WritableSpan);
-        for (var i = 0; i < count; i++)
-        {
-            rbw[i] = stage.Span[i] * 5;
-        }
-
-        for (var pass = 2; pass <= 10; pass++)
-        {
-            MovingAverage(data, maType, length, stage.Span, scratch.WritableSpan);
-            scratch.Span.CopyTo(stage.WritableSpan);
-
-            var weight = pass <= 4 ? 6 - pass : 1;
-            for (var i = 0; i < count; i++)
-            {
-                rbw[i] += stage.Span[i] * weight;
-            }
-        }
-
-        for (var i = 0; i < count; i++)
-        {
-            rbw[i] /= 20;
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingMinMax(stochLength);
-        var numerators = new RollingSum();
-        var denominators = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(rbw[i]);
-            numerators.Add(rbw[i] - window.Min);
-            denominators.Add(window.Max - window.Min);
-
-            var numeratorSum = numerators.Sum(smoothLength);
-            var denominatorSum = denominators.Sum(smoothLength);
-            var stochastic = denominatorSum + 0.0001 != 0
-                ? MathHelper.MinOrMax(numeratorSum / (denominatorSum + 0.0001) * 100, 100, 0)
-                : 0;
-
-            var scaled = MathHelper.Exp(2 * (0.1 * (stochastic - 50)));
-            output[i] = MathHelper.MinOrMax((((scaled - 1) / (scaled + 1)) + 1) * 50, 100, 0);
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var result = FisherStochasticWindow.Calculate(data, input, maType, length, stochLength, smoothLength, true); var buffer = context.Rent(input.Count);
+        result.Line.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

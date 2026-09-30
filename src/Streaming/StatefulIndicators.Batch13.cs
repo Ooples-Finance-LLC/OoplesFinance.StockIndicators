@@ -181,120 +181,17 @@ public sealed class FisherLeastSquaresMovingAverageState : IStreamingIndicatorSt
 [PrimaryOutput("Ftso")]
 public sealed class FisherTransformStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _wma1;
-    private readonly IMovingAverageSmoother _wma2;
-    private readonly IMovingAverageSmoother _wma3;
-    private readonly IMovingAverageSmoother _wma4;
-    private readonly IMovingAverageSmoother _wma5;
-    private readonly IMovingAverageSmoother _wma6;
-    private readonly IMovingAverageSmoother _wma7;
-    private readonly IMovingAverageSmoother _wma8;
-    private readonly IMovingAverageSmoother _wma9;
-    private readonly IMovingAverageSmoother _wma10;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly RollingWindowSum _numSum;
-    private readonly RollingWindowSum _denomSum;
-    private readonly StreamingInputResolver _input;
-
-    public FisherTransformStochasticOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int length = 2, int stochLength = 30, int smoothLength = 5)
-    {
-        var resolvedLength = Math.Max(1, length);
-        _wma1 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma2 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma3 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma4 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma5 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma6 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma7 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma8 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma9 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _wma10 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _maxWindow = new RollingWindowMax(Math.Max(1, stochLength));
-        _minWindow = new RollingWindowMin(Math.Max(1, stochLength));
-        _numSum = new RollingWindowSum(Math.Max(1, smoothLength));
-        _denomSum = new RollingWindowSum(Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FisherStochasticWindow _window;
+    public FisherTransformStochasticOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 2, int stochLength = 30, int smoothLength = 5)
+        => _window = new(maType, length, stochLength, smoothLength);
     public IndicatorName Name => IndicatorName.FisherTransformStochasticOscillator;
-
-    public void Reset()
-    {
-        _wma1.Reset();
-        _wma2.Reset();
-        _wma3.Reset();
-        _wma4.Reset();
-        _wma5.Reset();
-        _wma6.Reset();
-        _wma7.Reset();
-        _wma8.Reset();
-        _wma9.Reset();
-        _wma10.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _numSum.Reset();
-        _denomSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var wma1 = _wma1.Next(value, isFinal);
-        var wma2 = _wma2.Next(wma1, isFinal);
-        var wma3 = _wma3.Next(wma2, isFinal);
-        var wma4 = _wma4.Next(wma3, isFinal);
-        var wma5 = _wma5.Next(wma4, isFinal);
-        var wma6 = _wma6.Next(wma5, isFinal);
-        var wma7 = _wma7.Next(wma6, isFinal);
-        var wma8 = _wma8.Next(wma7, isFinal);
-        var wma9 = _wma9.Next(wma8, isFinal);
-        var wma10 = _wma10.Next(wma9, isFinal);
-
-        var rbw = ((wma1 * 5) + (wma2 * 4) + (wma3 * 3) + (wma4 * 2) + wma5 + wma6 + wma7 + wma8 + wma9 + wma10) / 20;
-        var highest = isFinal ? _maxWindow.Add(rbw, out _) : _maxWindow.Preview(rbw, out _);
-        var lowest = isFinal ? _minWindow.Add(rbw, out _) : _minWindow.Preview(rbw, out _);
-        var num = rbw - lowest;
-        var denom = highest - lowest;
-        var numSum = isFinal ? _numSum.Add(num, out _) : _numSum.Preview(num, out _);
-        var denomSum = isFinal ? _denomSum.Add(denom, out _) : _denomSum.Preview(denom, out _);
-        var rbws = denomSum + 0.0001 != 0
-            ? MathHelper.MinOrMax(numSum / (denomSum + 0.0001) * 100, 100, 0)
-            : 0;
-        var x = 0.1 * (rbws - 50);
-        var expValue = MathHelper.Exp(2 * x);
-        var ftso = MathHelper.MinOrMax((((expValue - 1) / (expValue + 1)) + 1) * 50, 100, 0);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ftso", ftso }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ftso, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Ftso", point.Line } } : null);
     }
-
-    public void Dispose()
-    {
-        _wma1.Dispose();
-        _wma2.Dispose();
-        _wma3.Dispose();
-        _wma4.Dispose();
-        _wma5.Dispose();
-        _wma6.Dispose();
-        _wma7.Dispose();
-        _wma8.Dispose();
-        _wma9.Dispose();
-        _wma10.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _numSum.Dispose();
-        _denomSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]
