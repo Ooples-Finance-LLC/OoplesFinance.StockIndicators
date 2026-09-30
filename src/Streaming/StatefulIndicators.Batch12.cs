@@ -186,64 +186,16 @@ public sealed class EndPointMovingAverageState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Ei")]
 public sealed class EnhancedIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public EnhancedIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        int signalLength = 8)
-    {
-        var resolved = Math.Max(1, length);
-        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _smaSmoother = MovingAverageSmootherFactory.Create(maType, smaLength);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EnhancedIndexWindow _window;
+    public EnhancedIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, int signalLength = 8) => _window = new(maType, length, signalLength);
     public IndicatorName Name => IndicatorName.EnhancedIndex;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _smaSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var dnm = highest - lowest;
-        var sma = _smaSmoother.Next(value, isFinal);
-        var closewr = dnm != 0 ? 2 * (value - sma) / dnm : 0;
-        var signal = _signalSmoother.Next(closewr, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ei", closewr },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(closewr, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Ei", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _smaSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ewr")]

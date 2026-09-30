@@ -2019,10 +2019,7 @@ internal static partial class IndicatorCompute
             ApirineSlowRelativeStrengthIndexSpecOptions asrsi => ComputeApirineSlowRsiFast(data, context, asrsi.Length, asrsi.SmoothLength, asrsi.MaType),
             ElderSafeZoneStopsSpecOptions eszs => ComputeElderSafeZoneStopsFast(data, context, length2: eszs.Length,
                 factor: eszs.Mult, maType: eszs.MaType),
-            EnhancedIndexSpecOptions ei => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeEnhancedIndexFast(data, context, ei.Length, ei.MaType),
-                    ei.SignalLength, ei.MaType)
-                : ComputeEnhancedIndexFast(data, context, ei.Length, ei.MaType),
+            EnhancedIndexSpecOptions ei => ComputeEnhancedIndexFast(data, context, ei.Length, ei.MaType, ei.SignalLength, spec.OutputKey == "Signal"),
             FastandSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio, fsko.MaType, spec.OutputKey ?? "Fsk"),
             FearAndGreedIndicatorSpecOptions fgi => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.MaType),
@@ -19101,41 +19098,22 @@ internal static partial class IndicatorCompute
 
     /// <summary>
     /// Computes Enhanced Index using zero-allocation fast path.
-    /// Returns the smoothed index value.
+    /// Returns the normalized index or its selected signal mean.
     /// </summary>
     internal static ComputeBuffer ComputeEnhancedIndexFast(StockData data, ComputeContext context, int length = 14,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int signalLength = 8, bool signal = false)
     {
-        // CalculateEnhancedIndex places the chained series against its own half-length moving average and
-        // scales that gap by the high-to-low range of the window. It is not a moving average of the close,
-        // and the signal length only reaches the separate Signal series, so this arm does not take one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, smaLength, input, smoothed.WritableSpan);
-        var sma = smoothed.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var buffer = context.Rent(input.Count);
+        if (!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides)
         {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var dnm = highWindow.Max - lowWindow.Min;
-            output[i] = dnm != 0 ? 2 * (input[i] - sma[i]) / dnm : 0;
+            var components = EnhancedIndexWindow.Components(data, input, high, low, maType, length, signalLength, true, signal);
+            (signal ? components.Signal : components.Line).AsSpan().CopyTo(buffer.WritableSpan);
         }
-
+        else
+        {
+            using var window = new EnhancedIndexWindow(maType, length, signalLength);
+            for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); buffer.WritableSpan[i] = signal ? point.SignalLine : point.Line; }
+        }
         return buffer;
     }
 

@@ -57227,5 +57227,311 @@
     "before": "_window.Next(bar.Close, isFinal)",
     "after": "_window.Next(bar.Close, true)",
     "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "enhanced-index-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 1;",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-half-floor",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Math.Max(2, Math.Min(530,",
+    "after": "Math.Max(1, Math.Min(530,",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-half-ceiling",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "length / 2 + length % 2",
+    "after": "length / 2",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.ExtremePeriodsPreserveHalfPeriodClampAndLazySignalHistory"
+  },
+  {
+    "id": "enhanced-index-wide-half-cap",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(529,",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.ExtremePeriodsPreserveHalfPeriodClampAndLazySignalHistory"
+  },
+  {
+    "id": "enhanced-index-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_signal = new(kind, Math.Max(1, signalLength));",
+    "after": "_signal = new(kind, 1);",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_index - _length + 1L",
+    "after": "_index - _length",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-high-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Extreme(_highs, high, true, final)",
+    "after": "Extreme(_highs, high, false, final)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-low-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Extreme(_lows, low, false, final)",
+    "after": "Extreme(_lows, low, true, final)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-high-input",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Extreme(_highs, high, true, final)",
+    "after": "Extreme(_highs, price, true, final)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-low-input",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Extreme(_lows, low, false, final)",
+    "after": "Extreme(_lows, price, false, final)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-range",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Units(highest) - ExactVarianceWindow.Units(lowest)",
+    "after": "Units(highest) + ExactVarianceWindow.Units(lowest)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-price-input",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_mean!.Next(new(price), final)",
+    "after": "_mean!.Next(new(high), final)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-numerator-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "var numerator = 2 *",
+    "after": "var numerator = 1 *",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-range-zero",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "range.IsZero ? default : Value",
+    "after": "range.IsZero ? new RocBankValue(1) : Value",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-signed-range",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "RoundUnits(-numerator, -range)",
+    "after": "RoundUnits(numerator, -range)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-published-line",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_signal!.Next(line, final)",
+    "after": "_signal!.Next(new(line.Publish()), final)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.ExtendedLineCanCancelBeforeSignalPublication"
+  },
+  {
+    "id": "enhanced-index-wide-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_signal!.Next(line, final)",
+    "after": "_signal!.Next(mean, final)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-spread-direction",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Units(line) - Units(signal)",
+    "after": "Units(signal) - Units(line)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-signal-strong",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "? Signal.StrongBuy : spread.Sign",
+    "after": "? Signal.Buy : spread.Sign",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_previousSpread = spread;",
+    "after": "_previousSpread = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_mean!.Next(new(price), final)",
+    "after": "_mean!.Next(new(price), true)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_signal!.Next(line, final)",
+    "after": "_signal!.Next(line, true)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-clock-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "if (final) { _index++;",
+    "after": "if (true) { _index++;",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "_highs.Clear();",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-weighted-mean",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "count: (long)_length * (_length + 1L) / 2",
+    "after": "count: (long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-simple-startup",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_history.Count < _length - 1 ? default",
+    "after": "_history.Count < _length - 1 ? value",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-average-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+  },
+  {
+    "id": "enhanced-index-wide-custom-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "var mean = Mean(input, MeanLength(length));",
+    "after": "var mean = Mean(input, 1);",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.CustomMeansKeepRequestOrderInputsAndSelectedCandles"
+  },
+  {
+    "id": "enhanced-index-wide-custom-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedIndexWindow.cs",
+    "scope": "internal sealed class EnhancedIndexWindow",
+    "before": "Mean(line.ToList(), Math.Max(1, signalLength))",
+    "after": "Mean(line.ToList(), 1)",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.CustomMeansKeepRequestOrderInputsAndSelectedCandles"
+  },
+  {
+    "id": "enhanced-index-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEnhancedIndexFast",
+    "before": "EnhancedIndexWindow.Components(data, input, high, low",
+    "after": "EnhancedIndexWindow.Components(data, data.ClosePrices, high, low",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.CustomMeansKeepRequestOrderInputsAndSelectedCandles"
+  },
+  {
+    "id": "enhanced-index-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEnhancedIndexFast",
+    "before": "signal ? point.SignalLine : point.Line",
+    "after": "signal ? point.Line : point.Line",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-index-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class EnhancedIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.InvalidCandlesCannotAdvanceRangeOrMeanState"
+  },
+  {
+    "id": "enhanced-index-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class EnhancedIndexState",
+    "before": "{ \"Signal\", point.SignalLine }",
+    "after": "{ \"Signal\", point.Line }",
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
   }
 ]

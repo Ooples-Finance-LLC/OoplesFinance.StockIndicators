@@ -3164,48 +3164,18 @@ public static partial class Calculations
     public static StockData CalculateEnhancedIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, 
         int signalLength = 8)
     {
-        List<double> closewrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var smaLength = MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        var smaList = GetMovingAverageList(stockData, maType, smaLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = new List<double>(input.Count); var trades = CreateSignalsList(stockData);
+        var external = !StrengthWindow.Supports(maType);
+        var components = external ? EnhancedIndexWindow.Components(stockData, input, high, low, maType, length, signalLength, false, true) : default;
+        using var window = new EnhancedIndexWindow(maType, length, signalLength, external);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var dnm = highest - lowest;
-            var sma = smaList[i];
-
-            var closewr = dnm != 0 ? 2 * (currentValue - sma) / dnm : 0;
-            closewrList.Add(closewr);
+            var point = window.Next(high[i], low[i], input[i], true, external ? components.Mean[i] : null, external ? components.Signal[i] : null);
+            values.Add(point.Line); signals.Add(point.SignalLine); trades?.Add(point.Trade);
         }
-
-        var closewrSmaList = GetMovingAverageList(stockData, maType, signalLength, closewrList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var closewr = closewrList[i];
-            var closewrSma = closewrSmaList[i];
-            var prevCloseWr = i >= 1 ? closewrList[i - 1] : 0;
-            var prevCloseWrSma = i >= 1 ? closewrSmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(closewr - closewrSma, prevCloseWr - prevCloseWrSma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ei", closewrList },
-            { "Signal", closewrSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(closewrList);
-        stockData.IndicatorName = IndicatorName.EnhancedIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ei", values }, { "Signal", signals } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EnhancedIndex; return stockData;
     }
 
 

@@ -208,21 +208,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Eco", line), ("Signal", Average(line, length, kind)));
                 });
             case IndicatorName.EnhancedIndex:
-                kind = AverageKind(options, 1);
-                if (kind == 0) return null;
-                var enhancedSignal = Integer(options, "SignalLength", 8);
-                var enhancedMean = Math.Max(2, Math.Min(530, (length + 1) / 2));
-                return new("Ei", new[] { "Ei", "Signal" }, bars =>
-                {
-                    var mean = Average(Closes(bars), enhancedMean, kind);
-                    var line = bars.Select((b, i) =>
-                    {
-                        var window = Window(bars, i, length).ToArray();
-                        var range = window.Max(v => v.High) - window.Min(v => v.Low);
-                        return range == 0 ? 0 : 2 * (b.Close - mean[i]) / range;
-                    }).ToArray();
-                    return Outputs(("Ei", line), ("Signal", Average(line, enhancedSignal, kind)));
-                });
+                kind = AverageKind(options, 1); if (kind == 0) return null;
+                return new("Ei", new[] { "Ei", "Signal" }, bars => EnhancedIndexOutputs(bars, indicator));
             case IndicatorName.EhlersRelativeVigorIndex:
                 kind = AverageKind(options, 1);
                 if (kind == 0) return null;
