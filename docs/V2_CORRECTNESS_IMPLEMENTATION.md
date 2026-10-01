@@ -4482,3 +4482,12 @@ The compiled inventory is **6,431/7,131 enrolled**, with **700 omissions across 
 ### Batch 651: EMV mutation selection repair
 
 The first Insync campaigns caught 51 compiled faults and left one survivor: the EMV vote fault selected a zero-width-candle test, whose EMV contribution is zero. Its filter now selects the existing independent hand with EMV values 0 and 6 and production-route checks. Production and regression sources are unchanged. Fresh campaigns for all 52 faults are required; the original pair is not qualified and its kills will not be pooled.
+
+
+### Batch 651: Insync repaired mutation qualification
+
+The isolated campaigns `651-repaired-a` and `651-repaired-b` passed their baselines and caught **52/52 compiled behavioral faults**, alongside **278/278 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-651 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `557514b5b33542e231aba89869d499e17089f2189ef37fea5987abda86bd30b9`. Archive SHA256: `217610ede993c130586ddefdabde79ae5664242c826ecb8369f2ecfb99e15087` and `217610ede993c130586ddefdabde79ae5664242c826ecb8369f2ecfb99e15087`.
+
+This is evidence for the isolated batch-651 source. Source was already published in the batch-651 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
