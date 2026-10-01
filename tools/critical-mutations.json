@@ -72022,5 +72022,365 @@
     "before": "ParametricKalmanFilter or ",
     "after": "",
     "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.PublicConfigurationsPassEveryNumericalClass"
+  },
+  {
+    "id": "polarized-efficiency-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "new(kind, Math.Max(1, smooth))",
+    "after": "new(kind, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-cross-term",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "square.AddProduct(current, previous, -2)",
+    "after": "square.AddProduct(current, previous, -1)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-horizontal",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "square.AddProduct(horizontal, horizontal)",
+    "after": "square.Add(horizontal)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-overflow-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "square.ScaleByPowerOfTwo(-2)",
+    "after": "square.ScaleByPowerOfTwo(-4)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-overflow-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "square.SqrtMean(1)) << 1",
+    "after": "square.SqrtMean(1)) << 0",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-path-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "_steps.Count == _length ? _steps.Peek() : BigInteger.Zero",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-direction",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "price.CompareTo(lagged)",
+    "after": "lagged.CompareTo(price)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-direct-horizontal",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "Distance(price, lagged, _length)",
+    "after": "Distance(price, lagged, 1)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "100 * direct",
+    "after": "99 * direct",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-triangle-bound",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "Math.Min(100, ratio)",
+    "after": "ratio",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "if (full)\n        {",
+    "after": "if (_prices.Count > 0)\n        {",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "if (final)\n        {",
+    "after": "if (final || price != 0)\n        {",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-price-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "if (full) _prices.Dequeue();",
+    "after": "if (_prices.Count > _length) _prices.Dequeue();",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-step-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "if (_steps.Count == _length) _steps.Dequeue();",
+    "after": "if (_steps.Count > _length) _steps.Dequeue();",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-path-memory",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "_path = path;",
+    "after": "_path = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.IndependentGeometryHandsAndTriangleBound"
+  },
+  {
+    "id": "polarized-efficiency-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "ComponentAverage.Take(raw, smooth)",
+    "after": "ComponentAverage.Take(raw, length)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.CallbackReceivesRawEfficiencyAndSmoothingPeriod"
+  },
+  {
+    "id": "polarized-efficiency-wide-callback-input",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "ComponentAverage.Take(raw, smooth)",
+    "after": "ComponentAverage.Take(prices.ToArray(), smooth)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.CallbackReceivesRawEfficiencyAndSmoothingPeriod"
+  },
+  {
+    "id": "polarized-efficiency-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "_prices.Clear(); _steps.Clear(); _average.Reset();",
+    "after": "_steps.Clear(); _average.Reset();",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-reset-path",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "internal sealed class PolarizedEfficiencyWindow",
+    "before": "_path = BigInteger.Zero; _previousPrice = 0;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Subtract(default);",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (_history.Count == _length) sum.Add(_history.Peek(), -1);",
+    "after": "if (_history.Count > _length) sum.Add(_history.Peek(), -1);",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "next.Add(_previous, _length - 1)",
+    "after": "next.Add(_previous, _length)",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-recursive-drive",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "ExponentialMovingAverage ? 2 : 1",
+    "after": "ExponentialMovingAverage ? 3 : 1",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths"
+  },
+  {
+    "id": "polarized-efficiency-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (final)\n            {",
+    "after": "if (final || value != 0)\n            {",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PolarizedEfficiencyWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_sum = _weighted = default;",
+    "after": "_weighted = default;",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.ExpiryPreviewResetAndExtremePeriodsStayLazy"
+  },
+  {
+    "id": "polarized-efficiency-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PolarizedFractalEfficiencyState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (!isFinal && !includeOutputs) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.RejectedPricesAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "polarized-efficiency-wide-core-length",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PolarizedFractalEfficiency(",
+    "before": "length, smoothLength);",
+    "after": "1, smoothLength);",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.CoreSpanBoundsAndInPlaceReplay"
+  },
+  {
+    "id": "polarized-efficiency-wide-core-smooth",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PolarizedFractalEfficiency(",
+    "before": "length, smoothLength);",
+    "after": "length, 1);",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.CoreSpanBoundsAndInPlaceReplay"
+  },
+  {
+    "id": "polarized-efficiency-wide-raw-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePolarizedFractalEfficiencyFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "polarized-efficiency-wide-batch-source",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePolarizedFractalEfficiency(",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var input = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "polarized-efficiency-wide-factory-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "polarized.MaType, polarized.Length, polarized.SmoothLength",
+    "after": "polarized.MaType, 1, polarized.SmoothLength",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "polarized-efficiency-wide-streaming-full",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "PolarizedFractalEfficiencySpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "polarized-efficiency-wide-streaming-alias",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "PfeSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "polarized-efficiency-wide-enrollment-full",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "PolarizedFractalEfficiency or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "polarized-efficiency-wide-enrollment-alias",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "Pfe or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

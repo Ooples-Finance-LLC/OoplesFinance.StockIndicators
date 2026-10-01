@@ -1622,48 +1622,13 @@ public static partial class Calculations
     public static StockData CalculatePolarizedFractalEfficiency(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 9, int smoothLength = 5)
     {
-        length = Math.Max(1, length);
-        smoothLength = Math.Max(1, smoothLength);
-        List<double> fracEffList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var c2cSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorValue = i >= length ? inputList[i - length] : 0;
-            var displacement = MinPastValues(i, length, currentValue - priorValue);
-            var pfe = Sqrt(Pow(displacement, 2) + ((double)length * length));
-
-            var c2c = Sqrt(Pow(MinPastValues(i, 1, currentValue - prevValue), 2) + 1);
-            c2cSumWindow.Add(c2c);
-
-            var c2cSum = c2cSumWindow.Sum(length);
-            var efRatio = c2cSum != 0 ? pfe / c2cSum * 100 : 0;
-
-            var fracEff = i >= length ? Math.Sign(displacement) * efRatio : 0;
-            fracEffList.Add(fracEff);
-        }
-
-        var emaList = GetMovingAverageList(stockData, maType, smoothLength, fracEffList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ema = emaList[i];
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(ema, prevEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pfe", emaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(emaList);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var values = PolarizedEfficiencyWindow.Calculate(stockData, input, maType, length, smoothLength, false).ToList();
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Count; i++) signals?.Add(GetCompareSignal(values[i], i == 0 ? 0 : values[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pfe", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values);
         stockData.IndicatorName = IndicatorName.PolarizedFractalEfficiency;
-
         return stockData;
     }
 

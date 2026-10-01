@@ -15298,34 +15298,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 9,
         int smoothLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculatePolarizedFractalEfficiency compares the straight line distance covered over the window with
-        // the distance actually walked bar by bar, signs it by the direction of the move, and smooths the
-        // result. One arm now serves both the full spec and its Pfe alias.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var efficiency = context.Rent(count);
-        var fracEff = efficiency.WritableSpan;
-
-        var walked = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var priorValue = i >= length ? input[i - length] : 0;
-
-            var displacement = CalculationsHelper.MinPastValues(i, length, input[i] - priorValue);
-            var pfe = MathHelper.Sqrt(MathHelper.Pow(displacement, 2) + ((double)length * length));
-            walked.Add(MathHelper.Sqrt(MathHelper.Pow(CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue), 2) + 1));
-
-            var c2cSum = walked.Sum(length);
-            var efRatio = c2cSum != 0 ? pfe / c2cSum * 100 : 0;
-            fracEff[i] = i >= length ? Math.Sign(displacement) * efRatio : 0;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, efficiency.Span, buffer.WritableSpan);
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = PolarizedEfficiencyWindow.Calculate(data, input, maType, length, smoothLength, true);
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

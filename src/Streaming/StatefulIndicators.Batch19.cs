@@ -738,78 +738,16 @@ public sealed class PivotPointAverageState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Pfe")]
 public sealed class PolarizedFractalEfficiencyState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _c2cSum;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private int _index;
-    private bool _hasPrev;
-
-    public PolarizedFractalEfficiencyState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 9,
-        int smoothLength = 5)
-    {
-        _length = Math.Max(1, length);
-        _c2cSum = new RollingWindowSum(_length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PolarizedEfficiencyWindow _window;
+    public PolarizedFractalEfficiencyState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 9, int smoothLength = 5)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.PolarizedFractalEfficiency;
-
-    public void Reset()
-    {
-        _c2cSum.Reset();
-        _signalSmoother.Reset();
-        _values.Clear();
-        _prevValue = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priorValue = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_values, value, _length) : 0;
-        var diff = _index >= _length ? value - priorValue : 0;
-        var pfe = MathHelper.Sqrt(MathHelper.Pow(diff, 2) + ((double)_length * _length));
-
-        var c2cDiff = _hasPrev ? value - prevValue : 0;
-        var c2c = MathHelper.Sqrt(MathHelper.Pow(c2cDiff, 2) + 1);
-        int countAfter;
-        var c2cSum = isFinal ? _c2cSum.Add(c2c, out countAfter) : _c2cSum.Preview(c2c, out countAfter);
-        var efRatio = c2cSum != 0 ? pfe / c2cSum * 100 : 0;
-        var fracEff = _index >= _length ? Math.Sign(diff) * efRatio : 0;
-        var pfeSmoothed = _signalSmoother.Next(fracEff, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevValue = value;
-            _index++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pfe", pfeSmoothed }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pfeSmoothed, outputs);
-    }
-
-    public void Dispose()
-    {
-        _c2cSum.Dispose();
-        _signalSmoother.Dispose();
-        _values.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Pfe", value } } : null);
     }
 }
 
