@@ -944,20 +944,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.KwanIndicator:
-                return new("Ki", new[] { "Ki" }, bars =>
-                {
-                    var smooth = Integer(options, "SmoothLength", 2);
-                    var strength = MotionRsi(Closes(bars), length, kind);
-                    var ratios = bars.Select((b, i) =>
-                    {
-                        if (i < length || b.Close == 0 || bars[i - length].Close == 0) return 0;
-                        var low = Window(bars, i, length).Min(v => v.Low);
-                        var high = Window(bars, i, length).Max(v => v.High);
-                        return high == low ? 0 : (b.Close - low) / (high - low) * strength[i] * bars[i - length].Close / b.Close; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    }).ToArray();
-                    // This library's Kwan variant is a delayed cumulative integral, not a rolling mean.
-                    return Outputs(("Ki", bars.Select((_, i) => ratios.Take(Math.Max(0, i - smooth + 1)).Sum() / smooth).ToArray()));
-                });
+                return new("Ki", new[] { "Ki" }, bars => KwanOutputs(bars, indicator));
             case IndicatorName.KaseSerialDependencyIndex:
                 return new("KsdiUp", new[] { "KsdiUp", "KsdiDn" }, bars =>
                 {

@@ -4233,3 +4233,12 @@ The isolated campaigns `638a` and `638b` passed their baselines and caught **39/
 Source snapshot SHA256: `50e884e7028f7c9bf369d331f442e9d21cf7d908851521bba0b0ead506c4ef0d`. Archive SHA256: `e31647bb85c4853ae7edbcda81d2db1b2312fe9d7049efbfb193697e03f3fed7` and `e31647bb85c4853ae7edbcda81d2db1b2312fe9d7049efbfb193697e03f3fed7`.
 
 This is evidence for the isolated batch-638 source. Source was already published in the batch-638 checkpoint; this update does not restore older source files. Mutation verification for batches 639 through 657 and the remaining final gates is still incomplete.
+
+
+### Batch 658: Kwan numerical coverage
+
+Kwan's nine configurations now use the complete stochastic/RSI/momentum quotient, extended delayed contributions and exact cumulative sums. Signed denominators retain their sign; zero denominators retain the existing zero-contribution convention. The common delayed-increment representation also prevents false trading signals from rounded cumulative-output subtraction. Window and RSI histories allocate only observed entries, selected-price candle ranges agree across routes, and Kwan is bound to the native streaming factory.
+
+The final focused run passed **82/82 checks**, including existing Kwan hand and cross-route cases. Independent rational references, all five routes, selected inputs, injected-output faults, enrollment, four standard smoothing kinds, extreme periods, signed/subnormal prices, finite recovery after published overflow, custom gain/loss slots, legacy routes, invalid bars and preview/reset behavior are covered. The first run found the missing streaming binding (63 passed, 18 failed); it was fixed before final verification. Final test-only checks reused the unchanged production build.
+
+**39 prepared mutation faults remain pending**; all **7,715 unique anchors** apply. Built inventory is **6,347/7,131 enrolled**, with **784 omissions across 116 types** and no construction failures. DLL SHA256: `CF27E3169DD065785B165DD66B2C712C82613137C74F4EC5FBA944A993B204F6`. Mutation qualification is complete through638. Original639 campaigns have exposed test gaps and receive no qualification credit; corrected evidence and later batches through658, pending formula decisions and final hosted/package/release/performance gates remain incomplete. PR246 stays draft.

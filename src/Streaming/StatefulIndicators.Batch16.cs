@@ -581,82 +581,18 @@ public sealed class KurtosisIndicatorState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Ki")]
 public sealed class KwanIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _smoothLength;
-    private readonly RsiState _rsi;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _vrValues;
-    private readonly StreamingInputResolver _input;
-    private double _prevSum;
-
-    public KwanIndicatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 9,
-        int smoothLength = 2)
-    {
-        _length = Math.Max(1, length);
-        _smoothLength = Math.Max(1, smoothLength);
-        _rsi = new RsiState(maType, _length);
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _vrValues = new PooledRingBuffer<double>(_smoothLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KwanWindow _window;
+    public KwanIndicatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 9, int smoothLength = 2)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.KwanIndicator;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _values.Clear();
-        _vrValues.Clear();
-        _prevSum = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var hh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var ll = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var rsi = _rsi.Next(close, isFinal);
-        var priorClose = EhlersStreamingWindow.GetOffsetValue(_values, close, _length);
-        var mom = priorClose != 0 ? close / priorClose * 100 : 0;
-        var sto = hh - ll != 0 ? (close - ll) / (hh - ll) * 100 : 0;
-        var vr = mom != 0 ? sto * rsi / mom : 0;
-        var prevVr = EhlersStreamingWindow.GetOffsetValue(_vrValues, vr, _smoothLength);
-        var sum = _prevSum + prevVr;
-        var knrp = sum / _smoothLength;
-
-        if (isFinal)
-        {
-            _values.TryAdd(close, out _);
-            _vrValues.TryAdd(vr, out _);
-            _prevSum = sum;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ki", knrp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(knrp, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Ki", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _values.Dispose();
-        _vrValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Aatr")]

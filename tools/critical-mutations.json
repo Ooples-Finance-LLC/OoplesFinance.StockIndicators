@@ -66191,5 +66191,356 @@
     "before": "maType == MovingAvgType.KaufmanAdaptiveMovingAverage && !ComponentAverage.HasOverrides",
     "after": "maType == MovingAvgType.KaufmanAdaptiveMovingAverage",
     "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ComponentOverridesRetainEveryMomentSlot"
+  },
+  {
+    "id": "kwan-wide-length",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.ExtremePeriodsStoreOnlyObservedHistory"
+  },
+  {
+    "id": "kwan-wide-delay",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_delay = Math.Max(1, delay)",
+    "after": "_delay = Math.Max(2, delay)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.ExtremePeriodsStoreOnlyObservedHistory"
+  },
+  {
+    "id": "kwan-wide-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_count == 0 ? default : GainLossShare.Change",
+    "after": "_count < 0 ? default : GainLossShare.Change",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-positive-change",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "change.Mantissa > 0 ? change : default",
+    "after": "change.Mantissa < 0 ? change : default",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-negative-change",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "change.Mantissa < 0 ? change.Absolute : default",
+    "after": "change.Mantissa > 0 ? change.Absolute : default",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-rsi-scale",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "gain.AddTo(ref numerator, 100)",
+    "after": "gain.AddTo(ref numerator, 99)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-flat-carry",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "? _previousRsi : GainLossShare.Of",
+    "after": "? 100 : GainLossShare.Of",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "first.Value.Index <= _count - _length",
+    "after": "first.Value.Index < _count - _length",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-high-selection",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "Math.Max(value, first.Value.Value)",
+    "after": "Math.Min(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-low-selection",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "Math.Min(value, first.Value.Value)",
+    "after": "Math.Max(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-committed-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "deque.First.Value.Index <= _count - _length",
+    "after": "deque.First.Value.Index < _count - _length",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-prune-high",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "deque.Last.Value.Value <= value",
+    "after": "deque.Last.Value.Value >= value",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-prune-low",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "deque.Last.Value.Value >= value",
+    "after": "deque.Last.Value.Value <= value",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_prices.Count == _length && price != 0",
+    "after": "_prices.Count > _length && price != 0",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-price-origin",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "ExactVarianceWindow.Units(price) - ExactVarianceWindow.Units(ll)",
+    "after": "ExactVarianceWindow.Units(price) + ExactVarianceWindow.Units(ll)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.CompleteQuotientsSurviveOverflowAndSubnormalPrices"
+  },
+  {
+    "id": "kwan-wide-prior-price",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "ExactVarianceWindow.Units(_prices.Peek())",
+    "after": "ExactVarianceWindow.Units(price)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-range",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "ExactVarianceWindow.Units(hh) - ExactVarianceWindow.Units(ll)",
+    "after": "ExactVarianceWindow.Units(hh) + ExactVarianceWindow.Units(ll)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.CompleteQuotientsSurviveOverflowAndSubnormalPrices"
+  },
+  {
+    "id": "kwan-wide-denominator-sign",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "numerator = -numerator; denominator = -denominator;",
+    "after": "denominator = -denominator;",
+    "filter": "FullyQualifiedName~KwanNumericalTests.CompleteQuotientsSurviveOverflowAndSubnormalPrices"
+  },
+  {
+    "id": "kwan-wide-ratio-projection",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "ratio = RocBankValue.RoundUnits(numerator, denominator);",
+    "after": "ratio = RocBankValue.RoundUnits(numerator, denominator * 2);",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-delayed-term",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_ratios.Count == _delay ? _ratios.Peek()",
+    "after": "_ratios.Count > _delay ? _ratios.Peek()",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-sum",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "var sum = _sum + increment;",
+    "after": "var sum = increment;",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-sum-sign",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "var sum = _sum + increment;",
+    "after": "var sum = _sum - increment;",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "ExactMeanAccumulator.UnitRatio(sum, _delay)",
+    "after": "ExactMeanAccumulator.UnitRatio(sum, _delay + 1L)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-strong-buy",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "Signal.StrongBuy : increment.Sign",
+    "after": "Signal.Buy : increment.Sign",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-strong-sell",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "Signal.StrongSell\n            : increment.Sign",
+    "after": "Signal.Sell\n            : increment.Sign",
+    "filter": "FullyQualifiedName~KwanNumericalTests.ExtendedDelayedTermsCancelAfterPublishedOverflow"
+  },
+  {
+    "id": "kwan-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "if (final)\n        {\n            if (_prices.Count",
+    "after": "if (!final)\n        {\n            if (_prices.Count",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-price-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "if (_prices.Count == _length) _prices.Dequeue();",
+    "after": "if (_prices.Count > _length) _prices.Dequeue();",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-delay-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "if (_ratios.Count == _delay) _ratios.Dequeue();",
+    "after": "if (_ratios.Count > _delay) _ratios.Dequeue();",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_sum = _previousIncrement = default;",
+    "after": "_previousIncrement = default;",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_prices.Clear();",
+    "after": "_prices.TrimExcess();",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-reset-ratios",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_ratios.Clear();",
+    "after": "_ratios.TrimExcess();",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Subtract(default);",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-simple-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count < _length ? default",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-recursive-weight",
+    "module": "numerical",
+    "file": "src/Helpers/KwanWindow.cs",
+    "scope": "internal sealed class KwanWindow",
+    "before": "ema ? 2 : 1",
+    "after": "ema ? 1 : 2",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class KwanIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* removed finite guard */",
+    "filter": "FullyQualifiedName~KwanNumericalTests.InvalidBarsCannotAdvanceAnyState"
+  },
+  {
+    "id": "kwan-wide-native-price",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class KwanIndicatorState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, bar.Low, bar.High, isFinal)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
+  },
+  {
+    "id": "kwan-wide-fast-custom",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeKwanIndicatorFast(",
+    "before": "!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~KwanNumericalTests.CustomGainAndLossSlotsRetainInputsAndPeriods"
+  },
+  {
+    "id": "kwan-wide-selected-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeKwanIndicatorFast(",
+    "before": "window.Next(highs[i], lows[i], prices[i]",
+    "after": "window.Next(data.HighPrices[i], data.LowPrices[i], prices[i]",
+    "filter": "FullyQualifiedName~KwanNumericalTests.SelectedSourcePreservesCandles"
   }
 ]

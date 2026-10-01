@@ -137,15 +137,6 @@ OoplesFinance.StockIndicators.Indicators.Kvo/default
 OoplesFinance.StockIndicators.Indicators.Kvo/longer-periods
 OoplesFinance.StockIndicators.Indicators.Kvo/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Kvo/shorter-periods
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/default
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/longer-length
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/longer-periods
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/longer-smoothLength
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/minimum-length
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/minimum-smoothLength
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.KwanIndicator/weighted-average
 OoplesFinance.StockIndicators.Indicators.LBRPaintBars/default
 OoplesFinance.StockIndicators.Indicators.LBRPaintBars/longer-lbLength
 OoplesFinance.StockIndicators.Indicators.LBRPaintBars/longer-length

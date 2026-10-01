@@ -19357,47 +19357,13 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeKwanIndicatorFast(StockData data, ComputeContext context, int length = 9,
         int smoothLength = 2, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        // CalculateKwanIndicator scales a windowed stochastic of the chained series by its relative strength
-        // index and divides by its momentum over the same length, then publishes the running total of that
-        // value taken smoothLength bars back, divided by smoothLength. The routine this replaced smoothed the
-        // close with a moving average and computed none of it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-        smoothLength = Math.Max(smoothLength, 1);
-
-        using var strength = context.Rent(count);
-        RelativeStrengthIndex(data, context, input, length, maType, strength.WritableSpan);
-        var rsi = strength.Span;
-
-        using var valueRatio = context.Rent(count);
-        var vr = valueRatio.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        double runningSum = 0;
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var currentClose = input[i];
-            var priorClose = i >= length ? input[i - length] : 0;
-            var mom = priorClose != 0 ? currentClose / priorClose * 100 : 0;
-            var range = highWindow.Max - lowWindow.Min;
-            var sto = range != 0 ? (currentClose - lowWindow.Min) / range * 100 : 0;
-
-            vr[i] = mom != 0 ? sto * rsi[i] / mom : 0;
-            runningSum += i >= smoothLength ? vr[i - smoothLength] : 0;
-            output[i] = runningSum / smoothLength;
-        }
-
+        var (prices, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);
+        using var strength = context.Rent(prices.Count);
+        var external = !StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides;
+        if (external) RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(prices), Math.Max(1, length), maType, strength.WritableSpan);
+        using var window = new KwanWindow(maType, length, smoothLength);
+        var buffer = context.Rent(prices.Count);
+        for (var i = 0; i < prices.Count; i++) buffer.WritableSpan[i] = window.Next(highs[i], lows[i], prices[i], true, external ? strength.Span[i] : null).Value;
         return buffer;
     }
 

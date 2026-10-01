@@ -1888,41 +1888,15 @@ public static partial class Calculations
     public static StockData CalculateKwanIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 9, 
         int smoothLength = 2)
     {
-        List<double> vrList = new(stockData.Count);
-        List<double> prevList = new(stockData.Count);
         List<double> knrpList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double prevSum = 0;
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).ChainedValues;
-
+        using var window = new KwanWindow(maType, length, smoothLength);
+        var external = StrengthWindow.Supports(maType) ? null : CalculateRelativeStrengthIndex(stockData, maType, length: Math.Max(1, length)).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentClose = inputList[i];
-            var priorClose = i >= length ? inputList[i - length] : 0;
-            var mom = priorClose != 0 ? currentClose / priorClose * 100 : 0;
-            var rsi = rsiList[i];
-            var hh = highestList[i];
-            var ll = lowestList[i];
-            var sto = hh - ll != 0 ? (currentClose - ll) / (hh - ll) * 100 : 0;
-            var prevVr = i >= smoothLength ? vrList[i - smoothLength] : 0;
-            var prevKnrp1 = i >= 1 ? knrpList[i - 1] : 0;
-            var prevKnrp2 = i >= 2 ? knrpList[i - 2] : 0;
-
-            var vr = mom != 0 ? sto * rsi / mom : 0;
-            vrList.Add(vr);
-
-            var prev = prevVr;
-            prevList.Add(prev);
-
-            prevSum += prev;
-            var knrp = prevSum / smoothLength;
-            knrpList.Add(knrp);
-
-            var signal = GetCompareSignal(knrp - prevKnrp1, prevKnrp1 - prevKnrp2);
-            signalsList?.Add(signal);
+            var point = window.Next(highList[i], lowList[i], inputList[i], true, external?[i]);
+            knrpList.Add(point.Value); signalsList?.Add(point.Trade);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
