@@ -57166,13 +57166,13 @@
     "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
   },
   {
-    "id": "median-adaptive-wide-expiry",
+    "id": "median-adaptive-wide-expiry-drop",
     "module": "numerical",
     "file": "src/Helpers/MedianAdaptiveWindow.cs",
     "scope": "internal sealed class MedianAdaptiveWindow",
     "before": "if (_history.Count - _start > _length) _start++;",
-    "after": "if (_history.Count - _start > _length) _start += 2;",
-    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HistoryCompactionPreservesTrailingMedians"
+    "after": "if (_history.Count - _start > _length) _start += 3;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
   },
   {
     "id": "median-adaptive-wide-preview",
