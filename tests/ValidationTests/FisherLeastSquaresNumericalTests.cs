@@ -50,6 +50,7 @@ public sealed class FisherLeastSquaresNumericalTests
         var result = Check(Prices(0, 2), 2); Assert.Equal(new[] { 0d, 1 + Math.Tanh(1) }, result.Outputs["Flsma"]);
         Assert.Equal(new[] { Signal.None, Signal.StrongBuy }, result.Signals);
         foreach (var kind in Kinds) Assert.Equal(new[] { 4d, -2, 7 }, Check(Prices(4, -2, 7), 1, kind.Kind, kind.Reference).Outputs["Flsma"]);
+        foreach (var kind in Kinds) Check(Prices(4, -2, 7, 3, -1, 8), 3, kind.Kind, kind.Reference);
         foreach (var period in new[] { -1, 0, 1, 2, 5, int.MaxValue }) Check(Prices(4, -2, 7, 3), period);
         Assert.Equal(new[] { 0d, 0, 4 }, Check(Prices(4, 4, 4), 3).Outputs["Flsma"]);
     }
