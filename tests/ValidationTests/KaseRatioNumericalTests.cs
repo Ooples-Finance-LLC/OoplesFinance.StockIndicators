@@ -56,6 +56,9 @@ public sealed class KaseRatioNumericalTests
     {
         var values = Check(new[] { B(3, 1, 2), B(5, 3, 4), B(7, 5, 6, 0) }, 1);
         Assert.Equal(new[] { 0d, 1, 1 }, values["KaseUp"]); Assert.Equal(new[] { 0d, 5, 5 }, values["KaseDn"]);
+        // ATR is exactly zero but a faulty refresh would change Up from 1 to 5/4.
+        var zeroAtr = Check(new[] { B(3, 1, 2), B(5, 3, 4), B(4, 4, 4) }, 1);
+        Assert.Equal(new[] { 0d, 1, 1 }, zeroAtr["KaseUp"]); Assert.Equal(new[] { 0d, 5, 5 }, zeroAtr["KaseDn"]);
         Check(new[] { B(3, 1, 2), B(4, 0, 2), B(8, 2, 4), B(4, 4, 4), B(5, 3, 4, -1), B(5, -3, -1) }, 1);
     }
     [Fact]

@@ -4579,3 +4579,10 @@ The isolated campaigns `654-repaired-a` and `654-repaired-b` passed their baseli
 Source snapshot SHA256: `6ad2fa2ae795d38e987e603ef1eb4256bd9de882ff13f1e3792dbdb7c880a609`. Archive SHA256: `65a582b732def6761aef8474b3f20b75b12cd2ca96b676de8f25a2ec15b2b478` and `ebdc9e16b4ec8f808835d91094be35e3425b7017d4f48de379a735bec8dc781e`.
 
 This is evidence for the isolated batch-654 source. Source was already published in the batch-654 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 655: Distinct zero-ATR gate regression
+
+The original Kase Ratio mutation pair caught 38 compiled faults but left the up-gate fault alive. The zero-ATR hand accidentally recomputed the held value. A new three-bar hand holds Up at 1 while the faulty update would produce 5/4; Down independently holds at 5. The retained source has no production or mutation-definition changes, only the strengthened regression.
+
+All **49/49 focused tests passed** on the repaired snapshot (kase655-repaired.trx). A fresh matching 39-fault pair is running. The original 38 kills are not pooled into repaired qualification, which remains pending.
