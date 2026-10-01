@@ -55924,12 +55924,12 @@
     "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
   },
   {
-    "id": "dynamic-momentum-wide-prefix-compaction",
+    "id": "dynamic-momentum-wide-prefix-compaction-history",
     "module": "numerical",
     "file": "src/Helpers/DynamicMomentumWindow.cs",
     "scope": "internal sealed class DynamicMomentumWindow",
     "before": "_prefix.RemoveRange(0, _start);",
-    "after": "_prefix.RemoveRange(0, _start - 1);",
+    "after": "_prefix.RemoveRange(0, _start + _capacity);",
     "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
   },
   {

@@ -3970,3 +3970,10 @@ Function to Candles now evaluates all four candle RSI series with complete gain/
 **48/48 focused tests passed on the first run** in `function-candles-644.trx`, including 47 family cases and the existing transformed-price hand regression. Coverage includes five configurations across five routes, four supported means, maximum/subnormal values, extreme periods, all four outputs, two callback slots per fast output, batch zero callbacks and legacy mean parity. A hand example independently fixes all four candle outputs and the three trading signals. **34 prepared behavioral faults remain pending**; all **7,147 anchors** pass preflight. Candidate/frozen snapshots match on 2168 files. Enrollment is **6,217/7,131**, with **914 omissions** and no construction failures. DLL SHA256: `76D5EC72060A13A191FB6B76D4E3C122D05690E15DE57EE7FA6B7C924F705AD8`.
 
 Mutation qualification is complete through627. Original628 contains a surviving prefix-compaction mutant under investigation; no628 qualification is claimed. Remaining numerical coverage, mutation campaigns, pending formula decisions and hosted/package/release/performance gates remain incomplete.
+
+
+### Dynamic Momentum628: replace an equivalent compaction mutation
+
+The original `prefix-compaction` fault removed one fewer expired prefix entry. Once compaction is possible, every queried period is at most the retained capacity; prefix differences still select the same suffix, and the signal divisor is already capped by the period. The extra old entry therefore changes retention only, not any published value. This surviving fault is excluded as behaviorally equivalent; it is not credited as caught.
+
+The replacement `prefix-compaction-history` incorrectly removes the active history as well as expired prefixes. The existing 2,110-bar adaptive-window regression exercises compaction followed by expansion to the maximum lookback. Production and regression tests are unchanged. Corrected campaigns must qualify the replacement against retained matching snapshots before batch628 can be marked complete; original campaign evidence remains separate.
