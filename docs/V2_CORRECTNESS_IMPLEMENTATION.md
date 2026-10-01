@@ -4459,3 +4459,12 @@ The isolated campaigns `650-final-a` and `650-final-b` passed their baselines an
 The original native-guard fault was redundant and a first replacement was rejected by SI0004. This fresh campaign preserves the resolver on one runtime branch and bypasses both whole-bar guards on the output-producing branch exercised by the test. No original kills were pooled. Production and test files are identical to the original batch-650 snapshot. Source snapshot SHA256: `18514270ca9b087b3290997052c29b5b63bc60da4cd5174cb0438a43c015809c`. Archive SHA256: `242e5d3f88dc233b46cfb3e8ae3f61d328d5871bfb7007e33c1d565843351c6e` and `242e5d3f88dc233b46cfb3e8ae3f61d328d5871bfb7007e33c1d565843351c6e`.
 
 This is evidence for the isolated batch-650 source. Source was already published in the batch-650 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 649: Inertia repaired mutation qualification
+
+The isolated campaigns `649-repaired-a` and `649-repaired-b` passed their baselines and caught **40/40 compiled behavioral faults**, alongside **113/113 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-649 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `664f7d89969a009383aa9e30570f6e13afd1c0d257fce45bd91a059cd54593d6`. Archive SHA256: `ba39a9a279ef631338c9cc3051e360aaa5de4f8515a4960fd6dbd18f790373c7` and `ba39a9a279ef631338c9cc3051e360aaa5de4f8515a4960fd6dbd18f790373c7`.
+
+This is evidence for the isolated batch-649 source. Source was already published in the batch-649 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
