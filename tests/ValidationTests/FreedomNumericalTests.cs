@@ -68,6 +68,12 @@ public sealed class FreedomNumericalTests
             Check(Bars(Enumerable.Range(0, 19).Select(i => (i % 7 - 3) * scale).ToArray(), Enumerable.Range(0, 19).Select(i => (i % 5 - 2) * scale).ToArray()), 4, kind.Kind, kind.Reference);
         foreach (var kind in Kinds)
         {
+            // Two overflow scales must share a rank window: a two-bar rank
+            // sees only endpoints and can hide a discarded movement exponent.
+            var mixedScales = Check(Bars(new[] { 1e-100, double.MaxValue, double.Epsilon, double.MaxValue, 1e-100, double.MaxValue, double.Epsilon, double.MaxValue, 1d, 2, 3, 4 },
+                new[] { 1d, 2, 3, 7, 2, 9, 4, 1, 3, 8, 2, 6 }), 4, kind.Kind, kind.Reference);
+            // SMA's four ratios at bar 4 are [0,0,1,1], giving z=(1-.5)/.5=1.
+            if (kind.Reference == 1) Assert.Equal(1, mixedScales.Outputs["Fom"][4]);
             Check(Bars(new[] { double.Epsilon, double.MaxValue, -double.MaxValue, double.Epsilon, 0, 1, 2, 1, 1, 1, 1 }, new[] { double.MaxValue, double.Epsilon, 2 * double.Epsilon, double.Epsilon, 0, 1, 2, 1, 1, 1, 1 }), 2, kind.Kind, kind.Reference);
             Check(Bars(new[] { 1d, 2, 6, 6, 3, 1, 2 }, new[] { 1d, Math.BitIncrement(1), 1, Math.BitIncrement(1), 1, 1, 1 }), 3, kind.Kind, kind.Reference);
             Check(Bars(Enumerable.Repeat(double.MaxValue, 12).ToArray(), Enumerable.Repeat(double.MaxValue, 12).ToArray()), 3, kind.Kind, kind.Reference);
