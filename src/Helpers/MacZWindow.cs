@@ -26,10 +26,10 @@ internal sealed class MacZWindow : IDisposable
         private readonly int _exponent;
         private readonly BigInteger _denominator;
         private BigInteger Denominator => _denominator.IsZero ? BigInteger.One : _denominator;
-        private Number(BigInteger coefficient, int exponent, BigInteger denominator = default)
+        private Number(BigInteger coefficient, int exponent, BigInteger denominator = default, bool reduced = false)
         {
             if (denominator.IsZero) denominator = BigInteger.One;
-            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(coefficient), denominator);
+            var common = reduced ? BigInteger.One : BigInteger.GreatestCommonDivisor(BigInteger.Abs(coefficient), denominator);
             _coefficient = coefficient / common; _denominator = denominator / common; _exponent = exponent;
         }
         internal int Sign => _coefficient.Sign;
@@ -40,14 +40,26 @@ internal sealed class MacZWindow : IDisposable
         {
             if (a.Sign == 0) return b; if (b.Sign == 0) return a;
             var power = Math.Min(a._exponent, b._exponent);
-            return new((a._coefficient << (a._exponent - power)) * b.Denominator + (b._coefficient << (b._exponent - power)) * a.Denominator, power, a.Denominator * b.Denominator);
+            var common = BigInteger.GreatestCommonDivisor(a.Denominator, b.Denominator);
+            var aScale = b.Denominator / common; var bScale = a.Denominator / common;
+            // Exponent alignment can create further factors, so fully reduce the sum.
+            return new((a._coefficient << (a._exponent - power)) * aScale + (b._coefficient << (b._exponent - power)) * bScale, power, a.Denominator * aScale);
         }
-        public static Number operator -(Number a, Number b) => a + new Number(-b._coefficient, b._exponent, b.Denominator);
-        public static Number operator *(Number a, Number b) => new(a._coefficient * b._coefficient, checked(a._exponent + b._exponent), a.Denominator * b.Denominator);
+        public static Number operator -(Number a, Number b) => a + new Number(-b._coefficient, b._exponent, b.Denominator, reduced: true);
+        public static Number operator *(Number a, Number b)
+        {
+            var crossA = BigInteger.GreatestCommonDivisor(BigInteger.Abs(a._coefficient), b.Denominator);
+            var crossB = BigInteger.GreatestCommonDivisor(BigInteger.Abs(b._coefficient), a.Denominator);
+            return new((a._coefficient / crossA) * (b._coefficient / crossB), checked(a._exponent + b._exponent),
+                (a.Denominator / crossB) * (b.Denominator / crossA), reduced: true);
+        }
         internal Number Divide(Number divisor)
         {
             if (divisor.Sign == 0) throw new DivideByZeroException();
-            return new(_coefficient * divisor.Denominator * divisor.Sign, checked(_exponent - divisor._exponent), Denominator * BigInteger.Abs(divisor._coefficient));
+            var numeratorCommon = BigInteger.GreatestCommonDivisor(BigInteger.Abs(_coefficient), BigInteger.Abs(divisor._coefficient));
+            var denominatorCommon = BigInteger.GreatestCommonDivisor(Denominator, divisor.Denominator);
+            return new((_coefficient / numeratorCommon) * (divisor.Denominator / denominatorCommon) * divisor.Sign,
+                checked(_exponent - divisor._exponent), (Denominator / denominatorCommon) * (BigInteger.Abs(divisor._coefficient) / numeratorCommon), reduced: true);
         }
         internal Number OverRoot(Number square)
         {

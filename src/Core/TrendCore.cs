@@ -922,41 +922,7 @@ internal static class TrendCore
     /// </summary>
     internal static void MassThrust(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var thrustArray = pool.Rent(close.Length);
-
-        try
-        {
-            var thrust = thrustArray.AsSpan(0, close.Length);
-
-            thrust[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                if (close[i] > close[i - 1])
-                {
-                    thrust[i] = volume[i];
-                }
-                else if (close[i] < close[i - 1])
-                {
-                    thrust[i] = -volume[i];
-                }
-                else
-                {
-                    thrust[i] = 0;
-                }
-            }
-
-            MovingAverageCore.SimpleMovingAverage(thrust, output, length);
-        }
-        finally
-        {
-            pool.Return(thrustArray);
-        }
+        MassThrustWindow.Compute(close, volume, output, length, false);
     }
 
     /// <summary>

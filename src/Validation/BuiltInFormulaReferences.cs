@@ -22,6 +22,13 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName is IndicatorName.MassThrustIndicator or IndicatorName.MassThrustOscillator)
+        {
+            if (AverageKind(builtIn.CreateOptions(), 3) == 0) yield break;
+            var massKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? (builtIn.BatchName == IndicatorName.MassThrustOscillator ? "Mto" : "Mti") } : new[] { builtIn.BatchName == IndicatorName.MassThrustOscillator ? "Mto" : "Mti", "Signal" };
+            for (var slot = 0; slot < massKeys.Length; slot++) { var key = massKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MassThrustOutputs(bars, builtIn)[key], MassThrustBudget); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.MarketDirectionIndicator)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MarketDirectionOutputs(bars, builtIn), IndicatorErrorBudget.Exact);

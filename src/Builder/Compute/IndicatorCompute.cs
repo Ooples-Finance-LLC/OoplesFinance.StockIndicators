@@ -598,7 +598,7 @@ internal static partial class IndicatorCompute
             LinRegInterceptSpecOptions lri => ComputeLinRegInterceptFast(data, context, lri.Length),
             ElderImpulseSystemSpecOptions eis => ComputeElderImpulseSystemFast(data, context, eis.Length),
             MassThrustSpecOptions mt => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeMassThrustFast(data, context, mt.Length), mt.Length, MovingAvgType.ExponentialMovingAverage)
+                ? ComputeMassThrustSignalFast(data, context, mt.Length, MovingAvgType.ExponentialMovingAverage, false)
                 : ComputeMassThrustFast(data, context, mt.Length),
 
             // Batch 5 - Chande indicators
@@ -1012,7 +1012,7 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - Mass Thrust oscillator
             MassThrustOscillatorSpecOptions mto => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeMassThrustOscillatorFast(data, context, mto.Length), mto.Length, mto.MaType)
+                ? ComputeMassThrustSignalFast(data, context, mto.Length, mto.MaType, true)
                 : ComputeMassThrustOscillatorFast(data, context, mto.Length),
 
             // Batch 7 - Moving averages
@@ -2102,7 +2102,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             MassThrustIndicatorSpecOptions mti => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeMassThrustIndicatorFast(data, context, mti.Length), mti.Length, mti.MaType)
+                ? ComputeMassThrustSignalFast(data, context, mti.Length, mti.MaType, false)
                 : ComputeMassThrustIndicatorFast(data, context, mti.Length),
             ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.Length,
                 maType: mgha.MaType),
@@ -6008,6 +6008,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Thrust Indicator using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeMassThrustSignalFast(StockData data, ComputeContext context, int length, MovingAvgType kind, bool oscillator)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var values = MassThrustWindow.Calculate(input, data.Volumes, oscillator, kind, length).SignalLine;
+        var output = context.Rent(values.Count); for (var i = 0; i < values.Count; i++) output.WritableSpan[i] = values[i]; return output;
+    }
+
     internal static ComputeBuffer ComputeMassThrustFast(StockData data, ComputeContext context, int length = 14)
         // MassThrust is an alias of MassThrustIndicator - BuilderArmTargets binds both specs to
         // IndicatorName.MassThrustIndicator - so it delegates rather than keeping a second derivation that
@@ -10307,46 +10314,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeMassThrustOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateMassThrustOscillator weighs the advancing side of the window against the declining side,
-        // each scaled by the volume that arrived on its bars. The moving average type reaches only the signal
-        // line, never the published "Mto" series, so the arm does not take one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var advances = new RollingSum();
-        var declines = new RollingSum();
-        var advanceVolumes = new RollingSum();
-        var declineVolumes = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-
-            advances.Add(i >= 1 && currentValue > previousValue
-                ? CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue)
-                : 0);
-            declines.Add(i >= 1 && currentValue < previousValue
-                ? CalculationsHelper.MinPastValues(i, 1, previousValue - currentValue)
-                : 0);
-
-            var advanceSum = advances.Sum(length);
-            var declineSum = declines.Sum(length);
-
-            advanceVolumes.Add(currentValue > previousValue && advanceSum != 0 ? volumes[i] / advanceSum : 0);
-            declineVolumes.Add(currentValue < previousValue && declineSum != 0 ? volumes[i] / declineSum : 0);
-
-            var advanceWeight = advanceSum * advanceVolumes.Sum(length);
-            var declineWeight = declineSum * declineVolumes.Sum(length);
-            var bottom = advanceWeight + declineWeight;
-            output[i] = bottom != 0 ? 100 * (advanceWeight - declineWeight) / bottom : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var values = MassThrustWindow.Calculate(input, data.Volumes, true, MovingAvgType.ExponentialMovingAverage, length).Values;
+        var output = context.Rent(values.Count); for (var i = 0; i < values.Count; i++) output.WritableSpan[i] = values[i]; return output;
     }
 
     #endregion
@@ -19389,44 +19359,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeMassThrustIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateMassThrustIndicator sums the advances and declines of the chained series over the window,
-        // divides each bar's volume by the matching sum, sums those ratios over the same window and takes
-        // the difference of the two products, scaled down by a million. The arm this replaced published a
-        // plain moving average of the close. maType only smooths the Signal key.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var advSumWindow = new RollingSum();
-        var decSumWindow = new RollingSum();
-        var advVolSumWindow = new RollingSum();
-        var decVolSumWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-
-            advSumWindow.Add(i >= 1 && currentValue > prevValue
-                ? CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue)
-                : 0);
-            decSumWindow.Add(i >= 1 && currentValue < prevValue
-                ? CalculationsHelper.MinPastValues(i, 1, prevValue - currentValue)
-                : 0);
-
-            var advSum = advSumWindow.Sum(length);
-            var decSum = decSumWindow.Sum(length);
-
-            advVolSumWindow.Add(currentValue > prevValue && advSum != 0 ? volumes[i] / advSum : 0);
-            decVolSumWindow.Add(currentValue < prevValue && decSum != 0 ? volumes[i] / decSum : 0);
-
-            output[i] = ((advSum * advVolSumWindow.Sum(length)) - (decSum * decVolSumWindow.Sum(length))) / 1000000;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var values = MassThrustWindow.Calculate(input, data.Volumes, false, MovingAvgType.ExponentialMovingAverage, length).Values;
+        var output = context.Rent(values.Count); for (var i = 0; i < values.Count; i++) output.WritableSpan[i] = values[i]; return output;
     }
 
     /// <summary>

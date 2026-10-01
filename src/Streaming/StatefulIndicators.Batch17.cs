@@ -87,173 +87,31 @@ public sealed class MassIndexState : IStreamingIndicatorState, IDisposable, ICus
 [PrimaryOutput("Mti")]
 public sealed class MassThrustIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _advSum;
-    private readonly RollingWindowSum _decSum;
-    private readonly RollingWindowSum _advVolSum;
-    private readonly RollingWindowSum _decVolSum;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public MassThrustIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _advSum = new RollingWindowSum(resolved);
-        _decSum = new RollingWindowSum(resolved);
-        _advVolSum = new RollingWindowSum(resolved);
-        _decVolSum = new RollingWindowSum(resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MassThrustWindow _window;
+    public MassThrustIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14) => _window = new(false, maType, length);
     public IndicatorName Name => IndicatorName.MassThrustIndicator;
-
-    public void Reset()
-    {
-        _advSum.Reset();
-        _decSum.Reset();
-        _advVolSum.Reset();
-        _decVolSum.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var adv = _hasPrev && value > prevValue ? value - prevValue : 0;
-        var dec = _hasPrev && value < prevValue ? prevValue - value : 0;
-
-        var advSum = isFinal ? _advSum.Add(adv, out _) : _advSum.Preview(adv, out _);
-        var decSum = isFinal ? _decSum.Add(dec, out _) : _decSum.Preview(dec, out _);
-
-        var advVol = _hasPrev && value > prevValue && advSum != 0 ? bar.Volume / advSum : 0;
-        var decVol = _hasPrev && value < prevValue && decSum != 0 ? bar.Volume / decSum : 0;
-
-        var advVolSum = isFinal ? _advVolSum.Add(advVol, out _) : _advVolSum.Preview(advVol, out _);
-        var decVolSum = isFinal ? _decVolSum.Add(decVol, out _) : _decVolSum.Preview(decVol, out _);
-
-        var mti = ((advSum * advVolSum) - (decSum * decVolSum)) / 1000000d;
-        var signal = _signalSmoother.Next(mti, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Mti", mti },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mti, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Mti", point.Value }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _advSum.Dispose();
-        _decSum.Dispose();
-        _advVolSum.Dispose();
-        _decVolSum.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Mto")]
 public sealed class MassThrustOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _advSum;
-    private readonly RollingWindowSum _decSum;
-    private readonly RollingWindowSum _advVolSum;
-    private readonly RollingWindowSum _decVolSum;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public MassThrustOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _advSum = new RollingWindowSum(resolved);
-        _decSum = new RollingWindowSum(resolved);
-        _advVolSum = new RollingWindowSum(resolved);
-        _decVolSum = new RollingWindowSum(resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MassThrustWindow _window;
+    public MassThrustOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14) => _window = new(true, maType, length);
     public IndicatorName Name => IndicatorName.MassThrustOscillator;
-
-    public void Reset()
-    {
-        _advSum.Reset();
-        _decSum.Reset();
-        _advVolSum.Reset();
-        _decVolSum.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var adv = _hasPrev && value > prevValue ? value - prevValue : 0;
-        var dec = _hasPrev && value < prevValue ? prevValue - value : 0;
-
-        var advSum = isFinal ? _advSum.Add(adv, out _) : _advSum.Preview(adv, out _);
-        var decSum = isFinal ? _decSum.Add(dec, out _) : _decSum.Preview(dec, out _);
-
-        var advVol = _hasPrev && value > prevValue && advSum != 0 ? bar.Volume / advSum : 0;
-        var decVol = _hasPrev && value < prevValue && decSum != 0 ? bar.Volume / decSum : 0;
-
-        var advVolSum = isFinal ? _advVolSum.Add(advVol, out _) : _advVolSum.Preview(advVol, out _);
-        var decVolSum = isFinal ? _decVolSum.Add(decVol, out _) : _decVolSum.Preview(decVol, out _);
-
-        var top = (advSum * advVolSum) - (decSum * decVolSum);
-        var bot = (advSum * advVolSum) + (decSum * decVolSum);
-        var mto = bot != 0 ? 100d * top / bot : 0;
-        var signal = _signalSmoother.Next(mto, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Mto", mto },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mto, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Mto", point.Value }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _advSum.Dispose();
-        _decSum.Dispose();
-        _advVolSum.Dispose();
-        _decVolSum.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Mm")]

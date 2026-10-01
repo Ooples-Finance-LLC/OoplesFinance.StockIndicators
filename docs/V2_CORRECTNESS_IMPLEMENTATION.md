@@ -4348,3 +4348,14 @@ The isolated campaigns `646-corrected-a` and `646-corrected-b` passed their base
 Source snapshot SHA256: `e3fe516b680548565fce77d69770a72143a32b7e6ae2174ed48201a069ac8df4`. Archive SHA256: `0884b54a8ff9ccc78aa3fa957cbdf16e996b24954022368df9b2fad515a2ae15` and `0884b54a8ff9ccc78aa3fa957cbdf16e996b24954022368df9b2fad515a2ae15`.
 
 This is evidence for the isolated batch-646 source. Source was already published in the batch-646 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 664: Mass Thrust exact nested price-volume ratios
+
+MassThrust, MassThrustIndicator and MassThrustOscillator now retain their rolling move/volume ratios and products until publication. Signal smoothing consumes unpublished values, preserving finite results and recovery after overflow. Both internal cores follow the public formula; the new volume-aware oscillator overload and existing unit-volume overload have independent span coverage. Signed volumes remain supported, including exact zero-denominator behavior and a subnormal denominator whose overflowing result later recovers.
+
+**142/142 focused checks passed** in `mass-thrust664-shared-arithmetic.trx`: all 14 configurations across five routes, selected inputs, output fault detection, numerical classes, independent hand/closed-form trajectories, signals, previews/reset, core spans, finite-input guards and extreme periods. The reference scans rational windows independently; four binary64 residual components bound only recursive smoothing memory at approximately 212 bits, above production 106-bit states. The earlier 78-pass run was intentionally stopped after a stack sample identified reference fraction growth; it is not qualification evidence. The second run was intentionally stopped after 91 partial passes when a stack sample identified production rational reduction overhead; it is not qualification evidence. Shared arithmetic now cancels factors before products and uses least-common denominators for sums. Five independent algebraic tests compare complete rational values (including unpublished exponent extremes), and seven focused MacZ/MacZ VWAP caller regressions passed. No assertion budget was relaxed.
+
+Enrollment is **6,406/7,131**, leaving **725 omissions across 108 types**, with no construction failures and an exact backlog match. **47 prepared behavioral faults remain pending** (43 Mass Thrust and four shared arithmetic faults); all **7,957 global anchors** pass preflight. Formula/domain/core compatibility is documented in V2_FORMULA_VARIANTS.md. Source verification does not establish mutation qualification or completion of hosted/platform/package/release/performance gates. PR246 remains draft.
+
+DLL SHA256: `D567527A6AC9F83EB4C95AC405E2E8A991CBBAD33F535E22EEA3F8B5E62AC0FA`.

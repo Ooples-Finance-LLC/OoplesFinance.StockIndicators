@@ -2898,70 +2898,12 @@ public static partial class Calculations
     public static StockData CalculateMassThrustOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 14)
     {
-        List<double> topList = new(stockData.Count);
-        List<double> botList = new(stockData.Count);
-        List<double> mtoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-        var advSumWindow = new RollingSum();
-        var decSumWindow = new RollingSum();
-        var advVolSumWindow = new RollingSum();
-        var decVolSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentVolume = volumeList[i];
-
-            var adv = i >= 1 && currentValue > prevValue ? MinPastValues(i, 1, currentValue - prevValue) : 0;
-            advSumWindow.Add(adv);
-
-            var dec = i >= 1 && currentValue < prevValue ? MinPastValues(i, 1, prevValue - currentValue) : 0;
-            decSumWindow.Add(dec);
-
-            var advSum = advSumWindow.Sum(length);
-            var decSum = decSumWindow.Sum(length);
-
-            var advVol = currentValue > prevValue && advSum != 0 ? currentVolume / advSum : 0;
-            advVolSumWindow.Add(advVol);
-
-            var decVol = currentValue < prevValue && decSum != 0 ? currentVolume / decSum : 0;
-            decVolSumWindow.Add(decVol);
-
-            var advVolSum = advVolSumWindow.Sum(length);
-            var decVolSum = decVolSumWindow.Sum(length);
-
-            var top = (advSum * advVolSum) - (decSum * decVolSum);
-            topList.Add(top);
-
-            var bot = (advSum * advVolSum) + (decSum * decVolSum);
-            botList.Add(bot);
-
-            var mto = bot != 0 ? 100 * top / bot : 0;
-            mtoList.Add(mto);
-        }
-
-        var mtoEmaList = GetMovingAverageList(stockData, maType, length, mtoList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var mto = mtoList[i];
-            var mtoEma = mtoEmaList[i];
-            var prevMto = i >= 1 ? mtoList[i - 1] : 0;
-            var prevMtoEma = i >= 1 ? mtoEmaList[i - 1] : 0;
-
-            var signal = GetRsiSignal(mto - mtoEma, prevMto - prevMtoEma, mto, prevMto, 50, -50);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mto", mtoList },
-            { "Signal", mtoEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mtoList);
+        var (input, _, _, _, volume) = GetInputValuesList(stockData);
+        var result = MassThrustWindow.Calculate(input, volume, true, maType, length);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mto", result.Values }, { "Signal", result.SignalLine } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades);
+        stockData.SetCustomValues(result.Values);
         stockData.IndicatorName = IndicatorName.MassThrustOscillator;
-
         return stockData;
     }
 
@@ -3310,60 +3252,12 @@ public static partial class Calculations
     public static StockData CalculateMassThrustIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        List<double> mtiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-        var advSumWindow = new RollingSum();
-        var decSumWindow = new RollingSum();
-        var advVolSumWindow = new RollingSum();
-        var decVolSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentVolume = volumeList[i];
-
-            var adv = i >= 1 && currentValue > prevValue ? MinPastValues(i, 1, currentValue - prevValue) : 0;
-            advSumWindow.Add(adv);
-
-            var dec = i >= 1 && currentValue < prevValue ? MinPastValues(i, 1, prevValue - currentValue) : 0;
-            decSumWindow.Add(dec);
-
-            var advSum = advSumWindow.Sum(length);
-            var decSum = decSumWindow.Sum(length);
-
-            var advVol = currentValue > prevValue && advSum != 0 ? currentVolume / advSum : 0;
-            advVolSumWindow.Add(advVol);
-
-            var decVol = currentValue < prevValue && decSum != 0 ? currentVolume / decSum : 0;
-            decVolSumWindow.Add(decVol);
-
-            var advVolSum = advVolSumWindow.Sum(length);
-            var decVolSum = decVolSumWindow.Sum(length);
-
-            var mti = ((advSum * advVolSum) - (decSum * decVolSum)) / 1000000;
-            mtiList.Add(mti);
-        }
-
-        var mtiEmaList = GetMovingAverageList(stockData, maType, length, mtiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var mtiEma = mtiEmaList[i];
-            var prevMtiEma = i >= 1 ? mtiEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(mtiEma, prevMtiEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mti", mtiList },
-            { "Signal", mtiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mtiList);
+        var (input, _, _, _, volume) = GetInputValuesList(stockData);
+        var result = MassThrustWindow.Calculate(input, volume, false, maType, length);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mti", result.Values }, { "Signal", result.SignalLine } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades);
+        stockData.SetCustomValues(result.Values);
         stockData.IndicatorName = IndicatorName.MassThrustIndicator;
-
         return stockData;
     }
 

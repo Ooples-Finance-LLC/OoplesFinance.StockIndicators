@@ -11,6 +11,8 @@ internal static partial class BuiltInFormulaReferences
         if (name != IndicatorName.SellGravitationIndex && name != IndicatorName.TrendAnalysisIndex &&
             name != IndicatorName.TrendAnalysisIndicator && name != IndicatorName.MassThrustIndicator &&
             name != IndicatorName.MassThrustOscillator) return null;
+        if (name is IndicatorName.MassThrustIndicator or IndicatorName.MassThrustOscillator)
+            return new(name == IndicatorName.MassThrustIndicator ? "Mti" : "Mto", new[] { name == IndicatorName.MassThrustIndicator ? "Mti" : "Mto", "Signal" }, bars => MassThrustOutputs(bars, indicator));
         var trend = name == IndicatorName.TrendAnalysisIndex || name == IndicatorName.TrendAnalysisIndicator;
         var kind = AverageKind(options, trend ? 1 : 3);
         if (kind == 0) return null;

@@ -5756,44 +5756,14 @@ internal static class OscillatorCore
     /// Computes Mass Thrust Oscillator.
     /// Uses advancing/declining price ratio as proxy for breadth.
     /// </summary>
+    internal static void MassThrustOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 10)
+    {
+        MassThrustWindow.Compute(close, volume, output, length, true);
+    }
+
     internal static void MassThrustOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var thrustArray = pool.Rent(close.Length);
-        var emaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var thrust = thrustArray.AsSpan(0, close.Length);
-            var ema = emaArray.AsSpan(0, close.Length);
-
-            // Calculate daily thrust (advance/decline ratio proxy)
-            thrust[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                var change = close[i] - close[i - 1];
-                thrust[i] = change > 0 ? 1 : (change < 0 ? -1 : 0);
-            }
-
-            // Smooth with EMA
-            MovingAverageCore.ExponentialMovingAverage(thrust, ema, length);
-
-            // Scale to percentage
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = ema[i] * 100;
-            }
-        }
-        finally
-        {
-            pool.Return(thrustArray);
-            pool.Return(emaArray);
-        }
+        MassThrustWindow.Compute(close, ReadOnlySpan<double>.Empty, output, length, true, true);
     }
 
     /// <summary>

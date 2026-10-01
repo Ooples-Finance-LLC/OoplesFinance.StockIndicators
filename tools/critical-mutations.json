@@ -68297,5 +68297,428 @@
     "before": "new MarketDirectionIndicatorState(marketDirection.Length, 55)",
     "after": "new MarketDirectionIndicatorState(1, 55)",
     "filter": "FullyQualifiedName~MarketDirectionNumericalTests.EveryRouteMatchesIndependentCrossings"
+  },
+  {
+    "id": "mass-thrust-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "length = Math.Max(1, length);",
+    "after": "length = 1;",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "change.Sign > 0 ? change : default",
+    "after": "change.Sign > 0 ? Number.Of(1) : default",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-loss",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "default(Number) - change",
+    "after": "Number.Of(1)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-up-volume",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "Number.Of(volume).Divide(advances)",
+    "after": "Number.Of(1).Divide(advances)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-down-volume",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "Number.Of(volume).Divide(declines)",
+    "after": "Number.Of(1).Divide(declines)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-product",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "var positive = advances * up;",
+    "after": "var positive = advances;",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-negative-product",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "var negative = declines * down;",
+    "after": "var negative = declines;",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "var denominator = positive + negative;",
+    "after": "var denominator = positive - negative;",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "denominator.Sign == 0 ? default",
+    "after": "denominator.Sign == 0 ? Number.Of(1)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_signal.Next(line, final)",
+    "after": "_signal.Next(line.Times(2), final)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "var acceleration = slope - _previousSlope",
+    "after": "var acceleration = _previousSlope - slope",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_previousPrice = current;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "if (final) { _previousPrice",
+    "after": "if (true) { _previousPrice",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "sum -= _history.Peek();",
+    "after": "sum -= default(Number);",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-sum-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "if (final) { if (_history.Count",
+    "after": "if (true) { if (_history.Count",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-sum-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_history.Clear(); _sum = default;",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_signal.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-reset-price",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-output-signal",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "signal.Publish(), trade",
+    "after": "line.Publish(), trade",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-first-move",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_hasPrevious ? current - _previousPrice : default",
+    "after": "current - _previousPrice",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-difference",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "current - _previousPrice",
+    "after": "Number.Of(price - _previousPrice.Publish())",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-up-projection",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "Number.Of(volume).Divide(advances)",
+    "after": "Number.Of(Number.Of(volume).Divide(advances).Publish())",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-oscillator-scale",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": ".Times(100).Divide(denominator)",
+    "after": ".Divide(denominator)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-indicator-scale",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": ": (positive - negative).Divide(1000000)",
+    "after": ": (positive - negative).Divide(1000)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-signal-projection",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_signal.Next(line, final)",
+    "after": "_signal.Next(Number.Of(line.Publish()), final)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.OverflowOutputRecoversAndSignalsKeepExtendedValues"
+  },
+  {
+    "id": "mass-thrust-wide-core-indicator",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "scope": "internal static void MassThrust(",
+    "before": "MassThrustWindow.Compute(close, volume, output, length, false);",
+    "after": "MassThrustWindow.Compute(close, volume, output, length, true);",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.CoreSpanContractsAndUnitVolumeOverload"
+  },
+  {
+    "id": "mass-thrust-wide-core-unit",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void MassThrustOscillator(ReadOnlySpan<double> close, Span<double> output",
+    "before": "output, length, true, true);",
+    "after": "output, 1, true, true);",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.CoreSpanContractsAndUnitVolumeOverload"
+  },
+  {
+    "id": "mass-thrust-wide-indicator-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustIndicatorState",
+    "before": "{ \"Mti\", point.Value }",
+    "after": "{ \"Mti\", 0 }",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-indicator-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustIndicatorState",
+    "before": "{ \"Signal\", point.SignalLine }",
+    "after": "{ \"Signal\", 0 }",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-indicator-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.NonfiniteInputIsRejectedBeforeStateChanges"
+  },
+  {
+    "id": "mass-thrust-wide-indicator-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustIndicatorState",
+    "before": "new(false, maType, length)",
+    "after": "new(false, maType, 1)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-indicator-fast-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustIndicatorFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "mass-thrust-wide-oscillator-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustOscillatorState",
+    "before": "{ \"Mto\", point.Value }",
+    "after": "{ \"Mto\", 0 }",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-oscillator-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustOscillatorState",
+    "before": "{ \"Signal\", point.SignalLine }",
+    "after": "{ \"Signal\", 0 }",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "mass-thrust-wide-oscillator-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.NonfiniteInputIsRejectedBeforeStateChanges"
+  },
+  {
+    "id": "mass-thrust-wide-oscillator-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MassThrustOscillatorState",
+    "before": "new(true, maType, length)",
+    "after": "new(true, maType, 1)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-oscillator-fast-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustOscillatorFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "mass-thrust-wide-signal-fast-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustSignalFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "mass-thrust-wide-alias-native-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "internal static partial class StatefulIndicatorFactory",
+    "before": "new MassThrustIndicatorState(MovingAvgType.ExponentialMovingAverage, mass.Length)",
+    "after": "new MassThrustIndicatorState(MovingAvgType.ExponentialMovingAverage, 1)",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.AliasFactoriesRetainPeriodAndBothOutputs"
+  },
+  {
+    "id": "mass-thrust-wide-mean-kind",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_signal = new(kind, length);",
+    "after": "_signal = new(MovingAvgType.ExponentialMovingAverage, length);",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/MassThrustWindow.cs",
+    "scope": "internal sealed class MassThrustWindow",
+    "before": "_signal = new(kind, length);",
+    "after": "_signal = new(kind, 1);",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignedVolumesZeroDenominatorsAndWindowExpiry"
+  },
+  {
+    "id": "mass-thrust-wide-core-volume-oscillator",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void MassThrustOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume",
+    "before": "MassThrustWindow.Compute(close, volume, output, length, true);",
+    "after": "MassThrustWindow.Compute(close, volume, output, length, false);",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
+  },
+  {
+    "id": "exact-rational-wide-sum-scale",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal readonly struct Number",
+    "before": "* aScale + (b._coefficient",
+    "after": "* bScale + (b._coefficient",
+    "filter": "FullyQualifiedName~ExactRationalArithmeticTests"
+  },
+  {
+    "id": "exact-rational-wide-product-cancel",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal readonly struct Number",
+    "before": "(a._coefficient / crossA) * (b._coefficient / crossB)",
+    "after": "(a._coefficient / crossA) * b._coefficient",
+    "filter": "FullyQualifiedName~ExactRationalArithmeticTests"
+  },
+  {
+    "id": "exact-rational-wide-quotient-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal readonly struct Number",
+    "before": "* divisor.Sign,",
+    "after": "* 1,",
+    "filter": "FullyQualifiedName~ExactRationalArithmeticTests"
+  },
+  {
+    "id": "exact-rational-wide-quotient-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal readonly struct Number",
+    "before": "(Denominator / denominatorCommon) * (BigInteger.Abs(divisor._coefficient) / numeratorCommon)",
+    "after": "Denominator * (BigInteger.Abs(divisor._coefficient) / numeratorCommon)",
+    "filter": "FullyQualifiedName~ExactRationalArithmeticTests"
   }
 ]
