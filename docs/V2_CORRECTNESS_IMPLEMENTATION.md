@@ -4224,3 +4224,12 @@ Kaufman Adaptive Correlation Oscillator and Kaufman Adaptive Least Squares Movin
 The complete final focused run passed **71/71 checks**, including the four existing common-weight regression cases. Independent exact raw weighted moments use a shared dyadic denominator; the root estimate is accepted only after exact rational endpoint and midpoint comparisons. Hand fits, subnormal squares, large translated prices, mathematically overflowing fits and recovery, affine and perturbed-line signals, five/seven callback slots, input preservation, invalid bars, previews/reset and extreme periods are covered. Earlier runs exposed fitted-value cancellation and false affine signals; both were corrected. A route fixture's universal-finiteness assertion was replaced by independently verified overflow handling, and a callback fixture was corrected to target the actual fast-path override contract. Interrupted runs receive no qualification credit.
 
 **40 prepared mutation faults remain pending**; all **7,676 unique anchors** apply. Candidate/frozen snapshots match on **2205 files**. Built inventory is **6,338/7,131 enrolled**, with **793 omissions across 117 types** and no construction failures. DLL SHA256: `74D54A9CF3925B40529848CAE322EB77EBF8C3F4D5C23074A227AEF913DDCAA7`. Mutation qualification is complete through637;638 campaigns and later batches through657, the remaining numerical configurations, pending decisions and final hosted/package/release/performance gates are incomplete. PR246 remains draft.
+
+
+### Batch 638: Fear and Greed mutation qualification
+
+The isolated campaigns `638a` and `638b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **97/97 selected tests** (96 Fear/Greed cases and one DT startup regression). Both archives were compared byte-for-byte with the retained batch-638 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `50e884e7028f7c9bf369d331f442e9d21cf7d908851521bba0b0ead506c4ef0d`. Archive SHA256: `e31647bb85c4853ae7edbcda81d2db1b2312fe9d7049efbfb193697e03f3fed7` and `e31647bb85c4853ae7edbcda81d2db1b2312fe9d7049efbfb193697e03f3fed7`.
+
+This is evidence for the isolated batch-638 source. Source was already published in the batch-638 checkpoint; this update does not restore older source files. Mutation verification for batches 639 through 657 and the remaining final gates is still incomplete.
