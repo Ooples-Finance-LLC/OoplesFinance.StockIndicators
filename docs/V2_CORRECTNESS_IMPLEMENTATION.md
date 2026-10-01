@@ -4389,3 +4389,12 @@ This is evidence for the isolated batch-648 source. Source was already published
 The fast Signal route again requests the caller's moving-average substitution for all three Mass Thrust aliases. The callback receives the published primary series and clamped period; short custom outputs retain zero-fill behavior. Without a substitution, the exact unpublished signal calculation remains in use. All **7/7 focused checks passed**, covering three aliases, short outputs, request discovery, existing alias factories, overflow recovery, and signed-volume poles (`mass-thrust664-callback-followup.trx`). Five callback mutation faults are prepared but not yet qualified. All 7,962 mutation anchors validate.
 
 SonarCloud passed on commit `49946c7b08720b50455dc5a2547dcce8263509c3`; the PR quality gate reports OK. Other hosted checks and final gates remain outstanding.
+
+
+### Batch 647: Hawkeye repaired mutation qualification
+
+The isolated campaigns `647-repaired-a` and `647-repaired-b` passed their baselines and caught **31/31 compiled behavioral faults**, alongside **43/43 distinct focused tests**. Both archives were compared byte-for-byte with the retained repaired batch-647 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `ce976d9685320321e25e3fe0ace873750b090968dd40ea9886215281972648f1`. Archive SHA256: `92717c59982167af41e8f378a82ea425bb9b360165cbd7e2a67ab4d64e6daa80` and `92717c59982167af41e8f378a82ea425bb9b360165cbd7e2a67ab4d64e6daa80`.
+
+This is evidence for the isolated batch-647 source. Source was already published in the batch-647 checkpoint; this update does not restore older source files. Other mutation batches and the remaining final gates are still incomplete.
