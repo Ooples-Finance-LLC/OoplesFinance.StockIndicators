@@ -4136,3 +4136,12 @@ The first focused run passed **43/43 checks**:32 configuration/route/rule cases,
 ### Batch 633: asymmetric reset regression
 
 The original Enhanced Index campaigns exposed a reset regression gap: omitting the low-deque clear survived a replay whose first low already matched the retained minimum. The new regression seeds a deep low of-100, resets, then starts a different history at high3/low1/close2. Its first independently derived line is2; a retained low would instead produce4/103. Native state and the shared window are checked through previews, commits and two resets, including their signal outputs. The unchanged implementation passes the new test using existing production build outputs. The original reset fault is retained and now selects this test; it receives no qualification credit until corrected campaigns demonstrate the kill. Combined focused evidence is80 distinct checks (79 original and one new regression).
+
+
+### Batch 633: Enhanced Index mutation qualification
+
+The isolated campaigns `633-corrected-a` and `633-corrected-b` passed their baselines and caught **34/34 compiled behavioral faults**, alongside **80 distinct focused tests** (79 original passes plus the new reset regression). Both archives were compared byte-for-byte with the retained batch-633 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `63aec05fb342372938a5ebc5453a2472445a035cbeadd35fbb07233ff29dfdfe`. Archive SHA256: `b9161b54e78a4f44c39fb47e395b26cbdf8fa65ea863b622dad809a2734ff27c` and `b9161b54e78a4f44c39fb47e395b26cbdf8fa65ea863b622dad809a2734ff27c`.
+
+This is evidence for the isolated batch-633 source. Source was already published in the batch-633 checkpoint; this update does not restore older source files. Mutation verification for batches 634 through 652 and the remaining final gates is still incomplete.
