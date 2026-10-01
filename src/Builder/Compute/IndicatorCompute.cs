@@ -2132,7 +2132,7 @@ internal static partial class IndicatorCompute
 
             // Batch 23 - Volume and Statistical Indicators
             OnBalanceVolumeReflexSpecOptions obvr => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeOnBalanceVolumeReflexFast(data, context, obvr.Length), obvr.SignalLength, obvr.MaType)
+                ? ComputeOnBalanceVolumeReflexSignalFast(data, context, obvr.Length, obvr.SignalLength, obvr.MaType)
                 : ComputeOnBalanceVolumeReflexFast(data, context, obvr.Length),
             PivotPointAverageSpecOptions ppa => spec.OutputKey switch
             {
@@ -19681,32 +19681,18 @@ internal static partial class IndicatorCompute
 
     // Batch 23 - Volume and Statistical Indicators (using registry pattern)
 
+    internal static ComputeBuffer ComputeOnBalanceVolumeReflexSignalFast(StockData data, ComputeContext context, int length, int signalLength, MovingAvgType maType)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = ObvReflexWindow.Calculate(data, input, maType, length, signalLength, callbacks: true).SignalLine;
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
+    }
+
     internal static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4)
     {
-        // CalculateOnBalanceVolumeReflex adds or subtracts volume according to where the chained value sits
-        // against its reading a window ago, not against the previous bar - that lookback is the whole
-        // difference from ordinary on balance volume, and VolumeCore.OnBalanceVolume does not have it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var priorValue = i >= length ? input[i - length] : 0;
-            var prevOvr = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = currentValue > priorValue ? prevOvr + volumes[i]
-                : currentValue < priorValue ? prevOvr - volumes[i]
-                : prevOvr;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = ObvReflexWindow.Calculate(data, input, MovingAvgType.SimpleMovingAverage, length, 1, callbacks: true, includeSignal: false).Line;
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

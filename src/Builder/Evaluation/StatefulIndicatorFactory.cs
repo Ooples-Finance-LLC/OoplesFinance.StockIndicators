@@ -241,6 +241,7 @@ internal static partial class StatefulIndicatorFactory
             TradeVolumeIndexSpecOptions tvi => new TradeVolumeIndexState(tvi.MaType, tvi.Length),
             VolumeFlowIndicatorSpecOptions flow => new VolumeFlowIndicatorState(flow.MaType, flow.Length1, flow.Length2,
                 flow.SignalLength, flow.SmoothLength, flow.Coef, flow.Vcoef),
+            OnBalanceVolumeReflexSpecOptions obvr => new OnBalanceVolumeReflexState(obvr.MaType, obvr.Length, obvr.SignalLength),
             OnBalanceVolumeDisparityIndicatorSpecOptions obv => new OnBalanceVolumeDisparityIndicatorState(obv.MaType, obv.Length, obv.SignalLength, obv.Top, obv.Bottom),
             NegativeVolumeDisparityIndicatorSpecOptions nvi => new NegativeVolumeDisparityIndicatorState(nvi.MaType, nvi.Length, nvi.SignalLength, nvi.Top, nvi.Bottom),
             KlingerVolumeOscillatorSpecOptions klinger => new KlingerVolumeOscillatorState(klinger.MaType, klinger.FastLength, klinger.SlowLength, klinger.SignalLength),

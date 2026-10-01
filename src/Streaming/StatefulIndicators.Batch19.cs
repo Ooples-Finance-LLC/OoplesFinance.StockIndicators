@@ -24,66 +24,18 @@ public sealed class OnBalanceVolumeModifiedState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Obvr")]
 public sealed class OnBalanceVolumeReflexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevOvr;
-    private bool _hasPrev;
-
+    private readonly ObvReflexWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public OnBalanceVolumeReflexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 4,
-        int signalLength = 14)
-    {
-        _length = Math.Max(1, length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        int signalLength = 14) => _window = new(maType, length, signalLength);
     public IndicatorName Name => IndicatorName.OnBalanceVolumeReflex;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _values.Clear();
-        _prevOvr = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var prevOvr = _hasPrev ? _prevOvr : 0;
-        var ovr = value > prevValue ? prevOvr + bar.Volume
-            : value < prevValue ? prevOvr - bar.Volume
-            : prevOvr;
-        var signal = _signalSmoother.Next(ovr, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevOvr = ovr;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Obvr", ovr },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ovr, outputs);
-    }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-        _values.Dispose();
+        var point = _window.Next(_input.GetValue(bar), bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Line.Publish(), includeOutputs ? new Dictionary<string, double>
+            { { "Obvr", point.Line.Publish() }, { "Signal", point.SignalLine.Publish() } } : null);
     }
 }
 

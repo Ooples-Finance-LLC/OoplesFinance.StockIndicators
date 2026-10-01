@@ -70771,5 +70771,221 @@
     "before": "OnBalanceVolumeDisparityIndicator or ",
     "after": "",
     "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "obv-reflex-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.ZeroPricesAndSignedVolumesKeepTheirDirections"
+  },
+  {
+    "id": "obv-reflex-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "new(kind, Math.Max(1, signalLength))",
+    "after": "new(kind, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-partial-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "_prices.Count == _length ? _prices.Peek() : 0",
+    "after": "_prices.Count != 0 ? _prices.Peek() : 0",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "_prices.Peek() : 0",
+    "after": "_prices.Peek() : 1",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-tie",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "price > previous ?",
+    "after": "price >= previous ?",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.ZeroPricesAndSignedVolumesKeepTheirDirections"
+  },
+  {
+    "id": "obv-reflex-wide-falling",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "price < previous ? _total - Number.Of(volume)",
+    "after": "price < previous ? _total + Number.Of(volume)",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.ZeroPricesAndSignedVolumesKeepTheirDirections"
+  },
+  {
+    "id": "obv-reflex-wide-flat-carry",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": ": _total;",
+    "after": ": default(Number);",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.ZeroPricesAndSignedVolumesKeepTheirDirections"
+  },
+  {
+    "id": "obv-reflex-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "if (_prices.Count == _length) _prices.Dequeue();",
+    "after": "if (_prices.Count > _length) _prices.Dequeue();",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-published-total",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "_total = result;",
+    "after": "_total = Number.Of(result.Publish());",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.OverflowingTotalsAndSignalsRecoverToFiniteValues"
+  },
+  {
+    "id": "obv-reflex-wide-margin",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "var margin = line - signal;",
+    "after": "var margin = signal - line;",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.SignalComparisonsUseExactMargins"
+  },
+  {
+    "id": "obv-reflex-wide-change",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "var change = margin - _previousMargin;",
+    "after": "var change = margin;",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.SignalComparisonsUseExactMargins"
+  },
+  {
+    "id": "obv-reflex-wide-margin-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "if (final) _previousMargin = margin;",
+    "after": "_previousMargin = margin;",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "ComponentAverage.Take(published!, signalLength)",
+    "after": "ComponentAverage.Take(published!, length)",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.SignalCallbackReceivesTheLaggedVolumeTotal"
+  },
+  {
+    "id": "obv-reflex-wide-callback-source",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "line.Select(v => v.Publish()).ToArray() : null",
+    "after": "prices.ToArray() : null",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.SignalCallbackReceivesTheLaggedVolumeTotal"
+  },
+  {
+    "id": "obv-reflex-wide-total-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "private Number Total(",
+    "before": "if (final)",
+    "after": "if (price != 0 || final)",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "internal void Reset() { _prices.Clear();",
+    "after": "internal void Reset() {",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-reset-total",
+    "module": "numerical",
+    "file": "src/Helpers/ObvReflexWindow.cs",
+    "scope": "internal sealed class ObvReflexWindow",
+    "before": "_total = _previousMargin = default;",
+    "after": "_previousMargin = default;",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class OnBalanceVolumeReflexState : IStreamingIndicatorState, IDisposable",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? _input.GetValue(bar) : bar.Close",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.NonfiniteArgumentsAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "obv-reflex-wide-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class OnBalanceVolumeReflexState : IStreamingIndicatorState, IDisposable",
+    "before": "{ \"Signal\", point.SignalLine.Publish() }",
+    "after": "{ \"Signal\", point.Line.Publish() }",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-selected-Fast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOnBalanceVolumeReflexFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.InputValues;",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "obv-reflex-wide-selected-SignalFast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOnBalanceVolumeReflexSignalFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.InputValues;",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "obv-reflex-wide-signal-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOnBalanceVolumeReflexSignalFast(",
+    "before": ".SignalLine;",
+    "after": ".Line;",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.LaggedPriceDirectionHasIndependentHandValues"
+  },
+  {
+    "id": "obv-reflex-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "OnBalanceVolumeReflex or ",
+    "after": "",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "obv-reflex-wide-native-options",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions(IndicatorSpec spec)",
+    "before": "new OnBalanceVolumeReflexState(obvr.MaType, obvr.Length, obvr.SignalLength)",
+    "after": "new OnBalanceVolumeReflexState(obvr.MaType, 1, obvr.SignalLength)",
+    "filter": "FullyQualifiedName~ObvReflexNumericalTests.EveryRouteMatchesIndependentCoordinates"
   }
 ]

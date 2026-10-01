@@ -4515,3 +4515,10 @@ The batch, builder fallback, native, and streaming routes retain exact signed-vo
 ### Batch 652: Compiling the observable native-guard fault
 
 The first replacement bypassed validation but triggered analyzer SI0004 because the state no longer called its input resolver. Those campaigns were deliberately stopped and remain unqualified. The corrected fault retains the resolver for calls without outputs and bypasses validation when outputs are requested, which the existing five-field regression exercises. An isolated baseline passed and the compiled fault was caught; all 2,192 archived files match the corrected frozen snapshot. This preflight is not pooled with the fresh 37-fault pair, which is still required. Production and test sources are unchanged.
+
+
+### Batch 674: On Balance Volume Reflex numerical routes
+
+The batch, fast, typed compute, native, and streaming routes retain exact lag-directed volume totals through signal smoothing. Independent references and hands cover cancellation, overflow recovery, selected prices, previews/reset, callback slots, and lazy extreme periods. The typed native factory now registers the indicator.
+
+**83/83 distinct focused tests passed** after correcting a missing typed factory registration. The initial run had 56 passes and 27 failures; the 18-case factory rerun and 45-case route rerun supersede affected results on net10.0 (`obv-reflex674.trx`, `obv-reflex674-factory.trx`, `obv-reflex674-routes.trx`). Inventory: **6,458/7,131 enrolled**, **673 omissions across 100 types**, all independent references registered, no construction failures, backlog exact. The 24 behavioral faults and final hosted/platform/package/performance gates remain pending.

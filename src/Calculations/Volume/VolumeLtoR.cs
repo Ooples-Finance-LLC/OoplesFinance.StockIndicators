@@ -316,41 +316,12 @@ public static partial class Calculations
     public static StockData CalculateOnBalanceVolumeReflex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 4, int signalLength = 14)
     {
-        List<double> ovrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-
-            var prevOvr = i >= 1 ? ovrList[i - 1] : 0;
-            var ovr = currentValue > prevValue ? prevOvr + currentVolume : currentValue < prevValue ? prevOvr - currentVolume : prevOvr;
-            ovrList.Add(ovr);
-        }
-
-        var ovrSmaList = GetMovingAverageList(stockData, maType, signalLength, ovrList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ovr = ovrList[i];
-            var ovrEma = ovrSmaList[i];
-            var prevOvr = i >= 1 ? ovrList[i - 1] : 0;
-            var prevOvrEma = i >= 1 ? ovrSmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(ovr - ovrEma, prevOvr - prevOvrEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Obvr", ovrList },
-            { "Signal", ovrSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ovrList);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = ObvReflexWindow.Calculate(stockData, input, maType, length, signalLength, callbacks: false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Obvr", result.Line.ToList() }, { "Signal", result.SignalLine.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Trades);
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Line.ToList());
         stockData.IndicatorName = IndicatorName.OnBalanceVolumeReflex;
-
         return stockData;
     }
 

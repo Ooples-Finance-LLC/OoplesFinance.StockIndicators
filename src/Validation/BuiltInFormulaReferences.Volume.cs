@@ -241,8 +241,9 @@ internal static partial class BuiltInFormulaReferences
                     var contributions = bars.Select(b => b.Volume * ((b.Close - b.Low) - (b.High - b.Close)) / 2).ToArray();
                     return contributions.Select((_, i) => Window(contributions, i, length).Average()).ToArray();
                 });
-            case IndicatorName.OnBalanceVolumeModified:
             case IndicatorName.OnBalanceVolumeReflex:
+                return new("Obvr", new[] { "Obvr", "Signal" }, bars => ObvReflexOutputs(bars, indicator));
+            case IndicatorName.OnBalanceVolumeModified:
             case IndicatorName.MultiVoteOnBalanceVolume:
             case IndicatorName.ModifiedPriceVolumeTrend:
                 var modifiedObv = name == IndicatorName.OnBalanceVolumeModified;
