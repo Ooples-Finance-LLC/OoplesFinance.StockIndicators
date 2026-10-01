@@ -57451,7 +57451,7 @@
     "scope": "internal sealed class EnhancedIndexWindow",
     "before": "_highs.Clear(); _lows.Clear();",
     "after": "_highs.Clear();",
-    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.WideTinyAndExpiredRangesRetainNormalizedValues"
+    "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.ResetRemovesOldLowBeforeDifferentHistory"
   },
   {
     "id": "enhanced-index-wide-weighted-mean",

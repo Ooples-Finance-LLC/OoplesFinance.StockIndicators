@@ -104,6 +104,27 @@ public sealed class EnhancedIndexNumericalTests
         for (var i = 0; i < bars.Length; i++) { var actual = state.Update(Native(bars[i]), true, true); Assert.Equal(nativeExpected.OutputValues["Ei"][i], actual.Value); Assert.Equal(nativeExpected.OutputValues["Signal"][i], actual.Outputs!["Signal"]); }
     }
     [Fact]
+    public void ResetRemovesOldLowBeforeDifferentHistory()
+    {
+        var bars = new[] { B(3, 1, 2), B(5, 3, 4), B(4, 2, 3), B(9, 7, 8) };
+        var expected = BuiltInFormulaReferences.EnhancedIndexValues(bars, 5, 1, 1);
+        Assert.Equal(2, expected.Outputs["Ei"][0]);
+        using var state = new EnhancedIndexState(length: 5, signalLength: 1);
+        using var window = new EnhancedIndexWindow(MovingAvgType.SimpleMovingAverage, 5, 1);
+        for (var replay = 0; replay < 2; replay++)
+        {
+            state.Update(Native(B(0, -100, -50)), true, false); window.Next(0, -100, -50, true);
+            state.Reset(); window.Reset();
+            for (var i = 0; i < bars.Length; i++) foreach (var final in new[] { false, false, true })
+            {
+                var b = bars[i]; var point = state.Update(Native(b), final, true); var direct = window.Next(b.High, b.Low, b.Close, final);
+                Assert.Equal(expected.Outputs["Ei"][i], point.Value); Assert.Equal(point.Value, direct.Line);
+                Assert.Equal(expected.Outputs["Signal"][i], point.Outputs!["Signal"]); Assert.Equal(point.Outputs["Signal"], direct.SignalLine);
+                Assert.Equal(expected.Signals[i], direct.Trade);
+            }
+        }
+    }
+    [Fact]
     public void InvalidCandlesCannotAdvanceRangeOrMeanState()
     {
         foreach (var bad in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity }) foreach (var field in Enumerable.Range(0, 5)) foreach (var final in new[] { false, true })
