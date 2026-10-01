@@ -4330,3 +4330,12 @@ The isolated campaigns `644-corrected-a` and `644-corrected-b` passed their base
 Source snapshot SHA256: `cf6df4b9cb8c963b54363fd06ee0eafbaf2ec5b400e1eb35c8c5d766fbf6f0b9`. Archive SHA256: `2cc433d822e6bbc09c63f8e9a8d50b64a1581d4b3218eb0350e7b0cf55fba687` and `2cc433d822e6bbc09c63f8e9a8d50b64a1581d4b3218eb0350e7b0cf55fba687`.
 
 This is evidence for the isolated batch-644 source. Source was already published in the batch-644 checkpoint; this update does not restore older source files. Mutation verification for batches 645 through 664 and the remaining final gates is still incomplete.
+
+
+### Batch 645: Grand Forecast mutation qualification
+
+The isolated campaigns `645-corrected-a` and `645-corrected-b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **74/74 distinct focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-645 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `b49cf08d69808e3525226e8f8404ab89c9274a5261a460969d327d55bb5a0fe0`. Archive SHA256: `f976019673432fbd2b0706899535cb58a2d0fe450b5a3abae6aca6c4764f2f14` and `f976019673432fbd2b0706899535cb58a2d0fe450b5a3abae6aca6c4764f2f14`.
+
+This is evidence for the isolated batch-645 source. Source was already published in the batch-645 checkpoint; this update does not restore older source files. Mutation verification for batches 646 through 664 and the remaining final gates is still incomplete.
