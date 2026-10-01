@@ -666,6 +666,15 @@ public static partial class Calculations
     public static StockData CalculateGroverLlorensCycleOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 100, int smoothLength = 20, double mult = 10)
     {
+        if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));
+        if (StrengthWindow.Supports(maType))
+        {
+            var (prices, highs, lows, _, _) = GetInputValuesList(stockData);
+            var points = GroverWindow.Calculate(prices, highs, lows, maType, length, smoothLength, mult, true, false); var line = points.Line.ToList();
+            var signals = CreateSignalsList(stockData); signals?.AddRange(points.Trades);
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Glco", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.GroverLlorensCycleOscillator; return stockData;
+        }
+
         List<double> tsList = new(stockData.Count);
         List<double> oscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -723,6 +732,15 @@ public static partial class Calculations
     public static StockData CalculateGroverLlorensActivator(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 100, double mult = 5)
     {
+        if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));
+        if (StrengthWindow.Supports(maType))
+        {
+            var (prices, highs, lows, _, _) = GetInputValuesList(stockData);
+            var points = GroverWindow.Calculate(prices, highs, lows, maType, length, 1, mult, false, false); var line = points.Line.ToList();
+            var signals = CreateSignalsList(stockData); signals?.AddRange(points.Trades);
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Gla", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.GroverLlorensActivator; return stockData;
+        }
+
         List<double> tsList = new(stockData.Count);
         List<double> diffList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

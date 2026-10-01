@@ -61781,5 +61781,437 @@
     "before": "double.IsNaN(mult) || double.IsInfinity(mult) || mult < 0",
     "after": "double.IsNaN(mult) || double.IsInfinity(mult)",
     "filter": "FullyQualifiedName~GrandForecastNumericalTests.InvalidMultiplierIsRejectedOnAllRoutesIncludingEmptyInput"
+  },
+  {
+    "id": "grover-wide-atr-period",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_atr = new(kind, length)",
+    "after": "_atr = new(kind, 1)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-osc-period",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_oscillator = new(kind, smoothLength)",
+    "after": "_oscillator = new(kind, 1)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-gain-period",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_gains = new(kind, smoothLength)",
+    "after": "_gains = new(kind, 1)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-loss-period",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_losses = new(kind, smoothLength)",
+    "after": "_losses = new(kind, 1)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-true-range",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p)))",
+    "after": "h - l",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-range-previous",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_started ? Publish(_previousPrice) : price",
+    "after": "price",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-zero-fallback",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "if (!_cycle && previous.IsZero)",
+    "after": "if (previous.IsZero)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-activator-zero",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "previous = _started ? _previousPrice : BigInteger.Zero",
+    "after": "previous = BigInteger.Zero",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-trail-direction",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "previous * Unit - diff.Sign * atr * _mult",
+    "after": "previous * Unit + diff.Sign * atr * _mult",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-trail-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "atr * _mult, Unit",
+    "after": "atr * Unit, Unit",
+    "filter": "FullyQualifiedName~GroverNumericalTests.WideSubnormalTrailsAndNestedMeansMatchExactReference"
+  },
+  {
+    "id": "grover-wide-trail-seed",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_started ? _trail : current",
+    "after": "_started ? _trail : BigInteger.Zero",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-oscillator",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "Round(current - trail)",
+    "after": "Round(trail - current)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-atr-override",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "ExactVarianceWindow.Units(externalAtr.Value)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~GroverNumericalTests.CallbackStagesReceiveRangesOscillatorAndSignedMoves"
+  },
+  {
+    "id": "grover-wide-smooth-override",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "ExactVarianceWindow.Units(external.Value)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~GroverNumericalTests.CallbackStagesReceiveRangesOscillatorAndSignedMoves"
+  },
+  {
+    "id": "grover-wide-gain-override",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "ExactVarianceWindow.Units(gainOverride.Value)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~GroverNumericalTests.CallbackStagesReceiveRangesOscillatorAndSignedMoves"
+  },
+  {
+    "id": "grover-wide-loss-override",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "ExactVarianceWindow.Units(lossOverride.Value)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~GroverNumericalTests.CallbackStagesReceiveRangesOscillatorAndSignedMoves"
+  },
+  {
+    "id": "grover-wide-rsi-gain",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "BigInteger.Max(change, BigInteger.Zero), final",
+    "after": "BigInteger.Max(-change, BigInteger.Zero), final",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-rsi-loss",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "BigInteger.Max(-change, BigInteger.Zero), final",
+    "after": "BigInteger.Zero, final",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-rsi-scale",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "100 * gain * Unit",
+    "after": "99 * gain * Unit",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-rsi-total",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "var total = gain + loss",
+    "after": "var total = gain + gain",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-rsi-flat",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "total.IsZero ? 100",
+    "after": "total.IsZero ? 0",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-actual-override-flat",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "&& !gainOverride.HasValue && !lossOverride.HasValue",
+    "after": "",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ActualFlatOverridesAndExhaustedSlotsKeepTheirOwnRatios"
+  },
+  {
+    "id": "grover-wide-default-flat",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_carryFlat && _rsiStarted",
+    "after": "false && _rsiStarted",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "if (final) { _rsiStarted",
+    "after": "if (true) { _rsiStarted",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-trail-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "if (final) { _started",
+    "after": "if (true) { _started",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-trail-memory",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_trail = trail;",
+    "after": "_trail = current;",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-signal-diff",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_previousDiff = diff;",
+    "after": "_previousDiff = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-signal-slope",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-smooth-memory",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_previousSmooth = smooth;",
+    "after": "_previousSmooth = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~GroverNumericalTests.HandAtrTrailRsiAndZeroFallbackAreIndependent"
+  },
+  {
+    "id": "grover-wide-reset-atr",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_atr.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-reset-rsi",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_rsiStarted = false;",
+    "after": "_rsiStarted = true;",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "weighted - sum + _length * value",
+    "after": "weighted + _length * value",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-weighted-position",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "weighted - sum + _length * value",
+    "after": "weighted - sum + value",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-average-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "sum -= _history.Peek()",
+    "after": "sum += _history.Peek()",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-ema-seed",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "new BigInteger(_count + 1)",
+    "after": "new BigInteger(_length)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-recursive-carry",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "(_length - 1L) * _previous",
+    "after": "_length * _previous",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-recursive-gain",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "(ema ? 2 : 1) * value",
+    "after": "value",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "if (final) { _sum",
+    "after": "if (true) { _sum",
+    "filter": "FullyQualifiedName~GroverNumericalTests.ExpiryPlateausAndDifferentSmoothingPeriodsKeepSeparateState"
+  },
+  {
+    "id": "grover-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "ComponentAverage.Take(ranges, length)",
+    "after": "ComponentAverage.Take(ranges, smoothLength)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.CallbackStagesReceiveRangesOscillatorAndSignedMoves"
+  },
+  {
+    "id": "grover-wide-callback-gains",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "ComponentAverage.Take(gains, smoothLength)",
+    "after": "ComponentAverage.Take(losses, smoothLength)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.CallbackStagesReceiveRangesOscillatorAndSignedMoves"
+  },
+  {
+    "id": "grover-wide-callback-losses",
+    "module": "numerical",
+    "file": "src/Helpers/GroverWindow.cs",
+    "scope": "internal sealed class GroverWindow",
+    "before": "ComponentAverage.Take(losses, smoothLength)",
+    "after": "ComponentAverage.Take(gains, smoothLength)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.CallbackStagesReceiveRangesOscillatorAndSignedMoves"
+  },
+  {
+    "id": "grover-wide-fast-activator-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeGroverLlorensActivatorFast",
+    "before": "GroverWindow.Calculate(prices, highs, lows, maType",
+    "after": "GroverWindow.Calculate(data.ClosePrices, highs, lows, maType",
+    "filter": "FullyQualifiedName~GroverNumericalTests.SelectedRangesAndBatchZeroCallbacksRemainConsistent"
+  },
+  {
+    "id": "grover-wide-native-activator-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class GroverLlorensActivatorState",
+    "before": "_wide.Next(bar.Close, bar.High, bar.Low, isFinal)",
+    "after": "_wide.Next(bar.Open, bar.High, bar.Low, isFinal)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.EveryRouteMatchesIndependentAtrTrailAndRsi"
+  },
+  {
+    "id": "grover-wide-native-activator-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class GroverLlorensActivatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~GroverNumericalTests.InvalidMultiplierAndCandleCannotAdvanceState"
+  },
+  {
+    "id": "grover-wide-fast-cycle-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeGroverLlorensCycleOscillatorFast",
+    "before": "GroverWindow.Calculate(prices, highs, lows, maType",
+    "after": "GroverWindow.Calculate(data.ClosePrices, highs, lows, maType",
+    "filter": "FullyQualifiedName~GroverNumericalTests.SelectedRangesAndBatchZeroCallbacksRemainConsistent"
+  },
+  {
+    "id": "grover-wide-native-cycle-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class GroverLlorensCycleOscillatorState",
+    "before": "_wide.Next(bar.Close, bar.High, bar.Low, isFinal)",
+    "after": "_wide.Next(bar.Open, bar.High, bar.Low, isFinal)",
+    "filter": "FullyQualifiedName~GroverNumericalTests.EveryRouteMatchesIndependentAtrTrailAndRsi"
+  },
+  {
+    "id": "grover-wide-native-cycle-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class GroverLlorensCycleOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~GroverNumericalTests.InvalidMultiplierAndCandleCannotAdvanceState"
   }
 ]

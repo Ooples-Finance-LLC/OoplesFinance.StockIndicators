@@ -132,9 +132,10 @@ public sealed class GrandTrendForecastingState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Gla")]
 public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _atrSmoother;
+    private readonly GroverWindow? _wide;
+    private readonly IMovingAverageSmoother _atrSmoother = null!;
     private readonly double _mult;
-    private readonly StreamingInputResolver _input;
+    private readonly StreamingInputResolver _input = default;
     private double _prevValue;
     private double _prevTs;
     private bool _hasPrev;
@@ -142,6 +143,8 @@ public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDis
     public GroverLlorensActivatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 100, double mult = 5)
     {
+        if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));
+        if (StrengthWindow.Supports(maType)) { _wide = new(maType, length, 1, mult, false); return; }
         _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _mult = mult;
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -151,6 +154,7 @@ public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDis
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _atrSmoother.Reset();
         _prevValue = 0;
         _prevTs = 0;
@@ -159,6 +163,8 @@ public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDis
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null) { var point = _wide.Next(bar.Close, bar.High, bar.Low, isFinal); return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Gla", point.Line } } : null); }
         var value = _input.GetValue(bar);
         // For TrueRange on first bar, use current close to avoid inflated TR
         var prevValue = _hasPrev ? _prevValue : value;
@@ -194,6 +200,7 @@ public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDis
 
     public void Dispose()
     {
+        if (_wide is not null) return;
         _atrSmoother.Dispose();
     }
 }
@@ -201,11 +208,12 @@ public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Glco")]
 public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _oscSmoother;
-    private readonly RsiState _rsi;
+    private readonly GroverWindow? _wide;
+    private readonly IMovingAverageSmoother _atrSmoother = null!;
+    private readonly IMovingAverageSmoother _oscSmoother = null!;
+    private readonly RsiState _rsi = null!;
     private readonly double _mult;
-    private readonly StreamingInputResolver _input;
+    private readonly StreamingInputResolver _input = default;
     private double _prevValue;
     private double _prevTs;
     private bool _hasPrev;
@@ -213,6 +221,8 @@ public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState
     public GroverLlorensCycleOscillatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 100, int smoothLength = 20, double mult = 10)
     {
+        if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));
+        if (StrengthWindow.Supports(maType)) { _wide = new(maType, length, smoothLength, mult, true); return; }
         _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _oscSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _rsi = new RsiState(maType, Math.Max(1, smoothLength));
@@ -224,6 +234,7 @@ public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _atrSmoother.Reset();
         _oscSmoother.Reset();
         _rsi.Reset();
@@ -234,6 +245,8 @@ public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null) { var point = _wide.Next(bar.Close, bar.High, bar.Low, isFinal); return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Glco", point.Line } } : null); }
         var value = _input.GetValue(bar);
         // The first bar has no previous close, so it stands in for itself (TR = High - Low), as the batch's
         // true range and AverageTrueRangeState both do. A zero there made the first TR the whole high.
@@ -266,12 +279,13 @@ public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState
         return new StreamingIndicatorStateResult(rsi, outputs);
     }
 
-public void Dispose()
-{
-    _atrSmoother.Dispose();
-    _oscSmoother.Dispose();
-    _rsi.Dispose();
-}
+    public void Dispose()
+    {
+        if (_wide is not null) return;
+        _atrSmoother.Dispose();
+        _oscSmoother.Dispose();
+        _rsi.Dispose();
+    }
 }
 
 [PrimaryOutput("Cbl")]

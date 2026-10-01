@@ -7971,6 +7971,13 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeGroverLlorensCycleOscillatorFast(StockData data, ComputeContext context, int length = 100,
         int smoothLength = 20, double mult = 10, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));
+        if (StrengthWindow.Supports(maType))
+        {
+            var (prices, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);
+            var values = GroverWindow.Calculate(prices, highs, lows, maType, length, smoothLength, mult, true, true).Line;
+            var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
+        }
         // CalculateGroverLlorensCycleOscillator runs a trailing stop that steps AGAINST the direction of the
         // move by a multiple of the average true range, takes the distance from it, smooths that, and then
         // publishes the relative strength index of the smoothed distance over the smoothing length. The
@@ -18995,7 +19002,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeGroverLlorensActivatorFast(StockData data, ComputeContext context, int length = 100,
         double mult = 5, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        // CalculateGroverLlorensActivator is a trailing stop that steps towards the chained series by a
+        if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));
+        if (StrengthWindow.Supports(maType))
+        {
+            var (prices, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);
+            var values = GroverWindow.Calculate(prices, highs, lows, maType, length, 1, mult, false, true).Line;
+            var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
+        }
+        // CalculateGroverLlorensActivator is a trail that steps against the chained series by a
         // multiple of the average true range, reversing side whenever the series crosses it. The switch this
         // replaced returned a plain moving average of the close, which is not a stop at all.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
