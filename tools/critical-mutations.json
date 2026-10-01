@@ -63886,7 +63886,7 @@
     "scope": "internal sealed class InsyncWindow",
     "before": "InsyncVotes.Direction(ease, easeMean)",
     "after": "0 * InsyncVotes.Direction(ease, easeMean)",
-    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+    "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
   },
   {
     "id": "insync-wide-vote-macd",

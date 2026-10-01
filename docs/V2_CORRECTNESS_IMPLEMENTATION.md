@@ -4477,3 +4477,8 @@ The public one-, two-, and three-pole filters now retain exact fixed-coefficient
 **40/40 focused tests passed** on net10.0 (`multidepth671-flat-reference-final.trx`): four configurations across five public routes, selected inputs, every output's fault rejection, numerical enrollment, dyadic and closed-form impulse hands, constant/extreme inputs, lazy extreme periods, preview/reset, invalid-candle rejection, and callback behavior. The exact integer reference was also checked against a direct rational recurrence in 720 independent Python algebra comparisons. No tolerance was widened. The earlier precision-limited failure and interrupted reference run are not qualification evidence.
 
 The compiled inventory is **6,431/7,131 enrolled**, with **700 omissions across 103 types**, all 7,131 independent reference registrations, no construction failures, and an exact backlog match. The 39 prepared behavioral faults await isolated mutation qualification. Later numerical batches and final hosted/platform/package/release/performance gates remain incomplete.
+
+
+### Batch 651: EMV mutation selection repair
+
+The first Insync campaigns caught 51 compiled faults and left one survivor: the EMV vote fault selected a zero-width-candle test, whose EMV contribution is zero. Its filter now selects the existing independent hand with EMV values 0 and 6 and production-route checks. Production and regression sources are unchanged. Fresh campaigns for all 52 faults are required; the original pair is not qualified and its kills will not be pooled.
