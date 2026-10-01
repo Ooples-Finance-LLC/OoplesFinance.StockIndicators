@@ -4450,3 +4450,12 @@ All 39 public-route focused tests passed on net10.0 in `adaptive-q670-public-fin
 Inventory: 6,427/7,131 numerical configurations enrolled, 704 omissions across 104 types, all independent references registered, no construction failures, and an exact backlog match. Assembly SHA256: `6b4b7d902fa7b7ddc3bbeb3db17474ecad05760b82a29e94dbc155785e21393d`. There are 34 prepared behavioral faults; isolated mutation qualification remains pending.
 
 This publication covers the public routes only. The internal core and moving-average registry still compute a different formula using the maximum volatility over the full input; causal alignment remains an outstanding scope decision, not completed work. The snapshot retains the separate locally tested Mobility density kernel and integer factory, excluded from this publication. Final assurance work remains incomplete and PR246 stays draft.
+
+
+### Batch 650: Jma final mutation qualification
+
+The isolated campaigns `650-final-a` and `650-final-b` passed their baselines and caught **41/41 compiled behavioral faults**, alongside **44/44 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-650 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+The original native-guard fault was redundant and a first replacement was rejected by SI0004. This fresh campaign preserves the resolver on one runtime branch and bypasses both whole-bar guards on the output-producing branch exercised by the test. No original kills were pooled. Production and test files are identical to the original batch-650 snapshot. Source snapshot SHA256: `18514270ca9b087b3290997052c29b5b63bc60da4cd5174cb0438a43c015809c`. Archive SHA256: `242e5d3f88dc233b46cfb3e8ae3f61d328d5871bfb7007e33c1d565843351c6e` and `242e5d3f88dc233b46cfb3e8ae3f61d328d5871bfb7007e33c1d565843351c6e`.
+
+This is evidence for the isolated batch-650 source. Source was already published in the batch-650 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.

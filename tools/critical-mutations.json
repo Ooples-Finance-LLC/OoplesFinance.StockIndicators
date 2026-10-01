@@ -63506,8 +63506,8 @@
     "module": "numerical",
     "file": "src/Streaming/StatefulIndicators.Batch15.cs",
     "scope": "public sealed class JurikMovingAverageState : IStreamingIndicatorState",
-    "before": "StreamingInputValidation.Validate(bar);",
-    "after": "",
+    "before": "StreamingInputValidation.Validate(bar);\n        var value = _window.Next(_input.GetValue(bar), isFinal).Value;",
+    "after": "var value = _window.Next(includeOutputs ? bar.Close : _input.GetValue(bar), isFinal).Value;",
     "filter": "FullyQualifiedName~JmaNumericalTests.RejectedCandlesCannotAdvanceRecursiveStages"
   },
   {
