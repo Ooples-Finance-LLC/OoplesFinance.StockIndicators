@@ -4260,3 +4260,12 @@ The isolated campaigns `639-corrected2-a` and `639-corrected2-b` passed their ba
 Source snapshot SHA256: `f5510092d9159a1c85815fd321893f1c8bcb08f4d09a9783bfe1130e5f1c5c41`. Archive SHA256: `d4b5c94ae65cc5f0c280412b676c8640215062e699910aa81b05000dcc4e83f4` and `d4b5c94ae65cc5f0c280412b676c8640215062e699910aa81b05000dcc4e83f4`.
 
 This is evidence for the isolated batch-639 source. Source was already published in the batch-639 checkpoint; this update does not restore older source files. Mutation verification for batches 640 through 659 and the remaining final gates is still incomplete.
+
+
+### Batch 640: Firefly mutation qualification
+
+The isolated campaigns `640-corrected-a` and `640-corrected-b` passed their baselines and caught **44/44 compiled behavioral faults**, alongside **55/55 selected tests** (51 Firefly cases and four existing regressions). Both archives were compared byte-for-byte with the retained batch-640 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `fdfb258a6177d057b7f9dcb4b40356ffef1335a8ea863f87a7ac2c6639bf7bd5`. Archive SHA256: `dba7a8a2c27e6109b1d725bc05054574f7682eaaba410fd1fd31627df45c2fae` and `dba7a8a2c27e6109b1d725bc05054574f7682eaaba410fd1fd31627df45c2fae`.
+
+This is evidence for the isolated batch-640 source. Source was already published in the batch-640 checkpoint; this update does not restore older source files. Mutation verification for batches 641 through 660 and the remaining final gates is still incomplete.
