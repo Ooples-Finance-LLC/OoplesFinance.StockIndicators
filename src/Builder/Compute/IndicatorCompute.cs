@@ -1175,6 +1175,12 @@ internal static partial class IndicatorCompute
             CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
             DynamicallyAdjustableFilterSpecOptions daf => ComputeDynamicallyAdjustableFilterFast(data, context, daf.Length),
             EhlersConvolutionIndicatorSpecOptions convolution => ComputeEhlersConvolutionFast(data, context, convolution.Length1, convolution.Length2, convolution.Length3, spec.OutputKey == "Slope"),
+            HawkeyeVolumeIndicatorSpecOptions hawkeye => spec.OutputKey switch
+            {
+                null or "Up" => ComputeHawkeyeVolumeFast(data, context, hawkeye.Length, hawkeye.Divisor),
+                "Dn" => ComputeHawkeyeVolumeFast(data, context, hawkeye.Length, hawkeye.Divisor, true),
+                _ => null
+            },
             EhlersHurstCoefficientSpecOptions hurst => ComputeEhlersHurstCoefficientFast(data, context, hurst.Length1, hurst.Length2),
             EdgePreservingFilterSpecOptions epf => ComputeEdgePreservingFilterFast(data, context, epf.Length, epf.MaType),
             EhlersAllPassPhaseShifterSpecOptions eapps => ComputeEhlersAllPassPhaseShifterFast(data, context, eapps.Length),
@@ -11777,8 +11783,22 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Ehlers Hurst Coefficient with exact range normalization and lazy history.
+    /// Computes Hawkeye previous-bar thresholds with a complete signed quotient.
     /// </summary>
+    internal static ComputeBuffer ComputeHawkeyeVolumeFast(StockData data, ComputeContext context, int length = 200, double divisor = 3.6, bool down = false)
+    {
+        var window = new HawkeyeWindow(length, divisor);
+        var (input, highs, lows, _, closes, volumes) = CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(input[i], highs[i], lows[i], closes[i], volumes[i], true);
+            output.WritableSpan[i] = down ? point.Down : point.Up;
+        }
+        return output;
+    }
+
+    /// <summary>Computes Ehlers Hurst Coefficient with exact range normalization and lazy history.</summary>
     internal static ComputeBuffer ComputeEhlersHurstCoefficientFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 20)
     {
         var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var window = new HurstCoefficientWindow(length1, length2); var output = context.Rent(input.Count);

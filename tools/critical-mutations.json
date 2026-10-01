@@ -62213,5 +62213,284 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~GroverNumericalTests.InvalidMultiplierAndCandleCannotAdvanceState"
+  },
+  {
+    "id": "hawkeye-wide-signed-offset",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "* Unit * _divisor.Sign",
+    "after": "* Unit",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-up-direction",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_previousMidpoint * denominator + offset",
+    "after": "_previousMidpoint * denominator - offset",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-down-direction",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_previousMidpoint * denominator - offset",
+    "after": "_previousMidpoint * denominator + offset",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-offset-range",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "(_previousHigh - _previousLow)",
+    "after": "(_previousHigh + _previousLow)",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-offset-scale",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "* Unit * _divisor.Sign",
+    "after": "* _divisor.Sign",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-zero-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_divisor.IsZero ? BigInteger.Zero :",
+    "after": "_divisor.IsZero ? Unit :",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-high-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_previousHigh = h;",
+    "after": "_previousHigh = l;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-low-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_previousLow = l;",
+    "after": "_previousLow = h;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-midpoint-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "ExactVarianceWindow.Units(midpoint);",
+    "after": "ExactVarianceWindow.Units(close);",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+  },
+  {
+    "id": "hawkeye-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_history.Clear();",
+    "after": ";",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+  },
+  {
+    "id": "hawkeye-wide-reset-levels",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_previousMidpoint = BigInteger.Zero;",
+    "after": "_previousMidpoint = Unit;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "ranges -= old.Range;",
+    "after": "ranges += old.Range;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+  },
+  {
+    "id": "hawkeye-wide-volume-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "volumes -= old.Volume;",
+    "after": "volumes += old.Volume;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+  },
+  {
+    "id": "hawkeye-wide-queue-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_history.Dequeue();",
+    "after": "_history.Peek();",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+  },
+  {
+    "id": "hawkeye-wide-range-sum",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_rangeSum = ranges;",
+    "after": "_rangeSum = range;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+  },
+  {
+    "id": "hawkeye-wide-volume-sum",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "_volumeSum = volumes;",
+    "after": "_volumeSum = v;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+  },
+  {
+    "id": "hawkeye-wide-large-range",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "range * count > ranges",
+    "after": "range * count < ranges",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-small-range",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "3 * range * count < 2 * ranges",
+    "after": "3 * range * count > 2 * ranges",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-large-volume",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "v * count > volumes",
+    "after": "v * count >= volumes",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-small-volume",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "v * count < volumes",
+    "after": "v * count <= volumes",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-above-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "c * denominator > up",
+    "after": "c * denominator >= up",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-green-second",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "largeRange && above && largeVolume",
+    "after": "false",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-green-third",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "h > _previousHigh && smallRange && smallVolume",
+    "after": "false",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-green-fourth",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "l < _previousLow && smallRange && largeVolume",
+    "after": "false",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-signal-priority",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "green ? Signal.Buy : red ? Signal.Sell",
+    "after": "red ? Signal.Sell : green ? Signal.Buy",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandClassificationDistinguishesRollingVolumeAndRangeBranches"
+  },
+  {
+    "id": "hawkeye-wide-complete-quotient",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "ExactMeanAccumulator.UnitRatio(up, denominator)",
+    "after": "ExactMeanAccumulator.UnitRatio(up - offset, denominator) + ExactMeanAccumulator.UnitRatio(offset, denominator)",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.CompleteThresholdRecoversAfterOverflowAndKeepsSubnormalRanges"
+  },
+  {
+    "id": "hawkeye-wide-fast-key",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHawkeyeVolumeFast(",
+    "before": "down ? point.Down : point.Up",
+    "after": "point.Up",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.HandLevelsHavePreviousBarTimingAndSignedDivisors"
+  },
+  {
+    "id": "hawkeye-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHawkeyeVolumeFast(",
+    "before": "var (input, highs, lows, _, closes, volumes) = CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);",
+    "after": "var input = data.ClosePrices; var highs = data.HighPrices; var lows = data.LowPrices; var closes = data.ClosePrices; var volumes = data.Volumes;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.SelectedPricesUseCausalOutsideRangesOnBothOutputs"
+  },
+  {
+    "id": "hawkeye-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class HawkeyeVolumeIndicatorState",
+    "before": "var midpoint = _input.GetValue(bar);",
+    "after": "var midpoint = bar.Close;",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.InvalidCandlesCannotAdvanceEitherThreshold"
+  },
+  {
+    "id": "hawkeye-wide-finite-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/HawkeyeWindow.cs",
+    "scope": "internal sealed class HawkeyeWindow",
+    "before": "double.IsNaN(divisor) || double.IsInfinity(divisor)",
+    "after": "false",
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.NonfiniteDivisorsAreRejectedEvenForEmptyInput"
   }
 ]

@@ -11,7 +11,7 @@ public sealed class VolumeAccumulationPercentSpecOptions : IIndicatorSpecOptions
 public sealed class HawkeyeVolumeIndicatorSpecOptions : IIndicatorSpecOptions
 {
     public HawkeyeVolumeIndicatorSpecOptions(int length = 200, double divisor = 3.6)
-    { Length = Math.Max(1, length); Divisor = divisor; }
+    { if (double.IsNaN(divisor) || double.IsInfinity(divisor)) throw new ArgumentOutOfRangeException(nameof(divisor)); Length = Math.Max(1, length); Divisor = divisor; }
     public int Length { get; }
     public double Divisor { get; }
 }

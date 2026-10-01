@@ -167,69 +167,17 @@ public static partial class Calculations
     public static StockData CalculateHawkeyeVolumeIndicator(this StockData stockData, int length = 200,
         double divisor = 3.6)
     {
-        List<double> tempRangeList = new(stockData.Count);
-        List<double> tempVolumeList = new(stockData.Count);
-        List<double> u1List = new(stockData.Count);
-        List<double> d1List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumeSum = new();
-        RollingSum rangeSum = new();
-        var (inputList, highList, lowList, _, closeList, volumeList) = GetInputValuesList(InputName.MedianPrice, stockData);
-
+        var window = new HawkeyeWindow(length, divisor);
+        var (input, highs, lows, _, closes, volumes) = GetInputValuesList(InputName.MedianPrice, stockData);
+        List<double> up = new(stockData.Count), down = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentValue = closeList[i];
-
-            var currentVolume = volumeList[i];
-            tempVolumeList.Add(currentVolume);
-            volumeSum.Add(currentVolume);
-
-            var range = currentHigh - currentLow;
-            tempRangeList.Add(range);
-            rangeSum.Add(range);
-
-            var volumeSma = volumeSum.Average(length);
-            var rangeSma = rangeSum.Average(length);
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevMidpoint = i >= 1 ? inputList[i - 1] : 0;
-            var prevVolume = i >= 1 ? volumeList[i - 1] : 0;
-
-            var u1 = divisor != 0 ? prevMidpoint + ((prevHigh - prevLow) / divisor) : prevMidpoint;
-            u1List.Add(u1);
-
-            var d1 = divisor != 0 ? prevMidpoint - ((prevHigh - prevLow) / divisor) : prevMidpoint;
-            d1List.Add(d1);
-
-            var rEnabled1 = range > rangeSma && currentValue < d1 && currentVolume > volumeSma;
-            var rEnabled2 = currentValue < prevMidpoint;
-            var rEnabled = rEnabled1 || rEnabled2;
-
-            var gEnabled1 = currentValue > prevMidpoint;
-            var gEnabled2 = range > rangeSma && currentValue > u1 && currentVolume > volumeSma;
-            var gEnabled3 = currentHigh > prevHigh && range < rangeSma / 1.5 && currentVolume < volumeSma;
-            var gEnabled4 = currentLow < prevLow && range < rangeSma / 1.5 && currentVolume > volumeSma;
-            var gEnabled = gEnabled1 || gEnabled2 || gEnabled3 || gEnabled4;
-
-            var grEnabled1 = range > rangeSma && currentValue > d1 && currentValue < u1 && currentVolume > volumeSma && currentVolume < volumeSma * 1.5 && currentVolume > prevVolume;
-            var grEnabled2 = range < rangeSma / 1.5 && currentVolume < volumeSma / 1.5;
-            var grEnabled3 = currentValue > d1 && currentValue < u1;
-            var grEnabled = grEnabled1 || grEnabled2 || grEnabled3;
-
-            var signal = GetConditionSignal(gEnabled, rEnabled);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], highs[i], lows[i], closes[i], volumes[i], true);
+            up.Add(point.Up); down.Add(point.Down); signals?.Add(point.Trade);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Up", u1List },
-            { "Dn", d1List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Up", up }, { "Dn", down } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.HawkeyeVolumeIndicator;
-
         return stockData;
     }
 

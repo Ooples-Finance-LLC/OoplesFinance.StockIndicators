@@ -209,14 +209,7 @@ internal static partial class BuiltInFormulaReferences
                     return total == 0 ? 0 : Clamp(100 * balance / total, -100, 100);
                 }).ToArray());
             case IndicatorName.HawkeyeVolumeIndicator:
-                var hawkeyeDivisor = Number(options, 3.6, "Divisor");
-                return new("Up", new[] { "Up", "Dn" }, bars =>
-                {
-                    double[] Level(double sign) => bars.Select((_, i) => i == 0 ? 0 :
-                        (bars[i - 1].High + bars[i - 1].Low) / 2
-                        + (hawkeyeDivisor == 0 ? 0 : sign * (bars[i - 1].High - bars[i - 1].Low) / hawkeyeDivisor)).ToArray();
-                    return Outputs(("Up", Level(1)), ("Dn", Level(-1)));
-                });
+                return new("Up", new[] { "Up", "Dn" }, bars => HawkeyeOutputs(bars, indicator));
             case IndicatorName.BetterVolumeIndicator:
                 return Single("Bvi", bars => BetterVolumeOutputs(bars, indicator)["Bvi"]);
             case IndicatorName.EarningSupportResistanceLevels:

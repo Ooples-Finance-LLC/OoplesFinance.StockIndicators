@@ -747,62 +747,18 @@ public sealed class HampelFilterState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Up")]
 public sealed class HawkeyeVolumeIndicatorState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly double _divisor;
+    private readonly HawkeyeWindow _window;
     private StreamingInputResolver _input;
-    private double _prevHigh;
-    private double _prevLow;
-    private double _prevMidpoint;
-    private bool _hasPrev;
-
-    public HawkeyeVolumeIndicatorState(int length = 200,
-        double divisor = 3.6)
-    {
-        _divisor = divisor;
-        _input = new StreamingInputResolver(InputName.MedianPrice, null);
-    }
-
+    public HawkeyeVolumeIndicatorState(int length = 200, double divisor = 3.6)
+    { _window = new(length, divisor); _input = new StreamingInputResolver(InputName.MedianPrice, null); }
     public IndicatorName Name => IndicatorName.HawkeyeVolumeIndicator;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _prevHigh = 0;
-        _prevLow = 0;
-        _prevMidpoint = 0;
-        _hasPrev = false;
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _input = new StreamingInputResolver(InputName.Close, null);
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var midpoint = _input.GetValue(bar);
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var prevMidpoint = _hasPrev ? _prevMidpoint : 0;
-
-        var u1 = _divisor != 0 ? prevMidpoint + ((prevHigh - prevLow) / _divisor) : prevMidpoint;
-        var d1 = _divisor != 0 ? prevMidpoint - ((prevHigh - prevLow) / _divisor) : prevMidpoint;
-
-        if (isFinal)
-        {
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _prevMidpoint = midpoint;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Up", u1 },
-                { "Dn", d1 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(u1, outputs);
+        var point = _window.Next(midpoint, bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Up, includeOutputs ? new Dictionary<string, double> { { "Up", point.Up }, { "Dn", point.Down } } : null);
     }
 }
 
