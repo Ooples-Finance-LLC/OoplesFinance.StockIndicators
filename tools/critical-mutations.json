@@ -56617,12 +56617,12 @@
     "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.InvalidCandlesCannotAdvanceRangeOrRecursiveHistory"
   },
   {
-    "id": "convolution-wide-high-period",
+    "id": "convolution-wide-high-period-floor",
     "module": "numerical",
     "file": "src/Helpers/EhlersConvolutionWindow.cs",
     "scope": "internal sealed class EhlersConvolutionWindow",
     "before": "Math.Max(1, highLength)",
-    "after": "Math.Max(2, highLength)",
+    "after": "Math.Max(5, highLength)",
     "filter": "FullyQualifiedName~ConvolutionNumericalTests.ExtremePeriodsAllocateOnlyObservedCorrelationHistory"
   },
   {
