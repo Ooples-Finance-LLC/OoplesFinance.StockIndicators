@@ -9129,87 +9129,10 @@ internal static partial class IndicatorCompute
     /// Computes Kase Peak Oscillator V2 using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeKasePeakOscillatorV2Fast(StockData data, ComputeContext context, int length2 = 30,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 8, int slowLength = 65, int length1 = 9,
-        int smoothLength = 3, double sensitivity = 40)
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 8, int slowLength = 65, int length1 = 9, int smoothLength = 3, double sensitivity = 40)
     {
-        // CalculateKasePeakOscillatorV2 publishes only "Kpo", which is xpList: the difference between the
-        // smoothed up and down pressures, each the largest log range over the fastLength..slowLength lookbacks
-        // scaled by the square root of the lookback and normalised by the average log-return deviation.
-        // The peak buffer that its second loop builds - and with it length3 and devFactor - never reaches a
-        // published series, so it is not reproduced here.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-        smoothLength = Math.Max(1, smoothLength);
-
-        using var highBuffer = context.Rent(count);
-        using var lowBuffer = context.Rent(count);
-        CustomRange(data, input, highBuffer.WritableSpan, lowBuffer.WritableSpan);
-        var highs = highBuffer.Span;
-        var lows = lowBuffer.Span;
-
-        using var logReturns = context.Rent(count);
-        var ccLog = logReturns.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var previous = i >= 1 ? input[i - 1] : 0;
-            var temp = previous != 0 ? input[i] / previous : 0;
-            ccLog[i] = temp > 0 ? Math.Log(temp) : 0;
-        }
-
-        using var deviation = context.Rent(count);
-        var ccDev = deviation.WritableSpan;
-        VolatilityCore.StandardDeviation(logReturns.Span, ccDev, length1);
-        for (var i = 0; i < length1 && i < count; i++)
-        {
-            // the batch blanks the opening window before averaging, so the average starts from zeros
-            ccDev[i] = 0;
-        }
-
-        using var smoothedDeviation = context.Rent(count);
-        if (ComponentAverage.HasOverrides)
-            MovingAverage(data, maType, length2, deviation.Span, smoothedDeviation.WritableSpan);
-        else
-        {
-            using var preciseDeviation = new Streaming.SpreadAverage(maType, length2);
-            for (var i = 0; i < count; i++)
-                smoothedDeviation.WritableSpan[i] = preciseDeviation.Next(new(ccDev[i]), true).Value;
-        }
-        var ccDevAvg = smoothedDeviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var upPressure = new RollingSum();
-        var downPressure = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var avg = ccDevAvg[i];
-            var currentHigh = highs[i];
-            var currentLow = lows[i];
-            double max1 = 0, max2 = 0;
-            for (var j = fastLength; j < slowLength; j++)
-            {
-                var sqrtK = MathHelper.Sqrt(j);
-                var previousLow = i >= j ? lows[i - j] : 0;
-                var previousHigh = i >= j ? highs[i - j] : 0;
-
-                var temp1 = previousLow != 0 ? currentHigh / previousLow : 0;
-                var log1 = temp1 > 0 ? Math.Log(temp1) : 0;
-                max1 = Math.Max(log1 / sqrtK, max1);
-
-                var temp2 = currentLow != 0 ? previousHigh / currentLow : 0;
-                var log2 = temp2 > 0 ? Math.Log(temp2) : 0;
-                max2 = Math.Max(log2 / sqrtK, max2);
-            }
-
-            upPressure.Add(avg != 0 ? max1 / avg : 0);
-            downPressure.Add(avg != 0 ? max2 / avg : 0);
-            output[i] = sensitivity * (upPressure.Average(smoothLength) - downPressure.Average(smoothLength));
-        }
-
-        return buffer;
+        var values = KasePeakV2Window.Compute(data, maType, fastLength, slowLength, length1, length2, smoothLength, sensitivity, true).Values;
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

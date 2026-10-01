@@ -1008,25 +1008,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.KaseConvergenceDivergence:
                 return new("Kcd", new[] { "Kcd" }, bars => KaseConvergenceOutputs(bars, indicator));
             case IndicatorName.KasePeakOscillatorV2:
-                return new("Kpo", new[] { "Kpo" }, bars =>
-                {
-                    var returns = bars.Select((b, i) => i == 0 || bars[i - 1].Close == 0 || b.Close / bars[i - 1].Close <= 0
-                        ? 0 : Math.Log(b.Close / bars[i - 1].Close)).ToArray();
-                    // Only genuine returns count: the fabricated first return must leave the window.
-                    var sigma = PopulationVariance(returns, 9).Select((v, i) => i < 9 ? 0 : Math.Sqrt(v)).ToArray();
-                    var divisor = Average(sigma, length, kind);
-                    double[] Pressure(bool up) => bars.Select((b, i) => divisor[i] == 0 ? 0 :
-                        Enumerable.Range(8, 57).Select(lag =>
-                        {
-                            if (i < lag) return 0;
-                            var denominator = up ? bars[i - lag].Low : b.Low;
-                            var ratio = denominator == 0 ? 0 : (up ? b.High : bars[i - lag].High) / denominator;
-                            return ratio <= 1 ? 0 : Math.Log(ratio) / Math.Sqrt(lag);
-                        }).Max() / divisor[i]).ToArray();
-                    var up = Pressure(true); var down = Pressure(false);
-                    return Outputs(("Kpo", bars.Select((_, i) => 40 *
-                        (Window(up, i, 3).Average() - Window(down, i, 3).Average())).ToArray()));
-                });
+                return new("Kpo", new[] { "Kpo" }, bars => KasePeakV2Outputs(bars, indicator));
             case IndicatorName.RandomWalkIndex:
                 return new("RwiHigh", new[] { "RwiHigh", "RwiLow" }, bars =>
                 {

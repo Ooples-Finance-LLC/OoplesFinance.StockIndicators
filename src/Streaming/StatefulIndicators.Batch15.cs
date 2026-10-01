@@ -755,118 +755,18 @@ public sealed class KasePeakOscillatorV1State : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Kpo")]
 public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _fastLength;
-    private readonly int _slowLength;
-    private readonly double _sensitivity;
-    // The deviation of the log-return window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _ccDev;
-    private readonly SpreadAverage _ccDevAvg;
-    private readonly RollingWindowSum _x1Sum;
-    private readonly RollingWindowSum _x2Sum;
-    private readonly PooledRingBuffer<double> _highValues;
-    private readonly PooledRingBuffer<double> _lowValues;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
+    private readonly KasePeakV2Window _window;
     public KasePeakOscillatorV2State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int fastLength = 8, int slowLength = 65, int length1 = 9, int length2 = 30, int length3 = 50, int smoothLength = 3,
-        double devFactor = 2, double sensitivity = 40)
-    {
-        _fastLength = Math.Max(1, fastLength);
-        _slowLength = Math.Max(1, slowLength);
-        _sensitivity = sensitivity;
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        _ccDev = new RollingStandardDeviation(resolvedLength1);
-        _ccDevAvg = new SpreadAverage(maType, resolvedLength2);
-        _x1Sum = new RollingWindowSum(resolvedSmooth);
-        _x2Sum = new RollingWindowSum(resolvedSmooth);
-        _highValues = new PooledRingBuffer<double>(_slowLength);
-        _lowValues = new PooledRingBuffer<double>(_slowLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        int fastLength = 8, int slowLength = 65, int length1 = 9, int length2 = 30, int length3 = 50, int smoothLength = 3, double devFactor = 2, double sensitivity = 40)
+        => _window = new(maType, fastLength, slowLength, length1, length2, smoothLength, sensitivity);
     public IndicatorName Name => IndicatorName.KasePeakOscillatorV2;
-
-    public void Reset()
-    {
-        _ccDev.Reset();
-        _ccDevAvg.Reset();
-        _x1Sum.Reset();
-        _x2Sum.Reset();
-        _highValues.Clear();
-        _lowValues.Clear();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var temp = prevValue != 0 ? value / prevValue : 0;
-        var ccLog = temp > 0 ? Math.Log(temp) : 0;
-
-        // The first bar's log return is fabricated, so it is kept out of the window entirely rather than
-        // counted as an observation. The window then fills one bar later, at index length1, which is where
-        // the batch publishes its first value too - neither counts it, so the two stay aligned. See #209.
-        var ccDev = _hasPrev ? _ccDev.Next(ccLog, isFinal) : 0;
-        var ccDevAvg = _ccDevAvg.Next(new(ccDev), isFinal).Value;
-
-        double max1 = 0;
-        double max2 = 0;
-        for (var j = _fastLength; j < _slowLength; j++)
-        {
-            var sqrtK = MathHelper.Sqrt(j);
-            var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, bar.Low, j);
-            var prevHigh = EhlersStreamingWindow.GetOffsetValue(_highValues, bar.High, j);
-            var temp1 = prevLow != 0 ? bar.High / prevLow : 0;
-            var log1 = temp1 > 0 ? Math.Log(temp1) : 0;
-            max1 = Math.Max(log1 / sqrtK, max1);
-            var temp2 = bar.Low != 0 ? prevHigh / bar.Low : 0;
-            var log2 = temp2 > 0 ? Math.Log(temp2) : 0;
-            max2 = Math.Max(log2 / sqrtK, max2);
-        }
-
-        var x1 = ccDevAvg != 0 ? max1 / ccDevAvg : 0;
-        var x1Sum = isFinal ? _x1Sum.Add(x1, out var x1Count) : _x1Sum.Preview(x1, out x1Count);
-        var x1Avg = x1Count > 0 ? x1Sum / x1Count : 0;
-        var x2 = ccDevAvg != 0 ? max2 / ccDevAvg : 0;
-        var x2Sum = isFinal ? _x2Sum.Add(x2, out var x2Count) : _x2Sum.Preview(x2, out x2Count);
-        var x2Avg = x2Count > 0 ? x2Sum / x2Count : 0;
-        var xp = _sensitivity * (x1Avg - x2Avg);
-
-        if (isFinal)
-        {
-            _highValues.TryAdd(bar.High, out _);
-            _lowValues.TryAdd(bar.Low, out _);
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Kpo", xp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(xp, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Kpo", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ccDev.Dispose();
-        _ccDevAvg.Dispose();
-        _x1Sum.Dispose();
-        _x2Sum.Dispose();
-        _highValues.Dispose();
-        _lowValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("KsdiUp")]

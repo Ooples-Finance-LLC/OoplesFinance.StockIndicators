@@ -65435,5 +65435,401 @@
     "before": "bar.Volume, isFinal",
     "after": "bar.Volume, true",
     "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-peak-v2-wide-fast-floor",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_fast = Math.Max(1, fast)",
+    "after": "_fast = Math.Max(2, fast)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-lag-upper",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Math.Min(_slow - 1,",
+    "after": "Math.Min(_slow - 2,",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-log-quotient",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "StableLogRatio.OfSameSign(numerator, denominator)",
+    "after": "Math.Log(numerator / denominator)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.LogContractAgreesWithIndependentRationalTruth"
+  },
+  {
+    "id": "kase-peak-v2-wide-negative-sensitivity",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "MathHelper.IsValueNullOrInfinity(sensitivity)",
+    "after": "sensitivity < 0 || MathHelper.IsValueNullOrInfinity(sensitivity)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.SensitivityOverflowRecoversAndSignalsRemainDefined"
+  },
+  {
+    "id": "kase-peak-v2-wide-sensitivity-zero",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_sensitivity = U(sensitivity)",
+    "after": "_sensitivity = U(40)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-deviation-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "sum -= expired; squares -= expired * expired;",
+    "after": "sum += expired; squares += expired * expired;",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-deviation-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_returns.Count >= _deviationLength - 1",
+    "after": "_returns.Count >= _deviationLength - 2",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-variance-center",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_deviationLength * squares - sum * sum",
+    "after": "_deviationLength * squares",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-variance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "(long)_deviationLength * _deviationLength",
+    "after": "(long)_deviationLength",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-variance-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "if (final) { if (_returns.Count",
+    "after": "if (true) { if (_returns.Count",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-return-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = 1;",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-first-return",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "if (_hasPrevious)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-return-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "if (final) { _previousPrice",
+    "after": "if (true) { _previousPrice",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-up-root",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Log(high, prior.Low) / root",
+    "after": "Log(high, prior.Low) * root",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-down-root",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Log(prior.High, low) / root",
+    "after": "Log(prior.High, low) * root",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-up-lag",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Log(high, prior.Low)",
+    "after": "Log(high, low)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-down-lag",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Log(prior.High, low)",
+    "after": "Log(high, low)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-up-positive-cap",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "double maxUp = 0, maxDown = 0",
+    "after": "double maxUp = -1, maxDown = 0",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-up-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Round(U(maxUp) << 1074, divisor)",
+    "after": "Round(U(maxUp) << 1074, U(1))",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-down-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Round(U(maxDown) << 1074, divisor)",
+    "after": "Round(U(maxDown) << 1074, U(1))",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-up-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_up.Count == _smooth ? _up.Peek() : BigInteger.Zero",
+    "after": "false ? _up.Peek() : BigInteger.Zero",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-down-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_down.Count == _smooth ? _down.Peek() : BigInteger.Zero",
+    "after": "false ? _down.Peek() : BigInteger.Zero",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-partial-count",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "Math.Min(_up.Count + 1L, _smooth)",
+    "after": "(long)_smooth",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.ExtremePeriodsBoundWorkByAvailableHistory"
+  },
+  {
+    "id": "kase-peak-v2-wide-pressure-sign",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "(upMean - downMean) * _sensitivity",
+    "after": "(upMean + downMean) * _sensitivity",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-pressure-scale",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_sensitivity, BigInteger.One << 1074",
+    "after": "_sensitivity, BigInteger.One << 1073",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-peak-v2-wide-signal-strong",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "output.Sign > 0 && output > _previousOutput",
+    "after": "output.Sign > 0 && output < _previousOutput",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-history-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "if (final)\n        {\n            if (_up.Count",
+    "after": "if (true)\n        {\n            if (_up.Count",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-down-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_down.Enqueue(down)",
+    "after": "_down.Enqueue(up)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-history-side",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_history.Add((high, low))",
+    "after": "_history.Add((low, high))",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-compaction-offset",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_history.RemoveRange(0, _first); _first = 0;",
+    "after": "_history.RemoveRange(0, _first);",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.LongHistoryCompactionPreservesEveryAvailableLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "ComponentAverage.Take(deviations, Math.Max(1, averageLength))",
+    "after": "ComponentAverage.Take(deviations, Math.Max(1, deviationLength))",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.SelectedRangesAndDeviationCallbackRemainExplicit"
+  },
+  {
+    "id": "kase-peak-v2-wide-callback-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "window.Reset();",
+    "after": "// omitted reset",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.SelectedRangesAndDeviationCallbackRemainExplicit"
+  },
+  {
+    "id": "kase-peak-v2-wide-reset-returns",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_returns.Clear(); _up.Clear();",
+    "after": "_up.Clear();",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_down.Clear(); _history.Clear();",
+    "after": "_down.Clear();",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-reset-moments",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_sum = _squares = _upSum",
+    "after": "_sum = _upSum",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_weighted - _sum + value * _length",
+    "after": "_weighted + _sum + value * _length",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "value * _length;",
+    "after": "value * (_length - 1L);",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_history.Count == _length ? _history.Peek() : BigInteger.Zero",
+    "after": "false ? _history.Peek() : BigInteger.Zero",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.WideTinySignedAndAdjacentPricesRetainVolatility"
+  },
+  {
+    "id": "kase-peak-v2-wide-weighted-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "(long)_length * (_length + 1L)",
+    "after": "_length * (_length + 1)",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.ExtremePeriodsBoundWorkByAvailableHistory"
+  },
+  {
+    "id": "kase-peak-v2-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "if (final)\n            {\n                _sum",
+    "after": "if (true)\n            {\n                _sum",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KasePeakV2Window.cs",
+    "scope": "internal sealed class KasePeakV2Window",
+    "before": "_sum = _weighted = default;",
+    "after": "_sum = default;",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kase-peak-v2-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KasePeakOscillatorV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted guard\n",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.RejectedCandlesCannotAdvanceReturnOrPressureWindows"
+  },
+  {
+    "id": "kase-peak-v2-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KasePeakOscillatorV2State",
+    "before": "bar.Close, isFinal",
+    "after": "bar.Close, true",
+    "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
   }
 ]

@@ -1451,120 +1451,12 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKasePeakOscillatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int fastLength = 8, int slowLength = 65, int length1 = 9, int length2 = 30, int length3 = 50, int smoothLength = 3, double devFactor = 2,
-        double sensitivity = 40)
+        int fastLength = 8, int slowLength = 65, int length1 = 9, int length2 = 30, int length3 = 50, int smoothLength = 3, double devFactor = 2, double sensitivity = 40)
     {
-        List<double> ccLogList = new(stockData.Count);
-        List<double> xpAbsAvgList = new(stockData.Count);
-        List<double> kpoBufferList = new(stockData.Count);
-        List<double> xpList = new(stockData.Count);
-        List<double> xpAbsList = new(stockData.Count);
-        List<double> kppBufferList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var x1SumWindow = new RollingSum();
-        var x2SumWindow = new RollingSum();
-        var xpAbsSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var temp = prevValue != 0 ? currentValue / prevValue : 0;
-
-            var ccLog = temp > 0 ? Math.Log(temp) : 0;
-            ccLogList.Add(ccLog);
-        }
-
-        // The deviation of the log-return window about its own mean, which the readings below divide by.
-        // See #190.
-        var ccDevList = GetStandardDeviationList(ccLogList, length1);
-
-        // The first bar has no prior close, so its log return is a fabricated zero rather than a return. A
-        // window still holding it is one genuine return short, and here that dilution does not stay put: the
-        // deviation is smoothed and then divided by, so a too-small divisor inflates the readings for as
-        // long as the average carries it. Suppressed before the smoothing rather than at consumption, for
-        // that reason. Nothing is published until index length1, where the window is returns 1..length1.
-        // See #209.
-        for (var i = 0; i < length1 && i < ccDevList.Count; i++)
-        {
-            ccDevList[i] = 0;
-        }
-
-        // A finite volatility window must return exactly to zero after a spike leaves.
-        var ccDevAvgList = Streaming.SpreadAverage.Calculate(ccDevList, maType, length2);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var avg = ccDevAvgList[i];
-            var currentLow = lowList[i];
-            var currentHigh = highList[i];
-
-            double max1 = 0, max2 = 0;
-            for (var j = fastLength; j < slowLength; j++)
-            {
-                var sqrtK = Sqrt(j);
-                var prevLow = i >= j ? lowList[i - j] : 0;
-                var prevHigh = i >= j ? highList[i - j] : 0;
-                var temp1 = prevLow != 0 ? currentHigh / prevLow : 0;
-                var log1 = temp1 > 0 ? Math.Log(temp1) : 0;
-                max1 = Math.Max(log1 / sqrtK, max1);
-                var temp2 = currentLow != 0 ? prevHigh / currentLow : 0;
-                var log2 = temp2 > 0 ? Math.Log(temp2) : 0;
-                max2 = Math.Max(log2 / sqrtK, max2);
-            }
-
-            var x1 = avg != 0 ? max1 / avg : 0;
-            x1SumWindow.Add(x1);
-
-            var x2 = avg != 0 ? max2 / avg : 0;
-            x2SumWindow.Add(x2);
-
-            var xp = sensitivity * (x1SumWindow.Average(smoothLength) - x2SumWindow.Average(smoothLength));
-            xpList.Add(xp);
-
-            var xpAbs = Math.Abs(xp);
-            xpAbsList.Add(xpAbs);
-
-            xpAbsSumWindow.Add(xpAbs);
-            var xpAbsAvg = xpAbsSumWindow.Average(length3);
-            xpAbsAvgList.Add(xpAbsAvg);
-        }
-
-        // The deviation of that window about its own mean, again as a band multiplier below. See #190.
-        var xpAbsStdDevList = GetStandardDeviationList(xpAbsList, length3);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var xpAbsAvg = xpAbsAvgList[i];
-            var xpAbsStdDev = xpAbsStdDevList[i];
-            var prevKpoBuffer1 = i >= 1 ? kpoBufferList[i - 1] : 0;
-            var prevKpoBuffer2 = i >= 2 ? kpoBufferList[i - 2] : 0;
-
-            var tmpVal = xpAbsAvg + (devFactor * xpAbsStdDev);
-            var maxVal = Math.Max(90, tmpVal);
-
-            var prevKpoBuffer = GetLastOrDefault(kpoBufferList);
-            var kpoBuffer = xpList[i];
-            kpoBufferList.Add(kpoBuffer);
-
-            var kppBuffer = prevKpoBuffer1 > 0 && prevKpoBuffer1 > kpoBuffer && prevKpoBuffer1 >= prevKpoBuffer2 &&
-                            prevKpoBuffer1 >= maxVal ? prevKpoBuffer1 : prevKpoBuffer1 < 0 && prevKpoBuffer1 < kpoBuffer &&
-                                                                        prevKpoBuffer1 <= prevKpoBuffer2 && prevKpoBuffer1 <= maxVal * -1 ? prevKpoBuffer1 :
-                prevKpoBuffer1 > 0 && prevKpoBuffer1 > kpoBuffer && prevKpoBuffer1 >= prevKpoBuffer2 ? prevKpoBuffer1 :
-                prevKpoBuffer1 < 0 && prevKpoBuffer1 < kpoBuffer && prevKpoBuffer1 <= prevKpoBuffer2 ? prevKpoBuffer1 : 0;
-            kppBufferList.Add(kppBuffer);
-
-            var signal = GetCompareSignal(kpoBuffer, prevKpoBuffer);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Kpo", xpList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(xpList);
-        stockData.IndicatorName = IndicatorName.KasePeakOscillatorV2;
-
-        return stockData;
+        var result = KasePeakV2Window.Compute(stockData, maType, fastLength, slowLength, length1, length2, smoothLength, sensitivity, false);
+        var values = result.Values.ToList(); var trades = CreateSignalsList(stockData); trades?.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Kpo", values } }); stockData.SetSignals(trades);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.KasePeakOscillatorV2; return stockData;
     }
 
 
