@@ -4503,3 +4503,10 @@ The original campaigns caught 36 compiled faults and left one equivalent native-
 All five public routes now retain extended NVI values, exact window moments, and cancellation-safe normalized coordinates. Selected inputs, ordered signal thresholds, callback slots, previews, reset, and lazy extreme periods have focused coverage. The independent reference uses direct window deviations and Newton-refined roots stored as four binary64 residuals; exact-zero and one-ULP hand cases prevent tolerance-based ties. A separate 49-root/98-coordinate algebra check preserved binary64 results with root changes below 2^-200 while reducing intermediate representation size. The earlier aborted run is not qualification evidence.
 
 **84/84 focused tests passed** on net10.0 (`negative-volume-disparity672-compact-root.trx`). Inventory: **6,440/7,131 enrolled**, **691 omissions across 102 types**, all references registered, no construction failures, backlog exact. The 21 behavioral mutations and final hosted/platform/package/performance gates remain pending.
+
+
+### Batch 673: On Balance Volume Disparity numerical routes
+
+The batch, builder fallback, native, and streaming routes retain exact signed-volume totals and window moments before normalized-coordinate division. Exact zero, one-ULP perturbations, overflow recovery, selected prices, signal thresholds, previews, reset, and lazy periods have independent reference and hand coverage. The existing absent compute arm and no-component-callback contract are preserved.
+
+**75/75 focused tests passed** on net10.0 (`on-balance-disparity673.trx`). Inventory: **6,449/7,131 enrolled**, **682 omissions across 101 types**, all independent references registered, no construction failures, backlog exact. The 25 behavioral faults and final hosted/platform/package/performance gates remain pending.

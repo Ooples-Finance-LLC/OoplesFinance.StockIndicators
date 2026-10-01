@@ -1012,113 +1012,17 @@ public sealed class OmegaRatioState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Obvdi")]
 public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _inputSma;
-    private readonly IMovingAverageSmoother _obvSma;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
-    // the resolved input and the other the on balance volume, and they must not be crossed.
-    private readonly RollingStandardDeviation _inputStdDev;
-    private readonly RollingStandardDeviation _obvStdDev;
-    private readonly StreamingInputResolver _input;
-    private readonly double _top;
-    private readonly double _bottom;
-    private double _prevClose;
-    private ExactMeanAccumulator _obvTotal;
-    private double _prevObvdi;
-    private double _prevBsc;
-    private bool _hasPrev;
-
+    private readonly OnBalanceVolumeDisparityWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public OnBalanceVolumeDisparityIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 33,
-        int signalLength = 4, double top = 1.1, double bottom = 0.9)
-    {
-        var resolved = Math.Max(1, length);
-        _inputSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _obvSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        // No moving-average type, and no selector: RollingStandardDeviation is handed the value itself.
-        _inputStdDev = new RollingStandardDeviation(resolved);
-        _obvStdDev = new RollingStandardDeviation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _top = top;
-        _bottom = bottom;
-    }
-
+        int signalLength = 4, double top = 1.1, double bottom = .9) => _window = new(maType, length, signalLength, top, bottom);
     public IndicatorName Name => IndicatorName.OnBalanceVolumeDisparityIndicator;
-
-    public void Reset()
-    {
-        _inputSma.Reset();
-        _obvSma.Reset();
-        _signalSmoother.Reset();
-        _inputStdDev.Reset();
-        _obvStdDev.Reset();
-        _prevClose = 0;
-        _obvTotal = default;
-        _prevObvdi = 0;
-        _prevBsc = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var total = _obvTotal;
-        if (value > prevClose) total.Add(bar.Volume);
-        else if (value < prevClose) total.Add(bar.Volume, -1);
-        var obv = total.Mean(1);
-
-        var inputSma = _inputSma.Next(value, isFinal);
-        var obvSma = _obvSma.Next(obv, isFinal);
-        // Each deviation is fed the series it measures: the resolved input, and the on balance volume.
-        var stdDev = _inputStdDev.Next(value, isFinal);
-        var obvStdDev = _obvStdDev.Next(obv, isFinal);
-
-        var aTop = value - (inputSma - (2 * stdDev));
-        var aBot = 4 * stdDev;
-        var a = aBot != 0 ? aTop / aBot : 0;
-        var bTop = obv - (obvSma - (2 * obvStdDev));
-        var bBot = 4 * obvStdDev;
-        var b = bBot != 0 ? bTop / bBot : 0;
-        var obvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
-        var signal = _signalSmoother.Next(obvdi, isFinal);
-
-        var prevObvdi = _hasPrev ? _prevObvdi : 0;
-        var prevBsc = _hasPrev ? _prevBsc : 0;
-        var bsc = (prevObvdi < _bottom && obvdi > _bottom) || obvdi > signal
-            ? 1
-            : (prevObvdi > _top && obvdi < _top) || obvdi < _bottom
-                ? -1
-                : prevBsc;
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _obvTotal = total;
-            _prevObvdi = obvdi;
-            _prevBsc = bsc;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Obvdi", obvdi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(obvdi, outputs);
-    }
-
-    public void Dispose()
-    {
-        _inputSma.Dispose();
-        _obvSma.Dispose();
-        _signalSmoother.Dispose();
-        _inputStdDev.Dispose();
-        _obvStdDev.Dispose();
+        var point = _window.Next(_input.GetValue(bar), bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Line.Publish(), includeOutputs ? new Dictionary<string, double>
+            { { "Obvdi", point.Line.Publish() }, { "Signal", point.SignalLine.Publish() } } : null);
     }
 }

@@ -369,71 +369,12 @@ public static partial class Calculations
     public static StockData CalculateOnBalanceVolumeDisparityIndicator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> obvdiList = new(stockData.Count);
-        List<double> bscList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var obvList = CalculateOnBalanceVolume(stockData, maType, length).ChainedValues;
-        var obvSmaList = GetMovingAverageList(stockData, maType, length, obvList);
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        // The deviation of each window about its own mean, not the mean squared residual from a moving average
-        // of it. Both halves build the Bollinger construction - a value's position between bands two
-        // deviations either side of its average - so sigma is the windowed deviation in each. See #190.
-        //
-        // Taken over the two lists by name rather than by chaining, which is what keeps them apart: the first
-        // measures the prices and the second the on balance volume. Measuring one on the other's window is the
-        // redirection #190 warns of for chained sites.
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        stockData.SetCustomValues(obvList);
-        var obvStdDevList = GetStandardDeviationList(obvList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var stdDev = stdDevList[i];
-            var obvSma = obvSmaList[i];
-            var obvStdDev = obvStdDevList[i];
-            var aTop = currentValue - (sma - (2 * stdDev));
-            var aBot = 4 * stdDev;
-            var obv = obvList[i];
-            var a = aBot != 0 ? aTop / aBot : 0;
-            var bTop = obv - (obvSma - (2 * obvStdDev));
-            var bBot = 4 * obvStdDev;
-            var b = bBot != 0 ? bTop / bBot : 0;
-
-            var obvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
-            obvdiList.Add(obvdi);
-        }
-
-        var obvdiEmaList = GetMovingAverageList(stockData, maType, signalLength, obvdiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var obvdi = obvdiList[i];
-            var obvdiEma = obvdiEmaList[i];
-            var prevObvdi = i >= 1 ? obvdiList[i - 1] : 0;
-
-            var prevBsc = i >= 1 ? bscList[i - 1] : 0;
-            var bsc = (prevObvdi < bottom && obvdi > bottom) || obvdi > obvdiEma ? 1 : (prevObvdi > top && obvdi < top) ||
-                obvdi < bottom ? -1 : prevBsc;
-            bscList.Add(bsc);
-
-            var signal = GetCompareSignal(bsc, prevBsc);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Obvdi", obvdiList },
-            { "Signal", obvdiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(obvdiList);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = OnBalanceVolumeDisparityWindow.Calculate(stockData, input, maType, length, signalLength, top, bottom);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Obvdi", result.Line.ToList() }, { "Signal", result.SignalLine.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Trades);
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Line.ToList());
         stockData.IndicatorName = IndicatorName.OnBalanceVolumeDisparityIndicator;
-
         return stockData;
     }
 

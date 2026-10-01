@@ -65,35 +65,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.NegativeVolumeDisparityIndicator:
                 return new("Nvdi", new[] { "Nvdi", "Signal" }, bars => NegativeVolumeDisparityOutputs(bars, indicator));
             case IndicatorName.OnBalanceVolumeDisparityIndicator:
-                if (kind == 0) return null;
-                var negativeDisparity = name == IndicatorName.NegativeVolumeDisparityIndicator;
-                var disparityKey = negativeDisparity ? "Nvdi" : "Obvdi";
-                return new(disparityKey, new[] { disparityKey, "Signal" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var volumeIndex = new double[bars.Count];
-                    double value = negativeDisparity ? 1000 : 0;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        if (negativeDisparity)
-                        {
-                            if (i > 0 && bars[i].Volume < bars[i - 1].Volume && prices[i - 1] != 0)
-                                value *= prices[i] / prices[i - 1];
-                        }
-                        else value += Math.Sign(prices[i] - (i == 0 ? 0 : prices[i - 1])) * bars[i].Volume;
-                        volumeIndex[i] = value;
-                    }
-                    double[] Position(double[] values)
-                    {
-                        var means = Average(values, length, kind);
-                        var variances = PopulationVariance(values, length);
-                        return values.Select((v, i) => variances[i] == 0 ? 0 : .5 + (v - means[i]) / (4 * Math.Sqrt(variances[i]))).ToArray();
-                    }
-                    var pricePosition = Position(prices);
-                    var volumePosition = Position(volumeIndex);
-                    var line = pricePosition.Zip(volumePosition, (p, v) => v == -1 ? 0 : (1 + p) / (1 + v)).ToArray(); // NOSONAR: S1244 - Only minus one makes the following denominator exactly zero.
-                    return Outputs((disparityKey, line), ("Signal", Average(line, Integer(options, "SignalLength", 4), kind)));
-                });
+                return new("Obvdi", new[] { "Obvdi", "Signal" }, bars => OnBalanceVolumeDisparityOutputs(bars, indicator));
             case IndicatorName.TradeVolumeIndex:
                 if (kind == 0) return null;
                 return new("Tvi", new[] { "Tvi", "Signal" }, bars =>

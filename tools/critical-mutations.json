@@ -70546,5 +70546,230 @@
     "before": "NegativeVolumeDisparityIndicator or ",
     "after": "",
     "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "obvdi-wide-flat",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "if (variance.Sign == 0) return Number.Of(1);",
+    "after": "if (variance.Sign == 0) return Number.Of(1.5);",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-positive-offset",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "Number.Of(1.5) + delta",
+    "after": "Number.Of(1) + delta",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-positive-width",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "delta.OverRoot(variance).Divide(4)",
+    "after": "delta.OverRoot(variance).Divide(2)",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-negative-discriminant",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "Number.Of(36) - normalizedSquare",
+    "after": "Number.Of(35) - normalizedSquare",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ExactZeroAndOneUlpPerturbationRemainDistinct"
+  },
+  {
+    "id": "obvdi-wide-negative-width",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "rootRatio).Times(4)",
+    "after": "rootRatio).Times(2)",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ExactZeroAndOneUlpPerturbationRemainDistinct"
+  },
+  {
+    "id": "obvdi-wide-zero-tolerance",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "if (remainder.Sign == 0)",
+    "after": "if (Math.Abs(remainder.Publish()) < 1e-12)",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ExactZeroAndOneUlpPerturbationRemainDistinct"
+  },
+  {
+    "id": "obvdi-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "_signalMean = new(kind, signalLength)",
+    "after": "_signalMean = new(kind, length)",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "sum -= old; squares -= old * old;",
+    "after": "sum += old; squares += old * old;",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ExpiryScalingAndAverageKindsPreserveTheFormula"
+  },
+  {
+    "id": "obvdi-wide-variance-startup",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-variance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "Divide((long)_length * _length)",
+    "after": "Divide((long)_length)",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (current.Sign != 0 || final) { if (full)",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-lag-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "if (final) { _previousLine",
+    "after": "if (line.Sign != 0 || final) { _previousLine",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ExpiryScalingAndAverageKindsPreserveTheFormula"
+  },
+  {
+    "id": "obvdi-wide-reset-index",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "_index = default; _previousPrice = 0;",
+    "after": "_index = Number.Of(5); _previousPrice = 0;",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ExpiryScalingAndAverageKindsPreserveTheFormula"
+  },
+  {
+    "id": "obvdi-wide-reset-trade",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "_previousLine = default; _previousState = 0;",
+    "after": "_previousLine = Number.Of(1); _previousState = 1;",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-index-falling",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "price < _previousPrice ? _index - value",
+    "after": "price < _previousPrice ? _index + value",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.SignedVolumesAndFirstPricesKeepExactDirections"
+  },
+  {
+    "id": "obvdi-wide-index-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "if (final) { _index = total",
+    "after": "if (price != 0 || final) { _index = total",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.SignedVolumesAndFirstPricesKeepExactDirections"
+  },
+  {
+    "id": "obvdi-wide-batch-falling",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "else if (prices[i] < previous) total -= volume;",
+    "after": "else if (prices[i] < previous) total += volume;",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.SignedVolumesAndFirstPricesKeepExactDirections"
+  },
+  {
+    "id": "obvdi-wide-batch-tie",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "if (prices[i] > previous) total += volume;",
+    "after": "if (prices[i] >= previous) total += volume;",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.SignedVolumesAndFirstPricesKeepExactDirections"
+  },
+  {
+    "id": "obvdi-wide-native-tie",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal sealed class OnBalanceVolumeDisparityWindow",
+    "before": "price > _previousPrice ? _index + value",
+    "after": "price >= _previousPrice ? _index + value",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.SignedVolumesAndFirstPricesKeepExactDirections"
+  },
+  {
+    "id": "obvdi-wide-constructor-top-guard",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal OnBalanceVolumeDisparityWindow(",
+    "before": "StreamingInputValidation.Finite(top, nameof(top));",
+    "after": "",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.NonfiniteArgumentsAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "obvdi-wide-constructor-bottom-guard",
+    "module": "numerical",
+    "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
+    "scope": "internal OnBalanceVolumeDisparityWindow(",
+    "before": "StreamingInputValidation.Finite(bottom, nameof(bottom));",
+    "after": "",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.NonfiniteArgumentsAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "obvdi-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? _input.GetValue(bar) : bar.Close",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.NonfiniteArgumentsAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "obvdi-wide-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "{ \"Signal\", point.SignalLine.Publish() }",
+    "after": "{ \"Signal\", point.Line.Publish() }",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "obvdi-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Volume/VolumeLtoR.cs",
+    "scope": "public static StockData CalculateOnBalanceVolumeDisparityIndicator(",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var input = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "obvdi-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "OnBalanceVolumeDisparityIndicator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.NumericalClassesAreEnrolled"
   }
 ]
