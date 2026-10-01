@@ -4029,3 +4029,12 @@ Hawkeye's previous-midpoint plus/minus range/divisor thresholds now evaluate the
 **42 distinct focused checks are verified**: the initial run passed41/42, and the corrected wide-volume test passed1/1 against unchanged production binaries. The initial fixture multiplied volume30 by2^1020, creating infinity before the indicator; using2^1019 keeps inputs finite while ordinary rolling sums can still overflow. Evidence is retained in `hawkeye-647.trx` and `hawkeye-647-wide-volume.trx`. Four configurations across five routes, both output keys, selected input, signed/zero/subnormal divisors, complete-quotient cancellation, exact signal comparisons, period normalization and preview/reset behavior are covered.
 
 **31 prepared behavioral faults remain pending**. All7,265 mutation anchors passed preflight, and candidate/frozen snapshots match on2177 files. An invariant zero-divisor denominator rescaling was excluded before campaigns; it is not a behavioral fault. Enrollment is **6,239/7,131**, leaving **892 omissions**, with no construction failures. DLL SHA256: `E7CCD87C704D1BB61A71AC022CD4FFC5E803648D0A1E7F0A490BCB0B6A3ECACB`. Corrected Hurst630 campaigns and later qualification, pending formula decisions, remaining numerical coverage and hosted/package/release/performance gates are incomplete. PR246 remains draft.
+
+
+### Batch 630: Hurst Coefficient mutation qualification
+
+The isolated campaigns `630-corrected-a` and `630-corrected-b` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **73/73 focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-630 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `e7bc17d0e5b53ef661cf2d94ceb1f7d78e9d9048ff52f6181743bda4bd606f8f`. Archive SHA256: `6f03c704114adaa3cbbd155515145c3417c81416c7485c20d4b3e36de95d4f43` and `6f03c704114adaa3cbbd155515145c3417c81416c7485c20d4b3e36de95d4f43`.
+
+This is evidence for the isolated batch-630 source. Source was already published in the batch-630 checkpoint; this update does not restore older source files. Mutation verification for batches 631 through 647 and the remaining final gates is still incomplete.
