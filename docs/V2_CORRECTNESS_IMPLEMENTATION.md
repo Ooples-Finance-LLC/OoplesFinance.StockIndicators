@@ -3995,3 +3995,12 @@ The isolated campaigns `628-corrected-a` and `628-corrected-b` passed their base
 Source snapshot SHA256: `c0e11b8978014766880ccc379ff042de669ea096296f99bf7ef15e91320083af`. Archive SHA256: `da7d0199cd1cbd3f42fcbab5dfaed1963ab98e213068a4f7396326021ea9d296` and `da7d0199cd1cbd3f42fcbab5dfaed1963ab98e213068a4f7396326021ea9d296`.
 
 This is evidence for the isolated batch-628 source. Source was already published in the batch-628 checkpoint; this update does not restore older source files. Mutation verification for batches 629 through 645 and the remaining final gates is still incomplete.
+
+
+### Batch 629: Edge Preserving mutation qualification
+
+The isolated campaigns `629a` and `629b` passed their baselines and caught **34/34 compiled behavioral faults**, alongside **48/48 focused tests**. Both archives were compared byte-for-byte with the retained batch-629 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `a2642ee5802e91b7c082a52b7276aeaab4005c3ed488c815d7ab944d9415d250`. Archive SHA256: `645e558cdecd5d7d03e8713b3aa616c4466689d99fd229bbfb72fa41a18b4090` and `645e558cdecd5d7d03e8713b3aa616c4466689d99fd229bbfb72fa41a18b4090`.
+
+This is evidence for the isolated batch-629 source. Source was already published in the batch-629 checkpoint; this update does not restore older source files. Mutation verification for batches 630 through 646 and the remaining final gates is still incomplete.
