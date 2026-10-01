@@ -99,6 +99,24 @@ public sealed class HawkeyeNumericalTests
         Assert.Equal(Signal.Sell, Check(falling, 2, -2).Signals[1]);
     }
     [Fact]
+    public void ExpiredVolumeAndRangeCannotVoteInLaterWindows()
+    {
+        foreach (var scale in new[] { double.Epsilon, 1d, Math.ScaleB(1d, 1010) })
+        {
+            var observations = new[] { (10d, 0d, 5d, 1000d), (70d, -30d, 20d, 1d),
+                (30d, 10d, 20d, 1d), (21d, 9d, 20d, 10d), (21d, 8d, 15d, 20d) };
+            var bars = observations.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i),
+                v.Item3 * scale, v.Item1 * scale, v.Item2 * scale, v.Item3 * scale, v.Item4 * scale)).ToArray();
+            var actual = Check(bars, 3, 2);
+            // At bar 3, expired volume 1000 is absent: mean volume=4, range=44.
+            // Close equals the previous midpoint; the lower-low/small-range/large-volume branch buys.
+            Assert.Equal(Signal.Buy, actual.Signals[3]);
+            // At bar 4, expired range 100 is absent: mean range=15 and 13 is not < 2/3*15.
+            // Close again equals the previous midpoint, leaving no buy or sell branch.
+            Assert.Equal(Signal.None, actual.Signals[4]);
+        }
+    }
+    [Fact]
     public void ExtremePeriodsAllocateOnlyObservedHistory()
     {
         foreach (var length in new[] { int.MinValue, 0, 1, int.MaxValue })

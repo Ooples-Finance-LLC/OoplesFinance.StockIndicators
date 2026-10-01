@@ -62338,7 +62338,7 @@
     "scope": "internal sealed class HawkeyeWindow",
     "before": "volumes -= old.Volume;",
     "after": "volumes += old.Volume;",
-    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.ExpiredVolumeAndRangeCannotVoteInLaterWindows"
   },
   {
     "id": "hawkeye-wide-queue-expiry",
@@ -62347,7 +62347,7 @@
     "scope": "internal sealed class HawkeyeWindow",
     "before": "_history.Dequeue();",
     "after": "_history.Peek();",
-    "filter": "FullyQualifiedName~HawkeyeNumericalTests.RollingClassificationUsesExactWidePartialMeans"
+    "filter": "FullyQualifiedName~HawkeyeNumericalTests.ExpiredVolumeAndRangeCannotVoteInLaterWindows"
   },
   {
     "id": "hawkeye-wide-range-sum",
@@ -62481,7 +62481,7 @@
     "file": "src/Streaming/StatefulIndicators.Batch14.cs",
     "scope": "public sealed class HawkeyeVolumeIndicatorState",
     "before": "var midpoint = _input.GetValue(bar);",
-    "after": "var midpoint = bar.Close;",
+    "after": "var midpoint = includeOutputs ? bar.Close : _input.GetValue(bar);",
     "filter": "FullyQualifiedName~HawkeyeNumericalTests.InvalidCandlesCannotAdvanceEitherThreshold"
   },
   {
@@ -62489,8 +62489,8 @@
     "module": "numerical",
     "file": "src/Helpers/HawkeyeWindow.cs",
     "scope": "internal sealed class HawkeyeWindow",
-    "before": "double.IsNaN(divisor) || double.IsInfinity(divisor)",
-    "after": "false",
+    "before": "if (double.IsNaN(divisor) || double.IsInfinity(divisor)) throw new ArgumentOutOfRangeException(nameof(divisor));",
+    "after": "if (double.IsNaN(divisor) || double.IsInfinity(divisor)) divisor = 0;",
     "filter": "FullyQualifiedName~HawkeyeNumericalTests.NonfiniteDivisorsAreRejectedEvenForEmptyInput"
   },
   {

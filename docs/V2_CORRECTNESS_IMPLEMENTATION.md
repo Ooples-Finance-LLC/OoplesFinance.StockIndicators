@@ -4359,3 +4359,10 @@ MassThrust, MassThrustIndicator and MassThrustOscillator now retain their rollin
 Enrollment is **6,406/7,131**, leaving **725 omissions across 108 types**, with no construction failures and an exact backlog match. **47 prepared behavioral faults remain pending** (43 Mass Thrust and four shared arithmetic faults); all **7,957 global anchors** pass preflight. Formula/domain/core compatibility is documented in V2_FORMULA_VARIANTS.md. Source verification does not establish mutation qualification or completion of hosted/platform/package/release/performance gates. PR246 remains draft.
 
 DLL SHA256: `D567527A6AC9F83EB4C95AC405E2E8A991CBBAD33F535E22EEA3F8B5E62AC0FA`.
+
+
+### Batch 647: Hawkeye expiry and guard qualification follow-up
+
+The first corrected mutation campaigns finished with 27 compiled kills, three survivors and one compilation rejection; they do not qualify this batch. A five-bar hand example now separates expired-volume and expired-range contributions to subsequent signals, with ordinary, subnormal and large finite scales, route checks, preview and reset coverage. The native guard fault now bypasses the resolver only when outputs are requested, preserving an actual resolver call so the analyzer allows the behavioral test to execute. The divisor fault now coerces nonfinite inputs to zero; simply deleting its first guard was ineffective because exact-value conversion also rejects them. Production formulas are unchanged.
+
+**43/43 distinct focused checks passed** in `hawkeye647-expiry-followup.trx` (42 checks) and `hawkeye647-expiry-hand.trx` (one existing signed hand-reference check). The test-only build reused the verified production assembly. All **7,957 mutation anchors** validate. Fresh identical snapshots will rerun all **31 Hawkeye faults**; no qualification is claimed from the failed campaigns or the repaired definitions alone.
