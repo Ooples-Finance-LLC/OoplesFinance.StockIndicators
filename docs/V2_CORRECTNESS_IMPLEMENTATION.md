@@ -4321,3 +4321,12 @@ The isolated campaigns `643-corrected2-a` and `643-corrected2-b` passed their ba
 Source snapshot SHA256: `c8fb82a5fd8a89e1e8a77fa1241afa669e9fdaec339412c22b46c61d1487c196`. Archive SHA256: `40e846601fc72ddbe17e08720d7200c483e9df157241cfd89d01f766b367d3da` and `40e846601fc72ddbe17e08720d7200c483e9df157241cfd89d01f766b367d3da`.
 
 This is evidence for the isolated batch-643 source. Source was already published in the batch-643 checkpoint; this update does not restore older source files. Mutation verification for batches 644 through 663 and the remaining final gates is still incomplete.
+
+
+### Batch 644: Function to Candles mutation qualification
+
+The isolated campaigns `644-corrected-a` and `644-corrected-b` passed their baselines and caught **34/34 compiled behavioral faults**, alongside **48/48 selected tests** (47 Function to Candles cases and one existing regression). Both archives were compared byte-for-byte with the retained batch-644 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `cf6df4b9cb8c963b54363fd06ee0eafbaf2ec5b400e1eb35c8c5d766fbf6f0b9`. Archive SHA256: `2cc433d822e6bbc09c63f8e9a8d50b64a1581d4b3218eb0350e7b0cf55fba687` and `2cc433d822e6bbc09c63f8e9a8d50b64a1581d4b3218eb0350e7b0cf55fba687`.
+
+This is evidence for the isolated batch-644 source. Source was already published in the batch-644 checkpoint; this update does not restore older source files. Mutation verification for batches 645 through 664 and the remaining final gates is still incomplete.
