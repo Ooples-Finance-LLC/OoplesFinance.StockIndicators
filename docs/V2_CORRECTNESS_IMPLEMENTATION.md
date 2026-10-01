@@ -4529,3 +4529,12 @@ The batch, fast, typed compute, native, and streaming routes retain exact lag-di
 All five routes and the existing core now preserve exact range ratios and recursive arithmetic for the Oscar recurrence. Independent weighted-sum references and rational hands cover extreme and subnormal ranges, clamping, selected prices, signals, previews/reset, and lazy periods. Core argument checks precede output writes.
 
 **39/39 focused tests passed** on net10.0 (`oscar675-corrected.trx`). Inventory: **6,462/7,131 enrolled**, **669 omissions across 99 types**, all independent references registered, no construction failures, backlog exact. The 24 behavioral faults and final hosted/platform/package/performance gates remain pending.
+
+
+### Batch 652: Rsx corrected mutation qualification
+
+The isolated campaigns `652-corrected-a` and `652-corrected-b` passed their baselines and caught **37/37 compiled behavioral faults**, alongside **43/43 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-652 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `c9fda7e283368b685bb3bd7f5e9caafa34a0008e3b86a0c5cfb10de848d62453`. Archive SHA256: `3a6cc0dc94ca26fcf7fc74bb4e0745296db3c98b65a33098d4697eb8a80633c6` and `3a6cc0dc94ca26fcf7fc74bb4e0745296db3c98b65a33098d4697eb8a80633c6`.
+
+This is evidence for the isolated batch-652 source. Source was already published in the batch-652 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
