@@ -4206,3 +4206,12 @@ The isolated campaigns `636-corrected-a` and `636-corrected-b` passed their base
 Source snapshot SHA256: `17965927032132656222c460976c86ca3ff6b37514df9804cb0c96cc266ef7ac`. Archive SHA256: `b8e59cccff13312885de35f93229abdd239fc7c6c143ca21623eb12234129ce0` and `b8e59cccff13312885de35f93229abdd239fc7c6c143ca21623eb12234129ce0`.
 
 This is evidence for the isolated batch-636 source. Source was already published in the batch-636 checkpoint; this update does not restore older source files. Mutation verification for batches 637 through 656 and the remaining final gates is still incomplete.
+
+
+### Batch 637: Fast/Slow Degree mutation qualification
+
+The isolated campaigns `637-corrected-a` and `637-corrected-b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **50/50 focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-637 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `c1724af10a19293e2e9590b689010d4057ecabaf312403c677a650b9a6e2cb41`. Archive SHA256: `6c3ae82b6701461717e97bb7c6bca072b18327667cac7d2a7079b88227bd5bd1` and `6c3ae82b6701461717e97bb7c6bca072b18327667cac7d2a7079b88227bd5bd1`.
+
+This is evidence for the isolated batch-637 source. Source was already published in the batch-637 checkpoint; this update does not restore older source files. Mutation verification for batches 638 through 656 and the remaining final gates is still incomplete.
