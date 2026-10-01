@@ -145,4 +145,33 @@ public sealed class JrcNumericalTests
         foreach (var kind in Kinds) Check(bars, 3, 3, 2, kind.Kind, kind.Reference);
         Check(Enumerable.Range(0, 180).Select(i => B(i % 11 + 2, i % 7 - 8, i % 5 - 1)).ToArray(), 7, 5, 3);
     }
+    [Fact]
+    public void LongRangeRetainsTheOldExtremeUntilItsOwnExpiry()
+    {
+        var bars = new[] { B(100, 0, 0) }.Concat(Enumerable.Repeat(B(1, 0, 0), 7)).ToArray();
+        var values = Check(bars, 2, 3, 1);
+        var independent = 2 - Math.Log(400d / 103) / Math.Log(3);
+        Assert.InRange(Math.Abs(values.Raw[4] - independent), 0, 2e-15);
+        Assert.Equal(2, values.Raw[6]);
+    }
+    [Fact]
+    public void TradeStrengthRemembersThePreviousSpread()
+    {
+        using var window = new JrcWindow(MovingAvgType.SimpleMovingAverage, 2, 3, 1);
+        Assert.Equal(Signal.StrongSell, window.Next(0, 0, 0, true, externalLine: 2, externalSignal: 0).Trade);
+        window.Next(0, 0, 0, false, externalLine: 100, externalSignal: 0);
+        Assert.Equal(Signal.Sell, window.Next(0, 0, 0, true, externalLine: 1, externalSignal: 0).Trade);
+        Assert.Equal(Signal.StrongBuy, window.Next(0, 0, 0, true, externalLine: -2, externalSignal: 0).Trade);
+        Assert.Equal(Signal.Buy, window.Next(0, 0, 0, true, externalLine: -1, externalSignal: 0).Trade);
+        window.Reset();
+        Assert.Equal(Signal.StrongBuy, window.Next(0, 0, 0, true, externalLine: -.5, externalSignal: 0).Trade);
+    }
+    [Fact]
+    public void LaggedCloseExtendsTheShortTrueRange()
+    {
+        var bars = new[] { B(10, 10, 10) }.Concat(Enumerable.Repeat(B(1, 1, 1), 7)).ToArray();
+        var values = Check(bars, 2, 3, 1);
+        var independent = 2 - Math.Log(40d / 29) / Math.Log(3);
+        Assert.InRange(Math.Abs(values.Raw[2] - independent), 0, 2e-15);
+    }
 }

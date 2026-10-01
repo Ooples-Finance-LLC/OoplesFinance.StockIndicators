@@ -64426,7 +64426,7 @@
     "scope": "internal sealed class JrcWindow",
     "before": "_longLength = BoundedProduct(_length, _scale)",
     "after": "_longLength = BoundedProduct(_length, _scale - 1)",
-    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+    "filter": "FullyQualifiedName~JrcNumericalTests.LongRangeRetainsTheOldExtremeUntilItsOwnExpiry"
   },
   {
     "id": "jrc-wide-scale-log",
@@ -64507,7 +64507,7 @@
     "scope": "internal sealed class JrcWindow",
     "before": "U(Math.Max(shortPrevious, shortRange.High))",
     "after": "U(shortRange.High)",
-    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+    "filter": "FullyQualifiedName~JrcNumericalTests.LaggedCloseExtendsTheShortTrueRange"
   },
   {
     "id": "jrc-wide-long-range",
@@ -64596,8 +64596,8 @@
     "file": "src/Helpers/JrcWindow.cs",
     "scope": "internal sealed class JrcWindow",
     "before": "if (final) _previousSpread = spread;",
-    "after": "if (false) _previousSpread = spread;",
-    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+    "after": "if (final) _previousSpread = default;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.TradeStrengthRemembersThePreviousSpread"
   },
   {
     "id": "jrc-wide-callback-period",
@@ -64668,7 +64668,7 @@
     "file": "src/Helpers/JrcWindow.cs",
     "scope": "internal sealed class JrcWindow",
     "before": "weighted.Subtract(sum);",
-    "after": "weighted.Add(sum);",
+    "after": "",
     "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
   },
   {
@@ -64739,8 +64739,8 @@
     "module": "numerical",
     "file": "src/Streaming/StatefulIndicators.Batch15.cs",
     "scope": "public sealed class JrcFractalDimensionState",
-    "before": "StreamingInputValidation.Validate(bar);",
-    "after": "// omitted guard",
+    "before": "StreamingInputValidation.Validate(bar);\n        var point = _window.Next(bar.High, bar.Low, _input.GetValue(bar), isFinal);",
+    "after": "var point = _window.Next(bar.High, bar.Low, includeOutputs ? bar.Close : _input.GetValue(bar), isFinal);",
     "filter": "FullyQualifiedName~JrcNumericalTests.RejectedCandlesCannotAdvanceRangeOrMeans"
   },
   {

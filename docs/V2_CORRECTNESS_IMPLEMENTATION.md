@@ -4547,3 +4547,10 @@ All five routes and the existing SMA core retain exact mean residuals, OLS endpo
 The independent reference uses exact prefix moments and an ordered maximum set; 528 Python Fraction cases and 6,144 bar comparisons matched the direct centered calculation exactly. The earlier scan-based test run was deliberately stopped and is excluded from qualification.
 
 **84/84 focused tests passed** on net10.0 (`peak-valley676-prefix.trx`). Inventory: **6,471/7,131 enrolled**, **660 omissions across 98 types**, all independent references registered, no construction failures, backlog exact. The 30 behavioral faults and final hosted/platform/package/performance gates remain pending.
+
+
+### Batch 653: Repairing mutation coverage
+
+The original JRC campaigns finished with 35 compiled kills, three surviving faults, and two compiler-inconclusive faults; that pair is unqualified. New independent hands distinguish the long lookback from the aggregation period, retain a lagged close outside the short candle range, and check trading-signal strength against the previous spread. All three new regressions passed, alongside 98 retained focused results for 101 distinct passing tests. Production calculations are unchanged.
+
+Five fault definitions now target these scenarios, bypass both native validation paths while retaining the analyzer-required resolver call, omit weighted aging with valid accumulator syntax, and suppress spread memory without unreachable code. A five-fault isolated precheck and a fresh complete 40-fault pair are required; earlier kills will not be pooled. Both repaired source snapshots contain 2,195 matching files. The retained helper differs from the current helper only by an existing Sonar annotation, verified explicitly before freezing.
