@@ -136,6 +136,37 @@ public sealed class MassThrustNumericalTests
             expected /= new ReferenceFraction(3);
         }
     }
+    [Theory, InlineData(0), InlineData(1), InlineData(2)]
+    public void SignalAliasesConsumeThePublishedSeriesOverride(int alias)
+    {
+        IBuiltInIndicator indicator = alias switch { 0 => new MassThrust(length: 2), 1 => new MassThrustIndicator(length: 2), _ => new MassThrustOscillator(length: 2) };
+        var bars = Candles(new[] { 0d, 1, 0, 1 });
+        var spec = new IndicatorSpec(indicator.BatchName, indicator.CreateOptions(), "Signal");
+        foreach (var custom in new[] { new[] { 9d, 8, 7, 6 }, new[] { 9d, 8 } })
+        {
+            using var scope = ComponentAverage.Arm((source, period) =>
+            {
+                Assert.Equal(2, period);
+                Assert.Equal(new[] { 0d, alias == 2 ? 100 : .000001, 0, 0 }, source);
+                return custom;
+            });
+            using var context = new ComputeContext();
+            using var actual = IndicatorCompute.TryComputeFast(Data(bars), spec, context);
+            Assert.NotNull(actual);
+            Assert.Equal(custom.Length == 4 ? custom : new[] { 9d, 8, 0, 0 }, actual.Value.ToArray());
+            Assert.Equal(1, ComponentAverage.Requests);
+            Assert.Equal(1, ComponentAverage.Substitutions);
+            Assert.Equal(2, ComponentAverage.LengthAsked);
+        }
+        using var discovery = ComponentAverage.Arm(Array.Empty<Func<IReadOnlyList<double>, int, IReadOnlyList<double>>>());
+        using var discoveryContext = new ComputeContext();
+        using var unmodified = IndicatorCompute.TryComputeFast(Data(bars), spec, discoveryContext);
+        Assert.NotNull(unmodified);
+        Assert.Equal(1, ComponentAverage.Requests);
+        Assert.Equal(0, ComponentAverage.Substitutions);
+        Assert.Equal(2, ComponentAverage.LengthAsked);
+    }
+
     [Fact]
     public void AliasFactoriesRetainPeriodAndBothOutputs()
     {

@@ -6011,8 +6011,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeMassThrustSignalFast(StockData data, ComputeContext context, int length, MovingAvgType kind, bool oscillator)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var values = MassThrustWindow.Calculate(input, data.Volumes, oscillator, kind, length).SignalLine;
-        var output = context.Rent(values.Count); for (var i = 0; i < values.Count; i++) output.WritableSpan[i] = values[i]; return output;
+        var result = MassThrustWindow.Calculate(input, data.Volumes, oscillator, kind, length);
+        var custom = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(result.Values), Math.Max(1, length));
+        var values = custom ?? result.SignalLine;
+        var output = context.Rent(result.Values.Count);
+        for (var i = 0; i < result.Values.Count; i++) output.WritableSpan[i] = i < values.Count ? values[i] : 0;
+        return output;
     }
 
     internal static ComputeBuffer ComputeMassThrustFast(StockData data, ComputeContext context, int length = 14)

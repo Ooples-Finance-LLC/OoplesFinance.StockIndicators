@@ -4373,3 +4373,19 @@ The first corrected mutation campaigns finished with 27 compiled kills, three su
 The bounded follow-up covers the 16 previously triaged Sonar reliability findings. Thirteen documented NOSONAR lines retain exact pole, flat-series and discrete-parameter comparisons and explain conditional initialization overwrites; after removing those annotations, their files are byte-identical to the inspected sources. Two Kaufman streaming fallback checks were unreachable because the preceding nonnull-moments branch always returns. Removing those alternatives retains the same fallback expressions. No numerical comparison was replaced by a tolerance.
 
 All **7,957 mutation anchors** remain valid. **10/10 existing focused Kaufman checks passed** in `sonar664-kaufman-followup.trx`, covering hand/linear fits, overflow recovery, subnormal moments, extreme periods, component overrides and native-state rejection. The fallback equivalence follows directly from the earlier unconditional return; no new tests were added for annotations or unreachable-code removal. The pre-push hosted gate still reported reliability C versus required A, with other quality conditions passing and GitHub platform jobs queued. This local evidence does not claim a passing hosted gate; reanalysis is required.
+
+
+### Batch 648: Hirashima mutation qualification
+
+The isolated campaigns `648-corrected-a` and `648-corrected-b` passed their baselines and caught **41/41 compiled behavioral faults**, alongside **50/50 distinct focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-648 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `37771dda6a9b3cae469dbfcd3fce3ab4ed0072176f3eac833894cacb69f887f6`. Archive SHA256: `45c645add9e446ffab86aded55f56017f145d30f1231c6786148bab6d1015cf8` and `45c645add9e446ffab86aded55f56017f145d30f1231c6786148bab6d1015cf8`.
+
+This is evidence for the isolated batch-648 source. Source was already published in the batch-648 checkpoint; this update does not restore older source files. Other mutation batches and the remaining final gates are still incomplete.
+
+
+### Mass Thrust callback follow-up
+
+The fast Signal route again requests the caller's moving-average substitution for all three Mass Thrust aliases. The callback receives the published primary series and clamped period; short custom outputs retain zero-fill behavior. Without a substitution, the exact unpublished signal calculation remains in use. All **7/7 focused checks passed**, covering three aliases, short outputs, request discovery, existing alias factories, overflow recovery, and signed-volume poles (`mass-thrust664-callback-followup.trx`). Five callback mutation faults are prepared but not yet qualified. All 7,962 mutation anchors validate.
+
+SonarCloud passed on commit `49946c7b08720b50455dc5a2547dcce8263509c3`; the PR quality gate reports OK. Other hosted checks and final gates remain outstanding.

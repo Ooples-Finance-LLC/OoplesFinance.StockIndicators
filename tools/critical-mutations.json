@@ -68720,5 +68720,50 @@
     "before": "(Denominator / denominatorCommon) * (BigInteger.Abs(divisor._coefficient) / numeratorCommon)",
     "after": "Denominator * (BigInteger.Abs(divisor._coefficient) / numeratorCommon)",
     "filter": "FullyQualifiedName~ExactRationalArithmeticTests"
+  },
+  {
+    "id": "mass-thrust-callback-hook",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustSignalFast",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignalAliasesConsumeThePublishedSeriesOverride",
+    "before": "var values = custom ?? result.SignalLine;",
+    "after": "var values = result.SignalLine;"
+  },
+  {
+    "id": "mass-thrust-callback-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustSignalFast",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignalAliasesConsumeThePublishedSeriesOverride",
+    "before": "SpanCompat.AsReadOnlySpan(result.Values)",
+    "after": "SpanCompat.AsReadOnlySpan(result.SignalLine)"
+  },
+  {
+    "id": "mass-thrust-callback-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustSignalFast",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignalAliasesConsumeThePublishedSeriesOverride",
+    "before": "Math.Max(1, length)",
+    "after": "1"
+  },
+  {
+    "id": "mass-thrust-callback-discovery",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustSignalFast",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignalAliasesConsumeThePublishedSeriesOverride",
+    "before": "var custom = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(result.Values), Math.Max(1, length));",
+    "after": "var custom = ComponentAverage.HasOverrides ? ComponentAverage.Take(SpanCompat.AsReadOnlySpan(result.Values), Math.Max(1, length)) : null;"
+  },
+  {
+    "id": "mass-thrust-callback-short-result",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMassThrustSignalFast",
+    "filter": "FullyQualifiedName~MassThrustNumericalTests.SignalAliasesConsumeThePublishedSeriesOverride",
+    "before": "i < values.Count ? values[i] : 0",
+    "after": "i < values.Count ? values[i] : result.SignalLine[i]"
   }
 ]
