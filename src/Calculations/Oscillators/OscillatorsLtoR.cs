@@ -3083,60 +3083,11 @@ public static partial class Calculations
     public static StockData CalculateModifiedGannHiloActivator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 50, double mult = 1)
     {
-        List<double> gannHiloList = new(stockData.Count);
-        List<double> cList = new(stockData.Count);
-        List<double> dList = new(stockData.Count);
-        List<double> gList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-            var currentClose = inputList[i];
-            var currentOpen = openList[i];
-            var max = Math.Max(currentClose, currentOpen);
-            var min = Math.Min(currentClose, currentOpen);
-            var a = highestHigh - max;
-            var b = min - lowestLow;
-
-            var c = max + (a * mult);
-            cList.Add(c);
-
-            var d = min - (b * mult);
-            dList.Add(d);
-        }
-
-        var eList = GetMovingAverageList(stockData, maType, length, cList);
-        var fList = GetMovingAverageList(stockData, maType, length, dList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentClose = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var f = fList[i];
-            var e = eList[i];
-
-            var prevG = GetLastOrDefault(gList);
-            var g = currentClose > e ? 1 : currentClose > f ? 0 : prevG;
-            gList.Add(g);
-
-            var prevGannHilo = GetLastOrDefault(gannHiloList);
-            var gannHilo = (g * f) + ((1 - g) * e);
-            gannHiloList.Add(gannHilo);
-
-            var signal = GetCompareSignal(currentClose - gannHilo, prevClose - prevGannHilo);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ghla", gannHiloList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(gannHiloList);
-        stockData.IndicatorName = IndicatorName.ModifiedGannHiloActivator;
-
+        var (input, high, low, open, _) = GetInputValuesList(stockData);
+        var result = ModifiedGannWindow.Calculate(stockData, input, high, low, open, maType, length, mult, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ghla", result.Values } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades);
+        stockData.SetCustomValues(result.Values); stockData.IndicatorName = IndicatorName.ModifiedGannHiloActivator;
         return stockData;
     }
 

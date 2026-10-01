@@ -674,84 +674,19 @@ public sealed class MobilityOscillatorState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Ghla")]
 public sealed class ModifiedGannHiloActivatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _cSmoother;
-    private readonly IMovingAverageSmoother _dSmoother;
+    private readonly ModifiedGannWindow _window;
     private readonly StreamingInputResolver _input;
-    private readonly double _mult;
-    private double _prevG;
-    private bool _hasPrev;
-
-    public ModifiedGannHiloActivatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 50, double mult = 1)
-    {
-        var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _cSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _dSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _mult = mult;
-    }
-
+    public ModifiedGannHiloActivatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50, double mult = 1)
+    { _window = new(maType, length, mult); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.ModifiedGannHiloActivator;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _cSmoother.Reset();
-        _dSmoother.Reset();
-        _prevG = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var open = bar.Open;
-        var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowestLow = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-
-        var max = Math.Max(close, open);
-        var min = Math.Min(close, open);
-        var a = highestHigh - max;
-        var b = min - lowestLow;
-        var c = max + (a * _mult);
-        var d = min - (b * _mult);
-        var e = _cSmoother.Next(c, isFinal);
-        var f = _dSmoother.Next(d, isFinal);
-
-        var prevG = _hasPrev ? _prevG : 0;
-        var g = close > e ? 1 : close > f ? 0 : prevG;
-        var gannHilo = (g * f) + ((1 - g) * e);
-
-        if (isFinal)
-        {
-            _prevG = g;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ghla", gannHilo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(gannHilo, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.High, bar.Low, bar.Open, _input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Ghla", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _cSmoother.Dispose();
-        _dSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Mpvt")]

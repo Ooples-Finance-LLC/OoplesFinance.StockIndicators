@@ -14,20 +14,7 @@ internal static partial class BuiltInFormulaReferences
         switch (indicator.BatchName)
         {
             case IndicatorName.ModifiedGannHiloActivator:
-                return new("Ghla", new[] { "Ghla" }, bars =>
-                {
-                    // With the exposed multiplier of one, the envelopes are simply
-                    // smoothed rolling candle extrema. Reconstruct the latest switching
-                    // event instead of sharing the production direction recurrence.
-                    var upper = Average(bars.Select((_, i) => bars.Skip(Math.Max(0, i-length+1)).Take(Math.Min(length, i+1)).Max(b => b.High)).ToArray(), length, kind);
-                    var lower = Average(bars.Select((_, i) => bars.Skip(Math.Max(0, i-length+1)).Take(Math.Min(length, i+1)).Min(b => b.Low)).ToArray(), length, kind);
-                    var events = Enumerable.Range(0, bars.Count).Where(i => bars[i].Close > upper[i] || bars[i].Close > lower[i]).ToArray();
-                    return Outputs(("Ghla", Enumerable.Range(0, bars.Count).Select(i =>
-                    {
-                        var last = events.Where(j => j <= i).DefaultIfEmpty(-1).Last();
-                        return last >= 0 && bars[last].Close > upper[last] ? lower[i] : upper[i];
-                    }).ToArray()));
-                });
+                return new("Ghla", new[] { "Ghla" }, bars => ModifiedGannOutputs(bars, indicator));
             case IndicatorName.PercentageTrend:
                 return new("Pti", new[] { "Pti" }, bars =>
                 {

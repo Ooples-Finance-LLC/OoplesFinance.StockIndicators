@@ -19374,52 +19374,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeModifiedGannHiloActivatorFast(StockData data, ComputeContext context, int length = 50,
         double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateModifiedGannHiloActivator extends the candle body out to the window's highest high and
-        // lowest low by a multiple, averages each extension, and then flips between the two averages as the
-        // close crosses them. The arm this replaced published a plain moving average of the close, and its
-        // switch handled only two moving average types. lookbackLength is [Obsolete] and sets nothing.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-
-        using var upperExtension = context.Rent(count);
-        using var lowerExtension = context.Rent(count);
-        var c = upperExtension.WritableSpan;
-        var d = lowerExtension.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var max = Math.Max(input[i], opens[i]);
-            var min = Math.Min(input[i], opens[i]);
-            c[i] = max + ((highWindow.Max - max) * mult);
-            d[i] = min - ((min - lowWindow.Min) * mult);
-        }
-
-        using var upperAverage = context.Rent(count);
-        using var lowerAverage = context.Rent(count);
-        MovingAverage(data, maType, length, upperExtension.Span, upperAverage.WritableSpan);
-        MovingAverage(data, maType, length, lowerExtension.Span, lowerAverage.WritableSpan);
-        var e = upperAverage.Span;
-        var f = lowerAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        double g = 0;
-        for (var i = 0; i < count; i++)
-        {
-            g = input[i] > e[i] ? 1 : input[i] > f[i] ? 0 : g;
-            output[i] = (g * f[i]) + ((1 - g) * e[i]);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var values = ModifiedGannWindow.Calculate(data, input, data.HighPrices, data.LowPrices, data.OpenPrices, maType, length, mult, true).Values;
+        var output = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++) output.WritableSpan[i] = values[i];
+        return output;
     }
 
     /// <summary>

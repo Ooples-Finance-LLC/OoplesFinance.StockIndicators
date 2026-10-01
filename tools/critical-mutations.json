@@ -68765,5 +68765,329 @@
     "filter": "FullyQualifiedName~MassThrustNumericalTests.SignalAliasesConsumeThePublishedSeriesOverride",
     "before": "i < values.Count ? values[i] : 0",
     "after": "i < values.Count ? values[i] : result.SignalLine[i]"
+  },
+  {
+    "id": "modified-gann-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 1;",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_mult = Number.Of(mult);",
+    "after": "_mult = Number.Of(1);",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.AffineExtensionsCancelOverflowBeforeAveraging"
+  },
+  {
+    "id": "modified-gann-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "var skip = _history.Count == _length;",
+    "after": "var skip = false;",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-high-extremum",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "highest = Math.Max(highest, candle.High);",
+    "after": "highest = Math.Min(highest, candle.High);",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-low-extremum",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "lowest = Math.Min(lowest, candle.Low);",
+    "after": "lowest = Math.Max(lowest, candle.Low);",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-body-top",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "Math.Max(open, close)",
+    "after": "Math.Min(open, close)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-body-bottom",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "Math.Min(open, close)",
+    "after": "Math.Max(open, close)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-upper-difference",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "Number.Of(highest) - top",
+    "after": "Number.Of(highest) + top",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-lower-difference",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "bottom - Number.Of(lowest)",
+    "after": "bottom + Number.Of(lowest)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-upper-native-projection",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "var upper = top + (Number.Of(highest) - top) * _mult;",
+    "after": "var upper = Number.Of(top.Publish() + (highest - top.Publish()) * _mult.Publish());",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.AffineExtensionsCancelOverflowBeforeAveraging"
+  },
+  {
+    "id": "modified-gann-wide-lower-native-projection",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "var lower = bottom - (bottom - Number.Of(lowest)) * _mult;",
+    "after": "var lower = Number.Of(bottom.Publish() - (bottom.Publish() - lowest) * _mult.Publish());",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.AffineExtensionsCancelOverflowBeforeAveraging"
+  },
+  {
+    "id": "modified-gann-wide-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "if (final) { if (_history.Count == _length)",
+    "after": "if (true) { if (_history.Count == _length)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-queue-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "if (_history.Count == _length) _history.Dequeue();",
+    "after": "if (_history.Count > _length) _history.Dequeue();",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-direction-upper",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "(price - upper).Sign > 0 ? 1",
+    "after": "(price - upper).Sign < 0 ? 1",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-direction-lower",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "(price - lower).Sign > 0 ? 0",
+    "after": "(price - lower).Sign < 0 ? 0",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-direction-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "? 0 : _direction",
+    "after": "? 0 : 0",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-output-selection",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "direction == 1 ? lower : upper",
+    "after": "direction == 1 ? upper : lower",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-signal-margin",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "var margin = price - line;",
+    "after": "var margin = line - price;",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "var change = margin - _previousMargin;",
+    "after": "var change = margin;",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-preview-direction",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "if (final) { _direction = direction;",
+    "after": "if (true) { _direction = direction;",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-upper-mean-source",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_upper.Next(extensions.Upper, final)",
+    "after": "_upper.Next(extensions.Lower, final)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-lower-mean-source",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_lower.Next(extensions.Lower, final)",
+    "after": "_lower.Next(extensions.Upper, final)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-callback-bypass",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "if (custom is not null) return",
+    "after": "if (custom is not null && custom.Count > source.Length) return",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.ComponentOverridesRetainBothEnvelopeSlots"
+  },
+  {
+    "id": "modified-gann-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "ComponentAverage.Take(published!, window._length)",
+    "after": "ComponentAverage.Take(published!, 1)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.ComponentOverridesRetainBothEnvelopeSlots"
+  },
+  {
+    "id": "modified-gann-wide-callback-discovery",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "var custom = callbacks ?",
+    "after": "var custom = callbacks && ComponentAverage.HasOverrides ?",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.ComponentOverridesRetainBothEnvelopeSlots"
+  },
+  {
+    "id": "modified-gann-wide-callback-short",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "i < custom.Count ? Number.Of(custom[i]) : default",
+    "after": "i < custom.Count ? Number.Of(custom[i]) : Number.Of(99)",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.ComponentOverridesRetainBothEnvelopeSlots"
+  },
+  {
+    "id": "modified-gann-wide-callback-lower-source",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "var lowerMean = Mean(lower);",
+    "after": "var lowerMean = Mean(upper);",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.ComponentOverridesRetainBothEnvelopeSlots"
+  },
+  {
+    "id": "modified-gann-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-reset-upper",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_upper.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-reset-lower",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_lower.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-reset-direction",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_direction = 0; _previousMargin = default;",
+    "after": "_previousMargin = default;",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.ResetClearsTheDirectionBeforeNegativeStartup"
+  },
+  {
+    "id": "modified-gann-wide-reset-margin",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedGannWindow.cs",
+    "scope": "internal sealed class ModifiedGannWindow : IDisposable",
+    "before": "_direction = 0; _previousMargin = default;",
+    "after": "_direction = 0;",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-fast-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeModifiedGannHiloActivatorFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "modified-gann-wide-native-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class ModifiedGannHiloActivatorState : IStreamingIndicatorState, IDisposable",
+    "before": "_window.Next(bar.High, bar.Low, bar.Open,",
+    "after": "_window.Next(bar.Close, bar.Low, bar.Open,",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-native-low",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class ModifiedGannHiloActivatorState : IStreamingIndicatorState, IDisposable",
+    "before": "_window.Next(bar.High, bar.Low, bar.Open,",
+    "after": "_window.Next(bar.High, bar.Close, bar.Open,",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "modified-gann-wide-native-open",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class ModifiedGannHiloActivatorState : IStreamingIndicatorState, IDisposable",
+    "before": "_window.Next(bar.High, bar.Low, bar.Open,",
+    "after": "_window.Next(bar.High, bar.Low, bar.Close,",
+    "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
   }
 ]

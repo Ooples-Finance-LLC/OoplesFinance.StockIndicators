@@ -4398,3 +4398,14 @@ The isolated campaigns `647-repaired-a` and `647-repaired-b` passed their baseli
 Source snapshot SHA256: `ce976d9685320321e25e3fe0ace873750b090968dd40ea9886215281972648f1`. Archive SHA256: `92717c59982167af41e8f378a82ea425bb9b360165cbd7e2a67ab4d64e6daa80` and `92717c59982167af41e8f378a82ea425bb9b360165cbd7e2a67ab4d64e6daa80`.
 
 This is evidence for the isolated batch-647 source. Source was already published in the batch-647 checkpoint; this update does not restore older source files. Other mutation batches and the remaining final gates are still incomplete.
+
+
+### Batch 667: Modified Gann Hilo extended envelope arithmetic
+
+The batch, fast and native routes now retain candle extensions, smoothed envelopes, switching comparisons and signal margins until publication. A candle spanning opposite binary64 extremes with multiplier one now recovers the finite rolling bound instead of overflowing its intermediate difference. Band selection avoids zero times an unselected infinite projection. History grows only with observed candles; previews and resets preserve the direction and envelope state. Both fast moving-average callbacks retain their extension inputs, periods, request accounting and short-result zero fill.
+
+**78 distinct focused checks passed** across nine configurations, five routes, selected sources, fault injection, numerical fixture classes, independent affine/rational/event-history references, extreme periods and multipliers, invalid-bar recovery and callbacks. The first consolidated run passed 77 tests; its one failure was a hand expectation that averaged current highs instead of rolling highs. Correcting the expected upper band from -13 to -8 passed the isolated test-only rerun, reusing unchanged production binaries (`modified-gann667-final.trx`, `modified-gann667-reset-hand.trx`). No assertion budget changed.
+
+Enrollment is **6,415/7,131**, leaving **716 omissions across 107 types**; all 7,131 independent references are registered, construction succeeds and the backlog matches exactly. **36 prepared mutation faults remain pending**, with all **7,998 anchors** valid. This is source-level focused evidence, not final hosted/platform/package/release/performance qualification. The locally pending Mobility kernel is not connected to public routes and is excluded from this source commit.
+
+Verification DLL SHA256: `f051605a02f05f6f25db47f9e3b52d21843d15782acc9a84b722f58569ee0a57`.
