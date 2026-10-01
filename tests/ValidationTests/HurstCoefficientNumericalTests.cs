@@ -46,6 +46,15 @@ public sealed class HurstCoefficientNumericalTests
             Assert.Equal(new[] { 0d, 1, 1, 1.5, 1.75, 1.875 }, result.Dimensions); Assert.Equal(new[] { 2d, 1, 1, .5, .25, .125 }, result.Hurst);
         }
         Check(Bars(new[] { 0d, -1, 0, -1, 0, -1 }));
+        // A step separates the older half from the current half; a period-two
+        // alternating input cannot detect accidentally feeding current prices to both.
+        var step = Check(Bars(new[] { 0d, 0, 1, 1 }));
+        Assert.Equal(new[] { 0d, 0, .5, .5 }, step.Dimensions);
+        Assert.Equal(new[] { 2d, 2, 1.5, 1.5 }, step.Hurst);
+        // Before the older half fills, its missing sample remains zero.
+        var positiveStep = Check(Bars(new[] { 1d, 1, 2, 2 }));
+        Assert.Equal(new[] { 0d, 0, 1, 1 }, positiveStep.Dimensions);
+        Assert.Equal(new[] { 2d, 2, 1, 1 }, positiveStep.Hurst);
     }
     [Fact]
     public void WideAlternatingAndNarrowPedestalPricesRecover()
