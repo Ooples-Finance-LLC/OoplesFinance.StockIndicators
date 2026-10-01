@@ -4251,3 +4251,12 @@ LBR Paint Bars' nine configurations retain extended true ranges and ATR stages t
 The final focused run passed **82/82 checks**, including existing hand examples and shared route regressions. Independent rational references, all five routes, output-fault rejection, enrollment, selected inputs, crossed-band and retained-extrema hand examples, SMA startup, subnormal ties, overflow recovery in bands, signed multipliers, adjacent-price signals, extreme periods, custom/legacy paths, invalid bars and preview/reset are covered. Mutation review strengthened reset preconditioning and the repeated bearish-margin check; final test-only verification reused unchanged production outputs.
 
 **40 prepared mutation faults remain pending**; all **7,755 unique anchors** apply. Built inventory is **6,356/7,131 enrolled**, with **775 omissions across 115 types** and no construction failures. DLL SHA256: `F177D21AF0EFD1157E2E5270C31F1388813B1E78BE00E84664884E976E79747D`. Mutation qualification remains complete through638; corrected639 campaigns and later batches through659, pending formula decisions and final hosted/package/release/performance gates remain incomplete. PR246 stays draft.
+
+
+### Batch 639: Fibonacci Retrace mutation qualification
+
+The isolated campaigns `639-corrected2-a` and `639-corrected2-b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **82/82 selected tests** (81 Fibonacci cases and one existing cross-route regression). The original campaigns exposed three missing extrema-pruning and nonzero-SMA-warmup checks and are not qualified. The corrected2 hand fixture passed before these replacement campaigns. Both archives were compared byte-for-byte with the retained batch-639 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `f5510092d9159a1c85815fd321893f1c8bcb08f4d09a9783bfe1130e5f1c5c41`. Archive SHA256: `d4b5c94ae65cc5f0c280412b676c8640215062e699910aa81b05000dcc4e83f4` and `d4b5c94ae65cc5f0c280412b676c8640215062e699910aa81b05000dcc4e83f4`.
+
+This is evidence for the isolated batch-639 source. Source was already published in the batch-639 checkpoint; this update does not restore older source files. Mutation verification for batches 640 through 659 and the remaining final gates is still incomplete.
