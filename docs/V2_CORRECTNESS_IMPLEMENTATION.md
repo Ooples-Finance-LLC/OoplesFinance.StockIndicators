@@ -4434,3 +4434,11 @@ All 35 focused adaptive-filter tests passed on net10.0 in `adaptive-filter669-fi
 The rebuilt inventory verifies 6,423/7,131 numerical configurations, 708 omissions across 105 types, all 7,131 independent reference registrations, no construction failures, and an exact backlog match. Assembly SHA256: `58268bc66904b334ee7eb933e486177f6251a706f9c994d010997b1e6ab91067`. The earlier interrupted run is not final verification. The final build includes restoration of neighboring reference cases caught during diff review; only the intended adaptive-filter reference case changes.
 
 There are 41 prepared behavioral faults; isolated campaigns and mutation qualification remain pending. The retained local verification snapshot includes the separately tested, unconnected Mobility density kernel and its integer factory; those are excluded from this source publication. Final hosted/platform/package/performance gates remain incomplete, and PR246 stays draft.
+
+### Batch 669: Adaptive-filter anchor follow-up
+
+All 36 adaptive-filter checks pass after preserving the smaller-magnitude quantity in recursive memory: either the mean or its residual relative to the current price. This retains the long constant-price decay while preventing a huge price excursion from erasing a small mean during zero-gain warmup. The independent hand input [1, MaxValue, 0, 1, 2] with Length=3, FastAlpha=1 and SlowAlpha=0 keeps the mean at 1 during warmup and ends with deviation rounding to sqrt(2)/3; both price signs are covered. The independent reference and existing 360-bar decay regression pass alongside all route, state and numerical-class checks.
+
+Final evidence is `adaptive-filter669-anchor-final.trx` (36/36, 27.55 minutes). The rebuilt inventory remains 6,423/7,131 enrolled, 708 omissions across 105 types, complete reference registration, no construction failures, and an exact backlog match. Assembly SHA256: `48bd59a960548c6dde58478ee2a06b5cabd8897fe2666100bc29f2081f39dd85`.
+
+The original batch-669 snapshots are superseded and must not be launched or qualified. Fresh corrected snapshots contain 42 behavioral faults, including both competing memory-rounding errors; their campaigns remain pending. The separate Mobility kernel and integer factory remain outside this publication. PR246 remains draft, with final assurance work outstanding.

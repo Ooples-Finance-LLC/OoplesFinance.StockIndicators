@@ -9,7 +9,7 @@ internal sealed class MovingAverageAdaptiveFilterWindow
     private readonly Queue<(Number Price, Number Step)> _prices = new();
     private readonly Queue<Number> _changes = new();
     private readonly EmaState _ema;
-    private Number _previousPrice, _amaResidual, _travel, _sum, _squares, _previousVariance, _previousSlope;
+    private Number _previousPrice, _amaAnchor, _amaResidual, _travel, _sum, _squares, _previousVariance, _previousSlope;
     private bool _hasPrevious;
     internal MovingAverageAdaptiveFilterWindow(int length, double filter, double fastAlpha, double slowAlpha)
     {
@@ -26,11 +26,15 @@ internal sealed class MovingAverageAdaptiveFilterWindow
         if (full) travel -= _prices.Peek().Step;
         var efficiency = full && travel.Sign > 0 ? Abs(current - _prices.Peek().Price).Divide(travel) : default;
         var alpha = _slow + (_fast - _slow) * efficiency; var gain = alpha * alpha;
-        var distance = _hasPrevious ? (current - _previousPrice) - _amaResidual : default;
+        var distance = _hasPrevious ? (current - _amaAnchor) - _amaResidual : default;
         var increment = gain * distance;
-        // Anchor recursive memory at the current price so a decaying residual
-        // keeps its relative precision even on a long constant-price tail.
-        var residual = (increment - distance).Round();
+        // Keep the smaller of the mean and its price-relative residual: a
+        // constant-price tail needs the residual, but a huge excursion must
+        // not erase a small mean while the gain is zero.
+        var residual = increment - distance; var average = current + residual;
+        var usePriceAnchor = (Abs(average) - Abs(residual)).Sign >= 0;
+        var anchor = usePriceAnchor ? current : default;
+        var memory = (usePriceAnchor ? residual : average).Round();
         var sum = _sum + increment; var squares = _squares + increment * increment;
         if (_changes.Count == _length) { var old = _changes.Peek(); sum -= old; squares -= old * old; }
         var variance = _changes.Count < _length - 1 ? default : (squares.Times(_length) - sum * sum).Divide(_length).Divide(_length);
@@ -44,7 +48,7 @@ internal sealed class MovingAverageAdaptiveFilterWindow
         {
             if (full) _prices.Dequeue(); _prices.Enqueue((current, step));
             if (_changes.Count == _length) _changes.Dequeue(); _changes.Enqueue(increment);
-            _travel = travel; _sum = sum; _squares = squares; _previousPrice = current; _amaResidual = residual;
+            _travel = travel; _sum = sum; _squares = squares; _previousPrice = current; _amaAnchor = anchor; _amaResidual = memory;
             _previousVariance = variance; _previousSlope = slope; _hasPrevious = true;
         }
         return (value.Publish(), trade);
@@ -52,6 +56,6 @@ internal sealed class MovingAverageAdaptiveFilterWindow
     internal void Reset()
     {
         _prices.Clear(); _changes.Clear(); _ema.Reset();
-        _previousPrice = _amaResidual = _travel = _sum = _squares = _previousVariance = _previousSlope = default; _hasPrevious = false;
+        _previousPrice = _amaAnchor = _amaResidual = _travel = _sum = _squares = _previousVariance = _previousSlope = default; _hasPrevious = false;
     }
 }

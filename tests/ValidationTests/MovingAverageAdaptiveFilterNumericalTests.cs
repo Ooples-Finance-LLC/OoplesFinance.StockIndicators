@@ -95,6 +95,18 @@ public sealed class MovingAverageAdaptiveFilterNumericalTests
             Equal(.03125 * Math.Pow(.75, i - 2), line[i]);
     }
     [Fact]
+    public void ZeroGainWarmupKeepsSmallMeanAcrossHugeExcursions()
+    {
+        foreach (var sign in new[] { 1d, -1d })
+        {
+            var line = Check(new[] { sign, sign * double.MaxValue, 0, sign, 2 * sign }, 3, 1, 1, 0).Values;
+            Assert.All(line.Take(4), value => Assert.Equal(0, value));
+            // At index 4, ER=(M-2)/(M+2), mean is still +/-1, and
+            // increments are [0,0,+/-ER^2]. The deviation rounds to sqrt(2)/3.
+            Equal(Math.Sqrt(2) / 3, line[4]);
+        }
+    }
+    [Fact]
     public void ExtremePeriodsGrowOnlyObservedHistory()
     {
         foreach (var length in new[] { int.MinValue, 0, 1, int.MaxValue })

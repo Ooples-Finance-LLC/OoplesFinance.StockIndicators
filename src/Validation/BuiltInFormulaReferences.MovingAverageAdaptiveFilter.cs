@@ -12,7 +12,7 @@ internal static partial class BuiltInFormulaReferences
     internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) MovingAverageAdaptiveFilterValues(double[] prices, int length, double filter, double fast, double slow)
     {
         length = Math.Max(1, length); ReferenceFraction R(double v) => ReferenceFraction.FromDouble(v);
-        var zero = R(0); var previousPrice = zero; var previousResidual = zero; var changes = new ReferenceFraction[prices.Length];
+        var zero = R(0); var previousAnchor = zero; var previousResidual = zero; var changes = new ReferenceFraction[prices.Length];
         ReferenceFraction Compact(ReferenceFraction value)
         {
             if (value.Sign == 0) return zero;
@@ -33,10 +33,11 @@ internal static partial class BuiltInFormulaReferences
                 if (travel.Sign > 0) er = Abs(R(prices[i]) - R(prices[i - length])) / travel;
             }
             var alpha = R(slow) + er * (R(fast) - R(slow));
-            var distance = i == 0 ? zero : R(prices[i]) - previousPrice - previousResidual;
+            var distance = i == 0 ? zero : R(prices[i]) - previousAnchor - previousResidual;
             changes[i] = alpha * alpha * distance;
-            previousResidual = Compact((alpha * alpha - R(1)) * distance);
-            previousPrice = R(prices[i]);
+            var gap = (alpha * alpha - R(1)) * distance; var mean = R(prices[i]) + gap;
+            if (Abs(mean).CompareTo(Abs(gap)) < 0) { previousAnchor = zero; previousResidual = Compact(mean); }
+            else { previousAnchor = R(prices[i]); previousResidual = Compact(gap); }
         }
         var values = new double[prices.Length]; var signals = new Signal[prices.Length];
         var ema = Average(prices, length, 3); var previousVariance = zero; var previousSlope = zero;

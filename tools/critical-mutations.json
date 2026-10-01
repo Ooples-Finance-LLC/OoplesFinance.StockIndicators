@@ -69437,8 +69437,8 @@
     "module": "numerical",
     "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
     "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
-    "before": "var distance = _hasPrevious ? (current - _previousPrice) - _amaResidual : default;",
-    "after": "var distance = _hasPrevious ? (current - _previousPrice) - _amaResidual : current;",
+    "before": "var distance = _hasPrevious ? (current - _amaAnchor) - _amaResidual : default;",
+    "after": "var distance = _hasPrevious ? (current - _amaAnchor) - _amaResidual : current;",
     "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
   },
   {
@@ -69599,7 +69599,7 @@
     "module": "numerical",
     "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
     "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
-    "before": "_amaResidual = residual;",
+    "before": "_amaResidual = memory;",
     "after": "_amaResidual = default;",
     "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
   },
@@ -69689,8 +69689,17 @@
     "module": "numerical",
     "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
     "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
-    "before": "var residual = (increment - distance).Round();",
-    "after": "var residual = (current + increment - distance).Round() - current;",
+    "before": "var memory = (usePriceAnchor ? residual : average).Round();",
+    "after": "var memory = (anchor + (usePriceAnchor ? residual : average)).Round() - anchor;",
     "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.ConstantPriceTailRetainsDecayingAdaptiveIncrements"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-always-price-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "var usePriceAnchor = (Abs(average) - Abs(residual)).Sign >= 0;",
+    "after": "var usePriceAnchor = Abs(current).Sign >= 0;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.ZeroGainWarmupKeepsSmallMeanAcrossHugeExcursions"
   }
 ]
