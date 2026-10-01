@@ -87,10 +87,6 @@ OoplesFinance.StockIndicators.Indicators.HampelFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.HampelFilter/minimum-periods
 OoplesFinance.StockIndicators.Indicators.HampelFilter/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HerrickPayoffIndex/default
-OoplesFinance.StockIndicators.Indicators.JmaRsxClone/default
-OoplesFinance.StockIndicators.Indicators.JmaRsxClone/longer-periods
-OoplesFinance.StockIndicators.Indicators.JmaRsxClone/minimum-periods
-OoplesFinance.StockIndicators.Indicators.JmaRsxClone/shorter-periods
 OoplesFinance.StockIndicators.Indicators.JrcFractalDimension/default
 OoplesFinance.StockIndicators.Indicators.JrcFractalDimension/longer-length1
 OoplesFinance.StockIndicators.Indicators.JrcFractalDimension/longer-length2

@@ -15463,73 +15463,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeJmaRsxCloneFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateJmaRsxClone runs three pairs of exponential filters over the bar-to-bar change and three
-        // more over its absolute value, each pair combined 1.5 : -0.5 into the next stage, and reports the
-        // ratio of the two chains rescaled to 0..100 - but only once its f88 / f90 warm-up counter allows it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var f18 = (double)3 / (length + 2);
-        var f20 = 1 - f18;
-
-        var f8 = 0d;
-        var f28 = 0d;
-        var f30 = 0d;
-        var f38 = 0d;
-        var f40 = 0d;
-        var f48 = 0d;
-        var f50 = 0d;
-        var f58 = 0d;
-        var f60 = 0d;
-        var f68 = 0d;
-        var f70 = 0d;
-        var f78 = 0d;
-        var f80 = 0d;
-        var f90 = 0d;
-        var previousF88 = 0d;
-        for (var i = 0; i < count; i++)
-        {
-            var f10 = f8;
-            f8 = 100 * input[i];
-            var v8 = f8 - f10;
-
-            f28 = (f20 * f28) + (f18 * v8);
-            f30 = (f18 * f28) + (f20 * f30);
-            var vC = (f28 * 1.5) - (f30 * 0.5);
-            f38 = (f20 * f38) + (f18 * vC);
-            f40 = (f18 * f38) + (f20 * f40);
-            var v10 = (f38 * 1.5) - (f40 * 0.5);
-            f48 = (f20 * f48) + (f18 * v10);
-            f50 = (f18 * f48) + (f20 * f50);
-            var v14 = (f48 * 1.5) - (f50 * 0.5);
-
-            f58 = (f20 * f58) + (f18 * Math.Abs(v8));
-            f60 = (f18 * f58) + (f20 * f60);
-            var v18 = (f58 * 1.5) - (f60 * 0.5);
-            f68 = (f20 * f68) + (f18 * v18);
-            f70 = (f18 * f68) + (f20 * f70);
-            var v1C = (f68 * 1.5) - (f70 * 0.5);
-            f78 = (f20 * f78) + (f18 * v1C);
-            f80 = (f18 * f78) + (f20 * f80);
-            var v20 = (f78 * 1.5) - (f80 * 0.5);
-
-            var previousF90 = f90;
-            f90 = previousF90 == 0 ? 1 : previousF88 <= previousF90 ? previousF88 + 1 : previousF90 + 1;
-            var f88 = previousF90 == 0 && length - 1 >= 5 ? length - 1 : 5;
-            previousF88 = f88;
-            var f0 = f88 >= f90 && f8 != f10 ? 1 : 0;
-            var comparand = f88 == f90 && f0 == 0 ? 0 : f90;
-
-            var raw = f88 < comparand && v20 > 0 ? MathHelper.MinOrMax(((v14 / v20) + 1) * 50, 100, 0) : 50;
-            output[i] = raw > 100 ? 100 : raw < 0 ? 0 : raw;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        OscillatorCore.JmaRsxClone(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, length); return buffer;
     }
 
     /// <summary>

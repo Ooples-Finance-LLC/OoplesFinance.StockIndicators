@@ -266,32 +266,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName._1LCLeastSquaresMovingAverage:
                 return new("1lsma", new[] { "1lsma" }, bars => OneLcValues(bars, length, kind).Outputs);
             case IndicatorName.JmaRsxClone:
-                return new("Rsx", new[] { "Rsx" }, bars =>
-                {
-                    var changes = bars.Select((b, i) => 100 * b.Close - (i == 0 ? 0 : 100 * bars[i - 1].Close)).ToArray();
-                    var gain = 3d / (length + 2);
-                    // [1.5H - .5H^2]^3, evaluated as negative-binomial impulse weights.
-                    double Weight(int lag)
-                    {
-                        double total = 0;
-                        var coefficients = new[] { 3.375, -3.375, 1.125, -.125 };
-                        for (var depth = 3; depth <= 6; depth++)
-                        {
-                            double choose = 1;
-                            for (var k = 1; k < depth; k++) choose *= (lag + k) / (double)k;
-                            total += coefficients[depth - 3] * choose * Math.Pow(gain, depth) * Math.Pow(1 - gain, lag);
-                        }
-                        return total;
-                    }
-                    var weights = Enumerable.Range(0, bars.Count).Select(Weight).ToArray();
-                    return Outputs(("Rsx", changes.Select((_, i) =>
-                    {
-                        if (i < 5) return 50d;
-                        var signed = Enumerable.Range(0, i + 1).Sum(j => weights[i - j] * changes[j]);
-                        var absolute = Enumerable.Range(0, i + 1).Sum(j => weights[i - j] * Math.Abs(changes[j]));
-                        return absolute > 0 ? Math.Max(0, Math.Min(100, 50 * (1 + signed / absolute))) : 50;
-                    }).ToArray()));
-                });
+                return new("Rsx", new[] { "Rsx" }, bars => RsxOutputs(bars, indicator));
             case IndicatorName.JurikMovingAverage:
                 return new("Jma", new[] { "Jma" }, bars =>
                 {

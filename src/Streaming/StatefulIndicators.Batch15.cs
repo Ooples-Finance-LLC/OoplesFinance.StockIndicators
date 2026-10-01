@@ -411,121 +411,16 @@ public sealed class JapaneseCorrelationCoefficientState : IStreamingIndicatorSta
 [PrimaryOutput("Rsx")]
 public sealed class JmaRsxCloneState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly double _f18;
-    private readonly double _f20;
-    private readonly StreamingInputResolver _input;
-    private double _f8;
-    private double _f28;
-    private double _f30;
-    private double _f38;
-    private double _f40;
-    private double _f48;
-    private double _f50;
-    private double _f58;
-    private double _f60;
-    private double _f68;
-    private double _f70;
-    private double _f78;
-    private double _f80;
-    private double _f90;
-    private double _f88;
-
-    public JmaRsxCloneState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _f18 = 3d / (_length + 2);
-        _f20 = 1 - _f18;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RsxWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public JmaRsxCloneState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.JmaRsxClone;
-
-    public void Reset()
-    {
-        _f8 = 0;
-        _f28 = 0;
-        _f30 = 0;
-        _f38 = 0;
-        _f40 = 0;
-        _f48 = 0;
-        _f50 = 0;
-        _f58 = 0;
-        _f60 = 0;
-        _f68 = 0;
-        _f70 = 0;
-        _f78 = 0;
-        _f80 = 0;
-        _f90 = 0;
-        _f88 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevF8 = _f8;
-        var f8 = 100 * value;
-        var f10 = prevF8;
-        var v8 = f8 - f10;
-
-        var f28 = (_f20 * _f28) + (_f18 * v8);
-        var f30 = (_f18 * f28) + (_f20 * _f30);
-        var vC = (f28 * 1.5) - (f30 * 0.5);
-        var f38 = (_f20 * _f38) + (_f18 * vC);
-        var f40 = (_f18 * f38) + (_f20 * _f40);
-        var v10 = (f38 * 1.5) - (f40 * 0.5);
-        var f48 = (_f20 * _f48) + (_f18 * v10);
-        var f50 = (_f18 * f48) + (_f20 * _f50);
-        var v14 = (f48 * 1.5) - (f50 * 0.5);
-        var f58 = (_f20 * _f58) + (_f18 * Math.Abs(v8));
-        var f60 = (_f18 * f58) + (_f20 * _f60);
-        var v18 = (f58 * 1.5) - (f60 * 0.5);
-        var f68 = (_f20 * _f68) + (_f18 * v18);
-        var f70 = (_f18 * f68) + (_f20 * _f70);
-        var v1C = (f68 * 1.5) - (f70 * 0.5);
-        var f78 = (_f20 * _f78) + (_f18 * v1C);
-        var f80 = (_f18 * f78) + (_f20 * _f80);
-        var v20 = (f78 * 1.5) - (f80 * 0.5);
-
-        var prevF90_ = _f90;
-        var prevF88 = _f88;
-        var f90_ = prevF90_ == 0 ? 1 : prevF88 <= prevF90_ ? prevF88 + 1 : prevF90_ + 1;
-
-        double f88 = prevF90_ == 0 && _length - 1 >= 5 ? _length - 1 : 5;
-        double f0 = f88 >= f90_ && f8 != f10 ? 1 : 0;
-        var f90 = f88 == f90_ && f0 == 0 ? 0 : f90_;
-        var v4_ = f88 < f90 && v20 > 0 ? MathHelper.MinOrMax(((v14 / v20) + 1) * 50, 100, 0) : 50;
-        var rsx = v4_ > 100 ? 100 : v4_ < 0 ? 0 : v4_;
-
-        if (isFinal)
-        {
-            _f8 = f8;
-            _f28 = f28;
-            _f30 = f30;
-            _f38 = f38;
-            _f40 = f40;
-            _f48 = f48;
-            _f50 = f50;
-            _f58 = f58;
-            _f60 = f60;
-            _f68 = f68;
-            _f70 = f70;
-            _f78 = f78;
-            _f80 = f80;
-            _f90 = f90_;
-            _f88 = f88;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rsx", rsx }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rsx, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), isFinal).Value;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Rsx", value } } : null);
     }
 }
 

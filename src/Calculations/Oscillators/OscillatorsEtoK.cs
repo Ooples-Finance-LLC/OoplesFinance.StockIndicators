@@ -104,120 +104,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateJmaRsxClone(this StockData stockData, int length = 14)
     {
-        List<double> rsxList = new(stockData.Count);
-        List<double> f8List = new(stockData.Count);
-        List<double> f28List = new(stockData.Count);
-        List<double> f30List = new(stockData.Count);
-        List<double> f38List = new(stockData.Count);
-        List<double> f40List = new(stockData.Count);
-        List<double> f48List = new(stockData.Count);
-        List<double> f50List = new(stockData.Count);
-        List<double> f58List = new(stockData.Count);
-        List<double> f60List = new(stockData.Count);
-        List<double> f68List = new(stockData.Count);
-        List<double> f70List = new(stockData.Count);
-        List<double> f78List = new(stockData.Count);
-        List<double> f80List = new(stockData.Count);
-        List<double> f88List = new(stockData.Count);
-        List<double> f90_List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var f18 = (double)3 / (length + 2);
-        var f20 = 1 - f18;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevRsx1 = i >= 1 ? rsxList[i - 1] : 0;
-            var prevRsx2 = i >= 2 ? rsxList[i - 2] : 0;
-
-            var prevF8 = GetLastOrDefault(f8List);
-            var f8 = 100 * currentValue;
-            f8List.Add(f8);
-
-            var f10 = prevF8;
-            var v8 = f8 - f10;
-
-            var prevF28 = GetLastOrDefault(f28List);
-            var f28 = (f20 * prevF28) + (f18 * v8);
-            f28List.Add(f28);
-
-            var prevF30 = GetLastOrDefault(f30List);
-            var f30 = (f18 * f28) + (f20 * prevF30);
-            f30List.Add(f30);
-
-            var vC = (f28 * 1.5) - (f30 * 0.5);
-            var prevF38 = GetLastOrDefault(f38List);
-            var f38 = (f20 * prevF38) + (f18 * vC);
-            f38List.Add(f38);
-
-            var prevF40 = GetLastOrDefault(f40List);
-            var f40 = (f18 * f38) + (f20 * prevF40);
-            f40List.Add(f40);
-
-            var v10 = (f38 * 1.5) - (f40 * 0.5);
-            var prevF48 = GetLastOrDefault(f48List);
-            var f48 = (f20 * prevF48) + (f18 * v10);
-            f48List.Add(f48);
-
-            var prevF50 = GetLastOrDefault(f50List);
-            var f50 = (f18 * f48) + (f20 * prevF50);
-            f50List.Add(f50);
-
-            var v14 = (f48 * 1.5) - (f50 * 0.5);
-            var prevF58 = GetLastOrDefault(f58List);
-            var f58 = (f20 * prevF58) + (f18 * Math.Abs(v8));
-            f58List.Add(f58);
-
-            var prevF60 = GetLastOrDefault(f60List);
-            var f60 = (f18 * f58) + (f20 * prevF60);
-            f60List.Add(f60);
-
-            var v18 = (f58 * 1.5) - (f60 * 0.5);
-            var prevF68 = GetLastOrDefault(f68List);
-            var f68 = (f20 * prevF68) + (f18 * v18);
-            f68List.Add(f68);
-
-            var prevF70 = GetLastOrDefault(f70List);
-            var f70 = (f18 * f68) + (f20 * prevF70);
-            f70List.Add(f70);
-
-            var v1C = (f68 * 1.5) - (f70 * 0.5);
-            var prevF78 = GetLastOrDefault(f78List);
-            var f78 = (f20 * prevF78) + (f18 * v1C);
-            f78List.Add(f78);
-
-            var prevF80 = GetLastOrDefault(f80List);
-            var f80 = (f18 * f78) + (f20 * prevF80);
-            f80List.Add(f80);
-
-            var v20 = (f78 * 1.5) - (f80 * 0.5);
-            var prevF88 = GetLastOrDefault(f88List);
-            var prevF90_ = GetLastOrDefault(f90_List);
-            var f90_ = prevF90_ == 0 ? 1 : prevF88 <= prevF90_ ? prevF88 + 1 : prevF90_ + 1;
-            f90_List.Add(f90_);
-
-            double f88 = prevF90_ == 0 && length - 1 >= 5 ? length - 1 : 5;
-            f88List.Add(f88);
-            double f0 = f88 >= f90_ && f8 != f10 ? 1 : 0;
-            var f90 = f88 == f90_ && f0 == 0 ? 0 : f90_;
-            var v4_ = f88 < f90 && v20 > 0 ? MinOrMax(((v14 / v20) + 1) * 50, 100, 0) : 50;
-            var rsx = v4_ > 100 ? 100 : v4_ < 0 ? 0 : v4_;
-            rsxList.Add(rsx);
-
-            var signal = GetRsiSignal(rsx - prevRsx1, prevRsx1 - prevRsx2, rsx, prevRsx1, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rsx", rsxList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rsxList);
-        stockData.IndicatorName = IndicatorName.JmaRsxClone;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new RsxWindow(length);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rsx", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values);
+        stockData.IndicatorName = IndicatorName.JmaRsxClone; return stockData;
     }
 
 

@@ -64058,5 +64058,338 @@
     "before": "return v > m ?",
     "after": "return v >= m ?",
     "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
+  },
+  {
+    "id": "rsx-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "3d / (Math.Max(1, length) + 2d)",
+    "after": "2d / (Math.Max(1, length) + 2d)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-gain-int-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "Math.Max(1, length) + 2d",
+    "after": "Math.Max(1, length) + 2",
+    "filter": "FullyQualifiedName~RsxNumericalTests.PeriodNormalizationAndMaximumPeriodUseFinitePositiveGain"
+  },
+  {
+    "id": "rsx-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-memory-pole",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "ExactVarianceWindow.Units(1 - gain)",
+    "after": "ExactVarianceWindow.Units(gain)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-scaled-publish",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "RocBankValue.RoundUnits(100 * ExactVarianceWindow.Units(price), BigInteger.One)",
+    "after": "ExactVarianceWindow.Units(100 * price)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.WideScaledPricesAndSubnormalChangesKeepBoundedRatios"
+  },
+  {
+    "id": "rsx-wide-change-order",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "scaled - _previousScaled",
+    "after": "_previousScaled - scaled",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_previousScaled = scaled;",
+    "after": "_previousScaled = change;",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-absolute-change",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "var absolute = BigInteger.Abs(change);",
+    "after": "var absolute = change;",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-cascade-depth",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "stage < 3",
+    "after": "stage < 2",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-signed-cascade",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_signed[stage].Next(signed,",
+    "after": "_signed[stage].Next(change,",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-absolute-cascade",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_absolute[stage].Next(absolute,",
+    "after": "_absolute[stage].Next(BigInteger.Abs(change),",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-warmup-short",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_warmup < 5",
+    "after": "_warmup < 4",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-warmup-long",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_warmup < 5",
+    "after": "_warmup < 6",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "absolute.Sign <= 0",
+    "after": "absolute.Sign < 0",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-upper-cap",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "signed >= absolute ? 100",
+    "after": "signed >= absolute ? 99",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-lower-cap",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "signed <= -absolute ? 0",
+    "after": "signed <= -absolute ? 1",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "50 * (signed + absolute) * Unit",
+    "after": "25 * (signed + absolute) * Unit",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-ratio-offset",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "(signed + absolute) * Unit",
+    "after": "(signed - absolute) * Unit",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-warmup-saturation",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "Math.Min(5, _warmup + 1)",
+    "after": "Math.Min(4, _warmup + 1)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_before = _previous; _previous = value;",
+    "after": "_before = value; _previous = value;",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-reset-scaled",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_previousScaled = default; _warmup = 0;",
+    "after": "_previousScaled = BigInteger.One << 1074; _warmup = 0;",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-reset-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "_warmup = 0; _previous = _before = 0;",
+    "after": "_warmup = 5; _previous = _before = 0;",
+    "filter": "FullyQualifiedName~RsxNumericalTests.UnitPeriodHasFiveNeutralBarsThenKnownDirections"
+  },
+  {
+    "id": "rsx-wide-first-drive",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "memory * _first + gain * input",
+    "after": "memory * _first + memory * input",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-first-memory",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "memory * _first + gain * input",
+    "after": "memory * _second + gain * input",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-second-drive",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "gain * first + memory * _second",
+    "after": "gain * input + memory * _second",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-second-memory",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "gain * first + memory * _second",
+    "after": "gain * first + memory * _first",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-pair-gain",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "3 * first - second",
+    "after": "2 * first - second",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-pair-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "3 * first - second",
+    "after": "3 * first + second",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-pair-second-weight",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "3 * first - second",
+    "after": "3 * first - 2 * second",
+    "filter": "FullyQualifiedName~RsxNumericalTests.DyadicImpulseWeightsGiveHandCalculatedRatio"
+  },
+  {
+    "id": "rsx-wide-pair-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "if (final) { _first = first; _second = second; }",
+    "after": "if (true) { _first = first; _second = second; }",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-pair-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RsxWindow.cs",
+    "scope": "internal sealed class RsxWindow",
+    "before": "internal void Reset() => _first = _second = default;",
+    "after": "internal void Reset() => _first = default;",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "scope": "public static StockData CalculateJmaRsxClone(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.SelectedInputAndNoAverageCallbacksRemainExplicit"
+  },
+  {
+    "id": "rsx-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeJmaRsxCloneFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RsxNumericalTests.SelectedInputAndNoAverageCallbacksRemainExplicit"
+  },
+  {
+    "id": "rsx-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class JmaRsxCloneState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted guard",
+    "filter": "FullyQualifiedName~RsxNumericalTests.RejectedCandlesCannotAdvanceRecursiveStages"
+  },
+  {
+    "id": "rsx-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class JmaRsxCloneState",
+    "before": "_window.Next(_input.GetValue(bar), isFinal)",
+    "after": "_window.Next(_input.GetValue(bar), true)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.LongHistoryRetainsAllTwelveStages"
+  },
+  {
+    "id": "rsx-wide-core-span",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void JmaRsxClone(",
+    "before": "if (output.Length < close.Length)",
+    "after": "if (false && output.Length < close.Length)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.CoreSpanBoundsAndExactInPlaceReplay"
+  },
+  {
+    "id": "rsx-wide-core-input",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void JmaRsxClone(",
+    "before": "window.Next(close[i], true)",
+    "after": "window.Next(close[close.Length - i - 1], true)",
+    "filter": "FullyQualifiedName~RsxNumericalTests.CoreSpanBoundsAndExactInPlaceReplay"
   }
 ]
