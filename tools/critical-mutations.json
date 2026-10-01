@@ -71203,5 +71203,275 @@
     "before": "OscarIndicator or ",
     "after": "",
     "filter": "FullyQualifiedName~OscarNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "peak-valley-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-smooth-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "_smooth = Math.Max(1, smooth)",
+    "after": "_smooth = Math.Max(2, smooth)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.IndependentThreeEventHands"
+  },
+  {
+    "id": "peak-valley-wide-fit-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "_sum + residual - expired",
+    "after": "_sum + residual",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-fit-weight-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "_weighted - _sum + expired",
+    "after": "_weighted + expired",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-fit-weight",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": ": _weighted + residual.Times(n - 1);",
+    "after": ": _weighted + residual.Times(n);",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.NegativeRegressionMaximumIsNotClippedToZero"
+  },
+  {
+    "id": "peak-valley-wide-fit-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "weighted.Times(6)",
+    "after": "weighted.Times(5)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.NegativeRegressionMaximumIsNotClippedToZero"
+  },
+  {
+    "id": "peak-valley-wide-fit-count",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "sum.Times(4 - 2 * n)",
+    "after": "sum.Times(3 - 2 * n)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.NegativeRegressionMaximumIsNotClippedToZero"
+  },
+  {
+    "id": "peak-valley-wide-fit-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (residual.Sign != 0 || final) { if (full)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-high-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "_count - Math.Max(2, _length) + 1L",
+    "after": "_count - Math.Max(2, _length)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-high-compare",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "(fit - first.Value.Value).Sign > 0",
+    "after": "(fit - first.Value.Value).Sign < 0",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.IndependentThreeEventHands"
+  },
+  {
+    "id": "peak-valley-wide-negative-high",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "high.Sign == 0 ? default",
+    "after": "high.Sign <= 0 ? default",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.NegativeRegressionMaximumIsNotClippedToZero"
+  },
+  {
+    "id": "peak-valley-wide-offset",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "var offset = value - mean;",
+    "after": "var offset = mean - value;",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.IndependentThreeEventHands"
+  },
+  {
+    "id": "peak-valley-wide-offset-publish",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "var fit = Fit(offset.Sign < 0 ? default(Number) - offset : offset, final);",
+    "after": "var fit = Fit(Number.Of(Math.Abs(offset.Publish())), final);",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.OverflowingResidualsAndFitsStillProduceExactVotes"
+  },
+  {
+    "id": "peak-valley-wide-ratio-publish",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "fit.Divide(high)",
+    "after": "Number.Of(fit.Publish()).Divide(Number.Of(high.Publish()))",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.OverflowingResidualsAndFitsStillProduceExactVotes"
+  },
+  {
+    "id": "peak-valley-wide-peak-tolerance",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "(ratio - Number.Of(1)).Sign == 0",
+    "after": "Math.Abs((ratio - Number.Of(1)).Publish()) < 1e-12",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.OneUlpBelowPeakDoesNotStartAnEvent"
+  },
+  {
+    "id": "peak-valley-wide-threshold-tie",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "(ratio.Times(5) - Number.Of(4)).Sign < 0",
+    "after": "(ratio.Times(5) - Number.Of(4)).Sign <= 0",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ThresholdAndPeakTiesRemainExact"
+  },
+  {
+    "id": "peak-valley-wide-threshold-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "ratio.Times(5)",
+    "after": "ratio.Times(4)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ThresholdAndPeakTiesRemainExact"
+  },
+  {
+    "id": "peak-valley-wide-new-peak",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "atPeak && !wasPeak",
+    "after": "atPeak",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.IndependentThreeEventHands"
+  },
+  {
+    "id": "peak-valley-wide-departure",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "wasPeak && (ratio - _previousRatio).Sign < 0",
+    "after": "wasPeak && (ratio - _previousRatio).Sign > 0",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.IndependentThreeEventHands"
+  },
+  {
+    "id": "peak-valley-wide-preview-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "if (final) { _previousRatio = ratio;",
+    "after": "if (value.Sign != 0 || final) { _previousRatio = ratio;",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "_average.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-high-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "_highs.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
+  },
+  {
+    "id": "peak-valley-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/PeakValleyWindow.cs",
+    "scope": "internal sealed class PeakValleyWindow",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(prices), length)",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(prices), smooth)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ComponentMeanReceivesSelectedPricesAndPeriod"
+  },
+  {
+    "id": "peak-valley-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PeakValleyEstimationState",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? bar.Close : _input.GetValue(bar)",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.RejectedCandlesCannotAdvanceHistory"
+  },
+  {
+    "id": "peak-valley-wide-native-sign2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PeakValleyEstimationState",
+    "before": "{ \"Sign2\", point.Sign2 }",
+    "after": "{ \"Sign2\", point.Sign1 }",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.IndependentThreeEventHands"
+  },
+  {
+    "id": "peak-valley-wide-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePeakValleyEstimationFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "peak-valley-wide-fast-sign3",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePeakValleyEstimationFast(",
+    "before": "outputKey == \"Sign3\" ? values.Sign3",
+    "after": "outputKey == \"Sign3\" ? values.Sign2",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.ThresholdAndPeakTiesRemainExact"
+  },
+  {
+    "id": "peak-valley-wide-core-smooth",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PeakValleyEstimation(",
+    "before": "length, smoothLength",
+    "after": "length, 1",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.NegativeRegressionMaximumIsNotClippedToZero"
+  },
+  {
+    "id": "peak-valley-wide-core-atomic",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PeakValleyEstimation(",
+    "before": "StreamingInputValidation.Finite(close[i], nameof(close));",
+    "after": "StreamingInputValidation.Finite(0, nameof(close));",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.CoreSpanValidationPrecedesOutputWrites"
+  },
+  {
+    "id": "peak-valley-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "PeakValleyEstimation or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PeakValleyNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

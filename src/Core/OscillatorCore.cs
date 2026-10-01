@@ -8570,69 +8570,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PeakValleyEstimation(ReadOnlySpan<double> close, Span<double> output, int length = 500, int smoothLength = 100)
     {
-        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        length = Math.Max(1, length);
-        smoothLength = Math.Max(1, smoothLength);
-
-        var pool = ArrayPool<double>.Shared;
-        var maArray = pool.Rent(close.Length);
-        var absOsArray = pool.Rent(close.Length);
-        var linRegArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ma = maArray.AsSpan(0, close.Length);
-            var absOs = absOsArray.AsSpan(0, close.Length);
-            var linReg = linRegArray.AsSpan(0, close.Length);
-
-            // Step 1: Compute SMA
-            MovingAverageCore.SimpleMovingAverage(close, ma, length);
-
-            // Step 2: Compute os = close - MA, absOs = abs(os)
-            for (int i = 0; i < close.Length; i++)
-            {
-                double os = close[i] - ma[i];
-                absOs[i] = Math.Abs(os);
-            }
-
-            // Step 3: Compute Linear Regression of absOs
-            MovingAverageCore.LinearRegression(absOs, linReg, smoothLength);
-
-            // Step 4: Find rolling highest of linReg
-            double prevH = 0;
-            for (int i = 0; i < close.Length; i++)
-            {
-                // Find highest in window
-                double highest = 0;
-                int start = Math.Max(0, i - length + 1);
-                for (int j = start; j <= i; j++)
-                {
-                    highest = Math.Max(highest, linReg[j]);
-                }
-
-                double h = highest > 0 ? linReg[i] / highest : 0;
-                double os = close[i] - ma[i];
-
-                // mod1: h just reached 1 (transition from <1 to 1)
-                double mod1 = h == 1 && prevH < 1 ? 1 : 0;
-
-                // sign1: signal based on mod1 and os direction
-                double sign1 = 0;
-                if (mod1 == 1)
-                {
-                    sign1 = os < 0 ? 1 : (os > 0 ? -1 : 0);
-                }
-
-                prevH = h;
-                output[i] = sign1;
-            }
-        }
-        finally
-        {
-            pool.Return(maArray);
-            pool.Return(absOsArray);
-            pool.Return(linRegArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) StreamingInputValidation.Finite(close[i], nameof(close));
+        using var window = new PeakValleyWindow(MovingAvgType.SimpleMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Sign1;
     }
 
     #endregion

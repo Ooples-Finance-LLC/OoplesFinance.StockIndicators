@@ -91,20 +91,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Smi", RegressionEndpoints(residual, length)));
                 });
             case IndicatorName.PeakValleyEstimation:
-                return new("Sign1", new[] { "Sign1", "Sign2", "Sign3" }, bars =>
-                {
-                    var prices = Closes(bars); var average = Average(prices, length, kind);
-                    var offset = prices.Select((v, i) => v - average[i]).ToArray();
-                    var fit = RegressionEndpoints(offset.Select(Math.Abs).ToArray(), Integer(options, "SmoothLength", 100));
-                    var ratios = fit.Select((v, i) =>
-                    {
-                        var high = Window(fit, i, Math.Max(2, length)).Max();
-                        return high == 0 ? 0 : v / high;
-                    }).ToArray();
-                    double[] Signs(Func<int, bool> condition) => offset.Select((v, i) => condition(i) ? -(double)Math.Sign(v) : 0).ToArray();
-                    return Outputs(("Sign1", Signs(i => ratios[i] == 1 && (i == 0 || ratios[i - 1] != 1))), // NOSONAR: S1244 - The signal contract detects exact visits to the normalized maximum.
-                        ("Sign2", Signs(i => ratios[i] < .8)), ("Sign3", Signs(i => i > 0 && ratios[i - 1] == 1 && ratios[i] < 1))); // NOSONAR: S1244 - The signal contract detects departure from the normalized maximum.
-                });
+                return new("Sign1", new[] { "Sign1", "Sign2", "Sign3" }, bars => PeakValleyOutputs(bars, indicator));
             case IndicatorName.StationaryExtrapolatedLevelsOscillator:
                 return new("Selo", new[] { "Selo" }, bars =>
                 {

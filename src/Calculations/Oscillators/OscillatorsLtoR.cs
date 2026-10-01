@@ -1792,68 +1792,11 @@ public static partial class Calculations
     public static StockData CalculatePeakValleyEstimation(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 500, int smoothLength = 100)
     {
-        List<double> sign1List = new(stockData.Count);
-        List<double> sign2List = new(stockData.Count);
-        List<double> sign3List = new(stockData.Count);
-        List<double> absOsList = new(stockData.Count);
-        List<double> osList = new(stockData.Count);
-        List<double> hList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-
-            var os = currentValue - sma;
-            osList.Add(os);
-
-            var absOs = Math.Abs(os);
-            absOsList.Add(absOs);
-        }
-
-        stockData.SetCustomValues(absOsList);
-        var pList = CalculateLinearRegression(stockData, smoothLength).ChainedValues;
-        var (highestList, _) = GetMaxAndMinValuesList(pList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var os = osList[i];
-            var p = pList[i];
-            var highest = highestList[i];
-
-            var prevH = i >= 1 ? hList[i - 1] : 0;
-            var h = highest != 0 ? p / highest : 0;
-            hList.Add(h);
-
-            double mod1 = h == 1 && prevH != 1 ? 1 : 0;
-            double mod2 = h < 0.8 ? 1 : 0;
-            double mod3 = prevH == 1 && h < prevH ? 1 : 0;
-
-            double sign1 = mod1 == 1 && os < 0 ? 1 : mod1 == 1 && os > 0 ? -1 : 0;
-            sign1List.Add(sign1);
-
-            double sign2 = mod2 == 1 && os < 0 ? 1 : mod2 == 1 && os > 0 ? -1 : 0;
-            sign2List.Add(sign2);
-
-            double sign3 = mod3 == 1 && os < 0 ? 1 : mod3 == 1 && os > 0 ? -1 : 0;
-            sign3List.Add(sign3);
-
-            var signal = GetConditionSignal(sign1 > 0, sign1 < 0);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sign1", sign1List },
-            { "Sign2", sign2List },
-            { "Sign3", sign3List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sign1List);
-        stockData.IndicatorName = IndicatorName.PeakValleyEstimation;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = PeakValleyWindow.Calculate(stockData, input, maType, length, smoothLength, callbacks: false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sign1", result.Sign1.ToList() }, { "Sign2", result.Sign2.ToList() }, { "Sign3", result.Sign3.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Sign1.Select(v => GetConditionSignal(v > 0, v < 0)));
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Sign1.ToList()); stockData.IndicatorName = IndicatorName.PeakValleyEstimation;
         return stockData;
     }
 

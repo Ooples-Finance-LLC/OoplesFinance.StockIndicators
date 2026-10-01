@@ -289,81 +289,18 @@ public sealed class ParametricKalmanFilterState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Sign1")]
 public sealed class PeakValleyEstimationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _sma;
-    private readonly LinearRegressionState _regression;
-    private readonly RollingWindowMax _highestWindow;
-    private readonly StreamingInputResolver _input;
-    private double _absOs;
-    private double _prevH;
-    private bool _hasPrev;
-
-    public PeakValleyEstimationState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 500,
-        int smoothLength = 100)
-    {
-        var resolved = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _regression = new LinearRegressionState(Math.Max(1, smoothLength), _ => _absOs);
-        _highestWindow = new RollingWindowMax(Math.Max(2, resolved));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PeakValleyWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public PeakValleyEstimationState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 500, int smoothLength = 100)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.PeakValleyEstimation;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _regression.Reset();
-        _highestWindow.Reset();
-        _absOs = 0;
-        _prevH = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        var os = value - sma;
-        _absOs = Math.Abs(os);
-        var p = _regression.Update(bar, isFinal, includeOutputs: false).Value;
-        var highest = isFinal ? _highestWindow.Add(p, out _) : _highestWindow.Preview(p, out _);
-
-        var prevH = _hasPrev ? _prevH : 0;
-        var h = highest != 0 ? p / highest : 0;
-
-        double mod1 = h == 1 && prevH != 1 ? 1 : 0;
-        double mod2 = h < 0.8 ? 1 : 0;
-        double mod3 = prevH == 1 && h < prevH ? 1 : 0;
-
-        double sign1 = mod1 == 1 && os < 0 ? 1 : mod1 == 1 && os > 0 ? -1 : 0;
-        double sign2 = mod2 == 1 && os < 0 ? 1 : mod2 == 1 && os > 0 ? -1 : 0;
-        double sign3 = mod3 == 1 && os < 0 ? 1 : mod3 == 1 && os > 0 ? -1 : 0;
-
-        if (isFinal)
-        {
-            _prevH = h;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Sign1", sign1 },
-                { "Sign2", sign2 },
-                { "Sign3", sign3 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sign1, outputs);
-    }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _regression.Dispose();
-        _highestWindow.Dispose();
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Sign1, includeOutputs ? new Dictionary<string, double>
+            { { "Sign1", point.Sign1 }, { "Sign2", point.Sign2 }, { "Sign3", point.Sign3 } } : null);
     }
 }
 

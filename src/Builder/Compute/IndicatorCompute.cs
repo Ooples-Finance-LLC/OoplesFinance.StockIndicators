@@ -21970,49 +21970,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePeakValleyEstimationFast(StockData data, ComputeContext context, int length = 500,
         int smoothLength = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculatePeakValleyEstimation fits a line through how far the series has strayed from its own moving
-        // average, in absolute terms, and marks the bar where that fit reaches its highest reading of the
-        // window - a peak when the series is above the average, a valley when it is below. The published
-        // signs mark a new peak, a reading below 80% of the peak, and departure from a peak.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-
-        using var offsets = context.Rent(count);
-        using var fitted = context.Rent(count);
-        var offset = offsets.WritableSpan;
-        var fit = fitted.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(smoothLength))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                offset[i] = input[i] - average.Span[i];
-                fit[i] = regression.Next(Math.Abs(offset[i]), isFinal: true).Last;
-            }
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingMinMax(Math.Max(length, 2));
-        double previousRatio = 0;
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(fit[i]);
-            var highest = window.Max;
-            var ratio = highest != 0 ? fit[i] / highest : 0;
-
-            var triggered = outputKey == "Sign2" ? ratio < .8 : outputKey == "Sign3"
-                ? previousRatio == 1 && ratio < previousRatio : ratio == 1 && previousRatio != 1; // NOSONAR: S1244 - The signal contract detects exact visits to the normalized maximum.
-            output[i] = triggered ? -Math.Sign(offset[i]) : 0;
-
-            previousRatio = ratio;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = PeakValleyWindow.Calculate(data, input, maType, length, smoothLength, callbacks: true);
+        var selected = outputKey == "Sign2" ? values.Sign2 : outputKey == "Sign3" ? values.Sign3 : values.Sign1;
+        var result = context.Rent(selected.Length); selected.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     internal static ComputeBuffer ComputePhaseChangeIndexFast(StockData data, ComputeContext context, int length = 35)
