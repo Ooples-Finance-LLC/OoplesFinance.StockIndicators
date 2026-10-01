@@ -535,15 +535,17 @@ public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Close")]
 public sealed class FunctionToCandlesState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RsiState _rsiC;
-    private readonly RsiState _rsiO;
-    private readonly RsiState _rsiH;
-    private readonly RsiState _rsiL;
+    private readonly FunctionCandleRsi[]? _wide;
+    private readonly RsiState? _rsiC;
+    private readonly RsiState? _rsiO;
+    private readonly RsiState? _rsiH;
+    private readonly RsiState? _rsiL;
 
     public FunctionToCandlesState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 14)
     {
         var resolved = Math.Max(1, length);
+        if (StrengthWindow.Supports(maType)) { _wide = Enumerable.Range(0, 4).Select(_ => new FunctionCandleRsi(maType, resolved)).ToArray(); return; }
         _rsiC = new RsiState(maType, resolved);
         _rsiO = new RsiState(maType, resolved);
         _rsiH = new RsiState(maType, resolved);
@@ -554,19 +556,20 @@ public sealed class FunctionToCandlesState : IStreamingIndicatorState, IDisposab
 
     public void Reset()
     {
-        _rsiC.Reset();
-        _rsiO.Reset();
-        _rsiH.Reset();
-        _rsiL.Reset();
+        if (_wide is not null) { foreach (var window in _wide) window.Reset(); return; }
+        _rsiC!.Reset();
+        _rsiO!.Reset();
+        _rsiH!.Reset();
+        _rsiL!.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var rsiC = _rsiC.Next(bar.Close, isFinal);
-        var rsiO = _rsiO.Next(bar.Open, isFinal);
-        var rsiH = _rsiH.Next(bar.High, isFinal);
-        var rsiL = _rsiL.Next(bar.Low, isFinal);
+        var rsiC = _wide is not null ? _wide[0].Next(bar.Close, isFinal) : _rsiC!.Next(bar.Close, isFinal);
+        var rsiO = _wide is not null ? _wide[1].Next(bar.Open, isFinal) : _rsiO!.Next(bar.Open, isFinal);
+        var rsiH = _wide is not null ? _wide[2].Next(bar.High, isFinal) : _rsiH!.Next(bar.High, isFinal);
+        var rsiL = _wide is not null ? _wide[3].Next(bar.Low, isFinal) : _rsiL!.Next(bar.Low, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -585,10 +588,11 @@ public sealed class FunctionToCandlesState : IStreamingIndicatorState, IDisposab
 
     public void Dispose()
     {
-        _rsiC.Dispose();
-        _rsiO.Dispose();
-        _rsiH.Dispose();
-        _rsiL.Dispose();
+        if (_wide is not null) { foreach (var window in _wide) window.Dispose(); return; }
+        _rsiC!.Dispose();
+        _rsiO!.Dispose();
+        _rsiH!.Dispose();
+        _rsiL!.Dispose();
     }
 }
 

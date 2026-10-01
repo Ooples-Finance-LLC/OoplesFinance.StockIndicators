@@ -22627,6 +22627,16 @@ internal static partial class IndicatorCompute
         var count = inputList.Count;
         length = Math.Max(length, 1);
 
+        if (StrengthWindow.Supports(maType))
+        {
+            double[] prices;
+            if (series == CandleSeries.Open) prices = data.OpenPrices.ToArray();
+            else if (series is CandleSeries.High or CandleSeries.Low)
+            { using var high = context.Rent(count); using var low = context.Rent(count); CustomRange(data, input, high.WritableSpan, low.WritableSpan); prices = (series == CandleSeries.High ? high.Span : low.Span).ToArray(); }
+            else prices = input.ToArray();
+            var result = context.Rent(count); FunctionCandleRsi.Calculate(prices, maType, length, true).AsSpan().CopyTo(result.WritableSpan); return result;
+        }
+
         var buffer = context.Rent(count);
         switch (series)
         {

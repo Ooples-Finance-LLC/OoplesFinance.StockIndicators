@@ -1489,6 +1489,21 @@ public static partial class Calculations
     public static StockData CalculateFunctionToCandles(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 14)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            var (close, high, low, open, _) = GetInputValuesList(stockData);
+            var c = FunctionCandleRsi.Calculate(close.ToArray(), maType, length, false).ToList();
+            var o = FunctionCandleRsi.Calculate(open.ToArray(), maType, length, false).ToList();
+            var h = FunctionCandleRsi.Calculate(high.ToArray(), maType, length, false).ToList();
+            var l = FunctionCandleRsi.Calculate(low.ToArray(), maType, length, false).ToList();
+            var events = CreateSignalsList(stockData); double previous = 0, previousTwo = 0;
+            for (var i = 0; i < c.Count; i++)
+            { var sum = new ExactMeanAccumulator(); sum.Add(c[i]); sum.Add(o[i]); sum.Add(h[i]); sum.Add(l[i]); var mean = sum.Mean(4);
+              events?.Add(GetCompareSignal(mean - previous, previous - previousTwo)); previousTwo = previous; previous = mean; }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Close", c }, { "Open", o }, { "High", h }, { "Low", l } });
+            stockData.SetSignals(events); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.FunctionToCandles; return stockData;
+        }
+
         List<double> tpList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);

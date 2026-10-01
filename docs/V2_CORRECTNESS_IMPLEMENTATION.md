@@ -3961,3 +3961,12 @@ The isolated campaigns `627-corrected-a` and `627-corrected-b` passed their base
 Source snapshot SHA256: `fd0626aa505297ee6d7a142508f8dcfa768c2a81087509658566ef120363a25d`. Archive SHA256: `9efa1d5b48db19f5d04b3e55e1e48658565dd75f1d3431b115ee7d528a32eb0f` and `9efa1d5b48db19f5d04b3e55e1e48658565dd75f1d3431b115ee7d528a32eb0f`.
 
 This is evidence for the isolated batch-627 source. Source was already published in the batch-627 checkpoint; this update does not restore older source files. Mutation verification for batches 628 through 643 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 644, Function to Candles
+
+Function to Candles now evaluates all four candle RSI series with complete gain/loss quotients and lazy SMA/WMA histories on the supported routes. Actual callback overrides determine flat-bar ratios; exhausted overrides retain extended default arithmetic. Selected prices preserve Open and follow the custom-range rule for High/Low. Native preview/reset and invalid-candle rejection are covered. The independent reference projects each field into the rational RSI oracle.
+
+**48/48 focused tests passed on the first run** in `function-candles-644.trx`, including 47 family cases and the existing transformed-price hand regression. Coverage includes five configurations across five routes, four supported means, maximum/subnormal values, extreme periods, all four outputs, two callback slots per fast output, batch zero callbacks and legacy mean parity. A hand example independently fixes all four candle outputs and the three trading signals. **34 prepared behavioral faults remain pending**; all **7,147 anchors** pass preflight. Candidate/frozen snapshots match on 2168 files. Enrollment is **6,217/7,131**, with **914 omissions** and no construction failures. DLL SHA256: `76D5EC72060A13A191FB6B76D4E3C122D05690E15DE57EE7FA6B7C924F705AD8`.
+
+Mutation qualification is complete through627. Original628 contains a surviving prefix-compaction mutant under investigation; no628 qualification is claimed. Remaining numerical coverage, mutation campaigns, pending formula decisions and hosted/package/release/performance gates remain incomplete.

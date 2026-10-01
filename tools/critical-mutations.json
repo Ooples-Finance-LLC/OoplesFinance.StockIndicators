@@ -61124,5 +61124,311 @@
     "before": "FreedomOfMovementSpecOptions or ",
     "after": "",
     "filter": "FullyQualifiedName~FreedomNumericalTests.SelectedSourcePreservesCandles"
+  },
+  {
+    "id": "function-candles-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "length = Math.Max(1, length); _gains",
+    "after": "length = 1; _gains",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-change",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "GainLossShare.Change(price, _previous)",
+    "after": "GainLossShare.Change(_previous, price)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "change.Mantissa > 0 ? change : default",
+    "after": "change.Mantissa < 0 ? change.Absolute : default",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-loss",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "change.Mantissa < 0 ? change.Absolute : default",
+    "after": "default(StrengthValue)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "gain.AddTo(ref numerator, 100)",
+    "after": "gain.AddTo(ref numerator, 99)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-ratio-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "loss.AddTo(ref denominator)",
+    "after": "gain.AddTo(ref denominator)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-empty",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "GainLossShare.Of(numerator, denominator, 100)",
+    "after": "GainLossShare.Of(numerator, denominator, 0)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-carry",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "_carryFlat && !gainOverride.HasValue",
+    "after": "false && !gainOverride.HasValue",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-override-flat",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "!gainOverride.HasValue && !lossOverride.HasValue &&",
+    "after": "",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.ActualOverridesDetermineFlatBarRatios"
+  },
+  {
+    "id": "function-candles-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "if (final) { _previous",
+    "after": "if (true) { _previous",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-previous",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "_previous = price;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "_started = false; _previous = _line = 0;",
+    "after": "_previous = _line = 0;",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-weighted-history",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Subtract(default);",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-weighted-new",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, 1)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "_history.Count + 1L < _length",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-simple-period",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "StrengthValue.Round(sum, _length)",
+    "after": "StrengthValue.Round(sum, _length + 1L)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-history-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "if (final) { _sum",
+    "after": "if (true) { _sum",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.WideSubnormalExpiryAndFlatRunsMatchExactReference"
+  },
+  {
+    "id": "function-candles-wide-gain-override",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "new StrengthValue(gainOverride.Value)",
+    "after": "new StrengthValue(0)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-loss-override",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "new StrengthValue(lossOverride.Value)",
+    "after": "new StrengthValue(0)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-callback-gains",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "gain = ComponentAverage.Take(gains, length)",
+    "after": "gain = ComponentAverage.Take(losses, length)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-callback-losses",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "loss = ComponentAverage.Take(losses, length)",
+    "after": "loss = ComponentAverage.Take(gains, length)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-callback-length",
+    "module": "numerical",
+    "file": "src/Helpers/FunctionCandleRsi.cs",
+    "scope": "internal sealed class FunctionCandleRsi",
+    "before": "ComponentAverage.Take(gains, length)",
+    "after": "ComponentAverage.Take(gains, 1)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-native-close",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FunctionToCandlesState",
+    "before": "_wide[0].Next(bar.Close, isFinal)",
+    "after": "_wide[0].Next(0, isFinal)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-native-open",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FunctionToCandlesState",
+    "before": "_wide[1].Next(bar.Open, isFinal)",
+    "after": "_wide[1].Next(0, isFinal)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-native-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FunctionToCandlesState",
+    "before": "_wide[2].Next(bar.High, isFinal)",
+    "after": "_wide[2].Next(0, isFinal)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-native-low",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FunctionToCandlesState",
+    "before": "_wide[3].Next(bar.Low, isFinal)",
+    "after": "_wide[3].Next(0, isFinal)",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-fast-open",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFunctionToCandlesFast",
+    "before": "prices = data.OpenPrices.ToArray()",
+    "after": "prices = input.ToArray()",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-fast-high-low",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFunctionToCandlesFast",
+    "before": "series == CandleSeries.High ? high.Span : low.Span",
+    "after": "series == CandleSeries.High ? low.Span : high.Span",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFunctionToCandlesFast",
+    "before": "else prices = input.ToArray()",
+    "after": "else prices = data.ClosePrices.ToArray()",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.CallbackSlotsUseEachSelectedCandleAndCompleteRatio"
+  },
+  {
+    "id": "function-candles-wide-batch-mean",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "scope": "public static StockData CalculateFunctionToCandles",
+    "before": "sum.Add(o[i]);",
+    "after": "sum.Add(c[i]);",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-batch-signal-history",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "scope": "public static StockData CalculateFunctionToCandles",
+    "before": "previousTwo = previous;",
+    "after": "previousTwo = 0;",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.HandCandleFieldsRemainIndependentAndSignalsUseTheirMean"
+  },
+  {
+    "id": "function-candles-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FunctionToCandlesState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
   }
 ]
