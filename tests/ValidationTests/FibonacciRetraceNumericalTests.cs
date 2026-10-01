@@ -62,6 +62,10 @@ public sealed class FibonacciRetraceNumericalTests
     [Fact]
     public void WideProductsMeansAndExpiryMatchFractions()
     {
+        // A nonzero SMA crosses the upper band on its third observation.
+        // A symmetric zero-mean startup cannot expose a one-bar warmup delay.
+        var startup = Check(Candles((10, 0, 9), (10, 0, 9), (10, 0, 9), (10, 0, 9)), 3, 3, .25, MovingAvgType.SimpleMovingAverage, 1);
+        Assert.Equal(new[] { Signal.StrongSell, Signal.Sell, Signal.StrongBuy, Signal.Buy }, startup.Signals);
         foreach (var kind in Kinds) foreach (var scale in new[] { double.Epsilon, Math.Pow(2, -540), 1d, double.MaxValue / 16 })
             Check(Candles(Enumerable.Range(0, 21).Select(i => ((i % 7 + 1) * scale, -(i % 5 + 1) * scale, (i % 3 - 1) * scale)).ToArray()), kind: kind.Kind, reference: kind.Reference);
         foreach (var factor in new[] { -double.MaxValue, -.5, 0, double.Epsilon, .25, .5, 1, 2, double.MaxValue })
