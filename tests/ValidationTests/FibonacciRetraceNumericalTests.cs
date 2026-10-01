@@ -49,6 +49,11 @@ public sealed class FibonacciRetraceNumericalTests
     {
         var result = Check(Candles((8, 0, 4), (12, -4, 6), (5, 1, 3), (6, 2, 4)), 1, 2, .25, MovingAvgType.SimpleMovingAverage, 1);
         Assert.Equal(new[] { 6d, 8, 8, 4.75 }, result.Outputs["UpperBand"]); Assert.Equal(new[] { 2d, 0, 0, 2.25 }, result.Outputs["LowerBand"]);
+        // With three bars, the second observation remains the extremum when a
+        // later weaker observation arrives; two-bar windows cannot expose reversed pruning.
+        var retained = Check(Candles((8, 0, 4), (12, -4, 6), (5, 1, 3), (6, 2, 4), (7, 3, 5)), 1, 3, .25, MovingAvgType.SimpleMovingAverage, 1);
+        Assert.Equal(new[] { 6d, 8, 8, 8, 5.5 }, retained.Outputs["UpperBand"]);
+        Assert.Equal(new[] { 2d, 0, 0, 0, 2.5 }, retained.Outputs["LowerBand"]);
         var signals = Check(Candles(new[] { 1d, 9, 9, 8, 1 }.Select(v => (10d, 0d, v)).ToArray()), 1, 1, .25, MovingAvgType.SimpleMovingAverage, 1);
         Assert.Equal(new[] { Signal.StrongSell, Signal.StrongBuy, Signal.Buy, Signal.Buy, Signal.StrongSell }, signals.Signals);
         Assert.All(Check(Candles((10, 0, 5)), factor: -.5).Outputs["UpperBand"], v => Assert.Equal(15, v));
