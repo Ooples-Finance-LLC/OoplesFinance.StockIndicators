@@ -4312,3 +4312,12 @@ The reference retains four binary64 residual components for recursive state (at 
 All **four Market Direction configurations** are enrolled. **42/42 focused checks passed** in `market-direction663-focused.trx`: 38 Market Direction checks, three existing short/equal/reversed-period checks, and the strengthened Freedom mixed-exponent regression on the current root build. Independent fraction references cover batch, fast, arm, native and streaming routes. Exact hand outputs, extreme ratios, subnormal midpoints, overflow recovery, selected inputs, signal comparisons, preview/reset, window expiry, extreme periods and core span contracts are covered.
 
 **39 prepared behavioral faults remain pending**, with **7,910 unique global anchors**. Enrollment is **6,392/7,131**, leaving **739 omissions across 111 types**, with no construction failures. DLL SHA256: `4F8D2A4809034A637027E513963E30D086181F2D4B659B59413B5EA91F0D190B`. This records source verification, not mutation qualification. The replacement Freedom643 campaigns, later mutation batches, batch660's recording block, pending formula decisions and final hosted/platform/package/release/performance gates remain incomplete. PR246 stays draft.
+
+
+### Batch 643: Freedom of Movement mutation qualification
+
+The isolated campaigns `643-corrected2-a` and `643-corrected2-b` passed their baselines and caught **50/50 compiled behavioral faults**, alongside **50/50 selected tests** (48 Freedom of Movement cases and two existing regressions). Both archives were compared byte-for-byte with the retained batch-643 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `c8fb82a5fd8a89e1e8a77fa1241afa669e9fdaec339412c22b46c61d1487c196`. Archive SHA256: `40e846601fc72ddbe17e08720d7200c483e9df157241cfd89d01f766b367d3da` and `40e846601fc72ddbe17e08720d7200c483e9df157241cfd89d01f766b367d3da`.
+
+This is evidence for the isolated batch-643 source. Source was already published in the batch-643 checkpoint; this update does not restore older source files. Mutation verification for batches 644 through 663 and the remaining final gates is still incomplete.
