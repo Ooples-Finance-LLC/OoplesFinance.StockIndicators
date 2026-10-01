@@ -4179,3 +4179,12 @@ Kase Indicator now forms each complete price/volume/square-root ratio before pub
 Independent fraction means, complete ratios and backwards scans for each side's latest valid observation cover the formula and its carry rules. **49/49 focused checks passed** on the first run:40 configuration/route/rule checks, eight family regressions and the existing Kase hold/offset hand test. Hand cases recover double.MaxValue and2^-1000 from intermediate overflow/underflow. Further checks cover overflowing denominator products, held infinite outputs and later recovery, signed/zero volume, tiny ranges, maximum periods, callbacks, legacy means, previews/reset and native guards. No production/test source changed after the passing run.
 
 **39 prepared faults remain unqualified**; all **7,592 anchors** apply. Candidate/frozen snapshots match on2201 files. Enrollment is **6,325/7,131**, leaving **806 omissions across120 types**. DLL SHA256: 451FD5EFD4F071ECF66DFF4D4138732292AEB1A47A3A7AB1D50D378278660B6F. Qualification remains complete through634; batches635–655, pending formula/core decisions and final gates remain incomplete. PR246 stays draft. The separate proposed Kase Convergence/Peak V1 formula investigation is still pending.
+
+
+### Batch 635: Ergodic Selection mutation qualification
+
+The isolated campaigns `635a` and `635b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **80/80 focused tests**. Both archives were compared byte-for-byte with the retained batch-635 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `56f3ef0e556db9b1b36a9f9912d89e159afa4db60c8429fe59674d2a57434104`. Archive SHA256: `fde16a32049c0f04153c7d24ee920d14788318260cf28e8333c38b6c9c8726b2` and `fde16a32049c0f04153c7d24ee920d14788318260cf28e8333c38b6c9c8726b2`.
+
+This is evidence for the isolated batch-635 source. Source was already published in the batch-635 checkpoint; this update does not restore older source files. Mutation verification for batches 636 through 655 and the remaining final gates is still incomplete.
