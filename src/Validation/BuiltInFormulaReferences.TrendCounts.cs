@@ -54,20 +54,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ts", line));
                 });
             case IndicatorName.MarketDirectionIndicator:
-                var fastPeriod = Integer(options, "FastLength", length);
-                var slowPeriod = Integer(options, "SlowLength", 55);
-                return new("Mdi", new[] { "Mdi" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var crossings = prices.Select((_, i) => slowPeriod == fastPeriod ? 0 :
-                        (fastPeriod * Window(prices, i, slowPeriod - 1).Sum()
-                            - slowPeriod * Window(prices, i, fastPeriod - 1).Sum()) / (slowPeriod - fastPeriod)).ToArray();
-                    return Outputs(("Mdi", prices.Select((v, i) =>
-                    {
-                        var previous = i == 0 ? 0 : prices[i - 1];
-                        return v + previous == 0 ? 0 : 200 * ((i == 0 ? 0 : crossings[i - 1]) - crossings[i]) / (v + previous);
-                    }).ToArray()));
-                });
+                return new("Mdi", new[] { "Mdi" }, bars => Outputs(("Mdi", MarketDirectionOutputs(bars, indicator))));
             case IndicatorName.JapaneseCorrelationCoefficient:
                 var japaneseKind = AverageKind(options, 1);
                 if (japaneseKind == 0) return null;

@@ -1085,62 +1085,14 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Mdi")]
 public sealed class MarketDirectionIndicatorState : IStreamingIndicatorState
 {
-    private readonly int _fastLength;
-    private readonly int _slowLength;
-    private readonly RollingCumulativeSum _sumWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevCp2;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public MarketDirectionIndicatorState(int fastLength = 13, int slowLength = 55)
-    {
-        _fastLength = Math.Max(1, fastLength);
-        _slowLength = Math.Max(1, slowLength);
-        _sumWindow = new RollingCumulativeSum();
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MarketDirectionWindow _window;
+    public MarketDirectionIndicatorState(int fastLength = 13, int slowLength = 55) => _window = new(fastLength, slowLength);
     public IndicatorName Name => IndicatorName.MarketDirectionIndicator;
-
-    public void Reset()
-    {
-        _sumWindow.Reset();
-        _prevCp2 = 0;
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var len1Sum = _sumWindow.Preview(value, _fastLength - 1);
-        var len2Sum = _sumWindow.Preview(value, _slowLength - 1);
-        var denom = _slowLength - _fastLength;
-        var cp2 = denom != 0 ? ((_fastLength * len2Sum) - (_slowLength * len1Sum)) / denom : 0;
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var mdi = value + prevValue != 0
-            ? 100 * (_prevCp2 - cp2) / ((value + prevValue) / 2)
-            : 0;
-
-        if (isFinal)
-        {
-            _sumWindow.Add(value, 0);
-            _prevCp2 = cp2;
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mdi", mdi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mdi, outputs);
+        StreamingInputValidation.Validate(bar); var result = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(result.Value, includeOutputs ? new Dictionary<string, double> { { "Mdi", result.Value } } : null);
     }
 }
 

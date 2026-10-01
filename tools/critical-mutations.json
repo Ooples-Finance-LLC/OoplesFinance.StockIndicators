@@ -67946,5 +67946,356 @@
     "before": "return new(Sign * numeratorRoot, binaryPower / 2, denominatorRoot)",
     "after": "return new(numeratorRoot, binaryPower / 2, denominatorRoot)",
     "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "market-direction-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_fast = Math.Max(1, fast)",
+    "after": "_fast = 1",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "market-direction-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_slow = Math.Max(1, slow)",
+    "after": "_slow = 1",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "market-direction-wide-difference",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_difference = (long)_slow - _fast",
+    "after": "_difference = (long)_fast - _slow",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-fast-window",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_fastSum = new(_fast - 1)",
+    "after": "_fastSum = new(_fast)",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-slow-window",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_slowSum = new(_slow - 1)",
+    "after": "_slowSum = new(_slow)",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-empty-window",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "if (_length == 0) return BigInteger.Zero",
+    "after": "if (_length == 0) return units",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "sum -= ExactVarianceWindow.Units(_history.Peek())",
+    "after": "sum -= BigInteger.Zero",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-window-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "if (final) { if (_history.Count",
+    "after": "if (true) { if (_history.Count",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-window-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_sum = sum;",
+    "after": "_sum = default;",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-fast-weight",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "var crossing = _fast * slow",
+    "after": "var crossing = _slow * slow",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-slow-weight",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "- _slow * fast;",
+    "after": "- _fast * fast;",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-crossing-subtraction",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_fast * slow - _slow * fast",
+    "after": "_fast * slow + _slow * fast",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-crossing-difference",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "(_previousCrossing - crossing)",
+    "after": "(crossing - _previousCrossing)",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-percent",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "var numerator = 200 *",
+    "after": "var numerator = 100 *",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "(units + _previousPrice)",
+    "after": "(units + units)",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-crossing-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "var denominator = _difference *",
+    "after": "var denominator = 1 *",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "market-direction-wide-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "numerator = BigInteger.Zero; denominator = BigInteger.One",
+    "after": "numerator = BigInteger.One; denominator = BigInteger.One",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-negative-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "denominator.Sign < 0",
+    "after": "denominator.Sign > 0",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WideAndSubnormalQuotientsRetainUnpublishedCrossings"
+  },
+  {
+    "id": "market-direction-wide-binary-grid",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "numerator << 1074",
+    "after": "numerator << 1073",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-change",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "numerator * _previousDenominator - _previousNumerator * denominator",
+    "after": "numerator * _previousDenominator + _previousNumerator * denominator",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_previousPrice = units;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-crossing-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_previousCrossing = crossing;",
+    "after": "_previousCrossing = default;",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-output-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_previousNumerator = numerator;",
+    "after": "_previousNumerator = default;",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-output-denominator-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_previousDenominator = denominator;",
+    "after": "_previousDenominator = BigInteger.One;",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-state-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "if (final) { _previousPrice",
+    "after": "if (true) { _previousPrice",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-reset-fast",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_fastSum.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-reset-slow",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_slowSum.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_sum = default; }",
+    "after": "}",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-reset-price",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_previousPrice = _previousCrossing = _previousNumerator = default",
+    "after": "_previousCrossing = _previousNumerator = default",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-reset-crossing",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_previousPrice = _previousCrossing = _previousNumerator = default",
+    "after": "_previousPrice = _previousNumerator = default",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.WindowExpiryAndResetKeepIndependentHistories"
+  },
+  {
+    "id": "market-direction-wide-reset-output",
+    "module": "numerical",
+    "file": "src/Helpers/MarketDirectionWindow.cs",
+    "scope": "internal sealed class MarketDirectionWindow",
+    "before": "_previousPrice = _previousCrossing = _previousNumerator = default",
+    "after": "_previousPrice = _previousCrossing = default",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-core-span",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void MarketDirectionIndicator",
+    "before": "output.Length < input.Length",
+    "after": "output.Length < 0",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.CoreSpanContractsAndInPlaceInput"
+  },
+  {
+    "id": "market-direction-wide-core-prevalidation",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void MarketDirectionIndicator",
+    "before": "for (var i = 0; i < input.Length; i++) StreamingInputValidation.Finite(input[i], nameof(input));",
+    "after": "",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.NonfiniteInputCannotAdvanceStateOrPartiallyWriteCore"
+  },
+  {
+    "id": "market-direction-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MarketDirectionIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Validate(default(OhlcvBar));",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.NonfiniteInputCannotAdvanceStateOrPartiallyWriteCore"
+  },
+  {
+    "id": "market-direction-wide-native-value",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MarketDirectionIndicatorState",
+    "before": "new StreamingIndicatorStateResult(result.Value,",
+    "after": "new StreamingIndicatorStateResult(0,",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MarketDirectionIndicatorState",
+    "before": "{ \"Mdi\", result.Value }",
+    "after": "{ \"Mdi\", 0 }",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.HandCrossingsZeroMidpointsAndEqualPeriods"
+  },
+  {
+    "id": "market-direction-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMarketDirectionIndicatorFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "market-direction-wide-native-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "internal static partial class StatefulIndicatorFactory",
+    "before": "new MarketDirectionIndicatorState(marketDirection.Length, 55)",
+    "after": "new MarketDirectionIndicatorState(1, 55)",
+    "filter": "FullyQualifiedName~MarketDirectionNumericalTests.EveryRouteMatchesIndependentCrossings"
   }
 ]

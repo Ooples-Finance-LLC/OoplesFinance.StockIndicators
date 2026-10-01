@@ -6081,19 +6081,10 @@ internal static class OscillatorCore
     /// <param name="slowLength">Slow period.</param>
     internal static void MarketDirectionIndicator(ReadOnlySpan<double> input, Span<double> output, int fastLength = 13, int slowLength = 55)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        var sums = new RollingSum();
-        double previousCrossing = 0;
-        for (var i = 0; i < input.Length; i++)
-        {
-            sums.Add(input[i]);
-            var crossing = slowLength == fastLength ? 0 :
-                (fastLength * sums.Sum(slowLength - 1) - slowLength * sums.Sum(fastLength - 1)) / (slowLength - fastLength);
-            var midpoint = (input[i] + (i == 0 ? 0 : input[i - 1])) / 2;
-            output[i] = midpoint == 0 ? 0 : 100 * (previousCrossing - crossing) / midpoint;
-            previousCrossing = crossing;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < input.Length; i++) StreamingInputValidation.Finite(input[i], nameof(input));
+        var window = new MarketDirectionWindow(fastLength, slowLength);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     // NthOrderDifferencingOscillator already implemented above in Batch 11

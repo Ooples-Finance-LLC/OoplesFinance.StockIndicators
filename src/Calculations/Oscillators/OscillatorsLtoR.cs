@@ -3209,40 +3209,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMarketDirectionIndicator(this StockData stockData, int fastLength = 13, int slowLength = 55)
     {
-        List<double> mdiList = new(stockData.Count);
-        List<double> cp2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var tempSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            tempSumWindow.Add(currentValue);
-
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var len1Sum = tempSumWindow.Sum(fastLength - 1);
-            var len2Sum = tempSumWindow.Sum(slowLength - 1);
-
-            var prevCp2 = GetLastOrDefault(cp2List);
-            var cp2 = slowLength == fastLength ? 0 : ((fastLength * len2Sum) - (slowLength * len1Sum)) / (slowLength - fastLength);
-            cp2List.Add(cp2);
-
-            var prevMdi = GetLastOrDefault(mdiList);
-            var mdi = currentValue + prevValue != 0 ? 100 * (prevCp2 - cp2) / ((currentValue + prevValue) / 2) : 0;
-            mdiList.Add(mdi);
-
-            var signal = GetCompareSignal(mdi, prevMdi);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mdi", mdiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mdiList);
-        stockData.IndicatorName = IndicatorName.MarketDirectionIndicator;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = MarketDirectionWindow.Calculate(input, fastLength, slowLength); var line = result.Values.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mdi", line } });
+        stockData.SetSignals(result.Trades.ToList()); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.MarketDirectionIndicator;
         return stockData;
     }
 
