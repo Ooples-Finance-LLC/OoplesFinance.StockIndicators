@@ -66902,5 +66902,338 @@
     "before": "atrMult, true);",
     "after": "atrMult, false);",
     "filter": "FullyQualifiedName~LbrPaintNumericalTests.CustomAtrSlotKeepsTrueRangeAndSelectedPrices"
+  },
+  {
+    "id": "liquid-rsi-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.ExtremePeriodsAndEmptyInputNeedNoHistoryAllocation"
+  },
+  {
+    "id": "liquid-rsi-wide-previous-weight",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "previous.AddTo(ref product, length - 1)",
+    "after": "previous.AddTo(ref product, length)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-residual",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "product.Add(high, -length)",
+    "after": "product.Add(high, 1 - length)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-lower-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "shift = checked(shift - 512)",
+    "after": "shift = checked(shift + 512)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.SquaredSubnormalsAndOverflowingProductsRetainShares"
+  },
+  {
+    "id": "liquid-rsi-wide-upper-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "shift = checked(shift + 512)",
+    "after": "shift = checked(shift - 512)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.SquaredSubnormalsAndOverflowingProductsRetainShares"
+  },
+  {
+    "id": "liquid-rsi-wide-state-shift",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "opposite.ScaleByPowerOfTwo(_shift)",
+    "after": "opposite.ScaleByPowerOfTwo(0)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.SquaredSubnormalsAndOverflowingProductsRetainShares"
+  },
+  {
+    "id": "liquid-rsi-wide-first-observation",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "if (_hasPrevious)",
+    "after": "if (!_hasPrevious)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-price-volume-product",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "product.AddProduct(price, volume);",
+    "after": "product.AddProduct(price, volume, -1);",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-previous-volume-product",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "product.AddProduct(price, _volume, -1)",
+    "after": "product.AddProduct(price, _volume, 1)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-previous-price-product",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "product.AddProduct(_price, volume, -1)",
+    "after": "product.AddProduct(_price, volume, 1)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-previous-pair-product",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "product.AddProduct(_price, _volume);",
+    "after": "product.AddProduct(_price, _volume, -1);",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-absolute-direction",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "if (product.Sign < 0)",
+    "after": "if (product.Sign > 0)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-positive-price",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "price > _price && volume > _volume",
+    "after": "price < _price && volume > _volume",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-positive-volume",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "price > _price && volume > _volume",
+    "after": "price > _price && volume < _volume",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-positive-both",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "price > _price && volume > _volume",
+    "after": "price > _price || volume > _volume",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-numerator-membership",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "positive ? product : default",
+    "after": "positive ? default : product",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-denominator-mass",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "Number.Smooth(_denominator, product, _length)",
+    "after": "Number.Smooth(_denominator, positive ? product : default, _length)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-percentage",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "numerator.AddTo(ref top, 100)",
+    "after": "numerator.AddTo(ref top, 99)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-ratio-order",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "top.Ratio(bottom)",
+    "after": "bottom.Ratio(top)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-flat-share",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "? _value : Math.Max",
+    "after": "? 0 : Math.Max",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.ZeroProductsPreserveShareUntilAnotherProductArrives"
+  },
+  {
+    "id": "liquid-rsi-wide-unit-period-flat",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_length > 1 && product.IsExactlyZero",
+    "after": "_length >= 1 && product.IsExactlyZero",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.ZeroProductsPreserveShareUntilAnotherProductArrives"
+  },
+  {
+    "id": "liquid-rsi-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "if (final) { _price",
+    "after": "if (!final) { _price",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_price = price;",
+    "after": "_price = 0;",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-volume-memory",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_volume = volume;",
+    "after": "_volume = 0;",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-numerator-memory",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_numerator = numerator;",
+    "after": "_numerator = denominator;",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-denominator-memory",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_denominator = denominator;",
+    "after": "_denominator = numerator;",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-reset-presence",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-reset-mass",
+    "module": "numerical",
+    "file": "src/Helpers/LiquidRsiWindow.cs",
+    "scope": "internal sealed class LiquidRsiWindow",
+    "before": "_numerator = _denominator = default;",
+    "after": "_numerator = _denominator;",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LiquidRelativeStrengthIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* full bar guard removed */",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.InvalidInputsAndShortSpansCannotPartiallyWriteOrAdvance"
+  },
+  {
+    "id": "liquid-rsi-wide-native-volume",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LiquidRelativeStrengthIndexState",
+    "before": "_window.Next(bar.Close, bar.Volume, isFinal)",
+    "after": "_window.Next(bar.Close, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-fast-volume",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLiquidRelativeStrengthIndexFast(",
+    "before": "window.Next(input[i], data.Volumes[i], true)",
+    "after": "window.Next(input[i], input[i], true)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLiquidRelativeStrengthIndexFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.SelectedSourcePreservesVolume"
+  },
+  {
+    "id": "liquid-rsi-wide-batch-slope",
+    "module": "numerical",
+    "file": "src/Calculations/Rsi/RsiLtoR.cs",
+    "scope": "public static StockData CalculateLiquidRelativeStrengthIndex(",
+    "before": "value - previous, previous - beforePrevious",
+    "after": "previous - value, previous - beforePrevious",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.PublishedSignalsUseLiquidShareThresholds"
+  },
+  {
+    "id": "liquid-rsi-wide-core-volume",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void LiquidRelativeStrengthIndex(",
+    "before": "window.Next(close[i], volume[i], true)",
+    "after": "window.Next(close[i], close[i], true)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.HandProductsStartAtZeroAndRequireBothChangesToRise"
+  },
+  {
+    "id": "liquid-rsi-wide-core-volume-span",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void LiquidRelativeStrengthIndex(",
+    "before": "if (volume.Length < close.Length)",
+    "after": "if (volume.Length > close.Length)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.InvalidInputsAndShortSpansCannotPartiallyWriteOrAdvance"
+  },
+  {
+    "id": "liquid-rsi-wide-core-output-span",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void LiquidRelativeStrengthIndex(",
+    "before": "if (output.Length < close.Length)",
+    "after": "if (output.Length > close.Length)",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.InvalidInputsAndShortSpansCannotPartiallyWriteOrAdvance"
+  },
+  {
+    "id": "liquid-rsi-wide-core-prevalidation",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void LiquidRelativeStrengthIndex(",
+    "before": "for (var i = 0; i < close.Length; i++) { StreamingInputValidation",
+    "after": "for (var i = close.Length; i < close.Length; i++) { StreamingInputValidation",
+    "filter": "FullyQualifiedName~LiquidRsiNumericalTests.InvalidInputsAndShortSpansCannotPartiallyWriteOrAdvance"
   }
 ]

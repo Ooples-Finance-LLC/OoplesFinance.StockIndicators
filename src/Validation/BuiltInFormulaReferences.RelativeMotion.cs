@@ -322,17 +322,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.ElderSafeZoneStops:
                 return new("Eszs", new[] { "Eszs" }, bars => Outputs(("Eszs", ElderSafeZoneOutputs(bars, indicator))));
             case IndicatorName.LiquidRelativeStrengthIndex:
-                return new("Lrsi", new[] { "Lrsi" }, bars =>
-                {
-                    var priceChange = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                    var volumeChange = bars.Select((b, i) => i == 0 ? 0 : b.Volume - bars[i - 1].Volume).ToArray();
-                    return Outputs(("Lrsi", bars.Select((_, i) =>
-                    {
-                        var weights = Enumerable.Range(0, i + 1).Select(j => Math.Pow(1 - 1d / length, i - j) * Math.Abs(priceChange[j] * volumeChange[j])).ToArray();
-                        var total = weights.Sum();
-                        return total == 0 ? 0 : 100 * weights.Where((_, j) => priceChange[j] > 0 && volumeChange[j] > 0).Sum() / total;
-                    }).ToArray()));
-                });
+                return new("Lrsi", new[] { "Lrsi" }, bars => LiquidRsiOutputs(bars, indicator));
             case IndicatorName.FisherLeastSquaresMovingAverage:
                 return new("Flsma", new[] { "Flsma" }, bars =>
                 {

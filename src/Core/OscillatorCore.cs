@@ -6735,29 +6735,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void LiquidRelativeStrengthIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var k = 1.0 / length;
-        double numEma = 0, denEma = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var prevValue = i >= 1 ? close[i - 1] : 0;
-            var prevVolume = i >= 1 ? volume[i - 1] : 0;
-            var a = close[i] - prevValue;
-            var b = volume[i] - prevVolume;
-            var num = Math.Max(a, 0) * Math.Max(b, 0);
-            var den = Math.Abs(a) * Math.Abs(b);
-
-            numEma = (num * k) + (numEma * (1 - k));
-            denEma = (den * k) + (denEma * (1 - k));
-
-            output[i] = denEma != 0 ? Math.Min(Math.Max(100 * numEma / denEma, 0), 100) : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < close.Length) throw new ArgumentException("Volume span must be at least price length.", nameof(volume));
+        for (var i = 0; i < close.Length; i++) { StreamingInputValidation.Finite(close[i], nameof(close)); StreamingInputValidation.Finite(volume[i], nameof(volume)); }
+        var window = new LiquidRsiWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true);
     }
 
     /// <summary>

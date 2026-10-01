@@ -1018,63 +1018,14 @@ public sealed class LinearWeightedMovingAverageState : IStreamingIndicatorState,
 [PrimaryOutput("Lrsi")]
 public sealed class LiquidRelativeStrengthIndexState : IStreamingIndicatorState
 {
-    private readonly double _k;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevVolume;
-    private double _numEma;
-    private double _denEma;
-    private bool _hasPrev;
-
-    public LiquidRelativeStrengthIndexState(int length = 14)
-    {
-        _k = 1d / Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly LiquidRsiWindow _window;
+    public LiquidRelativeStrengthIndexState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.LiquidRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevVolume = 0;
-        _numEma = 0;
-        _denEma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevVolume = _hasPrev ? _prevVolume : 0;
-        var a = _hasPrev ? value - prevValue : 0;
-        var b = _hasPrev ? bar.Volume - prevVolume : 0;
-        var num = Math.Max(a, 0) * Math.Max(b, 0);
-        var den = Math.Abs(a) * Math.Abs(b);
-        var numEma = (num * _k) + (_numEma * (1 - _k));
-        var denEma = (den * _k) + (_denEma * (1 - _k));
-        var lrsi = denEma != 0 ? MathHelper.MinOrMax(100 * numEma / denEma, 100, 0) : 0;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevVolume = bar.Volume;
-            _numEma = numEma;
-            _denEma = denEma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Lrsi", lrsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(lrsi, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Lrsi", value } } : null);
     }
 }
 

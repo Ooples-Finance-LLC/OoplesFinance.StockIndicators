@@ -14496,35 +14496,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLiquidRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateLiquidRelativeStrengthIndex is not a Wilder relative strength index at all: it smooths the
-        // product of the price change and the volume change - numerator only when both rise - against the
-        // product of their magnitudes, each through an exponential average seeded at zero. The routine this
-        // replaced started at 100 on the first bar, where the batch starts at zero.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var k = (double)1 / length;
-        double numEma = 0;
-        double denEma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevVolume = i >= 1 ? volumes[i - 1] : 0;
-            var a = CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue);
-            var b = CalculationsHelper.MinPastValues(i, 1, volumes[i] - prevVolume);
-
-            numEma = (Math.Max(a, 0) * Math.Max(b, 0) * k) + (numEma * (1 - k));
-            denEma = (Math.Abs(a) * Math.Abs(b) * k) + (denEma * (1 - k));
-
-            output[i] = denEma != 0 ? MathHelper.MinOrMax(100 * numEma / denEma, 100, 0) : 0;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new LiquidRsiWindow(length); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], data.Volumes[i], true);
         return buffer;
     }
 

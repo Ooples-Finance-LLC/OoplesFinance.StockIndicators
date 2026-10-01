@@ -157,40 +157,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateLiquidRelativeStrengthIndex(this StockData stockData, int length = 14)
     {
-        List<double> numEmaList = new(stockData.Count);
-        List<double> denEmaList = new(stockData.Count);
         List<double> cList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var k = (double)1 / length;
-
+        var window = new LiquidRsiWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentVolume = volumeList[i];
-            var prevVolume = i >= 1 ? volumeList[i - 1] : 0;
-            var a = MinPastValues(i, 1, currentValue - prevValue);
-            var b = MinPastValues(i, 1, currentVolume - prevVolume);
-            var prevC1 = i >= 1 ? cList[i - 1] : 0;
-            var prevC2 = i >= 2 ? cList[i - 2] : 0;
-            var num = Math.Max(a, 0) * Math.Max(b, 0);
-            var den = Math.Abs(a) * Math.Abs(b);
-
-            var prevNumEma = GetLastOrDefault(numEmaList);
-            var numEma = (num * k) + (prevNumEma * (1 - k));
-            numEmaList.Add(numEma);
-
-            var prevDenEma = GetLastOrDefault(denEmaList);
-            var denEma = (den * k) + (prevDenEma * (1 - k));
-            denEmaList.Add(denEma);
-
-            var c = denEma != 0 ? MinOrMax(100 * numEma / denEma, 100, 0) : 0;
-            cList.Add(c);
-
-            var signal = GetRsiSignal(c - prevC1, prevC1 - prevC2, c, prevC1, 80, 20);
-            signalsList?.Add(signal);
+            var value = window.Next(inputList[i], volumeList[i], true);
+            var previous = i == 0 ? 0 : cList[i - 1]; var beforePrevious = i < 2 ? 0 : cList[i - 2];
+            signalsList?.Add(GetRsiSignal(value - previous, previous - beforePrevious, value, previous, 80, 20)); cList.Add(value);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
