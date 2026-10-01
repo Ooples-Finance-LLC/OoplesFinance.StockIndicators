@@ -14133,16 +14133,14 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Oscar Indicator using zero-allocation fast path.
+    /// Computes Oscar Indicator with exact range and recursive arithmetic.
     /// </summary>
     internal static ComputeBuffer ComputeOscarIndicatorFast(StockData data, ComputeContext context, int length = 8)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.OscarIndicator(close, high, low, buffer.WritableSpan, length);
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = new double[input.Count];
+        OscillatorCore.OscarIndicator(SpanCompat.AsReadOnlySpan(input), SpanCompat.AsReadOnlySpan(high), SpanCompat.AsReadOnlySpan(low), values, length);
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

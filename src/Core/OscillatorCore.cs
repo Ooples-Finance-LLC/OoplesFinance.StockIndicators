@@ -6404,27 +6404,16 @@ internal static class OscillatorCore
     /// </summary>
     internal static void OscarIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 8)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must cover input length.");
         for (var i = 0; i < close.Length; i++)
         {
-            highWindow.Add(high[i]);
-            lowWindow.Add(low[i]);
-
-            var highest = highWindow.Max;
-            var lowest = lowWindow.Min;
-            var range = highest - lowest;
-            var rough = range != 0 ? Math.Min(Math.Max((close[i] - lowest) / range * 100, 0), 100) : 0;
-            var prevOscar = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = (prevOscar / 6) + (rough / 3);
+            OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(close[i], nameof(close));
+            OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(high[i], nameof(high));
+            OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(low[i], nameof(low));
         }
+        using var window = new OscarWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true).Value;
     }
 
     /// <summary>

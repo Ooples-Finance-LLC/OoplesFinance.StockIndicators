@@ -492,17 +492,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.MovingAverageAdaptiveQ:
                 return new("Maaq", new[] { "Maaq" }, bars => MovingAverageAdaptiveQOutputs(bars, indicator));
             case IndicatorName.OscarIndicator:
-                return new("Oscar", new[] { "Oscar" }, bars =>
-                {
-                    var positions = bars.Select((b, i) =>
-                    {
-                        var sample = Window(bars, i, length).ToArray();
-                        var low = sample.Min(v => v.Low); var high = sample.Max(v => v.High);
-                        return high == low ? 0 : Math.Max(0, Math.Min(100, 100 * (b.Close - low) / (high - low))); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    }).ToArray();
-                    return Outputs(("Oscar", positions.Select((_, i) => Enumerable.Range(0, i + 1)
-                        .Sum(j => positions[j] * Math.Pow(1d / 6, i - j) / 3)).ToArray()));
-                });
+                return new("Oscar", new[] { "Oscar" }, bars => OscarOutputs(bars, indicator));
             case IndicatorName.KarobeinOscillator:
                 return new("Ko", new[] { "Ko" }, bars =>
                 {

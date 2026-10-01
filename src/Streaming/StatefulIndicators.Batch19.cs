@@ -70,62 +70,16 @@ public sealed class OptimizedTrendTrackerState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Oscar")]
 public sealed class OscarIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevOscar;
-    private bool _hasPrev;
-
-    public OscarIndicatorState(int length = 8)
-    {
-        var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OscarWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public OscarIndicatorState(int length = 8) => _window = new(length);
     public IndicatorName Name => IndicatorName.OscarIndicator;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _prevOscar = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = highest - lowest;
-        var rough = range != 0 ? MathHelper.MinOrMax((value - lowest) / range * 100, 100, 0) : 0;
-        var prevOscar = _hasPrev ? _prevOscar : 0;
-        var oscar = (prevOscar / 6) + (rough / 3);
-
-        if (isFinal)
-        {
-            _prevOscar = oscar;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Oscar", oscar }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(oscar, outputs);
-    }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
+        var point = _window.Next(_input.GetValue(bar), bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Oscar", point.Value } } : null);
     }
 }
 

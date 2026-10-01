@@ -799,34 +799,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateOscarIndicator(this StockData stockData, int length = 8)
     {
-        List<double> oscarList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var rough = highest - lowest != 0 ? MinOrMax((currentValue - lowest) / (highest - lowest) * 100, 100, 0) : 0;
-            var prevOscar1 = i >= 1 ? oscarList[i - 1] : 0;
-            var prevOscar2 = i >= 2 ? oscarList[i - 2] : 0;
-
-            var oscar = (prevOscar1 / 6) + (rough / 3);
-            oscarList.Add(oscar);
-
-            var signal = GetRsiSignal(oscar - prevOscar1, prevOscar1 - prevOscar2, oscar, prevOscar1, 80, 20);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Oscar", oscarList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(oscarList);
-        stockData.IndicatorName = IndicatorName.OscarIndicator;
-
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        using var window = new OscarWindow(length);
+        for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(input[i], high[i], low[i], true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Oscar", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.OscarIndicator;
         return stockData;
     }
 

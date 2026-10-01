@@ -150,10 +150,6 @@ OoplesFinance.StockIndicators.Indicators.MobilityOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.MobilityOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.MobilityOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.MobilityOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.OscarIndicator/default
-OoplesFinance.StockIndicators.Indicators.OscarIndicator/longer-periods
-OoplesFinance.StockIndicators.Indicators.OscarIndicator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.OscarIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/default
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/minimum-periods

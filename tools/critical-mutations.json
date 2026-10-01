@@ -70987,5 +70987,221 @@
     "before": "new OnBalanceVolumeReflexState(obvr.MaType, obvr.Length, obvr.SignalLength)",
     "after": "new OnBalanceVolumeReflexState(obvr.MaType, 1, obvr.SignalLength)",
     "filter": "FullyQualifiedName~ObvReflexNumericalTests.EveryRouteMatchesIndependentCoordinates"
+  },
+  {
+    "id": "oscar-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "_count - _length + 1L",
+    "after": "_count - _length",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "if (final)\n        {",
+    "after": "if (value != 0 || final)\n        {",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-high",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "Extreme(_highs, high, true, final)",
+    "after": "Extreme(_highs, high, false, final)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-low",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "Extreme(_lows, low, false, final)",
+    "after": "Extreme(_lows, low, true, final)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-range",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "Number.Of(highest) - Number.Of(lowest)",
+    "after": "Number.Of(highest - lowest)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.OppositeExtremeBoundsAndSubnormalRanges"
+  },
+  {
+    "id": "oscar-wide-difference",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "Number.Of(price) - Number.Of(lowest)",
+    "after": "Number.Of(price - lowest)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.OppositeExtremeBoundsAndSubnormalRanges"
+  },
+  {
+    "id": "oscar-wide-scale",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": ".Divide(range).Times(100)",
+    "after": ".Divide(range).Times(99)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.IndependentHandValuesAndSignals"
+  },
+  {
+    "id": "oscar-wide-zero",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "range.Sign == 0 ? default",
+    "after": "range.Sign == 0 ? Number.Of(50)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ClampAndExactZeroRangePreserveFormula"
+  },
+  {
+    "id": "oscar-wide-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "if (rough.Sign < 0) rough = default;",
+    "after": "if (rough.Sign < 0) rough = Number.Of(1);",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ClampAndExactZeroRangePreserveFormula"
+  },
+  {
+    "id": "oscar-wide-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "rough = Number.Of(100);",
+    "after": "rough = Number.Of(99);",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ClampAndExactZeroRangePreserveFormula"
+  },
+  {
+    "id": "oscar-wide-memory-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "_previous.Divide(6)",
+    "after": "_previous.Divide(5)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.IndependentHandValuesAndSignals"
+  },
+  {
+    "id": "oscar-wide-drive-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "rough.Divide(3)",
+    "after": "rough.Divide(2)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.IndependentHandValuesAndSignals"
+  },
+  {
+    "id": "oscar-wide-slope",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "var slope = value - _previous",
+    "after": "var slope = _previous - value",
+    "filter": "FullyQualifiedName~OscarNumericalTests.IndependentHandValuesAndSignals"
+  },
+  {
+    "id": "oscar-wide-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "var acceleration = slope - _previousSlope",
+    "after": "var acceleration = slope",
+    "filter": "FullyQualifiedName~OscarNumericalTests.IndependentHandValuesAndSignals"
+  },
+  {
+    "id": "oscar-wide-commit",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "if (final) { _previous = value;",
+    "after": "if (price != 0 || final) { _previous = value;",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "_previous = _previousSlope = default;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "_highs.Clear();",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-count",
+    "module": "numerical",
+    "file": "src/Helpers/OscarWindow.cs",
+    "scope": "internal sealed class OscarWindow",
+    "before": "_count++;",
+    "after": "_count += 2;",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class OscarIndicatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? bar.Close : _input.GetValue(bar)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.RejectedCandlesDoNotAdvanceState"
+  },
+  {
+    "id": "oscar-wide-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOscarIndicatorFast(",
+    "before": "var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var (_, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~OscarNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "oscar-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void OscarIndicator(",
+    "before": "new OscarWindow(length)",
+    "after": "new OscarWindow(1)",
+    "filter": "FullyQualifiedName~OscarNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "oscar-wide-core-atomic",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void OscarIndicator(",
+    "before": "StreamingInputValidation.Finite(close[i], nameof(close));",
+    "after": "StreamingInputValidation.Finite(0, nameof(close));",
+    "filter": "FullyQualifiedName~OscarNumericalTests.CoreSpanAndInvalidInputsAreAtomic"
+  },
+  {
+    "id": "oscar-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "OscarIndicator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~OscarNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

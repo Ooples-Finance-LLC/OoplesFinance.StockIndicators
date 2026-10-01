@@ -4522,3 +4522,10 @@ The first replacement bypassed validation but triggered analyzer SI0004 because 
 The batch, fast, typed compute, native, and streaming routes retain exact lag-directed volume totals through signal smoothing. Independent references and hands cover cancellation, overflow recovery, selected prices, previews/reset, callback slots, and lazy extreme periods. The typed native factory now registers the indicator.
 
 **83/83 distinct focused tests passed** after correcting a missing typed factory registration. The initial run had 56 passes and 27 failures; the 18-case factory rerun and 45-case route rerun supersede affected results on net10.0 (`obv-reflex674.trx`, `obv-reflex674-factory.trx`, `obv-reflex674-routes.trx`). Inventory: **6,458/7,131 enrolled**, **673 omissions across 100 types**, all independent references registered, no construction failures, backlog exact. The 24 behavioral faults and final hosted/platform/package/performance gates remain pending.
+
+
+### Batch 675: Oscar Indicator numerical routes
+
+All five routes and the existing core now preserve exact range ratios and recursive arithmetic for the Oscar recurrence. Independent weighted-sum references and rational hands cover extreme and subnormal ranges, clamping, selected prices, signals, previews/reset, and lazy periods. Core argument checks precede output writes.
+
+**39/39 focused tests passed** on net10.0 (`oscar675-corrected.trx`). Inventory: **6,462/7,131 enrolled**, **669 omissions across 99 types**, all independent references registered, no construction failures, backlog exact. The 24 behavioral faults and final hosted/platform/package/performance gates remain pending.
