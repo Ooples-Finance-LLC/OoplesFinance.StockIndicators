@@ -34,19 +34,6 @@ internal static partial class BuiltInFormulaReferences
         }).ToArray();
     }
 
-    private static double[] DepthCorrectionReference(double[] prices, double[] feedback)
-    {
-        var impulse = new double[prices.Length];
-        var gain = 1 - feedback.Sum();
-        for (var i = 0; i < impulse.Length; i++)
-            impulse[i] = i == 0 ? 1 : Enumerable.Range(1, Math.Min(i, feedback.Length)).Sum(lag => feedback[lag - 1] * impulse[i - lag]);
-        // Missing alpha history is seeded with that bar's price; beta history is zero.
-        var forcing = prices.Select((price, i) => price * (gain + feedback.Skip(i).Sum())).ToArray();
-        var alpha = prices.Select((_, i) => Enumerable.Range(0, i + 1).Sum(j => forcing[j] * impulse[i - j])).ToArray();
-        return prices.Select((_, i) => alpha[i] + gain / feedback.Length * Enumerable.Range(0, i + 1)
-            .Sum(j => (prices[j] - alpha[j]) * impulse[i - j])).ToArray();
-    }
-
     private static double[] SecondOrderImpulse(int count, double first, double second)
     {
         var impulse = new double[count];
@@ -425,17 +412,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.MorphedSineWave:
                 return new("Msw", new[] { "Msw" }, bars => MorphedSineOutputs(bars, indicator));
             case IndicatorName.MultiDepthZeroLagExponentialMovingAverage:
-                return new("Md2Pole", new[] { "Md2Pole", "Md1Pole", "Md3Pole" }, bars =>
-                {
-                    var radius2 = Math.Exp(-Math.Sqrt(2) * Math.PI / length);
-                    var radius3 = Math.Exp(-Math.PI / length);
-                    var b = 2 * radius3 * Math.Cos(Math.Sqrt(3) * Math.PI / length);
-                    var c = radius3 * radius3;
-                    var prices = Closes(bars);
-                    return Outputs(("Md1Pole", DepthCorrectionReference(prices, new[] { 1 - 2d / (length + 1) })),
-                        ("Md2Pole", DepthCorrectionReference(prices, new[] { 2 * radius2 * Math.Cos(Math.Sqrt(2) * Math.PI / length), -radius2 * radius2 })),
-                        ("Md3Pole", DepthCorrectionReference(prices, new[] { b + c, -c * (1 + b), c * c })));
-                });
+                return new("Md2Pole", new[] { "Md2Pole", "Md1Pole", "Md3Pole" }, bars => MultiDepthOutputs(bars, indicator));
             case IndicatorName.KalmanSmoother:
                 return new("Ks", new[] { "Ks" }, bars =>
                 {

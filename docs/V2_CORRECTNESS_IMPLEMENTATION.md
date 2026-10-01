@@ -4468,3 +4468,12 @@ The isolated campaigns `649-repaired-a` and `649-repaired-b` passed their baseli
 Source snapshot SHA256: `664f7d89969a009383aa9e30570f6e13afd1c0d257fce45bd91a059cd54593d6`. Archive SHA256: `ba39a9a279ef631338c9cc3051e360aaa5de4f8515a4960fd6dbd18f790373c7` and `ba39a9a279ef631338c9cc3051e360aaa5de4f8515a4960fd6dbd18f790373c7`.
 
 This is evidence for the isolated batch-649 source. Source was already published in the batch-649 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 671: Multi-Depth public numerical routes
+
+The public one-, two-, and three-pole filters now retain exact fixed-coefficient state, stable small feed gains, finite-input guards, and selected-source routing. The two-pole output remains primary. Missing alpha history uses current price; beta history starts at zero. The separate internal core and moving-average registry remain unchanged pending their alignment decision.
+
+**40/40 focused tests passed** on net10.0 (`multidepth671-flat-reference-final.trx`): four configurations across five public routes, selected inputs, every output's fault rejection, numerical enrollment, dyadic and closed-form impulse hands, constant/extreme inputs, lazy extreme periods, preview/reset, invalid-candle rejection, and callback behavior. The exact integer reference was also checked against a direct rational recurrence in 720 independent Python algebra comparisons. No tolerance was widened. The earlier precision-limited failure and interrupted reference run are not qualification evidence.
+
+The compiled inventory is **6,431/7,131 enrolled**, with **700 omissions across 103 types**, all 7,131 independent reference registrations, no construction failures, and an exact backlog match. The 39 prepared behavioral faults await isolated mutation qualification. Later numerical batches and final hosted/platform/package/release/performance gates remain incomplete.

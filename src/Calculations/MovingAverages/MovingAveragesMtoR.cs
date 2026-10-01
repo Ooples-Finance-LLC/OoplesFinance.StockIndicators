@@ -1233,87 +1233,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMultiDepthZeroLagExponentialMovingAverage(this StockData stockData, int length = 50)
     {
-        List<double> alpha1List = new(stockData.Count);
-        List<double> beta1List = new(stockData.Count);
-        List<double> alpha2List = new(stockData.Count);
-        List<double> beta2List = new(stockData.Count);
-        List<double> alpha3List = new(stockData.Count);
-        List<double> beta3List = new(stockData.Count);
-        List<double> mda1List = new(stockData.Count);
-        List<double> mda2List = new(stockData.Count);
-        List<double> mda3List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a1 = (double)2 / (length + 1);
-        var a2 = Exp(-Sqrt(2) * Math.PI / length);
-        var a3 = Exp(-Math.PI / length);
-        var b2 = 2 * a2 * Math.Cos(Sqrt(2) * Math.PI / length);
-        var b3 = 2 * a3 * Math.Cos(Sqrt(3) * Math.PI / length);
-        var c = Exp(-2 * Math.PI / length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevAlpha1 = i >= 1 ? alpha1List[i - 1] : currentValue;
-            var alpha1 = (a1 * currentValue) + ((1 - a1) * prevAlpha1);
-            alpha1List.Add(alpha1);
-
-            var prevAlpha2 = i >= 1 ? alpha2List[i - 1] : currentValue;
-            var priorAlpha2 = i >= 2 ? alpha2List[i - 2] : currentValue;
-            var alpha2 = (b2 * prevAlpha2) - (a2 * a2 * priorAlpha2) + ((1 - b2 + (a2 * a2)) * currentValue);
-            alpha2List.Add(alpha2);
-
-            var prevAlpha3 = i >= 1 ? alpha3List[i - 1] : currentValue;
-            var prevAlpha3_2 = i >= 2 ? alpha3List[i - 2] : currentValue;
-            var prevAlpha3_3 = i >= 3 ? alpha3List[i - 3] : currentValue;
-            var alpha3 = ((b3 + c) * prevAlpha3) - ((c + (b3 * c)) * prevAlpha3_2) + (c * c * prevAlpha3_3) + ((1 - b3 + c) * (1 - c) * currentValue);
-            alpha3List.Add(alpha3);
-
-            var detrend1 = currentValue - alpha1;
-            var detrend2 = currentValue - alpha2;
-            var detrend3 = currentValue - alpha3;
-
-            var prevBeta1 = i >= 1 ? beta1List[i - 1] : 0;
-            var beta1 = (a1 * detrend1) + ((1 - a1) * prevBeta1);
-            beta1List.Add(beta1);
-
-            var prevBeta2 = i >= 1 ? beta2List[i - 1] : 0;
-            var prevBeta2_2 = i >= 2 ? beta2List[i - 2] : 0;
-            var beta2 = (b2 * prevBeta2) - (a2 * a2 * prevBeta2_2) + ((1 - b2 + (a2 * a2)) * detrend2);
-            beta2List.Add(beta2);
-
-            var prevBeta3 = i >= 1 ? beta3List[i - 1] : 0;
-            var prevBeta3_2 = i >= 2 ? beta3List[i - 2] : 0;
-            var prevBeta3_3 = i >= 3 ? beta3List[i - 3] : 0;
-            var beta3 = ((b3 + c) * prevBeta3) - ((c + (b3 * c)) * prevBeta3_2) + (c * c * prevBeta3_3) + ((1 - b3 + c) * (1 - c) * detrend3);
-            beta3List.Add(beta3);
-
-            var mda1 = alpha1 + ((double)1 / 1 * beta1);
-            mda1List.Add(mda1);
-
-            var prevMda2 = GetLastOrDefault(mda2List);
-            var mda2 = alpha2 + ((double)1 / 2 * beta2);
-            mda2List.Add(mda2);
-
-            var mda3 = alpha3 + ((double)1 / 3 * beta3);
-            mda3List.Add(mda3);
-
-            var signal = GetCompareSignal(currentValue - mda2, prevValue - prevMda2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Md2Pole", mda2List },
-            { "Md1Pole", mda1List },
-            { "Md3Pole", mda3List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mda2List);
-        stockData.IndicatorName = IndicatorName.MultiDepthZeroLagExponentialMovingAverage;
-
+        var window = new MultiDepthWindow(length);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var first = new List<double>(stockData.Count); var second = new List<double>(stockData.Count); var third = new List<double>(stockData.Count);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(input[i], true); first.Add(point.One); second.Add(point.Two); third.Add(point.Three); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Md2Pole", second }, { "Md1Pole", first }, { "Md3Pole", third } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(second); stockData.IndicatorName = IndicatorName.MultiDepthZeroLagExponentialMovingAverage;
         return stockData;
     }
 

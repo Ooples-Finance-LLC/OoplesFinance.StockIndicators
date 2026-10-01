@@ -135,123 +135,16 @@ public sealed class MovingAverageV3State : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Md2Pole")]
 public sealed class MultiDepthZeroLagExponentialMovingAverageState : IStreamingIndicatorState
 {
-    private readonly double _a1;
-    private readonly double _a2;
-    private readonly double _a3;
-    private readonly double _b2;
-    private readonly double _b3;
-    private readonly double _c;
-    private readonly StreamingInputResolver _input;
-    private double _alpha1;
-    private double _alpha2;
-    private double _alpha2_2;
-    private double _alpha3;
-    private double _alpha3_2;
-    private double _alpha3_3;
-    private double _beta1;
-    private double _beta2;
-    private double _beta2_2;
-    private double _beta3_1;
-    private double _beta3_2;
-    private double _beta3_3;
-    private int _index;
-
-    public MultiDepthZeroLagExponentialMovingAverageState(int length = 50)
-    {
-        var resolved = Math.Max(1, length);
-        _a1 = (double)2 / (resolved + 1);
-        _a2 = MathHelper.Exp(-MathHelper.Sqrt(2) * Math.PI / resolved);
-        _a3 = MathHelper.Exp(-Math.PI / resolved);
-        _b2 = 2 * _a2 * Math.Cos(MathHelper.Sqrt(2) * Math.PI / resolved);
-        _b3 = 2 * _a3 * Math.Cos(MathHelper.Sqrt(3) * Math.PI / resolved);
-        _c = MathHelper.Exp(-2 * Math.PI / resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MultiDepthWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public MultiDepthZeroLagExponentialMovingAverageState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.MultiDepthZeroLagExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _alpha1 = 0;
-        _alpha2 = 0;
-        _alpha2_2 = 0;
-        _alpha3 = 0;
-        _alpha3_2 = 0;
-        _alpha3_3 = 0;
-        _beta1 = 0;
-        _beta2 = 0;
-        _beta2_2 = 0;
-        _beta3_1 = 0;
-        _beta3_2 = 0;
-        _beta3_3 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevAlpha1 = _index >= 1 ? _alpha1 : value;
-        var alpha1 = (_a1 * value) + ((1 - _a1) * prevAlpha1);
-
-        var prevAlpha2 = _index >= 1 ? _alpha2 : value;
-        var priorAlpha2 = _index >= 2 ? _alpha2_2 : value;
-        var alpha2 = (_b2 * prevAlpha2) - (_a2 * _a2 * priorAlpha2) + ((1 - _b2 + (_a2 * _a2)) * value);
-
-        var prevAlpha3 = _index >= 1 ? _alpha3 : value;
-        var prevAlpha3_2 = _index >= 2 ? _alpha3_2 : value;
-        var prevAlpha3_3 = _index >= 3 ? _alpha3_3 : value;
-        var alpha3 = ((_b3 + _c) * prevAlpha3) - ((_c + (_b3 * _c)) * prevAlpha3_2) +
-            (_c * _c * prevAlpha3_3) + ((1 - _b3 + _c) * (1 - _c) * value);
-
-        var detrend1 = value - alpha1;
-        var detrend2 = value - alpha2;
-        var detrend3 = value - alpha3;
-
-        var prevBeta1 = _index >= 1 ? _beta1 : 0;
-        var beta1 = (_a1 * detrend1) + ((1 - _a1) * prevBeta1);
-
-        var prevBeta2 = _index >= 1 ? _beta2 : 0;
-        var prevBeta2_2 = _index >= 2 ? _beta2_2 : 0;
-        var beta2 = (_b2 * prevBeta2) - (_a2 * _a2 * prevBeta2_2) + ((1 - _b2 + (_a2 * _a2)) * detrend2);
-
-        var prevBeta3_2 = _index >= 2 ? _beta3_2 : 0;
-        var prevBeta3_3 = _index >= 3 ? _beta3_3 : 0;
-        var beta3 = ((_b3 + _c) * (_index >= 1 ? _beta3_1 : 0)) - ((_c + (_b3 * _c)) * prevBeta3_2) +
-            (_c * _c * prevBeta3_3) + ((1 - _b3 + _c) * (1 - _c) * detrend3);
-
-        var mda1 = alpha1 + beta1;
-        var mda2 = alpha2 + (0.5 * beta2);
-        var mda3 = alpha3 + ((double)1 / 3 * beta3);
-
-        if (isFinal)
-        {
-            _alpha1 = alpha1;
-            _alpha2_2 = _alpha2;
-            _alpha2 = alpha2;
-            _alpha3_3 = _alpha3_2;
-            _alpha3_2 = _alpha3;
-            _alpha3 = alpha3;
-            _beta1 = beta1;
-            _beta2_2 = _beta2;
-            _beta2 = beta2;
-            _beta3_3 = _beta3_2;
-            _beta3_2 = _beta3_1;
-            _beta3_1 = beta3;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Md2Pole", mda2 },
-                { "Md1Pole", mda1 },
-                { "Md3Pole", mda3 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mda2, outputs);
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Two, includeOutputs ? new Dictionary<string, double>
+            { { "Md2Pole", point.Two }, { "Md1Pole", point.One }, { "Md3Pole", point.Three } } : null);
     }
 }
 

@@ -12534,74 +12534,19 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(StockData data,
         ComputeContext context, int length = 50, MultiDepthPole pole = MultiDepthPole.TwoPole)
     {
-        // CalculateMultiDepthZeroLagExponentialMovingAverage runs one, two and three pole filters over the
-        // series, runs the same filter again over what each one leaves behind, and adds that correction back
-        // divided by the depth. The two pole depth is the primary series. Each filter seeds its own history
-        // with the current value rather than zero, so none of them opens from the bottom of the chart.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var a1 = (double)2 / (length + 1);
-        var a2 = MathHelper.Exp(-MathHelper.Sqrt(2) * Math.PI / length);
-        var a3 = MathHelper.Exp(-Math.PI / length);
-        var b2 = 2 * a2 * Math.Cos(MathHelper.Sqrt(2) * Math.PI / length);
-        var b3 = 2 * a3 * Math.Cos(MathHelper.Sqrt(3) * Math.PI / length);
-        var c = MathHelper.Exp(-2 * Math.PI / length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double alpha1Previous = 0;
-        double alpha2Previous = 0, alpha2Prior = 0;
-        double alpha3Previous = 0, alpha3Prior = 0, alpha3Earliest = 0;
-        double beta1Previous = 0;
-        double beta2Previous = 0, beta2Prior = 0;
-        double beta3Previous = 0, beta3Prior = 0, beta3Earliest = 0;
-        for (var i = 0; i < count; i++)
+        var window = new MultiDepthWindow(length);
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var result = context.Rent(input.Count);
+        try
         {
-            var currentValue = input[i];
-
-            var alpha1 = (a1 * currentValue) + ((1 - a1) * (i >= 1 ? alpha1Previous : currentValue));
-            var alpha2 = (b2 * (i >= 1 ? alpha2Previous : currentValue))
-                - (a2 * a2 * (i >= 2 ? alpha2Prior : currentValue))
-                + ((1 - b2 + (a2 * a2)) * currentValue);
-            var alpha3 = ((b3 + c) * (i >= 1 ? alpha3Previous : currentValue))
-                - ((c + (b3 * c)) * (i >= 2 ? alpha3Prior : currentValue))
-                + (c * c * (i >= 3 ? alpha3Earliest : currentValue))
-                + ((1 - b3 + c) * (1 - c) * currentValue);
-
-            var beta1 = (a1 * (currentValue - alpha1)) + ((1 - a1) * beta1Previous);
-            var beta2 = (b2 * beta2Previous) - (a2 * a2 * beta2Prior)
-                + ((1 - b2 + (a2 * a2)) * (currentValue - alpha2));
-
-            // Apply the same three-pole filter to the residual, with successive one-, two-, and three-bar delays.
-            var beta3 = ((b3 + c) * beta3Previous) - ((c + (b3 * c)) * beta3Prior) + (c * c * beta3Earliest)
-                + ((1 - b3 + c) * (1 - c) * (currentValue - alpha3));
-
-            output[i] = pole switch
+            for (var i = 0; i < input.Count; i++)
             {
-                MultiDepthPole.OnePole => alpha1 + ((double)1 / 1 * beta1),
-                MultiDepthPole.ThreePole => alpha3 + ((double)1 / 3 * beta3),
-                _ => alpha2 + ((double)1 / 2 * beta2)
-            };
-
-            alpha1Previous = alpha1;
-            alpha2Prior = alpha2Previous;
-            alpha2Previous = alpha2;
-            alpha3Earliest = alpha3Prior;
-            alpha3Prior = alpha3Previous;
-            alpha3Previous = alpha3;
-            beta1Previous = beta1;
-            beta2Prior = beta2Previous;
-            beta2Previous = beta2;
-            beta3Earliest = beta3Prior;
-            beta3Prior = beta3Previous;
-            beta3Previous = beta3;
+                var point = window.Next(input[i], true);
+                result.WritableSpan[i] = pole switch { MultiDepthPole.OnePole => point.One, MultiDepthPole.ThreePole => point.Three, _ => point.Two };
+            }
+            return result;
         }
-
-        return buffer;
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

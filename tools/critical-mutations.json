@@ -70006,5 +70006,356 @@
     "before": "MovingAverageAdaptiveQ or ",
     "after": "",
     "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "multidepth-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-one-gain",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "Number.Of(2).Round(1).Divide(length + 1L)",
+    "after": "Number.Of(1).Divide(length + 1L)",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-two-angle",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "Math.Sqrt(2) * Math.PI / length",
+    "after": "Math.PI / length",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-three-angle",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "Math.Sqrt(3) * Math.PI / length / 2",
+    "after": "Math.PI / length / 2",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-two-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "default(Number) - radius2 * radius2",
+    "after": "radius2 * radius2",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-three-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "default(Number) - c - b3 * c",
+    "after": "default(Number) - c + b3 * c",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-three-last",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "c * c })",
+    "after": "c })",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-two-gain-zero",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "var gain2 = gap2 * gap2 + (radius2 * sine2 * sine2).Times(4);",
+    "after": "var gain2 = Number.Of(0);",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.ExtremePeriodsAreLazyAndPreserveFeedGain"
+  },
+  {
+    "id": "multidepth-wide-three-gain-zero",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "var gain3 = (gap3 * gap3 + (radius3 * sine3 * sine3).Times(4)) * (one - c);",
+    "after": "var gain3 = Number.Of(0);",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.ExtremePeriodsAreLazyAndPreserveFeedGain"
+  },
+  {
+    "id": "multidepth-wide-margin-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "var margin = current - second;",
+    "after": "var margin = second - current;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-signal-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "var change = margin - _previousMargin;",
+    "after": "var change = margin;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-margin-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "if (final) _previousMargin = margin;",
+    "after": "if (price != 0 || final) _previousMargin = margin;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-lag-residual",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "((_anchors[lag] - current) + _alpha[lag])",
+    "after": "((_anchors[lag] - current) - _alpha[lag])",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-alpha-current",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "var alpha = current + residual;",
+    "after": "var alpha = current - residual;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-beta-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_gain * (default(Number) - residual)",
+    "after": "_gain * residual",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-beta-history",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "beta += _feedback[lag] * _beta[lag];",
+    "after": "beta -= _feedback[lag] * _beta[lag];",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-depth-correction",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "beta.Divide(_feedback.Length)",
+    "after": "beta",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-state-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "if (final)\n            {",
+    "after": "if (_count != 0 || final)\n            {",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-alpha-shift",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_alpha[lag] = _alpha[lag - 1];",
+    "after": "_alpha[lag] = default;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-anchor-shift",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_anchors[lag] = _anchors[lag - 1];",
+    "after": "_anchors[lag] = default;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-beta-shift",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_beta[lag] = _beta[lag - 1];",
+    "after": "_beta[lag] = default;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-remember-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "relative ? residual : alpha",
+    "after": "Number.Of(0)",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-remember-beta",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_beta[0] = beta;",
+    "after": "_beta[0] = default;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-history-count",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "if (_count < _feedback.Length) _count++;",
+    "after": "if (_count < 1) _count++;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_count = 0;",
+    "after": "_count = _feedback.Length;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-publish-two",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "second.Publish(), third.Publish()",
+    "after": "first.Publish(), third.Publish()",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MultiDepthZeroLagExponentialMovingAverageState : IStreamingIndicatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? _input.GetValue(bar) : bar.Close",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.NonfiniteCandlesCannotAdvanceState"
+  },
+  {
+    "id": "multidepth-wide-native-one",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MultiDepthZeroLagExponentialMovingAverageState : IStreamingIndicatorState",
+    "before": "{ \"Md1Pole\", point.One }",
+    "after": "{ \"Md1Pole\", point.Two }",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-native-three",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MultiDepthZeroLagExponentialMovingAverageState : IStreamingIndicatorState",
+    "before": "{ \"Md3Pole\", point.Three }",
+    "after": "{ \"Md3Pole\", point.Two }",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-native-length",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MultiDepthZeroLagExponentialMovingAverageState : IStreamingIndicatorState",
+    "before": "_window = new(length)",
+    "after": "_window = new(50)",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.InputValues;",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "multidepth-wide-fast-tail",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(",
+    "before": "i < input.Count",
+    "after": "i < input.Count - 1",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-fast-one",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(",
+    "before": "MultiDepthPole.OnePole => point.One",
+    "after": "MultiDepthPole.OnePole => point.Two",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.OnePoleHasIndependentDyadicHandValues"
+  },
+  {
+    "id": "multidepth-wide-fast-three",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(",
+    "before": "MultiDepthPole.ThreePole => point.Three",
+    "after": "MultiDepthPole.ThreePole => point.Two",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-batch-three",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculateMultiDepthZeroLagExponentialMovingAverage(",
+    "before": "third.Add(point.Three)",
+    "after": "third.Add(point.Two)",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.WideAlternatingPricesRecoverWithoutNaN"
+  },
+  {
+    "id": "multidepth-wide-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)",
+    "before": "MultiDepthZeroLagExponentialMovingAverageSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.EveryPublicRouteMatchesIndependentPoles"
+  },
+  {
+    "id": "multidepth-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "MultiDepthZeroLagExponentialMovingAverage or ",
+    "after": "",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "multidepth-wide-round-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_alpha[0] = relative ? residual : alpha;",
+    "after": "_alpha[0] = (relative ? residual : alpha).Round();",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.IsolatedSpikeCancelsExactlyAtTheClosedFormZero"
+  },
+  {
+    "id": "multidepth-wide-round-beta",
+    "module": "numerical",
+    "file": "src/Helpers/MultiDepthWindow.cs",
+    "scope": "internal sealed class MultiDepthWindow",
+    "before": "_beta[0] = beta;",
+    "after": "_beta[0] = beta.Round();",
+    "filter": "FullyQualifiedName~MultiDepthNumericalTests.IsolatedSpikeCancelsExactlyAtTheClosedFormZero"
   }
 ]
