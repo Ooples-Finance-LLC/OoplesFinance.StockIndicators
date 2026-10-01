@@ -4152,3 +4152,12 @@ This is evidence for the isolated batch-633 source. Source was already published
 JRC now retains exact ranges and rolling sums until forming its logarithmic ratio, preventing overflow and cancellation in bounded dimension results. Period products widen before the existing 2..530 clamp; histories allocate as observations arrive. Batch, fast and native routes share the range and smoothing implementation, with the typed native factory binding included. Selected inputs derive consistent ranges, and the two callback slots retain their distinct inputs. The documented startup, scale-one convention and reversed spread signals remain explicit.
 
 Independent fraction-array window recomputation covers all outputs, with separate rational-log comparisons for extreme and near-unity ratios. The corrected focused run passed **98/98 checks**, including existing range-expiry regressions, route and enrollment checks, callbacks, extreme periods/ranges, preview/reset and rejected candles. The initial run exposed a missing typed factory binding and a test that registered only one of its two expected callbacks; both are corrected. **40 prepared faults remain unqualified**; all **7,516 anchors** apply. Candidate/frozen snapshots match on2,195 files. Enrollment is **6,309/7,131**, leaving **822 omissions**. Mutation qualification is complete through633; batches634–653 and final gates remain pending. PR246 stays draft.
+
+
+### Batch 634: Enhanced Williams mutation qualification
+
+The isolated campaigns `634a` and `634b` passed their baselines and caught **38/38 compiled behavioral faults**, alongside **81/81 initial focused tests plus1/1 new reset regression**. Both archives were compared byte-for-byte with the retained batch-634 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `3ad3c7021e2b9a36bc7e8d026c5b40a7fa9914b34f9dda0e69cf5be282069d08`. Archive SHA256: `1e658dc172f12a02d801f69fc90686b595bbc39de58e2fa5942851a19b7d02bb` and `1e658dc172f12a02d801f69fc90686b595bbc39de58e2fa5942851a19b7d02bb`.
+
+This is evidence for the isolated batch-634 source. Source was already published in the batch-634 checkpoint; this update does not restore older source files. Mutation verification for batches 635 through 653 and the remaining final gates is still incomplete.
