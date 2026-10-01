@@ -45,6 +45,7 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            JrcFractalDimensionSpecOptions jrc => new JrcFractalDimensionState(jrc.MaType, jrc.Length1, jrc.Length2, jrc.SmoothLength),
             InertiaSpecOptions inertia => new InertiaIndicatorState(length: inertia.SmoothLength, rviLength: inertia.RviLength),
             InertiaIndicatorSpecOptions inertia => new InertiaIndicatorState(inertia.MaType, inertia.Length),
             EnhancedWilliamsRSpecOptions williams => new EnhancedWilliamsRState(williams.MaType, williams.Length, williams.SignalLength),

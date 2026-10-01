@@ -2067,9 +2067,7 @@ internal static partial class IndicatorCompute
             InverseFisherFastZScoreSpecOptions iffz => ComputeInverseFisherFastZScoreFast(data, context, iffz.Length, iffz.MaType),
             InverseFisherZScoreSpecOptions ifz => ComputeInverseFisherZScoreFast(data, context, ifz.Length, ifz.MaType),
             JapaneseCorrelationCoefficientSpecOptions jcc => ComputeJapaneseCorrelationCoefficientFast(data, context, jcc.Length, jcc.MaType),
-            JrcFractalDimensionSpecOptions jfd => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeJrcFractalDimensionFast(data, context, jfd.Length1, jfd.Length2, jfd.SmoothLength, jfd.MaType), jfd.SmoothLength, jfd.MaType)
-                : ComputeJrcFractalDimensionFast(data, context, jfd.Length1, jfd.Length2, jfd.SmoothLength, jfd.MaType),
+            JrcFractalDimensionSpecOptions jfd => ComputeJrcFractalDimensionFast(data, context, jfd.Length1, jfd.Length2, jfd.SmoothLength, jfd.MaType, spec.OutputKey == "Signal"),
             KaseConvergenceDivergenceSpecOptions kcd => ComputeKaseConvergenceDivergenceFast(data, context, kcd.Length1, kcd.Length2, kcd.Length3, kcd.MaType),
             KaseDevStopV1SpecOptions kds1 => ComputeKaseDevStopV1Fast(data, context, kds1, spec.OutputKey),
             KaseDevStopV2SpecOptions kds2 => spec.OutputKey switch
@@ -19383,59 +19381,19 @@ internal static partial class IndicatorCompute
     /// Returns the fractal dimension value.
     /// </summary>
     internal static ComputeBuffer ComputeJrcFractalDimensionFast(StockData data, ComputeContext context, int length1 = 20,
-        int length2 = 5, int smoothLength = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        int length2 = 5, int smoothLength = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool signal = false)
     {
-        // CalculateJrcFractalDimension compares the range the market covered over one long window against the
-        // average of the ranges it covered over the short windows inside it, and reads the fractal dimension
-        // off that ratio on a log scale. The arm this replaces was a moving average of the close, and answered
-        // for only two of the moving average types besides.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        var wind1 = MathHelper.MinOrMax((length2 - 1) * length1);
-        var wind2 = MathHelper.MinOrMax(length2 * length1);
-        var nLog = Math.Log(length2);
-
-        using var dimension = context.Rent(count);
-        using var ranges = context.Rent(count);
-        var fractalDimension = dimension.WritableSpan;
-        var smallRanges = ranges.WritableSpan;
-
-        var shortHigh = new RollingMinMax(length1);
-        var shortLow = new RollingMinMax(length1);
-        var longHigh = new RollingMinMax(wind2);
-        var longLow = new RollingMinMax(wind2);
-
-        double smallSum = 0;
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var buffer = context.Rent(input.Count);
+        if (!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides)
         {
-            shortHigh.Add(highs[i]);
-            shortLow.Add(lows[i]);
-            longHigh.Add(highs[i]);
-            longLow.Add(lows[i]);
-
-            var previousValue1 = i >= length1 ? input[i - length1] : 0;
-            var previousValue2 = i >= wind2 ? input[i - wind2] : 0;
-            var bigRange = Math.Max(previousValue2, longHigh.Max) - Math.Min(previousValue2, longLow.Min);
-
-            var previousSmallRange = i >= wind1 ? smallRanges[i - wind1] : 0;
-            var smallRange = Math.Max(previousValue1, shortHigh.Max) - Math.Min(previousValue1, shortLow.Min);
-            smallRanges[i] = smallRange;
-
-            smallSum += smallRange - previousSmallRange;
-
-            var average = wind1 != 0 ? smallSum / wind1 : 0;
-            var ratio = average != 0 ? bigRange / average : 0;
-            var scaled = ratio > 0 ? Math.Log(ratio) : 0;
-            fractalDimension[i] = nLog != 0 ? 2 - (scaled / nLog) : 0;
+            var components = JrcWindow.Components(data, input, high, low, maType, length1, length2, smoothLength, true, signal);
+            (signal ? components.Signal : components.Line).AsSpan().CopyTo(buffer.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, dimension.Span, buffer.WritableSpan);
-
+        else
+        {
+            using var window = new JrcWindow(maType, length1, length2, smoothLength);
+            for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); buffer.WritableSpan[i] = signal ? point.SignalLine : point.Line; }
+        }
         return buffer;
     }
 

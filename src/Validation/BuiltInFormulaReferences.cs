@@ -22,6 +22,11 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.JrcFractalDimension && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var jrcKeys = builtIn.BatchOutputKey is { } jrcSelected ? new[] { jrcSelected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < jrcKeys.Length; slot++) { var key = jrcKeys[slot]; yield return IndicatorValidationRule.Reference(slot, bars => JrcOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.JmaRsxClone)
         {
             yield return IndicatorValidationRule.Reference(0, bars => RsxOutputs(bars, builtIn)["Rsx"], IndicatorErrorBudget.Exact); yield break;

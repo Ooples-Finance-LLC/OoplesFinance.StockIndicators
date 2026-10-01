@@ -64391,5 +64391,365 @@
     "before": "window.Next(close[i], true)",
     "after": "window.Next(close[close.Length - i - 1], true)",
     "filter": "FullyQualifiedName~RsxNumericalTests.CoreSpanBoundsAndExactInPlaceReplay"
+  },
+  {
+    "id": "jrc-wide-product-width",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "(long)left * right",
+    "after": "left * right",
+    "filter": "FullyQualifiedName~JrcNumericalTests.WidenedPeriodProductsPreserveClampAndLazyHistory"
+  },
+  {
+    "id": "jrc-wide-product-cap",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "Math.Min(530L,",
+    "after": "Math.Min(529L,",
+    "filter": "FullyQualifiedName~JrcNumericalTests.WidenedPeriodProductsPreserveClampAndLazyHistory"
+  },
+  {
+    "id": "jrc-wide-aggregation",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "BoundedProduct(_length, _scale - 1)",
+    "after": "BoundedProduct(_length, _scale)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-long-period",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_longLength = BoundedProduct(_length, _scale)",
+    "after": "_longLength = BoundedProduct(_length, _scale - 1)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-scale-log",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "Math.Log(_scale);",
+    "after": "Math.Log(_scale + 1d);",
+    "filter": "FullyQualifiedName~JrcNumericalTests.HandStartupExpiryAndScaleOneHaveKnownValues"
+  },
+  {
+    "id": "jrc-wide-equal-log",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "if (numerator == denominator) return 0;",
+    "after": "if (numerator == denominator) return 1;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.RationalLogRetainsExtremeAndNearUnityRatios"
+  },
+  {
+    "id": "jrc-wide-relative-log",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "(numerator - denominator) << 1074",
+    "after": "(denominator - numerator) << 1074",
+    "filter": "FullyQualifiedName~JrcNumericalTests.RationalLogRetainsExtremeAndNearUnityRatios"
+  },
+  {
+    "id": "jrc-wide-near-unity",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "if (argument == 1) return relative;",
+    "after": "if (argument == 1) return 0;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.RationalLogRetainsExtremeAndNearUnityRatios"
+  },
+  {
+    "id": "jrc-wide-exponent-sign",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "result.Add(Math.Log(2), exponent)",
+    "after": "result.Add(Math.Log(2), -exponent)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.RationalLogRetainsExtremeAndNearUnityRatios"
+  },
+  {
+    "id": "jrc-wide-mantissa-log",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "result.Add(Math.Log(mantissa))",
+    "after": "result.Add(Math.Log(mantissa + 1))",
+    "filter": "FullyQualifiedName~JrcNumericalTests.RationalLogRetainsExtremeAndNearUnityRatios"
+  },
+  {
+    "id": "jrc-wide-short-lag",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_shortPrices.Peek() : 0",
+    "after": "_shortPrices.Peek() : price",
+    "filter": "FullyQualifiedName~JrcNumericalTests.HandStartupExpiryAndScaleOneHaveKnownValues"
+  },
+  {
+    "id": "jrc-wide-long-lag",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_longPrices.Peek() : 0",
+    "after": "_longPrices.Peek() : price",
+    "filter": "FullyQualifiedName~JrcNumericalTests.HandStartupExpiryAndScaleOneHaveKnownValues"
+  },
+  {
+    "id": "jrc-wide-short-range",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "U(Math.Max(shortPrevious, shortRange.High))",
+    "after": "U(shortRange.High)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-long-range",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "U(Math.Min(longPrevious, longRange.Low))",
+    "after": "U(longRange.Low)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_ranges.Count == _aggregation ? _ranges.Peek() : BigInteger.Zero",
+    "after": "false ? _ranges.Peek() : BigInteger.Zero",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-scale-one",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "if (_scale == 1) dimension = 0;",
+    "after": "if (_scale == 1) dimension = 2;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.HandStartupExpiryAndScaleOneHaveKnownValues"
+  },
+  {
+    "id": "jrc-wide-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "else if (sum.IsZero || big.IsZero) dimension = 2;",
+    "after": "else if (sum.IsZero || big.IsZero) dimension = 0;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.HandStartupExpiryAndScaleOneHaveKnownValues"
+  },
+  {
+    "id": "jrc-wide-ratio-aggregation",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "LogRatio(big * _aggregation, sum)",
+    "after": "LogRatio(big, sum)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.HandStartupExpiryAndScaleOneHaveKnownValues"
+  },
+  {
+    "id": "jrc-wide-dimension-sign",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "numerator.Add(log, -1)",
+    "after": "numerator.Add(log, 1)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.HandStartupExpiryAndScaleOneHaveKnownValues"
+  },
+  {
+    "id": "jrc-wide-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "if (final)\n        {\n            Push(_shortPrices",
+    "after": "if (true)\n        {\n            Push(_shortPrices",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_signal!.Next(line, final)",
+    "after": "_signal!.Next(raw, final)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-trade-direction",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "spread.Sign < 0 && spread < _previousSpread",
+    "after": "spread.Sign > 0 && spread > _previousSpread",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-trade-memory",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "if (final) _previousSpread = spread;",
+    "after": "if (false) _previousSpread = spread;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "ComponentAverage.Take(values, smoothing)",
+    "after": "ComponentAverage.Take(values, smoothing + 1)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.SelectedRangesAndBothCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "jrc-wide-callback-signal",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "includeSignal ? Average(line)",
+    "after": "includeSignal ? Average(raw)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.SelectedRangesAndBothCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "jrc-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_shortPrices.Clear(); _longPrices.Clear();",
+    "after": "_shortPrices.Clear();",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_sum = _previousSpread = default;",
+    "after": "_previousSpread = default;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-extrema-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "index - _length + 1",
+    "after": "index - _length",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-extrema-preview",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "if (final)\n            {\n                while (deque.First",
+    "after": "if (true)\n            {\n                while (deque.First",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-extrema-reset",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "_highs.Clear();",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Add(sum);",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-weighted-position",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "weighted.Add(value, _length)",
+    "after": "weighted.Add(value, _length + 1L)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "sum.Add(_history.Peek(), -1)",
+    "after": "sum.Add(_history.Peek(), 1)",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_history.Count < _length - 1 ? 0",
+    "after": "_history.Count < _length - 1 ? value",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "if (final) { _sum = sum;",
+    "after": "if (true) { _sum = sum;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/JrcWindow.cs",
+    "scope": "internal sealed class JrcWindow",
+    "before": "_sum = _weighted = default;",
+    "after": "_sum = default;",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "jrc-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeJrcFractalDimensionFast(",
+    "before": "signal ? point.SignalLine : point.Line",
+    "after": "point.Line",
+    "filter": "FullyQualifiedName~JrcNumericalTests.EveryRouteMatchesIndependentRangesAndMeans"
+  },
+  {
+    "id": "jrc-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class JrcFractalDimensionState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted guard",
+    "filter": "FullyQualifiedName~JrcNumericalTests.RejectedCandlesCannotAdvanceRangeOrMeans"
+  },
+  {
+    "id": "jrc-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class JrcFractalDimensionState",
+    "before": "_input.GetValue(bar), isFinal",
+    "after": "_input.GetValue(bar), true",
+    "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
   }
 ]

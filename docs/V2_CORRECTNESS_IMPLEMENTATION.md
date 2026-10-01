@@ -4145,3 +4145,10 @@ The isolated campaigns `633-corrected-a` and `633-corrected-b` passed their base
 Source snapshot SHA256: `63aec05fb342372938a5ebc5453a2472445a035cbeadd35fbb07233ff29dfdfe`. Archive SHA256: `b9161b54e78a4f44c39fb47e395b26cbdf8fa65ea863b622dad809a2734ff27c` and `b9161b54e78a4f44c39fb47e395b26cbdf8fa65ea863b622dad809a2734ff27c`.
 
 This is evidence for the isolated batch-633 source. Source was already published in the batch-633 checkpoint; this update does not restore older source files. Mutation verification for batches 634 through 652 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 653, JRC Fractal Dimension
+
+JRC now retains exact ranges and rolling sums until forming its logarithmic ratio, preventing overflow and cancellation in bounded dimension results. Period products widen before the existing 2..530 clamp; histories allocate as observations arrive. Batch, fast and native routes share the range and smoothing implementation, with the typed native factory binding included. Selected inputs derive consistent ranges, and the two callback slots retain their distinct inputs. The documented startup, scale-one convention and reversed spread signals remain explicit.
+
+Independent fraction-array window recomputation covers all outputs, with separate rational-log comparisons for extreme and near-unity ratios. The corrected focused run passed **98/98 checks**, including existing range-expiry regressions, route and enrollment checks, callbacks, extreme periods/ranges, preview/reset and rejected candles. The initial run exposed a missing typed factory binding and a test that registered only one of its two expected callbacks; both are corrected. **40 prepared faults remain unqualified**; all **7,516 anchors** apply. Candidate/frozen snapshots match on2,195 files. Enrollment is **6,309/7,131**, leaving **822 omissions**. Mutation qualification is complete through633; batches634–653 and final gates remain pending. PR246 stays draft.

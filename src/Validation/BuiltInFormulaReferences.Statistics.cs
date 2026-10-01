@@ -25,30 +25,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Filter", new[] { "Lco", "Filter" }, bars => ZeroLagCycleValues(bars, length).Outputs);
             case IndicatorName.JrcFractalDimension:
                 if (kind == 0) return null;
-                return new("Jrcfd", new[] { "Jrcfd", "Signal" }, bars =>
-                {
-                    var shortPeriod = Integer(options, "Length1", 20);
-                    var scale = Integer(options, "Length2", 5);
-                    var aggregation = Math.Max(2, Math.Min(530, (scale - 1) * shortPeriod));
-                    var longPeriod = Math.Max(2, Math.Min(530, scale * shortPeriod));
-                    double Range(int index, int period)
-                    {
-                        var window = Window(bars, index, period).ToArray();
-                        var previous = index < period ? 0 : bars[index - period].Close;
-                        return Math.Max(previous, window.Max(b => b.High)) - Math.Min(previous, window.Min(b => b.Low));
-                    }
-                    var ranges = bars.Select((_, i) => Range(i, shortPeriod)).ToArray();
-                    var dimension = bars.Select((_, i) =>
-                    {
-                        if (scale == 1) return 0;
-                        var mean = Window(ranges, i, aggregation).Sum() / aggregation;
-                        var spread = Range(i, longPeriod);
-                        return mean <= 0 || spread <= 0 ? 2 : 2 + Math.Log(mean / spread) / Math.Log(scale);
-                    }).ToArray();
-                    var smoothing = Integer(options, "SmoothLength", 5);
-                    var line = Average(dimension, smoothing, kind);
-                    return Outputs(("Jrcfd", line), ("Signal", Average(line, smoothing, kind)));
-                });
+                return new("Jrcfd", new[] { "Jrcfd", "Signal" }, bars => JrcOutputs(bars, indicator));
             case IndicatorName.StiffnessIndicator:
                 if (kind == 0) return null;
                 return new("Si", new[] { "Si" }, bars =>

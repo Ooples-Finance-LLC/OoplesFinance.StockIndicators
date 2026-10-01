@@ -427,117 +427,19 @@ public sealed class JmaRsxCloneState : IStreamingIndicatorState
 [PrimaryOutput("Jrcfd")]
 public sealed class JrcFractalDimensionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly int _smoothLength;
-    private readonly int _wind1;
-    private readonly int _wind2;
-    private readonly double _nLog;
-    private readonly RollingWindowMax _highest1;
-    private readonly RollingWindowMin _lowest1;
-    private readonly RollingWindowMax _highest2;
-    private readonly RollingWindowMin _lowest2;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _smallRanges;
-    private readonly IMovingAverageSmoother _fdSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevSmallSum;
-    private int _index;
-
+    private readonly JrcWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public JrcFractalDimensionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length1 = 20, int length2 = 5, int smoothLength = 5)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _smoothLength = Math.Max(1, smoothLength);
-        _wind1 = MathHelper.MinOrMax((_length2 - 1) * _length1);
-        _wind2 = MathHelper.MinOrMax(_length2 * _length1);
-        _nLog = Math.Log(_length2);
-        _highest1 = new RollingWindowMax(_length1);
-        _lowest1 = new RollingWindowMin(_length1);
-        _highest2 = new RollingWindowMax(_wind2);
-        _lowest2 = new RollingWindowMin(_wind2);
-        var capacity = Math.Max(_wind2, _length1);
-        _values = new PooledRingBuffer<double>(capacity);
-        _smallRanges = new PooledRingBuffer<double>(_wind1);
-        _fdSmoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        int length1 = 20, int length2 = 5, int smoothLength = 5) => _window = new(maType, length1, length2, smoothLength);
     public IndicatorName Name => IndicatorName.JrcFractalDimension;
-
-    public void Reset()
-    {
-        _highest1.Reset();
-        _lowest1.Reset();
-        _highest2.Reset();
-        _lowest2.Reset();
-        _values.Clear();
-        _smallRanges.Clear();
-        _fdSmoother.Reset();
-        _signalSmoother.Reset();
-        _prevSmallSum = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest1 = isFinal ? _highest1.Add(bar.High, out _) : _highest1.Preview(bar.High, out _);
-        var lowest1 = isFinal ? _lowest1.Add(bar.Low, out _) : _lowest1.Preview(bar.Low, out _);
-        var highest2 = isFinal ? _highest2.Add(bar.High, out _) : _highest2.Preview(bar.High, out _);
-        var lowest2 = isFinal ? _lowest2.Add(bar.Low, out _) : _lowest2.Preview(bar.Low, out _);
-
-        var prevValue1 = EhlersStreamingWindow.GetOffsetValue(_values, value, _length1);
-        var prevValue2 = EhlersStreamingWindow.GetOffsetValue(_values, value, _wind2);
-        var bigRange = Math.Max(prevValue2, highest2) - Math.Min(prevValue2, lowest2);
-
-        var prevSmallRange = EhlersStreamingWindow.GetOffsetValue(_smallRanges, _wind1);
-        var smallRange = Math.Max(prevValue1, highest1) - Math.Min(prevValue1, lowest1);
-        var smallSum = _prevSmallSum + smallRange - prevSmallRange;
-
-        var value1 = _wind1 != 0 ? smallSum / _wind1 : 0;
-        var value2 = value1 != 0 ? bigRange / value1 : 0;
-        var temp = value2 > 0 ? Math.Log(value2) : 0;
-        var fd = _nLog != 0 ? 2 - (temp / _nLog) : 0;
-
-        var jrcfd = _fdSmoother.Next(fd, isFinal);
-        var signal = _signalSmoother.Next(jrcfd, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _smallRanges.TryAdd(smallRange, out _);
-            _prevSmallSum = smallSum;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Jrcfd", jrcfd },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(jrcfd, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.High, bar.Low, _input.GetValue(bar), isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Jrcfd", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _highest1.Dispose();
-        _lowest1.Dispose();
-        _highest2.Dispose();
-        _lowest2.Dispose();
-        _values.Dispose();
-        _smallRanges.Dispose();
-        _fdSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Jma")]

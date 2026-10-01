@@ -126,67 +126,18 @@ public static partial class Calculations
     public static StockData CalculateJrcFractalDimension(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 5, int smoothLength = 5)
     {
-        List<double> smallSumList = new(stockData.Count);
-        List<double> smallRangeList = new(stockData.Count);
-        List<double> fdList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var wind1 = MinOrMax((length2 - 1) * length1);
-        var wind2 = MinOrMax(length2 * length1);
-        var nLog = Math.Log(length2);
-
-        var (highest1List, lowest1List) = length1 == 1 ? (highList, lowList) : GetMaxAndMinValuesList(highList, lowList, length1);
-        var (highest2List, lowest2List) = GetMaxAndMinValuesList(highList, lowList, wind2);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = new List<double>(input.Count); var trades = CreateSignalsList(stockData);
+        var external = !StrengthWindow.Supports(maType);
+        var components = external ? JrcWindow.Components(stockData, input, high, low, maType, length1, length2, smoothLength, false, true) : default;
+        using var window = new JrcWindow(maType, length1, length2, smoothLength, external);
+        for (var i = 0; i < input.Count; i++)
         {
-            var highest1 = highest1List[i];
-            var lowest1 = lowest1List[i];
-            var prevValue1 = i >= length1 ? inputList[i - length1] : 0;
-            var highest2 = highest2List[i];
-            var lowest2 = lowest2List[i];
-            var prevValue2 = i >= wind2 ? inputList[i - wind2] : 0;
-            var bigRange = Math.Max(prevValue2, highest2) - Math.Min(prevValue2, lowest2);
-
-            var prevSmallRange = i >= wind1 ? smallRangeList[i - wind1] : 0;
-            var smallRange = Math.Max(prevValue1, highest1) - Math.Min(prevValue1, lowest1);
-            smallRangeList.Add(smallRange);
-
-            var prevSmallSum = GetLastOrDefault(smallSumList);
-            var smallSum = prevSmallSum + smallRange - prevSmallRange;
-            smallSumList.Add(smallSum);
-
-            var value1 = wind1 != 0 ? smallSum / wind1 : 0;
-            var value2 = value1 != 0 ? bigRange / value1 : 0;
-            var temp = value2 > 0 ? Math.Log(value2) : 0;
-
-            var fd = nLog != 0 ? 2 - (temp / nLog) : 0;
-            fdList.Add(fd);
+            var point = window.Next(high[i], low[i], input[i], true, external ? components.Line[i] : null, external ? components.Signal[i] : null);
+            values.Add(point.Line); signals.Add(point.SignalLine); trades?.Add(point.Trade);
         }
-
-        var jrcfdList = GetMovingAverageList(stockData, maType, smoothLength, fdList);
-        var jrcfdSignalList = GetMovingAverageList(stockData, maType, smoothLength, jrcfdList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var jrcfd = jrcfdList[i];
-            var jrcfdSignal = jrcfdSignalList[i];
-            var prevJrcfd = i >= 1 ? jrcfdList[i - 1] : 0;
-            var prevJrcfdSignal = i >= 1 ? jrcfdSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(jrcfd - jrcfdSignal, prevJrcfd - prevJrcfdSignal, true);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Jrcfd", jrcfdList },
-            { "Signal", jrcfdSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(jrcfdList);
-        stockData.IndicatorName = IndicatorName.JrcFractalDimension;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Jrcfd", values }, { "Signal", signals } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.JrcFractalDimension; return stockData;
     }
 
 
