@@ -4287,3 +4287,12 @@ The isolated campaigns `641-corrected2-a` and `641-corrected2-b` passed their ba
 Source snapshot SHA256: `155660919f538c46a54a67b084e74012c0f46bd566ccb0b12a87c5fdad4f7b55`. Archive SHA256: `f40649f8dabb484768822148d39ab29b98b04c36aafa273f7738c418ec35e0eb` and `f40649f8dabb484768822148d39ab29b98b04c36aafa273f7738c418ec35e0eb`.
 
 This is evidence for the isolated batch-641 source. Source was already published in the batch-641 checkpoint; this update does not restore older source files. Mutation verification for batches 642 through 661 and the remaining final gates is still incomplete.
+
+
+### Batch 642: Fisher Stochastic mutation qualification
+
+The isolated campaigns `642-corrected-a` and `642-corrected-b` passed their baselines and caught **42/42 compiled behavioral faults**, alongside **41/41 selected tests** (39 Fisher Stochastic cases and two existing regressions). Both archives were compared byte-for-byte with the retained batch-642 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `0556e374e229d796891cae2f7bea38b2da78030924eae4c2101457cd2b7cea70`. Archive SHA256: `83d53e019e7e2504fbd0339a2cb1002f836ca30455278c4c51836eb256842603` and `83d53e019e7e2504fbd0339a2cb1002f836ca30455278c4c51836eb256842603`.
+
+This is evidence for the isolated batch-642 source. Source was already published in the batch-642 checkpoint; this update does not restore older source files. Mutation verification for batches 643 through 662 and the remaining final gates is still incomplete.
