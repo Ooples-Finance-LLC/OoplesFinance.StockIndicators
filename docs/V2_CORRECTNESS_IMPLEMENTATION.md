@@ -4278,3 +4278,12 @@ All **13 MacZ configurations** are enrolled. **112/112 focused checks passed** i
 Earlier verification exposed missing native/output registration, an unrecognized output declaration, a half-epsilon tie and a period-one rounding artifact; these were corrected without relaxing assertions. The superseded `macz-661-final.trx` and `macz-661-complete.trx` runs were explicitly stopped before reference updates and are incomplete evidence. The final reference uses a normalized floating-point root seed followed by two exact rational Newton refinements; assertions and budgets are unchanged.
 
 **40 prepared behavioral faults remain pending**, with **7,832 unique global anchors**. Enrollment is **6,373/7,131**, leaving **758 omissions across 113 types**, with no construction failures. DLL SHA256: `1F88A840E5CCD93AAA5A89D4D34B3E66E8EDB817F1F9A99A147822F0B30B5317`. This records source verification, not mutation qualification. Corrected Fisher Least Squares replacement campaigns and later batches, pending formula decisions, and hosted/package/release/performance gates remain incomplete. PR246 stays draft.
+
+
+### Batch 641: Fisher Least Squares mutation qualification
+
+The isolated campaigns `641-corrected2-a` and `641-corrected2-b` passed their baselines and caught **37/37 compiled behavioral faults**, alongside **49/49 selected tests** (47 Fisher Least Squares cases and two existing regressions). The superseded campaigns caught 36/37 faults; the skipped index-mean reset survived because the hand fixture did not exercise recursive means above period one. The corrected hand fixture covers all four mean kinds at period three after prefill/reset. Both archives were compared byte-for-byte with the retained batch-641 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `155660919f538c46a54a67b084e74012c0f46bd566ccb0b12a87c5fdad4f7b55`. Archive SHA256: `f40649f8dabb484768822148d39ab29b98b04c36aafa273f7738c418ec35e0eb` and `f40649f8dabb484768822148d39ab29b98b04c36aafa273f7738c418ec35e0eb`.
+
+This is evidence for the isolated batch-641 source. Source was already published in the batch-641 checkpoint; this update does not restore older source files. Mutation verification for batches 642 through 661 and the remaining final gates is still incomplete.
