@@ -668,42 +668,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateParametricKalmanFilter(this StockData stockData, int length = 50)
     {
-        List<double> errList = new(stockData.Count);
         List<double> estList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        var window = new ParametricKalmanWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : currentValue;
-            var priorEst = i >= length ? estList[i - length] : prevValue;
-            var errMea = Math.Abs(priorEst - currentValue);
-            var errPrv = Math.Abs(MinPastValues(i, 1, currentValue - prevValue) * -1);
-            var prevErr = i >= 1 ? errList[i - 1] : errPrv;
-            // A gain of prevErr / (prevErr + errMea) is 0/0 when neither the estimate nor the measurement
-            // carries any error - on a series that never moves, every bar. Holding the prior estimate there
-            // pins the filter to whatever it was seeded with; with nothing to disbelieve, take the measurement.
-            var kg = prevErr + errMea != 0 ? prevErr / (prevErr + errMea) : 1;
-            var prevEst = i >= 1 ? estList[i - 1] : prevValue;
-
-            var est = prevEst + (kg * (currentValue - prevEst));
-            estList.Add(est);
-
-            var err = (1 - kg) * errPrv;
-            errList.Add(err);
-
-            var signal = GetCompareSignal(currentValue - est, prevValue - prevEst);
-            signalsList?.Add(signal);
+            var point = window.Next(inputList[i], true);
+            estList.Add(point.Value); signalsList?.Add(point.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pkf", estList }
-        });
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pkf", estList } });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(estList);
         stockData.IndicatorName = IndicatorName.ParametricKalmanFilter;
-
         return stockData;
     }
 

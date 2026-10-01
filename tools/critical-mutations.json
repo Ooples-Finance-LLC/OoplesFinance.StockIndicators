@@ -71752,5 +71752,275 @@
     "before": "PhaseChangeIndex or ",
     "after": "",
     "filter": "FullyQualifiedName~PhaseChangeNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "parametric-kalman-wide-length-floor",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-lag-baseline",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "ExactVarianceWindow.Units(_estimates.Peek()) : previousPrice",
+    "after": "previousEstimate : previousPrice",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-startup-baseline",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": ": previousPrice;",
+    "after": ": BigInteger.Zero;",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-measurement",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "BigInteger.Abs(current - lagged)",
+    "after": "BigInteger.Abs(current - previousEstimate)",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-error-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "measurement + _error",
+    "after": "measurement + 2 * _error",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-measurement-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "measurement * previousEstimate",
+    "after": "measurement * previousPrice",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-price-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "_error * current",
+    "after": "_error * previousPrice",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-zero-error",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "total.IsZero ? price",
+    "after": "total.IsZero ? 0",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-movement-error",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "current - previousPrice",
+    "after": "current - previousEstimate",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-error-complement",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "measurement * BigInteger.Abs",
+    "after": "_error * BigInteger.Abs",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-margin-direction",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "current - estimateUnits",
+    "after": "estimateUnits - current",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-signal-strong-buy",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "margin > _margin",
+    "after": "margin >= _margin",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-signal-strong-sell",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "margin < _margin",
+    "after": "margin <= _margin",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "if (final)",
+    "after": "if (final || price != 0)",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "if (_estimates.Count == _length) _estimates.Dequeue();",
+    "after": "if (_estimates.Count > _length) _estimates.Dequeue();",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-error-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "_error = error;",
+    "after": "_error = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "_previousPrice = current;",
+    "after": "_previousPrice = estimateUnits;",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-estimate-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "_previousEstimate = estimateUnits;",
+    "after": "_previousEstimate = current;",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ErrorWeightingHasIndependentHandValues"
+  },
+  {
+    "id": "parametric-kalman-wide-margin-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "_margin = margin;",
+    "after": "_margin = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "_estimates.Clear();",
+    "after": "if (_length < 0) _estimates.Clear();",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-reset-state",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricKalmanWindow.cs",
+    "scope": "internal sealed class ParametricKalmanWindow",
+    "before": "_error = _previousPrice = _previousEstimate = _margin = BigInteger.Zero;",
+    "after": "_previousPrice = _previousEstimate = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
+  },
+  {
+    "id": "parametric-kalman-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class ParametricKalmanFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (!isFinal && !includeOutputs) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "parametric-kalman-wide-core-length",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void ParametricKalmanFilter(",
+    "before": "new ParametricKalmanWindow(length)",
+    "after": "new ParametricKalmanWindow(1)",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.CoreSpanAndRegistryOverloadsPreserveBoundsAndInput"
+  },
+  {
+    "id": "parametric-kalman-wide-core-span",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void ParametricKalmanFilter(",
+    "before": "output.Length < input.Length",
+    "after": "output.Length > input.Length",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.CoreSpanAndRegistryOverloadsPreserveBoundsAndInput"
+  },
+  {
+    "id": "parametric-kalman-wide-registry-length",
+    "module": "numerical",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct PkfCore",
+    "before": "MovingAverageCore.ParametricKalmanFilter(input, output, length)",
+    "after": "MovingAverageCore.ParametricKalmanFilter(input, output, 1)",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.CoreSpanAndRegistryOverloadsPreserveBoundsAndInput"
+  },
+  {
+    "id": "parametric-kalman-wide-raw-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeParametricKalmanFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.RawAndBatchRespectSelectedInput"
+  },
+  {
+    "id": "parametric-kalman-wide-batch-source",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculateParametricKalmanFilter(",
+    "before": "var (inputList, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var inputList = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.RawAndBatchRespectSelectedInput"
+  },
+  {
+    "id": "parametric-kalman-wide-factory-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "new ParametricKalmanFilterState(kalman.Length)",
+    "after": "new ParametricKalmanFilterState(1)",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.SelectedSourcePreservesTheFormulaAndOriginalCandleFields"
+  },
+  {
+    "id": "parametric-kalman-wide-streaming-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "ParametricKalmanFilterSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.SelectedSourcePreservesTheFormulaAndOriginalCandleFields"
+  },
+  {
+    "id": "parametric-kalman-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "ParametricKalmanFilter or ",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.PublicConfigurationsPassEveryNumericalClass"
   }
 ]

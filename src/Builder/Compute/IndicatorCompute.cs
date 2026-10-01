@@ -12302,37 +12302,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeParametricKalmanFilterFast(StockData data, ComputeContext context, int length = 50)
     {
-        // CalculateParametricKalmanFilter measures its error against its own estimate length bars back, so
-        // the estimate series has to be kept rather than only its last value.
-        // MovingAverageCore.ParametricKalmanFilter used a fixed gain and never looked that far back.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double previousError = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : currentValue;
-            var priorEstimate = i >= length ? output[i - length] : previousValue;
-
-            var errMea = Math.Abs(priorEstimate - currentValue);
-            var errPrv = Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue) * -1);
-            var prevErr = i >= 1 ? previousError : errPrv;
-            // A gain of prevErr / (prevErr + errMea) is 0/0 when neither the estimate nor the measurement
-            // carries any error - on a series that never moves, every bar. Holding the prior estimate there pins
-            // the filter to whatever it was seeded with; with nothing to disbelieve, take the measurement.
-            var kg = prevErr + errMea != 0 ? prevErr / (prevErr + errMea) : 1;
-            var prevEst = i >= 1 ? output[i - 1] : previousValue;
-
-            output[i] = prevEst + (kg * (currentValue - prevEst));
-            previousError = (1 - kg) * errPrv;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.ParametricKalmanFilter(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, length);
         return buffer;
     }
 

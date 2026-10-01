@@ -4570,3 +4570,10 @@ The isolated campaigns `653-repaired-a` and `653-repaired-b` passed their baseli
 Source snapshot SHA256: `e49408c6dad02e8a09d26eb4296d1edddeb4752d5a921a5cfc2f4780d56e0d56`. Archive SHA256: `e021931fafc31986e1f3b738b192114a0d9bc1ae13d7e51f223e19e901d0d1aa` and `ac5c3327a94ae49e308744ac095775085846ef11c2a32cdc8237f318f59c6589`.
 
 This is evidence for the isolated batch-653 source. Source was already published in the batch-653 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 679: Parametric Kalman public/core alignment
+
+Public batch, fast, native, core and moving-average registry paths now share lagged-estimate error weighting, replacing the core covariance filter. Exact differences and affine quotients preserve convex finite estimates, with explicit binary64 estimate and extended-binary64 error state boundaries. Lazy history handles extreme periods. Both factories register the native state; exact margin comparisons preserve signals.
+
+**39/39 focused tests passed** on net10.0 (`parametric679.trx`), including independent rational references, hand, extreme/subnormal, signal, preview/reset, selected-input and core/span/registry checks plus the existing golden and shared minimum-period tests. This isolated batch is based on `91e697a9`; inventory is **6,484/7,131 enrolled**, **647 omissions across 96 types**, with complete independent reference registration and no construction failures. It does not include the still-running Periodic677 batch. The 30 prepared behavioral faults and final readiness gates remain pending.

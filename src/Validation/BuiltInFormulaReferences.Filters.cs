@@ -48,23 +48,7 @@ internal static partial class BuiltInFormulaReferences
                         .Sum(j => weights[j] * bars[i - j].Close) / mass).ToArray()));
                 });
             case IndicatorName.ParametricKalmanFilter:
-                var estimateLength = Integer(options, "Length", 50);
-                return new("Pkf", new[] { "Pkf" }, bars =>
-                {
-                    var estimates = new double[bars.Count];
-                    var uncertainty = 0d;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var observation = bars[i].Close;
-                        var prior = i == 0 ? observation : estimates[i - 1];
-                        var baseline = i >= estimateLength ? estimates[i - estimateLength] : i == 0 ? observation : bars[i - 1].Close;
-                        var residual = Math.Abs(observation - baseline);
-                        var total = residual + uncertainty;
-                        estimates[i] = total == 0 ? observation : (residual * prior + uncertainty * observation) / total;
-                        uncertainty = total == 0 || i == 0 ? 0 : residual / total * Math.Abs(observation - bars[i - 1].Close);
-                    }
-                    return Outputs(("Pkf", estimates));
-                });
+                return new("Pkf", new[] { "Pkf" }, bars => ParametricKalmanOutputs(bars, Integer(options, "Length", 50)));
             case IndicatorName.EhlersDistanceCoefficientFilter:
                 var distanceLength = Integer(options, "Length", 14);
                 return new("Edcf", new[] { "Edcf" }, bars =>

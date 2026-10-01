@@ -217,72 +217,16 @@ public sealed class ParametricCorrectiveLinearMovingAverageState : IStreamingInd
 [PrimaryOutput("Pkf")]
 public sealed class ParametricKalmanFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _estValues;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevErr;
-    private double _prevEst;
-    private int _index;
-    private bool _hasPrev;
-
-    public ParametricKalmanFilterState(int length = 50)
-    {
-        _length = Math.Max(1, length);
-        _estValues = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ParametricKalmanWindow _window;
+    public ParametricKalmanFilterState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.ParametricKalmanFilter;
-
-    public void Reset()
-    {
-        _estValues.Clear();
-        _prevValue = 0;
-        _prevErr = 0;
-        _prevEst = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : value;
-        var priorEst = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_estValues, 0, _length) : prevValue;
-        var errMea = Math.Abs(priorEst - value);
-        var errPrv = Math.Abs(_hasPrev ? (value - prevValue) * -1 : 0);
-        var prevErr = _hasPrev ? _prevErr : errPrv;
-        var kg = prevErr + errMea != 0 ? prevErr / (prevErr + errMea) : 1;
-        var prevEst = _hasPrev ? _prevEst : prevValue;
-        var est = prevEst + (kg * (value - prevEst));
-        var err = (1 - kg) * errPrv;
-
-        if (isFinal)
-        {
-            _estValues.TryAdd(est, out _);
-            _prevValue = value;
-            _prevErr = err;
-            _prevEst = est;
-            _index++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pkf", est }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(est, outputs);
-    }
-
-    public void Dispose()
-    {
-        _estValues.Dispose();
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Pkf", point.Value } } : null);
     }
 }
 
