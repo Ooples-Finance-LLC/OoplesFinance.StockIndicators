@@ -62492,5 +62492,374 @@
     "before": "double.IsNaN(divisor) || double.IsInfinity(divisor)",
     "after": "false",
     "filter": "FullyQualifiedName~HawkeyeNumericalTests.NonfiniteDivisorsAreRejectedEvenForEmptyInput"
+  },
+  {
+    "id": "hirashima-wide-first-source",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_first.Next(residual, final)",
+    "after": "_first.Next(ema, final)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-second-residual",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Round(U(price) - ema - first)",
+    "after": "Round(U(price) - ema + first)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-second-source",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_second.Next(remaining, final)",
+    "after": "_second.Next(residual, final)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-basis-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "ema + first + second - _previousSecond",
+    "after": "ema + first + second + _previousSecond",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-basis-first",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "ema + first + second - _previousSecond",
+    "after": "ema - first + second - _previousSecond",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-basis-second",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "ema + first + second - _previousSecond",
+    "after": "ema + first - second - _previousSecond",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-second-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_previousSecond = second;",
+    "after": "_previousSecond = first;",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-signal-margin",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "U(price) - basis;",
+    "after": "basis - U(price);",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_previousMargin = margin;",
+    "after": "_previousMargin = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-finish-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "if (final) { _previousSecond",
+    "after": "if (true) { _previousSecond",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-upper-one",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Publish(basis + width)",
+    "after": "Publish(basis - width)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-upper-two",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Publish(basis + 2 * width)",
+    "after": "Publish(basis + width)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-lower-one",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Publish(basis - width)",
+    "after": "Publish(basis + width)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-lower-two",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Publish(basis - 2 * width)",
+    "after": "Publish(basis - width)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-center-key",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Publish(basis),",
+    "after": "Publish(width),",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-premature-upper",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Publish(basis + width)",
+    "after": "Publish(basis) + Publish(width)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-premature-residual",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Round(U(price) - ema - first)",
+    "after": "U(price - Publish(ema) - Publish(first))",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-regression-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_sum + value - expired",
+    "after": "_sum + value + expired",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-regression-shift",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_weighted - _sum + expired",
+    "after": "_weighted + _sum + expired",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-regression-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "2 * weighted + (n - 1) * sum",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-regression-position",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "3 * covariance * (n - 1)",
+    "after": "3 * covariance * (n + 1)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-regression-spread",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "n * n - 1;",
+    "after": "n * n + 1;",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-regression-count",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "var n = new BigInteger(count);",
+    "after": "var n = new BigInteger(_length);",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-regression-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (true) { if (full)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-regression-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_history.Clear(); _sum = _weighted = default;",
+    "after": "_sum = _weighted = default;",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "else if (_kind == MovingAvgType.ExponentialMovingAverage && _count < _length)",
+    "after": "else if (_kind == MovingAvgType.ExponentialMovingAverage && _count < _length - 1)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-wilder-input",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(ema ? 2 : 1) * value",
+    "after": "(ema ? 2 : 2) * value",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 2L) / 2",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length - 2",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-average-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_sum = _weighted = _previous = default;",
+    "after": "_sum = _weighted = default;",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-reset-second-fit",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_second.Reset();",
+    "after": ";",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-reset-first-fit",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "_first.Reset();",
+    "after": ";",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.WideResidualsAndBandsRecoverAfterExtremePrices"
+  },
+  {
+    "id": "hirashima-wide-callback-residual",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "Publish(BigInteger.Abs(v))",
+    "after": "Publish(v)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.CallbackSlotsUseEmaThenAbsoluteResidualAndAllBands"
+  },
+  {
+    "id": "hirashima-wide-callback-width",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "U(externalWidth[i]);",
+    "after": "BigInteger.Abs(U(externalWidth[i]));",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.CallbackSlotsUseEmaThenAbsoluteResidualAndAllBands"
+  },
+  {
+    "id": "hirashima-wide-callback-ema",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "U(externalEma[i]);",
+    "after": "U(prices[i]);",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.CallbackSlotsUseEmaThenAbsoluteResidualAndAllBands"
+  },
+  {
+    "id": "hirashima-wide-callback-exhausted",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal sealed class HirashimaWindow",
+    "before": "externalWidth is null ? window._width.Next(BigInteger.Abs(residuals[i]), true)",
+    "after": "externalWidth is null ? BigInteger.Zero",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.ExhaustedCallbacksRetainDefaultExtendedStages"
+  },
+  {
+    "id": "hirashima-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHirashimaSugitaRSFast(",
+    "before": "1 => 0, 2 => 1",
+    "after": "1 => 1, 2 => 0",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
+  },
+  {
+    "id": "hirashima-wide-fast-callbacks",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHirashimaSugitaRSFast(",
+    "before": "HirashimaWindow.Calculate(prices, maType, length, true)",
+    "after": "HirashimaWindow.Calculate(prices, maType, length, false)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.CallbackSlotsUseEmaThenAbsoluteResidualAndAllBands"
+  },
+  {
+    "id": "hirashima-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHirashimaSugitaRSFast(",
+    "before": "var (prices, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var prices = data.ClosePrices;",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.SelectedSeriesPreservesAllFiveFastBands"
+  },
+  {
+    "id": "hirashima-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class HirashimaSugitaRSState",
+    "before": "StreamingInputValidation.Validate(bar); var point",
+    "after": "var point",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.InvalidCandlesCannotAdvanceResidualOrRegressionHistory"
+  },
+  {
+    "id": "hirashima-wide-legacy-band-offset",
+    "module": "numerical",
+    "file": "src/Helpers/HirashimaWindow.cs",
+    "scope": "internal static double Band(",
+    "before": "U(basis) + offset * U(width)",
+    "after": "U(basis) + (offset + 1) * U(width)",
+    "filter": "FullyQualifiedName~HirashimaNumericalTests.LegacyMeansRetainOrdinaryRouteAgreement"
   }
 ]

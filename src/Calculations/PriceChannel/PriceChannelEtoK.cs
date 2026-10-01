@@ -318,6 +318,15 @@ public static partial class Calculations
     public static StockData CalculateHirashimaSugitaRS(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 1000)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            var (input, _, _, _, _) = GetInputValuesList(stockData); var result = HirashimaWindow.Calculate(input, maType, length, false);
+            var keys = new[] { "UpperBand1", "UpperBand2", "MiddleBand", "LowerBand1", "LowerBand2" };
+            stockData.SetOutputValues(() => keys.Select((key, i) => (key, values: result.Bands[i].ToList())).ToDictionary(v => v.key, v => v.values));
+            var signals = CreateSignalsList(stockData); if (signals is not null) signals.AddRange(result.Trades); stockData.SetSignals(signals);
+            stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.HirashimaSugitaRS; return stockData;
+        }
+
         List<double> d1List = new(stockData.Count);
         List<double> absD1List = new(stockData.Count);
         List<double> d2List = new(stockData.Count);
@@ -373,16 +382,16 @@ public static partial class Calculations
             var basis = ema + s1 + (s2 - prevS2);
             basisList.Add(basis);
 
-            var upper1 = basis + wma;
+            var upper1 = HirashimaWindow.Band(basis, wma, 1);
             upper1List.Add(upper1);
 
-            var lower1 = basis - wma;
+            var lower1 = HirashimaWindow.Band(basis, wma, -1);
             lower1List.Add(lower1);
 
-            var upper2 = upper1 + wma;
+            var upper2 = HirashimaWindow.Band(basis, wma, 2);
             upper2List.Add(upper2);
 
-            var lower2 = lower1 - wma;
+            var lower2 = HirashimaWindow.Band(basis, wma, -2);
             lower2List.Add(lower2);
 
             var signal = GetCompareSignal(currentValue - basis, prevValue - prevBasis);

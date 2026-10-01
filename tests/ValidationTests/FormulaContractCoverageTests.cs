@@ -1127,7 +1127,9 @@ public sealed class FormulaContractCoverageTests
     {
         var bars = new[] { 1d, 2, 4 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v, v, v, 1)).ToArray();
         Check(new VortexBands(2, new Sma()), bars, [0, 3, 4.5], [0, 1.5, 3], [0, 0, 1.5]);
-        Check(new HirashimaSugitaRS(2), bars.Take(2).ToArray(), [1, 7d / 3], [1, 8d / 3], [1, 2], [1, 5d / 3], [1, 4d / 3]);
+        // The WMA width is the rounded binary64 value 1/3; form each complete band from that stage.
+        var hirashimaLower2 = (new ReferenceFraction(2) - new ReferenceFraction(2) * ReferenceFraction.FromDouble(1d / 3)).ToDouble();
+        Check(new HirashimaSugitaRS(2), bars.Take(2).ToArray(), [1, 7d / 3], [1, 8d / 3], [1, 2], [1, 5d / 3], [1, hirashimaLower2]);
         void Check(IIndicator indicator, Bar[] input, params double[][] expected)
         {
             var rules = BuiltInFormulaReferences.For(indicator).ToArray();

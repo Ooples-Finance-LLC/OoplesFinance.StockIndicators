@@ -933,10 +933,11 @@ public sealed class HighLowIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema;
-    private readonly IMovingAverageSmoother _wma;
-    private readonly LinearRegressionState _s1Regression;
-    private readonly LinearRegressionState _s2Regression;
+    private readonly HirashimaWindow? _wide;
+    private readonly IMovingAverageSmoother _ema = null!;
+    private readonly IMovingAverageSmoother _wma = null!;
+    private readonly LinearRegressionState _s1Regression = null!;
+    private readonly LinearRegressionState _s2Regression = null!;
     private readonly StreamingInputResolver _input;
     private double _d1Value;
     private double _d2Value;
@@ -945,6 +946,7 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
 
     public HirashimaSugitaRSState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 1000)
     {
+        if (StrengthWindow.Supports(maType)) { _wide = new(maType, length); return; }
         var resolved = Math.Max(1, length);
         _ema = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved);
         _wma = MovingAverageSmootherFactory.Create(maType, resolved);
@@ -957,6 +959,7 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _ema.Reset();
         _wma.Reset();
         _s1Regression.Reset();
@@ -969,6 +972,12 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        if (_wide is not null)
+        {
+            StreamingInputValidation.Validate(bar); var point = _wide.Next(bar.Close, isFinal);
+            var keys = new[] { "UpperBand1", "UpperBand2", "MiddleBand", "LowerBand1", "LowerBand2" };
+            return new StreamingIndicatorStateResult(point.Bands[2], includeOutputs ? keys.Select((key, i) => (key, value: point.Bands[i])).ToDictionary(v => v.key, v => v.value) : null);
+        }
         var value = _input.GetValue(bar);
         var ema = _ema.Next(value, isFinal);
         var d1 = value - ema;
@@ -980,10 +989,10 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
         var s2 = _s2Regression.Update(bar, isFinal, includeOutputs: false).Value;
         var prevS2 = _hasPrev ? _prevS2 : 0;
         var basis = ema + s1 + (s2 - prevS2);
-        var upper1 = basis + wma;
-        var lower1 = basis - wma;
-        var upper2 = upper1 + wma;
-        var lower2 = lower1 - wma;
+        var upper1 = HirashimaWindow.Band(basis, wma, 1);
+        var lower1 = HirashimaWindow.Band(basis, wma, -1);
+        var upper2 = HirashimaWindow.Band(basis, wma, 2);
+        var lower2 = HirashimaWindow.Band(basis, wma, -2);
 
         if (isFinal)
         {
@@ -1009,6 +1018,7 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
 
     public void Dispose()
     {
+        if (_wide is not null) return;
         _ema.Dispose();
         _wma.Dispose();
         _s1Regression.Dispose();

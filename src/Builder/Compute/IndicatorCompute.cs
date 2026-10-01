@@ -19334,6 +19334,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeHirashimaSugitaRSFast(StockData data, ComputeContext context, int length = 1000,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int bandOffset = 0)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            var (prices, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+            var bands = HirashimaWindow.Calculate(prices, maType, length, true).Bands;
+            var slot = bandOffset switch { 1 => 0, 2 => 1, -1 => 3, -2 => 4, _ => 2 };
+            var result = context.Rent(prices.Count); bands[slot].AsSpan().CopyTo(result.WritableSpan); return result;
+        }
+
         // CalculateHirashimaSugitaRS builds its basis by correcting an exponential average of the chained
         // series twice: once by the linear regression of the residual from that average, and again by the
         // change in the regression of what is left over. The bands are that basis stepped by whole multiples
@@ -19386,7 +19394,7 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             var basis = ema[i] + s1[i] + (s2[i] - (i >= 1 ? s2[i - 1] : 0));
-            output[i] = basis + (bandOffset * wma[i]);
+            output[i] = HirashimaWindow.Band(basis, wma[i], bandOffset);
         }
 
         return buffer;
