@@ -158,179 +158,24 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, IC
     bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private bool _customInput;
     private CustomInputRange _componentRange;
-
-    private readonly int _smaLength;
-    private readonly RelativeStrengthIndexState _rsi;
-    private readonly CommodityChannelIndexState _cci;
-    private readonly MoneyFlowIndexState _mfi;
-    private readonly MovingAverageConvergenceDivergenceState _macd;
-    private readonly BollingerBandsPercentBState _pctB;
-    private readonly DetrendedPriceOscillatorState _dpo;
-    private readonly RateOfChangeState _roc;
-    private readonly EaseOfMovementState _eom;
-    private readonly RollingWindowSum _emoSum;
-    private readonly RollingWindowSum _macdSum;
-    private readonly RollingWindowSum _dpoSum;
-    private readonly RollingWindowSum _rocSum;
-    private readonly RollingWindowMax _stochHigh;
-    private readonly RollingWindowMin _stochLow;
-    private readonly IMovingAverageSmoother _stochFast;
-    private readonly IMovingAverageSmoother _stochSlow;
-    private readonly PooledRingBuffer<double> _pdoinsbValues;
-    private readonly PooledRingBuffer<double> _pdoinssValues;
-
+    private readonly InsyncWindow _window;
     public InsyncIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 12, int slowLength = 26, int signalLength = 9, int emoLength = 14, int mfiLength = 20, int bbLength = 20,
         int cciLength = 14, int dpoLength = 18, int rocLength = 10, int rsiLength = 14, int stochLength = 14, int stochKLength = 1,
         int stochDLength = 3, int smaLength = 10, double stdDevMult = 2, double divisor = 10000)
-    {
-        _smaLength = Math.Max(1, smaLength);
-        _rsi = new RelativeStrengthIndexState(Math.Max(1, rsiLength));
-        _cci = new CommodityChannelIndexState(length: Math.Max(1, cciLength));
-        _mfi = new MoneyFlowIndexState(Math.Max(1, mfiLength));
-        _macd = new MovingAverageConvergenceDivergenceState(Math.Max(1, fastLength), Math.Max(1, slowLength), Math.Max(1, signalLength));
-        _pctB = new BollingerBandsPercentBState(stdDevMult, MovingAvgType.SimpleMovingAverage, Math.Max(1, bbLength));
-        _dpo = new DetrendedPriceOscillatorState(MovingAvgType.SimpleMovingAverage, Math.Max(1, dpoLength));
-        _roc = new RateOfChangeState(Math.Max(1, rocLength));
-        _eom = new EaseOfMovementState(divisor);
-        _emoSum = new RollingWindowSum(_smaLength);
-        _macdSum = new RollingWindowSum(_smaLength);
-        _dpoSum = new RollingWindowSum(_smaLength);
-        _rocSum = new RollingWindowSum(_smaLength);
-        var resolvedStochLength = Math.Max(1, stochLength);
-        _stochHigh = new RollingWindowMax(resolvedStochLength);
-        _stochLow = new RollingWindowMin(resolvedStochLength);
-        _stochFast = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, stochKLength));
-        _stochSlow = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, stochDLength));
-        _pdoinsbValues = new PooledRingBuffer<double>(_smaLength);
-        _pdoinssValues = new PooledRingBuffer<double>(_smaLength);
-    }
-
+        => _window = new(fastLength, slowLength, mfiLength, bbLength, cciLength, dpoLength, rocLength, rsiLength, stochLength, stochKLength, stochDLength, smaLength, stdDevMult, divisor);
     public IndicatorName Name => IndicatorName.InsyncIndex;
-
-    // No resolver of its own: the inner states that default to a typical or median price are the
-    // ones that must switch to reading the close when this state is wrapped.
-    void ICustomInputConsumer.ReadCloseAsInput()
-    {
-        _customInput = true;
-        ((ICustomInputConsumer)_cci).ReadCloseAsInput();
-        ((ICustomInputConsumer)_mfi).ReadCloseAsInput();
-    }
-
-    public void Reset()
-    {
-        _componentRange.Reset();
-        _rsi.Reset();
-        _cci.Reset();
-        _mfi.Reset();
-        _macd.Reset();
-        _pctB.Reset();
-        _dpo.Reset();
-        _roc.Reset();
-        _eom.Reset();
-        _emoSum.Reset();
-        _macdSum.Reset();
-        _dpoSum.Reset();
-        _rocSum.Reset();
-        _stochHigh.Reset();
-        _stochLow.Reset();
-        _stochFast.Reset();
-        _stochSlow.Reset();
-        _pdoinsbValues.Clear();
-        _pdoinssValues.Clear();
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _customInput = true;
+    public void Reset() { _componentRange.Reset(); _window.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
         var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal) : bar;
-        var rsi = _rsi.Update(bar, isFinal, includeOutputs: false).Value;
-        var cci = _cci.Update(bar, isFinal, includeOutputs: false).Value;
-        var mfi = _mfi.Update(bar, isFinal, includeOutputs: false).Value;
-        var macd = _macd.Update(bar, isFinal, includeOutputs: false).Value;
-        var bolins2 = _pctB.Update(bar, isFinal, includeOutputs: false).Value;
-        var dpo = _dpo.Update(bar, isFinal, includeOutputs: false).Value;
-        var roc = _roc.Update(bar, isFinal, includeOutputs: false).Value;
-        var emo = _eom.Update(bar, isFinal, includeOutputs: false).Value;
-
-        var prevPdoinss10 = EhlersStreamingWindow.GetOffsetValue(_pdoinssValues, _smaLength);
-        var prevPdoinsb10 = EhlersStreamingWindow.GetOffsetValue(_pdoinsbValues, _smaLength);
-
-        double bolinsll = InsyncVotes.Band(bolins2, 5, 95);
-        double cciins = InsyncVotes.Band(cci, -100, 100);
-
-        var emoSum = isFinal ? _emoSum.Add(emo, out var emoCount) : _emoSum.Preview(emo, out emoCount);
-        var emoSma = _smaLength == 1 ? emo : emoCount > 0 ? emoSum / emoCount : 0;
-        var emvins2 = emo - emoSma;
-        double emvinsb = InsyncVotes.Direction(emo, emoSma);
-
-        var macdSum = isFinal ? _macdSum.Add(macd, out var macdCount) : _macdSum.Preview(macd, out macdCount);
-        var macdSma = _smaLength == 1 ? macd : macdCount > 0 ? macdSum / macdCount : 0;
-        var macdins2 = macd - macdSma;
-        double macdinsb = InsyncVotes.Direction(macd, macdSma);
-        double mfiins = InsyncVotes.Band(mfi, 20, 80);
-
-        var dpoSum = isFinal ? _dpoSum.Add(dpo, out var dpoCount) : _dpoSum.Preview(dpo, out dpoCount);
-        var dpoSma = _smaLength == 1 ? dpo : dpoCount > 0 ? dpoSum / dpoCount : 0;
-        var pdoins2 = dpo - dpoSma;
-        double pdoinsb = InsyncVotes.Direction(dpo, dpoSma);
-        double pdoinss = InsyncVotes.InverseDirection(dpo, dpoSma);
-
-        var rocSum = isFinal ? _rocSum.Add(roc, out var rocCount) : _rocSum.Preview(roc, out rocCount);
-        var rocSma = _smaLength == 1 ? roc : rocCount > 0 ? rocSum / rocCount : 0;
-        var rocins2 = roc - rocSma;
-        double rocinsb = InsyncVotes.Direction(roc, rocSma);
-        double rsiins = InsyncVotes.Band(rsi, 30, 70);
-
-        var highestHigh = isFinal ? _stochHigh.Add(ranged.High, out _) : _stochHigh.Preview(ranged.High, out _);
-        var lowestLow = isFinal ? _stochLow.Add(ranged.Low, out _) : _stochLow.Preview(ranged.Low, out _);
-        var range = highestHigh - lowestLow;
-        var fastK = range != 0 ? MathHelper.MinOrMax((bar.Close - lowestLow) / range * 100, 100, 0) : 0;
-        var fastD = _stochFast.Next(fastK, isFinal);
-        var slowD = _stochSlow.Next(fastD, isFinal);
-
-        double stopdins = InsyncVotes.Band(slowD, 20, 80);
-        double stopkins = InsyncVotes.Band(fastD, 20, 80);
-
-        var iidx = 50 + cciins + bolinsll + rsiins + stopkins + stopdins + mfiins + emvinsb + rocinsb + prevPdoinss10 +
-            prevPdoinsb10 + macdinsb;
-
-        if (isFinal)
-        {
-            _pdoinsbValues.TryAdd(pdoinsb, out _);
-            _pdoinssValues.TryAdd(pdoinss, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Iidx", iidx }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(iidx, outputs);
+        var typical = _customInput ? bar.Close : CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close);
+        var value = _window.Next(bar.Close, typical, bar.High, bar.Low, bar.Volume, ranged.High, ranged.Low, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Iidx", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _cci.Dispose();
-        _mfi.Dispose();
-        _pctB.Dispose();
-        _dpo.Dispose();
-        _roc.Dispose();
-        _emoSum.Dispose();
-        _macdSum.Dispose();
-        _dpoSum.Dispose();
-        _rocSum.Dispose();
-        _stochHigh.Dispose();
-        _stochLow.Dispose();
-        _stochFast.Dispose();
-        _stochSlow.Dispose();
-        _pdoinsbValues.Dispose();
-        _pdoinssValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ibs")]

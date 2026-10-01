@@ -447,120 +447,19 @@ public static partial class Calculations
         int cciLength = 14, int dpoLength = 18, int rocLength = 10, int rsiLength = 14, int stochLength = 14, int stochKLength = 1,
         int stochDLength = 3, int smaLength = 10, double stdDevMult = 2, double divisor = 10000)
     {
-        // The components that read their own default input - a typical or median price - read the
-        // CALLER's series instead whenever one is chained, and by the time this calculation calls them
-        // an earlier component has already published its output onto CustomValuesList, which they would
-        // otherwise take for the caller's chain. Unchained this is empty, and they read their own
-        // default input exactly as before.
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> iidxList = new(stockData.Count);
-        List<double> tempMacdList = new(stockData.Count);
-        List<double> tempDpoList = new(stockData.Count);
-        List<double> tempRocList = new(stockData.Count);
-        List<double> pdoinsbList = new(stockData.Count);
-        List<double> pdoinssList = new(stockData.Count);
-        List<double> emoList = new(stockData.Count);
-        List<double> emoSmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var emoSumWindow = new RollingSum();
-        var macdSumWindow = new RollingSum();
-        var dpoSumWindow = new RollingSum();
-        var rocSumWindow = new RollingSum();
-
-        var rsiList = CalculateRelativeStrengthIndex(stockData, length: rsiLength).ChainedValues;
-        // Each component reads the caller's series; each Calculate call leaves its own output on CustomValuesList.
-        stockData.RestoreInputSeries(callerSeries);
-        var cciList = CalculateCommodityChannelIndex(stockData, length: cciLength).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var mfiList = CalculateMoneyFlowIndex(stockData, length: mfiLength).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var macdList = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength,
-            signalLength: signalLength).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var bbIndicatorList = CalculateBollingerBandsPercentB(stockData, stdDevMult: stdDevMult, length: bbLength).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var dpoList = CalculateDetrendedPriceOscillator(stockData, length: dpoLength).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var rocList = CalculateRateOfChange(stockData, length: rocLength).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var stochasticList = CalculateStochasticOscillator(stockData, length: stochLength, smoothLength1: stochKLength, smoothLength2: stochDLength);
-        var stochKList = stochasticList.ChainedOutputs["FastD"];
-        var stochDList = stochasticList.ChainedOutputs["SlowD"];
-        stockData.RestoreInputSeries(callerSeries);
-        var emvList = CalculateEaseOfMovement(stockData, length: emoLength, divisor: divisor).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        // maType, signalLength and emoLength only described unused component signal lines.
+        using var window = new InsyncWindow(fastLength, slowLength, mfiLength, bbLength, cciLength, dpoLength, rocLength, rsiLength, stochLength, stochKLength, stochDLength, smaLength, stdDevMult, divisor);
+        var values = new double[stockData.Count]; window.Compute(stockData, values);
+        var line = values.ToList(); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Length; i++)
         {
-            var bolins2 = bbIndicatorList[i];
-            var prevPdoinss10 = i >= smaLength ? pdoinssList[i - smaLength] : 0;
-            var prevPdoinsb10 = i >= smaLength ? pdoinsbList[i - smaLength] : 0;
-            var cci = cciList[i];
-            var mfi = mfiList[i];
-            var rsi = rsiList[i];
-            var stochD = stochDList[i];
-            var stochK = stochKList[i];
-            var prevIidx1 = i >= 1 ? iidxList[i - 1] : 0;
-            var prevIidx2 = i >= 2 ? iidxList[i - 2] : 0;
-            double bolinsll = InsyncVotes.Band(bolins2, 5, 95);
-            double cciins = InsyncVotes.Band(cci, -100, 100);
-
-            var emo = emvList[i];
-            emoList.Add(emo);
-
-            emoSumWindow.Add(emo);
-            var emoSma = emoSumWindow.Average(smaLength);
-            emoSmaList.Add(emoSma);
-
-            var emvins2 = emo - emoSma;
-            double emvinsb = InsyncVotes.Direction(emo, emoSma);
-
-            var macd = macdList[i];
-            tempMacdList.Add(macd);
-
-            macdSumWindow.Add(macd);
-            var macdSma = macdSumWindow.Average(smaLength);
-            var macdins2 = macd - macdSma;
-            double macdinsb = InsyncVotes.Direction(macd, macdSma);
-            double mfiins = InsyncVotes.Band(mfi, 20, 80);
-
-            var dpo = dpoList[i];
-            tempDpoList.Add(dpo);
-
-            dpoSumWindow.Add(dpo);
-            var dpoSma = dpoSumWindow.Average(smaLength);
-            var pdoins2 = dpo - dpoSma;
-            double pdoinsb = InsyncVotes.Direction(dpo, dpoSma);
-            pdoinsbList.Add(pdoinsb);
-
-            double pdoinss = InsyncVotes.InverseDirection(dpo, dpoSma);
-            pdoinssList.Add(pdoinss);
-
-            var roc = rocList[i];
-            tempRocList.Add(roc);
-
-            rocSumWindow.Add(roc);
-            var rocSma = rocSumWindow.Average(smaLength);
-            var rocins2 = roc - rocSma;
-            double rocinsb = InsyncVotes.Direction(roc, rocSma);
-            double rsiins = InsyncVotes.Band(rsi, 30, 70);
-            double stopdins = InsyncVotes.Band(stochD, 20, 80);
-            double stopkins = InsyncVotes.Band(stochK, 20, 80);
-
-            var iidx = 50 + cciins + bolinsll + rsiins + stopkins + stopdins + mfiins + emvinsb + rocinsb + prevPdoinss10 + prevPdoinsb10 + macdinsb;
-            iidxList.Add(iidx);
-
-            var signal = GetRsiSignal(iidx - prevIidx1, prevIidx1 - prevIidx2, iidx, prevIidx1, 95, 5);
-            signalsList?.Add(signal);
+            var previous = i > 0 ? values[i - 1] : 0;
+            var before = i > 1 ? values[i - 2] : 0;
+            signals?.Add(GetRsiSignal(values[i] - previous, previous - before, values[i], previous, 95, 5));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Iidx", iidxList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(iidxList);
-        stockData.IndicatorName = IndicatorName.InsyncIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Iidx", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line);
+        stockData.IndicatorName = IndicatorName.InsyncIndex; return stockData;
     }
 
 

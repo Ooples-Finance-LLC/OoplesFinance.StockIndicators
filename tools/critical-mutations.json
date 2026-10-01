@@ -63590,5 +63590,473 @@
     "before": "length, phase: 50",
     "after": "length, phase: 0",
     "filter": "FullyQualifiedName~JmaNumericalTests.CoreUsesPublicPowerStartupAndRegistryDefaults"
+  },
+  {
+    "id": "insync-wide-cci-constant",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "U(.015) * deviation",
+    "after": "U(.03) * deviation",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-cci-window-factor",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "Ratio(_cciLength * residual * Unit",
+    "after": "Ratio(residual * Unit",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-cci-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "U(_cci.Peek()) : 0",
+    "after": "U(_cci.Peek()) * 0 : 0",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-cci-startup",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_cci.Count >= _cciLength - 1",
+    "after": "_cci.Count >= _cciLength",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-mfi-upper-empty",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "negative.IsZero ? 100",
+    "after": "negative.IsZero ? 0",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
+  },
+  {
+    "id": "insync-wide-mfi-expiry-positive",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "positive -= expired.Flow",
+    "after": "positive += expired.Flow",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-mfi-expiry-negative",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "negative -= expired.Flow",
+    "after": "negative += expired.Flow",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-mfi-volume",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "var flow = U(typical) * U(volume);",
+    "after": "var flow = U(typical) * Unit;",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.ExtremeComponentsStillProduceBoundedVotes"
+  },
+  {
+    "id": "insync-wide-mfi-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "Ratio(100 * positive, positive + negative)",
+    "after": "Ratio(50 * positive, positive + negative)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-bb-startup",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_bb.Count < _bbLength - 1",
+    "after": "_bb.Count < _bbLength",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-bb-variance",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "n * bbSquares - bbSum * bbSum, n * n",
+    "after": "n * bbSquares - bbSum * bbSum, n",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-bb-width",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "2 * width);",
+    "after": "4 * width);",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-bb-offset",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "(U(price) - Units(middle)) * Unit + width",
+    "after": "(U(price) - Units(middle)) * Unit - width",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-bb-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "U(_bb.Peek()) : BigInteger.Zero",
+    "after": "U(_bb.Peek()) * 0 : BigInteger.Zero",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-macd-order",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "Difference(_fast.Next(new(price), final), _slow.Next(new(price), final))",
+    "after": "Difference(_slow.Next(new(price), final), _fast.Next(new(price), final))",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-macd-publish",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "var macd = Difference(_fast.Next(new(price), final), _slow.Next(new(price), final));",
+    "after": "var macd = new RocBankValue(Difference(_fast.Next(new(price), final), _slow.Next(new(price), final)).Publish());",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.OverflowingMacdStillContributesItsDirectionVote"
+  },
+  {
+    "id": "insync-wide-dpo-delay",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "(dpoLength + 1L) / 2 + 1",
+    "after": "(dpoLength + 1L) / 2 + 2",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-dpo-startup",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_dpoPrices.Peek() : 0",
+    "after": "_dpoPrices.Peek() : price",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
+  },
+  {
+    "id": "insync-wide-roc-order",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "RocBankValue.Return(price, _rocPrices.Peek())",
+    "after": "RocBankValue.Return(_rocPrices.Peek(), price)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-roc-publish",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "var roc = _rocPrices.Count < _rocLength ? default : RocBankValue.Return(price, _rocPrices.Peek());",
+    "after": "var roc = new RocBankValue((_rocPrices.Count < _rocLength ? default(RocBankValue) : RocBankValue.Return(price, _rocPrices.Peek())).Publish());",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.ExtremeComponentsStillProduceBoundedVotes"
+  },
+  {
+    "id": "insync-wide-ease-order",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_ease.Next(high, low, volume, final)",
+    "after": "_ease.Next(low, high, volume, final)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
+  },
+  {
+    "id": "insync-wide-ease-publish",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "var ease = _ease.Next(high, low, volume, final);",
+    "after": "var ease = new RocBankValue(_ease.Next(high, low, volume, final).Publish());",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.ExtremeComponentsStillProduceBoundedVotes"
+  },
+  {
+    "id": "insync-wide-stochastic-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "100 * (U(price) - U(lowest))",
+    "after": "50 * (U(price) - U(lowest))",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-stochastic-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_count - _stochLength + 1L",
+    "after": "_count - _stochLength + 2L",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-stochastic-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_dMean.Next(k, final)",
+    "after": "_dMean.Next(new(stochastic), final)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-dpo-vote-delay",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_delayedVotes.Count == _smaLength ? _delayedVotes.Peek() : default",
+    "after": "_delayedVotes.Count == _smaLength ? (Buy: buy, Sell: sell) : default",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-cci",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Band(cci, -100, 100)",
+    "after": "0 * InsyncVotes.Band(cci, -100, 100)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-bb",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Band(percent, 5, 95)",
+    "after": "0 * InsyncVotes.Band(percent, 5, 95)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-rsi",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Band(rsi, 30, 70)",
+    "after": "0 * InsyncVotes.Band(rsi, 30, 70)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-mfi",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Band(mfi, 20, 80)",
+    "after": "0 * InsyncVotes.Band(mfi, 20, 80)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-k",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Band(k, 20, 80)",
+    "after": "0 * InsyncVotes.Band(k, 20, 80)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-d",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Band(d, 20, 80)",
+    "after": "0 * InsyncVotes.Band(d, 20, 80)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-emv",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Direction(ease, easeMean)",
+    "after": "0 * InsyncVotes.Direction(ease, easeMean)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-macd",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Direction(macd, macdMean)",
+    "after": "0 * InsyncVotes.Direction(macd, macdMean)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-roc",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "InsyncVotes.Direction(roc, rocMean)",
+    "after": "0 * InsyncVotes.Direction(roc, rocMean)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-dpo-buy",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "delayed.Buy",
+    "after": "0 * delayed.Buy",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-vote-dpo-sell",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "delayed.Sell",
+    "after": "0 * delayed.Sell",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-base",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "var result = 50 +",
+    "after": "var result = 45 +",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
+  },
+  {
+    "id": "insync-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-mean-partial",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_partial = partial;",
+    "after": "_partial = false;",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-mean-full-startup",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "!_partial && count < _length ? default",
+    "after": "false && count < _length ? default",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "RocBankValue.Round(sum, count: count)",
+    "after": "RocBankValue.Round(sum, count: count + 1)",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-preview-mean",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "if (final) { _sum = sum; Push(_history",
+    "after": "if (true) { _sum = sum; Push(_history",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "_previousTypical = 0; _count = 0;",
+    "after": "_previousTypical = 0; _count = 1;",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.LongHistoryExpiryAndZeroWidthsKeepVoteBoundaries"
+  },
+  {
+    "id": "insync-wide-selected-typical",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "var typical = custom ? input[i] :",
+    "after": "var typical = false ? input[i] :",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.SelectedInputsPreserveOriginalEaseRanges"
+  },
+  {
+    "id": "insync-wide-selected-ranges",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncWindow.cs",
+    "scope": "internal sealed class InsyncWindow",
+    "before": "var ranges = custom ?",
+    "after": "var ranges = false ?",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.SelectedInputsPreserveOriginalEaseRanges"
+  },
+  {
+    "id": "insync-wide-band-lower-equality",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncVotes.cs",
+    "scope": "internal static class InsyncVotes",
+    "before": "value < lower ? -5",
+    "after": "value <= lower ? -5",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.OneUlpThresholdsAndExtendedDirectionsAreNotTies"
+  },
+  {
+    "id": "insync-wide-band-upper-equality",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncVotes.cs",
+    "scope": "internal static class InsyncVotes",
+    "before": "value > upper ? 5",
+    "after": "value >= upper ? 5",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.OneUlpThresholdsAndExtendedDirectionsAreNotTies"
+  },
+  {
+    "id": "insync-wide-direction-equality",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncVotes.cs",
+    "scope": "internal static class InsyncVotes",
+    "before": "value < mean\n",
+    "after": "value <= mean\n",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.OneUlpThresholdsAndExtendedDirectionsAreNotTies"
+  },
+  {
+    "id": "insync-wide-inverse-equality",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncVotes.cs",
+    "scope": "internal static class InsyncVotes",
+    "before": "value > mean\n",
+    "after": "value >= mean\n",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.OneUlpThresholdsAndExtendedDirectionsAreNotTies"
+  },
+  {
+    "id": "insync-wide-extended-direction",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncVotes.cs",
+    "scope": "internal static class InsyncVotes",
+    "before": "return v < m ?",
+    "after": "return v <= m ?",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
+  },
+  {
+    "id": "insync-wide-extended-inverse",
+    "module": "numerical",
+    "file": "src/Helpers/InsyncVotes.cs",
+    "scope": "internal static class InsyncVotes",
+    "before": "return v > m ?",
+    "after": "return v >= m ?",
+    "filter": "FullyQualifiedName~InsyncNumericalTests.HandComponentsAndDelayedEqualityVotesRemainExplicit"
   }
 ]

@@ -921,12 +921,12 @@ public sealed class SharedValidationRegressionTests
     [Fact]
     public void InsyncVotesDistinguishThresholdCrossingsFromNumericalTies()
     {
-        Assert.Equal(0, InsyncVotes.Band(100 + 1e-13, -100, 100));
+        Assert.Equal(5, InsyncVotes.Band(100 + 1e-13, -100, 100));
         Assert.Equal(5, InsyncVotes.Band(100 + 1e-8, -100, 100));
         Assert.Equal(-5, InsyncVotes.Band(-100 - 1e-8, -100, 100));
-        Assert.Equal(5, InsyncVotes.Direction(1 - 1e-13, 1));
+        Assert.Equal(0, InsyncVotes.Direction(1 - 1e-13, 1));
         Assert.Equal(0, InsyncVotes.Direction(1 - 1e-8, 1));
-        Assert.Equal(-5, InsyncVotes.InverseDirection(-1 + 1e-13, -1));
+        Assert.Equal(0, InsyncVotes.InverseDirection(-1 + 1e-13, -1));
         Assert.Equal(0, InsyncVotes.InverseDirection(-1 + 1e-8, -1));
     }
 
