@@ -4561,3 +4561,12 @@ Five fault definitions now target these scenarios, bypass both native validation
 All five routes retain exact signed deviation sums and smooth unpublished ratios for SMA, WMA, EMA, and Wilder. Independent Fraction references and hands cover overflow/subnormal scaling, exact zero and one-ULP changes, selected prices, signals, previews/reset, lazy periods, and callback slots. A hand signal of 1825/23 proves why rounding the raw ratio before smoothing changes publication.
 
 **80/80 focused tests passed** on net10.0 (`phase-change678.trx`). Inventory: **6,480/7,131 enrolled**, **651 omissions across 97 types**, all independent references registered, no construction failures, backlog exact. The 31 behavioral faults and final hosted/platform/package/performance gates remain pending.
+
+
+### Batch 653: Jrc repaired mutation qualification
+
+The isolated campaigns `653-repaired-a` and `653-repaired-b` passed their baselines and caught **40/40 compiled behavioral faults**, alongside **101/101 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-653 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `e49408c6dad02e8a09d26eb4296d1edddeb4752d5a921a5cfc2f4780d56e0d56`. Archive SHA256: `e021931fafc31986e1f3b738b192114a0d9bc1ae13d7e51f223e19e901d0d1aa` and `ac5c3327a94ae49e308744ac095775085846ef11c2a32cdc8237f318f59c6589`.
+
+This is evidence for the isolated batch-653 source. Source was already published in the batch-653 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
