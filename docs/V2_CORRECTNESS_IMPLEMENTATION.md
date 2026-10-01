@@ -4079,3 +4079,12 @@ Inertia and InertiaIndicator retain paired high/low RVI with the ten-bar populat
 
 
 **40 prepared behavioral faults remain pending**; all **7,346 mutation anchors** apply uniquely. Candidate/frozen snapshots match on2183 files. Enrollment is **6,257/7,131**, leaving **874 omissions**, with no construction failures. DLL SHA256: `84F91195242C9C391BD2A378315B738C915D24EAD0C7C6BC2A318C9335CEF45E`. Mutation qualification remains complete through630;631 replacement campaigns and632–649 qualification, pending formula decisions, and final hosted/package/release/performance gates are incomplete. PR246 remains draft.
+
+
+### Batch 631: Convolution mutation qualification
+
+The isolated campaigns `631-final-a` and `631-final-b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **93/93 focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-631 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `2ae934d73e4dff6b4dbb4eb905a298a531bd8d92b67f98722d2966a3ba9e320c`. Archive SHA256: `779d794c3316d561e7fb26521bb9dca18a9ebdb8ef744258e1f0785e3b3f5303` and `779d794c3316d561e7fb26521bb9dca18a9ebdb8ef744258e1f0785e3b3f5303`.
+
+This is evidence for the isolated batch-631 source. Source was already published in the batch-631 checkpoint; this update does not restore older source files. Mutation verification for batches 632 through 649 and the remaining final gates is still incomplete.
