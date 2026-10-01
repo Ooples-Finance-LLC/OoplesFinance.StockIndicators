@@ -61430,5 +61430,356 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~FunctionCandlesNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "grand-forecast-wide-length",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-horizon",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_horizon = Math.Max(1, forecastLength)",
+    "after": "_horizon = 1",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-carry",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "Units(.9)",
+    "after": "Units(.8)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-input-weight",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "Units(.1)",
+    "after": "Units(.2)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-trend-seed",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_trend.Lag(_length) : current",
+    "after": "_trend.Lag(_length) : BigInteger.Zero",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-change-seed",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_change.Lag(_length) : current",
+    "after": "_change.Lag(_length) : BigInteger.Zero",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-trend-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_trend.Lag(_length) : current",
+    "after": "_trend.Lag(1) : current",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-change-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_change.Lag(_length) : current",
+    "after": "_change.Lag(1) : current",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-forecast-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_trend.Lag(_horizon) : BigInteger.Zero",
+    "after": "_trend.Lag(1) : BigInteger.Zero",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-error-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_forecast.Lag(_horizon) : BigInteger.Zero",
+    "after": "_forecast.Lag(1) : BigInteger.Zero",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-trend-change",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "2 * change - previousChange",
+    "after": "change - previousChange",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-trend-subtraction",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "2 * change - previousChange",
+    "after": "2 * change + previousChange",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-trend-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "trendSum = _trendSum + trend -",
+    "after": "trendSum = _trendSum + trend +",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.LagExpiryAndCompactionRetainCorrectForecastHistory"
+  },
+  {
+    "id": "grand-forecast-wide-trend-mean-partial",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "Math.Min(_length, _trend.Count + 1L)",
+    "after": "_length",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-forecast",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "2 * trend - priorTrend",
+    "after": "trend - priorTrend",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-forecast-prior",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "2 * trend - priorTrend",
+    "after": "2 * trend + priorTrend",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-error",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "current - previousForecast",
+    "after": "current + previousForecast",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-absolute-error",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "BigInteger.Abs(RocBankValue.RoundUnits(current - previousForecast, BigInteger.One))",
+    "after": "RocBankValue.RoundUnits(current - previousForecast, BigInteger.One)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.MultiplierProductsRemainCompleteAndZeroBandsCollapse"
+  },
+  {
+    "id": "grand-forecast-wide-error-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "errorSum = _errorSum + error -",
+    "after": "errorSum = _errorSum + error +",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.LagExpiryAndCompactionRetainCorrectForecastHistory"
+  },
+  {
+    "id": "grand-forecast-wide-error-mean-partial",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "Math.Min(_horizon, _errors.Count + 1L)",
+    "after": "_horizon",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-band-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "Units(mult)",
+    "after": "Units(1)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.MultiplierProductsRemainCompleteAndZeroBandsCollapse"
+  },
+  {
+    "id": "grand-forecast-wide-upper",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "forecast * Unit + errorMean * _multiplier",
+    "after": "forecast * Unit - errorMean * _multiplier",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-lower",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "forecast * Unit - errorMean * _multiplier",
+    "after": "forecast * Unit + errorMean * _multiplier",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-bull-max",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "BigInteger.Max(forecast, BigInteger.Max(trend, mean))",
+    "after": "BigInteger.Min(forecast, BigInteger.Min(trend, mean))",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-bear-min",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "BigInteger.Min(forecast, BigInteger.Min(trend, mean))",
+    "after": "BigInteger.Max(forecast, BigInteger.Max(trend, mean))",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.WideSubnormalLaggedStagesRecoverAfterOverflow"
+  },
+  {
+    "id": "grand-forecast-wide-signal-bull",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_previousBull = bull",
+    "after": "_previousBull = BigInteger.Zero",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.WideSubnormalLaggedStagesRecoverAfterOverflow"
+  },
+  {
+    "id": "grand-forecast-wide-signal-bear",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_previousBear = bear",
+    "after": "_previousBear = BigInteger.Zero",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.WideSubnormalLaggedStagesRecoverAfterOverflow"
+  },
+  {
+    "id": "grand-forecast-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.WideSubnormalLaggedStagesRecoverAfterOverflow"
+  },
+  {
+    "id": "grand-forecast-wide-reset-trend",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_trend.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.WideSubnormalLaggedStagesRecoverAfterOverflow"
+  },
+  {
+    "id": "grand-forecast-wide-reset-error",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_errors.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.WideSubnormalLaggedStagesRecoverAfterOverflow"
+  },
+  {
+    "id": "grand-forecast-wide-history-capacity",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "internal History(int capacity) => _capacity = capacity;",
+    "after": "internal History(int capacity) => _capacity = Math.Max(1, capacity - 1);",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.LagExpiryAndCompactionRetainCorrectForecastHistory"
+  },
+  {
+    "id": "grand-forecast-wide-history-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_values[_values.Count - period]",
+    "after": "_values[Math.Max(_start, _values.Count - period - 1)]",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.LagExpiryAndCompactionRetainCorrectForecastHistory"
+  },
+  {
+    "id": "grand-forecast-wide-history-compaction",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "_values.RemoveRange(0, _start)",
+    "after": "_values.RemoveRange(0, _start + 1)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.LagExpiryAndCompactionRetainCorrectForecastHistory"
+  },
+  {
+    "id": "grand-forecast-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeGrandTrendForecastingFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.SelectedPricesAndZeroCallbackContractCoverEveryOutput"
+  },
+  {
+    "id": "grand-forecast-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeGrandTrendForecastingFast",
+    "before": "\"LowerBand\" => point.Lower",
+    "after": "\"LowerBand\" => point.Upper",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-native-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class GrandTrendForecastingState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.EveryRouteMatchesIndependentLaggedForecast"
+  },
+  {
+    "id": "grand-forecast-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class GrandTrendForecastingState",
+    "before": "{ \"LowerBand\", point.Lower }",
+    "after": "{ \"LowerBand\", point.Upper }",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.HandStartupForecastErrorsAndPartialMeans"
+  },
+  {
+    "id": "grand-forecast-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class GrandTrendForecastingState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "grand-forecast-wide-multiplier-validation",
+    "module": "numerical",
+    "file": "src/Helpers/GrandForecastWindow.cs",
+    "scope": "internal sealed class GrandForecastWindow",
+    "before": "double.IsNaN(mult) || double.IsInfinity(mult) || mult < 0",
+    "after": "double.IsNaN(mult) || double.IsInfinity(mult)",
+    "filter": "FullyQualifiedName~GrandForecastNumericalTests.InvalidMultiplierIsRejectedOnAllRoutesIncludingEmptyInput"
   }
 ]

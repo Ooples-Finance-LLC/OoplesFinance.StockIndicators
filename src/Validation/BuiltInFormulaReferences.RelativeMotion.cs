@@ -306,21 +306,7 @@ internal static partial class BuiltInFormulaReferences
                         (1 - alpha) * (1 - alpha) * (i - j + 1) * Math.Pow(alpha, i - j) * target[j])).ToArray()));
                 });
             case IndicatorName.GrandTrendForecasting:
-                return new("Gtf", new[] { "Gtf", "UpperBand", "MiddleBand", "LowerBand" }, bars =>
-                {
-                    var prices = Closes(bars); var horizon = Integer(options, "ForecastLength", 200);
-                    var root = new System.Numerics.Complex(.9, .3);
-                    var forcing = prices.Select((v, i) => i < length ? .9 * v : .1 * v - (i < 2 * length ? .9 * prices[i - length] : 0)).ToArray();
-                    // Each residue class modulo length follows poles .9 +/- .3i.
-                    var trend = prices.Select((_, i) => Enumerable.Range(0, i / length + 1).Sum(lag =>
-                        forcing[i - lag * length] * System.Numerics.Complex.Pow(root, lag + 1).Imaginary / .3)).ToArray();
-                    var forecast = trend.Select((v, i) => 2 * v - (i < horizon ? 0 : trend[i - horizon])).ToArray();
-                    var errors = prices.Select((v, i) => Math.Abs(v - (i < horizon ? 0 : forecast[i - horizon]))).ToArray();
-                    var widths = prices.Select((_, i) => Number(options, 2, "Mult") * Window(errors, i, horizon).Average()).ToArray();
-                    return Outputs(("Gtf", trend.Select((_, i) => Window(trend, i, length).Average()).ToArray()),
-                        ("MiddleBand", forecast), ("UpperBand", forecast.Select((v, i) => v + widths[i]).ToArray()),
-                        ("LowerBand", forecast.Select((v, i) => v - widths[i]).ToArray()));
-                });
+                return new("Gtf", new[] { "Gtf", "UpperBand", "MiddleBand", "LowerBand" }, bars => GrandForecastOutputs(bars, indicator));
             case IndicatorName.VanillaABCDPattern:
                 return new("Vabcd", new[] { "Vabcd" }, bars =>
                 {

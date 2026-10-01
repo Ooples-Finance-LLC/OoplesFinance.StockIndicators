@@ -117,92 +117,16 @@ public void Dispose()
 [PrimaryOutput("Gtf")]
 public sealed class GrandTrendForecastingState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _forecastLength;
-    private readonly double _mult;
-    private readonly RollingWindowSum _tSum;
-    private readonly RollingWindowSum _diffSum;
-    private readonly PooledRingBuffer<double> _tValues;
-    private readonly PooledRingBuffer<double> _fcastValues;
-    private readonly PooledRingBuffer<double> _chgValues;
-    private readonly StreamingInputResolver _input;
-
-    public GrandTrendForecastingState(int length = 100, int forecastLength = 200, double mult = 2)
-    {
-        _length = Math.Max(1, length);
-        _forecastLength = Math.Max(1, forecastLength);
-        _mult = mult;
-        _tSum = new RollingWindowSum(_length);
-        _diffSum = new RollingWindowSum(_forecastLength);
-        var bufferLength = Math.Max(_length, _forecastLength);
-        _tValues = new PooledRingBuffer<double>(bufferLength);
-        _fcastValues = new PooledRingBuffer<double>(bufferLength);
-        _chgValues = new PooledRingBuffer<double>(bufferLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly GrandForecastWindow _window;
+    public GrandTrendForecastingState(int length = 100, int forecastLength = 200, double mult = 2) => _window = new(length, forecastLength, mult);
     public IndicatorName Name => IndicatorName.GrandTrendForecasting;
-
-    public void Reset()
-    {
-        _tSum.Reset();
-        _diffSum.Reset();
-        _tValues.Clear();
-        _fcastValues.Clear();
-        _chgValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevT = _tValues.Count >= _length ? _tValues[_tValues.Count - _length] : value;
-        var priorT = _tValues.Count >= _forecastLength ? _tValues[_tValues.Count - _forecastLength] : 0;
-        var prevFcast = _fcastValues.Count >= _forecastLength ? _fcastValues[_fcastValues.Count - _forecastLength] : 0;
-        var prevChg = _chgValues.Count >= _length ? _chgValues[_chgValues.Count - _length] : value;
-
-        var chg = 0.9 * prevT;
-        var t = (0.9 * prevT) + (0.1 * value) + (chg - prevChg);
-        var tSum = isFinal ? _tSum.Add(t, out var tCount) : _tSum.Preview(t, out tCount);
-        var trend = tCount > 0 ? tSum / tCount : 0;
-
-        var fcast = t + (t - priorT);
-        var diff = Math.Abs(value - prevFcast);
-        var diffSum = isFinal ? _diffSum.Add(diff, out var diffCount) : _diffSum.Preview(diff, out diffCount);
-        var diffSma = diffCount > 0 ? diffSum / diffCount : 0;
-        var dev = diffSma * _mult;
-        var upper = fcast + dev;
-        var lower = fcast - dev;
-
-        if (isFinal)
-        {
-            _chgValues.TryAdd(chg, out _);
-            _tValues.TryAdd(t, out _);
-            _fcastValues.TryAdd(fcast, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "Gtf", trend },
-                { "UpperBand", upper },
-                { "MiddleBand", fcast },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(trend, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Trend, includeOutputs ? new Dictionary<string, double> { { "Gtf", point.Trend }, { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _tSum.Dispose();
-        _diffSum.Dispose();
-        _tValues.Dispose();
-        _fcastValues.Dispose();
-        _chgValues.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Gla")]

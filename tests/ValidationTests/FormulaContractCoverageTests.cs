@@ -435,7 +435,7 @@ public sealed class FormulaContractCoverageTests
         var first = new[] { new Bar(DateTime.UnixEpoch, 2, 2, 2, 2, 1) };
         var rules = BuiltInFormulaReferences.For(new GrandTrendForecasting(1, 1, 2)).ToArray();
         Assert.Equal(4, rules.Length);
-        foreach (var rule in rules) rule.Check(new IndicatorValidationContext("grand-forecast-hand", first, [[1.8], [7.6], [3.6], [-.4]], 0));
+        foreach (var rule in rules) rule.Check(new IndicatorValidationContext("grand-forecast-hand", first, [[1.8], [7.6], [3.6], [3.6 - 4]], 0));
     }
 
     [Fact]

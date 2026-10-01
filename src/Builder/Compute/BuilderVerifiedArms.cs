@@ -300,6 +300,7 @@ internal static class BuilderVerifiedArms
         typeof(FractalChaosOscillatorSpecOptions),
         typeof(FramaSpecOptions),
         typeof(FreedomOfMovementSpecOptions),
+        typeof(GrandTrendForecastingSpecOptions),
         typeof(FullTypicalPriceSpecOptions),
         typeof(FunctionToCandlesSpecOptions),
         typeof(GOscillatorSpecOptions),

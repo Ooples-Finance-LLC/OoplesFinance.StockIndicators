@@ -22,6 +22,11 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.GrandTrendForecasting)
+        {
+            var grandKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < grandKeys.Length; slot++) { var key = grandKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GrandForecastOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.FunctionToCandles && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
         {
             var candleKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

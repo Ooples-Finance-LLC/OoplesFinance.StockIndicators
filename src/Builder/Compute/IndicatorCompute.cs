@@ -2025,6 +2025,7 @@ internal static partial class IndicatorCompute
             FiniteVolumeElementsSpecOptions fve => ComputeFiniteVolumeElementsFast(data, context, fve.Length, fve.Factor, fve.MaType),
             FibonacciRetraceSpecOptions fr => ComputeFibonacciRetraceFast(data, context, fr.Length2, fr.Factor,
                 spec.OutputKey == "LowerBand" ? ChannelBand.Lower : ChannelBand.Upper),
+            GrandTrendForecastingSpecOptions grand => ComputeGrandTrendForecastingFast(data, context, grand.Length, grand.ForecastLength, grand.Mult, spec.OutputKey),
             FreedomOfMovementSpecOptions fom => ComputeFreedomOfMovementFast(data, context, fom.Length, fom.MaType, spec.OutputKey),
             FXSniperIndicatorSpecOptions fxs => ComputeFXSniperFast(data, context, fxs.CciLength, fxs.T3Length, fxs.B, fxs.MaType),
             GroverLlorensActivatorSpecOptions gla => ComputeGroverLlorensActivatorFast(data, context, gla.Length, gla.Mult, gla.MaType),
@@ -22615,6 +22616,15 @@ internal static partial class IndicatorCompute
     }
 
     // Batch 32 - Remaining Indicators (Part 1)
+
+    internal static ComputeBuffer ComputeGrandTrendForecastingFast(StockData data, ComputeContext context, int length = 100, int forecastLength = 200, double mult = 2, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new GrandForecastWindow(length, forecastLength, mult); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(input[i], true); output.WritableSpan[i] = outputKey switch { "UpperBand" => point.Upper, "MiddleBand" => point.Middle, "LowerBand" => point.Lower, _ => point.Trend }; }
+        return output;
+    }
 
     internal static ComputeBuffer ComputeFunctionToCandlesFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, CandleSeries series = CandleSeries.Close)
