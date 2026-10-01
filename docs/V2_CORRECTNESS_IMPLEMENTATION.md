@@ -4491,3 +4491,8 @@ The isolated campaigns `651-repaired-a` and `651-repaired-b` passed their baseli
 Source snapshot SHA256: `557514b5b33542e231aba89869d499e17089f2189ef37fea5987abda86bd30b9`. Archive SHA256: `217610ede993c130586ddefdabde79ae5664242c826ecb8369f2ecfb99e15087` and `217610ede993c130586ddefdabde79ae5664242c826ecb8369f2ecfb99e15087`.
 
 This is evidence for the isolated batch-651 source. Source was already published in the batch-651 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 652: RSX native-guard mutation repair
+
+The original campaigns caught 36 compiled faults and left one equivalent native-guard mutation: it removed explicit candle validation while the input resolver still performed the same validation. The replacement bypasses both whole-candle validation calls. The existing regression checks all five fields, preview and final updates, and subsequent state integrity. Production and tests are unchanged. Fresh campaigns for all 37 faults are required; the original pair is not qualified and its kills will not be pooled.
