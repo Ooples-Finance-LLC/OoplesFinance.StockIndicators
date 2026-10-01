@@ -19374,18 +19374,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeLBRPaintBarsFast(StockData data, ComputeContext context, int length = 9,
         double atrMult = 2.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int lbLength = 16, string? outputKey = null)
     {
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-        var buffer = context.Rent(atr.Length);
-        var output = buffer.WritableSpan;
-        var high = new RollingMinMax(lbLength); var low = new RollingMinMax(lbLength);
-        for (var i = 0; i < atr.Length; i++)
-        {
-            high.Add(data.HighPrices[i]); low.Add(data.LowPrices[i]);
-            var width = atrMult * atr[i];
-            output[i] = outputKey switch { "UpperBand" => high.Max - width, "LowerBand" => low.Min + width, _ => width };
-        }
-        return buffer;
+        var values = LbrPaintWindow.Calculate(data, maType, length, lbLength, atrMult, true);
+        var selected = outputKey switch { "UpperBand" => values.Upper, "LowerBand" => values.Lower, _ => values.Width };
+        var buffer = context.Rent(selected.Length); selected.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

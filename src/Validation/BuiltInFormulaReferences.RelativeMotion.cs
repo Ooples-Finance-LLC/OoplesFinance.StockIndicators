@@ -355,13 +355,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.FXSniperIndicator:
                 return new("FXSniper", new[] { "FXSniper" }, bars => FxSniperOutputs(bars, indicator));
             case IndicatorName.LBRPaintBars:
-                return new("Aatr", new[] { "UpperBand", "LowerBand", "Aatr" }, bars =>
-                {
-                    var width = Average(TrueRanges(bars), length, kind).Select(v => v * Number(options, 2.5, "AtrMult")).ToArray();
-                    var lookback = Integer(options, "LbLength", 16);
-                    return Outputs(("Aatr", width), ("UpperBand", bars.Select((_, i) => Window(bars, i, lookback).Max(b => b.High) - width[i]).ToArray()),
-                        ("LowerBand", bars.Select((_, i) => Window(bars, i, lookback).Min(b => b.Low) + width[i]).ToArray()));
-                });
+                return new("Aatr", new[] { "UpperBand", "LowerBand", "Aatr" }, bars => LbrPaintOutputs(bars, indicator));
             case IndicatorName.PseudoPolynomialChannel:
                 return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
                 {

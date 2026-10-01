@@ -483,38 +483,9 @@ public static partial class Calculations
     public static StockData CalculateLBRPaintBars(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 9,
         int lbLength = 16, double atrMult = 2.5)
     {
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<double> aatrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, lbLength);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var currentAtr = atrList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var aatr = atrMult * currentAtr;
-            aatrList.Add(aatr);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = lowest + aatr;
-            lowerBandList.Add(lowerBand);
-
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = highest - aatr;
-            upperBandList.Add(upperBand);
-
-            var signal = GetBullishBearishSignal(currentValue - Math.Max(lowerBand, upperBand), prevValue - Math.Max(prevLowerBand, prevUpperBand),
-                currentValue - Math.Min(lowerBand, upperBand), prevValue - Math.Min(prevLowerBand, prevUpperBand));
-            signalsList?.Add(signal);
-        }
+        var result = LbrPaintWindow.Calculate(stockData, maType, length, lbLength, atrMult, false);
+        var upperBandList = result.Upper.ToList(); var lowerBandList = result.Lower.ToList(); var aatrList = result.Width.ToList();
+        var signalsList = CreateSignalsList(stockData); signalsList?.AddRange(result.Trades);
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             // Not a MiddleBand: aatr is the width the two bands are pulled in by, about 5 on a market

@@ -66542,5 +66542,365 @@
     "before": "window.Next(highs[i], lows[i], prices[i]",
     "after": "window.Next(data.HighPrices[i], data.LowPrices[i], prices[i]",
     "filter": "FullyQualifiedName~KwanNumericalTests.SelectedSourcePreservesCandles"
+  },
+  {
+    "id": "lbr-paint-wide-lookback",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_lookback = Math.Max(1, lookback)",
+    "after": "_lookback = Math.Max(2, lookback)",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "lbr-paint-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_mean = new(kind, Math.Max(1, length))",
+    "after": "_mean = new(kind, Math.Max(2, length))",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "lbr-paint-wide-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_multiplier = multiplier",
+    "after": "_multiplier = multiplier / 2",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-multiplier-domain",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "double.IsNaN(multiplier) || double.IsInfinity(multiplier)",
+    "after": "double.IsNaN(multiplier) && double.IsInfinity(multiplier)",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.InvalidMultiplierAndBarsCannotAdvanceState"
+  },
+  {
+    "id": "lbr-paint-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_index - _lookback + 1L",
+    "after": "_index - _lookback + 2L",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "first.Value.Index < expiry",
+    "after": "first.Value.Index <= expiry",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-prune-high",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "last.Value.Value <= value",
+    "after": "last.Value.Value >= value",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-prune-low",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "last.Value.Value >= value",
+    "after": "last.Value.Value <= value",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "if (final)\n        {\n            while (deque.First",
+    "after": "if (!final)\n        {\n            while (deque.First",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-first-price",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_index == 0 ? price : _previousPrice",
+    "after": "_index == 0 ? 0 : _previousPrice",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-range-direction",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "FearGreedWindow.TrueRange(high, low, _index",
+    "after": "FearGreedWindow.TrueRange(low, high, _index",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WideRangeSmoothingAndSignedMultipliers"
+  },
+  {
+    "id": "lbr-paint-wide-width-scale",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "width.ScaleByPowerOfTwo(atr.UpperShift)",
+    "after": "width.ScaleByPowerOfTwo(0)",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WidthCanOverflowWhileBothBandsRemainFinite"
+  },
+  {
+    "id": "lbr-paint-wide-width-product",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "width.AddProduct(atr.Mantissa, _multiplier)",
+    "after": "width.Add(atr.Mantissa * _multiplier)",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WideRangeSmoothingAndSignedMultipliers"
+  },
+  {
+    "id": "lbr-paint-wide-premature-width",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "upper.Subtract(width);",
+    "after": "upper.Add(width.Mean(1), -1);",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WidthCanOverflowWhileBothBandsRemainFinite"
+  },
+  {
+    "id": "lbr-paint-wide-upper-sign",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "upper.Subtract(width);",
+    "after": "upper.Subtract(default);",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "var lower = width;",
+    "after": "var lower = new ExactMeanAccumulator();",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-band-order",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "order.Sign >= 0 ? upper : lower",
+    "after": "order.Sign < 0 ? upper : lower",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-bearish-order",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "order.Sign >= 0 ? lower : upper",
+    "after": "order.Sign < 0 ? lower : upper",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-bullish-strength",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "bullChange.Sign > 0",
+    "after": "bullChange.Sign < 0",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.SignalMarginsDistinguishAdjacentPrices"
+  },
+  {
+    "id": "lbr-paint-wide-bearish-strength",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "bearChange.Sign < 0",
+    "after": "bearChange.Sign > 0",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.SignalMarginsDistinguishAdjacentPrices"
+  },
+  {
+    "id": "lbr-paint-wide-bullish-memory",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_previousBullish = bullish;",
+    "after": "_previousBullish = default;",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.SignalMarginsDistinguishAdjacentPrices"
+  },
+  {
+    "id": "lbr-paint-wide-bearish-memory",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_previousBearish = bearish;",
+    "after": "_previousBearish = default;",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.SignalMarginsDistinguishAdjacentPrices"
+  },
+  {
+    "id": "lbr-paint-wide-state-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "if (final) { _previousPrice",
+    "after": "if (!final) { _previousPrice",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-reset-high",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_highs.Clear();",
+    "after": "_lows.Clear();",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-reset-low",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_lows.Clear();",
+    "after": "_highs.Clear();",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_mean.Reset();",
+    "after": "_mean.GetHashCode();",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_history.Count == _length) _history.Peek()",
+    "after": "_history.Count > _length) _history.Peek()",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WideRangeSmoothingAndSignedMultipliers"
+  },
+  {
+    "id": "lbr-paint-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Subtract(default);",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WideRangeSmoothingAndSignedMultipliers"
+  },
+  {
+    "id": "lbr-paint-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WideRangeSmoothingAndSignedMultipliers"
+  },
+  {
+    "id": "lbr-paint-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_history.Count + 1L < _length",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "if (commit) { _sum",
+    "after": "if (!commit) { _sum",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-recursive-kind",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "_recursive = new(kind, length, 1)",
+    "after": "_recursive = new(MovingAvgType.SimpleMovingAverage, length, 1)",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.WideRangeSmoothingAndSignedMultipliers"
+  },
+  {
+    "id": "lbr-paint-wide-custom-dispatch",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "callbacks && ComponentAverage.HasOverrides",
+    "after": "!callbacks && ComponentAverage.HasOverrides",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.CustomAtrSlotKeepsTrueRangeAndSelectedPrices"
+  },
+  {
+    "id": "lbr-paint-wide-custom-period",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "ComponentAverage.Take(ranges, Math.Max(1, length))",
+    "after": "ComponentAverage.Take(ranges, Math.Max(1, lookback))",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.CustomAtrSlotKeepsTrueRangeAndSelectedPrices"
+  },
+  {
+    "id": "lbr-paint-wide-custom-range",
+    "module": "numerical",
+    "file": "src/Helpers/LbrPaintWindow.cs",
+    "scope": "internal sealed class LbrPaintWindow",
+    "before": "i == 0 ? prices[i] : prices[i - 1]",
+    "after": "i == 0 ? prices[i] : prices[i]",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.CustomAtrSlotKeepsTrueRangeAndSelectedPrices"
+  },
+  {
+    "id": "lbr-paint-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LBRPaintBarsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* removed finite guard */",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.InvalidMultiplierAndBarsCannotAdvanceState"
+  },
+  {
+    "id": "lbr-paint-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LBRPaintBarsState",
+    "before": "return new(point.Width,",
+    "after": "return new(point.Upper,",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLBRPaintBarsFast(",
+    "before": "\"UpperBand\" => values.Upper",
+    "after": "\"UpperBand\" => values.Lower",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.HandCrossedBandsRetainExtremaAndMeanStartup"
+  },
+  {
+    "id": "lbr-paint-wide-fast-custom",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLBRPaintBarsFast(",
+    "before": "atrMult, true);",
+    "after": "atrMult, false);",
+    "filter": "FullyQualifiedName~LbrPaintNumericalTests.CustomAtrSlotKeepsTrueRangeAndSelectedPrices"
   }
 ]

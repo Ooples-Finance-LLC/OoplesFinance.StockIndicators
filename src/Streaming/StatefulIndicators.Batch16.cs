@@ -598,74 +598,17 @@ public sealed class KwanIndicatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Aatr")]
 public sealed class LBRPaintBarsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly double _atrMult;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public LBRPaintBarsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 9, int lbLength = 16,
-        double atrMult = 2.5)
-    {
-        _highWindow = new RollingWindowMax(Math.Max(1, lbLength));
-        _lowWindow = new RollingWindowMin(Math.Max(1, lbLength));
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _atrMult = atrMult;
-    }
-
+    private readonly LbrPaintWindow _window;
+    public LBRPaintBarsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 9, int lbLength = 16, double atrMult = 2.5)
+        => _window = new(maType, length, lbLength, atrMult);
     public IndicatorName Name => IndicatorName.LBRPaintBars;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _atrSmoother.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var aatr = _atrMult * atr;
-        var upper = highest - aatr;
-        var lower = lowest + aatr;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            // aatr is the width the bands are pulled in by, not a centre, and these bands cross on most
-            // bars so there is no centre to publish; see the batch calculation.
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "LowerBand", lower },
-                { "Aatr", aatr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(aatr, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Width, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "LowerBand", point.Lower }, { "Aatr", point.Width } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Lsma")]
