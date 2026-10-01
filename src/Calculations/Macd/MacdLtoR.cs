@@ -257,53 +257,12 @@ public static partial class Calculations
     public static StockData CalculateMacZIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 12, int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1)
     {
-        List<double> maczList = new(stockData.Count);
-        List<double> histList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-        var wilderMovingAvgList = GetMovingAverageList(stockData, MovingAvgType.WildersSmoothingMethod, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var stdev = stdDevList[i];
-            var wima = wilderMovingAvgList[i];
-            var fastMa = fastSmaList[i];
-            var slowMa = slowSmaList[i];
-            var zscore = stdev != 0 ? (currentValue - wima) / stdev : 0;
-
-            var macd = fastMa - slowMa;
-            var macz = stdev != 0 ? (zscore * mult) + (mult * macd / stdev) : zscore;
-            maczList.Add(macz);
-        }
-
-        var maczSignalList = GetMovingAverageList(stockData, maType, signalLength, maczList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var macz = maczList[i];
-            var maczSignal = maczSignalList[i];
-
-            var prevHist = i >= 1 ? histList[i - 1] : 0;
-            var hist = macz - maczSignal;
-            histList.Add(hist);
-
-            var signal = GetCompareSignal(hist, prevHist);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Macz", maczList },
-            { "Signal", maczSignalList },
-            { "Histogram", histList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(maczList);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = MacZWindow.Calculate(stockData, input, maType, fastLength, slowLength, signalLength, length, mult, false);
+        var line = result.Line.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Macz", line }, { "Signal", result.SignalLine.ToList() }, { "Histogram", result.Histogram.ToList() } });
+        stockData.SetSignals(result.Trades.ToList()); stockData.SetCustomValues(line);
         stockData.IndicatorName = IndicatorName.MacZIndicator;
-
         return stockData;
     }
 

@@ -2087,14 +2087,8 @@ internal static partial class IndicatorCompute
             LBRPaintBarsSpecOptions lbr => ComputeLBRPaintBarsFast(data, context, lbr.Length, lbr.AtrMult, lbr.MaType, lbr.LbLength, spec.OutputKey),
 
             // Batch 21 - MACD-like and Directional Indicators
-            MacZIndicatorSpecOptions macz => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context, ComputeMacZIndicatorFast(data, context, macz.FastLength, macz.SlowLength,
-                    macz.Length, macz.Mult, macz.MaType), macz.SignalLength, macz.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context, ComputeMacZIndicatorFast(data, context, macz.FastLength, macz.SlowLength,
-                    macz.Length, macz.Mult, macz.MaType), macz.SignalLength, macz.MaType),
-                _ => ComputeMacZIndicatorFast(data, context, macz.FastLength, macz.SlowLength, macz.Length, macz.Mult, macz.MaType)
-            },
+            MacZIndicatorSpecOptions macz => ComputeMacZIndicatorFast(data, context, macz.FastLength, macz.SlowLength,
+                macz.Length, macz.Mult, macz.MaType, macz.SignalLength, spec.OutputKey),
             MacZVwapIndicatorSpecOptions maczvwap => spec.OutputKey switch
             {
                 null or "Macz" => ComputeMacZVwapIndicatorFast(data, context, maczvwap.FastLength, maczvwap.SlowLength, maczvwap.SignalLength, maczvwap.Length1,
@@ -19357,37 +19351,13 @@ internal static partial class IndicatorCompute
     /// Computes MacZ Indicator using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeMacZIndicatorFast(StockData data, ComputeContext context, int fastLength = 12,
-        int slowLength = 25, int length = 25, double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        int slowLength = 25, int length = 25, double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        int signalLength = 9, string? outputKey = null)
     {
-        // CalculateMacZIndicator adds the chained series' z score against its Wilders average to its own macd
-        // divided by the same deviation, so both terms are in units of deviation. The signal length smooths
-        // the signal line and gamma reaches nothing, so neither belongs here. The switch this replaced
-        // returned a moving average of the raw close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, Math.Max(1, length));
-
-        using var fastAverage = context.Rent(count);
-        using var slowAverage = context.Rent(count);
-        using var wildersAverage = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
-        MovingAverage(data, MovingAvgType.WildersSmoothingMethod, length, input, wildersAverage.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var stdev = deviation.Span[i];
-            var zscore = stdev != 0 ? (input[i] - wildersAverage.Span[i]) / stdev : 0;
-            var macd = fastAverage.Span[i] - slowAverage.Span[i];
-            output[i] = stdev != 0 ? (zscore * mult) + (mult * macd / stdev) : zscore;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = MacZWindow.Calculate(data, input, maType, fastLength, slowLength, signalLength, length, mult, true);
+        var values = outputKey == "Signal" ? result.SignalLine : outputKey == "Histogram" ? result.Histogram : result.Line;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

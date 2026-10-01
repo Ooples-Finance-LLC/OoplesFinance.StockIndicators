@@ -1049,74 +1049,19 @@ public sealed class LogisticCorrelationState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Macz")]
 public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly IMovingAverageSmoother _wilderSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _mult;
-
+    private readonly MacZWindow _window;
     public MacZIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 12,
         int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1)
-    {
-        var resolved = Math.Max(1, length);
-        _stdDev = new RollingStandardDeviation(resolved);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _wilderSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WildersSmoothingMethod, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _mult = mult;
-        _ = gamma;
-    }
-
+        => _window = new(maType, fastLength, slowLength, signalLength, length, mult);
     public IndicatorName Name => IndicatorName.MacZIndicator;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-        _signalSmoother.Reset();
-        _wilderSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var stdev = _stdDev.Next(value, isFinal);
-        var fastMa = _fastSmoother.Next(value, isFinal);
-        var slowMa = _slowSmoother.Next(value, isFinal);
-        var wima = _wilderSmoother.Next(value, isFinal);
-        var zscore = stdev != 0 ? (value - wima) / stdev : 0;
-        var macd = fastMa - slowMa;
-        var macz = stdev != 0 ? (zscore * _mult) + (_mult * macd / stdev) : zscore;
-        var signal = _signalSmoother.Next(macz, isFinal);
-        var histogram = macz - signal;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Macz", macz },
-                { "Signal", signal },
-                { "Histogram", histogram }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(macz, outputs);
+        StreamingInputValidation.Validate(bar); var result = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(result.Line, includeOutputs ? new Dictionary<string, double>
+            { ["Macz"] = result.Line, ["Signal"] = result.SignalLine, ["Histogram"] = result.Histogram } : null);
     }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-        _signalSmoother.Dispose();
-        _wilderSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Macz")]

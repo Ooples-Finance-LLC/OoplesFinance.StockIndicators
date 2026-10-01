@@ -4269,3 +4269,12 @@ The isolated campaigns `640-corrected-a` and `640-corrected-b` passed their base
 Source snapshot SHA256: `fdfb258a6177d057b7f9dcb4b40356ffef1335a8ea863f87a7ac2c6639bf7bd5`. Archive SHA256: `dba7a8a2c27e6109b1d725bc05054574f7682eaaba410fd1fd31627df45c2fae` and `dba7a8a2c27e6109b1d725bc05054574f7682eaaba410fd1fd31627df45c2fae`.
 
 This is evidence for the isolated batch-640 source. Source was already published in the batch-640 checkpoint; this update does not restore older source files. Mutation verification for batches 641 through 660 and the remaining final gates is still incomplete.
+
+
+### Batch 661: MacZ numerical source coverage
+
+All **13 MacZ configurations** are enrolled. **112/112 focused checks passed** in `macz-661-verified.trx`: 111 MacZ checks plus the strengthened Fisher Least Squares reset regression. Independent fraction references cover every output and route. Hand values, squared-range extremes, exact subnormal midpoint rounding, signed multipliers, finite signal/histogram results behind an overflowing line, extreme periods, custom component slots, legacy DEMA/TEMA references and invalid input atomicity are covered. The reference returns the mathematically exact zero trajectory for entirely flat inputs; production still executes every supplied bar.
+
+Earlier verification exposed missing native/output registration, an unrecognized output declaration, a half-epsilon tie and a period-one rounding artifact; these were corrected without relaxing assertions. The superseded `macz-661-final.trx` and `macz-661-complete.trx` runs were explicitly stopped before reference updates and are incomplete evidence. The final reference uses a normalized floating-point root seed followed by two exact rational Newton refinements; assertions and budgets are unchanged.
+
+**40 prepared behavioral faults remain pending**, with **7,832 unique global anchors**. Enrollment is **6,373/7,131**, leaving **758 omissions across 113 types**, with no construction failures. DLL SHA256: `1F88A840E5CCD93AAA5A89D4D34B3E66E8EDB817F1F9A99A147822F0B30B5317`. This records source verification, not mutation qualification. Corrected Fisher Least Squares replacement campaigns and later batches, pending formula decisions, and hosted/package/release/performance gates remain incomplete. PR246 stays draft.

@@ -22,6 +22,13 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.MacZIndicator)
+        {
+            if (AverageKind(builtIn.CreateOptions(), 1) == 0) yield break;
+            var maczKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Macz" } : new[] { "Macz", "Signal", "Histogram" };
+            for (var slot = 0; slot < maczKeys.Length; slot++) { var key = maczKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MacZOutputs(bars, builtIn)[key], MacZBudget); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.LiquidRelativeStrengthIndex)
         {
             yield return IndicatorValidationRule.Reference(0, bars => LiquidRsiOutputs(bars, builtIn)["Lrsi"], LiquidRsiBudget);

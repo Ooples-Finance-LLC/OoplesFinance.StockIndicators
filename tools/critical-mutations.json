@@ -67235,5 +67235,365 @@
     "before": "for (var i = 0; i < close.Length; i++) { StreamingInputValidation",
     "after": "for (var i = close.Length; i < close.Length; i++) { StreamingInputValidation",
     "filter": "FullyQualifiedName~LiquidRsiNumericalTests.InvalidInputsAndShortSpansCannotPartiallyWriteOrAdvance"
+  },
+  {
+    "id": "macz-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_length = Math.Max(1, length); _mult",
+    "after": "_length = Math.Max(2, length); _mult",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-wide-scale",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "checked(_exponent + 1074), Denominator * exactRoot)",
+    "after": "checked(_exponent + 1073), Denominator * exactRoot)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.TinyMeansAndDeviationSurviveUntilCompleteQuotient"
+  },
+  {
+    "id": "macz-wide-root-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "new(_coefficient * length, checked(_exponent + 1074)",
+    "after": "new(BigInteger.Abs(_coefficient) * length, checked(_exponent + 1074)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.TinyMeansAndDeviationSurviveUntilCompleteQuotient"
+  },
+  {
+    "id": "macz-wide-mean-precision",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "var shift = exponent - 105;",
+    "after": "var shift = exponent - 4;",
+    "filter": "FullyQualifiedName~MacZNumericalTests.WideDifferencesProductsAndUnpublishedSignals"
+  },
+  {
+    "id": "macz-wide-division-scale",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "checked(_exponent + shift)",
+    "after": "checked(_exponent - shift)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.TinyMeansAndDeviationSurviveUntilCompleteQuotient"
+  },
+  {
+    "id": "macz-wide-product-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "checked(a._exponent + b._exponent)",
+    "after": "checked(a._exponent - b._exponent)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.TinyMeansAndDeviationSurviveUntilCompleteQuotient"
+  },
+  {
+    "id": "macz-wide-subtract",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "a + new Number(-b._coefficient",
+    "after": "a + new Number(b._coefficient",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "sum -= _history.Peek();",
+    "after": "sum += _history.Peek();",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide((long)_length * (_length + 1L))",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-wide-sma-ready",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count + 1 <= _length ? default",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_count < _length)\n            { sum",
+    "after": "_count <= _length)\n            { sum",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-wide-recursive-retention",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-recursive-current",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "if (final) { if (window)",
+    "after": "if (!final) { if (window)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-mean-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_previous = result;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "sum -= old; squares -= old * old;",
+    "after": "sum += old; squares += old * old;",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-variance-centering",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_length * squares - sum * sum",
+    "after": "_length * squares + sum * sum",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-variance-ready",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_prices.Count < _length - 1",
+    "after": "_prices.Count <= _length - 1",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-price-term",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "Number.Of(price) - wilder",
+    "after": "Number.Of(price) + wilder",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-slow-term",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "+ fast - slow",
+    "after": "+ fast + slow",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "* Number.Of(_mult)",
+    "after": "* Number.Of(1)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.WideDifferencesProductsAndUnpublishedSignals"
+  },
+  {
+    "id": "macz-wide-variance-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "if (final) { if (_prices.Count",
+    "after": "if (!final) { if (_prices.Count",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-histogram",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "var histogram = line - signal",
+    "after": "var histogram = signal - line",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_previousHistogram = histogram",
+    "after": "_previousHistogram = default",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "histogram.Sign > 0 && change.Sign > 0",
+    "after": "histogram.Sign > 0 && change.Sign < 0",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-signal-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_previousHistogram = default; }",
+    "after": "_previousHistogram = Number.Of(100); }",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-moments-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_sum = _squares = default;",
+    "after": "_sum = default;",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "_sum = _weighted = _previous = default;",
+    "after": "_sum = _weighted = default;",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "ComponentAverage.Take(published!, period)",
+    "after": "ComponentAverage.Take(published!, period + 1)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ComponentSlotsReceiveTheirOwnPeriodsAndSources"
+  },
+  {
+    "id": "macz-wide-callback-source",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "var signals = Mean(line, kind, signal)",
+    "after": "var signals = Mean(source, kind, signal)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ComponentSlotsReceiveTheirOwnPeriodsAndSources"
+  },
+  {
+    "id": "macz-wide-wilder-source",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "Mean(source, MovingAvgType.WildersSmoothingMethod, length)",
+    "after": "Mean(fastValues, MovingAvgType.WildersSmoothingMethod, length)",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-multiplier-guard",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "StreamingInputValidation.Finite(mult, nameof(mult));\n        _length",
+    "after": "StreamingInputValidation.Finite(0, nameof(mult));\n        _length",
+    "filter": "FullyQualifiedName~MacZNumericalTests.NonfiniteInputsCannotAdvanceState"
+  },
+  {
+    "id": "macz-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MacZIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Validate(default(OhlcvBar));",
+    "filter": "FullyQualifiedName~MacZNumericalTests.NonfiniteInputsCannotAdvanceState"
+  },
+  {
+    "id": "macz-wide-native-line",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MacZIndicatorState",
+    "before": "new StreamingIndicatorStateResult(result.Line,",
+    "after": "new StreamingIndicatorStateResult(result.SignalLine,",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-native-histogram",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MacZIndicatorState",
+    "before": "[\"Histogram\"] = result.Histogram",
+    "after": "[\"Histogram\"] = result.SignalLine",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMacZIndicatorFast",
+    "before": "outputKey == \"Signal\" ? result.SignalLine",
+    "after": "outputKey == \"Signal\" ? result.Line",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-fast-histogram",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMacZIndicatorFast",
+    "before": "outputKey == \"Histogram\" ? result.Histogram",
+    "after": "outputKey == \"Histogram\" ? result.Line",
+    "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
+  },
+  {
+    "id": "macz-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMacZIndicatorFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~MacZNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "macz-wide-unit-mean",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "if (_length == 1) return value;",
+    "after": "if (_length == 0) return value;",
+    "filter": "FullyQualifiedName~MacZNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
   }
 ]

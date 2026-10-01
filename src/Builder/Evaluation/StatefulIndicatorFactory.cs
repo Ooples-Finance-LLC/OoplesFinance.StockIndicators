@@ -379,6 +379,7 @@ internal static partial class StatefulIndicatorFactory
             FXSniperIndicatorSpecOptions sniper => new FXSniperIndicatorState(sniper.MaType, sniper.CciLength, sniper.T3Length, sniper.B),
             EhlersZeroMeanRoofingFilterSpecOptions zeroRoof => new EhlersZeroMeanRoofingFilterState(zeroRoof.Length1, zeroRoof.Length2),
             EhlersRocketRelativeStrengthIndexSpecOptions rocket => new EhlersRocketRelativeStrengthIndexState(rocket.MaType, rocket.Length1, rocket.Length2, rocket.ObosLevel, rocket.Mult),
+            MacZIndicatorSpecOptions macz => new MacZIndicatorState(macz.MaType, macz.FastLength, macz.SlowLength, macz.SignalLength, macz.Length, macz.Gamma, macz.Mult),
             LiquidRelativeStrengthIndexSpecOptions liquid => new LiquidRelativeStrengthIndexState(liquid.Length),
             FisherLeastSquaresMovingAverageSpecOptions fisherLeast => new FisherLeastSquaresMovingAverageState(fisherLeast.MaType, fisherLeast.Length),
             ElderSafeZoneStopsSpecOptions safeZone => new ElderSafeZoneStopsState(safeZone.MaType, length2: safeZone.Length, factor: safeZone.Mult),
