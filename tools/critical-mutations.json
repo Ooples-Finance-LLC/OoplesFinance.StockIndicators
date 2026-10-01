@@ -64902,7 +64902,7 @@
     "file": "src/Helpers/KaseConvergenceWindow.cs",
     "scope": "internal sealed class KaseConvergenceWindow",
     "before": "if (final) _previousValue = value;",
-    "after": "if (false) _previousValue = value;",
+    "after": "if (final) _previousValue = default;",
     "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
   },
   {
