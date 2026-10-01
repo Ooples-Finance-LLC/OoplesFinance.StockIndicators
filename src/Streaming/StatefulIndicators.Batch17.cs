@@ -859,46 +859,16 @@ public sealed class MomentumOscillatorState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Msw")]
 public sealed class MorphedSineWaveState : IStreamingIndicatorState
 {
-    private readonly double _power;
-    private readonly double _p;
+    private readonly MorphedSineWindow _window;
     private readonly StreamingInputResolver _input;
-    private int _index;
-
     public MorphedSineWaveState(int length = 14, double power = 100)
-    {
-        var resolved = Math.Max(1, length);
-        _power = power;
-        _p = resolved / (2 * Math.PI);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(length, power); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.MorphedSineWave;
-
-    public void Reset()
-    {
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var s = ((value * _power) + Math.Sin(_index / _p)) / _power;
-
-        if (isFinal)
-        {
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Msw", s }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(s, outputs);
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Msw", point.Value } } : null);
     }
 }
 

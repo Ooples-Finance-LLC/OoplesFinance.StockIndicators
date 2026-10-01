@@ -2969,33 +2969,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMorphedSineWave(this StockData stockData, int length = 14, double power = 100)
     {
-        List<double> sList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var p = length / (2 * Math.PI);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevS1 = i >= 1 ? sList[i - 1] : 0;
-            var prevS2 = i >= 2 ? sList[i - 2] : 0;
-            var c = (currentValue * power) + Math.Sin(i / p);
-
-            var s = c / power;
-            sList.Add(s);
-
-            var signal = GetCompareSignal(s - prevS1, prevS1 - prevS2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Msw", sList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sList);
-        stockData.IndicatorName = IndicatorName.MorphedSineWave;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new MorphedSineWindow(length, power); var values = new List<double>(stockData.Count);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Msw", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.MorphedSineWave;
         return stockData;
     }
 

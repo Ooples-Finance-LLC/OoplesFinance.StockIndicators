@@ -4409,3 +4409,14 @@ The batch, fast and native routes now retain candle extensions, smoothed envelop
 Enrollment is **6,415/7,131**, leaving **716 omissions across 107 types**; all 7,131 independent references are registered, construction succeeds and the backlog matches exactly. **36 prepared mutation faults remain pending**, with all **7,998 anchors** valid. This is source-level focused evidence, not final hosted/platform/package/release/performance qualification. The locally pending Mobility kernel is not connected to public routes and is excluded from this source commit.
 
 Verification DLL SHA256: `f051605a02f05f6f25db47f9e3b52d21843d15782acc9a84b722f58569ee0a57`.
+
+
+### Batch 668: Morphed Sine Wave retained price and phase arithmetic
+
+All routes now evaluate price plus the sine offset without the overflowing or underflowing price-times-power intermediate. The fast route consumes the selected source. Exact integer phase reduction preserves cardinal zeros/extrema and periodicity, and native phase wrapping avoids index overflow. Finite nonzero power is required; negative power remains supported. Unpublished values determine trading signals, allowing recovery after an offset projects to infinity. The aligned core validates all inputs before writes and preserves exact in-place and output-tail contracts.
+
+**38/38 focused checks passed** (`morphed-sine668-final.trx`): four configurations across five routes, selected sources, injected faults, numerical classes, independent rational/phase references, cardinal hand vectors, periodicity, subnormals, extreme prices/powers/periods, maximum phase, preview/reset and rejected-bar state integrity. **26 prepared mutation faults remain pending**; all **8,024 anchors** validate.
+
+Enrollment is **6,419/7,131**, leaving **712 omissions across 106 types**, with all independent references registered, no construction failures and an exact backlog match. Other numerical batches, mutation campaigns and final hosted/platform/package/release/performance gates remain incomplete. The pending Mobility kernel is excluded from this commit.
+
+Verification DLL SHA256: `7b03ce8e57b9b1cabb93dfb32a684e1654081c195125ac4ed8e953e7bb6ce379`.

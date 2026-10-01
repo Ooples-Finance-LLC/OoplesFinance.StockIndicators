@@ -69089,5 +69089,239 @@
     "before": "_window.Next(bar.High, bar.Low, bar.Open,",
     "after": "_window.Next(bar.High, bar.Low, bar.Close,",
     "filter": "FullyQualifiedName~ModifiedGannNumericalTests.TinyCandleDistancesAndRollingExpiryRetainSwitches"
+  },
+  {
+    "id": "morphed-sine-wide-zero-power",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "if (power == 0) throw new ArgumentOutOfRangeException(nameof(power), \"Power must be nonzero.\");",
+    "after": "",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CoreSupportsExactInPlaceAndValidatesBeforeWriting"
+  },
+  {
+    "id": "morphed-sine-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 4;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-power",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_power = Number.Of(power);",
+    "after": "_power = Number.Of(100);",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.PriceScalingDoesNotOverflowOrEraseSubnormalInput"
+  },
+  {
+    "id": "morphed-sine-wide-phase-frequency",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "SinePhase(2L * _phase, _length)",
+    "after": "SinePhase(_phase, _length)",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-phase-offset",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "SinePhase(2L * _phase, _length)",
+    "after": "SinePhase(2L * (_phase + 1L), _length)",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-legacy-phase",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "var sine = FastSlowDegreeWindow.SinePhase(2L * _phase, _length);",
+    "after": "var sine = Math.Sin(_phase / (_length / (2 * Math.PI)));",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-legacy-product",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "var line = Number.Of(price) + Number.Of(sine).Divide(_power);",
+    "after": "var line = Number.Of((price * _power.Publish() + sine) / _power.Publish());",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.PriceScalingDoesNotOverflowOrEraseSubnormalInput"
+  },
+  {
+    "id": "morphed-sine-wide-offset-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "Number.Of(price) + Number.Of(sine).Divide(_power)",
+    "after": "Number.Of(price) - Number.Of(sine).Divide(_power)",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-offset-product",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "Number.Of(sine).Divide(_power)",
+    "after": "Number.Of(sine) * _power",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-line-projection",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "var slope = line - _previousLine;",
+    "after": "var slope = Number.Of(line.Publish()) - _previousLine;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.OverflowingSineOffsetsRecoverWithoutPoisoningSignals"
+  },
+  {
+    "id": "morphed-sine-wide-slope-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "var slope = line - _previousLine;",
+    "after": "var slope = _previousLine - line;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.PriceScalingDoesNotOverflowOrEraseSubnormalInput"
+  },
+  {
+    "id": "morphed-sine-wide-slope-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "var change = slope - _previousSlope;",
+    "after": "var change = slope;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "if (final) { _phase",
+    "after": "if (true) { _phase",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-phase-wrap",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_phase == _length - 1 ? 0 : _phase + 1",
+    "after": "_phase == _length ? 0 : _phase + 1",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.ExtremePeriodsAndMaximumPhaseRemainBounded"
+  },
+  {
+    "id": "morphed-sine-wide-remember-line",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_previousLine = line;",
+    "after": "_previousLine = default;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-remember-slope",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-output",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "return (line.Publish(), trade);",
+    "after": "return (price, trade);",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-core-prevalidate",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "for (var i = 0; i < input.Length; i++) StreamingInputValidation.Finite(input[i], nameof(input));",
+    "after": "",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CoreSupportsExactInPlaceAndValidatesBeforeWriting"
+  },
+  {
+    "id": "morphed-sine-wide-core-short-output",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "if (output.Length < input.Length) throw new ArgumentException(\"Output span must be at least input length.\", nameof(output));",
+    "after": "",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CoreSupportsExactInPlaceAndValidatesBeforeWriting"
+  },
+  {
+    "id": "morphed-sine-wide-reset-phase",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_phase = 0; _previousLine",
+    "after": "_phase = 1; _previousLine",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-reset-line",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_previousLine = _previousSlope = default;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-reset-slope",
+    "module": "numerical",
+    "file": "src/Helpers/MorphedSineWindow.cs",
+    "scope": "internal sealed class MorphedSineWindow",
+    "before": "_previousLine = _previousSlope = default;",
+    "after": "_previousLine = default;",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.PriceScalingDoesNotOverflowOrEraseSubnormalInput"
+  },
+  {
+    "id": "morphed-sine-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MorphedSineWaveState : IStreamingIndicatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? _input.GetValue(bar) : bar.Close",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.RejectedNativeBarCannotAdvancePhase"
+  },
+  {
+    "id": "morphed-sine-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MorphedSineWaveState : IStreamingIndicatorState",
+    "before": "{ \"Msw\", point.Value }",
+    "after": "{ \"Msw\", 0 }",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "morphed-sine-wide-fast-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMorphedSineWaveFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "morphed-sine-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void MorphedSineWave",
+    "before": "MorphedSineWindow.Compute(input, output, length, power);",
+    "after": "MorphedSineWindow.Compute(input, output, 1, power);",
+    "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
   }
 ]

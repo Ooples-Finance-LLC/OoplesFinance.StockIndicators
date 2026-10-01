@@ -430,8 +430,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.MorphedSineWave:
-                return new("Msw", new[] { "Msw" }, bars => Outputs(("Msw", bars.Select((b, i) =>
-                    b.Close + Math.Sin(2 * Math.PI * i / length) / 100).ToArray())));
+                return new("Msw", new[] { "Msw" }, bars => MorphedSineOutputs(bars, indicator));
             case IndicatorName.MultiDepthZeroLagExponentialMovingAverage:
                 return new("Md2Pole", new[] { "Md2Pole", "Md1Pole", "Md3Pole" }, bars =>
                 {

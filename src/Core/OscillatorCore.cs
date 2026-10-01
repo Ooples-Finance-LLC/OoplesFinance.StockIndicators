@@ -6068,19 +6068,7 @@ internal static class OscillatorCore
     /// <param name="power">Scaling power.</param>
     internal static void MorphedSineWave(ReadOnlySpan<double> input, Span<double> output, int length = 14, double power = 100)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var p = length / (2 * Math.PI);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var c = (currentValue * power) + Math.Sin(i / p);
-            output[i] = c / power;
-        }
+        MorphedSineWindow.Compute(input, output, length, power);
     }
 
     // MarketFacilitationIndex and VolumeAccumulationOscillator already implemented above
