@@ -58521,7 +58521,7 @@
     "file": "src/Streaming/StatefulIndicators.Batch13.cs",
     "scope": "public sealed class FXSniperIndicatorState :",
     "before": "_readClose ? bar.Close",
-    "after": "false ? bar.Close",
+    "after": "!_readClose ? bar.Close",
     "filter": "FullyQualifiedName~FxSniperNumericalTests.SelectedInputAndComponentMeansKeepBatchAndFastContracts"
   },
   {
