@@ -3986,3 +3986,12 @@ Grand Trend Forecasting now retains extended rounded trend, change, forecast and
 **74 distinct focused tests are verified**: the first run (`grand-forecast-645.trx`) passed73/74, and the corrected multiplier test passed1/1 in `grand-forecast-645-multiplier.trx` using the unchanged production build. The failure was an assertion that the generated wrapper validates during construction; validation occurs when it creates options. Only that test assertion changed. Coverage comprises72 family cases and two existing Grand Forecast/Vanilla hand and cross-route regressions. Eight configurations cover five routes and numerical classes. Additional cases cover asymmetric lags, 2,080-bar compaction, extreme periods, subnormal/wide values, post-overflow recovery, zero and maximum multipliers, selected prices, all four outputs and signals. The hand lower-band expectation now uses `3.6 - 4`, the exact difference of its published binary64 operands. The independent rational reference rebuilds chronological windows. **39 prepared mutation faults remain pending**, with all **7,186 anchors** passing preflight. Candidate/frozen snapshots match on 2171 files. Enrollment is **6,225/7,131**, leaving **906 omissions** with no construction failures. Built DLL SHA256: `6F060AD61862D0A36937C077C98A3C352F25457D14A99651A8262D4826FCDDFF`.
 
 Corrected628 and batches629-645 still require mutation qualification. Remaining numerical coverage, pending formula decisions, hosted/package/release assurance and competitor-performance evidence remain incomplete. PR246 stays draft.
+
+
+### Batch 628: Dynamic Momentum mutation qualification
+
+The isolated campaigns `628-corrected-a` and `628-corrected-b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **50/50 focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-628 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `c0e11b8978014766880ccc379ff042de669ea096296f99bf7ef15e91320083af`. Archive SHA256: `da7d0199cd1cbd3f42fcbab5dfaed1963ab98e213068a4f7396326021ea9d296` and `da7d0199cd1cbd3f42fcbab5dfaed1963ab98e213068a4f7396326021ea9d296`.
+
+This is evidence for the isolated batch-628 source. Source was already published in the batch-628 checkpoint; this update does not restore older source files. Mutation verification for batches 629 through 645 and the remaining final gates is still incomplete.
