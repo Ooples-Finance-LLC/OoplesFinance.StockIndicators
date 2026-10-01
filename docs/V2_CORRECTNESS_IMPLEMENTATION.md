@@ -4057,3 +4057,25 @@ The restored Convolution campaign exposed an equivalent mutation: replacing the 
 ### Batch 631: Convolution lag mutation selection correction
 
 The restored campaigns completed with 32 compiled kills and four survivors. The high-period survivor was equivalent because periods 1 and 2 share the same clamped angle; its meaningful period-5 replacement was already recorded. Three lag faults survived the neutral/two-point hand test, whose correlations of 0 or +/-1 mask altered roofing-filter magnitudes. Those faults now select the existing longer-history roofing test, which checks independent full correlations, output values, signals, previews, and reset behavior. Production and test source are unchanged; the existing 93 focused passes remain applicable. These selection changes are not mutation qualification: a fresh pair of isolated campaigns must catch all 36 faults before qualification.
+
+
+### Batch 640: unique Firefly mutation identifiers
+
+Firefly preflight found two distinct faults named `firefly-wide-weighted-divisor`: one changes the weighted-price divisor and the other changes the weighted-mean denominator. The latter is now `firefly-wide-weighted-mean-divisor`. All44 faults remain; none is dropped or counted twice. Corrected candidate/frozen snapshots preserve the original production and tests with only this manifest ID changed. The existing55 focused passes remain applicable; mutation qualification is still pending. All7,346 current anchors and the eight mutation-runner checks pass.
+
+
+
+
+### Prepared source checkpoint: batch 649, Inertia public pair
+
+
+
+Inertia and InertiaIndicator retain paired high/low RVI with the ten-bar population deviation and requested Wilder smoothing. Their default partial-window least-squares endpoint and supported SMA/WMA/EMA/Wilder output options now retain only observed history, allowing extreme periods without eager allocation. Exact differences of published endpoints determine signals. The new independent reference uses global prefix regression moments, distinct from the production rolling local-coordinate recurrence. The internal close-only core remains pending a separate alignment decision.
+
+
+
+**112/112 focused checks passed** in `inertia-649-final.trx`:104 discovered configuration/route/rule checks, seven family regressions, and the existing direct RVI-to-Inertia consumer regression. Coverage includes hand endpoints175/3 and125/3, wide/subnormal/narrow-pedestal inputs, independently varied extreme periods, chronological expiry, all five supported smoothing choices, previews/reset, finite-input guards, exact signal comparisons, and component callback order/exhaustion. Batch retains four RVI overrides; fast additionally consumes the output mean slot. The first compiled run passed73/112; all39 failures exposed missing typed factory mappings for the two Inertia option types. Both mappings were added and the full focused set rerun. No production or test changes followed the final passing run.
+
+
+
+**40 prepared behavioral faults remain pending**; all **7,346 mutation anchors** apply uniquely. Candidate/frozen snapshots match on2183 files. Enrollment is **6,257/7,131**, leaving **874 omissions**, with no construction failures. DLL SHA256: `84F91195242C9C391BD2A378315B738C915D24EAD0C7C6BC2A318C9335CEF45E`. Mutation qualification remains complete through630;631 replacement campaigns and632–649 qualification, pending formula decisions, and final hosted/package/release/performance gates are incomplete. PR246 remains draft.

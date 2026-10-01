@@ -6892,7 +6892,13 @@ internal static partial class IndicatorCompute
             smoothLength: Math.Max(1, rviLength));
 
         var buffer = context.Rent(data.Count);
-        MovingAverage(data, maType, length, relativeVolatility.Span, buffer.WritableSpan);
+        if (InertiaSmoother.Supports(maType))
+        {
+            var supplied = ComponentAverage.Take(relativeVolatility.Span, Math.Max(1, length));
+            var smoother = new InertiaSmoother(maType, length);
+            for (var i = 0; i < data.Count; i++) buffer.WritableSpan[i] = supplied is null ? smoother.Next(relativeVolatility.Span[i], true) : i < supplied.Count ? supplied[i] : 0;
+        }
+        else MovingAverage(data, maType, length, relativeVolatility.Span, buffer.WritableSpan);
 
         return buffer;
     }

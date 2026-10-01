@@ -82,7 +82,8 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
 {
     private readonly RelativeVolatilityIndexEngine _rviHigh;
     private readonly RelativeVolatilityIndexEngine _rviLow;
-    private readonly IMovingAverageSmoother _smoother;
+    private readonly IMovingAverageSmoother? _smoother;
+    private readonly InertiaSmoother? _exact;
 
     public InertiaIndicatorState(MovingAvgType maType = MovingAvgType.LinearRegression, int length = 20, int rviLength = 14)
     {
@@ -90,7 +91,8 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
         var resolvedRvi = Math.Max(1, rviLength);
         _rviHigh = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, resolvedRvi);
         _rviLow = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, resolvedRvi);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        if (InertiaSmoother.Supports(maType)) _exact = new(maType, resolved);
+        else _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
     }
 
     public IndicatorName Name => IndicatorName.InertiaIndicator;
@@ -99,7 +101,8 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
     {
         _rviHigh.Reset();
         _rviLow.Reset();
-        _smoother.Reset();
+        _exact?.Reset();
+        _smoother?.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -109,7 +112,7 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
         var rviLow = _rviLow.Next(bar.Low, bar, isFinal);
         var rvi = RelativeVolatilityWindow.Mean(rviHigh, rviLow);
 
-        var inertia = _smoother.Next(rvi, isFinal);
+        var inertia = _exact is not null ? _exact.Next(rvi, isFinal) : _smoother!.Next(rvi, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -127,7 +130,7 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
     {
         _rviHigh.Dispose();
         _rviLow.Dispose();
-        _smoother.Dispose();
+        _smoother?.Dispose();
     }
 }
 

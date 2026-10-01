@@ -313,7 +313,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var rviList = CalculateRelativeVolatilityIndexV2(stockData, smoothLength: Math.Max(1, rviLength)).ChainedValues;
-        var inertiaList = GetMovingAverageList(stockData, maType, length, rviList);
+        var inertiaList = InertiaSmoother.Supports(maType) ? InertiaSmoother.Compute(rviList, maType, length).ToList() : GetMovingAverageList(stockData, maType, length, rviList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -321,7 +321,7 @@ public static partial class Calculations
             var prevInertiaIndicator1 = i >= 1 ? inertiaList[i - 1] : 0;
             var prevInertiaIndicator2 = i >= 2 ? inertiaList[i - 2] : 0;
 
-            var signal = GetCompareSignal(inertiaIndicator - prevInertiaIndicator1, prevInertiaIndicator1 - prevInertiaIndicator2);
+            var signal = InertiaSmoother.Trade(inertiaIndicator, prevInertiaIndicator1, prevInertiaIndicator2);
             signalsList?.Add(signal);
         }
 

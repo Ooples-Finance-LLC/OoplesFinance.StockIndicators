@@ -59866,7 +59866,7 @@
     "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
   },
   {
-    "id": "firefly-wide-weighted-divisor",
+    "id": "firefly-wide-weighted-mean-divisor",
     "module": "numerical",
     "file": "src/Helpers/FireflyWindow.cs",
     "scope": "internal sealed class FireflyWindow",
@@ -62861,5 +62861,365 @@
     "before": "U(basis) + offset * U(width)",
     "after": "U(basis) + (offset + 1) * U(width)",
     "filter": "FullyQualifiedName~HirashimaNumericalTests.LegacyMeansRetainOrdinaryRouteAgreement"
+  },
+  {
+    "id": "inertia-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.ExtremePeriodsRetainOnlyObservedHistory"
+  },
+  {
+    "id": "inertia-wide-expiry-value",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "full ? _history.Peek() : BigInteger.Zero",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "sum += value - expired;",
+    "after": "sum += value + expired;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-regression-shift",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "weighted - sum + expired + (n - 1) * value",
+    "after": "weighted + sum + expired + (n - 1) * value",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-regression-expired-weight",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "weighted - sum + expired + (n - 1) * value",
+    "after": "weighted - sum - expired + (n - 1) * value",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-regression-start-weight",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "weighted + (n - 1) * value",
+    "after": "weighted + n * value",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-regression-spread",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "var spread = n * n - 1;",
+    "after": "var spread = n * n + 1;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-regression-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "2 * weighted + (n - 1) * sum",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-regression-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "3 * covariance * (n - 1)",
+    "after": "3 * covariance * n",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-regression-single",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "n.IsOne ? value :",
+    "after": "n.IsOne ? BigInteger.Zero :",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-regression-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "BigInteger.One : n * spread",
+    "after": "BigInteger.One : (n + 1) * spread",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "weighted - sum + _length * value",
+    "after": "weighted + sum + _length * value",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "_length * value",
+    "after": "(_length - 1) * value",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "new BigInteger(_length) * (_length + 1L) / 2",
+    "after": "new BigInteger(_length) * (_length + 2L) / 2",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-simple-start",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "n < _length ? BigInteger.Zero : sum",
+    "after": "n <= _length ? BigInteger.Zero : sum",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-ema-seed-count",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "denominator = _count + 1;",
+    "after": "denominator = _count + 2;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-ema-seed-history",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "sum += value; numerator = sum;",
+    "after": "sum = value; numerator = sum;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-recursive-prior",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "(_length - 1L) * _previous",
+    "after": "(_length - 2L) * _previous",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-recursive-current",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "(ema ? 2 : 1) * value",
+    "after": "(ema ? 1 : 2) * value",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-recursive-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "denominator = ema ? _length + 1L : _length;",
+    "after": "denominator = ema ? _length + 2L : _length + 1L;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "if (final)\n",
+    "after": "if (true)\n",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-remember-weight",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "_weighted = weighted;",
+    "after": "_weighted = sum;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-remember-output",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "_previous = ExactVarianceWindow.Units(result);",
+    "after": "_previous = value;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-expiry-dequeue",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "if (full) _history.Dequeue();",
+    "after": "if (false) _history.Dequeue();",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "_count = 0;",
+    "after": "_count = _length;",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "ExactVarianceWindow.Units(value) - ExactVarianceWindow.Units(previous)",
+    "after": "ExactVarianceWindow.Units(previous) - ExactVarianceWindow.Units(value)",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.SignalComparisonRetainsExactDifferences"
+  },
+  {
+    "id": "inertia-wide-signal-lag",
+    "module": "numerical",
+    "file": "src/Helpers/InertiaSmoother.cs",
+    "scope": "internal sealed class InertiaSmoother",
+    "before": "ExactVarianceWindow.Units(previous) - ExactVarianceWindow.Units(older)",
+    "after": "ExactVarianceWindow.Units(previous) + ExactVarianceWindow.Units(older)",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-native-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "_rviHigh.Next(bar.High, bar, isFinal)",
+    "after": "_rviHigh.Next(bar.Close, bar, isFinal)",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-native-low",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "_rviLow.Next(bar.Low, bar, isFinal)",
+    "after": "_rviLow.Next(bar.High, bar, isFinal)",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-native-mean",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "RelativeVolatilityWindow.Mean(rviHigh, rviLow)",
+    "after": "rviHigh",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RejectedCandlesCannotAdvanceRviOrRegression"
+  },
+  {
+    "id": "inertia-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "{ \"Inertia\", inertia }",
+    "after": "{ \"Inertia\", 0 }",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-fast-rvi-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeInertiaFast",
+    "before": "smoothLength: Math.Max(1, rviLength)",
+    "after": "smoothLength: 1",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
+  },
+  {
+    "id": "inertia-wide-fast-smoothing-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeInertiaFast",
+    "before": "new InertiaSmoother(maType, length)",
+    "after": "new InertiaSmoother(maType, 1)",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+  },
+  {
+    "id": "inertia-wide-fast-callback-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeInertiaFast",
+    "before": "ComponentAverage.Take(relativeVolatility.Span, Math.Max(1, length))",
+    "after": "ComponentAverage.Take(relativeVolatility.Span, Math.Max(1, rviLength))",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RviAndOutputCallbackSlotsKeepTheirOrderAndExhaustionDefaults"
+  },
+  {
+    "id": "inertia-wide-fast-callback-value",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeInertiaFast",
+    "before": "i < supplied.Count ? supplied[i] : 0",
+    "after": "0",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.RviAndOutputCallbackSlotsKeepTheirOrderAndExhaustionDefaults"
+  },
+  {
+    "id": "inertia-wide-factory-output-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "length: inertia.SmoothLength, rviLength: inertia.RviLength",
+    "after": "length: 1, rviLength: inertia.RviLength",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.EveryRouteMatchesIndependentHighLowRviRegression"
+  },
+  {
+    "id": "inertia-wide-factory-rvi-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "length: inertia.SmoothLength, rviLength: inertia.RviLength",
+    "after": "length: inertia.SmoothLength, rviLength: 1",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.EveryRouteMatchesIndependentHighLowRviRegression"
+  },
+  {
+    "id": "inertia-wide-factory-average",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new InertiaIndicatorState(inertia.MaType, inertia.Length)",
+    "after": "new InertiaIndicatorState(MovingAvgType.LinearRegression, inertia.Length)",
+    "filter": "FullyQualifiedName~InertiaNumericalTests.EveryRouteMatchesIndependentHighLowRviRegression"
   }
 ]
