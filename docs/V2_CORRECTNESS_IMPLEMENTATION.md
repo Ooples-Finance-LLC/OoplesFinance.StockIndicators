@@ -4296,3 +4296,12 @@ The isolated campaigns `642-corrected-a` and `642-corrected-b` passed their base
 Source snapshot SHA256: `0556e374e229d796891cae2f7bea38b2da78030924eae4c2101457cd2b7cea70`. Archive SHA256: `83d53e019e7e2504fbd0339a2cb1002f836ca30455278c4c51836eb256842603` and `83d53e019e7e2504fbd0339a2cb1002f836ca30455278c4c51836eb256842603`.
 
 This is evidence for the isolated batch-642 source. Source was already published in the batch-642 checkpoint; this update does not restore older source files. Mutation verification for batches 643 through 662 and the remaining final gates is still incomplete.
+
+
+### Batch 662: MacZ VWAP numerical source coverage
+
+All **15 MacZ VWAP configurations** are enrolled. **132/132 focused checks passed** in `macz-vwap662-pole-verified.trx`: 128 MacZ VWAP checks plus four existing MacZ shared-arithmetic regressions. Independent volume-weighted fractions and a fourth-order transfer recurrence cover all three outputs and five routes. Hand filters, zero/signed/nearly cancelling volume sums, tiny/overflowing products, gamma extremes, custom slots, legacy means, selected inputs, preview/reset, invalid input atomicity and lazy extreme-period allocation are covered.
+
+The reference retains four binary64 residual components for recursive state (at least 212 significant bits after normalization), independently of production's rounding implementation; finite-window reference arithmetic stays exact. An initial run was stopped after a stack sample identified growing reference fractions. The next run exposed a sign error from Laguerre-stage cancellation on alternating inputs; production now uses the equivalent numerator and pole cascade, while the independent fourth-order recurrence extends the initial input/output into negative time. A 256-bar alternating regression covers zero and nonzero initial values and zero volumes. Superseded runs are not qualification evidence. No assertions or budgets were relaxed.
+
+**39 prepared behavioral faults remain pending**, with **7,871 unique global anchors**. Enrollment is **6,388/7,131**, leaving **743 omissions across 112 types**, with no construction failures. DLL SHA256: `6882CB2BEF235502DBA24BCB39F5E6FDBD4ACDDBEC6FBEA66011536DE16BE80E`. This is source verification, not mutation qualification. Mutation batches 643 onward, the existing batch660 recording block, pending formula decisions and final hosted/platform/package/release/performance gates remain incomplete. PR246 stays draft.

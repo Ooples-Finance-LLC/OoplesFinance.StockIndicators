@@ -20,7 +20,7 @@ internal sealed class MacZWindow : IDisposable
         _fast = new(kind, fast); _slow = new(kind, slow); _signal = new(kind, signal);
         _wilder = new(MovingAvgType.WildersSmoothingMethod, length);
     }
-    private readonly struct Number
+    internal readonly struct Number
     {
         private readonly BigInteger _coefficient;
         private readonly int _exponent;
@@ -44,6 +44,31 @@ internal sealed class MacZWindow : IDisposable
         }
         public static Number operator -(Number a, Number b) => a + new Number(-b._coefficient, b._exponent, b.Denominator);
         public static Number operator *(Number a, Number b) => new(a._coefficient * b._coefficient, checked(a._exponent + b._exponent), a.Denominator * b.Denominator);
+        internal Number Divide(Number divisor)
+        {
+            if (divisor.Sign == 0) throw new DivideByZeroException();
+            return new(_coefficient * divisor.Denominator * divisor.Sign, checked(_exponent - divisor._exponent), Denominator * BigInteger.Abs(divisor._coefficient));
+        }
+        internal Number OverRoot(Number square)
+        {
+            if (square.Sign < 0) throw new ArgumentOutOfRangeException(nameof(square));
+            if (Sign == 0 || square.Sign == 0) return default;
+            var ratio = (this * this).Divide(square);
+            var numerator = ratio._coefficient; var denominator = ratio.Denominator; var binaryPower = ratio._exponent;
+            if ((binaryPower & 1) != 0) { numerator <<= 1; binaryPower--; }
+            var numeratorRoot = ExactPopulationDeviation.IntegerRoot(numerator);
+            var denominatorRoot = ExactPopulationDeviation.IntegerRoot(denominator);
+            if (numeratorRoot * numeratorRoot == numerator && denominatorRoot * denominatorRoot == denominator)
+                return new(Sign * numeratorRoot, binaryPower / 2, denominatorRoot);
+            var normalPower = Bits(numerator) - Bits(denominator);
+            if (normalPower >= 0 ? numerator < (denominator << normalPower) : (numerator << -normalPower) < denominator) normalPower--;
+            var grid = (normalPower >= 0 ? normalPower / 2 : (normalPower - 1) / 2) - 105;
+            if (grid >= 0) denominator <<= 2 * grid; else numerator <<= -2 * grid;
+            var significand = ExactPopulationDeviation.IntegerRoot(numerator / denominator);
+            var boundary = 2 * significand + 1; var side = (4 * numerator).CompareTo(denominator * boundary * boundary);
+            if (side > 0 || side == 0 && !significand.IsEven) significand++;
+            return new(Sign * significand, checked(binaryPower / 2 + grid));
+        }
         internal Number Times(long value) => new(_coefficient * value, _exponent, Denominator);
         internal Number Divide(long divisor) => new(_coefficient, _exponent, Denominator * divisor);
         // Recursive states are bounded to 106 significant bits. Finite-window
@@ -60,6 +85,19 @@ internal sealed class MacZWindow : IDisposable
             var comparison = (2 * remainder).CompareTo(denominator);
             if (comparison > 0 || comparison == 0 && !quotient.IsEven) quotient++;
             return new(Sign * quotient, checked(_exponent + shift));
+        }
+        internal Number Round(int precision)
+        {
+            if (Sign == 0) return default;
+            var magnitude = BigInteger.Abs(_coefficient); var divisor = Denominator;
+            var power = Bits(magnitude) - Bits(divisor);
+            if (power >= 0 ? magnitude < (divisor << power) : (magnitude << -power) < divisor) power--;
+            var grid = power - (precision - 1);
+            if (grid >= 0) divisor <<= grid; else magnitude <<= -grid;
+            var rounded = BigInteger.DivRem(magnitude, divisor, out var tail);
+            var direction = (2 * tail).CompareTo(divisor);
+            if (direction > 0 || direction == 0 && !rounded.IsEven) rounded++;
+            return new(Sign * rounded, checked(_exponent + grid));
         }
         internal Number OverDeviation(BigInteger radicand, int length)
         {
@@ -83,7 +121,7 @@ internal sealed class MacZWindow : IDisposable
         internal double Publish()
         { var sum = new ExactMeanAccumulator(); sum.Add(1, _coefficient); sum.ScaleByPowerOfTwo(_exponent); var denominator = new ExactMeanAccumulator(); denominator.Add(1, Denominator); return sum.Ratio(denominator); }
     }
-    private sealed class Average : IDisposable
+    internal sealed class Average : IDisposable
     {
         private readonly MovingAvgType _kind; private readonly int _length;
         private readonly Queue<Number> _history = new();

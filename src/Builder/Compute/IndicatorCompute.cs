@@ -19367,92 +19367,10 @@ internal static partial class IndicatorCompute
         int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, MacdSeries series = MacdSeries.Line)
     {
-        // CalculateMacZVwapIndicator adds the moving average convergence, divided by the series' own standard
-        // deviation, to the z score of the series against its rolling volume weighted mean, and passes the
-        // sum through a four stage Laguerre filter. The arm returned a moving average of the close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-
-        using var deviations = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviations.WritableSpan, length2);
-        var deviation = deviations.Span;
-
-        using var fastAverages = context.Rent(count);
-        using var slowAverages = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fastAverages.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slowAverages.WritableSpan);
-        var fastAverage = fastAverages.Span;
-        var slowAverage = slowAverages.Span;
-
-        using var scores = context.Rent(count);
-        var score = scores.WritableSpan;
-        var volumePriceTotal = new RollingSum();
-        var volumeTotal = new RollingSum();
-        var squaredTotal = new RollingSum();
-        using var means = context.Rent(count);
-        var mean = means.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            volumePriceTotal.Add(volumes[i] * input[i]);
-            volumeTotal.Add(volumes[i]);
-
-            var volumeSum = volumeTotal.Sum(length1);
-            mean[i] = volumeSum != 0 ? length1 == 1 ? input[i] : volumePriceTotal.Sum(length1) / volumeSum : 0;
-
-            var distance = input[i] - mean[i];
-            squaredTotal.Add(distance * distance);
-
-            // The variance is a plain average of exactly length1 squared distances, so it stays blank until
-            // that window has filled rather than averaging what is there.
-            var variance = i >= length1 - 1 ? squaredTotal.Sum(length1) / length1 : 0;
-            var spread = MathHelper.Sqrt(variance);
-            score[i] = spread != 0 ? distance / spread : 0;
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double l0 = 0;
-        double l1 = 0;
-        double l2 = 0;
-        double l3 = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var convergence = fastAverage[i] - slowAverage[i];
-            var combined = deviation[i] != 0 ? score[i] + (convergence / deviation[i]) : score[i];
-
-            var previousL0 = i >= 1 ? l0 : combined;
-            var previousL1 = i >= 1 ? l1 : combined;
-            var previousL2 = i >= 1 ? l2 : combined;
-            var previousL3 = i >= 1 ? l3 : combined;
-
-            l0 = ((1 - gamma) * combined) + (gamma * previousL0);
-            l1 = (-1 * gamma * l0) + previousL0 + (gamma * previousL1);
-            l2 = (-1 * gamma * l1) + previousL1 + (gamma * previousL2);
-            l3 = (-1 * gamma * l2) + previousL2 + (gamma * previousL3);
-
-            output[i] = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-        }
-
-        if (series == MacdSeries.Line)
-        {
-            return buffer;
-        }
-
-        using var signals = context.Rent(count);
-        MovingAverage(data, maType, signalLength, buffer.Span, signals.WritableSpan);
-        var signal = signals.Span;
-
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = series == MacdSeries.Signal ? signal[i] : output[i] - signal[i];
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = MacZVwapWindow.Calculate(data, input, maType, fastLength, slowLength, signalLength, length1, length2, gamma, true);
+        var values = series == MacdSeries.Signal ? result.SignalLine : series == MacdSeries.Histogram ? result.Histogram : result.Line;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

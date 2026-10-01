@@ -137,29 +137,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.MacZIndicator:
                 return new("Macz", new[] { "Macz", "Signal", "Histogram" }, bars => MacZOutputs(bars, indicator));
             case IndicatorName.MacZVwapIndicator:
-                return new("Macz", new[] { "Macz", "Signal", "Histogram" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var fast = Average(prices, Integer(options, "FastLength", 12), kind);
-                    var slow = Average(prices, Integer(options, "SlowLength", 25), kind);
-                    var period = Integer(options, "Length2", 25);
-                    var variance = PopulationVariance(prices, period);
-                    var volumePeriod = Integer(options, "Length1", 20);
-                    var residual = prices.Select((value, i) =>
-                    {
-                        var window = Window(bars, i, volumePeriod).ToArray();
-                        var volume = window.Sum(b => b.Volume);
-                        // Centered weighted mean is exact on a constant-price window.
-                        var mean = volume == 0 ? 0 : value + window.Sum(b => b.Volume * (b.Close - value)) / volume;
-                        return value - mean;
-                    }).ToArray();
-                    var energy = Average(residual.Select(v => v * v).ToArray(), volumePeriod, 1);
-                    var raw = prices.Select((_, i) => (energy[i] == 0 ? 0 : residual[i] / Math.Sqrt(energy[i]))
-                        + (variance[i] == 0 ? 0 : (fast[i] - slow[i]) / Math.Sqrt(variance[i]))).ToArray();
-                    var line = LaguerreObservationWeights(raw, Number(options, .02, "Gamma"));
-                    var signal = Average(line, Integer(options, "SignalLength", 9), kind);
-                    return Outputs(("Macz", line), ("Signal", signal), ("Histogram", line.Zip(signal, (v, s) => v - s).ToArray()));
-                });
+                return new("Macz", new[] { "Macz", "Signal", "Histogram" }, bars => MacZVwapOutputs(bars, indicator));
             case IndicatorName.ImpulsePercentagePriceOscillator:
                 return new("Ppo", new[] { "Ppo", "Signal", "Histogram" }, bars =>
                 {
@@ -181,20 +159,4 @@ internal static partial class BuiltInFormulaReferences
         }
     }
 
-    private static double[] LaguerreObservationWeights(double[] values, double gamma)
-    {
-        // The four-stage Laguerre filter has a symmetric cubic numerator and denominator (1-gamma*z)^4.
-        // Expand the denominator with the negative-binomial series and convolve the observation weights.
-        var scale = (1 - gamma) * (1 - gamma) / 6;
-        var a = scale * (1 - gamma + gamma * gamma);
-        var b = scale * (2 - 5 * gamma + 2 * gamma * gamma);
-        var numerator = new[] { a, b, b, a };
-        var impulse = Enumerable.Range(0, values.Length).Select(i => Enumerable.Range(0, Math.Min(4, i + 1)).Sum(j =>
-        {
-            var lag = i - j;
-            return numerator[j] * ((lag + 1d) * (lag + 2d) * (lag + 3d) / 6) * Math.Pow(gamma, lag);
-        })).ToArray();
-        return values.Select((_, i) => values[0] + Enumerable.Range(0, i + 1)
-            .Sum(j => impulse[i - j] * (values[j] - values[0]))).ToArray();
-    }
 }

@@ -67595,5 +67595,356 @@
     "before": "if (_length == 1) return value;",
     "after": "if (_length == 0) return value;",
     "filter": "FullyQualifiedName~MacZNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-vwap-wide-volume-period",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_volumeLength = Math.Max(1, volumeLength)",
+    "after": "_volumeLength = 1",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-vwap-wide-deviation-period",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_deviationLength = Math.Max(1, deviationLength)",
+    "after": "_deviationLength = 1",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-vwap-wide-product",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "product = value * weight",
+    "after": "product = value",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-volume-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "weights -= old.Volume",
+    "after": "weights -= default(Number)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-product-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "products -= old.Product",
+    "after": "products -= default(Number)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-zero-volume",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "weights.Sign == 0 ? default : products.Divide(weights)",
+    "after": "weights.Sign == 0 ? value : products.Divide(weights)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-center",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "products.Divide(weights)",
+    "after": "products.Divide(Number.Of(1))",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-energy-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "energy -= _residuals.Peek()",
+    "after": "energy -= default(Number)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-energy-period",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "energy.Divide(_volumeLength)",
+    "after": "energy.Divide(1)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-energy-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_residuals.Count < _volumeLength - 1",
+    "after": "_residuals.Count < 0",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-deviation-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_prices.Count < _deviationLength - 1",
+    "after": "_prices.Count < 0",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ExtremePeriodsAllocateOnlyObservedBars"
+  },
+  {
+    "id": "macz-vwap-wide-macd-term",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "(fast - slow).OverDeviation",
+    "after": "(fast + slow).OverDeviation",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-l0",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var l0 = feed + gamma * _l0;",
+    "after": "var l0 = feed + gamma * _l1;",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.GammaExtremesAndAllMeansMatchIndependentRecurrence"
+  },
+  {
+    "id": "macz-vwap-wide-l1",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var l1 = l0 + gamma * _l1;",
+    "after": "var l1 = l0 + gamma * _l2;",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.GammaExtremesAndAllMeansMatchIndependentRecurrence"
+  },
+  {
+    "id": "macz-vwap-wide-l2",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var l2 = l1 + gamma * _l2;",
+    "after": "var l2 = l1 + gamma * _l3;",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.GammaExtremesAndAllMeansMatchIndependentRecurrence"
+  },
+  {
+    "id": "macz-vwap-wide-l3",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var line = l2 + gamma * _l3;",
+    "after": "var line = l2 + gamma * _l2;",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.GammaExtremesAndAllMeansMatchIndependentRecurrence"
+  },
+  {
+    "id": "macz-vwap-wide-weights",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "b * (_raw1 + _raw2)",
+    "after": "b * (_raw1 + _raw1)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-filter-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "(complement * complement).Divide(6)",
+    "after": "(complement * complement).Divide(5)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-seed",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_l3 = raw; _raw1",
+    "after": "_l3 = default; _raw1",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "if (final)\n        {\n            var exact",
+    "after": "if (true)\n        {\n            var exact",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.GammaExtremesAndAllMeansMatchIndependentRecurrence"
+  },
+  {
+    "id": "macz-vwap-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_hasPrevious = _constant = false",
+    "after": "_hasPrevious = _constant = true",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-reset-volume",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_volumes.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-reset-energy",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_residuals.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-reset-price",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-histogram",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var histogram = line - signal",
+    "after": "var histogram = line + signal",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-trade-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "if (final) _previousHistogram = histogram",
+    "after": "if (false) _previousHistogram = histogram",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-gamma-guard",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "StreamingInputValidation.Finite(gamma, nameof(gamma)); _gamma = gamma;",
+    "after": "StreamingInputValidation.Finite(0, nameof(gamma)); _gamma = gamma;",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.NonfiniteInputsCannotAdvanceState"
+  },
+  {
+    "id": "macz-vwap-wide-custom-signal",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var signals = Mean(line, signal)",
+    "after": "var signals = Mean(source, signal)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ComponentSlotsReceiveOwnPeriodsAndUnpublishedLine"
+  },
+  {
+    "id": "macz-vwap-wide-custom-period",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var slowValues = Mean(source, slow)",
+    "after": "var slowValues = Mean(source, fast)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ComponentSlotsReceiveOwnPeriodsAndUnpublishedLine"
+  },
+  {
+    "id": "macz-vwap-wide-residual-projection",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var residual = value - mean",
+    "after": "var residual = Number.Of((value - mean).Publish())",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-product-projection",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "var product = value * weight",
+    "after": "var product = Number.Of((value * weight).Publish())",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MacZVwapWindow.cs",
+    "scope": "internal sealed class MacZVwapWindow",
+    "before": "squares -= old * old",
+    "after": "squares -= BigInteger.Zero",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
+  },
+  {
+    "id": "macz-vwap-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MacZVwapIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Validate(default(OhlcvBar));",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.NonfiniteInputsCannotAdvanceState"
+  },
+  {
+    "id": "macz-vwap-wide-native-line",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MacZVwapIndicatorState",
+    "before": "new StreamingIndicatorStateResult(result.Line,",
+    "after": "new StreamingIndicatorStateResult(result.SignalLine,",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-native-histogram",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class MacZVwapIndicatorState",
+    "before": "[\"Histogram\"] = result.Histogram",
+    "after": "[\"Histogram\"] = result.Line",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMacZVwapIndicatorFast",
+    "before": "series == MacdSeries.Signal ? result.SignalLine",
+    "after": "series == MacdSeries.Signal ? result.Line",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-fast-histogram",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMacZVwapIndicatorFast",
+    "before": "series == MacdSeries.Histogram ? result.Histogram",
+    "after": "series == MacdSeries.Histogram ? result.Line",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.ZeroVolumeHandValuesAndFilterTransfer"
+  },
+  {
+    "id": "macz-vwap-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMacZVwapIndicatorFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "macz-vwap-wide-root-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal Number OverRoot",
+    "before": "return new(Sign * numeratorRoot, binaryPower / 2, denominatorRoot)",
+    "after": "return new(numeratorRoot, binaryPower / 2, denominatorRoot)",
+    "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
   }
 ]
