@@ -1933,47 +1933,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKaseIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
     {
-        List<double> kUpList = new(stockData.Count);
-        List<double> kDownList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
-        var sqrtPeriod = Sqrt(length);
-
-        var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var avgTrueRange = atrList[i];
-            var avgVolSma = volumeSmaList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var ratio = avgVolSma * sqrtPeriod;
-
-            var prevKUp = GetLastOrDefault(kUpList);
-            var kUp = avgTrueRange > 0 && ratio != 0 && currentLow != 0 ? prevHigh / currentLow / ratio : prevKUp;
-            kUpList.Add(kUp);
-
-            var prevKDown = GetLastOrDefault(kDownList);
-            var kDown = avgTrueRange > 0 && ratio != 0 && prevLow != 0 ? currentHigh / prevLow / ratio : prevKDown;
-            kDownList.Add(kDown);
-
-            var signal = GetCompareSignal(kUp - kDown, prevKUp - prevKDown);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "KaseUp", kUpList },
-            { "KaseDn", kDownList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.KaseIndicator;
-
-        return stockData;
+        var result = KaseRatioWindow.Compute(stockData, maType, length, false); var up = result.Up.ToList(); var down = result.Down.ToList();
+        var trades = CreateSignalsList(stockData); trades?.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "KaseUp", up }, { "KaseDn", down } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.KaseIndicator; return stockData;
     }
 
 

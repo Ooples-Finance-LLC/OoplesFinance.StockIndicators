@@ -96,11 +96,6 @@ OoplesFinance.StockIndicators.Indicators.KarobeinOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.KarobeinOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.KarobeinOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.KarobeinOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.KaseIndicator/default
-OoplesFinance.StockIndicators.Indicators.KaseIndicator/longer-periods
-OoplesFinance.StockIndicators.Indicators.KaseIndicator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.KaseIndicator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.KaseIndicator/weighted-average
 OoplesFinance.StockIndicators.Indicators.KasePeakOscillatorV1/default
 OoplesFinance.StockIndicators.Indicators.KasePeakOscillatorV1/longer-length
 OoplesFinance.StockIndicators.Indicators.KasePeakOscillatorV1/longer-periods

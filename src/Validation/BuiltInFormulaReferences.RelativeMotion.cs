@@ -1112,21 +1112,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("To", RegressionEndpoints(angles, length).Select(Math.Atan).ToArray()));
                 });
             case IndicatorName.KaseIndicator:
-                return new("KaseUp", new[] { "KaseUp", "KaseDn" }, bars =>
-                {
-                    var volume = Average(bars.Select(b => (double)b.Volume).ToArray(), length, kind);
-                    var atr = Average(TrueRanges(bars), length, kind);
-                    double[] Side(bool up) => bars.Select((_, i) =>
-                    {
-                        var last = Enumerable.Range(0, i + 1).LastOrDefault(j => atr[j] > 0 && volume[j] != 0 &&
-                            (up ? bars[j].Low : j == 0 ? 0 : bars[j - 1].Low) != 0);
-                        var divisor = up ? bars[last].Low : last == 0 ? 0 : bars[last - 1].Low;
-                        if (atr[last] <= 0 || volume[last] == 0 || divisor == 0) return 0d;
-                        return (up ? last == 0 ? 0 : bars[last - 1].High : bars[last].High) /
-                            (divisor * volume[last] * Math.Sqrt(length));
-                    }).ToArray();
-                    return Outputs(("KaseUp", Side(true)), ("KaseDn", Side(false)));
-                });
+                return new("KaseUp", new[] { "KaseUp", "KaseDn" }, bars => KaseRatioOutputs(bars, indicator));
             case IndicatorName.KaseDevStopV2:
                 return new("Dev1", new[] { "Dev1", "Dev2", "Dev3", "Dev4" }, bars => KaseStopV2Outputs(bars, indicator));
             case IndicatorName.KaseDevStopV1:

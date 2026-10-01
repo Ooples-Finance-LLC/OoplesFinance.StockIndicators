@@ -22,6 +22,11 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.KaseIndicator && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var kaseKeys = builtIn.BatchOutputKey is { } kaseSelected ? new[] { kaseSelected } : new[] { "KaseUp", "KaseDn" };
+            for (var slot = 0; slot < kaseKeys.Length; slot++) { var key = kaseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KaseRatioOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KaseConvergenceDivergence && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => KaseConvergenceOutputs(bars, builtIn)["Kcd"], IndicatorErrorBudget.Exact); yield break;

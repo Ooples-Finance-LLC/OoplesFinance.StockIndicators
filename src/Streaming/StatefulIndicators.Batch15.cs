@@ -688,81 +688,16 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("KaseUp")]
 public sealed class KaseIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _volumeSma;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly double _sqrtLength;
-    private double _prevHigh;
-    private double _prevLow;
-    private double _prevClose;
-    private double _prevKUp;
-    private double _prevKDown;
-    private bool _hasPrev;
-
-    public KaseIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
-    {
-        var resolved = Math.Max(1, length);
-        _volumeSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _sqrtLength = MathHelper.Sqrt(resolved);
-    }
-
+    private readonly KaseRatioWindow _window;
+    public KaseIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.KaseIndicator;
-
-    public void Reset()
-    {
-        _volumeSma.Reset();
-        _atrSmoother.Reset();
-        _prevHigh = 0;
-        _prevLow = 0;
-        _prevClose = 0;
-        _prevKUp = 0;
-        _prevKDown = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var volumeSma = _volumeSma.Next(bar.Volume, isFinal);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var ratio = volumeSma * _sqrtLength;
-        var kUp = atr > 0 && ratio != 0 && bar.Low != 0 ? prevHigh / bar.Low / ratio : _prevKUp;
-        var kDown = atr > 0 && ratio != 0 && prevLow != 0 ? bar.High / prevLow / ratio : _prevKDown;
-
-        if (isFinal)
-        {
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _prevClose = bar.Close;
-            _prevKUp = kUp;
-            _prevKDown = kDown;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "KaseUp", kUp },
-                { "KaseDn", kDown }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kUp, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        return new(point.Up, includeOutputs ? new Dictionary<string, double> { { "KaseUp", point.Up }, { "KaseDn", point.Down } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeSma.Dispose();
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Kpo")]

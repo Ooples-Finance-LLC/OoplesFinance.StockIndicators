@@ -18974,37 +18974,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeKaseIndicatorFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateKaseIndicator scales each bar against the average volume of the window times the square root
-        // of that window, and publishes KaseUp - the previous high over the current low - as its first series.
-        // A bar whose true range has not yet developed carries the previous reading forward instead of zeroing.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        using var smoothedVolume = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), smoothedVolume.WritableSpan);
-        var volumeSma = smoothedVolume.Span;
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-        var sqrtPeriod = MathHelper.Sqrt(length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentLow = lows[i];
-            var prevHigh = i >= 1 ? highs[i - 1] : 0;
-            var ratio = volumeSma[i] * sqrtPeriod;
-            var prevKUp = i >= 1 ? output[i - 1] : 0;
-
-            var divisor = outputKey == "KaseDn" ? i == 0 ? 0 : lows[i - 1] : currentLow;
-            var numerator = outputKey == "KaseDn" ? highs[i] : prevHigh;
-            output[i] = atr[i] > 0 && ratio != 0 && divisor != 0 ? numerator / divisor / ratio : prevKUp;
-        }
-
-        return buffer;
+        var values = KaseRatioWindow.Compute(data, maType, length, true); var selected = outputKey == "KaseDn" ? values.Down : values.Up;
+        var result = context.Rent(selected.Length); selected.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

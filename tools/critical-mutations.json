@@ -65084,5 +65084,356 @@
     "before": "bar.Close, isFinal",
     "after": "bar.Close, true",
     "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-ratio-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "length = Math.Max(1, length); _sqrt",
+    "after": "length = Math.Max(2, length); _sqrt",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-root",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "U(Math.Sqrt(length))",
+    "after": "U(1)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.SelectedRangesAndTwoCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "kase-ratio-wide-denominator-volume",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "U(divisor) * volume * _sqrt",
+    "after": "U(divisor) * U(1) * _sqrt",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.CompleteDenominatorsRecoverOverflowAndUnderflow"
+  },
+  {
+    "id": "kase-ratio-wide-denominator-price",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "U(divisor) * volume * _sqrt",
+    "after": "U(1) * volume * _sqrt",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "U(numerator) << 3222",
+    "after": "U(numerator) << 3221",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-ratio-sign",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "* denominator.Sign, BigInteger.Abs(denominator)",
+    "after": "* 1, BigInteger.Abs(denominator)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.SignedVolumesAndTinyRangesRetainEveryGate"
+  },
+  {
+    "id": "kase-ratio-wide-early-volume-product",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "var denominator = U(divisor) * volume * _sqrt;",
+    "after": "var denominator = U(divisor) * U(Publish(volume) * Publish(_sqrt)) * U(1);",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.CompleteDenominatorsRecoverOverflowAndUnderflow"
+  },
+  {
+    "id": "kase-ratio-wide-volume-source",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_volume!.Next(U(volume), final)",
+    "after": "_volume!.Next(U(price), final)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.SignedVolumesAndTinyRangesRetainEveryGate"
+  },
+  {
+    "id": "kase-ratio-wide-up-gate",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "var up = atr.Sign > 0",
+    "after": "var up = atr.Sign >= 0",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-down-gate",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "var down = atr.Sign > 0",
+    "after": "var down = atr.Sign >= 0",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-up-hold",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "low, meanVolume) : _up",
+    "after": "low, meanVolume) : BigInteger.Zero",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-down-hold",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_low, meanVolume) : _down",
+    "after": "_low, meanVolume) : BigInteger.Zero",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-up-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "Ratio(_hasPrevious ? _high : 0,",
+    "after": "Ratio(high,",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-down-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "Ratio(high, _low, meanVolume)",
+    "after": "Ratio(high, low, meanVolume)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-up-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_up = up;",
+    "after": "_up = down;",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-down-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_down = down;",
+    "after": "_down = up;",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-low-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_low = low;",
+    "after": "_low = high;",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-high-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_high = high;",
+    "after": "_high = low;",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-spread",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "var spread = up - down",
+    "after": "var spread = down - up",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-previous-spread",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "var previous = _up - _down",
+    "after": "var previous = _down - _up",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "if (final) { _high = high;",
+    "after": "if (true) { _high = high;",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-held-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_up = _down = default;",
+    "after": "_up = default;",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.HandRatiosHoldIndependentlyAtZeroDivisors"
+  },
+  {
+    "id": "kase-ratio-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "ComponentAverage.Take(source, length)",
+    "after": "ComponentAverage.Take(source, length + 1)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.SelectedRangesAndTwoCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "kase-ratio-wide-callback-volume",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "Average(volume.ToArray())",
+    "after": "Average(input.ToArray())",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.SelectedRangesAndTwoCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "kase-ratio-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "weighted - sum + value * _length",
+    "after": "weighted + sum + value * _length",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "value * _length;",
+    "after": "value * (_length - 1L);",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_history.Count == _length ? _history.Peek() : BigInteger.Zero",
+    "after": "false ? _history.Peek() : BigInteger.Zero",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-weighted-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "(long)_length * (_length + 1L)",
+    "after": "_length * (_length + 1)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.MaximumAndNormalizedPeriodsUseLazyMeans"
+  },
+  {
+    "id": "kase-ratio-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_count + 1 < _length ? BigInteger.Zero",
+    "after": "_count + 1 < _length ? value",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-ema-seed-count",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "Round(sum, _count + 1)",
+    "after": "Round(sum, _length)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_previous * (_length - 1L)",
+    "after": "_previous * _length",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-recursive-drive",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "value * (ema ? 2 : 1)",
+    "after": "value * (ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-recursive-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "ema ? _length + 1L : _length",
+    "after": "ema ? _length : _length + 1L",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "if (final)\n            {\n                _sum",
+    "after": "if (true)\n            {\n                _sum",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KaseRatioWindow.cs",
+    "scope": "internal sealed class KaseRatioWindow",
+    "before": "_sum = _weighted = _previous = default;",
+    "after": "_sum = _previous = default;",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
+  },
+  {
+    "id": "kase-ratio-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeKaseIndicatorFast(",
+    "before": "outputKey == \"KaseDn\" ? values.Down : values.Up",
+    "after": "values.Up",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.EveryRouteMatchesIndependentRatios"
+  },
+  {
+    "id": "kase-ratio-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KaseIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted guard\n",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.RejectedCandlesCannotAdvanceMeansOrHeldValues"
+  },
+  {
+    "id": "kase-ratio-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KaseIndicatorState",
+    "before": "bar.Volume, isFinal",
+    "after": "bar.Volume, true",
+    "filter": "FullyQualifiedName~KaseRatioNumericalTests.ResetPreviewAndLongHistoryRetainRatiosAndMeans"
   }
 ]
