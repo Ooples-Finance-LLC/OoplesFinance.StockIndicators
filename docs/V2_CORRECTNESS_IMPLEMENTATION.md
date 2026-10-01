@@ -4339,3 +4339,12 @@ The isolated campaigns `645-corrected-a` and `645-corrected-b` passed their base
 Source snapshot SHA256: `b49cf08d69808e3525226e8f8404ab89c9274a5261a460969d327d55bb5a0fe0`. Archive SHA256: `f976019673432fbd2b0706899535cb58a2d0fe450b5a3abae6aca6c4764f2f14` and `f976019673432fbd2b0706899535cb58a2d0fe450b5a3abae6aca6c4764f2f14`.
 
 This is evidence for the isolated batch-645 source. Source was already published in the batch-645 checkpoint; this update does not restore older source files. Mutation verification for batches 646 through 664 and the remaining final gates is still incomplete.
+
+
+### Batch 646: Grover mutation qualification
+
+The isolated campaigns `646-corrected-a` and `646-corrected-b` passed their baselines and caught **48/48 compiled behavioral faults**, alongside **91/91 distinct focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-646 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `e3fe516b680548565fce77d69770a72143a32b7e6ae2174ed48201a069ac8df4`. Archive SHA256: `0884b54a8ff9ccc78aa3fa957cbdf16e996b24954022368df9b2fad515a2ae15` and `0884b54a8ff9ccc78aa3fa957cbdf16e996b24954022368df9b2fad515a2ae15`.
+
+This is evidence for the isolated batch-646 source. Source was already published in the batch-646 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
