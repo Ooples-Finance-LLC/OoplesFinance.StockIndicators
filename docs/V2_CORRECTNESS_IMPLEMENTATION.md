@@ -4554,3 +4554,10 @@ The independent reference uses exact prefix moments and an ordered maximum set; 
 The original JRC campaigns finished with 35 compiled kills, three surviving faults, and two compiler-inconclusive faults; that pair is unqualified. New independent hands distinguish the long lookback from the aggregation period, retain a lagged close outside the short candle range, and check trading-signal strength against the previous spread. All three new regressions passed, alongside 98 retained focused results for 101 distinct passing tests. Production calculations are unchanged.
 
 Five fault definitions now target these scenarios, bypass both native validation paths while retaining the analyzer-required resolver call, omit weighted aging with valid accumulator syntax, and suppress spread memory without unreachable code. A five-fault isolated precheck and a fresh complete 40-fault pair are required; earlier kills will not be pooled. Both repaired source snapshots contain 2,195 matching files. The retained helper differs from the current helper only by an existing Sonar annotation, verified explicitly before freezing.
+
+
+### Batch 678: Phase Change Index numerical routes
+
+All five routes retain exact signed deviation sums and smooth unpublished ratios for SMA, WMA, EMA, and Wilder. Independent Fraction references and hands cover overflow/subnormal scaling, exact zero and one-ULP changes, selected prices, signals, previews/reset, lazy periods, and callback slots. A hand signal of 1825/23 proves why rounding the raw ratio before smoothing changes publication.
+
+**80/80 focused tests passed** on net10.0 (`phase-change678.trx`). Inventory: **6,480/7,131 enrolled**, **651 omissions across 97 types**, all independent references registered, no construction failures, backlog exact. The 31 behavioral faults and final hosted/platform/package/performance gates remain pending.

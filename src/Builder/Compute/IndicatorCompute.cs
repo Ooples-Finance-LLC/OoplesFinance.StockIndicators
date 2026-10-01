@@ -2391,7 +2391,7 @@ internal static partial class IndicatorCompute
             },
             PeakValleyEstimationSpecOptions pve => ComputePeakValleyEstimationFast(data, context, pve.Length, pve.SmoothLength, pve.MaType, spec.OutputKey),
             PhaseChangeIndexSpecOptions pci => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputePhaseChangeIndexFast(data, context, pci.Length), pci.SmoothLength, pci.MaType)
+                ? ComputePhaseChangeIndexSignalFast(data, context, pci.Length, pci.SmoothLength, pci.MaType)
                 : ComputePhaseChangeIndexFast(data, context, pci.Length),
             PseudoPolynomialChannelSpecOptions ppc => ComputePseudoPolynomialChannelFast(data, context, ppc.Length, ppc.Morph, ppc.MaType, spec.OutputKey),
             RecursiveDifferenciatorSpecOptions rd => ComputeRecursiveDifferenciatorFast(data, context, rd.Length, rd.Alpha, rd.MaType),
@@ -21976,42 +21976,17 @@ internal static partial class IndicatorCompute
         var result = context.Rent(selected.Length); selected.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
+    internal static ComputeBuffer ComputePhaseChangeIndexSignalFast(StockData data, ComputeContext context, int length, int smoothLength, MovingAvgType maType)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = PhaseChangeWindow.Calculate(data, input, maType, length, smoothLength, callbacks: true).SignalLine;
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
+    }
     internal static ComputeBuffer ComputePhaseChangeIndexFast(StockData data, ComputeContext context, int length = 35)
     {
-        length = Math.Max(2, length);
-        // CalculatePhaseChangeIndex publishes the raw index and smooths it only for the signal line, so the
-        // smoothing length and average type the batch call is given never reach the series this arm returns.
-        // The routine this replaced read the close rather than the chained series and then smoothed it, which
-        // moved every bar. The gradient runs from the value length bars back to the current one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= length ? input[i - length] : 0;
-            var mom = CalculationsHelper.MinPastValues(i, length, input[i] - prevValue);
-
-            double positiveSum = 0;
-            double negativeSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue2 = i >= length - j ? input[i - (length - j)] : 0;
-                var gradient = prevValue + (mom * (length - j) / (length - 1));
-                var deviation = prevValue2 - gradient;
-                positiveSum = deviation > 0 ? positiveSum + deviation : positiveSum;
-                negativeSum = deviation < 0 ? negativeSum - deviation : negativeSum;
-            }
-
-            var sum = positiveSum + negativeSum;
-            output[i] = sum != 0 ? MathHelper.MinOrMax(100 * positiveSum / sum, 100, 0) : 0;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = PhaseChangeWindow.Calculate(data, input, MovingAvgType.SimpleMovingAverage, length, 1, callbacks: true, includeSignal: false).Line;
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     internal static ComputeBuffer ComputePseudoPolynomialChannelFast(StockData data, ComputeContext context, int length = 14, double morph = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)

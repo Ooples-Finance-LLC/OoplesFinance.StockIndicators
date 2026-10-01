@@ -166,15 +166,6 @@ OoplesFinance.StockIndicators.Indicators.Pfe/default
 OoplesFinance.StockIndicators.Indicators.Pfe/longer-periods
 OoplesFinance.StockIndicators.Indicators.Pfe/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Pfe/shorter-periods
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/default
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/longer-length
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/longer-smoothLength
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/minimum-length
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/minimum-smoothLength
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/weighted-average
 OoplesFinance.StockIndicators.Indicators.PivotDetectorOscillator/default
 OoplesFinance.StockIndicators.Indicators.PivotDetectorOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.PivotDetectorOscillator/minimum-periods

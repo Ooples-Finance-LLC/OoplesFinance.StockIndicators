@@ -895,20 +895,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Pco", distance.Select((v, i) => atr[i] == 0 ? 0 : 100 * v / atr[i]).ToArray()));
                 });
             case IndicatorName.PhaseChangeIndex:
-                return new("Pci", new[] { "Pci", "Signal" }, bars =>
-                {
-                    var window = Math.Max(2, length);
-                    var values = bars.Select((b, i) =>
-                    {
-                        var start = i < window ? 0 : bars[i - window].Close;
-                        var change = i < window ? 0 : b.Close - start;
-                        var residuals = Enumerable.Range(1, window).Select(lag =>
-                            (i < lag ? 0 : bars[i - lag].Close) - start - change * lag / (window - 1)).ToArray();
-                        var total = residuals.Sum(Math.Abs);
-                        return total == 0 ? 0 : 100 * residuals.Sum(v => Math.Max(0, v)) / total;
-                    }).ToArray();
-                    return Outputs(("Pci", values), ("Signal", Average(values, Integer(options, "SmoothLength", 3), kind)));
-                });
+                return new("Pci", new[] { "Pci", "Signal" }, bars => PhaseChangeOutputs(bars, indicator));
             case IndicatorName.KasePeakOscillatorV1:
                 return new("Kpo", new[] { "Kpo", "Pk" }, bars =>
                 {

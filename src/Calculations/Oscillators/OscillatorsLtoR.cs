@@ -1731,51 +1731,11 @@ public static partial class Calculations
     public static StockData CalculatePhaseChangeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 35, int smoothLength = 3)
     {
-        length = Math.Max(2, length);
-        List<double> pciList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var mom = MinPastValues(i, length, currentValue - prevValue);
-
-            double positiveSum = 0, negativeSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue2 = i >= length - j ? inputList[i - (length - j)] : 0;
-                var gradient = prevValue + (mom * (length - j) / (length - 1));
-                var deviation = prevValue2 - gradient;
-                positiveSum = deviation > 0 ? positiveSum + deviation : positiveSum + 0;
-                negativeSum = deviation < 0 ? negativeSum - deviation : negativeSum + 0;
-            }
-            var sum = positiveSum + negativeSum;
-
-            var pci = sum != 0 ? MinOrMax(100 * positiveSum / sum, 100, 0) : 0;
-            pciList.Add(pci);
-        }
-
-        var pciSmoothedList = GetMovingAverageList(stockData, maType, smoothLength, pciList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var pciSmoothed = pciSmoothedList[i];
-            var prevPciSmoothed1 = i >= 1 ? pciSmoothedList[i - 1] : 0;
-            var prevPciSmoothed2 = i >= 2 ? pciSmoothedList[i - 2] : 0;
-
-            var signal = GetRsiSignal(pciSmoothed - prevPciSmoothed1, prevPciSmoothed1 - prevPciSmoothed2, pciSmoothed, prevPciSmoothed1, 80, 20);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pci", pciList },
-            { "Signal", pciSmoothedList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pciList);
-        stockData.IndicatorName = IndicatorName.PhaseChangeIndex;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = PhaseChangeWindow.Calculate(stockData, input, maType, length, smoothLength, callbacks: false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pci", result.Line.ToList() }, { "Signal", result.SignalLine.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Trades);
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Line.ToList()); stockData.IndicatorName = IndicatorName.PhaseChangeIndex;
         return stockData;
     }
 

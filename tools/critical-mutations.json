@@ -71473,5 +71473,284 @@
     "before": "PeakValleyEstimation or ",
     "after": "",
     "filter": "FullyQualifiedName~PeakValleyNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "phase-change-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "_length = Math.Max(2, length)",
+    "after": "_length = Math.Max(3, length)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "new(kind, Math.Max(1, smooth))",
+    "after": "new(kind, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-startup-change",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "full ? current - start : BigInteger.Zero",
+    "after": "current - start",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-startup-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "full ? _prices.Peek() : BigInteger.Zero",
+    "after": "_prices.Count != 0 ? _prices.Peek() : BigInteger.Zero",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-lag",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "var lag = _prices.Count;",
+    "after": "var lag = _prices.Count + 1;",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-gradient",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "(_length - 1L) - change * lag",
+    "after": "_length - change * lag",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-direction",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "current - start",
+    "after": "start - current",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-negative",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "negative -= residual",
+    "after": "negative += residual",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "Number.Integer(100 * positive)",
+    "after": "Number.Integer(99 * positive)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-zero",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "total.IsZero ? default",
+    "after": "total.IsZero ? Number.Of(50)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExactFlatRangeAndOneUlpChangesRemainDistinct"
+  },
+  {
+    "id": "phase-change-wide-history-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (price != 0 || final) { if (full)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "if (full) _prices.Dequeue();",
+    "after": "if (_prices.Count > _length) _prices.Dequeue();",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-published-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "window._signal.Next(v, true)",
+    "after": "window._signal.Next(Number.Of(v.Publish()), true)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.SignalAveragesUnpublishedRatios"
+  },
+  {
+    "id": "phase-change-wide-slope-change",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "var change = slope - _previousSlope;",
+    "after": "var change = slope;",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "_previousSignal = signal;",
+    "after": "_previousSignal = default;",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "if (final) { _previousSignal",
+    "after": "if (signal.Sign != 0 || final) { _previousSignal",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "ComponentAverage.Take(published!, smooth)",
+    "after": "ComponentAverage.Take(published!, length)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.SignalCallbackReceivesRawIndexAndSmoothingPeriod"
+  },
+  {
+    "id": "phase-change-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "_prices.Clear(); _signal.Reset();",
+    "after": "_signal.Reset();",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "internal sealed class PhaseChangeWindow",
+    "before": "_previousSignal = _previousSlope = default;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.IndependentGradientRatioAndSignalHands"
+  },
+  {
+    "id": "phase-change-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExtremeAndSubnormalPricesKeepTheirDimensionlessRatios"
+  },
+  {
+    "id": "phase-change-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExtremeAndSubnormalPricesKeepTheirDimensionlessRatios"
+  },
+  {
+    "id": "phase-change-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExtremeAndSubnormalPricesKeepTheirDimensionlessRatios"
+  },
+  {
+    "id": "phase-change-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExtremeAndSubnormalPricesKeepTheirDimensionlessRatios"
+  },
+  {
+    "id": "phase-change-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PhaseChangeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.ExpiryPreviewResetAndLazyExtremePeriods"
+  },
+  {
+    "id": "phase-change-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PhaseChangeIndexState",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? bar.Close : _input.GetValue(bar)",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.RejectedPricesAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "phase-change-wide-selected-Fast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePhaseChangeIndexFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "phase-change-wide-selected-SignalFast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePhaseChangeIndexSignalFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "phase-change-wide-signal-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePhaseChangeIndexSignalFast(",
+    "before": ".SignalLine;",
+    "after": ".Line;",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.SignalAveragesUnpublishedRatios"
+  },
+  {
+    "id": "phase-change-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "PhaseChangeIndex or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PhaseChangeNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

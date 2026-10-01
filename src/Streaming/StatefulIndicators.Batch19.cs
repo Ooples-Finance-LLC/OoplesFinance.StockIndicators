@@ -644,73 +644,17 @@ public sealed class PerformanceIndexState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Pci")]
 public sealed class PhaseChangeIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public PhaseChangeIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 35,
-        int smoothLength = 3)
-    {
-        _length = Math.Max(2, length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PhaseChangeWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public PhaseChangeIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 35, int smoothLength = 3)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.PhaseChangeIndex;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _values.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_values, value, _length) : 0;
-        var mom = _index >= _length ? value - prevValue : 0;
-
-        double positiveSum = 0;
-        double negativeSum = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            var prevValue2 = EhlersStreamingWindow.GetOffsetValue(_values, value, _length - j);
-            var gradient = prevValue + (mom * (_length - j) / (_length - 1));
-            var deviation = prevValue2 - gradient;
-            positiveSum = deviation > 0 ? positiveSum + deviation : positiveSum;
-            negativeSum = deviation < 0 ? negativeSum - deviation : negativeSum;
-        }
-        var sum = positiveSum + negativeSum;
-        var pci = sum != 0 ? MathHelper.MinOrMax(100 * positiveSum / sum, 100, 0) : 0;
-        var signal = _signalSmoother.Next(pci, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Pci", pci },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pci, outputs);
-    }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-        _values.Dispose();
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Pci", point.Line }, { "Signal", point.SignalLine } } : null);
     }
 }
 
