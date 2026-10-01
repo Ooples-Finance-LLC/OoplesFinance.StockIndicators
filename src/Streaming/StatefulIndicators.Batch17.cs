@@ -955,76 +955,18 @@ public sealed class MoveTrackerState : IStreamingIndicatorState
 [PrimaryOutput("Maaf")]
 public sealed class MovingAverageAdaptiveFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly MovingAverageAdaptiveFilterWindow _window;
     private readonly StreamingInputResolver _input;
-    private readonly double _filter;
-    private readonly double _fastAlpha;
-    private readonly double _slowAlpha;
-    private double _prevAma;
-    private bool _hasPrev;
-
-    public MovingAverageAdaptiveFilterState(int length = 10, double filter = 0.15,
-        double fastAlpha = 0.667, double slowAlpha = 0.0645)
-    {
-        var resolved = Math.Max(1, length);
-        _er = new EfficiencyRatioState(resolved);
-        // No moving-average type, and no selector: the change is passed to Next directly.
-        _stdDev = new RollingStandardDeviation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _filter = filter;
-        _fastAlpha = fastAlpha;
-        _slowAlpha = slowAlpha;
-    }
-
+    public MovingAverageAdaptiveFilterState(int length = 10, double filter = .15, double fastAlpha = .667, double slowAlpha = .0645)
+    { _window = new(length, filter, fastAlpha, slowAlpha); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.MovingAverageAdaptiveFilter;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _stdDev.Reset();
-        _prevAma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevAma = _hasPrev ? _prevAma : value;
-        var er = _er.Next(value, isFinal);
-        var smooth = MathHelper.Pow((er * (_fastAlpha - _slowAlpha)) + _slowAlpha, 2);
-        var ama = prevAma + (smooth * (value - prevAma));
-        var amaDiff = ama - prevAma;
-
-        // Fed the adaptive average's own change, which is the series this measures.
-        var stdDev = _stdDev.Next(amaDiff, isFinal);
-        var maaf = stdDev * _filter;
-
-        if (isFinal)
-        {
-            _prevAma = ama;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Maaf", maaf }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(maaf, outputs);
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Maaf", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-        _stdDev.Dispose();
-    }
+    public void Dispose() { }
 }
 
 internal sealed class MacdEngine : IDisposable

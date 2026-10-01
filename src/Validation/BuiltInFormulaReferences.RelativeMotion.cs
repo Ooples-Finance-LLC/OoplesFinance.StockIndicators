@@ -376,14 +376,7 @@ internal static partial class BuiltInFormulaReferences
                         ("LowerBand", doubleMean.Select((v, i) => v - Number(options, .9, "LowBandMult") * width[i]).ToArray()));
                 });
             case IndicatorName.MovingAverageAdaptiveFilter:
-                return new("Maaf", new[] { "Maaf" }, bars =>
-                {
-                    var slow = Number(options, .0645, "SlowAlpha"); var fast = Number(options, .667, "FastAlpha");
-                    var gains = EfficiencyRatios(bars, length).Select(er => Math.Pow(slow + (fast - slow) * er, 2)).ToArray();
-                    var average = ExpandedGainTrajectory(Closes(bars), gains);
-                    var changes = average.Select((v, i) => i == 0 ? 0 : v - average[i - 1]).ToArray();
-                    return Outputs(("Maaf", PopulationVariance(changes, length).Select(v => Math.Sqrt(v) * Number(options, .15, "Filter")).ToArray()));
-                });
+                return new("Maaf", new[] { "Maaf" }, bars => MovingAverageAdaptiveFilterOutputs(bars, indicator));
             case IndicatorName.SwamiStochastics:
                 return new("Ss", new[] { "Ss" }, bars =>
                 {

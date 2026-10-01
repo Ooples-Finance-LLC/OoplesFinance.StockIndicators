@@ -193,59 +193,12 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageAdaptiveFilter(this StockData stockData, int length = 10, double filter = 0.15, 
         double fastAlpha = 0.667, double slowAlpha = 0.0645)
     {
-        List<double> amaList = new(stockData.Count);
-        List<double> amaDiffList = new(stockData.Count);
-        List<double> maafList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-        var emaList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevAma = i >= 1 ? amaList[i - 1] : currentValue;
-            var er = erList[i];
-            var sm = Pow((er * (fastAlpha - slowAlpha)) + slowAlpha, 2);
-
-            var ama = prevAma + (sm * (currentValue - prevAma));
-            amaList.Add(ama);
-
-            var amaDiff = ama - prevAma;
-            amaDiffList.Add(amaDiff);
-        }
-
-        stockData.SetCustomValues(amaDiffList);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The filter is a multiple of a deviation of the adaptive average's own changes, and price has
-        // to move by more than it to count; the quantity this replaces is about 55% wider on a typical price
-        // series, so the filter sat too high. Taken over amaDiffList by name. See #190.
-        var stdDevList = GetStandardDeviationList(amaDiffList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stdDev = stdDevList[i];
-            var currentValue = inputList[i];
-            var ema = emaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var prevMaaf = GetLastOrDefault(maafList);
-            var maaf = stdDev * filter;
-            maafList.Add(maaf);
-
-            var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, maaf, prevMaaf);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Maaf", maafList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(maafList);
-        stockData.IndicatorName = IndicatorName.MovingAverageAdaptiveFilter;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new MovingAverageAdaptiveFilterWindow(length, filter, fastAlpha, slowAlpha);
+        var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Maaf", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.MovingAverageAdaptiveFilter;
         return stockData;
     }
 

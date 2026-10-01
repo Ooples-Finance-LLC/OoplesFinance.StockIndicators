@@ -69323,5 +69323,374 @@
     "before": "MorphedSineWindow.Compute(input, output, length, power);",
     "after": "MorphedSineWindow.Compute(input, output, 1, power);",
     "filter": "FullyQualifiedName~MorphedSineNumericalTests.CardinalPhasesAreExactAndPeriodic"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-filter-domain",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "new MovingAverageAdaptiveFilterSpecOptions(length, filter, fastAlpha, slowAlpha)",
+    "after": "new MovingAverageAdaptiveFilterSpecOptions(length, Math.Abs(filter), fastAlpha, slowAlpha)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.InvalidCandlesAndParameterDomainsCannotAdvanceState"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-fast-domain",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "new MovingAverageAdaptiveFilterSpecOptions(length, filter, fastAlpha, slowAlpha)",
+    "after": "new MovingAverageAdaptiveFilterSpecOptions(length, filter, .5, slowAlpha)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.InvalidCandlesAndParameterDomainsCannotAdvanceState"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-slow-domain",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "new MovingAverageAdaptiveFilterSpecOptions(length, filter, fastAlpha, slowAlpha)",
+    "after": "new MovingAverageAdaptiveFilterSpecOptions(length, filter, fastAlpha, .5)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.InvalidCandlesAndParameterDomainsCannotAdvanceState"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_length = options.Length;",
+    "after": "_length = 2;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.ExtremePeriodsGrowOnlyObservedHistory"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-filter",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_filter = Number.Of(filter);",
+    "after": "_filter = Number.Of(1);",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-fast-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_fast = Number.Of(fastAlpha);",
+    "after": "_fast = Number.Of(slowAlpha);",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-step-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "Abs(current - _previousPrice)",
+    "after": "current - _previousPrice",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-travel-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "if (full) travel -= _prices.Peek().Step;",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-efficiency-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "full && travel.Sign > 0",
+    "after": "_prices.Count > 0 && travel.Sign > 0",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-efficiency-distance",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "Abs(current - _prices.Peek().Price)",
+    "after": "Abs(current - _previousPrice)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-efficiency-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "Abs(current - _prices.Peek().Price).Divide(travel)",
+    "after": "Abs(current - _prices.Peek().Price)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-gain-square",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "var gain = alpha * alpha;",
+    "after": "var gain = alpha;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-initial-average",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "var distance = _hasPrevious ? (current - _previousPrice) - _amaResidual : default;",
+    "after": "var distance = _hasPrevious ? (current - _previousPrice) - _amaResidual : current;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-increment-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "gain * distance",
+    "after": "gain * (default(Number) - distance)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-increment-projection",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "var sum = _sum + increment;",
+    "after": "increment = Number.Of(increment.Publish()); var sum = _sum + increment;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.RootScalingPreservesSquaredSubnormalsAndWideDifferences"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-change-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "sum -= old; squares -= old * old;",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-variance-start",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_changes.Count < _length - 1",
+    "after": "_changes.Count < _length",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-variance-centering",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "squares.Times(_length) - sum * sum",
+    "after": "squares.Times(_length) + sum * sum",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-variance-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": ".Divide(_length).Divide(_length)",
+    "after": ".Divide(_length)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-root-projection",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "variance.OverRoot(variance) * _filter",
+    "after": "Number.Of(variance.OverRoot(variance).Publish()) * _filter",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.RootScalingPreservesSquaredSubnormalsAndWideDifferences"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-root-omitted",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "variance.OverRoot(variance) * _filter",
+    "after": "variance * _filter",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-ema-slope",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "current - Number.Of(_ema.GetNext(price, final))",
+    "after": "Number.Of(_ema.GetNext(price, final)) - current",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-signal-change",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "var change = slope - _previousSlope;",
+    "after": "var change = slope;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-volatility-direction",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "(variance - _previousVariance).Sign >= 0",
+    "after": "(variance - _previousVariance).Sign <= 0",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-volatility-tie",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "(variance - _previousVariance).Sign >= 0",
+    "after": "(variance - _previousVariance).Sign > 0",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-zero-filter-gate",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "var active = _filter.Sign == 0 ||",
+    "after": "var active =",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.RootScalingPreservesSquaredSubnormalsAndWideDifferences"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-price-dequeue",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "if (full) _prices.Dequeue();",
+    "after": "if (full && _prices.Count > _length) _prices.Dequeue();",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-change-dequeue",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "if (_changes.Count == _length) _changes.Dequeue();",
+    "after": "if (_changes.Count > _length) _changes.Dequeue();",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-remember-travel",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_travel = travel;",
+    "after": "_travel = default;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-remember-average",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_amaResidual = residual;",
+    "after": "_amaResidual = default;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-reset-changes",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_changes.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-reset-ema",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_ema.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-reset-travel",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_travel = _sum =",
+    "after": "_sum =",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_sum = _squares =",
+    "after": "_squares =",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-reset-squares",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_squares = _previousVariance =",
+    "after": "_previousVariance =",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-reset-start",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MovingAverageAdaptiveFilterState : IStreamingIndicatorState, IDisposable",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? _input.GetValue(bar) : bar.Close",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.InvalidCandlesAndParameterDomainsCannotAdvanceState"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MovingAverageAdaptiveFilterState : IStreamingIndicatorState, IDisposable",
+    "before": "{ \"Maaf\", point.Value }",
+    "after": "{ \"Maaf\", 0 }",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
+  },
+  {
+    "id": "moving-adaptive-filter-wide-absolute-memory-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveFilterWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
+    "before": "var residual = (increment - distance).Round();",
+    "after": "var residual = (current + increment - distance).Round() - current;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.ConstantPriceTailRetainsDecayingAdaptiveIncrements"
   }
 ]
