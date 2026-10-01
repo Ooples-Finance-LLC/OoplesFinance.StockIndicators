@@ -12199,34 +12199,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeMovingAverageAdaptiveQFast(StockData data, ComputeContext context, int length = 10,
         double fastAlpha = 0.667, double slowAlpha = 0.0645)
     {
-        // CalculateMovingAverageAdaptiveQ smooths the chained series by the square of a rate built from
-        // Kaufman's efficiency ratio - the window's net move over the distance it travelled - and seeds itself
-        // at the first value. The core routine this replaced knew nothing of the efficiency ratio.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        length = Math.Max(1, length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var volatilityWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
+        var window = new MovingAverageAdaptiveQWindow(length, fastAlpha, slowAlpha);
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var result = context.Rent(input.Count);
+        try
         {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var priorValue = i >= length ? input[i - length] : 0;
-
-            volatilityWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue)));
-            var travelled = volatilityWindow.Sum(length);
-            var moved = Math.Abs(CalculationsHelper.MinPastValues(i, length, currentValue - priorValue));
-            var efficiencyRatio = travelled != 0 ? moved / travelled : 0;
-
-            var rate = (efficiencyRatio * fastAlpha) + slowAlpha;
-            var previousAverage = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = previousAverage + (MathHelper.Pow(rate, 2) * (currentValue - previousAverage));
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Value;
+            return result;
         }
-
-        return buffer;
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

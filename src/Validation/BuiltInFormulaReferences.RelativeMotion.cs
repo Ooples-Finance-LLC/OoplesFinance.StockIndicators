@@ -513,8 +513,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs((key, cycle ? MotionRsi(Average(bars.Select((b, i) => b.Close - trail[i]).ToArray(), 20, kind), 20, kind) : trail));
                 });
             case IndicatorName.MovingAverageAdaptiveQ:
-                return new("Maaq", new[] { "Maaq" }, bars => Outputs(("Maaq", ExpandedGainTrajectory(Closes(bars),
-                    EfficiencyRatios(bars, length).Select(er => Math.Pow(.667 * er + .0645, 2)).ToArray()))));
+                return new("Maaq", new[] { "Maaq" }, bars => MovingAverageAdaptiveQOutputs(bars, indicator));
             case IndicatorName.OscarIndicator:
                 return new("Oscar", new[] { "Oscar" }, bars =>
                 {

@@ -8,61 +8,17 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Maaq")]
 public sealed class MovingAverageAdaptiveQState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-    private readonly StreamingInputResolver _input;
-    private readonly double _fastAlpha;
-    private readonly double _slowAlpha;
-    private double _prevMaaq;
-    private bool _hasPrev;
-
-    public MovingAverageAdaptiveQState(int length = 10, double fastAlpha = 0.667, double slowAlpha = 0.0645)
-    {
-        var resolved = Math.Max(1, length);
-        _er = new EfficiencyRatioState(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _fastAlpha = fastAlpha;
-        _slowAlpha = slowAlpha;
-    }
-
+    private readonly MovingAverageAdaptiveQWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public MovingAverageAdaptiveQState(int length = 10, double fastAlpha = .667, double slowAlpha = .0645) => _window = new(length, fastAlpha, slowAlpha);
     public IndicatorName Name => IndicatorName.MovingAverageAdaptiveQ;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _prevMaaq = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevMaaq = _hasPrev ? _prevMaaq : value;
-        var er = _er.Next(value, isFinal);
-        var temp = (er * _fastAlpha) + _slowAlpha;
-        var maaq = prevMaaq + (MathHelper.Pow(temp, 2) * (value - prevMaaq));
-
-        if (isFinal)
-        {
-            _prevMaaq = maaq;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Maaq", maaq }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(maaq, outputs);
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Maaq", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Mabw")]

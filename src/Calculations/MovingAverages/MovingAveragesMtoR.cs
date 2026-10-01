@@ -1106,34 +1106,12 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageAdaptiveQ(this StockData stockData, int length = 10, double fastAlpha = 0.667, 
         double slowAlpha = 0.0645)
     {
-        List<double> maaqList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevMaaq = i >= 1 ? maaqList[i - 1] : currentValue;
-            var er = erList[i];
-            var temp = (er * fastAlpha) + slowAlpha;
-
-            var maaq = prevMaaq + (Pow(temp, 2) * (currentValue - prevMaaq));
-            maaqList.Add(maaq);
-
-            var signal = GetCompareSignal(currentValue - maaq, prevValue - prevMaaq);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Maaq", maaqList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(maaqList);
-        stockData.IndicatorName = IndicatorName.MovingAverageAdaptiveQ;
-
+        var window = new MovingAverageAdaptiveQWindow(length, fastAlpha, slowAlpha);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Maaq", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.MovingAverageAdaptiveQ;
         return stockData;
     }
 

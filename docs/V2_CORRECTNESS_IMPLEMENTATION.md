@@ -4442,3 +4442,11 @@ All 36 adaptive-filter checks pass after preserving the smaller-magnitude quanti
 Final evidence is `adaptive-filter669-anchor-final.trx` (36/36, 27.55 minutes). The rebuilt inventory remains 6,423/7,131 enrolled, 708 omissions across 105 types, complete reference registration, no construction failures, and an exact backlog match. Assembly SHA256: `48bd59a960548c6dde58478ee2a06b5cabd8897fe2666100bc29f2081f39dd85`.
 
 The original batch-669 snapshots are superseded and must not be launched or qualified. Fresh corrected snapshots contain 42 behavioral faults, including both competing memory-rounding errors; their campaigns remain pending. The separate Mobility kernel and integer factory remain outside this publication. PR246 remains draft, with final assurance work outstanding.
+
+### Batch 670: Moving Average Adaptive Q public correctness
+
+All 39 public-route focused tests passed on net10.0 in `adaptive-q670-public-final.trx` (51.95 seconds). The four public configurations and five existing execution routes now share exact efficiency and extended recurrence arithmetic, lazy history, finite alpha validation, selected-input handling, preview/reset integrity and independent output/signal checks. Exact hand vectors distinguish Adaptive Q's gain from KAMA's; separate regressions preserve small means across huge excursions and verify overflow followed by unit-gain recovery. No component-average callback is claimed.
+
+Inventory: 6,427/7,131 numerical configurations enrolled, 704 omissions across 104 types, all independent references registered, no construction failures, and an exact backlog match. Assembly SHA256: `6b4b7d902fa7b7ddc3bbeb3db17474ecad05760b82a29e94dbc155785e21393d`. There are 34 prepared behavioral faults; isolated mutation qualification remains pending.
+
+This publication covers the public routes only. The internal core and moving-average registry still compute a different formula using the maximum volatility over the full input; causal alignment remains an outstanding scope decision, not completed work. The snapshot retains the separate locally tested Mobility density kernel and integer factory, excluded from this publication. Final assurance work remains incomplete and PR246 stays draft.

@@ -69701,5 +69701,310 @@
     "before": "var usePriceAnchor = (Abs(average) - Abs(residual)).Sign >= 0;",
     "after": "var usePriceAnchor = Abs(current).Sign >= 0;",
     "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.ZeroGainWarmupKeepsSmallMeanAcrossHugeExcursions"
+  },
+  {
+    "id": "adaptive-q-wide-fast-domain",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "StreamingInputValidation.Finite(fastAlpha, nameof(fastAlpha));",
+    "after": "fastAlpha = double.IsNaN(fastAlpha) || double.IsInfinity(fastAlpha) ? .667 : fastAlpha;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.NonfiniteParametersAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "adaptive-q-wide-slow-domain",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "StreamingInputValidation.Finite(slowAlpha, nameof(slowAlpha));",
+    "after": "slowAlpha = double.IsNaN(slowAlpha) || double.IsInfinity(slowAlpha) ? .0645 : slowAlpha;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.NonfiniteParametersAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "adaptive-q-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.ExtremePeriodsRetainOnlyObservedHistory"
+  },
+  {
+    "id": "adaptive-q-wide-full-window",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var full = _history.Count == _length;",
+    "after": "var full = _history.Count > _length;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-travel-current",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var travel = _travel + step;",
+    "after": "var travel = _travel;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-travel-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "travel -= _history.Peek().Step;",
+    "after": "travel -= Number.Of(0);",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HistoryExpiryScalingAndPrefixCausalityAreIndependentOfFutureBars"
+  },
+  {
+    "id": "adaptive-q-wide-distance-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "Abs(current - _history.Peek().Price)",
+    "after": "Abs(current - _previousPrice)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-gain-formula",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var rate = _fast * efficiency + _slow;",
+    "after": "var rate = (_fast - _slow) * efficiency + _slow;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-gain-square",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var gain = rate * rate;",
+    "after": "var gain = rate;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-seed",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_started ? (current - _anchor) - _memory : default",
+    "after": "_started ? (current - _anchor) - _memory : current",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-residual",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "(gain - Number.Of(1)) * distance",
+    "after": "gain * distance",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-mean",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var mean = current + residual;",
+    "after": "var mean = current - residual;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-anchor-choice",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var priceAnchor = (Abs(mean) - Abs(residual)).Sign >= 0;",
+    "after": "var priceAnchor = Abs(current).Sign >= 0;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HugeExcursionsCannotEraseSmallFrozenMean"
+  },
+  {
+    "id": "adaptive-q-wide-margin-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var margin = default(Number) - residual;",
+    "after": "var margin = residual;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-previous-margin",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "var change = margin - _previousMargin;",
+    "after": "var change = margin;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "if (final)",
+    "after": "if (_started || final)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-queue-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "if (full) _history.Dequeue();",
+    "after": "if (_history.Count > _length) _history.Dequeue();",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HistoryExpiryScalingAndPrefixCausalityAreIndependentOfFutureBars"
+  },
+  {
+    "id": "adaptive-q-wide-remember-travel",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_travel = travel;",
+    "after": "_travel = default;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HistoryExpiryScalingAndPrefixCausalityAreIndependentOfFutureBars"
+  },
+  {
+    "id": "adaptive-q-wide-remember-price",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_previousPrice = current;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HistoryExpiryScalingAndPrefixCausalityAreIndependentOfFutureBars"
+  },
+  {
+    "id": "adaptive-q-wide-remember-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_anchor = anchor;",
+    "after": "_anchor = default;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-remember-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_memory = memory;",
+    "after": "_memory = default;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HugeExcursionsCannotEraseSmallFrozenMean"
+  },
+  {
+    "id": "adaptive-q-wide-remember-margin",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_previousMargin = margin;",
+    "after": "_previousMargin = default;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HistoryExpiryScalingAndPrefixCausalityAreIndependentOfFutureBars"
+  },
+  {
+    "id": "adaptive-q-wide-reset-start",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "_started = false;",
+    "after": "_started = true;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-publication",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageAdaptiveQWindow.cs",
+    "scope": "internal sealed class MovingAverageAdaptiveQWindow",
+    "before": "return (mean.Publish(), trade);",
+    "after": "return (current.Publish(), trade);",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MovingAverageAdaptiveQState : IStreamingIndicatorState, IDisposable",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? _input.GetValue(bar) : bar.Close",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.NonfiniteParametersAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "adaptive-q-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MovingAverageAdaptiveQState : IStreamingIndicatorState, IDisposable",
+    "before": "{ \"Maaq\", point.Value }",
+    "after": "{ \"Maaq\", 0 }",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-native-fast",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MovingAverageAdaptiveQState : IStreamingIndicatorState, IDisposable",
+    "before": "_window = new(length, fastAlpha, slowAlpha)",
+    "after": "_window = new(length, .667, slowAlpha)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMovingAverageAdaptiveQFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.InputValues;",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "adaptive-q-wide-fast-tail",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMovingAverageAdaptiveQFast(",
+    "before": "i < input.Count",
+    "after": "i < input.Count - 1",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-fast-slow",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMovingAverageAdaptiveQFast(",
+    "before": "new MovingAverageAdaptiveQWindow(length, fastAlpha, slowAlpha)",
+    "after": "new MovingAverageAdaptiveQWindow(length, fastAlpha, .0645)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-batch-fast",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculateMovingAverageAdaptiveQ(",
+    "before": "new MovingAverageAdaptiveQWindow(length, fastAlpha, slowAlpha)",
+    "after": "new MovingAverageAdaptiveQWindow(length, .667, slowAlpha)",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.HandGainAddsSlowInsteadOfSubtractingItFromFast"
+  },
+  {
+    "id": "adaptive-q-wide-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)",
+    "before": "MovingAverageAdaptiveQSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.EveryPublicRouteMatchesIndependentAdaptiveQ"
+  },
+  {
+    "id": "adaptive-q-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "MovingAverageAdaptiveQ or ",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveQNumericalTests.NumericalClassesAreEnrolled"
   }
 ]
