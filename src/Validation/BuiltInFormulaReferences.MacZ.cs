@@ -12,7 +12,7 @@ internal static partial class BuiltInFormulaReferences
         // Every deviation is zero on an entirely constant trajectory. This
         // exact branch avoids growing irrelevant Wilder fractions for the
         // 4,000-bar settled-flat fixtures; production still runs every bar.
-        if (bars.Count == 0 || bars.All(b => b.Close == bars[0].Close))
+        if (bars.Count == 0 || bars.All(b => b.Close == bars[0].Close)) // NOSONAR: S1244 - Exact flat trajectory shortcut; even one-ULP movement must not be classified flat.
             return (new Dictionary<string, double[]> { ["Macz"] = new double[bars.Count], ["Signal"] = new double[bars.Count], ["Histogram"] = new double[bars.Count] }, new Signal[bars.Count]);
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
         ReferenceFraction[] Mean(ReferenceFraction[] values, int period, int meanKind)
@@ -59,7 +59,7 @@ internal static partial class BuiltInFormulaReferences
             var variance = values.Aggregate(R(0), (a, b) => a + (b - mean) * (b - mean)) / R(length);
             if (variance.Sign == 0) continue;
             var numerator = R(mult) * (prices[i] - wilder[i] + fastValues[i] - slowValues[i]);
-            line[i] = Root(numerator * numerator / variance) * R(numerator.Sign);
+            line[i] = Root(numerator * numerator / variance) * R(numerator.Sign); // NOSONAR: S4143 - The initialized zero is retained on early-continue paths; this assignment handles the remaining nonzero domain.
         }
         var signals = Mean(line, signal, kind); var histogram = line.Select((v, i) => v - signals[i]).ToArray(); var trades = new Signal[bars.Count];
         for (var i = 0; i < bars.Count; i++)

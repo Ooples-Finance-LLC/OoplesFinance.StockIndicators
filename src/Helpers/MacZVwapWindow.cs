@@ -72,7 +72,7 @@ internal sealed class MacZVwapWindow : IDisposable
         var line = l2 + gamma * _l3;
         if (final)
         {
-            var exact = _gamma == 0 || _gamma == 1;
+            var exact = _gamma == 0 || _gamma == 1; // NOSONAR: S1244 - Exact gamma0/1 select algebraic finite-memory/constant-pole cases; near0/1 values require full recurrence. Never replace with epsilon.
             _l0 = exact ? l0 : l0.Round(160); _l1 = exact ? l1 : l1.Round(160);
             _l2 = exact ? l2 : l2.Round(160); _l3 = exact ? line : line.Round(160);
             _raw3 = _raw2; _raw2 = _raw1; _raw1 = raw; _constant = false;

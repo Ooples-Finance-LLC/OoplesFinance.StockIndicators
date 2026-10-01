@@ -29,7 +29,7 @@ internal sealed class KwanWindow : IDisposable
         var loss = _loss!.Next(change.Mantissa < 0 ? change.Absolute : default, final);
         var numerator = new ExactMeanAccumulator(); gain.AddTo(ref numerator, 100);
         var total = new ExactMeanAccumulator(); gain.AddTo(ref total); loss.AddTo(ref total);
-        return _count > 0 && _length > 1 && _kind is MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod && price == _previousPrice
+        return _count > 0 && _length > 1 && _kind is MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod && price == _previousPrice // NOSONAR: S1244 - Exact unchanged price preserves recursive RSI state; epsilon would discard real price moves.
             ? _previousRsi : GainLossShare.Of(numerator, total, 100);
     }
     private double Extreme(LinkedList<(long Index, double Value)> deque, double value, bool high, bool final)
@@ -51,7 +51,7 @@ internal sealed class KwanWindow : IDisposable
         var strength = externalStrength ?? Strength(price, final);
         var hh = Extreme(_highs, high, true, final); var ll = Extreme(_lows, low, false, final);
         var ratio = BigInteger.Zero;
-        if (_prices.Count == _length && price != 0 && _prices.Peek() != 0 && hh != ll)
+        if (_prices.Count == _length && price != 0 && _prices.Peek() != 0 && hh != ll) // NOSONAR: S1244 - Exact zero price/range singularity guards; every distinct finite bound or nonzero price must retain its formula.
         {
             // Cancel both percentage factors before taking the complete quotient.
             var numerator = (ExactVarianceWindow.Units(price) - ExactVarianceWindow.Units(ll)) * ExactVarianceWindow.Units(strength) * ExactVarianceWindow.Units(_prices.Peek());

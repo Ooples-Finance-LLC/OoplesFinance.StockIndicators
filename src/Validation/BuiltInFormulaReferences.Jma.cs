@@ -7,7 +7,7 @@ internal static partial class BuiltInFormulaReferences
     internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) JmaValues(IReadOnlyList<Bar> bars, int length, double phase, double power)
     {
         length = Math.Max(1, length); var ratio = .45 * (length - 1L); var beta = ratio / (ratio + 2);
-        var alpha = power == 2 ? beta * beta : power == 3 ? beta * beta * beta : Math.Pow(beta, power);
+        var alpha = power == 2 ? beta * beta : power == 3 ? beta * beta * beta : Math.Pow(beta, power); // NOSONAR: S1244 - Exact integer exponent2/3 selects algebraic multiplication matching binary64 contract; nearby powers must use general power.
         ReferenceFraction R(double x) => ReferenceFraction.FromDouble(x);
         ReferenceFraction Round(ReferenceFraction x) => x.RoundExtendedBinary64();
         var pole = R(alpha); var residualPole = R(beta); var drive = R(1 - alpha); var residualDrive = R(1 - beta);

@@ -973,7 +973,6 @@ public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndica
         var srcSt = srcSqrt >= 0 ? MathHelper.Sqrt(srcSqrt) : 0;
         var denom = indexSt * srcSt;
         var r = denom != 0 ? (indexSrcMa - (indexMa * srcMa)) / denom : 0;
-        if (_moments is not null) _moments.Next(value, isFinal, out indexSt, out srcSt, out r);
 
         if (isFinal)
         {

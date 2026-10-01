@@ -28,7 +28,7 @@ internal static partial class BuiltInFormulaReferences
             if (ratio.CompareTo(R(.5)) >= 0 && ratio.CompareTo(two) <= 0)
             {
                 var relative = (ratio - one).ToDouble(); var argument = 1 + relative;
-                return argument == 1 ? relative : (R(Math.Log(argument)) * R(relative) / R(argument - 1)).ToDouble();
+                return argument == 1 ? relative : (R(Math.Log(argument)) * R(relative) / R(argument - 1)).ToDouble(); // NOSONAR: S1244 - Detect exactly rounded 1+relative to avoid division by exactly zero; adjacent representable arguments must retain logarithm correction.
             }
             var exponent = 0;
             while (ratio.CompareTo(two) >= 0) { ratio /= two; exponent++; }

@@ -13,7 +13,7 @@ internal static partial class BuiltInFormulaReferences
             var relative = ((R(current) - R(previous)) / R(previous)).ToDouble();
             if (Math.Abs(relative) <= 1e-8) return ratio.LogToDouble();
             var argument = 1 + relative;
-            return argument == 1 ? relative : (R(Math.Log(argument)) * R((R(relative) / R(argument - 1)).ToDouble())).ToDouble();
+            return argument == 1 ? relative : (R(Math.Log(argument)) * R((R(relative) / R(argument - 1)).ToDouble())).ToDouble(); // NOSONAR: S1244 - Detect exactly rounded 1+relative to avoid division by exactly zero; adjacent representable arguments must retain logarithm correction.
         }
         (double Mantissa, int Exponent) Normalize(double value)
         { var exponent = 0; while (value < 1) { value *= 2; exponent--; } while (value >= 2) { value /= 2; exponent++; } return (value, exponent); }

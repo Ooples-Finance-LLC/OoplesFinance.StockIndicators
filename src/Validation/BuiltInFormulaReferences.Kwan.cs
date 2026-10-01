@@ -14,12 +14,12 @@ internal static partial class BuiltInFormulaReferences
             ratios[i] = zero;
             if (i < length || bars[i].Close == 0 || bars[i - length].Close == 0) continue;
             var window = Window(bars, i, length).ToArray(); var low = window.Min(b => b.Low); var high = window.Max(b => b.High);
-            if (high == low) continue;
+            if (high == low) continue; // NOSONAR: S1244 - Exact zero price/range singularity guards; every distinct finite bound or nonzero price must retain its formula.
             // Independent rational stochastic divided by rational momentum.
             var stochastic = (ReferenceFraction.FromDouble(bars[i].Close) - ReferenceFraction.FromDouble(low))
                 / (ReferenceFraction.FromDouble(high) - ReferenceFraction.FromDouble(low)) * new ReferenceFraction(100);
             var momentum = ReferenceFraction.FromDouble(bars[i].Close) / ReferenceFraction.FromDouble(bars[i - length].Close) * new ReferenceFraction(100);
-            ratios[i] = (stochastic * ReferenceFraction.FromDouble(strength[i]) / momentum).RoundExtendedBinary64();
+            ratios[i] = (stochastic * ReferenceFraction.FromDouble(strength[i]) / momentum).RoundExtendedBinary64(); // NOSONAR: S4143 - The initialized zero is retained on early-continue paths; this assignment handles the remaining nonzero domain.
         }
         var output = new double[bars.Count]; var signals = new Signal[bars.Count]; var sum = zero;
         var previousIncrement = zero;

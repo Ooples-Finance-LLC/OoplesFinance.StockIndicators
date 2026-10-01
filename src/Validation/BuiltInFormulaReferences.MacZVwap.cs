@@ -87,7 +87,7 @@ internal static partial class BuiltInFormulaReferences
         {
             line[i] = R(4) * g * Y(i - 1) - R(6) * g2 * Y(i - 2) + R(4) * g3 * Y(i - 3) - g4 * Y(i - 4)
                 + a * (X(i) + X(i - 3)) + b * (X(i - 1) + X(i - 2));
-            history[i] = gamma == 0 || gamma == 1 ? line[i] : Compact(line[i]);
+            history[i] = gamma == 0 || gamma == 1 ? line[i] : Compact(line[i]); // NOSONAR: S1244 - Exact gamma0/1 select algebraic finite-memory/constant-pole cases; near0/1 values require full recurrence. Never replace with epsilon.
         }
         var signals = Mean(line, signal, kind); var histogram = line.Select((v, i) => v - signals[i]).ToArray(); var trades = new Signal[bars.Count];
         for (var i = 0; i < bars.Count; i++)

@@ -31,7 +31,7 @@ internal sealed class JrcWindow : IDisposable
             var relative = ExactMeanAccumulator.UnitRatio((numerator - denominator) << 1074, denominator);
             var argument = 1 + relative;
             // Correct the rounded argument, retaining a ratio close to one.
-            if (argument == 1) return relative;
+            if (argument == 1) return relative; // NOSONAR: S1244 - Detect exactly rounded 1+relative to avoid division by exactly zero; adjacent representable arguments must retain logarithm correction.
             var top = new ExactMeanAccumulator(); top.AddProduct(Math.Log(argument), relative);
             var bottom = new ExactMeanAccumulator(); bottom.Add(argument - 1);
             return top.Ratio(bottom);

@@ -59,8 +59,7 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
         var indexMa = _indexMa.Next(index, isFinal);
         var alpha = indexSt != 0 ? srcSt / indexSt * r : 0;
         var beta = srcMa - (alpha * indexMa);
-        var kalsma = _moments is null ? (alpha * index) + beta
-            : _moments.Next(value, isFinal, out _, out _, out _);
+        var kalsma = (alpha * index) + beta;
 
         if (isFinal)
         {

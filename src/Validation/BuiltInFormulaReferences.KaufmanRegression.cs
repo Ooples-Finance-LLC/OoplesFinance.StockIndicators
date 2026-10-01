@@ -26,7 +26,7 @@ internal static partial class BuiltInFormulaReferences
         // every positive weight measure. Their fitted value is exactly the price;
         // no time moments are needed for the regression's single published output.
         var lastWarmup = Math.Min(bars.Count - 1, Math.Max(1, length) - 1);
-        if (regression && (bars.Count == 0 || bars.Skip(lastWarmup).All(b => b.Close == bars[lastWarmup].Close)))
+        if (regression && (bars.Count == 0 || bars.Skip(lastWarmup).All(b => b.Close == bars[lastWarmup].Close))) // NOSONAR: S1244 - Exact flat trajectory shortcut; even one-ULP movement must not be classified flat.
             return new() { { "Kalsma", bars.Select(b => b.Close).ToArray() } };
         return KaufmanRegressionValues(bars, length, regression);
     }
