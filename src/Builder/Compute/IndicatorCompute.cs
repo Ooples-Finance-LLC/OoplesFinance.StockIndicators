@@ -19404,23 +19404,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeKaseConvergenceDivergenceFast(StockData data, ComputeContext context, int length1 = 30,
         int length2 = 3, int length3 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateKaseConvergenceDivergence chains from the "Pk" series of the Kase peak oscillator - the
-        // weighted average of the random walk difference, not the banded oscillator that arm returns by
-        // default - and subtracts its own moving average from it.
-        var count = data.Count;
-
-        using var peak = ComputeKasePeakOscillatorV1Fast(data, context, length1, length2, KasePeakSeries.Pk);
-        using var signal = context.Rent(count);
-        MovingAverage(data, maType, length3, peak.Span, signal.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = peak.Span[i] - signal.Span[i];
-        }
-
-        return buffer;
+        var values = KaseConvergenceWindow.Compute(data, maType, length1, length2, length3, true).Values;
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

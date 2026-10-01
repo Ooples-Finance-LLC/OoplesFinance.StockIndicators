@@ -1006,12 +1006,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Kpo", levels), ("Pk", peak));
                 });
             case IndicatorName.KaseConvergenceDivergence:
-                return new("Kcd", new[] { "Kcd" }, bars =>
-                {
-                    var peak = KaseReferencePeak(bars, Integer(options, "Length1", 30), Integer(options, "Length2", 3));
-                    var signal = Average(peak, Integer(options, "Length3", 8), kind);
-                    return Outputs(("Kcd", peak.Zip(signal, (a, b) => a - b).ToArray()));
-                });
+                return new("Kcd", new[] { "Kcd" }, bars => KaseConvergenceOutputs(bars, indicator));
             case IndicatorName.KasePeakOscillatorV2:
                 return new("Kpo", new[] { "Kpo" }, bars =>
                 {

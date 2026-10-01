@@ -640,48 +640,17 @@ public sealed class KarobeinOscillatorState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Kcd")]
 public sealed class KaseConvergenceDivergenceState : IStreamingIndicatorState, IDisposable
 {
-    private readonly KasePeakOscillatorV1Engine _engine;
-    private readonly IMovingAverageSmoother _pkSmoother;
-
-    public KaseConvergenceDivergenceState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length1 = 30, int length2 = 3, int length3 = 8)
-    {
-        _engine = new KasePeakOscillatorV1Engine(Math.Max(1, length1), Math.Max(1, length2));
-        _pkSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-    }
-
+    private readonly KaseConvergenceWindow _window;
+    public KaseConvergenceDivergenceState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 30, int length2 = 3, int length3 = 8)
+        => _window = new(maType, length1, length2, length3);
     public IndicatorName Name => IndicatorName.KaseConvergenceDivergence;
-
-    public void Reset()
-    {
-        _engine.Reset();
-        _pkSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var pk = _engine.Next(bar, isFinal, out _, out _);
-        var pkSma = _pkSmoother.Next(pk, isFinal);
-        var kcd = pk - pkSma;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Kcd", kcd }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kcd, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Kcd", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-        _pkSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dev1")]

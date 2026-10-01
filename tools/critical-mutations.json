@@ -64751,5 +64751,338 @@
     "before": "_input.GetValue(bar), isFinal",
     "after": "_input.GetValue(bar), true",
     "filter": "FullyQualifiedName~JrcNumericalTests.ResetClearsDeepOldRangesBeforeDifferentHistory"
+  },
+  {
+    "id": "kase-convergence-wide-length-floor",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_length = Math.Max(1, length); _sqrt",
+    "after": "_length = Math.Max(2, length); _sqrt",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-sqrt",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "U(Math.Sqrt(_length))",
+    "after": "U(1)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-atr-kind",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_atr = new(MovingAvgType.WildersSmoothingMethod",
+    "after": "_atr = new(MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-peak-kind",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_peak = new(MovingAvgType.WeightedMovingAverage",
+    "after": "_peak = new(MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "U(high) - U(low),",
+    "after": "U(high) + U(low),",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.WideSubnormalAndPedestalRangesKeepFiniteRatios"
+  },
+  {
+    "id": "kase-convergence-wide-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "BigInteger.Abs(U(high) - U(previous))",
+    "after": "BigInteger.Abs(U(high) - U(low))",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.BothTrueRangeGapsUseThePreviousPrice"
+  },
+  {
+    "id": "kase-convergence-wide-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "BigInteger.Abs(U(low) - U(previous))",
+    "after": "BigInteger.Abs(U(low) - U(high))",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.BothTrueRangeGapsUseThePreviousPrice"
+  },
+  {
+    "id": "kase-convergence-wide-drive-low",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "U(high) + U(low) - U(previousHigh)",
+    "after": "U(high) - U(low) - U(previousHigh)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-drive-lag",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "- U(previousHigh) - U(previousLow)",
+    "after": "- U(previousHigh) + U(previousLow)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-zero-atr",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "atr.IsZero ? BigInteger.Zero",
+    "after": "atr.IsZero ? U(1)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-atr-first-price",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_hasPrevious ? _previousPrice : price",
+    "after": "_hasPrevious ? _previousPrice : 0",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-lag-startup",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_history.Peek() : default",
+    "after": "_history.Peek() : (High: high, Low: low)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-lag-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "if (final)\n        {\n            if (_history.Count",
+    "after": "if (true)\n        {\n            if (_history.Count",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = high;",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-signal-subtraction",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "Round(peak - signal, BigInteger.One)",
+    "after": "Round(peak + signal, BigInteger.One)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_signal.Next(peak, final)",
+    "after": "_signal.Next(BigInteger.Zero, final)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "if (final) _previousValue = value;",
+    "after": "if (false) _previousValue = value;",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-strong-buy",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "value.Sign > 0 && value > previous",
+    "after": "value.Sign > 0 && value < previous",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-reset-lag",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_history.Clear(); _previousPrice = 0;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-reset-first-price",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_hasPrevious = false; _previousValue",
+    "after": "_hasPrevious = true; _previousValue",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-callback-atr-period",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "Average(ranges, MovingAvgType.WildersSmoothingMethod, length)",
+    "after": "Average(ranges, MovingAvgType.WildersSmoothingMethod, peakLength)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.SelectedRangesAndThreeCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "kase-convergence-wide-callback-peak-period",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "Average(differences, MovingAvgType.WeightedMovingAverage, peakLength)",
+    "after": "Average(differences, MovingAvgType.WeightedMovingAverage, signalLength)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.SelectedRangesAndThreeCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "kase-convergence-wide-callback-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "Average(peak, kind, signalLength)",
+    "after": "Average(differences, kind, signalLength)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.SelectedRangesAndThreeCallbackSlotsRemainExplicit"
+  },
+  {
+    "id": "kase-convergence-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "weighted - sum + value * _length",
+    "after": "weighted + sum + value * _length",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "value * _length;",
+    "after": "value * (_length - 1L);",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_history.Count == _length ? _history.Peek() : BigInteger.Zero",
+    "after": "false ? _history.Peek() : BigInteger.Zero",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-weighted-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "(long)_length * (_length + 1L)",
+    "after": "_length * (_length + 1)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.MaximumAndNormalizedPeriodsUseLazyHistories"
+  },
+  {
+    "id": "kase-convergence-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_count + 1 < _length ? BigInteger.Zero",
+    "after": "_count + 1 < _length ? value",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.HandLagAndZeroPaddedMeansHaveKnownValues"
+  },
+  {
+    "id": "kase-convergence-wide-ema-seed-count",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "Round(sum, _count + 1)",
+    "after": "Round(sum, _length)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_previous * (_length - 1L)",
+    "after": "_previous * _length",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-recursive-drive",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "value * (ema ? 2 : 1)",
+    "after": "value * (ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-recursive-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "ema ? _length + 1L : _length",
+    "after": "ema ? _length : _length + 1L",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "if (final)\n            {\n                _sum",
+    "after": "if (true)\n            {\n                _sum",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KaseConvergenceWindow.cs",
+    "scope": "internal sealed class KaseConvergenceWindow",
+    "before": "_sum = _weighted = _previous = default;",
+    "after": "_sum = _previous = default;",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
+  },
+  {
+    "id": "kase-convergence-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KaseConvergenceDivergenceState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted guard\n",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.RejectedCandlesCannotAdvanceStages"
+  },
+  {
+    "id": "kase-convergence-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KaseConvergenceDivergenceState",
+    "before": "bar.Close, isFinal",
+    "after": "bar.Close, true",
+    "filter": "FullyQualifiedName~KaseConvergenceNumericalTests.ResetPreviewAndLongHistoryRetainEveryStage"
   }
 ]

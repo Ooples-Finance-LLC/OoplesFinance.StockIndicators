@@ -73,34 +73,12 @@ public static partial class Calculations
     public static StockData CalculateKaseConvergenceDivergence(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 30, int length2 = 3, int length3 = 8)
     {
-        List<double> kcdList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var pkList = CalculateKasePeakOscillatorV1(stockData, length1, length2).ChainedOutputs["Pk"];
-        var pkSignalList = GetMovingAverageList(stockData, maType, length3, pkList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var pk = pkList[i];
-            var pkSma = pkSignalList[i];
-
-            var prevKcd = i >= 1 ? kcdList[i - 1] : 0;
-            var kcd = pk - pkSma;
-            kcdList.Add(kcd);
-
-            var signal = GetCompareSignal(kcd, prevKcd);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Kcd", kcdList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kcdList);
-        stockData.IndicatorName = IndicatorName.KaseConvergenceDivergence;
-
-        return stockData;
+        var result = KaseConvergenceWindow.Compute(stockData, maType, length1, length2, length3, false);
+        var values = result.Values.ToList(); var trades = CreateSignalsList(stockData); trades?.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Kcd", values } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.KaseConvergenceDivergence; return stockData;
     }
+
 
 
     /// <summary>

@@ -4161,3 +4161,12 @@ The isolated campaigns `634a` and `634b` passed their baselines and caught **38/
 Source snapshot SHA256: `3ad3c7021e2b9a36bc7e8d026c5b40a7fa9914b34f9dda0e69cf5be282069d08`. Archive SHA256: `1e658dc172f12a02d801f69fc90686b595bbc39de58e2fa5942851a19b7d02bb` and `1e658dc172f12a02d801f69fc90686b595bbc39de58e2fa5942851a19b7d02bb`.
 
 This is evidence for the isolated batch-634 source. Source was already published in the batch-634 checkpoint; this update does not restore older source files. Mutation verification for batches 635 through 653 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 654, Kase Convergence Divergence
+
+Kase Convergence Divergence now retains true range, Wilder ATR, the combined signed drive, weighted peak, signal mean and final residual through overflow and cancellation. Each complete stage rounds once with an extended upper exponent. Shared batch/fast/native calculation uses lazy histories, derived selected-input ranges and three explicit fast callback slots. The existing sqrt(length1) multiplier is documented as the repository variant; a separate proposed investigation of its relationship to standard random-walk normalization remains pending and is not claimed complete here.
+
+Independent fraction arrays cover all stages, outputs and public signals. The focused run passed95 of96 checks; the sole failure was the old hand test's unrounded -1/3 expectation after registering an exact stage contract. Independent dyadic arithmetic gives peak6004799503160661/4503599627370496, signal3752999689475413/2251799813685248 and residual-1501199875790165/4503599627370496. The corrected hand check and a new test for both true-range gaps passed2/2 using existing production outputs, for **97 distinct passing checks**. Production source did not change after the initial passing family checks.
+
+**37 prepared faults remain unqualified**; all **7,553 anchors** apply. Candidate/frozen snapshots match on2198 files. Enrollment is **6,320/7,131**, leaving **811 omissions across121 types**. DLL SHA256: F1E741AE9D01639885CC51CAEE60EC9616FB2A176EFB8302EC961E7945283958. Mutation qualification is complete through634; batches635–654, pending formula/core decisions and final gates remain incomplete. PR246 stays draft.

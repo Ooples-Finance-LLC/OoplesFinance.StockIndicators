@@ -1058,7 +1058,7 @@ public sealed class FormulaContractCoverageTests
         foreach (var rule in rules) rule.Check(new IndicatorValidationContext("kase-peak-hand", bars,
             [[2.08, 2.08, 2.08], [2, 4d / 3, 4d / 3]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new KaseConvergenceDivergence(1, 1, 2))).Check(
-            new IndicatorValidationContext("kase-convergence-hand", bars, [[2, -1d / 3, 0]], 0));
+            new IndicatorValidationContext("kase-convergence-hand", bars, [[2, -1501199875790165d / 4503599627370496d, 0]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new KasePeakOscillatorV2(1))).Check(
             new IndicatorValidationContext("kase-volatility-warmup", bars, [[0, 0, 0]], 0));
     }
