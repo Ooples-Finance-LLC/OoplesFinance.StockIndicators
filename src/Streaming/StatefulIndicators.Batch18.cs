@@ -768,122 +768,18 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
 [PrimaryOutput("Nvdi")]
 public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _inputSma;
-    private readonly IMovingAverageSmoother _nviSma;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
-    // the resolved input and the other the negative volume index, and they must not be crossed.
-    private readonly RollingStandardDeviation _inputStdDev;
-    private readonly RollingStandardDeviation _nviStdDev;
-    private readonly StreamingInputResolver _input;
-    private readonly double _top;
-    private readonly double _bottom;
-    private double _prevClose;
-    private double _prevVolume;
-    private double _prevNvi;
-    private double _prevNvdi;
-    private double _prevBsc;
-    private bool _hasPrev;
-
+    private readonly NegativeVolumeDisparityWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public NegativeVolumeDisparityIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 33,
-        int signalLength = 4, double top = 1.1, double bottom = 0.9)
-    {
-        var resolved = Math.Max(1, length);
-        _inputSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _nviSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        // No moving-average type, and no selector: RollingStandardDeviation is handed the value itself, so
-        // the index no longer has to be smuggled in through a closure over a field.
-        _inputStdDev = new RollingStandardDeviation(resolved);
-        _nviStdDev = new RollingStandardDeviation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _top = top;
-        _bottom = bottom;
-    }
-
+        int signalLength = 4, double top = 1.1, double bottom = .9) => _window = new(maType, length, signalLength, top, bottom);
     public IndicatorName Name => IndicatorName.NegativeVolumeDisparityIndicator;
-
-    public void Reset()
-    {
-        _inputSma.Reset();
-        _nviSma.Reset();
-        _signalSmoother.Reset();
-        _inputStdDev.Reset();
-        _nviStdDev.Reset();
-        _prevClose = 0;
-        _prevVolume = 0;
-        _prevNvi = 0;
-        _prevNvdi = 0;
-        _prevBsc = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevVolume = _hasPrev ? _prevVolume : 0;
-        var prevNvi = _hasPrev ? _prevNvi : 1000;
-        var pctChg = CalculationsHelper.CalculatePercentChange(value, prevClose);
-        // Matches the batch CalculateNegativeVolumeIndex: Fosback compounds the rate of change onto the
-        // running index (NVI = prevNVI + prevNVI * ROC), and CalculatePercentChange returns that ROC
-        // already scaled to a percentage, so the 100 has to come back out.
-        var nvi = volume >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
-
-        var inputSma = _inputSma.Next(value, isFinal);
-        var nviSma = _nviSma.Next(nvi, isFinal);
-        // Each deviation is fed the series it measures: the resolved input, and the negative volume index.
-        var stdDev = _inputStdDev.Next(value, isFinal);
-        var nviStdDev = _nviStdDev.Next(nvi, isFinal);
-
-        var aTop = value - (inputSma - (2 * stdDev));
-        var aBot = 4 * stdDev;
-        var a = aBot != 0 ? aTop / aBot : 0;
-        var bTop = nvi - (nviSma - (2 * nviStdDev));
-        var bBot = 4 * nviStdDev;
-        var b = bBot != 0 ? bTop / bBot : 0;
-        var nvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
-        var signal = _signalSmoother.Next(nvdi, isFinal);
-
-        var prevNvdi = _hasPrev ? _prevNvdi : 0;
-        var prevBsc = _hasPrev ? _prevBsc : 0;
-        var bsc = (prevNvdi < _bottom && nvdi > _bottom) || nvdi > signal
-            ? 1
-            : (prevNvdi > _top && nvdi < _top) || nvdi < _bottom
-                ? -1
-                : prevBsc;
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _prevVolume = volume;
-            _prevNvi = nvi;
-            _prevNvdi = nvdi;
-            _prevBsc = bsc;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Nvdi", nvdi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(nvdi, outputs);
-    }
-
-    public void Dispose()
-    {
-        _inputSma.Dispose();
-        _nviSma.Dispose();
-        _signalSmoother.Dispose();
-        _inputStdDev.Dispose();
-        _nviStdDev.Dispose();
+        var point = _window.Next(_input.GetValue(bar), bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Line.Publish(), includeOutputs ? new Dictionary<string, double>
+            { { "Nvdi", point.Line.Publish() }, { "Signal", point.SignalLine.Publish() } } : null);
     }
 }
 

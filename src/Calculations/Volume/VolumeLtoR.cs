@@ -452,67 +452,12 @@ public static partial class Calculations
     public static StockData CalculateNegativeVolumeDisparityIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> nvdiList = new(stockData.Count);
-        List<double> bscList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var nviList = CalculateNegativeVolumeIndex(stockData, maType, length).ChainedValues;
-        var nviSmaList = GetMovingAverageList(stockData, maType, length, nviList);
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        // The deviation of each window about its own mean, as in the on balance volume disparity above: the
-        // first measures the prices and the second the negative volume index, each about its own mean. See
-        // #190.
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        stockData.SetCustomValues(nviList);
-        var nviStdDevList = GetStandardDeviationList(nviList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var stdDev = stdDevList[i];
-            var nviSma = nviSmaList[i];
-            var nviStdDev = nviStdDevList[i];
-            var aTop = currentValue - (sma - (2 * stdDev));
-            var aBot = 4 * stdDev;
-            var nvi = nviList[i];
-            var a = aBot != 0 ? aTop / aBot : 0;
-            var bTop = nvi - (nviSma - (2 * nviStdDev));
-            var bBot = 4 * nviStdDev;
-            var b = bBot != 0 ? bTop / bBot : 0;
-
-            var nvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
-            nvdiList.Add(nvdi);
-        }
-
-        var nvdiEmaList = GetMovingAverageList(stockData, maType, signalLength, nvdiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var nvdi = nvdiList[i];
-            var nvdiEma = nvdiEmaList[i];
-            var prevNvdi = i >= 1 ? nvdiList[i - 1] : 0;
-
-            var prevBsc = i >= 1 ? bscList[i - 1] : 0;
-            var bsc = (prevNvdi < bottom && nvdi > bottom) || nvdi > nvdiEma ? 1 : (prevNvdi > top && nvdi < top) ||
-                nvdi < bottom ? -1 : prevBsc;
-            bscList.Add(bsc);
-
-            var signal = GetCompareSignal(bsc, prevBsc);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Nvdi", nvdiList },
-            { "Signal", nvdiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(nvdiList);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = NegativeVolumeDisparityWindow.Calculate(stockData, input, maType, length, signalLength, top, bottom, callbacks: false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Nvdi", result.Line.ToList() }, { "Signal", result.SignalLine.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Trades);
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Line.ToList());
         stockData.IndicatorName = IndicatorName.NegativeVolumeDisparityIndicator;
-
         return stockData;
     }
 

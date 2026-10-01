@@ -62,8 +62,9 @@ internal static partial class BuiltInFormulaReferences
                     var signal = Average(line, Integer(options, "SignalLength", 13), kind);
                     return Outputs(("Kvo", line), ("KvoSignal", signal), ("KvoHistogram", line.Zip(signal, (v, m) => v - m).ToArray()));
                 });
-            case IndicatorName.OnBalanceVolumeDisparityIndicator:
             case IndicatorName.NegativeVolumeDisparityIndicator:
+                return new("Nvdi", new[] { "Nvdi", "Signal" }, bars => NegativeVolumeDisparityOutputs(bars, indicator));
+            case IndicatorName.OnBalanceVolumeDisparityIndicator:
                 if (kind == 0) return null;
                 var negativeDisparity = name == IndicatorName.NegativeVolumeDisparityIndicator;
                 var disparityKey = negativeDisparity ? "Nvdi" : "Obvdi";

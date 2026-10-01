@@ -22,6 +22,12 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.NegativeVolumeDisparityIndicator)
+        {
+            var nvdiKeys = new[] { "Nvdi", "Signal" };
+            for (var slot = 0; slot < nvdiKeys.Length; slot++) { var key = nvdiKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => NegativeVolumeDisparityOutputs(bars, builtIn)[key], NegativeVolumeDisparityBudget); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.MultiDepthZeroLagExponentialMovingAverage)
         {
             var depthKeys = new[] { "Md2Pole", "Md1Pole", "Md3Pole" };

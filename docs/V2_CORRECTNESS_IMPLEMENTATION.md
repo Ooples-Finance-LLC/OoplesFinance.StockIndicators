@@ -4496,3 +4496,10 @@ This is evidence for the isolated batch-651 source. Source was already published
 ### Batch 652: RSX native-guard mutation repair
 
 The original campaigns caught 36 compiled faults and left one equivalent native-guard mutation: it removed explicit candle validation while the input resolver still performed the same validation. The replacement bypasses both whole-candle validation calls. The existing regression checks all five fields, preview and final updates, and subsequent state integrity. Production and tests are unchanged. Fresh campaigns for all 37 faults are required; the original pair is not qualified and its kills will not be pooled.
+
+
+### Batch 672: Negative Volume Disparity numerical routes
+
+All five public routes now retain extended NVI values, exact window moments, and cancellation-safe normalized coordinates. Selected inputs, ordered signal thresholds, callback slots, previews, reset, and lazy extreme periods have focused coverage. The independent reference uses direct window deviations and Newton-refined roots stored as four binary64 residuals; exact-zero and one-ULP hand cases prevent tolerance-based ties. A separate 49-root/98-coordinate algebra check preserved binary64 results with root changes below 2^-200 while reducing intermediate representation size. The earlier aborted run is not qualification evidence.
+
+**84/84 focused tests passed** on net10.0 (`negative-volume-disparity672-compact-root.trx`). Inventory: **6,440/7,131 enrolled**, **691 omissions across 102 types**, all references registered, no construction failures, backlog exact. The 21 behavioral mutations and final hosted/platform/package/performance gates remain pending.

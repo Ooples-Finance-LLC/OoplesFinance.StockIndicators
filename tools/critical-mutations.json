@@ -70357,5 +70357,194 @@
     "before": "_beta[0] = beta;",
     "after": "_beta[0] = beta.Round();",
     "filter": "FullyQualifiedName~MultiDepthNumericalTests.IsolatedSpikeCancelsExactlyAtTheClosedFormZero"
+  },
+  {
+    "id": "nvdi-wide-flat",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "if (variance.Sign == 0) return Number.Of(1);",
+    "after": "if (variance.Sign == 0) return Number.Of(1.5);",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-positive-offset",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "Number.Of(1.5) + delta",
+    "after": "Number.Of(1) + delta",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-positive-width",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "delta.OverRoot(variance).Divide(4)",
+    "after": "delta.OverRoot(variance).Divide(2)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-negative-discriminant",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "Number.Of(36) - normalizedSquare",
+    "after": "Number.Of(35) - normalizedSquare",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ExactZeroAndOneUlpPerturbationRemainDistinct"
+  },
+  {
+    "id": "nvdi-wide-negative-width",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "rootRatio).Times(4)",
+    "after": "rootRatio).Times(2)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ExactZeroAndOneUlpPerturbationRemainDistinct"
+  },
+  {
+    "id": "nvdi-wide-zero-tolerance",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "if (remainder.Sign == 0)",
+    "after": "if (Math.Abs(remainder.Publish()) < 1e-12)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ExactZeroAndOneUlpPerturbationRemainDistinct"
+  },
+  {
+    "id": "nvdi-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "_signalMean = new(kind, signalLength)",
+    "after": "_signalMean = new(kind, length)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "sum -= old; squares -= old * old;",
+    "after": "sum += old; squares += old * old;",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ExpiryScalingAndAverageKindsPreserveTheFormula"
+  },
+  {
+    "id": "nvdi-wide-variance-startup",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-variance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "Divide((long)_length * _length)",
+    "after": "Divide((long)_length)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (current.Sign != 0 || final) { if (full)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-lag-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "if (final) { _previousLine",
+    "after": "if (line.Sign != 0 || final) { _previousLine",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ExpiryScalingAndAverageKindsPreserveTheFormula"
+  },
+  {
+    "id": "nvdi-wide-reset-index",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "_index.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ExpiryScalingAndAverageKindsPreserveTheFormula"
+  },
+  {
+    "id": "nvdi-wide-reset-trade",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal sealed class NegativeVolumeDisparityWindow",
+    "before": "_previousLine = default; _previousState = 0;",
+    "after": "_previousLine = Number.Of(1); _previousState = 1;",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-price-mean-slot",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal static (double[] Line, double[] SignalLine, Signal[] Trades) Calculate(",
+    "before": "var priceMeans = Mean(source, length)",
+    "after": "var priceMeans = Mean(indices, length)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.CallbacksReceivePriceNviAndSignalInTheirActualSlots"
+  },
+  {
+    "id": "nvdi-wide-signal-mean-slot",
+    "module": "numerical",
+    "file": "src/Helpers/NegativeVolumeDisparityWindow.cs",
+    "scope": "internal static (double[] Line, double[] SignalLine, Signal[] Trades) Calculate(",
+    "before": "var signal = Mean(line, signalLength)",
+    "after": "var signal = Mean(source, signalLength)",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.CallbacksReceivePriceNviAndSignalInTheirActualSlots"
+  },
+  {
+    "id": "nvdi-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "_input.GetValue(bar)",
+    "after": "includeOutputs ? _input.GetValue(bar) : bar.Close",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.NonfiniteArgumentsAndCandlesCannotAdvanceState"
+  },
+  {
+    "id": "nvdi-wide-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorState, IDisposable",
+    "before": "{ \"Signal\", point.SignalLine.Publish() }",
+    "after": "{ \"Signal\", point.Line.Publish() }",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.ProportionalCoordinatesAndSimpleBandsHaveHandValues"
+  },
+  {
+    "id": "nvdi-wide-selected-Fast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNegativeVolumeDisparityFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.InputValues;",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "nvdi-wide-selected-SignalFast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNegativeVolumeDisparitySignalFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.InputValues;",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "nvdi-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "NegativeVolumeDisparityIndicator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~NegativeVolumeDisparityNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

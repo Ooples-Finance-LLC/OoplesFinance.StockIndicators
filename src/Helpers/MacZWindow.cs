@@ -34,6 +34,7 @@ internal sealed class MacZWindow : IDisposable
         }
         internal int Sign => _coefficient.Sign;
         internal static Number Of(double value) => new(ExactVarianceWindow.Units(value), -1074);
+        internal static Number Integer(BigInteger value) => new(value, 0);
         private static int Bits(BigInteger value)
         { var bytes = BigInteger.Abs(value).ToByteArray(); var last = bytes.Length - 1; while (last > 0 && bytes[last] == 0) last--; var bits = last * 8; for (var b = bytes[last]; b != 0; b >>= 1) bits++; return bits; }
         public static Number operator +(Number a, Number b)

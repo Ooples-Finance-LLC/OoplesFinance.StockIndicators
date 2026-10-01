@@ -2120,8 +2120,8 @@ internal static partial class IndicatorCompute
             NaturalStochasticIndicatorSpecOptions nsi => ComputeNaturalStochasticIndicatorFast(data, context, nsi.Length, nsi.SmoothLength, nsi.MaType),
             NegativeVolumeDisparityIndicatorSpecOptions nvdi => spec.OutputKey switch
             {
-                null or "Nvdi" => ComputeNegativeVolumeDisparityFast(data, context, nvdi.Length, nvdi.MaType),
-                "Signal" => ComputeNegativeVolumeDisparitySignalFast(data, context, nvdi.Length, nvdi.SignalLength, nvdi.MaType),
+                null or "Nvdi" => ComputeNegativeVolumeDisparityFast(data, context, nvdi.Length, nvdi.MaType, nvdi.Top, nvdi.Bottom),
+                "Signal" => ComputeNegativeVolumeDisparitySignalFast(data, context, nvdi.Length, nvdi.SignalLength, nvdi.MaType, nvdi.Top, nvdi.Bottom),
                 _ => throw new ArgumentOutOfRangeException(nameof(spec.OutputKey))
             },
             OceanIndicatorSpecOptions oi => spec.OutputKey == "Signal"
@@ -19593,58 +19593,26 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Negative Volume Disparity Indicator using zero-allocation fast path.
+    /// Computes Negative Volume Disparity with extended intermediate arithmetic.
     /// </summary>
     internal static ComputeBuffer ComputeNegativeVolumeDisparitySignalFast(StockData data, ComputeContext context, int length,
-        int signalLength, MovingAvgType maType)
+        int signalLength, MovingAvgType maType, double top = 1.1, double bottom = .9)
     {
-        using var line = ComputeNegativeVolumeDisparityFast(data, context, length, maType);
-        var signal = context.Rent(data.Count);
-        MovingAverage(data, maType, signalLength, line.Span, signal.WritableSpan);
-        return signal;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = NegativeVolumeDisparityWindow.Calculate(data, input, maType, length, signalLength, top, bottom, callbacks: true, includeSignal: true).SignalLine;
+        var result = context.Rent(values.Length);
+        values.AsSpan().CopyTo(result.WritableSpan);
+        return result;
     }
 
     internal static ComputeBuffer ComputeNegativeVolumeDisparityFast(StockData data, ComputeContext context, int length = 33,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double top = 1.1, double bottom = .9)
     {
-        // CalculateNegativeVolumeDisparityIndicator places the price and the negative volume index each within
-        // its own two-deviation envelope, and reports the ratio of the two positions. signalLength, top and
-        // bottom only reach the Signal key and the buy-sell counter, so they are not parameters of this
-        // output; the arm used to take all three and answer with none of this.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var window = Math.Max(1, length);
-
-        using var negativeVolume = ComputeNegativeVolumeIndexFast(data, context);
-        var nvi = negativeVolume.Span;
-
-        using var priceAverage = context.Rent(count);
-        using var volumeAverage = context.Rent(count);
-        MovingAverage(data, maType, length, input, priceAverage.WritableSpan);
-        MovingAverage(data, maType, length, nvi, volumeAverage.WritableSpan);
-
-        using var priceDeviation = context.Rent(count);
-        using var volumeDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, priceDeviation.WritableSpan, window);
-        VolatilityCore.StandardDeviation(nvi, volumeDeviation.WritableSpan, window);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var priceFloor = priceAverage.Span[i] - (2 * priceDeviation.Span[i]);
-            var priceSpan = 4 * priceDeviation.Span[i];
-            var pricePosition = priceSpan != 0 ? (input[i] - priceFloor) / priceSpan : 0;
-
-            var volumeFloor = volumeAverage.Span[i] - (2 * volumeDeviation.Span[i]);
-            var volumeSpan = 4 * volumeDeviation.Span[i];
-            var volumePosition = volumeSpan != 0 ? (nvi[i] - volumeFloor) / volumeSpan : 0;
-
-            output[i] = 1 + volumePosition != 0 ? (1 + pricePosition) / (1 + volumePosition) : 0;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var values = NegativeVolumeDisparityWindow.Calculate(data, input, maType, length, 1, top, bottom, callbacks: true, includeSignal: false).Line;
+        var result = context.Rent(values.Length);
+        values.AsSpan().CopyTo(result.WritableSpan);
+        return result;
     }
 
     /// <summary>
