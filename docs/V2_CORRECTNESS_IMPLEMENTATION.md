@@ -4104,3 +4104,12 @@ The first public run passed42/42 checks. After core alignment was approved, the 
 ### Batch 632: equivalent history expiry mutation
 
 The original median-adaptive campaigns caught31 faults and left one equivalent survivor. Advancing the history start by2 rather than1 retains either length or length-1 prior observations; the next median reads at most length-1 prior observations plus the current sample. Compaction preserves that tail, so every result is unchanged. This fault receives no credit. The replacement advances by3, which can discard a required predecessor. It selects the existing exhaustive oracle over lengths1,2,3,6,9,30,79 and multiple thresholds; the former compaction test used period3, whose enforced minimum filter period masks adaptive-history changes. Production/tests are unchanged;41 existing focused passes remain applicable. A corrected matching snapshot pair and fresh campaigns must qualify the meaningful32-fault set.
+
+
+### Batch 632: Median Adaptive mutation qualification
+
+The isolated campaigns `632-corrected-a` and `632-corrected-b` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **41/41 focused tests**. Both archives were compared byte-for-byte with the retained batch-632 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `97103865c48393a624f90caca22478c846becfb4baf909cce4d23be7192cefa9`. Archive SHA256: `3819e4e73a2bada0026af30b83c6b80b183a312d5db08df9d58ed2717061532a` and `3819e4e73a2bada0026af30b83c6b80b183a312d5db08df9d58ed2717061532a`.
+
+This is evidence for the isolated batch-632 source. Source was already published in the batch-632 checkpoint; this update does not restore older source files. Mutation verification for batches 633 through 650 and the remaining final gates is still incomplete.
