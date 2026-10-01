@@ -63075,7 +63075,7 @@
     "file": "src/Helpers/InertiaSmoother.cs",
     "scope": "internal sealed class InertiaSmoother",
     "before": "if (full) _history.Dequeue();",
-    "after": "if (false) _history.Dequeue();",
+    "after": "if (_history.Count > _length) _history.Dequeue();",
     "filter": "FullyQualifiedName~InertiaNumericalTests.RegressionAndMovingAverageExpiryRetainChronologicalWeights"
   },
   {
@@ -63121,7 +63121,7 @@
     "scope": "public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposable",
     "before": "_rviHigh.Next(bar.High, bar, isFinal)",
     "after": "_rviHigh.Next(bar.Close, bar, isFinal)",
-    "filter": "FullyQualifiedName~InertiaNumericalTests.HandHighLowSplitAndPartialRegressionDetermineEndpoints"
+    "filter": "FullyQualifiedName~InertiaNumericalTests.FallingHighWithFlatCloseCannotBecomeNeutralRvi"
   },
   {
     "id": "inertia-wide-native-low",

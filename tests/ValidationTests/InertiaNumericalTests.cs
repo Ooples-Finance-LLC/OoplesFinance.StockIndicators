@@ -41,6 +41,18 @@ public sealed class InertiaNumericalTests
         return line;
     }
     [Fact]
+    public void FallingHighWithFlatCloseCannotBecomeNeutralRvi()
+    {
+        var bars = Enumerable.Range(0, 14).Select(i =>
+            new Bar(DateTime.UnixEpoch.AddMinutes(i), 0, 20 - i, -10, 0, 1)).ToArray();
+        var line = Check(bars, 1);
+        // The first full ten-bar deviation assigns high-series volatility to
+        // losses: high RVI is 0, flat-low RVI is 100, and their mean is 50.
+        Assert.All(line.Take(9), v => Assert.Equal(100, v));
+        Assert.All(line.Skip(9), v => Assert.Equal(50, v));
+    }
+
+    [Fact]
     public void HandHighLowSplitAndPartialRegressionDetermineEndpoints()
     {
         var bars = Enumerable.Range(0, 14).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i), 0, 10 + i, -10 - i, 0, 1)).ToArray();

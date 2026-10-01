@@ -4420,3 +4420,9 @@ All routes now evaluate price plus the sine offset without the overflowing or un
 Enrollment is **6,419/7,131**, leaving **712 omissions across 106 types**, with all independent references registered, no construction failures and an exact backlog match. Other numerical batches, mutation campaigns and final hosted/platform/package/release/performance gates remain incomplete. The pending Mobility kernel is excluded from this commit.
 
 Verification DLL SHA256: `7b03ce8e57b9b1cabb93dfb32a684e1654081c195125ac4ed8e953e7bb6ce379`.
+
+### Batch 649: Inertia mutation repair
+
+The original campaigns recorded 38 caught faults, one surviving fault and one compilation rejection, so they do not qualify. The new falling-high/flat-close hand vector distinguishes high-series RVI losses from a substituted close series: after the ten-bar deviation warmup, high RVI is zero, flat-low RVI is 100, and their mean is 50. It passes together with both affected existing hand/expiry checks. Combined with the original focused evidence, 113 distinct Inertia/dependent checks pass.
+
+The expiry fault now retains the oldest observation through a runtime condition instead of generating unreachable code. The native-high fault targets the new distinguishing regression. Production code is unchanged. All 40 faults require fresh corrected campaigns; no original kills will be pooled. The three repair checks are recorded in `adaptive-filter669-final-repair.trx` (42 total passing tests, including separate adaptive-filter and Mobility kernel checks).
