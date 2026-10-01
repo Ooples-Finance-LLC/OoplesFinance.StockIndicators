@@ -4052,3 +4052,8 @@ The supported SMA/WMA/EMA/Wilder routes now retain extended rounded residual, me
 ### Batch 631 follow-up: equivalent high-pass period mutation
 
 The restored Convolution campaign exposed an equivalent mutation: replacing the high-pass minimum period1 with2 leaves every coefficient unchanged because both angles are clamped to0.99. For periods above2 the expressions are identical. This survivor receives no credit. The replacement `convolution-wide-high-period-floor` raises the floor to5, crossing the clamp boundary (sqrt(2)*pi/5 <0.99) and changing the actual pole. Existing extreme-period tests vary the high-pass period independently from the low-pass and correlation periods. Production and tests are unchanged; all7,306 mutation anchors pass. Current campaigns retain their original evidence and cannot qualify this revised36-fault set. A corrected matching snapshot pair and complete replacement campaigns are required.
+
+
+### Batch 631: Convolution lag mutation selection correction
+
+The restored campaigns completed with 32 compiled kills and four survivors. The high-period survivor was equivalent because periods 1 and 2 share the same clamped angle; its meaningful period-5 replacement was already recorded. Three lag faults survived the neutral/two-point hand test, whose correlations of 0 or +/-1 mask altered roofing-filter magnitudes. Those faults now select the existing longer-history roofing test, which checks independent full correlations, output values, signals, previews, and reset behavior. Production and test source are unchanged; the existing 93 focused passes remain applicable. These selection changes are not mutation qualification: a fresh pair of isolated campaigns must catch all 36 faults before qualification.

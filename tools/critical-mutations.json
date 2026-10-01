@@ -56713,7 +56713,7 @@
     "scope": "internal sealed class EhlersConvolutionWindow",
     "before": "2 * _decay * _olderRoof",
     "after": "2 * _decay * _roof",
-    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
   },
   {
     "id": "convolution-wide-sum-expiry",
@@ -56866,7 +56866,7 @@
     "scope": "internal sealed class EhlersConvolutionWindow",
     "before": "_olderPrice = _price;",
     "after": "_olderPrice = 0;",
-    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
   },
   {
     "id": "convolution-wide-roof-lag",
@@ -56875,7 +56875,7 @@
     "scope": "internal sealed class EhlersConvolutionWindow",
     "before": "_olderRoof = _roof;",
     "after": "_olderRoof = 0;",
-    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
   },
   {
     "id": "convolution-wide-compaction",
