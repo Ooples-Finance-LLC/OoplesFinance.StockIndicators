@@ -1641,6 +1641,22 @@ public static partial class Calculations
     public static StockData CalculateKaufmanAdaptiveCorrelationOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.KaufmanAdaptiveMovingAverage, int length = 14)
     {
+        if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var indexDeviation = new List<double>(prices.Count); var priceDeviation = new List<double>(prices.Count); var line = new List<double>(prices.Count);
+            var trades = CreateSignalsList(stockData); using var window = new Streaming.KaufmanRegressionMoments(length);
+            for (var i = 0; i < prices.Count; i++)
+            {
+                window.Next(prices[i], true, out var time, out var price, out var correlation);
+                var previous = i > 0 ? line[i - 1] : 0; var before = i > 1 ? line[i - 2] : 0;
+                trades?.Add(GetRsiSignal(correlation - previous, previous - before, correlation, previous, .5, -.5));
+                indexDeviation.Add(time); priceDeviation.Add(price); line.Add(correlation);
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "IndexSt", indexDeviation }, { "SrcSt", priceDeviation }, { "Kaco", line } });
+            stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.KaufmanAdaptiveCorrelationOscillator; return stockData;
+        }
+
         List<double> indexList = new(stockData.Count);
         List<double> index2List = new(stockData.Count);
         List<double> src2List = new(stockData.Count);

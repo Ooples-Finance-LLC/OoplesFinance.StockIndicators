@@ -65831,5 +65831,365 @@
     "before": "bar.Close, isFinal",
     "after": "bar.Close, true",
     "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HistoryCompactionResetAndPreviewsPreserveEveryLag"
+  },
+  {
+    "id": "kaufman-regression-wide-period",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ExtremePeriodsDoNotAllocateUnobservedHistory"
+  },
+  {
+    "id": "kaufman-regression-wide-ready",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "var ready = _prices.Count == _length;",
+    "after": "var ready = _prices.Count > _length;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-travel-expiry",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "travel -= _changes.Peek();",
+    "after": "travel += _changes.Peek();",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-displacement",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "BigInteger.Abs(units - ExactVarianceWindow.Units(_prices.Peek()))",
+    "after": "BigInteger.Abs(units + ExactVarianceWindow.Units(_prices.Peek()))",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-efficiency-scale",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "displacement << 1074",
+    "after": "displacement << 1073",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-gain-power",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "Math.Pow(2d / 31 + efficiency * (2d / 3 - 2d / 31), 2)",
+    "after": "Math.Pow(2d / 31 + efficiency * (2d / 3 - 2d / 31), 1)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-gain-slow",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "2d / 31 + efficiency",
+    "after": "2d / 30 + efficiency",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-retention",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "var retained = one - weight;",
+    "after": "var retained = weight;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-age-difference",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "var dx = one - next.Age;",
+    "after": "var dx = one + next.Age;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-price-difference",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "var dy = input - next.Price;",
+    "after": "var dy = input + next.Price;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-fit-sign",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "dx * next.Covariance - dy * next.TimeVariance",
+    "after": "dx * next.Covariance + dy * next.TimeVariance",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-fit-denominator",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "var denominator = next.TimeVariance + weight * dx * dx;",
+    "after": "var denominator = weight * dx * dx;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-time-variance",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "retained * (next.TimeVariance + weight * dx * dx)",
+    "after": "retained * (next.TimeVariance + dx * dx)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-price-variance",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "retained * (next.PriceVariance + weight * dy * dy)",
+    "after": "retained * (next.PriceVariance + dy * dy)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-covariance",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "retained * (next.Covariance + weight * dx * dy)",
+    "after": "retained * (next.Covariance - weight * dx * dy)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-mean-age",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "next.Age = retained * (next.Age - one);",
+    "after": "next.Age = retained * next.Age;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-mean-price",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "next.Price += weight * dy;",
+    "after": "next.Price += retained * dy;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-correlation-sign",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "(next.Covariance / (timeRoot * priceRoot)).Publish()",
+    "after": "(default(Number) - next.Covariance / (timeRoot * priceRoot)).Publish()",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-affine-break",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "affine &= signedChange == step;",
+    "after": "affine |= signedChange == step;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ExactLinearFitsHaveNoTradingSignal"
+  },
+  {
+    "id": "kaufman-regression-wide-affine-proof",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "if (affine) { fit = input;",
+    "after": "if (!affine) { fit = input;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ExactLinearFitsHaveNoTradingSignal"
+  },
+  {
+    "id": "kaufman-regression-wide-affine-direction",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "ready ? step.Sign : 0",
+    "after": "ready ? 1 : 0",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ExtremePeriodsDoNotAllocateUnobservedHistory"
+  },
+  {
+    "id": "kaufman-regression-wide-affine-step-carry",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "_hasAffineStep = hasStep;",
+    "after": "_hasAffineStep = false;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ExactLinearFitsHaveNoTradingSignal"
+  },
+  {
+    "id": "kaufman-regression-wide-preview",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-price-expiry",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "if (_prices.Count == _length) _prices.Dequeue();",
+    "after": "if (_prices.Count > _length) _prices.Dequeue();",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-change-expiry",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "if (_changes.Count == _length) _changes.Dequeue();",
+    "after": "if (_changes.Count > _length) _changes.Dequeue();",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-reset-travel",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "_travel = default;",
+    "after": "_travel += 1;",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "_prices.Clear();",
+    "after": "_prices.TrimExcess();",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-reset-changes",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "_changes.Clear();",
+    "after": "_changes.TrimExcess();",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.TwoObservationsAndLinearPriceHaveIndependentFits"
+  },
+  {
+    "id": "kaufman-regression-wide-low-part",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "opposite.Add(_low, -sign);",
+    "after": "opposite.Add(_low, 0);",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-lower-exponent",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "shift = checked(shift - 512)",
+    "after": "shift = checked(shift + 512)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-upper-exponent",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "shift = checked(shift + 512)",
+    "after": "shift = checked(shift + 256)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-product-exponent",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "checked(a._shift + b._shift)",
+    "after": "checked(a._shift - b._shift)",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-quotient-exponent",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "quotient._shift + a._shift - b._shift",
+    "after": "quotient._shift + a._shift + b._shift",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-sqrt-exponent",
+    "module": "numerical",
+    "file": "src/Streaming/KaufmanRegressionMoments.cs",
+    "scope": "internal sealed class KaufmanRegressionMoments",
+    "before": "(_shift - odd) / 2",
+    "after": "(_shift - odd) / 3",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.SquaredSubnormalsAndOverflowingMomentsRetainTheirRatios"
+  },
+  {
+    "id": "kaufman-regression-wide-correlation-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KaufmanAdaptiveCorrelationOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* finite guard removed */",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.InvalidNativeBarCannotAdvanceAnyMoment"
+  },
+  {
+    "id": "kaufman-regression-wide-correlation-native-close",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KaufmanAdaptiveCorrelationOscillatorState",
+    "before": "_moments.Next(bar.Close, isFinal",
+    "after": "_moments.Next(bar.Open, isFinal",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.InvalidNativeBarCannotAdvanceAnyMoment"
+  },
+  {
+    "id": "kaufman-regression-wide-fit-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* finite guard removed */",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.InvalidNativeBarCannotAdvanceAnyMoment"
+  },
+  {
+    "id": "kaufman-regression-wide-fit-native-close",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState",
+    "before": "_moments.Next(bar.Close, isFinal",
+    "after": "_moments.Next(bar.Open, isFinal",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.InvalidNativeBarCannotAdvanceAnyMoment"
+  },
+  {
+    "id": "kaufman-regression-wide-correlation-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static void KaufmanAdaptiveCorrelation(",
+    "before": "maType == MovingAvgType.KaufmanAdaptiveMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.KaufmanAdaptiveMovingAverage",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ComponentOverridesRetainEveryMomentSlot"
+  },
+  {
+    "id": "kaufman-regression-wide-fit-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(",
+    "before": "maType == MovingAvgType.KaufmanAdaptiveMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.KaufmanAdaptiveMovingAverage",
+    "filter": "FullyQualifiedName~KaufmanRegressionNumericalTests.ComponentOverridesRetainEveryMomentSlot"
   }
 ]

@@ -1017,6 +1017,20 @@ public static partial class Calculations
     public static StockData CalculateKaufmanAdaptiveLeastSquaresMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.KaufmanAdaptiveMovingAverage, int length = 100)
     {
+        if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData); var line = new List<double>(prices.Count); var trades = CreateSignalsList(stockData);
+            using var window = new Streaming.KaufmanRegressionMoments(length); var previous = new ExactMeanAccumulator();
+            for (var i = 0; i < prices.Count; i++)
+            {
+                line.Add(window.Next(prices[i], true, out _, out _, out _)); var spread = window.FitDifference(prices[i]); var change = spread; change.Subtract(previous);
+                trades?.Add(spread.Sign > 0 && change.Sign > 0 ? Signal.StrongBuy : spread.Sign < 0 && change.Sign < 0 ? Signal.StrongSell
+                    : spread.Sign > 0 ? Signal.Buy : spread.Sign < 0 ? Signal.Sell : Signal.None); previous = spread;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Kalsma", line } }); stockData.SetSignals(trades); stockData.SetCustomValues(line);
+            stockData.IndicatorName = IndicatorName.KaufmanAdaptiveLeastSquaresMovingAverage; return stockData;
+        }
+
         List<double> kalsmaList = new(stockData.Count);
         List<double> indexList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

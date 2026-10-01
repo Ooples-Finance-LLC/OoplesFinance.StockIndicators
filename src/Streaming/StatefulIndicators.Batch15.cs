@@ -911,11 +911,11 @@ public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Kaco")]
 public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _srcMa;
-    private readonly IMovingAverageSmoother _indexMa;
-    private readonly IMovingAverageSmoother _indexSrcMa;
-    private readonly IMovingAverageSmoother _index2Ma;
-    private readonly IMovingAverageSmoother _src2Ma;
+    private readonly IMovingAverageSmoother _srcMa = null!;
+    private readonly IMovingAverageSmoother _indexMa = null!;
+    private readonly IMovingAverageSmoother _indexSrcMa = null!;
+    private readonly IMovingAverageSmoother _index2Ma = null!;
+    private readonly IMovingAverageSmoother _src2Ma = null!;
     private readonly StreamingInputResolver _input;
     private int _index;
     private readonly KaufmanRegressionMoments? _moments;
@@ -924,24 +924,13 @@ public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndica
         int length = 14)
     {
         var resolved = Math.Max(1, length);
-        if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage) _moments = new KaufmanRegressionMoments(resolved);
         if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage)
-        {
-            _srcMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _indexMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _indexSrcMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _index2Ma = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _src2Ma = new KaufmanAdaptiveMovingAverageEngine(resolved);
-        }
-        else
-        {
-            _srcMa = MovingAverageSmootherFactory.Create(maType, resolved);
-            _indexMa = MovingAverageSmootherFactory.Create(maType, resolved);
-            _indexSrcMa = MovingAverageSmootherFactory.Create(maType, resolved);
-            _index2Ma = MovingAverageSmootherFactory.Create(maType, resolved);
-            _src2Ma = MovingAverageSmootherFactory.Create(maType, resolved);
-        }
-
+        { _moments = new KaufmanRegressionMoments(resolved); _input = new StreamingInputResolver(InputName.Close, null); return; }
+        _srcMa = MovingAverageSmootherFactory.Create(maType, resolved);
+        _indexMa = MovingAverageSmootherFactory.Create(maType, resolved);
+        _indexSrcMa = MovingAverageSmootherFactory.Create(maType, resolved);
+        _index2Ma = MovingAverageSmootherFactory.Create(maType, resolved);
+        _src2Ma = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -949,17 +938,23 @@ public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndica
 
     public void Reset()
     {
-        _srcMa.Reset();
-        _indexMa.Reset();
-        _indexSrcMa.Reset();
-        _index2Ma.Reset();
-        _src2Ma.Reset();
+        _srcMa?.Reset();
+        _indexMa?.Reset();
+        _indexSrcMa?.Reset();
+        _index2Ma?.Reset();
+        _src2Ma?.Reset();
         _index = 0;
         _moments?.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_moments is not null)
+        {
+            _moments.Next(bar.Close, isFinal, out var time, out var price, out var correlation);
+            return new(correlation, includeOutputs ? new Dictionary<string, double> { { "IndexSt", time }, { "SrcSt", price }, { "Kaco", correlation } } : null);
+        }
         var value = _input.GetValue(bar);
         double index = _index;
         var indexSrc = index * value;
@@ -1002,11 +997,11 @@ public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndica
     public void Dispose()
     {
         _moments?.Dispose();
-        _srcMa.Dispose();
-        _indexMa.Dispose();
-        _indexSrcMa.Dispose();
-        _index2Ma.Dispose();
-        _src2Ma.Dispose();
+        _srcMa?.Dispose();
+        _indexMa?.Dispose();
+        _indexSrcMa?.Dispose();
+        _index2Ma?.Dispose();
+        _src2Ma?.Dispose();
     }
 }
 

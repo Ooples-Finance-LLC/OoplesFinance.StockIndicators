@@ -9,9 +9,9 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Kalsma")]
 public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _srcMa;
-    private readonly IMovingAverageSmoother _indexMa;
-    private readonly KaufmanAdaptiveCorrelationOscillatorState _kaco;
+    private readonly IMovingAverageSmoother _srcMa = null!;
+    private readonly IMovingAverageSmoother _indexMa = null!;
+    private readonly KaufmanAdaptiveCorrelationOscillatorState _kaco = null!;
     private readonly StreamingInputResolver _input;
     private int _index;
     private readonly KaufmanRegressionMoments? _moments;
@@ -20,18 +20,11 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
         int length = 100)
     {
         var resolved = Math.Max(1, length);
-        if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage) _moments = new KaufmanRegressionMoments(resolved);
-        _kaco = new KaufmanAdaptiveCorrelationOscillatorState(maType, resolved);
         if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage)
-        {
-            _srcMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _indexMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-        }
-        else
-        {
-            _srcMa = MovingAverageSmootherFactory.Create(maType, resolved);
-            _indexMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        }
+        { _moments = new KaufmanRegressionMoments(resolved); _input = new StreamingInputResolver(InputName.Close, null); return; }
+        _kaco = new KaufmanAdaptiveCorrelationOscillatorState(maType, resolved);
+        _srcMa = MovingAverageSmootherFactory.Create(maType, resolved);
+        _indexMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -39,15 +32,21 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
 
     public void Reset()
     {
-        _srcMa.Reset();
-        _indexMa.Reset();
-        _kaco.Reset();
+        _srcMa?.Reset();
+        _indexMa?.Reset();
+        _kaco?.Reset();
         _index = 0;
         _moments?.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_moments is not null)
+        {
+            var fit = _moments.Next(bar.Close, isFinal, out _, out _, out _);
+            return new(fit, includeOutputs ? new Dictionary<string, double> { { "Kalsma", fit } } : null);
+        }
         var value = _input.GetValue(bar);
         var kacoResult = _kaco.Update(bar, isFinal, includeOutputs: true);
         var kacoOutputs = kacoResult.Outputs!;
@@ -83,9 +82,9 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
     public void Dispose()
     {
         _moments?.Dispose();
-        _srcMa.Dispose();
-        _indexMa.Dispose();
-        _kaco.Dispose();
+        _srcMa?.Dispose();
+        _indexMa?.Dispose();
+        _kaco?.Dispose();
     }
 }
 

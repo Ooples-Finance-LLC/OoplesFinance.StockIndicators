@@ -22,6 +22,21 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName is IndicatorName.KaufmanAdaptiveCorrelationOscillator or IndicatorName.KaufmanAdaptiveLeastSquaresMovingAverage)
+        {
+            var regressionLength = Integer(builtIn.CreateOptions(), "Length");
+            var regressionKeys = builtIn.BatchOutputKey is { } selectedRegression ? new[] { selectedRegression }
+                : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            var regressionFixtures = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, Dictionary<string, double[]>>();
+            for (var slot = 0; slot < regressionKeys.Length; slot++)
+            {
+                var key = regressionKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => regressionFixtures.GetValue(bars, b => KaufmanRegressionOutputs(b, regressionLength, builtIn.BatchName == IndicatorName.KaufmanAdaptiveLeastSquaresMovingAverage))[key],
+                    new IndicatorErrorBudget(0, 1e-12, requireSameSign: true));
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KasePeakOscillatorV2 && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => KasePeakV2Outputs(bars, builtIn)["Kpo"], IndicatorErrorBudget.Exact); yield break;
