@@ -4088,3 +4088,14 @@ The isolated campaigns `631-final-a` and `631-final-b` passed their baselines an
 Source snapshot SHA256: `2ae934d73e4dff6b4dbb4eb905a298a531bd8d92b67f98722d2966a3ba9e320c`. Archive SHA256: `779d794c3316d561e7fb26521bb9dca18a9ebdb8ef744258e1f0785e3b3f5303` and `779d794c3316d561e7fb26521bb9dca18a9ebdb8ef744258e1f0785e3b3f5303`.
 
 This is evidence for the isolated batch-631 source. Source was already published in the batch-631 checkpoint; this update does not restore older source files. Mutation verification for batches 632 through 649 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 650, JMA public/core alignment
+
+The library's public JMA approximation now retains extended rounded level, residual, correction and accumulated-output stages. Each complete stage rounds once; exact margins determine trading signals. Zero alpha uses the identity transfer function, preserving tiny prices after huge prior observations. Periods normalize to one; phase/power and the derived pole must be finite. Constant-sized history supports extreme periods, and native validation precedes state changes. No component averages are consumed.
+
+The approved core alignment uses the same zero-initialized power-2 formula while retaining its length/phase arguments. Registry and moving-average helper bindings select public phase50 explicitly. Core output guards and exact in-place replay are covered. This implements the repository's approximation, not a claim of proprietary JMA equivalence.
+
+The first public run passed42/42 checks. After core alignment was approved, the complete focused set passed **44/44 checks** in jma-650-final.trx:32 configuration/route/rule cases, ten family regressions, and two existing Jurik hand/route regressions. Independent fraction arrays evaluate expanded stage equations. Wide/subnormal/narrow-pedestal prices, zero-pole identity, phase clamps, finite negative powers, invalid empty-input parameters, selected inputs, previews/reset, long recurrence memory, registry bindings and core spans are covered. No production/test edits followed the final passing run.
+
+**41 prepared behavioral faults remain pending**; all **7,387 anchors** apply uniquely. Candidate/frozen snapshots match on2186 files. Enrollment is **6,261/7,131**, leaving **870 omissions**, with no construction failures. DLL SHA256: A695802AA155B1D96C28E0C516AFE295E73099084BCC84C76F3ED52DE4D82852. Qualification is complete through631;632 and later campaigns and all remaining final gates are incomplete. The user approved the larger Insync public numerical correction; it remains outstanding. PR246 stays draft.

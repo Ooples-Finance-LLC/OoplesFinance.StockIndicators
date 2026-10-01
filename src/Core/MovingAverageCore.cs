@@ -641,39 +641,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void JurikMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double phase = 0)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Jurik MA approximation using adaptive smoothing
-        var beta = 0.45 * (length - 1) / (0.45 * (length - 1) + 2);
-        var alpha = beta;
-        var phaseRatio = phase < -100 ? 0.5 : (phase > 100 ? 2.5 : phase / 100 + 1.5);
-
-        double jma = 0;
-        double e0 = 0;
-        double e1 = 0;
-        double e2 = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i == 0)
-            {
-                jma = input[i];
-                e0 = input[i];
-                e1 = 0;
-                e2 = 0;
-            }
-            else
-            {
-                e0 = (1 - alpha) * input[i] + alpha * e0;
-                e1 = (input[i] - e0) * (1 - beta) + beta * e1;
-                e2 = (e0 + phaseRatio * e1 - jma) * Math.Pow(1 - alpha, 2) + Math.Pow(alpha, 2) * e2;
-                jma = jma + e2;
-            }
-            output[i] = jma;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new JmaWindow(length, phase, 2);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>

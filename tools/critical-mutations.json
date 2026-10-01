@@ -63221,5 +63221,374 @@
     "before": "new InertiaIndicatorState(inertia.MaType, inertia.Length)",
     "after": "new InertiaIndicatorState(MovingAvgType.LinearRegression, inertia.Length)",
     "filter": "FullyQualifiedName~InertiaNumericalTests.EveryRouteMatchesIndependentHighLowRviRegression"
+  },
+  {
+    "id": "jma-wide-phase-guard",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "if (double.IsNaN(phase) || double.IsInfinity(phase))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.InvalidParametersRejectEvenEmptyInput"
+  },
+  {
+    "id": "jma-wide-power-guard",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "if (double.IsNaN(power) || double.IsInfinity(power))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.InvalidParametersRejectEvenEmptyInput"
+  },
+  {
+    "id": "jma-wide-pole-guard",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "if (double.IsNaN(alpha) || double.IsInfinity(alpha))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.InvalidParametersRejectEvenEmptyInput"
+  },
+  {
+    "id": "jma-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.PeriodNormalizationPhaseClampsAndFinitePowerRemainIndependent"
+  },
+  {
+    "id": "jma-wide-beta-gain",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": ".45 * (length - 1L)",
+    "after": ".5 * (length - 1L)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-beta-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "ratio / (ratio + 2)",
+    "after": "ratio / (ratio + 3)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-alpha-power",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "MathHelper.Pow(beta, power)",
+    "after": "beta",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-phase-lower",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "phase < -100 ? .5",
+    "after": "phase < -100 ? 1",
+    "filter": "FullyQualifiedName~JmaNumericalTests.PeriodNormalizationPhaseClampsAndFinitePowerRemainIndependent"
+  },
+  {
+    "id": "jma-wide-phase-upper",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "phase > 100 ? 2.5",
+    "after": "phase > 100 ? 2",
+    "filter": "FullyQualifiedName~JmaNumericalTests.PeriodNormalizationPhaseClampsAndFinitePowerRemainIndependent"
+  },
+  {
+    "id": "jma-wide-phase-offset",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "phase / 100 + 1.5",
+    "after": "phase / 100 + 1",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-e0-drive",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_oneMinusAlpha * value",
+    "after": "_oneMinusBeta * value",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-e0-memory",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_alpha * _e0",
+    "after": "_beta * _e0",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-e1-residual",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "(value - e0) * _oneMinusBeta",
+    "after": "(value + e0) * _oneMinusBeta",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-e1-memory",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_beta * _e1",
+    "after": "_alpha * _e1",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-target-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "(e0 - _jma) * Unit",
+    "after": "(e0 + _jma) * Unit",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-target-phase",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_phase * e1",
+    "after": "e1 * Unit",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-correction-drive",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_oneMinusAlpha * _oneMinusAlpha",
+    "after": "_oneMinusAlpha * _oneMinusBeta",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-correction-decay",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_alpha * _alpha",
+    "after": "_beta * _beta",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-correction-memory",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_decay * _e2 * Unit",
+    "after": "_decay * _e1 * Unit",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-correction-scale",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "Unit * Unit);",
+    "after": "Unit * Unit * 2);",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-output-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "e2 + _jma",
+    "after": "e2 - _jma",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-zero-pole-identity",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_alpha.IsZero ? value :",
+    "after": "false ? value :",
+    "filter": "FullyQualifiedName~JmaNumericalTests.UnitPeriodAndZeroPowerHaveKnownValues"
+  },
+  {
+    "id": "jma-wide-margin-sign",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "var margin = value - jma;",
+    "after": "var margin = jma - value;",
+    "filter": "FullyQualifiedName~JmaNumericalTests.ExtendedStagesRecoverAfterWideAndSubnormalPrices"
+  },
+  {
+    "id": "jma-wide-trade-prior",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "margin > _margin",
+    "after": "margin > BigInteger.Zero",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "if (final) { _e0",
+    "after": "if (true) { _e0",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-remember-level",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_e0 = e0;",
+    "after": "_e0 = e1;",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-remember-residual",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_e1 = e1;",
+    "after": "_e1 = e2;",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-remember-correction",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_e2 = e2;",
+    "after": "_e2 = jma;",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-remember-output",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_jma = jma;",
+    "after": "_jma = e0;",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-remember-margin",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_margin = margin;",
+    "after": "_margin = value;",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RecursiveMemoryRetainsAllStagesAcrossLongTrajectories"
+  },
+  {
+    "id": "jma-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/JmaWindow.cs",
+    "scope": "internal sealed class JmaWindow",
+    "before": "_e0 = _e1 = _e2 = _jma = _margin = default;",
+    "after": "_e0 = _e1 = _e2 = _margin = default;",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class JurikMovingAverageState : IStreamingIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~JmaNumericalTests.RejectedCandlesCannotAdvanceRecursiveStages"
+  },
+  {
+    "id": "jma-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class JurikMovingAverageState : IStreamingIndicatorState",
+    "before": "{ \"Jma\", value }",
+    "after": "{ \"Jma\", 0 }",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeJmaFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~JmaNumericalTests.SelectedPricesAndNoAverageCallbacksArePreserved"
+  },
+  {
+    "id": "jma-wide-fast-phase",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeJmaFast",
+    "before": "new JmaWindow(length, phase, power)",
+    "after": "new JmaWindow(length, 0, power)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-fast-power",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeJmaFast",
+    "before": "new JmaWindow(length, phase, power)",
+    "after": "new JmaWindow(length, phase, 1)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.FirstImpulseHasThreeDerivedStageWeights"
+  },
+  {
+    "id": "jma-wide-core-power",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void JurikMovingAverage",
+    "before": "new JmaWindow(length, phase, 2)",
+    "after": "new JmaWindow(length, phase, 1)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.CoreUsesPublicPowerStartupAndRegistryDefaults"
+  },
+  {
+    "id": "jma-wide-core-phase",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void JurikMovingAverage",
+    "before": "new JmaWindow(length, phase, 2)",
+    "after": "new JmaWindow(length, 50, 2)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.CoreUsesPublicPowerStartupAndRegistryDefaults"
+  },
+  {
+    "id": "jma-wide-core-length",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void JurikMovingAverage",
+    "before": "new JmaWindow(length, phase, 2)",
+    "after": "new JmaWindow(1, phase, 2)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.CoreUsesPublicPowerStartupAndRegistryDefaults"
+  },
+  {
+    "id": "jma-wide-core-output-guard",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void JurikMovingAverage",
+    "before": "if (output.Length < input.Length)",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~JmaNumericalTests.CoreSpanBoundsAndExactInPlaceReplay"
+  },
+  {
+    "id": "jma-wide-core-registry-phase",
+    "module": "numerical",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct JmaCore : IMovingAverageCore",
+    "before": "length, phase: 50",
+    "after": "length, phase: 0",
+    "filter": "FullyQualifiedName~JmaNumericalTests.CoreUsesPublicPowerStartupAndRegistryDefaults"
   }
 ]

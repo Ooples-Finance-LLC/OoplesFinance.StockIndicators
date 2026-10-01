@@ -740,7 +740,7 @@ public static class CalculationsHelper
                     MovingAverageCore.RegularizedEma(inputSpan, outputSpan, length);
                     break;
                 case MovingAvgType.JurikMovingAverage:
-                    MovingAverageCore.JurikMovingAverage(inputSpan, outputSpan, length);
+                    MovingAverageCore.JurikMovingAverage(inputSpan, outputSpan, length, phase: 50);
                     break;
                 case MovingAvgType.EndPointWeightedMovingAverage:
                     MovingAverageCore.EndPointMovingAverage(inputSpan, outputSpan, length);

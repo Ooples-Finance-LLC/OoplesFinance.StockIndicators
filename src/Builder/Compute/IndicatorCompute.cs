@@ -5534,37 +5534,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeJmaFast(StockData data, ComputeContext context, int length = 7, double phase = 50,
         double power = 2)
     {
-        // CalculateJurikMovingAverage runs three cascaded stages over the chained series: a smoothed value,
-        // the phase-weighted distance of the series from it, and a second-order correction that is summed
-        // into the average itself. The arm this replaces read the close and passed a phase of zero.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var phaseRatio = phase < -100 ? 0.5 : phase > 100 ? 2.5 : (phase / 100) + 1.5;
-        var ratio = 0.45 * (length - 1);
-        var beta = ratio / (ratio + 2);
-        var alpha = MathHelper.Pow(beta, power);
-
-        double e0 = 0;
-        double e1 = 0;
-        double e2 = 0;
-        double jma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-
-            e0 = ((1 - alpha) * currentValue) + (alpha * e0);
-            e1 = ((currentValue - e0) * (1 - beta)) + (beta * e1);
-            e2 = ((e0 + (phaseRatio * e1) - jma) * MathHelper.Pow(1 - alpha, 2)) + (MathHelper.Pow(alpha, 2) * e2);
-
-            jma = e2 + jma;
-            output[i] = jma;
-        }
-
+        var window = new JmaWindow(length, phase, power); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true).Value;
         return buffer;
     }
 

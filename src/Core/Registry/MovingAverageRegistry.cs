@@ -1039,7 +1039,7 @@ public readonly struct JmaCore : IMovingAverageCore
     public bool RequiresOhlc => false;
     public bool RequiresVolume => false;
     public bool HasExtraParams => false;
-    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.JurikMovingAverage(input, output, length);
+    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.JurikMovingAverage(input, output, length, phase: 50);
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(input, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => Compute(close, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(close, output, length);

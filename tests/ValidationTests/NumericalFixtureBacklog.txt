@@ -120,10 +120,6 @@ OoplesFinance.StockIndicators.Indicators.InsyncIndex/minimum-stochKLength
 OoplesFinance.StockIndicators.Indicators.InsyncIndex/minimum-stochLength
 OoplesFinance.StockIndicators.Indicators.InsyncIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.InsyncIndex/weighted-average
-OoplesFinance.StockIndicators.Indicators.Jma/default
-OoplesFinance.StockIndicators.Indicators.Jma/longer-periods
-OoplesFinance.StockIndicators.Indicators.Jma/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Jma/shorter-periods
 OoplesFinance.StockIndicators.Indicators.JmaRsxClone/default
 OoplesFinance.StockIndicators.Indicators.JmaRsxClone/longer-periods
 OoplesFinance.StockIndicators.Indicators.JmaRsxClone/minimum-periods

@@ -853,63 +853,17 @@ public sealed class JsaMovingAverageState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Jma")]
 public sealed class JurikMovingAverageState : IStreamingIndicatorState
 {
-    private readonly double _phaseRatio;
-    private readonly double _alpha;
-    private readonly double _beta;
-    private readonly StreamingInputResolver _input;
-    private double _e0;
-    private double _e1;
-    private double _e2;
-    private double _jma;
-
-    public JurikMovingAverageState(int length = 7, double phase = 50, double power = 2)
-    {
-        var resolved = Math.Max(1, length);
-        _phaseRatio = phase < -100 ? 0.5 : phase > 100 ? 2.5 : (phase / 100) + 1.5;
-        var ratio = 0.45 * (resolved - 1);
-        _beta = ratio / (ratio + 2);
-        _alpha = MathHelper.Pow(_beta, power);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly JmaWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public JurikMovingAverageState(int length = 7, double phase = 50, double power = 2) => _window = new(length, phase, power);
     public IndicatorName Name => IndicatorName.JurikMovingAverage;
-
-    public void Reset()
-    {
-        _e0 = 0;
-        _e1 = 0;
-        _e2 = 0;
-        _jma = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevJma = _jma;
-        var e0 = ((1 - _alpha) * value) + (_alpha * _e0);
-        var e1 = ((value - e0) * (1 - _beta)) + (_beta * _e1);
-        var e2 = ((e0 + (_phaseRatio * e1) - prevJma) * MathHelper.Pow(1 - _alpha, 2)) +
-                 (MathHelper.Pow(_alpha, 2) * _e2);
-        var jma = e2 + prevJma;
-
-        if (isFinal)
-        {
-            _e0 = e0;
-            _e1 = e1;
-            _e2 = e2;
-            _jma = jma;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Jma", jma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(jma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), isFinal).Value;
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Jma", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 }
 

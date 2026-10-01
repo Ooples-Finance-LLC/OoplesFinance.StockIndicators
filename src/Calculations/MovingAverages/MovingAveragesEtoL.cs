@@ -385,51 +385,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateJurikMovingAverage(this StockData stockData, int length = 7, double phase = 50, double power = 2)
     {
-        List<double> e0List = new(stockData.Count);
-        List<double> e1List = new(stockData.Count);
-        List<double> e2List = new(stockData.Count);
-        List<double> jmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var phaseRatio = phase < -100 ? 0.5 : phase > 100 ? 2.5 : ((double)phase / 100) + 1.5;
-        var ratio = 0.45 * (length - 1);
-        var beta = ratio / (ratio + 2);
-        var alpha = Pow(beta, power);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevJma = GetLastOrDefault(jmaList);
-
-            var prevE0 = GetLastOrDefault(e0List);
-            var e0 = ((1 - alpha) * currentValue) + (alpha * prevE0);
-            e0List.Add(e0);
-
-            var prevE1 = GetLastOrDefault(e1List);
-            var e1 = ((currentValue - e0) * (1 - beta)) + (beta * prevE1);
-            e1List.Add(e1);
-
-            var prevE2 = GetLastOrDefault(e2List);
-            var e2 = ((e0 + (phaseRatio * e1) - prevJma) * Pow(1 - alpha, 2)) + (Pow(alpha, 2) * prevE2);
-            e2List.Add(e2);
-
-            var jma = e2 + prevJma;
-            jmaList.Add(jma);
-
-            var signal = GetCompareSignal(currentValue - jma, prevValue - prevJma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Jma", jmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(jmaList);
-        stockData.IndicatorName = IndicatorName.JurikMovingAverage;
-
-        return stockData;
+        var window = new JmaWindow(length, phase, power); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> values = new(stockData.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Jma", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.JurikMovingAverage; return stockData;
     }
 
 
