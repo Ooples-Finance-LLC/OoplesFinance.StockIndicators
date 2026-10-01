@@ -4197,3 +4197,12 @@ Kase Peak V2 now evaluates same-sign logarithmic ranges without overflowing or u
 The final production run passed **52/52 focused checks**, including three existing hand/route/flat-tail regressions. A subsequent test-only split isolates the1200-bar compaction fixture from the45-bar reset/preview checks; both passed2/2 with existing production outputs, giving **53 distinct passing checks**. Independent fraction arrays specify the logarithm rounding contract, centered variance and scanned pressure windows; separate rational-log truth checks, known +/-1 and partial-mean hand values, extreme ratios and periods, signed/adjacent prices, overflow recovery, callbacks and invalid input cover the numerical behavior. Production source did not change after the final52-check run.
 
 **44 prepared faults remain unqualified**; all **7,636 anchors** apply. Candidate/frozen snapshots match on2204 files. Enrollment is **6,330/7,131**, leaving **801 omissions across119 types**. DLL SHA256: 221CD2F14BAE4D3C07FB595B83298D8AD252827DDA45C361D307EA25B7629938. Qualification remains complete through635; batches636–656, pending formula/core decisions and final gates remain incomplete. PR246 stays draft. The separate Kase Convergence/Peak V1 formula investigation is still pending.
+
+
+### Batch 636: FX Sniper mutation qualification
+
+The isolated campaigns `636-corrected-a` and `636-corrected-b` passed their baselines and caught **38/38 compiled behavioral faults**, alongside **82/82 focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-636 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `17965927032132656222c460976c86ca3ff6b37514df9804cb0c96cc266ef7ac`. Archive SHA256: `b8e59cccff13312885de35f93229abdd239fc7c6c143ca21623eb12234129ce0` and `b8e59cccff13312885de35f93229abdd239fc7c6c143ca21623eb12234129ce0`.
+
+This is evidence for the isolated batch-636 source. Source was already published in the batch-636 checkpoint; this update does not restore older source files. Mutation verification for batches 637 through 656 and the remaining final gates is still incomplete.
