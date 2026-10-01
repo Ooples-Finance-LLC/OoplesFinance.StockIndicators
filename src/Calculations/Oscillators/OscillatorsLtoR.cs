@@ -1294,36 +1294,14 @@ public static partial class Calculations
     public static StockData CalculatePivotDetectorOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length1 = 200, int length2 = 14)
     {
-        List<double> pdoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length2).ChainedValues;
-        var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var rsi = rsiList[i];
-            var prevPdo1 = i >= 1 ? pdoList[i - 1] : 0;
-            var prevPdo2 = i >= 2 ? pdoList[i - 2] : 0;
-
-            var pdo = currentValue > sma ? (rsi - 35) / (85 - 35) * 100 : currentValue <= sma ? (rsi - 20) / (70 - 20) * 100 : 0;
-            pdoList.Add(pdo);
-
-            var signal = GetCompareSignal(pdo - prevPdo1, prevPdo1 - prevPdo2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pdo", pdoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pdoList);
-        stockData.IndicatorName = IndicatorName.PivotDetectorOscillator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = PivotDetectorWindow.Calculate(stockData, input, maType, length1, length2, false);
+        var values = result.Values.ToList();
+        List<Signal>? signals = CreateSignalsList(stockData);
+        if (signals is not null) signals.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pdo", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values);
+        stockData.IndicatorName = IndicatorName.PivotDetectorOscillator; return stockData;
     }
 
 

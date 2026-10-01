@@ -752,3 +752,10 @@ Regressions cover the independent rational recurrence, hand values, extreme valu
 The signed Euclidean direct/path distance formula is retained across batch, fast, native and EMA core routes. Exact squared differences precede correctly rounded binary64 distance norms, with one extra upper exponent bit for finite-price differences. Path sums and their ratio are exact until ratio publication. The triangle-inequality bound of 100 is enforced after independent norm rounding; a linear slope of five over three bars otherwise rounds to 100.00000000000001. Direction uses the exact ordering of finite prices, including subnormals. Raw efficiency and recursive mean stages round to binary64; finite-window sums and affine smoothing numerators are exact. Periods clamp to one and history is allocated only as bars arrive. Both streaming factories register full and alias specifications. Smoothing callbacks receive the raw efficiency and configured smoothing period, preserving selected input state.
 
 All 111 focused regressions passed on net10.0. The 40 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 681: Pivot Detector public numerical components
+
+The public formula is twice RSI minus 70 above the long moving average, otherwise minus 40. Price differences, finite-window and recursive component means, RSI ratios, price/mean branch decisions and signal differences remain exact until output publication. Zero loss gives RSI 100; the established EMA/Wilder unchanged-price carry rule remains. Periods clamp to one and queues grow only with observed history. Callback slots remain gain, loss and price mean, with respective RSI, RSI and long-average periods. The obsolete typed Length option remains inert, preserving the typed public defaults of 200 and 14. Both streaming factories register the public state.
+
+The separate local-pivot core remains unchanged pending the scope decision. All 47 focused public-route regressions passed on net10.0. The 38 prepared behavioral faults await isolated mutation qualification.

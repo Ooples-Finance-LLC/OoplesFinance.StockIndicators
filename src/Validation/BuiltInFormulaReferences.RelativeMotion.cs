@@ -182,12 +182,8 @@ internal static partial class BuiltInFormulaReferences
                     return change * b.Volume * Number(options, 100, "PointValue") * (1 + (change < 0 ? -adjustment : adjustment));
                 }).ToArray())));
             case IndicatorName.PivotDetectorOscillator:
-                return new("Pdo", new[] { "Pdo" }, bars =>
-                {
-                    // The legacy Length option is inert; the published periods are 200 and 14.
-                    var prices = Closes(bars); var level = Average(prices, 200, kind); var strength = MotionRsi(prices, 14, kind);
-                    return Outputs(("Pdo", prices.Select((v, i) => 2 * strength[i] - (v > level[i] ? 70 : 40)).ToArray()));
-                });
+                // The obsolete Length option remains inert; public defaults are 200 and 14.
+                return new("Pdo", new[] { "Pdo" }, bars => PivotDetectorValues(bars, kind: kind).Outputs);
             case IndicatorName.TopsAndBottomsFinder:
                 return new("Tabf", new[] { "Tabf" }, bars =>
                 {

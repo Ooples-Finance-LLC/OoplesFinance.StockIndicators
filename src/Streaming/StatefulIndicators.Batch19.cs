@@ -605,49 +605,16 @@ public sealed class PhaseChangeIndexState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Pdo")]
 public sealed class PivotDetectorOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RsiState _rsi;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly StreamingInputResolver _input;
-
-    public PivotDetectorOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 200,
-        int length2 = 14)
-    {
-        _rsi = new RsiState(maType, Math.Max(1, length2));
-        _sma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PivotDetectorWindow _window;
+    public PivotDetectorOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 200, int length2 = 14)
+        => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.PivotDetectorOscillator;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _sma.Reset();
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        var rsi = _rsi.Next(value, isFinal);
-        var pdo = value > sma ? (rsi - 35) / (85 - 35) * 100 : value <= sma ? (rsi - 20) / (70 - 20) * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pdo", pdo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pdo, outputs);
-    }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _sma.Dispose();
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Pdo", point.Value } } : null);
     }
 }
 

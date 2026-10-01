@@ -9181,32 +9181,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePivotDetectorOscillatorFast(StockData data, ComputeContext context,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 200, int length2 = 14)
     {
-        // CalculatePivotDetectorOscillator rescales the RSI of the chained series between one pair of bands
-        // while the series is above its long moving average and another pair while it is not.
-        // OscillatorCore.PivotDetectorOscillator read the bar high, low and close and measured a pivot
-        // distance, a different indicator entirely. The spec's Length reaches no parameter of the batch call,
-        // which is why it is marked as having no effect; the two lengths here are the batch defaults.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var relativeStrength = ComputeRsiFast(data, context, Math.Max(length2, 1), maType);
-        var rsi = relativeStrength.Span;
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, Math.Max(length1, 1), input, average.WritableSpan);
-        var sma = average.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            output[i] = currentValue > sma[i] ? (rsi[i] - 35) / (85 - 35) * 100
-                : currentValue <= sma[i] ? (rsi[i] - 20) / (70 - 20) * 100 : 0;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var result = PivotDetectorWindow.Calculate(data, input, maType, length1, length2, true);
+        var buffer = context.Rent(result.Values.Length); result.Values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

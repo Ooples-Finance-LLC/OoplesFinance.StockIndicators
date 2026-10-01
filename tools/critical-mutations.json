@@ -72382,5 +72382,347 @@
     "before": "Pfe or ",
     "after": "",
     "filter": "FullyQualifiedName~PolarizedEfficiencyNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "pivot-detector-wide-level-period",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_level = new(kind, length1)",
+    "after": "_level = new(kind, length2)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-rsi-period",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_gain = new(kind, length2)",
+    "after": "_gain = new(kind, length1)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal PivotDetectorWindow(",
+    "before": "length1 = Math.Max(1, length1)",
+    "after": "length1 = Math.Max(2, length1)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-loss-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal PivotDetectorWindow(",
+    "before": "length2 = Math.Max(1, length2)",
+    "after": "length2 = Math.Max(2, length2)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-gain-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "change.Sign > 0 ? change : default",
+    "after": "change.Sign < 0 ? change : default",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-loss-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "change.Sign < 0 ? change.Times(-1) : default",
+    "after": "change.Sign > 0 ? change : default",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-zero-loss",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "loss.Sign == 0 ? Number.Of(100)",
+    "after": "loss.Sign == 0 ? default",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-rsi-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "var total = gain + loss;",
+    "after": "var total = gain + loss.Times(2);",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-rsi-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "gain.Times(100).Divide(total)",
+    "after": "gain.Times(99).Divide(total)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-upper-offset",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "? 70 : 40",
+    "after": "? 69 : 40",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-lower-offset",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "? 70 : 40",
+    "after": "? 70 : 39",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-branch-tie",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "(current - level).Sign > 0",
+    "after": "(current - level).Sign >= 0",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-published-level",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "(current - level).Sign > 0",
+    "after": "(current - Number.Of(level.Publish())).Sign > 0",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-published-rsi",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "var value = rsi.Times(2)",
+    "after": "var value = Number.Of(rsi.Publish()).Times(2)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.ExtremeAndSubnormalInputsPreserveUnpublishedComponents"
+  },
+  {
+    "id": "pivot-detector-wide-signal-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "var acceleration = slope - _previousSlope;",
+    "after": "var acceleration = slope;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_previous = value;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-slope-memory",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "if (final) { _price",
+    "after": "if (final || price != 0) { _price",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_price = current;",
+    "after": "_price = default;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.ExtremeAndSubnormalInputsPreserveUnpublishedComponents"
+  },
+  {
+    "id": "pivot-detector-wide-first-price",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_hasPrevious ? current - _price : default",
+    "after": "current - _price",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.IndependentRsiRescalingAndExactBranchHands"
+  },
+  {
+    "id": "pivot-detector-wide-callback-gain-period",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "Average(changes.Select(v => v.Sign > 0 ? v.Publish() : 0).ToArray(), length2)",
+    "after": "Average(changes.Select(v => v.Sign > 0 ? v.Publish() : 0).ToArray(), length1)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.CallbacksPreserveThreeSlotsPeriodsAndSelectedInput"
+  },
+  {
+    "id": "pivot-detector-wide-callback-level-period",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "levels = Average(input.ToArray(), length1)",
+    "after": "levels = Average(input.ToArray(), length2)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.CallbacksPreserveThreeSlotsPeriodsAndSelectedInput"
+  },
+  {
+    "id": "pivot-detector-wide-callback-loss",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "v.Sign < 0 ? v.Times(-1).Publish() : 0",
+    "after": "v.Sign > 0 ? v.Publish() : 0",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.CallbacksPreserveThreeSlotsPeriodsAndSelectedInput"
+  },
+  {
+    "id": "pivot-detector-wide-reset-level",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_level?.Reset(); _gain?.Reset();",
+    "after": "_gain?.Reset();",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-reset-previous",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "internal sealed class PivotDetectorWindow",
+    "before": "_price = _rsi = _previous = _previousSlope = default;",
+    "after": "_price = _rsi = default;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.ExtremeAndSubnormalInputsPreserveUnpublishedComponents"
+  },
+  {
+    "id": "pivot-detector-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.ExtremeAndSubnormalInputsPreserveUnpublishedComponents"
+  },
+  {
+    "id": "pivot-detector-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.ExtremeAndSubnormalInputsPreserveUnpublishedComponents"
+  },
+  {
+    "id": "pivot-detector-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (final)\n            {",
+    "after": "if (final || value.Sign != 0)\n            {",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PivotDetectorWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_sum = _weighted = _previous = default;",
+    "after": "_weighted = _previous = default;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.PeriodFloorsLazyHistoryAndPreviewReset"
+  },
+  {
+    "id": "pivot-detector-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PivotDetectorOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (!isFinal && !includeOutputs) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.InvalidCandlesCannotAdvanceComponents"
+  },
+  {
+    "id": "pivot-detector-wide-raw-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePivotDetectorOscillatorFast(",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "pivot-detector-wide-batch-source",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePivotDetectorOscillator(",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var input = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "pivot-detector-wide-streaming-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "PivotDetectorOscillatorSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "pivot-detector-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "PivotDetectorOscillator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.NumericalClassesAreEnrolled"
   }
 ]
