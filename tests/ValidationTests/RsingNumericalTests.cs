@@ -1,4 +1,5 @@
-﻿using OoplesFinance.StockIndicators.Builder.Compute;
+﻿using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Streaming;
@@ -14,7 +15,27 @@ public sealed class RsingNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentProduct(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.RsingOutputs(bars, (IBuiltInIndicator)c.Factory()), IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var source = new Sma(3); var indicator = ((RSINGIndicator)c.Factory()).Of(source);
+        var bars = Enumerable.Range(0, Math.Max(64, indicator.WarmupBars + 8)).Select(i =>
+        { var price = i % 2 == 0 ? 2d : 100; return new Bar(DateTime.UnixEpoch.AddMinutes(i), price - .5, price + 1 + i % 3, price - 1, price, 1 + i % 4); }).ToArray();
+        using var run = await new StockIndicatorBuilder().ConfigureSource(OoplesFinance.StockIndicators.Indicators.Bars.From(bars)).ConfigureIndicators(source, indicator).BuildAsync();
+        var selected = run[source].ToArray();
+        var projected = bars.Select((b, i) => new Bar(b.Time, b.Open, b.High, b.Low, selected[i], b.Volume)).ToArray();
+        Assert.Contains(projected, b => b.Close < b.Low || b.Close > b.High);
+        var expected = BuiltInFormulaReferences.RsingOutputs(projected, (IBuiltInIndicator)c.Factory());
+        var keys = new[] { "Rsing", "Signal" };
+        for (var slot = 0; slot < keys.Length; slot++) Assert.Equal(expected[keys[slot]], run[indicator.Outputs[slot]].ToArray());
+        var feed = OoplesFinance.StockIndicators.Indicators.Bars.Live();
+        using var live = await new StockIndicatorBuilder().ConfigureSource(feed).PublishBeforeWarmup().ConfigureIndicators(source, indicator).BuildAsync();
+        foreach (var bar in bars) feed.Publish(bar); feed.Complete();
+        var actual = indicator.Outputs.Select(_ => new List<double>()).ToArray();
+        await foreach (var snapshot in live)
+            for (var slot = 0; slot < actual.Length; slot++) actual[slot].Add(snapshot[indicator.Outputs[slot]]);
+        for (var slot = 0; slot < actual.Length; slot++) Assert.Equal(expected[keys[slot]], actual[slot]);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
