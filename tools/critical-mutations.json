@@ -75973,5 +75973,392 @@
     "before": "var highs = data.HighPrices; var lows = data.LowPrices;",
     "after": "var (_, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);",
     "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.ExplicitFastSelectedInputPreservesOriginalCandles"
+  },
+  {
+    "id": "rmo-wide-range-floor",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Math.Max(2, range)",
+    "after": "Math.Max(3, range)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rmo-wide-cascade-count",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Enumerable.Range(0, 10)",
+    "after": "Enumerable.Range(0, 9)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "_count - _range + 1L",
+    "after": "_count - _range",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-high-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Math.Max(price, first.Value.Value)",
+    "after": "Math.Min(price, first.Value.Value)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rmo-wide-low-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Math.Min(price, first.Value.Value)",
+    "after": "Math.Max(price, first.Value.Value)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rmo-wide-price-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Number.Of(price).Times(10) - sum",
+    "after": "Number.Of(price).Times(9) - sum",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-swing-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "(Number.Of(price).Times(10) - sum).Times(10)",
+    "after": "(Number.Of(price).Times(10) - sum).Times(9)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Number.Of(high) - Number.Of(low)",
+    "after": "Number.Of(high) + Number.Of(low)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rmo-wide-flat-range",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "width.Sign == 0 ? default",
+    "after": "width.Sign == 0 ? Number.Of(1)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-cascade-sum",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal (double Rmo, double Swing1, double Swing2, double Swing3, Signal Trade) Next(",
+    "before": "sum += value;",
+    "after": "sum = value;",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-cascade-raw-price",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "stage.Next(value, final)",
+    "after": "stage.Next(Number.Of(price), final)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-swing3-source",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "_third.Next(second, final)",
+    "after": "_third.Next(first, final)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-rmo-source",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "_rmo.Next(first, final)",
+    "after": "_rmo.Next(third, final)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-rmo-period",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "_rmo = new(output, true)",
+    "after": "_rmo = new(swing, true)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-signal-buy",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "rmo.Sign > 0 && change.Sign > 0",
+    "after": "rmo.Sign > 0 && change.Sign < 0",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-signal-sell",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "rmo.Sign < 0 && change.Sign < 0",
+    "after": "rmo.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rmo-wide-callback-cascade-count",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "stage < 10",
+    "after": "stage < 9",
+    "filter": "FullyQualifiedName~RmoNumericalTests.CallbackGraphUsesOnlyRequestedOutputStages"
+  },
+  {
+    "id": "rmo-wide-callback-cascade-input",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Average(values, first, MovingAvgType.SimpleMovingAverage)",
+    "after": "Average(prices.ToArray(), first, MovingAvgType.SimpleMovingAverage)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.CallbackGraphUsesOnlyRequestedOutputStages"
+  },
+  {
+    "id": "rmo-wide-callback-sma-period",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Average(values, first, MovingAvgType.SimpleMovingAverage)",
+    "after": "Average(values, output, MovingAvgType.SimpleMovingAverage)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.CallbackGraphUsesOnlyRequestedOutputStages"
+  },
+  {
+    "id": "rmo-wide-callback-rmo-period",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Average(one, output, MovingAvgType.ExponentialMovingAverage)",
+    "after": "Average(one, swing, MovingAvgType.ExponentialMovingAverage)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.CallbackGraphUsesOnlyRequestedOutputStages"
+  },
+  {
+    "id": "rmo-wide-callback-third-input",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "Average(two, swing, MovingAvgType.ExponentialMovingAverage)",
+    "after": "Average(one, swing, MovingAvgType.ExponentialMovingAverage)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.CallbackGraphUsesOnlyRequestedOutputStages"
+  },
+  {
+    "id": "rmo-wide-callback-sum",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "sums[i] += Number.Of(values[i]);",
+    "after": "sums[i] = Number.Of(values[i]);",
+    "filter": "FullyQualifiedName~RmoNumericalTests.CallbackGraphUsesOnlyRequestedOutputStages"
+  },
+  {
+    "id": "rmo-wide-reset-cascade",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "foreach (var stage in _cascade) stage.Reset();",
+    "after": "foreach (var stage in _cascade) stage.Next(default, true);",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-reset-second",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "_second.Reset(); _third.Reset();",
+    "after": "_third.Reset();",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-reset-rmo",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "_third.Reset(); _rmo.Reset();",
+    "after": "_third.Reset();",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-reset-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "_lows.Clear();",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-history-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private double Extreme(",
+    "before": "if (final)\n        {",
+    "after": "if (final || price != 0)\n        {",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-count-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "if (final) _count++;",
+    "after": "if (final || price != 0) _count++;",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-callback-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "internal sealed class RmoWindow",
+    "before": "sums[i] += Number.Of(values[i]);",
+    "after": "sums[i] = Number.Of(sums[i].Publish() + values[i]);",
+    "filter": "FullyQualifiedName~RmoNumericalTests.CallbackCascadeSumCannotOverflowBeforeCancellation"
+  },
+  {
+    "id": "rmo-wide-mean-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "Math.Max(1, period)",
+    "after": "Math.Max(2, period)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.UnitCascadePeriodCancelsBeforePublication"
+  },
+  {
+    "id": "rmo-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (_history.Count == _period) sum -=",
+    "after": "if (_history.Count > _period) sum -=",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-mean-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count + 1 < _period",
+    "after": "_count + 1 < _period - 1",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rmo-wide-mean-sma-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "sum.Divide(_period)",
+    "after": "sum.Divide(_period + 1L)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-mean-ema-seed",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count < _period",
+    "after": "_count < _period - 1",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-mean-ema-count",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_period)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.OpeningConvolutionHasIndependentFourOutputHand"
+  },
+  {
+    "id": "rmo-wide-mean-ema-pole",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_previous.Times(_period - 1L)",
+    "after": "_previous.Times(_period)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-mean-ema-drive",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "value.Times(2)",
+    "after": "value.Times(3)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-mean-ema-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "Divide(_period + 1L)",
+    "after": "Divide(_period + 2L)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (final)",
+    "after": "if (final || value.Sign != 0)",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RmoWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_sum = _previous = default",
+    "after": "_previous = default",
+    "filter": "FullyQualifiedName~RmoNumericalTests.ExpiryAndEmaTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rmo-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class RahulMohindarOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (!isFinal && !includeOutputs) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RmoNumericalTests.InvalidBarsCannotAdvanceState"
+  },
+  {
+    "id": "rmo-wide-streaming-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "RahulMohindarOscillatorSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~RmoNumericalTests.EveryRouteMatchesIndependentCascade"
+  },
+  {
+    "id": "rmo-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "RahulMohindarOscillator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~RmoNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

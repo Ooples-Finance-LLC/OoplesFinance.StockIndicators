@@ -821,3 +821,8 @@ Batch consumes no override slots; fast primary consumes one and fast Signal cons
 The public formula fits a partial-window least-squares endpoint to selected price minus the average of its configured moving average and rolling high/low midpoint. SMA retains full-window startup zeros; the regression uses observed points. Exact rational means, midpoint, residuals and regression moments prevent premature rounding and overflowing differences. Lazy monotonic deques and queues allocate only observed history. Signals compare exact endpoint sign and change. Standard averages use exact trajectories; other average kinds retain the established smoother fallback.
 
 Original candle highs/lows remain unchanged for selected inputs, including direct-fast calls. Native state validates finite bars before committing any stage. Batch consumes no callback slots; fast consumes one price-average slot, and generator metadata retains that slot. No separate Squeeze Momentum core was found.
+
+
+### Batch 687: Rahul Mohindar public numerical cascade
+
+Ten SMA stages, their aggregate, the complete range quotient and subsequent EMA stages retain rational intermediates through output publication and signal comparisons. SMA startup zeros and EMA partial-mean seeds remain part of the formula. Lazy queues and monotone extrema handle large periods; range periods retain the public minimum of two. The four outputs stay distinct. Fast callback graphs preserve ten SMA slots and only the EMA slots required for the requested output. Both factories register the public state. Core alignment remains a separate pending decision. All 42 focused regressions passed on net10.0. The 43 prepared behavioral faults await isolated mutation qualification.

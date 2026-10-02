@@ -4741,3 +4741,10 @@ Strengthened the five existing RSING selected-source cases with valid gapping ca
 Public routes now retain exact arithmetic through price averaging, rolling range midpoint, residuals and the partial-window regression endpoint. The independent reference uses direct centered covariance and variance sums. Native and direct-fast selected inputs preserve original candles; observed-history storage avoids extreme-period allocation.
 
 **53/53 focused tests passed** on net10.0 (`squeeze697-final.trx`), covering five configurations/five routes, the independent hand and existing shared/golden regressions, numerical fixtures, extreme/subnormal inputs, preview/reset, huge periods, DEMA fallback, callback metadata and invalid inputs. The initial test-file compilation failure and the intermediate 51/53 run are excluded; that run exposed the fixed direct-fast range reconstruction and reference DEMA mapping. **33 behavioral faults are prepared; mutation qualification is pending.** All 8,726 manifest anchors resolve. Inventory: **6,567/7,131 enrolled**, **564 omissions across 83 types**, all references registered and backlog exact. This isolated chain excludes separate RMO687 and unfinished Periodic677. Integration and final project gates remain pending.
+
+
+### Batch 687: Rahul Mohindar public numerical cascade
+
+Ten SMA stages, their mean, the rolling-range quotient and subsequent EMA stages retain exact rational intermediates through publication and signal comparisons. Lazy history handles extreme periods. Output-specific callback graphs retain the required ten SMA stages and only the requested EMA stages. Both factories register the public state. Core alignment remains pending.
+
+**42/42 focused tests passed** on net10.0 (`rmo687-public.trx`), including independent hand, route, extreme, callback and existing golden regressions. Inventory: **6,528/7,131 enrolled**, **603 omissions across 89 types**, all independent references registered, no construction failures, backlog exact. The 43 prepared behavioral faults await isolated qualification; final readiness gates remain pending.

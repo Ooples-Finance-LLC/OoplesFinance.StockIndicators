@@ -66,6 +66,12 @@ internal static partial class BuiltInFormulaReferences
             for (var slot = 0; slot < rainbowKeys.Length; slot++) { var key = rainbowKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RainbowOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RahulMohindarOscillator)
+        {
+            var rmoKeys = new[] { "Rmo", "SwingTrade1", "SwingTrade2", "SwingTrade3" };
+            for (var slot = 0; slot < rmoKeys.Length; slot++) { var key = rmoKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RmoOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuantitativeQualitativeEstimation)
         {
             var qqeKeys = new[] { "FastAtrRsi", "SlowAtrRsi" };
