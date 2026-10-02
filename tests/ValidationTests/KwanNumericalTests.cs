@@ -14,7 +14,24 @@ public sealed class KwanNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentRatios(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.KwanOutputs(bars, (IBuiltInIndicator)c.Factory()), IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesCandles(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesCandles(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        // Builder/live routing alone does not exercise the explicit fast method.
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var options = (OoplesFinance.StockIndicators.Builder.Specs.KwanIndicatorSpecOptions)indicator.CreateOptions();
+        var bars = Enumerable.Range(0, Math.Max(64, c.Factory().WarmupBars + 8)).Select(i =>
+            new Bar(DateTime.UnixEpoch.AddMinutes(i), 4, 15 + i % 7, -5 - i % 3, 30 - i % 7, i % 4)).ToArray();
+        var selected = bars.Select((_, i) => 2d + i % 11).ToArray();
+        var projected = bars.Select((b, i) => new Bar(b.Time, b.Open, b.High, b.Low, selected[i], b.Volume)).ToArray();
+        var expected = BuiltInFormulaReferences.KwanOutputs(projected, indicator)["Ki"];
+        Assert.Contains(expected, value => value != 0);
+        var data = Data(bars); data.SetCustomValues(selected.ToList());
+        using var context = new ComputeContext();
+        using var actual = IndicatorCompute.ComputeKwanIndicatorFast(data, context, options.Length, options.SmoothLength, options.MaType);
+        Assert.Equal(expected, actual.ToArray());
+        Assert.Equal(selected, data.ChainedValues); Assert.Equal(bars.Select(b => b.High), data.HighPrices); Assert.Equal(bars.Select(b => b.Low), data.LowPrices);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
