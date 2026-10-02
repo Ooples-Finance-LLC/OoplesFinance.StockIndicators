@@ -4819,3 +4819,12 @@ Inventory: **6,597/7,131 enrolled**, **534 omissions across 77 types**, all 7,13
 The repaired2 MacZ VWAP pair finished with **38 compiled faults caught and one survivor**: dropping the sign in the exact-square-root branch. Those campaigns cannot qualify the batch. The existing filtered regression covered irrational negative roots but lacked the negative perfect-square case.
 
 The same regression now includes five prices of -2 with zero volumes and gamma zero. The exact standardized residual is -1 after warmup; independent filter weights give `[0, -1/6, -1/2, -5/6, -1]`. Batch, explicit fast and native/direct preview/reset paths agree with that hand calculation and the independent reference. The strengthened test passed **1/1** with an unchanged production DLL in `macz-vwap662-exact-root-repair.trx`. Fresh repaired3 snapshots preserve the original production source and require a complete new 39-fault pair; no earlier partial results may be pooled.
+
+
+### Batch 662: MacZ VWAP repaired mutation qualification
+
+The isolated campaigns `662-repaired3-a` and `662-repaired3-b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **132/132 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-662 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `07566371aff03e1e3e18bc67e4261e00570654b4b14cc5bad284942b8adfecfc`. Archive SHA256: `8da54848635023bb44e3096905053c362e948f54ed776db600b6bcc6a7697be3` and `088d3bc17ca3d0e1c9c21cc4fb60ac3dc1d2fe2098fc561325d16cd63123562c`.
+
+This is evidence for retained batch-662 source with repaired fault definitions, explicit fast selected-source coverage and a negative exact-square-root hand case. All superseded snapshots and the repaired2 campaign (38 kills, one exact-root-sign survivor) are excluded; the ineffective histogram-reset fault and nullable guard mutation cannot establish behavioral coverage. Source was already published in the batch-662 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
