@@ -941,6 +941,7 @@ internal static partial class IndicatorCompute
             // Batch 6 - Detector/Pivot oscillators
             PivotDetectorOscillatorSpecOptions pdo => ComputePivotDetectorOscillatorFast(data, context, pdo.MaType),
             TickLineMomentumOscillatorSpecOptions tlmo => ComputeTickLineMomentumOscillatorFast(data, context, tlmo.Length, tlmo.MaType),
+            SwamiStochasticsSpecOptions swami => ComputeSwamiStochasticsFast(data, context, swami.FastLength, swami.SlowLength),
             SupportAndResistanceOscillatorSpecOptions saro => ComputeSupportAndResistanceOscillatorFast(data, context, saro.Length),
             TradingMadeMoreSimplerOscillatorSpecOptions tmmso => ComputeTradingMadeMoreSimplerOscillatorFast(data, context, tmmso.Length),
             NthOrderDifferencingOscillatorSpecOptions nodo => ComputeNthOrderDifferencingOscillatorFast(data, context, nodo.Length),
@@ -9090,6 +9091,13 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         MovingAverage(data, maType, smoothLength, rateOfChange.Span, buffer.WritableSpan);
         return buffer;
+    }
+
+    /// <summary>Computes Swami Stochastics with exact recurrence and original candle ranges.</summary>
+    internal static ComputeBuffer ComputeSwamiStochasticsFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 48)
+    {
+        var values = SwamiWindow.Calculate(data, fastLength, slowLength); var buffer = context.Rent(values.Line.Length);
+        values.Line.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

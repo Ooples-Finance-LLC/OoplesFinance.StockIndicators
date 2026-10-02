@@ -584,6 +584,7 @@ internal static class BuilderVerifiedArms
         typeof(SuperSmootherSpecOptions),
         typeof(SuperTrendFilterSpecOptions),
         typeof(SuperTrendSpecOptions),
+        typeof(SwamiStochasticsSpecOptions),
         typeof(SupportAndResistanceOscillatorSpecOptions),
         typeof(SurfaceRoughnessEstimatorSpecOptions),
         typeof(SvamaSpecOptions),

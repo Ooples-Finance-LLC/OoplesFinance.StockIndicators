@@ -319,15 +319,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.MovingAverageAdaptiveFilter:
                 return new("Maaf", new[] { "Maaf" }, bars => MovingAverageAdaptiveFilterOutputs(bars, indicator));
             case IndicatorName.SwamiStochastics:
-                return new("Ss", new[] { "Ss" }, bars =>
-                {
-                    var window = Math.Max(1, Integer(options, "SlowLength", 48) - Integer(options, "FastLength", 12));
-                    var numerator = bars.Select((b, i) => b.Close - Window(bars, i, window).Min(v => v.Low)).ToArray();
-                    var denominator = bars.Select((_, i) => Window(bars, i, window).Max(v => v.High) - Window(bars, i, window).Min(v => v.Low)).ToArray();
-                    double Smooth(double[] values, int i, double gain) => Enumerable.Range(0, i + 1).Sum(j => gain * Math.Pow(1 - gain, i - j) * values[j]);
-                    var ratios = numerator.Select((_, i) => Smooth(denominator, i, .5) == 0 ? 0 : Smooth(numerator, i, .5) / Smooth(denominator, i, .5)).ToArray();
-                    return Outputs(("Ss", ratios.Select((_, i) => Smooth(ratios, i, .2)).ToArray()));
-                });
+                return new("Ss", new[] { "Ss" }, bars => SwamiOutputs(bars, indicator));
             case IndicatorName.RecursiveStochastic:
                 return new("Rsto", new[] { "Rsto" }, bars =>
                 {

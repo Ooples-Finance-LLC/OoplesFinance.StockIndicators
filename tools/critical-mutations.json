@@ -77521,5 +77521,347 @@
     "before": "values.Line.AsSpan().CopyTo(buffer.WritableSpan);",
     "after": "buffer.WritableSpan.Clear();",
     "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "swami-wide-width",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_width = Math.Max(1L, (long)Math.Max(1, slowLength) - Math.Max(1, fastLength))",
+    "after": "_width = Math.Max(1L, (long)Math.Max(1, slowLength) - Math.Max(1, fastLength) + 1)",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "var expiry = _index - _width + 1;",
+    "after": "var expiry = _index - _width;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "Extreme(_highs, high, true, final)",
+    "after": "Extreme(_highs, high, false, final)",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "Extreme(_lows, low, false, final)",
+    "after": "Extreme(_lows, low, true, final)",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-preview-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-numerator-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "Number.Of(price) - lowest + _numerator",
+    "after": "Number.Of(price) - lowest",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-denominator-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "highest - lowest + _denominator",
+    "after": "highest - lowest",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-numerator-half",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "var numerator = (Number.Of(price) - lowest + _numerator).Divide(2);",
+    "after": "var numerator = (Number.Of(price) - lowest + _numerator).Divide(3);",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-denominator-half",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "var denominator = (highest - lowest + _denominator).Divide(2);",
+    "after": "var denominator = (highest - lowest + _denominator).Divide(3);",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-range-projection",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "highest - lowest + _denominator",
+    "after": "Number.Of((highest - lowest).Publish()) + _denominator",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.OverflowingAndSubnormalRangesRetainTheirRatios"
+  },
+  {
+    "id": "swami-wide-numerator-projection",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "var denominator =",
+    "after": "numerator = Number.Of(numerator.Publish()); var denominator =",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.OverflowingAndSubnormalRangesRetainTheirRatios"
+  },
+  {
+    "id": "swami-wide-denominator-projection",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "var line = denominator.Sign",
+    "after": "denominator = Number.Of(denominator.Publish()); var line = denominator.Sign",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.OverflowingAndSubnormalRangesRetainTheirRatios"
+  },
+  {
+    "id": "swami-wide-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "denominator.Sign == 0 ? default :",
+    "after": "denominator.Sign == 0 ? _previous :",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.ZeroDenominatorResetsPublishedStochasticWhileNumeratorCarries"
+  },
+  {
+    "id": "swami-wide-smoothing-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_previous.Times(4)",
+    "after": "_previous.Times(3)",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-smoothing-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": ").Divide(5);",
+    "after": ").Divide(4);",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "if (line.Sign < 0) line = default;",
+    "after": "if (line.Sign < 0) line = Number.Of(1);",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.ClampFeedsBackBeforeFollowingBars"
+  },
+  {
+    "id": "swami-wide-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "if ((line - Number.Of(1)).Sign > 0) line = Number.Of(1);",
+    "after": "if ((line - Number.Of(1)).Sign > 0) line = default;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.ClampFeedsBackBeforeFollowingBars"
+  },
+  {
+    "id": "swami-wide-signal-projection",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "var slope = line - _previous;",
+    "after": "var slope = Number.Of(line.Publish()) - Number.Of(_previous.Publish());",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.EqualPublishedTailValuesStillHavePositiveExactSlopes"
+  },
+  {
+    "id": "swami-wide-state-projection",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_previous = line;",
+    "after": "_previous = Number.Of(line.Publish());",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.EqualPublishedTailValuesStillHavePositiveExactSlopes"
+  },
+  {
+    "id": "swami-wide-strong-buy-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "slope.Sign > 0 && acceleration.Sign > 0",
+    "after": "slope.Sign > 0 && acceleration.Sign >= 0",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.EqualPublishedTailValuesStillHavePositiveExactSlopes"
+  },
+  {
+    "id": "swami-wide-strong-sell-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "slope.Sign < 0 && acceleration.Sign < 0",
+    "after": "slope.Sign < 0 && acceleration.Sign <= 0",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.EqualPublishedTailValuesStillHavePositiveExactSlopes"
+  },
+  {
+    "id": "swami-wide-buy",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "slope.Sign > 0 ? Signal.Buy",
+    "after": "slope.Sign > 0 ? Signal.None",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.EqualPublishedTailValuesStillHavePositiveExactSlopes"
+  },
+  {
+    "id": "swami-wide-sell",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "slope.Sign < 0 ? Signal.Sell",
+    "after": "slope.Sign < 0 ? Signal.None",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.EqualPublishedTailValuesStillHavePositiveExactSlopes"
+  },
+  {
+    "id": "swami-wide-preview-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "if (final) { _numerator",
+    "after": "if (true) { _numerator",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-reset-highs",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_highs.Clear();",
+    "after": "_ = _highs.Count;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-reset-lows",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_lows.Clear();",
+    "after": "_ = _lows.Count;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-reset-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_numerator = _denominator = _previous = _previousSlope = default;",
+    "after": "_denominator = _previous = _previousSlope = default;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-reset-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_numerator = _denominator = _previous = _previousSlope = default;",
+    "after": "_numerator = _previous = _previousSlope = default;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-reset-line",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_numerator = _denominator = _previous = _previousSlope = default;",
+    "after": "_numerator = _denominator = _previousSlope = default;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-reset-slope",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "_numerator = _denominator = _previous = _previousSlope = default;",
+    "after": "_numerator = _denominator = _previous = default;",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.ExplicitFastSelectedInputPreservesOriginalCandles"
+  },
+  {
+    "id": "swami-wide-candles",
+    "module": "numerical",
+    "file": "src/Helpers/SwamiWindow.cs",
+    "scope": "internal sealed class SwamiWindow",
+    "before": "data.HighPrices[i], data.LowPrices[i]",
+    "after": "prices[i], prices[i]",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.ExplicitFastSelectedInputPreservesOriginalCandles"
+  },
+  {
+    "id": "swami-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SwamiStochasticsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.NonfiniteCandlesCannotAdvanceExtremaOrEitherRecurrence"
+  },
+  {
+    "id": "swami-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SwamiStochasticsState",
+    "before": "bar.Low, isFinal",
+    "after": "bar.Low, true",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-native-line",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SwamiStochasticsState",
+    "before": "return new StreamingIndicatorStateResult(value,",
+    "after": "return new StreamingIndicatorStateResult(0,",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SwamiStochasticsState",
+    "before": "{ \"Ss\", value }",
+    "after": "{ \"Ss\", 0 }",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "swami-wide-native-range",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SwamiStochasticsState",
+    "before": "PreserveOriginalRange => true",
+    "after": "PreserveOriginalRange => false",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.BuilderAndLiveOutsideRangeSelectionPreserveOriginalCandles"
+  },
+  {
+    "id": "swami-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSwamiStochasticsFast",
+    "before": "values.Line.AsSpan().CopyTo(buffer.WritableSpan);",
+    "after": "buffer.WritableSpan.Clear();",
+    "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
   }
 ]

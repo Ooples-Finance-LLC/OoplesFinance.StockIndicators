@@ -843,78 +843,21 @@ public sealed class SvamaState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Ss")]
-public sealed class SwamiStochasticsState : IStreamingIndicatorState, IDisposable
+public sealed class SwamiStochasticsState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevNum;
-    private double _prevDenom;
-    private double _prevStoch;
-    private bool _hasPrev;
-
-    public SwamiStochasticsState(int fastLength = 12, int slowLength = 48)
-    {
-        var resolved = Math.Max(1, slowLength - fastLength);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    private readonly SwamiWindow _window;
+    public SwamiStochasticsState(int fastLength = 12, int slowLength = 48) => _window = new(fastLength, slowLength);
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     public IndicatorName Name => IndicatorName.SwamiStochastics;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _prevNum = 0;
-        _prevDenom = 0;
-        _prevStoch = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-
-        var prevNum = _hasPrev ? _prevNum : 0;
-        var num = (value - lowest + prevNum) / 2;
-
-        var prevDenom = _hasPrev ? _prevDenom : 0;
-        var denom = (highest - lowest + prevDenom) / 2;
-
-        var prevStoch = _hasPrev ? _prevStoch : 0;
-        var stoch = denom != 0
-            ? MathHelper.MinOrMax((0.2 * num / denom) + (0.8 * prevStoch), 1, 0)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevNum = num;
-            _prevDenom = denom;
-            _prevStoch = stoch;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ss", stoch }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(stoch, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), bar.High, bar.Low, isFinal).Line;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ss", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Swma")]

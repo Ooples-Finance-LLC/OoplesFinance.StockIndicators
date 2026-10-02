@@ -854,3 +854,10 @@ Batch, explicit fast, native/live and the core span path share exact unpublished
 The public SVAMA line starts at the first selected price. Thereafter `H` is the running maximum volume, `g = volume/H` (zero when H is zero), and `y = previous + g*(price-previous)`. The existing length argument does not affect this formula. Finite signed and zero volumes retain their existing algebraic meaning; negative gains or gains above one can produce unbounded outputs. Exact unpublished gain, recurrence and price-minus-average comparisons avoid premature underflow, overflow and false signal ties. Only the published line rounds to binary64; a later gain of one can recover from a prior overflowing output. Preview does not commit running maximum or recurrence state.
 
 This correction covers public batch, explicit fast, native and builder/live routes. The price-only core and moving-average registry still compute a different adaptive average; their proposed volume-aware alignment is a separate pending scope decision. No core/registry alignment is claimed here.
+
+
+### Swami Stochastics: exact paired recurrences
+
+Normalize each length to at least one, then use `width = max(1, slowLength-fastLength)` for the original candle high/low extrema. Selected input replaces close only. Starting from zero, `N=(price-lowest+previousN)/2`, `D=(highest-lowest+previousD)/2`, and `Ss=clamp((N/D+4*previousSs)/5,0,1)`. When D is exactly zero, Ss is zero; N and D still advance. The fixed smoothing weights are exactly one fifth and four fifths. Clamping occurs before feedback to the next bar.
+
+Exact unpublished differences, ratios and state prevent false zero ranges and signal ties. The reference unrolls the half-decay recurrences into independently weighted sums whose common power of two cancels. Lazy monotone histories avoid allocating the requested period up front; preview leaves histories and recurrences unchanged. Batch, explicit fast, native and builder/live paths share these semantics. There is no separate Swami core method.

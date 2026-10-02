@@ -4828,3 +4828,12 @@ The isolated campaigns `662-repaired3-a` and `662-repaired3-b` passed their base
 Source snapshot SHA256: `07566371aff03e1e3e18bc67e4261e00570654b4b14cc5bad284942b8adfecfc`. Archive SHA256: `8da54848635023bb44e3096905053c362e948f54ed776db600b6bcc6a7697be3` and `088d3bc17ca3d0e1c9c21cc4fb60ac3dc1d2fe2098fc561325d16cd63123562c`.
 
 This is evidence for retained batch-662 source with repaired fault definitions, explicit fast selected-source coverage and a negative exact-square-root hand case. All superseded snapshots and the repaired2 campaign (38 kills, one exact-root-sign survivor) are excluded; the ineffective histogram-reset fault and nullable guard mutation cannot establish behavioral coverage. Source was already published in the batch-662 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 703: Swami Stochastics numerical coverage
+
+Swami now preserves exact numerator/denominator recurrences, one-fifth smoothing, clamped feedback and signal slopes. Lazy extrema normalize the two endpoints consistently and avoid period-sized allocation. Selected prices retain original candle ranges, native validation precedes state updates, and an explicit fast method plus verified arm covers the public builder path. No average callback slots are consumed; there is no separate Swami core.
+
+All **77/77 focused checks passed** in `swami703-focused-final.trx` (6 minutes 45 seconds), covering all eight configurations across five routes, independent unrolled weighted-sum references and hands, expiry, zero denominator, clamp feedback, subnormal/overflowing ranges, exact signals behind equal published values, extreme periods, selected input, preview/reset, nonfinite rejection and existing hand/route/golden regressions. The original run was deliberately interrupted after profiling unused signal calculations in value-only reference requests; its 53 partial passes are excluded. The bounded reference optimization skips those unused calculations while retaining the full independent signal reference and exact equality checks between both value paths.
+
+Inventory: **6,605/7,131 enrolled**, **526 omissions across 76 types**, all 7,131 independent references registered, no construction failures and exact backlog match. **38 prepared faults** bring the resolving manifest to **8,973 anchors**. Mutation qualification and final hosted/platform/package/release/performance assurance remain outstanding.

@@ -353,43 +353,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSwamiStochastics(this StockData stockData, int fastLength = 12, int slowLength = 48)
     {
-        List<double> numList = new(stockData.Count);
-        List<double> denomList = new(stockData.Count);
-        List<double> stochList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, slowLength - fastLength);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var prevStoch1 = i >= 1 ? stochList[i - 1] : 0;
-            var prevStoch2 = i >= 2 ? stochList[i - 2] : 0;
-
-            var pNum = GetLastOrDefault(numList);
-            var num = (currentValue - lowest + pNum) / 2;
-            numList.Add(num);
-
-            var pDenom = GetLastOrDefault(denomList);
-            var denom = (highest - lowest + pDenom) / 2;
-            denomList.Add(denom);
-
-            var stoch = denom != 0 ? MinOrMax((0.2 * num / denom) + (0.8 * prevStoch1), 1, 0) : 0;
-            stochList.Add(stoch);
-
-            var signal = GetRsiSignal(stoch - prevStoch1, prevStoch1 - prevStoch2, stoch, prevStoch1, 0.8, 0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ss", stochList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(stochList);
-        stockData.IndicatorName = IndicatorName.SwamiStochastics;
-
+        var values = SwamiWindow.Calculate(stockData, fastLength, slowLength);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ss", values.Line.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Line.ToList()); stockData.IndicatorName = IndicatorName.SwamiStochastics;
         return stockData;
     }
 }
