@@ -40,6 +40,11 @@ public sealed class ExactRationalArithmeticTests
     [Fact]
     public void CrossCancellationRetainsUnpublishableFactors()
     {
+        // (2/3)*(9/10)=3/5 requires cancellation across both operand pairs.
+        var left = Number.Integer(2).Divide(3); var right = Number.Integer(9).Divide(10);
+        var threeFifths = new ReferenceFraction(3) / new ReferenceFraction(5);
+        Equal(threeFifths, left * right); Equal(threeFifths, right * left);
+        Equal(new ReferenceFraction(-3) / new ReferenceFraction(5), left * (default(Number) - right));
         var huge = Number.Of(double.MaxValue).Divide(Number.Of(double.Epsilon));
         var tiny = Number.Of(double.Epsilon).Divide(Number.Of(double.MaxValue));
         Equal(new ReferenceFraction(1), huge * tiny);

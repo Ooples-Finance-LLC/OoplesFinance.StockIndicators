@@ -4876,3 +4876,7 @@ Inventory: **6,619/7,131 enrolled**, **512 omissions across 74 types**, all 7,13
 ### Batch 667 selected-source verification repair
 
 The nine existing Modified Gann selected-source cases now directly exercise the fast method against independent projected-price references. Selected prices alternate outside the original candle range to force envelope decisions distinct from the original close, while assertions preserve the original open/high/low fields and selected series. All **9/9 passed** in `modified-gann667-selected-fast-repair.trx`; the production assembly SHA256 remained unchanged. Fresh test-only snapshot overlays are required before the queued mutation campaign; the original snapshots remain unqualified.
+
+### Batch 664 cross-cancellation verification repair
+
+The first repaired campaign pair finished with 45 caught faults, one compilation failure and one survivor; it is excluded from qualification. The first-move fault now preserves its field read while intentionally treating the first price as a move. The existing exact-arithmetic test adds the independent hand (2/3)*(9/10)=3/5 in both operand orders and a negative-product case, exercising cancellation across both numerator/denominator pairs. The strengthened test passed **1/1** in `mass664-cross-cancel-repair.trx` with the production assembly unchanged. A fresh full 47-fault campaign is required; earlier partial results cannot be pooled.

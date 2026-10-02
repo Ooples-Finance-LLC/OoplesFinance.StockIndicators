@@ -68439,7 +68439,7 @@
     "file": "src/Helpers/MassThrustWindow.cs",
     "scope": "internal sealed class MassThrustWindow",
     "before": "_hasPrevious ? current - _previousPrice : default",
-    "after": "current - _previousPrice",
+    "after": "_hasPrevious ? current - _previousPrice : current",
     "filter": "FullyQualifiedName~MassThrustNumericalTests.HandValuesAndTinyOrOverflowingMoves"
   },
   {
