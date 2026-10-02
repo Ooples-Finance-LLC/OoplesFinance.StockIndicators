@@ -4978,3 +4978,12 @@ This is evidence for the isolated batch-669 source. Source was already published
 All **84/84 focused tests passed** in `variable-length713-core-final.trx`: nine configurations across five public routes, independent feedback/period/signal hands, exact inner/outer ties and neighboring means, overflow/subnormal decisions, extreme bounds, expiry, preview/reset, callback discovery/order/short means, primary-output identity, native guards and explicit selected-input routes. Core/registry mapping, prefix invariance, future-bar invariance, span guards and in-place use passed. Existing Variable Length and Ultimate Moving Average/bands golden fixtures and the shared bands route regression passed.
 
 An earlier build rejected a callback argument type; the next run passed 73/82 but exposed primary-output inference selecting Length. The final batch restores the explicit Vlma binding, adds its regression assertion and includes the approved core alignment. Earlier partial results are excluded from qualification. Inventory: **6,677/7,131 enrolled**, **454 omissions across 66 types**, all 7,131 reference registrations, no construction failures and exact backlog agreement. All **9,306 mutation anchors resolve**; 42 meaningful faults await isolated campaigns (an unobservable warmup fault was removed). Focused verification does not establish mutation, hosted-platform, performance or release qualification. Preserved TrendForce/Mobility files retain their hashes.
+
+
+### Batch 670: Moving Average Adaptive Q public mutation qualification
+
+The isolated campaigns `670-selected-repaired-a` and `670-selected-repaired-b` passed their baselines and caught **34/34 compiled behavioral faults**, alongside **39/39 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-670 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `ef5a1e68cd71c760a67369f03bf709b7dcd4729e388de0bcbc585f636f4ccb3d`. Archive SHA256: `a8aa1b848d7892a4d5dbc421d50826bc9b682c1a8537892450ae14a62ebea699` and `1749ea4cee15f174d1edfd5e07df426fa4e0a0c91a28eeb50772a189001f5b52`.
+
+This is evidence for the isolated batch-670 source. Source was already published in the batch-670 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
