@@ -17,7 +17,27 @@ public sealed class NegativeVolumeDisparityNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentCoordinates(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.NegativeVolumeDisparityOutputs(bars, (IBuiltInIndicator)c.Factory()), BuiltInFormulaReferences.NegativeVolumeDisparityBudget);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var options = (NegativeVolumeDisparityIndicatorSpecOptions)indicator.CreateOptions();
+        var bars = Bars(Enumerable.Range(0, 48).Select(i => 100d + i).ToArray(),
+            Enumerable.Range(0, 48).Select(i => (double)(1 + i % 5)).ToArray());
+        var selected = Enumerable.Range(0, bars.Length).Select(i => (double)(i * 7 % 13 - 6)).ToArray();
+        var expected = BuiltInFormulaReferences.NegativeVolumeDisparityValues(bars, options.Length, options.SignalLength,
+            Kind(options.MaType), options.Top, options.Bottom, selected).Outputs;
+        var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+        using var line = IndicatorCompute.ComputeNegativeVolumeDisparityFast(data, context, options.Length, options.MaType, options.Top, options.Bottom);
+        using var signal = IndicatorCompute.ComputeNegativeVolumeDisparitySignalFast(data, context, options.Length, options.SignalLength, options.MaType, options.Top, options.Bottom);
+        for (var i = 0; i < selected.Length; i++)
+        { Equal(expected["Nvdi"][i], line.Span[i]); Equal(expected["Signal"][i], signal.Span[i]); }
+        Assert.Equal(selected, data.ChainedValues);
+        data.CalculateNegativeVolumeDisparityIndicator(options.MaType, options.Length, options.SignalLength, options.Top, options.Bottom);
+        foreach (var key in expected.Keys)
+            for (var i = 0; i < selected.Length; i++) Equal(expected[key][i], data.OutputValues[key][i]);
+        Assert.Equal(bars.Select(b => b.Close), data.ClosePrices); Assert.Equal(bars.Select(b => b.Volume), data.Volumes);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
