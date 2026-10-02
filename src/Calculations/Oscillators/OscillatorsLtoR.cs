@@ -1714,69 +1714,14 @@ public static partial class Calculations
     /// <param name="length4"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateRahulMohindarOscillator(this StockData stockData, int length1 = 2, int length2 = 10, int length3 = 30, 
+    public static StockData CalculateRahulMohindarOscillator(this StockData stockData, int length1 = 2, int length2 = 10, int length3 = 30,
         int length4 = 81)
     {
-        List<double> swingTrd1List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length2);
-
-        var r1List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, inputList);
-        var r2List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r1List); //-V3056
-        var r3List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r2List);
-        var r4List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r3List);
-        var r5List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r4List);
-        var r6List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r5List);
-        var r7List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r6List);
-        var r8List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r7List);
-        var r9List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r8List);
-        var r10List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, r9List);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var r1 = r1List[i];
-            var r2 = r2List[i];
-            var r3 = r3List[i];
-            var r4 = r4List[i];
-            var r5 = r5List[i];
-            var r6 = r6List[i];
-            var r7 = r7List[i];
-            var r8 = r8List[i];
-            var r9 = r9List[i];
-            var r10 = r10List[i];
-
-            var swingTrd1 = highest - lowest != 0 ? 100 * (currentValue - ((r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10) / 10)) / 
-                                                    (highest - lowest) : 0;
-            swingTrd1List.Add(swingTrd1);
-        }
-
-        var swingTrd2List = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length3, swingTrd1List);
-        var swingTrd3List = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length3, swingTrd2List);
-        var rmoList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length4, swingTrd1List);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var rmo = rmoList[i];
-            var prevRmo = i >= 1 ? rmoList[i - 1] : 0;
-
-            var signal = GetCompareSignal(rmo, prevRmo);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rmo", rmoList },
-            { "SwingTrade1", swingTrd1List },
-            { "SwingTrade2", swingTrd2List },
-            { "SwingTrade3", swingTrd3List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rmoList);
-        stockData.IndicatorName = IndicatorName.RahulMohindarOscillator;
-
-        return stockData;
+        var values = RmoWindow.Calculate(stockData, length1, length2, length3, length4, false);
+        var rmo = values.Rmo.ToList(); var one = values.Swing1.ToList(); var two = values.Swing2.ToList(); var three = values.Swing3.ToList();
+        List<Signal>? signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rmo", rmo }, { "SwingTrade1", one }, { "SwingTrade2", two }, { "SwingTrade3", three } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(rmo); stockData.IndicatorName = IndicatorName.RahulMohindarOscillator; return stockData;
     }
 
 

@@ -22,6 +22,12 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RahulMohindarOscillator)
+        {
+            var rmoKeys = new[] { "Rmo", "SwingTrade1", "SwingTrade2", "SwingTrade3" };
+            for (var slot = 0; slot < rmoKeys.Length; slot++) { var key = rmoKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RmoOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuantitativeQualitativeEstimation)
         {
             var qqeKeys = new[] { "FastAtrRsi", "SlowAtrRsi" };

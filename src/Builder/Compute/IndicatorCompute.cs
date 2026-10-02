@@ -5785,69 +5785,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRahulMohindarOscillatorFast(StockData data, ComputeContext context, int length2 = 10,
         int length1 = 2, int length3 = 30, int length4 = 81, RahulMohindarSeries series = RahulMohindarSeries.Rmo)
     {
-        // CalculateRahulMohindarOscillator measures the chained value against the average of ten successive
-        // short simple averages of itself, scaled by the range of the window, and publishes the long
-        // exponential average of that swing as its primary series. OscillatorCore.RahulMohindarOscillator
-        // read the close and took a single length. length3 smooths the two swing series the batch also
-        // publishes, neither of which reaches this arm's target.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var stage = context.Rent(count);
-        using var scratch = context.Rent(count);
-        using var total = context.Rent(count);
-        MovingAverage(data, MovingAvgType.SimpleMovingAverage, length1, input, stage.WritableSpan);
-        stage.Span.CopyTo(total.WritableSpan);
-
-        var totals = total.WritableSpan;
-        for (var pass = 1; pass < 10; pass++)
-        {
-            MovingAverage(data, MovingAvgType.SimpleMovingAverage, length1, stage.Span, scratch.WritableSpan);
-            scratch.Span.CopyTo(stage.WritableSpan);
-            for (var i = 0; i < count; i++)
-            {
-                totals[i] += stage.Span[i];
-            }
-        }
-
-        using var swing = context.Rent(count);
-        var swingTrade = swing.WritableSpan;
-        var window = new RollingMinMax(Math.Max(2, length2));
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(input[i]);
-            var range = window.Max - window.Min;
-            swingTrade[i] = range != 0 ? 100 * (input[i] - (totals[i] / 10)) / range : 0;
-        }
-
-        var buffer = context.Rent(count);
-
-        // The swing was already being built here and thrown away, and the batch publishes it plus two
-        // successive exponential averages of it over length3 beside the long one this returned.
-        if (series == RahulMohindarSeries.SwingTrade1)
-        {
-            swing.Span.CopyTo(buffer.WritableSpan);
-            return buffer;
-        }
-
-        if (series == RahulMohindarSeries.Rmo)
-        {
-            MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length4, swing.Span, buffer.WritableSpan);
-            return buffer;
-        }
-
-        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length3, swing.Span, buffer.WritableSpan);
-        if (series == RahulMohindarSeries.SwingTrade2)
-        {
-            return buffer;
-        }
-
-        using var second = context.Rent(count);
-        buffer.Span.CopyTo(second.WritableSpan);
-        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length3, second.Span, buffer.WritableSpan);
-
-        return buffer;
+        var values = RmoWindow.Calculate(data, length1, length2, length3, length4, true, series);
+        var selected = series == RahulMohindarSeries.SwingTrade1 ? values.Swing1 : series == RahulMohindarSeries.SwingTrade2 ? values.Swing2
+            : series == RahulMohindarSeries.SwingTrade3 ? values.Swing3 : values.Rmo;
+        var result = context.Rent(selected.Length); selected.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

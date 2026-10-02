@@ -1094,121 +1094,15 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Rmo")]
 public sealed class RahulMohindarOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _r1;
-    private readonly IMovingAverageSmoother _r2;
-    private readonly IMovingAverageSmoother _r3;
-    private readonly IMovingAverageSmoother _r4;
-    private readonly IMovingAverageSmoother _r5;
-    private readonly IMovingAverageSmoother _r6;
-    private readonly IMovingAverageSmoother _r7;
-    private readonly IMovingAverageSmoother _r8;
-    private readonly IMovingAverageSmoother _r9;
-    private readonly IMovingAverageSmoother _r10;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _swing2Smoother;
-    private readonly IMovingAverageSmoother _swing3Smoother;
-    private readonly IMovingAverageSmoother _rmoSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public RahulMohindarOscillatorState(int length1 = 2, int length2 = 10, int length3 = 30, int length4 = 81)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(2, length2);
-        var resolved3 = Math.Max(1, length3);
-        var resolved4 = Math.Max(1, length4);
-        _r1 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r2 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r3 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r4 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r5 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r6 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r7 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r8 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r9 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r10 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _highWindow = new RollingWindowMax(resolved2);
-        _lowWindow = new RollingWindowMin(resolved2);
-        _swing2Smoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved3);
-        _swing3Smoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved3);
-        _rmoSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved4);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RmoWindow _window;
+    public RahulMohindarOscillatorState(int length1 = 2, int length2 = 10, int length3 = 30, int length4 = 81) => _window = new(length1, length2, length3, length4);
     public IndicatorName Name => IndicatorName.RahulMohindarOscillator;
-
-    public void Reset()
-    {
-        _r1.Reset();
-        _r2.Reset();
-        _r3.Reset();
-        _r4.Reset();
-        _r5.Reset();
-        _r6.Reset();
-        _r7.Reset();
-        _r8.Reset();
-        _r9.Reset();
-        _r10.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _swing2Smoother.Reset();
-        _swing3Smoother.Reset();
-        _rmoSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(value, out _) : _highWindow.Preview(value, out _);
-        var lowest = isFinal ? _lowWindow.Add(value, out _) : _lowWindow.Preview(value, out _);
-        var r1 = _r1.Next(value, isFinal);
-        var r2 = _r2.Next(r1, isFinal);
-        var r3 = _r3.Next(r2, isFinal);
-        var r4 = _r4.Next(r3, isFinal);
-        var r5 = _r5.Next(r4, isFinal);
-        var r6 = _r6.Next(r5, isFinal);
-        var r7 = _r7.Next(r6, isFinal);
-        var r8 = _r8.Next(r7, isFinal);
-        var r9 = _r9.Next(r8, isFinal);
-        var r10 = _r10.Next(r9, isFinal);
-        var avg = (r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10) / 10;
-        var swingTrd1 = highest - lowest != 0 ? 100 * (value - avg) / (highest - lowest) : 0;
-        var swingTrd2 = _swing2Smoother.Next(swingTrd1, isFinal);
-        var swingTrd3 = _swing3Smoother.Next(swingTrd2, isFinal);
-        var rmo = _rmoSmoother.Next(swingTrd1, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "Rmo", rmo },
-                { "SwingTrade1", swingTrd1 },
-                { "SwingTrade2", swingTrd2 },
-                { "SwingTrade3", swingTrd3 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rmo, outputs);
-    }
-
-    public void Dispose()
-    {
-        _r1.Dispose();
-        _r2.Dispose();
-        _r3.Dispose();
-        _r4.Dispose();
-        _r5.Dispose();
-        _r6.Dispose();
-        _r7.Dispose();
-        _r8.Dispose();
-        _r9.Dispose();
-        _r10.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _swing2Smoother.Dispose();
-        _swing3Smoother.Dispose();
-        _rmoSmoother.Dispose();
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Rmo, includeOutputs ? new Dictionary<string, double> { { "Rmo", point.Rmo }, { "SwingTrade1", point.Swing1 }, { "SwingTrade2", point.Swing2 }, { "SwingTrade3", point.Swing3 } } : null);
     }
 }
 

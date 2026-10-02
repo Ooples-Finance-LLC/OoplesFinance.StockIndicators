@@ -626,21 +626,7 @@ internal static partial class BuiltInFormulaReferences
                         ("Signal", Average(strength, Integer(options, "Length4", 7), kind)));
                 });
             case IndicatorName.RahulMohindarOscillator:
-                return new("Rmo", new[] { "Rmo", "SwingTrade1", "SwingTrade2", "SwingTrade3" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var cascades = new List<double[]> { Average(prices, 2, 1) };
-                    for (var stage = 1; stage < 10; stage++) cascades.Add(Average(cascades[stage - 1], 2, 1));
-                    var swing = prices.Select((v, i) =>
-                    {
-                        var sample = Window(prices, i, Math.Max(2, length)).ToArray();
-                        var range = sample.Max() - sample.Min();
-                        return range == 0 ? 0 : 100 * (v - cascades.Sum(stage => stage[i]) / 10) / range;
-                    }).ToArray();
-                    var second = Average(swing, 30, 3);
-                    return Outputs(("Rmo", Average(swing, 81, 3)), ("SwingTrade1", swing),
-                        ("SwingTrade2", second), ("SwingTrade3", Average(second, 30, 3)));
-                });
+                return new("Rmo", new[] { "Rmo", "SwingTrade1", "SwingTrade2", "SwingTrade3" }, bars => RmoOutputs(bars, indicator));
             case IndicatorName.ReverseEngineeringRelativeStrengthIndex:
                 return new("Rersi", new[] { "Rersi" }, bars =>
                 {
