@@ -4771,3 +4771,12 @@ The public batch, native state and explicit fast arm share exact residual-square
 **56/56 distinct focused tests passed**:54 original passes plus the two corrected test cases, retained in `residual-volatility698-focused.trx`, `residual-volatility698-test-followup.trx` and `residual-volatility698-component-slots.trx`. The ordinary DEMA fallback test now uses an ordinary preview rather than an overflowing square outside its existing component boundary. The generated-slot test uses an EMA(1) third component; its earlier SMA(1) attempt exposed a separate shared native SMA identity defect, which remains recorded and pending a scope decision. No shared SMA fix is claimed. Production was unchanged during these test-only follow-ups.
 
 **32 behavioral faults are prepared; mutation qualification is pending.** All8,838 manifest anchors resolve. Inventory: **6,584/7,131 enrolled**, **547 omissions across80 types**, complete independent references, no construction failures and an exact backlog match. Final project gates and the separately recorded shared SMA defect remain incomplete.
+
+
+### Batch 661: MacZ repaired mutation qualification
+
+The isolated campaigns `661-repaired2-a` and `661-repaired2-b` passed their baselines and caught **40/40 compiled behavioral faults**, alongside **112/112 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-661 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `e9b209b92bf99750f455a15f2896efec00fed70f2e9f70a5618a448db17454d1`. Archive SHA256: `96a178b3e614cf3c8a86f853a0f3d09621ee34519c6e76c2b8f95e1c2bb4be74` and `3b43cb16edc10e9daf32965cea5c510e305e11a5bd9427107fe39a4752f5e534`.
+
+This is evidence for retained batch-661 source with two repaired fault definitions and an explicit fast selected-source test overlay. The original partial campaign, its ineffective histogram-reset fault and its guard compilation failure are excluded. Source was already published in the batch-661 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
