@@ -292,45 +292,9 @@ public static partial class Calculations
     public static StockData CalculateVolumePriceConfirmationIndicator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 20, int length = 8)
     {
-        List<double> vpciList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var vwmaShortList = GetMovingAverageList(stockData, MovingAvgType.VolumeWeightedMovingAverage, fastLength, inputList);
-        var vwmaLongList = GetMovingAverageList(stockData, MovingAvgType.VolumeWeightedMovingAverage, slowLength, inputList);
-        var volumeSmaShortList = GetMovingAverageList(stockData, maType, fastLength, volumeList);
-        var volumeSmaLongList = GetMovingAverageList(stockData, maType, slowLength, volumeList);
-        var smaShortList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var smaLongList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var vwmaLong = vwmaLongList[i];
-            var vwmaShort = vwmaShortList[i];
-            var volumeSmaLong = volumeSmaLongList[i];
-            var volumeSmaShort = volumeSmaShortList[i];
-            var smaLong = smaLongList[i];
-            var smaShort = smaShortList[i];
-            var vpc = vwmaLong - smaLong;
-            var vpr = smaShort != 0 ? vwmaShort / smaShort : 0;
-            var vm = volumeSmaLong != 0 ? volumeSmaShort / volumeSmaLong : 0;
-
-            var vpci = vpc * vpr * vm;
-            vpciList.Add(vpci);
-        }
-
-        var vpciSmaList = GetMovingAverageList(stockData, maType, length, vpciList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var vpci = vpciList[i];
-            var vpciSma = vpciSmaList[i];
-            var prevVpci = i >= 1 ? vpciList[i - 1] : 0;
-            var prevVpciSma = i >= 1 ? vpciSmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(vpci - vpciSma, prevVpci - prevVpciSma);
-            signalsList?.Add(signal);
-        }
-
+        var result = VpciWindow.Calculate(stockData, maType, fastLength, slowLength, length, false);
+        var vpciList = result.Line.ToList(); var vpciSmaList = result.SignalLine.ToList();
+        var signalsList = result.Trades.ToList();
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Vpci", vpciList },
             { "Signal", vpciSmaList }

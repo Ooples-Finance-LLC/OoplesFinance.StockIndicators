@@ -5100,3 +5100,10 @@ The isolated campaigns `678-repaired-a` and `678-repaired-b` passed their baseli
 Source snapshot SHA256: `08253d52287c1dc04cc37121f7331a88e5322aeba309127b1b75369639f46c76`. Archive SHA256: `cae9f3fb3698cbf32ea6bc525f8cd9ac1a88985f28e991b9cd3ce6d5b7787d32` and `7551d8b08724ea320254adce0453abbc6be86fe1926d87703b41456567ce8158`.
 
 This is evidence for the isolated batch-678 source. Source was already published in the batch-678 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 722: Volume Price Confirmation numerical routes and core alignment
+
+Exact component products and ratios now feed unpublished signal smoothing across batch, fast, and native routes. The approved core follows the public formula; the explicit streaming gate uses its typed native state. Independent rational window references cover both outputs and exact trading-signal comparisons. A subnormal hand has line 13/10 epsilon and signal 13/20 epsilon: both publish epsilon, whereas smoothing a rounded line loses the signal. Preview/reset, callback order and padding, lazy extreme periods, input guards, and core aliasing are covered.
+
+**45/45 focused tests passed** on net10.0 (`vpci722-verified.trx`, 81.60 seconds). The initial build encountered a local identifier collision, corrected before testing. Inventory: **6,705/7,131 enrolled**, **426 omissions across 60 types**, all references registered, no construction failures, exact backlog match. The 40 behavioral faults and final hosted/platform/package/performance gates remain pending.

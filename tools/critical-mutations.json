@@ -82237,5 +82237,365 @@
     "before": "VolumeWeightedRsi or ",
     "after": "",
     "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "vpci-wide-zero-price",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "priceFast.Sign == 0 || volumeSlow.Sign == 0",
+    "after": "volumeSlow.Sign == 0",
+    "filter": "FullyQualifiedName~VpciNumericalTests.ZeroDenominatorsAndExactCancellationRemainDefined"
+  },
+  {
+    "id": "vpci-wide-zero-volume",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "priceFast.Sign == 0 || volumeSlow.Sign == 0",
+    "after": "priceFast.Sign == 0",
+    "filter": "FullyQualifiedName~VpciNumericalTests.ZeroDenominatorsAndExactCancellationRemainDefined"
+  },
+  {
+    "id": "vpci-wide-confirmation",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "(weightedSlow - priceSlow)",
+    "after": "(weightedFast - priceFast)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-price-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "weightedFast.Divide(priceFast)",
+    "after": "weightedSlow.Divide(priceFast)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-volume-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "volumeFast.Divide(volumeSlow)",
+    "after": "volumeSlow.Divide(volumeFast)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-signal-margin",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "var margin = line - signal;",
+    "after": "var margin = line;",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-trade-direction",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "var change = margin - _previousMargin;",
+    "after": "var change = margin + _previousMargin;",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-trade-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "if (final) _previousMargin = margin;",
+    "after": "_previousMargin = margin;",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-native-weight-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "_weightedFast.Next(p, v, final)",
+    "after": "_weightedFast.Next(p, v, true)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-native-fast-price",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "_priceFast.Next(p, final)",
+    "after": "_priceFast.Next(v, final)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-native-fast-volume",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "_volumeFast.Next(v, final)",
+    "after": "_volumeFast.Next(p, final)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-native-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "_signal = new(kind, signal)",
+    "after": "_signal = new(kind, slow)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "ComponentAverage.Take(values.Select(value => value.Publish()).ToArray(), period)",
+    "after": "ComponentAverage.Take(values.Select(value => value.Publish()).ToArray(), fast)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.CallbackOrdersAndShortResultsPreserveTheirContracts"
+  },
+  {
+    "id": "vpci-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.CallbackOrdersAndShortResultsPreserveTheirContracts"
+  },
+  {
+    "id": "vpci-wide-callback-order",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "if (fastRoute) { pf",
+    "after": "if (!fastRoute) { pf",
+    "filter": "FullyQualifiedName~VpciNumericalTests.CallbackOrdersAndShortResultsPreserveTheirContracts"
+  },
+  {
+    "id": "vpci-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "var (prices, _, _, _, volumes) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var prices = data.ClosePrices; var volumes = data.Volumes;",
+    "filter": "FullyQualifiedName~VpciNumericalTests.SelectedPricesRetainVolumesForBothFastOutputs"
+  },
+  {
+    "id": "vpci-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "prices, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, volumes",
+    "after": "prices, volumes",
+    "filter": "FullyQualifiedName~VpciNumericalTests.InvalidNativeAndOriginalSelectedFieldsAreRejectedBeforeMutation"
+  },
+  {
+    "id": "vpci-wide-batch-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "var wf = Mean(p, fast, true)",
+    "after": "var wf = Mean(p, slow, true)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-unpublished-signal",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "includeSignal ? Mean(raw, signal)",
+    "after": "includeSignal ? Mean(raw.Select(v => Number.Of(v.Publish())).ToArray(), signal)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.UnpublishedSignalRetainsSubnormalProductInformation"
+  },
+  {
+    "id": "vpci-wide-signal-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal sealed class VpciWindow",
+    "before": "_signal.Reset(); _previousMargin",
+    "after": "_previousMargin",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-weighted-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class VolumeMean",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.ExtremePeriodsGrowOnlyWithObservedHistory"
+  },
+  {
+    "id": "vpci-wide-weighted-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class VolumeMean",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length - 2",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-weighted-product",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class VolumeMean",
+    "before": "var product = price * volume;",
+    "after": "var product = price;",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-weighted-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class VolumeMean",
+    "before": "products -= old.Product; volumes -= old.Volume;",
+    "after": "products += old.Product; volumes += old.Volume;",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-weighted-zero",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class VolumeMean",
+    "before": "volumes.Sign == 0 ? default",
+    "after": "volumes.Sign == 0 ? Number.Of(1)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-weighted-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class VolumeMean",
+    "before": "_history.Clear(); _products",
+    "after": "_products",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-mean-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.ExtremePeriodsGrowOnlyWithObservedHistory"
+  },
+  {
+    "id": "vpci-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.StandardMeansRetainExtremeProductsAndSignedVolumes"
+  },
+  {
+    "id": "vpci-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumePriceConfirmationIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VpciNumericalTests.InvalidNativeAndOriginalSelectedFieldsAreRejectedBeforeMutation"
+  },
+  {
+    "id": "vpci-wide-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumePriceConfirmationIndicatorState",
+    "before": "[\"Signal\"] = point.SignalLine",
+    "after": "[\"Signal\"] = point.Line",
+    "filter": "FullyQualifiedName~VpciNumericalTests.IndependentThreeFactorAndSignalHand"
+  },
+  {
+    "id": "vpci-wide-core-volume",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "scope": "internal static void VolumePriceConfirmationIndicator(",
+    "before": "window.Next(close[i], volume[i], true)",
+    "after": "window.Next(close[i], 1, true)",
+    "filter": "FullyQualifiedName~VpciNumericalTests.CoreValidatesAndSupportsAliasedOutput"
+  },
+  {
+    "id": "vpci-wide-primary-callback-count",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVpciFast(",
+    "before": "8, true, false",
+    "after": "8, true, true",
+    "filter": "FullyQualifiedName~VpciNumericalTests.CallbackOrdersAndShortResultsPreserveTheirContracts"
+  },
+  {
+    "id": "vpci-wide-signal-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVpciSignalFast(",
+    "before": "true).SignalLine",
+    "after": "true).Line",
+    "filter": "FullyQualifiedName~VpciNumericalTests.SelectedPricesRetainVolumesForBothFastOutputs"
+  },
+  {
+    "id": "vpci-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "Vpci or ",
+    "after": "",
+    "filter": "FullyQualifiedName~VpciNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

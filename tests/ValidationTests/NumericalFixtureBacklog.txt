@@ -396,10 +396,6 @@ OoplesFinance.StockIndicators.Indicators.VortexBands/longer-periods
 OoplesFinance.StockIndicators.Indicators.VortexBands/minimum-periods
 OoplesFinance.StockIndicators.Indicators.VortexBands/shorter-periods
 OoplesFinance.StockIndicators.Indicators.VortexBands/weighted-average
-OoplesFinance.StockIndicators.Indicators.Vpci/default
-OoplesFinance.StockIndicators.Indicators.Vpci/longer-periods
-OoplesFinance.StockIndicators.Indicators.Vpci/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Vpci/shorter-periods
 OoplesFinance.StockIndicators.Indicators.WaddahAttarExplosion/default
 OoplesFinance.StockIndicators.Indicators.WaddahAttarExplosion/longer-fastLength
 OoplesFinance.StockIndicators.Indicators.WaddahAttarExplosion/longer-periods

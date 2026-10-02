@@ -132,27 +132,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray();
                 });
             case IndicatorName.VolumePriceConfirmationIndicator:
-                return new("Vpci", new[] { "Vpci", "Signal" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var volume = bars.Select(b => b.Volume).ToArray();
-                    double[] Weighted(int period) => prices.Select((_, i) =>
-                    {
-                        if (i + 1 < period) return 0;
-                        var window = Window(bars, i, period).ToArray();
-                        var total = window.Sum(b => b.Volume);
-                        return total == 0 ? 0 : window.Sum(b => b.Close * b.Volume) / total;
-                    }).ToArray();
-                    var fast = Weighted(5);
-                    var slow = Weighted(20);
-                    var fastMean = Average(prices, 5, 1);
-                    var slowMean = Average(prices, 20, 1);
-                    var fastVolume = Average(volume, 5, 1);
-                    var slowVolume = Average(volume, 20, 1);
-                    var line = prices.Select((_, i) => fastMean[i] == 0 || slowVolume[i] == 0 ? 0
-                        : (slow[i] - slowMean[i]) * fast[i] / fastMean[i] * fastVolume[i] / slowVolume[i]).ToArray();
-                    return Outputs(("Vpci", line), ("Signal", Average(line, length, 1)));
-                });
+                return new("Vpci", new[] { "Vpci", "Signal" }, bars => VpciOutputs(bars, indicator));
             case IndicatorName.VolumeAdaptiveBands:
                 if (kind == 0) return null;
                 return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>

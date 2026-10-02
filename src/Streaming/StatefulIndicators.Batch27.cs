@@ -207,102 +207,19 @@ public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorSt
 [PrimaryOutput("Vpci")]
 public sealed class VolumePriceConfirmationIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _vwmaFastSum;
-    private readonly RollingWindowSum _vwmaSlowSum;
-    private readonly IMovingAverageSmoother _vwmaFastVolMa;
-    private readonly IMovingAverageSmoother _vwmaSlowVolMa;
-    private readonly IMovingAverageSmoother _volumeFastMa;
-    private readonly IMovingAverageSmoother _volumeSlowMa;
-    private readonly IMovingAverageSmoother _smaFast;
-    private readonly IMovingAverageSmoother _smaSlow;
-    private readonly IMovingAverageSmoother _vpciMa;
-    private readonly StreamingInputResolver _input;
-
+    private readonly VpciWindow _window;
     public VolumePriceConfirmationIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5,
-        int slowLength = 20, int length = 8)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var resolved = Math.Max(1, length);
-        _vwmaFastSum = new RollingWindowSum(resolvedFast);
-        _vwmaSlowSum = new RollingWindowSum(resolvedSlow);
-        _vwmaFastVolMa = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedFast);
-        _vwmaSlowVolMa = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSlow);
-        _volumeFastMa = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _volumeSlowMa = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _smaFast = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _smaSlow = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _vpciMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        int slowLength = 20, int length = 8) => _window = new(maType, fastLength, slowLength, length);
     public IndicatorName Name => IndicatorName.VolumePriceConfirmationIndicator;
-
-    public void Reset()
-    {
-        _vwmaFastSum.Reset();
-        _vwmaSlowSum.Reset();
-        _vwmaFastVolMa.Reset();
-        _vwmaSlowVolMa.Reset();
-        _volumeFastMa.Reset();
-        _volumeSlowMa.Reset();
-        _smaFast.Reset();
-        _smaSlow.Reset();
-        _vpciMa.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var volumePrice = value * volume;
-
-        var vwmaFastVol = _vwmaFastVolMa.Next(volume, isFinal);
-        var vwmaFastSum = isFinal ? _vwmaFastSum.Add(volumePrice, out var fastCount) : _vwmaFastSum.Preview(volumePrice, out fastCount);
-        var vwmaFastAvg = fastCount > 0 ? vwmaFastSum / fastCount : 0;
-        var vwmaFast = vwmaFastVol != 0 ? vwmaFastAvg / vwmaFastVol : 0;
-
-        var vwmaSlowVol = _vwmaSlowVolMa.Next(volume, isFinal);
-        var vwmaSlowSum = isFinal ? _vwmaSlowSum.Add(volumePrice, out var slowCount) : _vwmaSlowSum.Preview(volumePrice, out slowCount);
-        var vwmaSlowAvg = slowCount > 0 ? vwmaSlowSum / slowCount : 0;
-        var vwmaSlow = vwmaSlowVol != 0 ? vwmaSlowAvg / vwmaSlowVol : 0;
-
-        var volumeSmaFast = _volumeFastMa.Next(volume, isFinal);
-        var volumeSmaSlow = _volumeSlowMa.Next(volume, isFinal);
-        var smaFast = _smaFast.Next(value, isFinal);
-        var smaSlow = _smaSlow.Next(value, isFinal);
-
-        var vpc = vwmaSlow - smaSlow;
-        var vpr = smaFast != 0 ? vwmaFast / smaFast : 0;
-        var vm = volumeSmaSlow != 0 ? volumeSmaFast / volumeSmaSlow : 0;
-        var vpci = vpc * vpr * vm;
-        var vpciSma = _vpciMa.Next(vpci, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Vpci", vpci },
-                { "Signal", vpciSma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vpci, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double>
+            { ["Vpci"] = point.Line, ["Signal"] = point.SignalLine } : null);
     }
-
-    public void Dispose()
-    {
-        _vwmaFastSum.Dispose();
-        _vwmaSlowSum.Dispose();
-        _vwmaFastVolMa.Dispose();
-        _vwmaSlowVolMa.Dispose();
-        _volumeFastMa.Dispose();
-        _volumeSlowMa.Dispose();
-        _smaFast.Dispose();
-        _smaSlow.Dispose();
-        _vpciMa.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vwap")]

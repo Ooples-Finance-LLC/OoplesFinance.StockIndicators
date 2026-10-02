@@ -4038,51 +4038,17 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeVpciSignalFast(StockData data, ComputeContext context, int length)
     {
-        using var line = ComputeVpciFast(data, context);
-        var result = context.Rent(data.Count);
-        MovingAverage(data, MovingAvgType.SimpleMovingAverage, length, line.Span, result.WritableSpan);
-        return result;
+        var values = VpciWindow.Calculate(data, MovingAvgType.SimpleMovingAverage, 5, 20, length, true).SignalLine;
+        var result = context.Rent(values.Length);
+        try { values.AsSpan().CopyTo(result.WritableSpan); return result; } catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeVpciFast(StockData data, ComputeContext context, int fastLength = 5,
         int slowLength = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateVolumePriceConfirmationIndicator multiplies three readings of the chained series: how far
-        // its volume weighted average sits above its plain average over the long window, the ratio of the two
-        // over the short window, and the ratio of short to long average volume. The spec's own length smooths
-        // the signal line only, so it never reaches this series. VolumeCore.VolumePriceConfirmationIndicator
-        // read the raw close and took a single window.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        using var vwmaFast = context.Rent(count);
-        using var vwmaSlow = context.Rent(count);
-        MovingAverage(data, MovingAvgType.VolumeWeightedMovingAverage, fastLength, input, vwmaFast.WritableSpan);
-        MovingAverage(data, MovingAvgType.VolumeWeightedMovingAverage, slowLength, input, vwmaSlow.WritableSpan);
-
-        using var smaFast = context.Rent(count);
-        using var smaSlow = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, smaFast.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, smaSlow.WritableSpan);
-
-        using var volumeFast = context.Rent(count);
-        using var volumeSlow = context.Rent(count);
-        MovingAverage(data, maType, fastLength, volumes, volumeFast.WritableSpan);
-        MovingAverage(data, maType, slowLength, volumes, volumeSlow.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var vpc = vwmaSlow.Span[i] - smaSlow.Span[i];
-            var vpr = smaFast.Span[i] != 0 ? vwmaFast.Span[i] / smaFast.Span[i] : 0;
-            var vm = volumeSlow.Span[i] != 0 ? volumeFast.Span[i] / volumeSlow.Span[i] : 0;
-            output[i] = vpc * vpr * vm;
-        }
-
-        return buffer;
+        var values = VpciWindow.Calculate(data, maType, fastLength, slowLength, 8, true, false).Line;
+        var result = context.Rent(values.Length);
+        try { values.AsSpan().CopyTo(result.WritableSpan); return result; } catch { result.Dispose(); throw; }
     }
 
     #endregion

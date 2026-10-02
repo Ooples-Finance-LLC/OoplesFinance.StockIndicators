@@ -961,3 +961,12 @@ Finite signed price changes are multiplied by finite signed volume before gain/l
 Batch and fast calls preserve the three component callback slots (gains, losses, centered values), selected prices, and original volumes. Native previews do not commit price or smoother history. Original OHLCV is validated before selected inputs can hide invalid values. The approved internal core alignment uses the public WMA and three-bar final smoothing with its existing length argument/default 14; the public default length remains 10. Span outputs are written only after validation/calculation, including aliased inputs.
 
 Independent references use signed/absolute flow ratios and direct rational windows, separate from the production gain/loss recurrence. All 43 focused checks passed on net10.0. Inventory confirms four additional enrollments (6,701/7,131 total); the 32 prepared behavioral faults await isolated qualification.
+
+
+### Batch 722: Volume Price Confirmation Indicator
+
+VPCI multiplies (slow VWMA minus slow price MA), (fast VWMA divided by fast price MA), and (fast volume MA divided by slow volume MA). A zero fast price mean or slow volume mean yields zero. VWMA uses full-window warmup and returns zero for exactly zero total signed volume. Exact products, signed volume sums, standard SMA/WMA/EMA/Wilder means, component ratios, and final signal smoothing retain information until publication. True nonrepresentable raw results publish signed infinity, allowing existing v2 overflow-rejection rules to distinguish them from lost finite results. Exact finite history remains usable after such a publication.
+
+The approved core alignment replaces its difference-of-confirmations formula with the public three-factor SMA formula, retaining short/long arguments and atomic/aliased span handling. The typed length controls only signal smoothing. Batch preserves callback order VWMA fast/slow, volume fast/slow, price fast/slow, signal; explicit fast routes retain price-before-volume order, six primary slots and seven signal slots. Native previews/reset and extreme periods use only observed history.
+
+All 45 focused checks passed on net10.0, including an independent 13/30 line and 13/60 signal hand, both selected-input fast outputs, exact subnormal signal preservation, signed-volume cancellation, and recovery after true overflow. The 40 targeted mutation candidates await isolated qualification.

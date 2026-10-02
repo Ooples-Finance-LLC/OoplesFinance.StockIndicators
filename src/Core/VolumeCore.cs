@@ -195,43 +195,14 @@ internal static class VolumeCore
     /// </summary>
     internal static void VolumePriceConfirmationIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int shortLength = 5, int longLength = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var vwmaShortArray = pool.Rent(close.Length);
-        var vwmaLongArray = pool.Rent(close.Length);
-        var smaShortArray = pool.Rent(close.Length);
-        var smaLongArray = pool.Rent(close.Length);
-
-        try
-        {
-            var vwmaShort = vwmaShortArray.AsSpan(0, close.Length);
-            var vwmaLong = vwmaLongArray.AsSpan(0, close.Length);
-            var smaShort = smaShortArray.AsSpan(0, close.Length);
-            var smaLong = smaLongArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.VolumeWeightedMovingAverage(close, volume, vwmaShort, shortLength);
-            MovingAverageCore.VolumeWeightedMovingAverage(close, volume, vwmaLong, longLength);
-            MovingAverageCore.SimpleMovingAverage(close, smaShort, shortLength);
-            MovingAverageCore.SimpleMovingAverage(close, smaLong, longLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var vpcShort = vwmaShort[i] - smaShort[i];
-                var vpcLong = vwmaLong[i] - smaLong[i];
-                output[i] = vpcShort - vpcLong;
-            }
-        }
-        finally
-        {
-            pool.Return(vwmaShortArray);
-            pool.Return(vwmaLongArray);
-            pool.Return(smaShortArray);
-            pool.Return(smaLongArray);
-        }
+        if (volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Input lengths must agree and output must fit every input.");
+        foreach (var value in close) StreamingInputValidation.Finite(value, nameof(close));
+        foreach (var value in volume) StreamingInputValidation.Finite(value, nameof(volume));
+        using var window = new VpciWindow(MovingAvgType.SimpleMovingAverage, shortLength, longLength, 1);
+        var values = new double[close.Length];
+        for (var i = 0; i < close.Length; i++) values[i] = window.Next(close[i], volume[i], true).Line;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>
