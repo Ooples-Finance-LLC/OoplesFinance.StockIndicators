@@ -4586,3 +4586,12 @@ This is evidence for the isolated batch-654 source. Source was already published
 The original Kase Ratio mutation pair caught 38 compiled faults but left the up-gate fault alive. The zero-ATR hand accidentally recomputed the held value. A new three-bar hand holds Up at 1 while the faulty update would produce 5/4; Down independently holds at 5. The retained source has no production or mutation-definition changes, only the strengthened regression.
 
 All **49/49 focused tests passed** on the repaired snapshot (kase655-repaired.trx). A fresh matching 39-fault pair is running. The original 38 kills are not pooled into repaired qualification, which remains pending.
+
+
+### Batch 655: Kase Ratio repaired mutation qualification
+
+The isolated campaigns `655-repaired-a` and `655-repaired-b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **49/49 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-655 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `a5313d10b91c1878dc99904643bf76d3a45953595acce56e7f7c74c1bffd2c64`. Archive SHA256: `f08ab2cdf1ec2b44f6d684ca1b91265200259fbc3efac2904801c94512ff86ef` and `049fd253be5132a51fc3110a7c06f77f4fc13460b5d792719693c853cfa162e7`.
+
+This is evidence for the isolated batch-655 source. Source was already published in the batch-655 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
