@@ -5173,3 +5173,10 @@ The local exact helper replaces rounded differences/ratios and premature signal 
 **84/84 distinct focused tests passed** on net10.0: 83 initial class cases plus one native selected-price synthetic-range/preview/reset regression added after the initial build. The additional test used a test-only build with unchanged production outputs. Coverage includes all five routes, selected original candle fields, enrollment, injected faults, hand signal ties, four means, signed/extreme/subnormal inputs, zero-range carry, lazy extreme periods, callback behavior and invalid-field atomicity.
 
 Inventory: **6,727/7,131 enrolled**, **404 omissions across 57 types**, all independent references registered, no construction failures, exact backlog match. Wilson, WaveTrend and Ultimate Moving Average remain separately unpublished. Thirty-seven mutation candidates are frozen and queued; final assurance remains incomplete.
+
+
+### Batch 734: Periodic Channel survivor regressions
+
+Two new focused regressions passed against the current published production source with a test-only build (`periodic734-regressions.trx`). The asymmetric price path [100,101,0] has cumulative correlation 1-50/sqrt(3367)>0, whereas replacing centered price variance with n*sum(x*x)+sum(x)^2 makes that sum negative. The earlier symmetric cancellation test could not distinguish that mutation. A separate direct selected-input test exercises every configuration's batch method against a nonconstant selected series and constant original closes; the prior selected-source test exercised native builder routes only.
+
+The two mutation filters now target these discriminating tests. Production code and numerical enrollment are unchanged. The original Periodic Channel campaign remains live with its observed survivors; retained snapshots/results are untouched and no replacement qualification is claimed. The earlier 64-case evidence is historical evidence for its retained source, while these two checks cover the current production source. Replacement snapshots and full mutation qualification await consolidation of the original campaign's remaining outcomes.

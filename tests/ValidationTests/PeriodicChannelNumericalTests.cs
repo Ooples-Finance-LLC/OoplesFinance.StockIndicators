@@ -112,6 +112,49 @@ public sealed class PeriodicChannelNumericalTests
     }
 
     [Fact]
+    public void UnequalWindowMeansRequireCenteredVariance()
+    {
+        // At n=2 correlation is +1. At n=3, covariance=-200 and variance=20202,
+        // so correlation is -50/sqrt(3367). Their sum is positive because3367>2500.
+        // Replacing centered variance by n*sum(x^2)+sum(x)^2 instead gives
+        // 1/sqrt(80803)-sqrt(1250/8417), which is negative.
+        var prices = new[] { 100d, 101, 0 };
+        var expected = new[] { 0, 1, 1 };
+        Assert.Equal(expected, BuiltInFormulaReferences.PeriodicValues(Bars(prices), 5, 3).Directions);
+        var state = new PeriodicCorrelationSign(3);
+        for (var replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            for (var i = 0; i < prices.Length; i++)
+            {
+                state.Next(-27, false);
+                Assert.Equal(expected[i], state.Next(prices[i], false));
+                Assert.Equal(expected[i], state.Next(prices[i], true));
+            }
+        }
+        Check(prices, 5, 3);
+    }
+
+    [Fact]
+    public void DirectSelectedBatchPreservesFormula()
+    {
+        var selected = new[] { 0d, 0, 1, 2, 1, 0, 0, -3, 2 };
+        var bars = Bars(Enumerable.Repeat(100d, selected.Length).ToArray());
+        foreach (var row in Cases)
+        {
+            var indicator = (PeriodicChannel)((IndicatorValidationCase)row[0]).Factory();
+            var expected = BuiltInFormulaReferences.PeriodicValues(Bars(selected), indicator.Length1, indicator.Length2);
+            var original = BuiltInFormulaReferences.PeriodicValues(bars, indicator.Length1, indicator.Length2);
+            Assert.False(expected.Outputs["K"].SequenceEqual(original.Outputs["K"]));
+            var data = Data(bars); data.SetCustomValues(selected.ToList());
+            data.CalculatePeriodicChannel(indicator.Length1, indicator.Length2);
+            foreach (var key in expected.Outputs.Keys) Assert.Equal(expected.Outputs[key], data.OutputValues[key]);
+            Assert.Equal(expected.Signals, data.SignalsList); Assert.Empty(data.CustomValuesList);
+            Assert.Equal(bars.Select(b => b.Close), data.ClosePrices);
+        }
+    }
+
+    [Fact]
     public void IndependentBarIndexAndBandHands()
     {
         var output = Check(new[] { 2d, 2, 2 }, lookback: 1);

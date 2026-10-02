@@ -71913,7 +71913,7 @@
     "scope": "internal sealed class PeriodicCorrelationSign",
     "before": "n * squares - sum * sum",
     "after": "n * squares + sum * sum",
-    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.UnequalWindowMeansRequireCenteredVariance"
   },
   {
     "id": "periodic-wide-exact-zero",
@@ -71967,7 +71967,7 @@
     "scope": "public static StockData CalculatePeriodicChannel(",
     "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
     "after": "var input = stockData.ClosePrices;",
-    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.SelectedSourcePreservesFormula"
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.DirectSelectedBatchPreservesFormula"
   },
   {
     "id": "periodic-wide-native-guard",
