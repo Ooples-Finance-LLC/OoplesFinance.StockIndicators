@@ -4887,3 +4887,5 @@ The first repaired campaign pair finished with 45 caught faults, one compilation
 Both isolated campaigns passed their baselines and caught **5/5 compiled behavioral faults**, with **7/7 focused checks**. Callback use, source series, period, discovery requests and short-result zero fill are covered. The campaign archives match the retained callback snapshot byte-for-byte. Other queued batches and final assurance gates remain incomplete.
 
 Source snapshot SHA256: `cc791379e77ede302b9a9f5049a11d4c88df8c4d8a7a4c06ab5ef1250a3d3c0b`. Archive SHA256: `2747cdca6ec85454630c858d4bdaf01c02d397768e50209a18fadb79ebc5a1fe` and `17d6e3cf1a65eb9823dda389181fddee1a4adabb0f2dc0125cd717a3d77762b2`.
+
+The next retained-source baseline exposed a test compatibility issue: its older Number helper lacks Integer. The same exact hand fractions now use Number.Of, supported by both versions; **1/1** affected test passed in `mass664-cross-cancel-compatible.trx`, with production unchanged. Both failed baselines are excluded and fresh snapshots are required.
