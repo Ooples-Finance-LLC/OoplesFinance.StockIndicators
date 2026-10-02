@@ -5032,3 +5032,8 @@ Three isolated campaigns passed their baselines. The original repaired pair caug
 Source snapshot SHA256: `77dd4d2fdfdd4a816d4ff10cbb59d9a19f8a297d81d8bded9329daa5ed8c645a`. Archive SHA256: `d72e20015e6ea76c9ffd52f99c918f832fc4d7016248a73ff61f85d07a253b56` , `6af8ace0335710a49d29a9e60370a2f6b216ac72cb152a8a74f9aef3767e7bec` and `6af8ace0335710a49d29a9e60370a2f6b216ac72cb152a8a74f9aef3767e7bec`.
 
 This is evidence for the isolated batch-672 source. Source was already published in the batch-672 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 674: OBV Reflex hand-example coverage repair
+
+The original hand test used equal lag and smoothing periods and did not distinguish zero-filled lag warmup from an available partial lag. An added independent hand uses lag 3, smoothing 2, prices `[4,1,-1,5,0]` and volumes `[2,3,5,7,11]`: cumulative totals are `[2,5,0,7,-4]`, and two-bar SMA values are `[0,3.5,2.5,3.5,1.5]`. The existing checker exercises batch, both fast outputs, native previews/reset and the internal kernel. **1/1 affected test passed** against the unchanged production DLL (`obv-reflex674-hand-repair.trx`). The active original campaigns contain survivors and cannot qualify; fresh repaired snapshots/campaigns remain required.

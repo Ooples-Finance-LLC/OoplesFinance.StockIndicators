@@ -69,6 +69,12 @@ public sealed class ObvReflexNumericalTests
         var result = Check(bars, 2, 2);
         Assert.Equal(new[] { 1d, 3, 0, -4, 1 }, result["Obvr"]);
         Assert.Equal(new[] { 0d, 2, 1.5, -2, -1.5 }, result["Signal"]);
+        // For lag 3 the first three comparisons use zero, not the first
+        // available price. Independent signed increments are +2,+3,-5,+7,-11.
+        // A separate two-bar SMA averages the resulting cumulative totals.
+        var distinctPeriods = Check(Bars(new[] { 4d, 1, -1, 5, 0 }, new[] { 2d, 3, 5, 7, 11 }), 3, 2);
+        Assert.Equal(new[] { 2d, 5, 0, 7, -4 }, distinctPeriods["Obvr"]);
+        Assert.Equal(new[] { 0d, 3.5, 2.5, 3.5, 1.5 }, distinctPeriods["Signal"]);
     }
     [Fact]
     public void ZeroPricesAndSignedVolumesKeepTheirDirections()
