@@ -82,19 +82,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.PremierStochasticOscillator:
                 if (kind == 0) return null;
-                return new("Pso", new[] { "Pso" }, bars =>
-                {
-                    var stochastic = bars.Select((b, i) =>
-                    {
-                        var window = Window(bars, i, length).ToArray();
-                        var low = window.Min(v => v.Low);
-                        var high = window.Max(v => v.High);
-                        return high == low ? -5 : 10 * (b.Close - low) / (high - low) - 5; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    }).ToArray();
-                    var period = Math.Max(2, Math.Min(530, (int)Math.Ceiling(Math.Sqrt(Integer(options, "SmoothLength", 25)))));
-                    var smoothed = Average(Average(stochastic, period, kind), period, kind);
-                    return Outputs(("Pso", smoothed.Select(v => Math.Tanh(v / 2)).ToArray()));
-                });
+                return new("Pso", new[] { "Pso" }, bars => PremierValues(bars, length, Integer(options, "SmoothLength", 25), kind));
             case IndicatorName.SchaffTrendCycleShk:
                 if (kind == 0) return null;
                 return new("Stc", new[] { "Stc", "Macd" }, bars => SchaffShkOutputs(bars, indicator));

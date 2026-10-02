@@ -144,12 +144,35 @@ public sealed class KaufmanRegressionNumericalTests
     [Fact]
     public void InvalidNativeBarCannotAdvanceAnyMoment()
     {
-        using var correlation = new KaufmanAdaptiveCorrelationOscillatorState(length: 1);
-        using var fit = new KaufmanAdaptiveLeastSquaresMovingAverageState(length: 1);
-        correlation.Update(Native(B(1)), true, false); fit.Update(Native(B(1)), true, false);
-        Assert.ThrowsAny<ArgumentException>(() => correlation.Update(Native(B(double.NaN)), true, true));
-        Assert.ThrowsAny<ArgumentException>(() => fit.Update(Native(B(double.NaN)), true, true));
-        var selected = new Bar(DateTime.UnixEpoch, 99, 100, -100, 3, 1);
-        Assert.Equal(1, correlation.Update(Native(selected), true, false).Value); Assert.Equal(3, fit.Update(Native(selected), true, false).Value);
+        var bars = new[] { (20d, 1d), (-10d, 4d), (40d, -2d), (0d, 3d), (10d, -5d), (-20d, 2d) }
+            .Select(v => new Bar(DateTime.UnixEpoch, v.Item1, 50, -50, v.Item2, 2)).ToArray();
+        foreach (var length in new[] { 1, 3, 8 })
+        {
+            var expected = BuiltInFormulaReferences.KaufmanRegressionValues(bars, length);
+            foreach (var invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            foreach (var field in Enumerable.Range(0, 5)) foreach (var final in new[] { false, true })
+            {
+                using var correlation = new KaufmanAdaptiveCorrelationOscillatorState(length: length);
+                using var fit = new KaufmanAdaptiveLeastSquaresMovingAverageState(length: length);
+                for (var index = 0; index < bars.Length; index++)
+                {
+                    if (index == 2)
+                    {
+                        var fields = new[] { bars[index].Open, bars[index].High, bars[index].Low, bars[index].Close, bars[index].Volume };
+                        fields[field] = invalid;
+                        var bad = new Bar(DateTime.UnixEpoch, fields[0], fields[1], fields[2], fields[3], fields[4]);
+                        Assert.ThrowsAny<ArgumentException>(() => correlation.Update(Native(bad), final, true));
+                        Assert.ThrowsAny<ArgumentException>(() => fit.Update(Native(bad), final, true));
+                    }
+                    foreach (var commit in new[] { false, true })
+                    {
+                        var point = correlation.Update(Native(bars[index]), commit, true);
+                        foreach (var key in new[] { "IndexSt", "SrcSt", "Kaco" }) Equal(expected[key][index], point.Outputs![key]);
+                        Equal(expected["Kaco"][index], point.Value);
+                        Equal(expected["Kalsma"][index], fit.Update(Native(bars[index]), commit, true).Value);
+                    }
+                }
+            }
+        }
     }
 }

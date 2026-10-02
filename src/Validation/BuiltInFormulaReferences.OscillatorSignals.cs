@@ -157,25 +157,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ttf", line));
                 });
             case IndicatorName.RainbowOscillator:
-                return new("Ro", new[] { "Ro", "UpperBand", "LowerBand" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var layers = new List<double[]>();
-                    var layer = prices;
-                    for (var pass = 0; pass < 10; pass++)
-                    {
-                        layer = Average(layer, length, kind);
-                        layers.Add(layer);
-                    }
-                    var ranges = prices.Select((_, i) =>
-                    {
-                        var window = Window(prices, i, 10).ToArray();
-                        return window.Max() - window.Min();
-                    }).ToArray();
-                    var line = prices.Select((v, i) => ranges[i] == 0 ? 0 : 100 * (v - layers.Average(l => l[i])) / ranges[i]).ToArray();
-                    var band = prices.Select((_, i) => ranges[i] == 0 ? 0 : 100 * (layers.Max(l => l[i]) - layers.Min(l => l[i])) / ranges[i]).ToArray();
-                    return Outputs(("Ro", line), ("UpperBand", band), ("LowerBand", band.Select(v => -v).ToArray()));
-                });
+                return new("Ro", new[] { "Ro", "UpperBand", "LowerBand" }, bars => RainbowOutputs(bars, indicator));
             case IndicatorName.FireflyOscillator:
                 return new("Fo", new[] { "Fo", "Signal" }, bars =>
                 {

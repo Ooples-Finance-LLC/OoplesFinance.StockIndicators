@@ -1186,57 +1186,9 @@ internal static class OscillatorCore
     internal static void PolarizedFractalEfficiency(ReadOnlySpan<double> close, Span<double> output, int length = 9, int smoothLength = 5)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        smoothLength = Math.Max(1, smoothLength);
-        var pool = ArrayPool<double>.Shared;
-        var pfeRawArray = pool.Rent(close.Length);
-
-        try
-        {
-            var pfeRaw = pfeRawArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length)
-                {
-                    pfeRaw[i] = 0;
-                    continue;
-                }
-
-                // Euclidean path in (bar index, price) coordinates.
-                double pricePath = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var step = close[j] - close[j - 1];
-                    pricePath += Math.Sqrt(step * step + 1);
-                }
-
-                // Calculate direct distance
-                var directDist = close[i] - close[i - length];
-                var sign = Math.Sign(directDist);
-
-                if (pricePath != 0)
-                {
-                    var efficiency = Math.Sqrt(directDist * directDist + (double)length * length) / pricePath;
-                    pfeRaw[i] = sign * efficiency * 100;
-                }
-                else
-                {
-                    pfeRaw[i] = 0;
-                }
-            }
-
-            // Smooth with EMA
-            MovingAverageCore.ExponentialMovingAverage(pfeRaw, output, smoothLength);
-        }
-        finally
-        {
-            pool.Return(pfeRawArray);
-        }
+        using var window = new PolarizedEfficiencyWindow(MovingAvgType.ExponentialMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -1873,51 +1825,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PremierStochastic(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 8, int smoothLength = 25)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var stochArray = pool.Rent(close.Length);
-        var normalizedArray = pool.Rent(close.Length);
-        var smoothed1Array = pool.Rent(close.Length);
-        var smoothed2Array = pool.Rent(close.Length);
-
-        try
-        {
-            var stoch = stochArray.AsSpan(0, close.Length);
-            var normalized = normalizedArray.AsSpan(0, close.Length);
-            var smoothed1 = smoothed1Array.AsSpan(0, close.Length);
-            var smoothed2 = smoothed2Array.AsSpan(0, close.Length);
-
-            StochasticK(high, low, close, stoch, length);
-
-            // Normalize to -0.5 to +0.5 range
-            for (var i = 0; i < close.Length; i++)
-            {
-                normalized[i] = 0.1 * (stoch[i] - 50);
-            }
-
-            // Double smoothing
-            int emaLength = (int)Math.Sqrt(smoothLength);
-            MovingAverageCore.ExponentialMovingAverage(normalized, smoothed1, emaLength);
-            MovingAverageCore.ExponentialMovingAverage(smoothed1, smoothed2, emaLength);
-
-            // Final transformation
-            for (var i = 0; i < close.Length; i++)
-            {
-                var exp = Math.Exp(smoothed2[i]);
-                output[i] = (exp - 1) / (exp + 1);
-            }
-        }
-        finally
-        {
-            pool.Return(stochArray);
-            pool.Return(normalizedArray);
-            pool.Return(smoothed1Array);
-            pool.Return(smoothed2Array);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length) throw new ArgumentException("High span must be at least input length.", nameof(high));
+        if (low.Length < close.Length) throw new ArgumentException("Low span must be at least input length.", nameof(low));
+        using var window = new PremierStochasticWindow(MovingAvgType.ExponentialMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true);
     }
 
     /// <summary>

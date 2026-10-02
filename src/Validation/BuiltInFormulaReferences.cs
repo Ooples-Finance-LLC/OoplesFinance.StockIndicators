@@ -17,6 +17,27 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SqueezeMomentumIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SqueezeMomentumOutputs(bars, builtIn)["Smi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SellGravitationIndex)
+        {
+            var sellKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Sgi", "Signal" };
+            for (var slot = 0; slot < sellKeys.Length; slot++) { var key = sellKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SellGravitationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RSINGIndicator)
+        {
+            var rsingKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Rsing", "Signal" };
+            for (var slot = 0; slot < rsingKeys.Length; slot++) { var key = rsingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RsingOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RelativeSpreadStrength)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RelativeSpreadOutputs(bars, builtIn)["Rss"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName is IndicatorName.FastandSlowRelativeStrengthIndexOscillator or IndicatorName.FastandSlowStochasticOscillator)
         {
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
@@ -27,6 +48,33 @@ internal static partial class BuiltInFormulaReferences
             var periodicKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "K" } : new[] { "K", "Os", "Ap", "Bp", "Cp", "Al", "Bl", "Cl" };
             var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, Dictionary<string, double[]>>();
             for (var slot = 0; slot < periodicKeys.Length; slot++) { var key = periodicKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => PeriodicOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RecursiveRelativeStrengthIndex)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RecursiveRsiOutputs(bars, builtIn)["Rrsi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RandomWalkIndex)
+        {
+            var walkKeys = new[] { "RwiHigh", "RwiLow" };
+            for (var slot = 0; slot < walkKeys.Length; slot++) { var key = walkKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RandomWalkOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RainbowOscillator)
+        {
+            var rainbowKeys = new[] { "Ro", "UpperBand", "LowerBand" };
+            for (var slot = 0; slot < rainbowKeys.Length; slot++) { var key = rainbowKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RainbowOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.QuantitativeQualitativeEstimation)
+        {
+            var qqeKeys = new[] { "FastAtrRsi", "SlowAtrRsi" };
+            for (var slot = 0; slot < qqeKeys.Length; slot++) { var key = qqeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => QqeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PremierStochasticOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => PremierOutputs(bars, builtIn)["Pso"], RsiInverseFisherBudget);
             yield break;
         }
         if (builtIn.BatchName == IndicatorName.PhaseChangeIndex)

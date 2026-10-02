@@ -96,139 +96,18 @@ public sealed class RecursiveMovingTrendAverageState : IStreamingIndicatorState
 [PrimaryOutput("Rrsi")]
 public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _srcMa;
-    private readonly WilderState _avgGain;
-    private readonly WilderState _avgLoss;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _bValues;
-    private readonly PooledRingBuffer<double> _avgValues;
-    private readonly PooledRingBuffer<double> _gainValues;
-    private readonly PooledRingBuffer<double> _lossValues;
-    private readonly PooledRingBuffer<double> _avgRsiValues;
-    private double _avgRsiSum;
-    private double _prevSrc;
-    private bool _hasPrevSrc;
-
-    public RecursiveRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _srcMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length);
-        _bValues = new PooledRingBuffer<double>(_length);
-        _avgValues = new PooledRingBuffer<double>(_length);
-        _gainValues = new PooledRingBuffer<double>(_length);
-        _lossValues = new PooledRingBuffer<double>(_length);
-        _avgRsiValues = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly RecursiveRsiWindow _window;
+    public RecursiveRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
+        => _window = new RecursiveRsiWindow(maType, length);
     public IndicatorName Name => IndicatorName.RecursiveRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _srcMa.Reset();
-        _avgGain.Reset();
-        _avgLoss.Reset();
-        _values.Clear();
-        _bValues.Clear();
-        _avgValues.Clear();
-        _gainValues.Clear();
-        _lossValues.Clear();
-        _avgRsiValues.Clear();
-        _avgRsiSum = 0;
-        _prevSrc = 0;
-        _hasPrevSrc = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var chg = _values.Count >= _length ? value - prevValue : 0;
-        var src = _srcMa.Next(chg, isFinal);
-        var prevSrc = _hasPrevSrc ? _prevSrc : 0;
-        var srcChg = _hasPrevSrc ? src - prevSrc : 0;
-        var srcGain = srcChg > 0 ? srcChg : 0;
-        var srcLoss = srcChg < 0 ? Math.Abs(srcChg) : 0;
-        var avgGain = _avgGain.GetNext(srcGain, isFinal);
-        var avgLoss = _avgLoss.GetNext(srcLoss, isFinal);
-        var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-        var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-
-        double b = 0;
-        double avg = 0;
-        double gain = 0;
-        double loss = 0;
-        double avgRsi = 0;
-        var useAvg = _avgRsiValues.Count >= _length;
-        for (var j = 1; j <= _length; j++)
-        {
-            var prevB = j <= _bValues.Count ? _bValues[_bValues.Count - j] : src;
-            var prevAvg = j <= _avgValues.Count ? _avgValues[_avgValues.Count - j] : 0;
-            var prevGain = j <= _gainValues.Count ? _gainValues[_gainValues.Count - j] : 0;
-            var prevLoss = j <= _lossValues.Count ? _lossValues[_lossValues.Count - j] : 0;
-            var k = (double)j / _length;
-            var a = rsi * ((double)_length / j);
-            avg = (a + prevB) / 2;
-            var avgChg = avg - prevAvg;
-            gain = avgChg > 0 ? avgChg : 0;
-            loss = avgChg < 0 ? Math.Abs(avgChg) : 0;
-            var avgGainRec = (gain * k) + (prevGain * (1 - k));
-            var avgLossRec = (loss * k) + (prevLoss * (1 - k));
-            var rsRec = avgLossRec != 0 ? avgGainRec / avgLossRec : 0;
-            avgRsi = avgLossRec == 0 ? 100 : avgGainRec == 0
-                ? 0
-                : MathHelper.MinOrMax(100 - (100 / (1 + rsRec)), 1, 0);
-            b = useAvg ? _avgRsiSum / _length : avgRsi;
-        }
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _bValues.TryAdd(b, out _);
-            _avgValues.TryAdd(avg, out _);
-            _gainValues.TryAdd(gain, out _);
-            _lossValues.TryAdd(loss, out _);
-            if (_avgRsiValues.TryAdd(avgRsi, out var removed))
-            {
-                _avgRsiSum += avgRsi - removed;
-            }
-            else
-            {
-                _avgRsiSum += avgRsi;
-            }
-
-            _prevSrc = src;
-            _hasPrevSrc = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rrsi", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(b, outputs);
+        StreamingInputValidation.Validate(bar); var result = _window.Next(bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Rrsi", result.Value } } : null;
+        return new StreamingIndicatorStateResult(result.Value, outputs);
     }
-
-    public void Dispose()
-    {
-        _srcMa.Dispose();
-        _values.Dispose();
-        _bValues.Dispose();
-        _avgValues.Dispose();
-        _gainValues.Dispose();
-        _lossValues.Dispose();
-        _avgRsiValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rsto")]

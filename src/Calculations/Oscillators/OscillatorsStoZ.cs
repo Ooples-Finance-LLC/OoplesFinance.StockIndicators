@@ -2750,42 +2750,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSellGravitationIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20)
     {
-        List<double> v3List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentClose = inputList[i];
-            var currentOpen = openList[i];
-            var v1 = currentClose - currentOpen;
-            var v2 = currentHigh - currentLow;
-
-            var v3 = v2 != 0 ? v1 / v2 : 0;
-            v3List.Add(v3);
-        }
-
-        var sgiList = GetMovingAverageList(stockData, maType, length, v3List);
-        var sgiEmaList = GetMovingAverageList(stockData, maType, length, sgiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sgi = sgiList[i];
-            var sgiEma = sgiEmaList[i];
-            var prevSgi = i >= 1 ? sgiList[i - 1] : 0;
-            var prevSgiEma = i >= 1 ? sgiEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(sgi - sgiEma, prevSgi - prevSgiEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sgi", sgiList },
-            { "Signal", sgiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sgiList);
+        var values = SellGravitationWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sgi", values.Line.ToList() }, { "Signal", values.Signal.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Line.ToList());
         stockData.IndicatorName = IndicatorName.SellGravitationIndex;
 
         return stockData;

@@ -3023,39 +3023,8 @@ internal static class MovingAverageCore
     {
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            double p = 1.0; // Error covariance estimate
-            double q = 0.01; // Process noise
-            double r = 0.1; // Measurement noise
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var prevEstimate = i >= 1 ? output[i - 1] : currentValue;
-
-                // Adaptive measurement noise based on volatility
-                var adaptiveR = stdDevBuffer[i] > 0 ? r * stdDevBuffer[i] : r;
-
-                // Predict
-                p = p + q;
-
-                // Update (Kalman gain)
-                var k = p / (p + adaptiveR);
-                var estimate = prevEstimate + k * (currentValue - prevEstimate);
-                p = (1 - k) * p;
-
-                output[i] = estimate;
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-        }
+        var window = new ParametricKalmanWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>

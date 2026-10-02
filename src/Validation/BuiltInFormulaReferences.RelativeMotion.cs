@@ -78,18 +78,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.Trender:
                 return new("Trender", new[] { "TrendUp", "TrendDn", "Trender" }, bars => TrenderOutputs(bars, indicator));
             case IndicatorName.SqueezeMomentumIndicator:
-                return new("Smi", new[] { "Smi" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var average = Average(prices, length, kind);
-                    var residual = prices.Select((price, i) =>
-                    {
-                        var window = Window(bars, i, length).ToArray();
-                        var rangeCenter = (window.Max(b => b.High) + window.Min(b => b.Low)) / 2;
-                        return price - (rangeCenter + average[i]) / 2;
-                    }).ToArray();
-                    return Outputs(("Smi", RegressionEndpoints(residual, length)));
-                });
+                return new("Smi", new[] { "Smi" }, bars => SqueezeMomentumOutputs(bars, indicator));
             case IndicatorName.PeakValleyEstimation:
                 return new("Sign1", new[] { "Sign1", "Sign2", "Sign3" }, bars => PeakValleyOutputs(bars, indicator));
             case IndicatorName.StationaryExtrapolatedLevelsOscillator:
@@ -142,25 +131,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Fom", scores), ("Dpl", line));
                 });
             case IndicatorName.RSINGIndicator:
-                return new("Rsing", new[] { "Rsing", "Signal" }, bars =>
-                {
-                    var volume = Average(bars.Select(b => b.Volume).ToArray(), length, kind);
-                    var ranges = bars.Select(b => b.High - b.Low).ToArray();
-                    var momentum = bars.Select((b, i) =>
-                    {
-                        if (i < length || volume[i] == 0) return 0d;
-                        var sample = Window(ranges, i, length).ToArray();
-                        // Independent pair-distance identity: variance = sum_{j<k}(xj-xk)^2/n^2.
-                        // Rounding a mean near a constant range changes this small denominator materially.
-                        double squaredDistances = 0;
-                        for (var j = 0; j < sample.Length; j++)
-                            for (var k = j + 1; k < sample.Length; k++)
-                                squaredDistances += (sample[j] - sample[k]) * (sample[j] - sample[k]);
-                        var sigma = Math.Sqrt(squaredDistances / ((double)sample.Length * sample.Length));
-                        return sigma == 0 ? 0 : (b.Close - bars[i - length].Close) * b.Volume * ranges[i] / (volume[i] * sigma);
-                    }).ToArray();
-                    return Outputs(("Rsing", momentum), ("Signal", Average(momentum, length, kind)));
-                });
+                return new("Rsing", new[] { "Rsing", "Signal" }, bars => RsingOutputs(bars, indicator));
             case IndicatorName.QuadraticRegression:
                 return new("QuadReg", new[] { "QuadReg" }, bars => Outputs(("QuadReg", QuadraticProjectionReference(Closes(bars), length, kind))));
             case IndicatorName.LinearQuadraticConvergenceDivergenceOscillator:
@@ -182,12 +153,8 @@ internal static partial class BuiltInFormulaReferences
                     return change * b.Volume * Number(options, 100, "PointValue") * (1 + (change < 0 ? -adjustment : adjustment));
                 }).ToArray())));
             case IndicatorName.PivotDetectorOscillator:
-                return new("Pdo", new[] { "Pdo" }, bars =>
-                {
-                    // The legacy Length option is inert; the published periods are 200 and 14.
-                    var prices = Closes(bars); var level = Average(prices, 200, kind); var strength = MotionRsi(prices, 14, kind);
-                    return Outputs(("Pdo", prices.Select((v, i) => 2 * strength[i] - (v > level[i] ? 70 : 40)).ToArray()));
-                });
+                // The obsolete Length option remains inert; public defaults are 200 and 14.
+                return new("Pdo", new[] { "Pdo" }, bars => PivotDetectorValues(bars, kind: kind).Outputs);
             case IndicatorName.TopsAndBottomsFinder:
                 return new("Tabf", new[] { "Tabf" }, bars =>
                 {
@@ -703,14 +670,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Kbw", result));
                 });
             case IndicatorName.QuantitativeQualitativeEstimation:
-                return new("FastAtrRsi", new[] { "FastAtrRsi", "SlowAtrRsi" }, bars =>
-                {
-                    var oscillator = Average(MotionRsi(Closes(bars), length, kind), Integer(options, "SmoothLength", 5), kind);
-                    var movements = oscillator.Select((v, i) => Math.Abs(v - (i == 0 ? 0 : oscillator[i - 1]))).ToArray();
-                    var width = Average(Average(movements, 2 * length - 1, kind), 2 * length - 1, kind);
-                    return Outputs(("FastAtrRsi", width.Select(v => v * Number(options, 2.618, "FastFactor")).ToArray()),
-                        ("SlowAtrRsi", width.Select(v => v * Number(options, 4.236, "SlowFactor")).ToArray()));
-                });
+                return new("FastAtrRsi", new[] { "FastAtrRsi", "SlowAtrRsi" }, bars => QqeOutputs(bars, indicator));
             case IndicatorName.PrimeNumberOscillator:
                 return new("Pno", new[] { "Pno" }, bars => Outputs(("Pno", PrimeOffsetsReference(Closes(bars), length))));
             case IndicatorName.PrimeNumberBands:
@@ -913,14 +873,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.KasePeakOscillatorV2:
                 return new("Kpo", new[] { "Kpo" }, bars => KasePeakV2Outputs(bars, indicator));
             case IndicatorName.RandomWalkIndex:
-                return new("RwiHigh", new[] { "RwiHigh", "RwiLow" }, bars =>
-                {
-                    var scale = Average(TrueRanges(bars), length, kind).Select(v => v * Math.Sqrt(length)).ToArray();
-                    return Outputs(("RwiHigh", bars.Select((b, i) => scale[i] == 0 ? 0 :
-                        (b.High - (i < length ? 0 : bars[i - length].Low)) / scale[i]).ToArray()),
-                        ("RwiLow", bars.Select((b, i) => scale[i] == 0 ? 0 :
-                        ((i < length ? 0 : bars[i - length].High) - b.Low) / scale[i]).ToArray()));
-                });
+                return new("RwiHigh", new[] { "RwiHigh", "RwiLow" }, bars => RandomWalkOutputs(bars, indicator));
             case IndicatorName.RunningEquity:
                 return new("Req", new[] { "Req" }, bars =>
                 {
@@ -936,20 +889,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Rosc", bars.Select((b, i) => fit[i] == 0 ? 0 : 100 * (b.Close - fit[i]) / fit[i]).ToArray()));
                 });
             case IndicatorName.RelativeSpreadStrength:
-                return new("Rss", new[] { "Rss" }, bars =>
-                {
-                    var prices = Closes(bars).Select(BinaryDecimal).ToArray();
-                    var fast = MotionDecimalAverage(prices, Integer(options, "FastLength", 10), kind);
-                    var slow = MotionDecimalAverage(prices, Integer(options, "SlowLength", 40), kind);
-                    var spread = fast.Zip(slow, (a, b) => a - b).ToArray();
-                    var changes = spread.Select((v, i) => i == 0 ? 0 : v - spread[i - 1]).ToArray();
-                    var gains = MotionDecimalAverage(changes.Select(v => Math.Max(0, v)).ToArray(), length, 6);
-                    var losses = MotionDecimalAverage(changes.Select(v => Math.Max(0, -v)).ToArray(), length, 6);
-                    var rsi = gains.Select((v, i) => losses[i] == 0 ? 100 : 100 * v / (v + losses[i])).ToArray();
-                    for (var i = 1; i < rsi.Length; i++)
-                        if (length > 1 && changes[i] == 0) rsi[i] = rsi[i - 1];
-                    return Outputs(("Rss", MotionDecimalAverage(rsi, Integer(options, "SmoothLength", 5), kind).Select(v => (double)v).ToArray()));
-                });
+                return new("Rss", new[] { "Rss" }, bars => RelativeSpreadOutputs(bars, indicator));
             case IndicatorName.RecursiveDifferenciator:
                 return new("Rd", new[] { "Rd" }, bars =>
                 {

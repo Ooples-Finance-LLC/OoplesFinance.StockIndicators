@@ -64,20 +64,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.PolarizedFractalEfficiency:
                 var efficiencyKind = AverageKind(options, 3);
                 if (efficiencyKind == 0) return null;
-                return new("Pfe", new[] { "Pfe" }, bars =>
-                {
-                    var positions = bars.Select((b, i) => new System.Numerics.Complex(i, b.Close)).ToArray();
-                    var line = positions.Select((position, i) =>
-                    {
-                        if (i < length) return 0;
-                        var displacement = position - positions[i - length];
-                        var path = Enumerable.Range(i - length + 1, length)
-                            .Sum(j => (positions[j] - positions[j - 1]).Magnitude);
-                        // Triangle inequality bounds the unsmoothed signed distance ratio by one.
-                        return 100 * Math.Sign(displacement.Imaginary) * displacement.Magnitude / path;
-                    }).ToArray();
-                    return Outputs(("Pfe", Average(line, Integer(options, "SmoothLength", 5), efficiencyKind)));
-                });
+                return new("Pfe", new[] { "Pfe" }, bars => PolarizedEfficiencyOutputs(bars, length, Integer(options, "SmoothLength", 5), efficiencyKind));
             case IndicatorName.NthOrderDifferencingOscillator:
                 return new("Nodo", new[] { "Nodo" }, bars =>
                 {

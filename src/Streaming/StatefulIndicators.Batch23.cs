@@ -392,67 +392,20 @@ public sealed class SquareRootWeightedMovingAverageState : IStreamingIndicatorSt
 }
 
 [PrimaryOutput("Smi")]
-public sealed class SqueezeMomentumIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class SqueezeMomentumIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly int _length;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly LinearRegressionState _linReg;
-    private readonly StreamingInputResolver _input;
-    private double _diffValue;
-
-    public SqueezeMomentumIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _linReg = new LinearRegressionState(_length, _ => _diffValue);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly SqueezeMomentumWindow _window;
+    public SqueezeMomentumIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.SqueezeMomentumIndicator;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _sma.Reset();
-        _linReg.Reset();
-        _diffValue = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var midprice = (highest + lowest) / 2;
-        var sma = _sma.Next(value, isFinal);
-        var midpriceSmaAvg = (midprice + sma) / 2;
-        _diffValue = value - midpriceSmaAvg;
-        var linreg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Smi", linreg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(linreg, outputs);
+        StreamingInputValidation.Validate(bar);
+        var result = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(result.Value, includeOutputs ? new Dictionary<string, double> { { "Smi", result.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _sma.Dispose();
-        _linReg.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Pivot")]

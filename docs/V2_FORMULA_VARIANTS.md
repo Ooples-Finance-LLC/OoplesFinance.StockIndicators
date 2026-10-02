@@ -745,3 +745,79 @@ SMA, WMA, EMA, and Wilder smoothing retain exact rational PCI values until signa
 Rolling centered correlations now retain exact integer moments. Their accumulated sign groups rationally equivalent square roots (proved by gcd and integer square roots); distinct remaining square classes cannot sum to zero over rational coefficients. Nonzero sums use certified dyadic bounds with adaptive precision, without an epsilon or fixed precision cutoff. Lookup fingerprints only reject impossible matches; every accepted match is proved exactly. The sequence [0,0,1,2,1,0,0] cancels exactly; changing its final zero to either signed minimum subnormal selects the corresponding direction.
 
 The established channel divides cumulative sums by bar index rather than count. Its sine sample uses Math.Sin; downstream sums, ratios, bands and signal margins remain exact until publication. Lengths clamp to one, history is lazy, and previews preserve committed history. Batch, fast fallback, native and streaming routes share the corrected formula; there is no separate core. The independent reference uses centered fractional moments and rational radical classes. All 64 focused regressions passed on net10.0. The 37 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 679: Parametric Kalman lagged-error weighting
+
+The batch, fast, native streaming, core and moving-average registry use the public lagged-estimate error formula. The core no longer uses a separate covariance/noise filter. Length clamps to one; history grows only as bars arrive. Before the lag is available the baseline is the previous price. A zero sum of errors selects the current measurement. The estimate is an exact affine quotient rounded once to binary64; recursive error is rounded once to binary64 precision with an extended upper exponent. Differences, weights, and signal margin comparisons are exact before those boundaries. This preserves finite convex estimates for opposite-sign extremes without storing an overflowing error. Preview does not commit history or error. Both factories register the native state.
+
+Regressions cover the independent rational recurrence, hand values, extreme values, lag, preview/reset, input selection, signals and core/span/registry behavior. All 39 focused regressions passed on net10.0. The 30 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 680: Polarized Fractal Efficiency and Pfe alias
+
+The signed Euclidean direct/path distance formula is retained across batch, fast, native and EMA core routes. Exact squared differences precede correctly rounded binary64 distance norms, with one extra upper exponent bit for finite-price differences. Path sums and their ratio are exact until ratio publication. The triangle-inequality bound of 100 is enforced after independent norm rounding; a linear slope of five over three bars otherwise rounds to 100.00000000000001. Direction uses the exact ordering of finite prices, including subnormals. Raw efficiency and recursive mean stages round to binary64; finite-window sums and affine smoothing numerators are exact. Periods clamp to one and history is allocated only as bars arrive. Both streaming factories register full and alias specifications. Smoothing callbacks receive the raw efficiency and configured smoothing period, preserving selected input state.
+
+All 111 focused regressions passed on net10.0. The 40 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 681: Pivot Detector public numerical components
+
+The public formula is twice RSI minus 70 above the long moving average, otherwise minus 40. Price differences, finite-window and recursive component means, RSI ratios, price/mean branch decisions and signal differences remain exact until output publication. Zero loss gives RSI 100; the established EMA/Wilder unchanged-price carry rule remains. Periods clamp to one and queues grow only with observed history. Callback slots remain gain, loss and price mean, with respective RSI, RSI and long-average periods. The obsolete typed Length option remains inert, preserving the typed public defaults of 200 and 14. Both streaming factories register the public state.
+
+The separate local-pivot core remains unchanged pending the scope decision. All 47 focused public-route regressions passed on net10.0. The 38 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 682: Premier Stochastic centered arithmetic
+
+The full indicator and alias center the exact clamped range position before rounding, then apply two once-rounded averages and tanh(x/2). Finite sums and recursive affine numerators are exact at each binary64 stage boundary. The final transform resolves subnormal half-input midpoint ties toward smaller magnitude, since tanh(x)<x for positive x. Independent rational subtraction and Taylor bounds verify the 15-epsilon input yielding seven epsilon after transformation. The core now uses the public ceiling square-root smoothing period clamped to 2..530. Extrema allocate history lazily; both factories register full and alias specifications. Two smoothing callbacks retain their inputs and resolved period. Signal comparisons use exact differences of published outputs.
+
+All 113 focused public-route regressions passed on net10.0. The 46 prepared behavioral faults await isolated mutation qualification. The shared reference tanh helper is unchanged; this reference has a local midpoint correction and the existing strict relative transform budget with same-sign enforcement.
+
+
+### Batch 685: QQE volatility widths
+
+QQE retains its published pair of scaled RSI-movement widths. The RSI component retains the established rounded gain/loss stages and unchanged-price carry rule. Subsequent signal smoothing, absolute movements and both width smoothing stages retain exact rational intermediates until scaling and publication; signal comparisons retain those intermediates as well. Lazy queues avoid period-sized allocation. Derived periods use 64-bit arithmetic (2*length-1), including 4,294,967,293 for the largest input period. Nonnegative finite factors follow the existing typed-option domain. Five callbacks retain gain, loss, RSI signal, first width and second width order; callback/legacy paths reject derived periods outside their int API instead of wrapping. Unsupported native smoothing retains batch fallback. All 82 focused tests passed on net10.0. The 40 prepared behavioral faults await isolated qualification.
+
+
+### Batch 688: Rainbow public numerical cascade
+
+Ten moving-average stages, their mean and extrema, and the complete rolling-range quotients retain exact intermediates until output publication. SMA full-window startup zeros and weighted startup weights remain defined. Lazy queues avoid period-sized storage. All three output names and ten callback stages remain explicit; both factories register the public state. Core alignment remains a separate pending decision. All 50 focused regressions passed on net10.0. The 35 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 689: Random Walk complete root-scaled ratios
+
+The existing fixed-lag formula retains zero missing history and zero-ATR results. True ranges include opening gaps to the current selected close and later gaps to the previous selected close. Exact rational ATR stages and lagged differences remain unpublished until each complete ratio is rounded using the exact square root of the period. This corrects the length-two opening hand from the lower neighboring double to sqrt(2). Signals cancel the shared positive root factor before comparison. Lazy history supports extreme periods. Both factories register the state. Fast callbacks retain one true-range average; batch legacy ATR callback behavior remains. All 50 focused Random Walk regressions passed on net10.0. The 34 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 690: Recursive RSI exact delayed direction votes
+
+Only the last iteration of the legacy inner loop survives: its midpoint is compared with the midpoint one period ago, producing a 100/0 nondecreasing vote. The published value averages the preceding window of votes, excluding the current vote. Exact lagged differences, component means, Wilder gain/loss ratios, midpoint comparisons and unpublished feedback prevent overflow and loss of tiny directions. Lazy history replaces period-sized buffers and the redundant inner loop. Signal threshold clauses add no behavior because each crossing already implies the corresponding exact slope sign. Fast callbacks retain source/gain/loss order; the legacy batch does not consume standard-average override slots. Both factories register the public state. All 54 focused regressions passed on net10.0. The 34 prepared behavioral faults await isolated mutation qualification.
+
+
+### Relative Spread Strength: exact spread and bounded RSI component (batch 691)
+
+Fast and slow averages, their difference, successive spread changes, and Wilder gain/loss moments now retain exact rational values. The bounded RSI is rounded to binary64 before the signal average, preserving the existing component boundary. A zero spread change carries the preceding RSI when its period exceeds one; zero loss otherwise yields 100. Signal averages retain exact arithmetic until publication. SMA/WMA windows allocate only observed history; EMA, Wilder, DEMA and TEMA preserve their startup definitions. Other average kinds retain the existing smoother fallback.
+
+Standard batch consumes no component override slots. The fast callback path retains three slots (fast average, slow average, signal average) and computes the intervening spread and RSI without overflowing finite callback results. No independent core exists. Shared SpreadNumber/SpreadAverage implementations are unchanged.
+
+
+### RSING: complete range-volume quotient and signal component (batch 694)
+
+RSING multiplies length-lagged price change by volume/volume-average and candle-range/population-deviation-of-range. Exact range moments and rational volume averages now feed a single complete root quotient; neither candle subtraction nor the deviation denominator is rounded prematurely. Warmup, zero volume average, and zero range variance produce zero. Observed-history queues avoid period-sized allocation and length+1 overflow.
+
+The raw oscillator remains a binary64 component before its signal average. If its exponent exceeds binary64, retain the same 53 significant bits with an extended upper exponent so a finite signal or cancellation remains computable; public outputs still follow the existing overflow-rejection contract. Signal means and slope/acceleration decisions retain exact arithmetic after that component boundary. Standard batch consumes no override slots; fast overrides retain volume-average then signal-average slots, with finite values required at callback boundaries. Generator metadata preserves both configurable averages. Native selected-price inputs preserve original candles. Other average kinds retain their existing smoother fallback.
+
+
+### Sell Gravitation: exact candle-body ratio and two averages (batch 696)
+
+The public formula divides selected-price minus original open by original high minus low, returning zero for zero range, then applies two configured averages. Exact rational body/range arithmetic and the first average avoid premature overflow. The first output remains a binary64 component before the second average; overflowing components retain 53 significant bits with an extended upper exponent, allowing finite later cancellation. The second average and spread-based signal decisions remain exact until publication. SMA/WMA queues allocate observed history; EMA/Wilder retain their startup definitions, and other kinds use the established smoother fallback.
+
+Batch consumes no override slots; fast primary consumes one and fast Signal consumes two. Generator metadata preserves both average slots. Native routing now registers the state and preserves original candles when selected prices fall outside their range. The unrelated internal core remains unchanged pending its separate scope decision.
+
+
+### Squeeze Momentum: exact residual regression (batch 697)
+
+The public formula fits a partial-window least-squares endpoint to selected price minus the average of its configured moving average and rolling high/low midpoint. SMA retains full-window startup zeros; the regression uses observed points. Exact rational means, midpoint, residuals and regression moments prevent premature rounding and overflowing differences. Lazy monotonic deques and queues allocate only observed history. Signals compare exact endpoint sign and change. Standard averages use exact trajectories; other average kinds retain the established smoother fallback.
+
+Original candle highs/lows remain unchanged for selected inputs, including direct-fast calls. Native state validates finite bars before committing any stage. Batch consumes no callback slots; fast consumes one price-average slot, and generator metadata retains that slot. No separate Squeeze Momentum core was found.

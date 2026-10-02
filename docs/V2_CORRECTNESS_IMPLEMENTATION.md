@@ -4638,3 +4638,106 @@ This is evidence for the isolated batch-658 source. Production and tests were al
 Exact rolling moments and rational square-class grouping distinguish proven cancellation from arbitrarily small nonzero correlation sums. Certified adaptive dyadic bounds preserve both signed minimum-subnormal perturbations. Downstream channel arithmetic stays exact after the Math.Sin sample. The independent centered-moment oracle and 2,160 exact algebra comparisons cover the derivation. All eight output names remain explicit for source generation, with an output-map assertion and independent hand and fault-injection checks.
 
 **64/64 focused tests passed** on net10.0 (`periodic677-registered.trx`), including the existing hand and golden tests. Inventory: **6,488/7,131 enrolled**, **643 omissions across 96 types**, all independent references registered, no construction failures, backlog exact. The 37 prepared behavioral faults await isolated qualification; final readiness gates remain pending.
+
+
+### Batch 679: Parametric Kalman public/core alignment
+
+Public batch, fast, native, core and moving-average registry paths now share lagged-estimate error weighting, replacing the core covariance filter. Exact differences and affine quotients preserve convex finite estimates, with explicit binary64 estimate and extended-binary64 error state boundaries. Lazy history handles extreme periods. Both factories register the native state; exact margin comparisons preserve signals.
+
+**39/39 focused tests passed** on net10.0 (`parametric679.trx`), including independent rational references, hand, extreme/subnormal, signal, preview/reset, selected-input and core/span/registry checks plus the existing golden and shared minimum-period tests. This isolated batch is based on `91e697a9`; inventory is **6,484/7,131 enrolled**, **647 omissions across 96 types**, with complete independent reference registration and no construction failures. It does not include the still-running Periodic677 batch. The 30 prepared behavioral faults and final readiness gates remain pending.
+
+
+### Batch 680: Polarized Fractal Efficiency numerical geometry
+
+PFE and its full-name indicator preserve finite signed distance/path ratios across batch, fast, native, builder and EMA core routes. Exact squared differences, extended rounded norms, exact path sums, bounded publication and exact smoothing numerators handle extreme prices without losing subnormal direction. Lazy queues support extreme periods. Both factories register both specifications; callbacks retain raw inputs and smoothing periods.
+
+**111/111 focused tests passed** on net10.0 (`pfe680.trx`) across 13 configurations, including independent geometric references, hand values, the triangle bound, extreme/subnormal prices, signals, preview/reset, selected input, callback substitution, core/span behavior and the existing golden test. This isolated branch includes Parametric679 and is based on `b5cfe42a`; inventory is **6,497/7,131 enrolled**, **634 omissions across 94 types**, with complete independent references and no construction failures. It does not include the still-running Periodic677 batch. The 40 prepared behavioral faults and final readiness gates remain pending.
+
+
+### Batch 681: Pivot Detector public numerical components
+
+Exact component means and RSI ratios preserve the long-average branch and output rescaling across public routes. A one-ULP input hand proves why comparing against a rounded mean selects the wrong branch. Minimum-subnormal gain/loss means retain their ratio. Signals use exact differences; previews/reset, lazy periods and three callback slots are covered. The separate local-pivot core remains unchanged pending its alignment decision.
+
+**47/47 focused public tests passed** on net10.0 (pivot681-public.trx), across five typed configurations, including independent exact-fraction references, hand, extreme/subnormal, signal, preview/reset, input-selection, callback and legacy-fallback checks plus the existing golden test. This isolated branch includes Parametric679 and PFE680, based on 452e6973; inventory is **6,502/7,131 enrolled**, **629 omissions across 93 types**, with complete independent references and no construction failures. Periodic677 is not included. The 38 prepared behavioral faults, core-alignment decision and final readiness gates remain pending.
+
+
+### Batch 682: Premier Stochastic centered range and smoothing
+
+Exact centered range arithmetic preserves near-midpoint and extreme-range values before two once-rounded smoothing stages. The final tanh handles subnormal halfway values correctly. Core smoothing periods now use the public ceiling and clamp; both factories expose the alias and full specification. Regression coverage includes independent rational references, hands, callbacks, signals, previews/reset, extreme periods, legacy fallback and core spans.
+
+**113/113 focused tests passed** on net10.0 (premier682.trx), across 13 configurations and the existing golden test. This isolated branch includes batches 679-681; inventory is **6,515/7,131 enrolled**, **616 omissions across 91 types**, with complete independent references and no construction failures. Periodic677 is not included. The 46 prepared behavioral faults and final readiness gates remain pending.
+
+
+### Batch 662: pending mutation compiler repair
+
+The queued MacZ VWAP histogram-memory fault now resets the retained histogram to zero on committed bars instead of using a constant-false conditional. Both mutations leave the retained value at its initial/reset zero, but the replacement avoids an unreachable-code warning being treated as a compilation error. All 8,448 manifest anchors resolve. Production and test sources are unchanged; the 39-fault campaign remains unqualified and must use fresh matching snapshots containing this manifest repair. The original retained batch-662 snapshots remain untouched.
+
+
+### Batch 685: QQE volatility-width numerical arithmetic
+
+QQE retains the established RSI component, then carries exact smoothing and movement arithmetic through both width stages and final factors. Long derived periods and lazy storage avoid wraparound and eager allocation; five callbacks retain their order and supported integer-period contract. Nonnegative finite factors agree with typed options. Both factories route natively.
+
+**82/82 focused tests passed** on net10.0 (qqe685-repaired-build.trx), including nine configurations across five routes, exact rational references, opening/weighted hands, overflow/subnormal inputs, signals, preview/reset, lazy extreme periods, invalid inputs, callbacks, legacy fallback and existing hand/golden tests. The first attempt failed compilation and is excluded; the corrected build passed. Isolated inventory is **6,524/7,131 enrolled**, **607 omissions across 90 types**, with complete references and no construction failures. This branch includes679-682 and the662 manifest repair, but not unfinished Periodic677. The40 prepared faults and final readiness gates remain pending.
+
+
+### Batch 656: repair two mutation definitions
+
+The original pair caught42 compiled faults, left one equivalent fault alive and encountered one compiler failure; it does not qualify. The first-return fault now forces an opening return while still reading the previous-price flag, avoiding CS0414. The omitted callback reset was equivalent: the prepass changes only deviation state, and the callback replaces every deviation used by the second pass. Its replacement discards the callback result, testing an observable callback contract. Production and regression sources are unchanged.
+
+Fresh snapshots contain2,204 matching files, with only these two manifest definitions changed from the retained656 source. All8,488 current manifest anchors resolve. The replacement44-fault pair is running; qualification remains pending. Original partial results will not be pooled into its result.
+
+
+### Batch 688: Rainbow public numerical cascade
+
+Ten moving-average stages, their aggregate and extrema, and the complete range quotients retain rational intermediates through publication and signal comparisons. SMA startup zeros and weighted startup weights remain defined. Lazy history handles extreme periods; all three outputs and ten callback stages remain distinct. Both factories register the public state. Core alignment remains pending.
+
+**50/50 focused tests passed** on net10.0 (`rainbow688-public.trx`), including independent hand, five-route, extreme, callback, preview/reset, existing hand and golden regressions. Inventory: **6,529/7,131 enrolled**, **602 omissions across 89 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes unfinished RMO687 and Periodic677. The 35 prepared behavioral faults await isolated qualification; final readiness gates remain pending.
+
+
+### Batch 689: Random Walk complete root-scaled ratios
+
+Exact rational true ranges, ATR stages and lagged differences retain scale until the complete quotient is rounded with the exact square root of the period. The length-two opening hand now yields correctly rounded sqrt(2), rather than its lower neighboring double. Signals cancel the common positive root factor. Lazy history supports extreme periods; both output names, selected-close gaps, preview/reset and callback behavior remain explicit.
+
+**50/50 focused tests passed** on net10.0 (`random-walk689-focused-final.trx`), including independent root/lag hands, five routes, extreme/subnormal values, callbacks and the existing golden test. Inventory: **6,534/7,131 enrolled**, **597 omissions across 88 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes unfinished RMO687 and Periodic677. The 34 prepared behavioral faults await isolated qualification.
+
+A broader shared hand-example test passed its Random Walk entry but failed later on the separate Recursive Differenciator reference (0.19999999999999996 versus hand 0.2). That failure is preserved in `random-walk689-repaired-build.trx` and excluded from the 50 passing focused checks; its bounded follow-up is pending a scope decision. The initial compiler failure is also excluded. Final readiness gates remain pending.
+
+
+### Batch 690: Recursive RSI exact delayed direction votes
+
+The legacy inner loop reduces to a midpoint comparison and delayed count of nondecreasing votes. Exact lagged changes, source smoothing, Wilder gain/loss ratios, midpoint decisions and unpublished feedback preserve tiny directions and avoid overflowing intermediates. Lazy queues replace period-sized buffers and eliminate the redundant inner loop. Signals retain slope/acceleration semantics. Fast callbacks preserve source/gain/loss order; standard legacy batch averages consume no override slots. Both factories register the public state.
+
+**54/54 focused tests passed** on net10.0 (`recursive-rsi690-public.trx`), including independent delayed-vote hands, five routes, extreme/subnormal values, exact ties, callbacks, preview/reset, existing four-period shared regressions and the golden test. Inventory: **6,539/7,131 enrolled**, **592 omissions across 87 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes RMO687 and unfinished Periodic677. The 34 prepared behavioral faults await isolated qualification; final readiness gates remain pending.
+
+
+### Batch 691: Relative Spread Strength numerical correction
+
+Replaced the dedicated spread kernel's double-double differences and binary64 Wilder moments with exact rational arithmetic, retaining the binary64 RSI component boundary before the signal average. Lazy window history handles extreme periods. The fast callback path preserves its three-slot graph and no longer overflows when subtracting opposing finite average results. The independent reference directly sums windows and evaluates fraction trajectories; all 13 configurations now enter numerical verification and native routing.
+
+Verification: **112/112 focused tests passed**, covering five routes, selected inputs, numerical fixtures, injected output faults, an independently calculated SMA/Wilder hand example, subnormal and extreme spreads, large periods, preview/reset, invalid bars, callback order, and the existing DEMA/TEMA regression. **32 behavioral faults are prepared but mutation qualification is pending**; all 8,623 manifest anchors resolve. No compilation failure is counted as a kill. This isolated branch awaits integration after Periodic677 verification/freeze; final project gates remain incomplete.
+
+
+### Batch 694: RSING exact range-volume product
+
+Public batch, fast and native routes share a lazy range-moment kernel that evaluates the complete volume/range/momentum quotient before rounding. The independent reference uses centered range residuals and a binary64-search square root. Finite or extended-exponent oscillator components feed exact signal averages, allowing opposite overflowing raw values to cancel to a finite signal. Both published outputs and both configurable average slots remain explicit, and selected prices preserve source candles.
+
+**52/52 focused tests passed** on net10.0 (`rsing694-complete.trx`), including existing route and custom-average regressions, five configurations/five routes, numerical fixtures, hand calculations, extreme/subnormal products, repeated exponent normalization, finite signals from overflowing components, lazy periods, preview/reset, invalid inputs, and callback order. The two initial compilation failures are excluded. **37 behavioral faults are prepared; mutation qualification is pending.** All 8,660 manifest anchors resolve. Isolated inventory is **6,557/7,131 enrolled**, with **574 omissions across 85 types**, complete independent-reference registration, and an exact backlog match. This branch excludes separate RMO687 and unfinished Periodic677; integration and final project gates remain pending.
+
+
+### Batch 696: Sell Gravitation public numerical correction
+
+Public batch, fast and native routes now share exact candle-body/range arithmetic and two-stage smoothing with an explicit first-output component boundary. Native factory registration and selected-price candle preservation are covered, including smoothed selected prices outside valid original candle ranges.
+
+**52/52 focused tests passed** on net10.0 (`sell-gravitation696-final.trx`), covering five configurations and five routes, independent hands, numerical fixtures, extreme/subnormal inputs, finite signals from overflowing components, lazy periods, preview/reset, invalid inputs and callback slots. The initial failed run is excluded. **33 behavioral faults are prepared; mutation qualification is pending.** All 8,693 manifest anchors resolve. Isolated inventory: **6,562/7,131 enrolled**, **569 omissions across 84 types**, complete reference registration and exact backlog match. Core alignment is pending; this branch excludes separate RMO687 and unfinished Periodic677. Integration and final project gates remain incomplete.
+
+
+### Batch 694 selected-candle regression follow-up
+
+Strengthened the five existing RSING selected-source cases with valid gapping candles whose SMA-selected prices fall outside the original high/low range. Static and live outputs must match the independent formula evaluated with unchanged original candle fields. **5/5 strengthened cases passed** (`rsing694-selected-range-repair.trx`), using the unchanged production DLL. These replace the earlier five selected-source results within the 52 distinct focused cases. Fresh mutation snapshots will overlay only this test repair onto retained batch-694 source; original snapshots will not be qualified.
+
+
+### Batch 697: Squeeze Momentum residual regression
+
+Public routes now retain exact arithmetic through price averaging, rolling range midpoint, residuals and the partial-window regression endpoint. The independent reference uses direct centered covariance and variance sums. Native and direct-fast selected inputs preserve original candles; observed-history storage avoids extreme-period allocation.
+
+**53/53 focused tests passed** on net10.0 (`squeeze697-final.trx`), covering five configurations/five routes, the independent hand and existing shared/golden regressions, numerical fixtures, extreme/subnormal inputs, preview/reset, huge periods, DEMA fallback, callback metadata and invalid inputs. The initial test-file compilation failure and the intermediate 51/53 run are excluded; that run exposed the fixed direct-fast range reconstruction and reference DEMA mapping. **33 behavioral faults are prepared; mutation qualification is pending.** All 8,726 manifest anchors resolve. Inventory: **6,567/7,131 enrolled**, **564 omissions across 83 types**, all references registered and backlog exact. This isolated chain excludes separate RMO687 and unfinished Periodic677. Integration and final project gates remain pending.

@@ -8,55 +8,16 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Pso")]
 public sealed class PremierStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ssSmoother;
-    private readonly IMovingAverageSmoother _nskSmoother;
-    private readonly StochasticOscillatorState _stochastic;
-
-    public PremierStochasticOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 8, int smoothLength = 25)
-    {
-        var resolved = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(smoothLength)));
-        _stochastic = new StochasticOscillatorState(maType, Math.Max(1, length), 3, 3);
-        _nskSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ssSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-    }
-
+    private readonly PremierStochasticWindow _window;
+    public PremierStochasticOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 8, int smoothLength = 25)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.PremierStochasticOscillator;
-
-    public void Reset()
-    {
-        _stochastic.Reset();
-        _nskSmoother.Reset();
-        _ssSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var sk = _stochastic.Update(bar, isFinal, includeOutputs: false).Value;
-        var nsk = 0.1 * (sk - 50);
-        var nskEma = _nskSmoother.Next(nsk, isFinal);
-        var ss = _ssSmoother.Next(nskEma, isFinal);
-        var exp = MathHelper.Exp(ss);
-        var pso = exp + 1 != 0 ? MathHelper.MinOrMax((exp - 1) / (exp + 1), 1, -1) : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pso", pso }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pso, outputs);
-    }
-
-    public void Dispose()
-    {
-        _stochastic.Dispose();
-        _nskSmoother.Dispose();
-        _ssSmoother.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Pso", value } } : null);
     }
 }
 
@@ -916,80 +877,16 @@ public sealed class QuadrupleExponentialMovingAverageState : IStreamingIndicator
 [PrimaryOutput("FastAtrRsi")]
 public sealed class QuantitativeQualitativeEstimationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RsiState _rsi;
-    private readonly IMovingAverageSmoother _rsiSignal;
-    private readonly IMovingAverageSmoother _atrRsiEma;
-    private readonly IMovingAverageSmoother _atrRsiSmooth;
-    private readonly StreamingInputResolver _input;
-    private readonly double _fastFactor;
-    private readonly double _slowFactor;
-    private double _prevRsiSignal;
-    private bool _hasPrev;
-
+    private readonly QqeWindow _window;
     public QuantitativeQualitativeEstimationState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14,
-        int smoothLength = 5, double fastFactor = 2.618, double slowFactor = 4.236)
-    {
-        var resolvedLength = Math.Max(1, length);
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        var wildersLength = Math.Max(1, (resolvedLength * 2) - 1);
-        _rsi = new RsiState(maType, resolvedLength);
-        _rsiSignal = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _atrRsiEma = MovingAverageSmootherFactory.Create(maType, wildersLength);
-        _atrRsiSmooth = MovingAverageSmootherFactory.Create(maType, wildersLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _fastFactor = fastFactor;
-        _slowFactor = slowFactor;
-    }
-
+        int smoothLength = 5, double fastFactor = 2.618, double slowFactor = 4.236) => _window = new(maType, length, smoothLength, fastFactor, slowFactor);
     public IndicatorName Name => IndicatorName.QuantitativeQualitativeEstimation;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _rsiSignal.Reset();
-        _atrRsiEma.Reset();
-        _atrRsiSmooth.Reset();
-        _prevRsiSignal = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var rsi = _rsi.Next(value, isFinal);
-        var rsiSignal = _rsiSignal.Next(rsi, isFinal);
-        var prevRsiSignal = _hasPrev ? _prevRsiSignal : 0;
-        var atrRsi = Math.Abs(rsiSignal - prevRsiSignal);
-        var atrRsiEma = _atrRsiEma.Next(atrRsi, isFinal);
-        var atrRsiSmooth = _atrRsiSmooth.Next(atrRsiEma, isFinal);
-        var fastAtrRsi = atrRsiSmooth * _fastFactor;
-        var slowAtrRsi = atrRsiSmooth * _slowFactor;
-
-        if (isFinal)
-        {
-            _prevRsiSignal = rsiSignal;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "FastAtrRsi", fastAtrRsi },
-                { "SlowAtrRsi", slowAtrRsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fastAtrRsi, outputs);
-    }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _rsiSignal.Dispose();
-        _atrRsiEma.Dispose();
-        _atrRsiSmooth.Dispose();
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Fast, includeOutputs ? new Dictionary<string, double> { { "FastAtrRsi", point.Fast }, { "SlowAtrRsi", point.Slow } } : null);
     }
 }
 
@@ -1318,174 +1215,37 @@ public sealed class RahulMohindarOscillatorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Ro")]
 public sealed class RainbowOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _r1;
-    private readonly IMovingAverageSmoother _r2;
-    private readonly IMovingAverageSmoother _r3;
-    private readonly IMovingAverageSmoother _r4;
-    private readonly IMovingAverageSmoother _r5;
-    private readonly IMovingAverageSmoother _r6;
-    private readonly IMovingAverageSmoother _r7;
-    private readonly IMovingAverageSmoother _r8;
-    private readonly IMovingAverageSmoother _r9;
-    private readonly IMovingAverageSmoother _r10;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-
+    private readonly RainbowWindow _window;
     public RainbowOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 2, int length2 = 10)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(2, length2);
-        _r1 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r2 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r3 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r4 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r5 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r6 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r7 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r8 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r9 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r10 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _highWindow = new RollingWindowMax(resolved2);
-        _lowWindow = new RollingWindowMin(resolved2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new RainbowWindow(maType, length1, length2);
     public IndicatorName Name => IndicatorName.RainbowOscillator;
-
-    public void Reset()
-    {
-        _r1.Reset();
-        _r2.Reset();
-        _r3.Reset();
-        _r4.Reset();
-        _r5.Reset();
-        _r6.Reset();
-        _r7.Reset();
-        _r8.Reset();
-        _r9.Reset();
-        _r10.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(value, out _) : _highWindow.Preview(value, out _);
-        var lowest = isFinal ? _lowWindow.Add(value, out _) : _lowWindow.Preview(value, out _);
-        var r1 = _r1.Next(value, isFinal);
-        var r2 = _r2.Next(r1, isFinal);
-        var r3 = _r3.Next(r2, isFinal);
-        var r4 = _r4.Next(r3, isFinal);
-        var r5 = _r5.Next(r4, isFinal);
-        var r6 = _r6.Next(r5, isFinal);
-        var r7 = _r7.Next(r6, isFinal);
-        var r8 = _r8.Next(r7, isFinal);
-        var r9 = _r9.Next(r8, isFinal);
-        var r10 = _r10.Next(r9, isFinal);
-        var highestRainbow = Math.Max(r1, Math.Max(r2, Math.Max(r3, Math.Max(r4, Math.Max(r5, Math.Max(r6, Math.Max(r7,
-            Math.Max(r8, Math.Max(r9, r10)))))))));
-        var lowestRainbow = Math.Min(r1, Math.Min(r2, Math.Min(r3, Math.Min(r4, Math.Min(r5, Math.Min(r6, Math.Min(r7,
-            Math.Min(r8, Math.Min(r9, r10)))))))));
-        var avg = (r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10) / 10;
-        var ro = highest - lowest != 0 ? 100 * (value - avg) / (highest - lowest) : 0;
-        var upper = highest - lowest != 0 ? 100 * ((highestRainbow - lowestRainbow) / (highest - lowest)) : 0;
-        var lower = -upper;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Ro", ro },
-                { "UpperBand", upper },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ro, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> {
+            { "Ro", value.Line }, { "UpperBand", value.Upper }, { "LowerBand", value.Lower } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _r1.Dispose();
-        _r2.Dispose();
-        _r3.Dispose();
-        _r4.Dispose();
-        _r5.Dispose();
-        _r6.Dispose();
-        _r7.Dispose();
-        _r8.Dispose();
-        _r9.Dispose();
-        _r10.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("RwiHigh")]
 public sealed class RandomWalkIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _sqrtLength;
-    private readonly AverageTrueRangeSmoother _atrSmoother;
-    private readonly PooledRingBuffer<double> _highValues;
-    private readonly PooledRingBuffer<double> _lowValues;
-
+    private readonly RandomWalkWindow _window;
     public RandomWalkIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _sqrtLength = MathHelper.Sqrt(_length);
-        _atrSmoother = new AverageTrueRangeSmoother(maType, _length, InputName.Close);
-        _highValues = new PooledRingBuffer<double>(_length);
-        _lowValues = new PooledRingBuffer<double>(_length);
-    }
-
+        => _window = new RandomWalkWindow(maType, length);
     public IndicatorName Name => IndicatorName.RandomWalkIndex;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _highValues.Clear();
-        _lowValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var atr = _atrSmoother.Next(bar, isFinal);
-        var prevHigh = EhlersStreamingWindow.GetOffsetValue(_highValues, bar.High, _length);
-        var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, bar.Low, _length);
-        var bottom = atr * _sqrtLength;
-        var rwiLow = bottom != 0 ? (prevHigh - bar.Low) / bottom : 0;
-        var rwiHigh = bottom != 0 ? (bar.High - prevLow) / bottom : 0;
-
-        if (isFinal)
-        {
-            _highValues.TryAdd(bar.High, out _);
-            _lowValues.TryAdd(bar.Low, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "RwiHigh", rwiHigh },
-                { "RwiLow", rwiLow }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rwiHigh, outputs);
+        StreamingInputValidation.Validate(bar); var result = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> {
+            { "RwiHigh", result.High }, { "RwiLow", result.Low } } : null;
+        return new StreamingIndicatorStateResult(result.High, outputs);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-        _highValues.Dispose();
-        _lowValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ravi")]

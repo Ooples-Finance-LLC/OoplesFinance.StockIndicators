@@ -164,44 +164,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSqueezeMomentumIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
-        List<double> diffList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var midprice = (highest + lowest) / 2;
-            var sma = smaList[i];
-            var midpriceSmaAvg = (midprice + sma) / 2;
-
-            var diff = currentValue - midpriceSmaAvg;
-            diffList.Add(diff);
-        }
-
-        stockData.SetCustomValues(diffList);
-        var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var predictedToday = linregList[i];
-            var prevPredictedToday = i >= 1 ? linregList[i - 1] : 0;
-
-            var signal = GetCompareSignal(predictedToday, prevPredictedToday);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Smi", linregList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(linregList);
-        stockData.IndicatorName = IndicatorName.SqueezeMomentumIndicator;
-
+        var values = SqueezeMomentumWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Smi", values.Values.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Values.ToList()); stockData.IndicatorName = IndicatorName.SqueezeMomentumIndicator;
         return stockData;
     }
 }
