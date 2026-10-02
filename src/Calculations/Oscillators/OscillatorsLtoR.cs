@@ -2371,70 +2371,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRSINGIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20)
     {
-        List<double> rsingList = new(stockData.Count);
-        List<double> upList = new(stockData.Count);
-        List<double> dnList = new(stockData.Count);
-        List<double> rangeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
-        var maList = GetMovingAverageList(stockData, maType, length, volumeList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var high = highList[i];
-            var low = lowList[i];
-
-            var range = high - low;
-            rangeList.Add(range);
-        }
-
-        stockData.SetCustomValues(rangeList);
-        var stdevList = GetStandardDeviationList(rangeList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentVolume = volumeList[i];
-            var ma = maList[i];
-            var stdev = stdevList[i];
-            var range = rangeList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var vwr = ma != 0 ? currentVolume / ma : 0;
-            var blr = stdev != 0 ? range / stdev : 0;
-            var isUp = currentValue > prevValue;
-            var isDn = currentValue < prevValue;
-            var isEq = currentValue == prevValue;
-
-            var prevUpCount = GetLastOrDefault(upList);
-            var upCount = isEq ? 0 : isUp ? (prevUpCount <= 0 ? 1 : prevUpCount + 1) : (prevUpCount >= 0 ? -1 : prevUpCount - 1);
-            upList.Add(upCount);
-
-            var prevDnCount = GetLastOrDefault(dnList);
-            var dnCount = isEq ? 0 : isDn ? (prevDnCount <= 0 ? 1 : prevDnCount + 1) : (prevDnCount >= 0 ? -1 : prevDnCount - 1);
-            dnList.Add(dnCount);
-
-            var pmo = MinPastValues(i, length, currentValue - prevValue);
-            var rsing = vwr * blr * pmo;
-            rsingList.Add(rsing);
-        }
-
-        var rsingMaList = GetMovingAverageList(stockData, maType, length, rsingList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var rsing = rsingMaList[i];
-            var prevRsing1 = i >= 1 ? rsingMaList[i - 1] : 0;
-            var prevRsing2 = i >= 2 ? rsingMaList[i - 2] : 0;
-
-            var signal = GetCompareSignal(rsing - prevRsing1, prevRsing1 - prevRsing2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rsing", rsingList },
-            { "Signal", rsingMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rsingList);
+        var values = RsingWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rsing", values.Line.ToList() }, { "Signal", values.Signal.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Line.ToList());
         stockData.IndicatorName = IndicatorName.RSINGIndicator;
 
         return stockData;

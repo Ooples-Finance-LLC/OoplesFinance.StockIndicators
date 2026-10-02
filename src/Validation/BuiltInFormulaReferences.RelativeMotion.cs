@@ -142,25 +142,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Fom", scores), ("Dpl", line));
                 });
             case IndicatorName.RSINGIndicator:
-                return new("Rsing", new[] { "Rsing", "Signal" }, bars =>
-                {
-                    var volume = Average(bars.Select(b => b.Volume).ToArray(), length, kind);
-                    var ranges = bars.Select(b => b.High - b.Low).ToArray();
-                    var momentum = bars.Select((b, i) =>
-                    {
-                        if (i < length || volume[i] == 0) return 0d;
-                        var sample = Window(ranges, i, length).ToArray();
-                        // Independent pair-distance identity: variance = sum_{j<k}(xj-xk)^2/n^2.
-                        // Rounding a mean near a constant range changes this small denominator materially.
-                        double squaredDistances = 0;
-                        for (var j = 0; j < sample.Length; j++)
-                            for (var k = j + 1; k < sample.Length; k++)
-                                squaredDistances += (sample[j] - sample[k]) * (sample[j] - sample[k]);
-                        var sigma = Math.Sqrt(squaredDistances / ((double)sample.Length * sample.Length));
-                        return sigma == 0 ? 0 : (b.Close - bars[i - length].Close) * b.Volume * ranges[i] / (volume[i] * sigma);
-                    }).ToArray();
-                    return Outputs(("Rsing", momentum), ("Signal", Average(momentum, length, kind)));
-                });
+                return new("Rsing", new[] { "Rsing", "Signal" }, bars => RsingOutputs(bars, indicator));
             case IndicatorName.QuadraticRegression:
                 return new("QuadReg", new[] { "QuadReg" }, bars => Outputs(("QuadReg", QuadraticProjectionReference(Closes(bars), length, kind))));
             case IndicatorName.LinearQuadraticConvergenceDivergenceOscillator:

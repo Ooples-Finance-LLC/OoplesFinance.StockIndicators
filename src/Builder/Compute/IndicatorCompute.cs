@@ -21819,46 +21819,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRSINGIndicatorFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, string? outputKey = null)
     {
-        // CalculateRSINGIndicator scales the length-bar price change by how heavy the bar's volume was against
-        // its average and by how wide the bar ranged against the deviation of that range. The arm this
-        // replaced returned a relative strength index of the close, which shares nothing with it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        using var volumeAverage = context.Rent(count);
-        MovingAverage(data, maType, length, volumes, volumeAverage.WritableSpan);
-
-        using var ranges = context.Rent(count);
-        var range = ranges.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            range[i] = highs[i] - lows[i];
-        }
-
-        using var deviations = context.Rent(count);
-        VolatilityCore.StandardDeviation(ranges.Span, deviations.WritableSpan, Math.Max(1, length));
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var average = volumeAverage.Span[i];
-            var deviation = deviations.Span[i];
-            var volumeRatio = average != 0 ? volumes[i] / average : 0;
-            var rangeRatio = deviation != 0 ? ranges.Span[i] / deviation : 0;
-            var change = CalculationsHelper.MinPastValues(i, length, input[i] - (i >= length ? input[i - length] : 0));
-
-            output[i] = volumeRatio * rangeRatio * change;
-        }
-
-        using var signal = context.Rent(count);
-        MovingAverage(data, maType, length, buffer.Span, signal.WritableSpan);
-        if (outputKey == "Signal") signal.Span.CopyTo(output);
-        return buffer;
+        var values = RsingWindow.Calculate(data, maType, length, true);
+        var selected = outputKey == "Signal" ? values.Signal : values.Line;
+        var buffer = context.Rent(selected.Length); selected.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     internal static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100,

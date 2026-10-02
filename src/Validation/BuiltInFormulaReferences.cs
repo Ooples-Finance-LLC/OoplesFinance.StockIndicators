@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.RSINGIndicator)
+        {
+            var rsingKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Rsing", "Signal" };
+            for (var slot = 0; slot < rsingKeys.Length; slot++) { var key = rsingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RsingOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RelativeSpreadStrength)
         {
             yield return IndicatorValidationRule.Reference(0, bars => RelativeSpreadOutputs(bars, builtIn)["Rss"], IndicatorErrorBudget.Exact); yield break;

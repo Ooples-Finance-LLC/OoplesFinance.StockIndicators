@@ -126,82 +126,20 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
 }
 
 [PrimaryOutput("Rsing")]
-public sealed class RSINGIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class RSINGIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _volumeMa;
-    private readonly IMovingAverageSmoother _signalMa;
-    private readonly RollingStandardDeviation _rangeStdDev;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _rangeValue;
-    private int _index;
-
-    public RSINGIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _volumeMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _signalMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _rangeStdDev = new RollingStandardDeviation(_length);
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly RsingWindow _window;
+    public RSINGIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.RSINGIndicator;
-
-    public void Reset()
-    {
-        _volumeMa.Reset();
-        _signalMa.Reset();
-        _rangeStdDev.Reset();
-        _values.Clear();
-        _rangeValue = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var ma = _volumeMa.Next(volume, isFinal);
-        var range = bar.High - bar.Low;
-        _rangeValue = range;
-        var stdev = _rangeStdDev.Next(_rangeValue, isFinal);
-
-        var count = _values.Count;
-        var prevValue = count >= _length ? _values[count - _length] : 0;
-        var vwr = ma != 0 ? volume / ma : 0;
-        var blr = stdev != 0 ? range / stdev : 0;
-        var pmo = _index >= _length ? value - prevValue : 0;
-        var rsing = vwr * blr * pmo;
-        var signal = _signalMa.Next(rsing, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Rsing", rsing },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rsing, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.High, bar.Low, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Rsing", value.Line }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeMa.Dispose();
-        _signalMa.Dispose();
-        _rangeStdDev.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 public sealed class RSMKIndicatorState : IMultiSeriesIndicatorState, IDisposable, Validation.IMultiSeriesInputDomainContract

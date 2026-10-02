@@ -74713,5 +74713,338 @@
     "before": "_kernel.Next(bar.Close, isFinal)",
     "after": "_kernel.Next(bar.Close, true)",
     "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rsing-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-lag-ready",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "var full = _history.Count == _length;",
+    "after": "var full = _history.Count == 1;",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-range",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "Units(high) - Units(low)",
+    "after": "Units(high) + Units(low)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-range-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "Units(high) - Units(low)",
+    "after": "Units(high - low)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.CompleteProductsPreserveExtremeAndSubnormalInputs"
+  },
+  {
+    "id": "rsing-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_sum + range - old.Range",
+    "after": "_sum + range + old.Range",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "range * range - old.Range * old.Range",
+    "after": "range * range + old.Range * old.Range",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-variance",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_length * squares - sum * sum",
+    "after": "_length * squares + sum * sum",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-variance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_length * squares - sum * sum",
+    "after": "(_length + 1L) * squares - sum * sum",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "if (full && mean.Sign != 0",
+    "after": "if (_history.Count > 0 && mean.Sign != 0",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-mean-zero",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "full && mean.Sign != 0 && variance.Sign > 0",
+    "after": "full && variance.Sign > 0",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ZeroVarianceAndZeroVolumeHaveZeroProducts"
+  },
+  {
+    "id": "rsing-wide-change",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "Units(price) - Units(old.Price)",
+    "after": "Units(price) + Units(old.Price)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-volume",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "change * Units(volume) * range",
+    "after": "change * Units(1) * range",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-range-product",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "change * Units(volume) * range",
+    "after": "change * Units(volume) * Units(1)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-root-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": ".Times(_length) / mean",
+    "after": ".Times(1) / mean",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": " / mean;",
+    "after": " / mean.Times(2);",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-history-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "if (final)\n        { if (full)",
+    "after": "if (true)\n        { if (full)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-signal-strong",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "change.Sign > 0 && acceleration.Sign > 0",
+    "after": "change.Sign > 0 && acceleration.Sign < 0",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_previous = signal;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-acceleration-memory",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_previousChange = change;",
+    "after": "_previousChange = default;",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-signal-average",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_signal.Next(line, final)",
+    "after": "line",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-root-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "Denominator * Denominator * square",
+    "after": "Denominator * Denominator * square * 4",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-root-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "Units(Sign * value)",
+    "after": "Units(value)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-extended-restore",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "shift += 512",
+    "after": "shift += 511",
+    "filter": "FullyQualifiedName~RsingNumericalTests.OverflowingOscillatorComponentsCanHaveFiniteSignalAndCancel"
+  },
+  {
+    "id": "rsing-wide-extended-repeat",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "while (double.IsInfinity(value))",
+    "after": "if (double.IsInfinity(value))",
+    "filter": "FullyQualifiedName~RsingNumericalTests.CompleteProductsPreserveExtremeAndSubnormalInputs"
+  },
+  {
+    "id": "rsing-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "weighted = weighted - sum",
+    "after": "weighted = weighted + sum",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "value.Times(_length)",
+    "after": "value.Times(_length - 1L)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.HandVolumeRangeAndLagProduct"
+  },
+  {
+    "id": "rsing-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count + 1 <= _length ? default",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-ema-start",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-recursive-weight",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "if (final) { if (window)",
+    "after": "if (true) { if (window)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-reset-range",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "_sum = _squares = default;",
+    "after": "_sum = default;",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-callback-volume",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "Average(volumes.ToArray())",
+    "after": "Average(prices.ToArray())",
+    "filter": "FullyQualifiedName~RsingNumericalTests.CallbackGraphUsesVolumeThenOscillator"
+  },
+  {
+    "id": "rsing-wide-callback-signal",
+    "module": "numerical",
+    "file": "src/Helpers/RsingWindow.cs",
+    "scope": "internal sealed class RsingWindow : IDisposable",
+    "before": "var average = Average(line);",
+    "after": "var average = Average(prices.ToArray());",
+    "filter": "FullyQualifiedName~RsingNumericalTests.CallbackGraphUsesVolumeThenOscillator"
+  },
+  {
+    "id": "rsing-wide-native-range",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class RSINGIndicatorState",
+    "before": "_window.Next(bar.Close, bar.High, bar.Low, bar.Volume, isFinal)",
+    "after": "_window.Next(bar.Close, bar.Close, bar.Close, bar.Volume, isFinal)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.EveryRouteMatchesIndependentProduct"
+  },
+  {
+    "id": "rsing-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class RSINGIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* guard removed */",
+    "filter": "FullyQualifiedName~RsingNumericalTests.InvalidBarsCannotAdvanceState"
+  },
+  {
+    "id": "rsing-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class RSINGIndicatorState",
+    "before": "bar.Low, bar.Volume, isFinal)",
+    "after": "bar.Low, bar.Volume, true)",
+    "filter": "FullyQualifiedName~RsingNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "rsing-wide-selected-policy",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class RSINGIndicatorState",
+    "before": "PreserveOriginalRange => true",
+    "after": "PreserveOriginalRange => false",
+    "filter": "FullyQualifiedName~RsingNumericalTests.SelectedSourcePreservesFormula"
   }
 ]
