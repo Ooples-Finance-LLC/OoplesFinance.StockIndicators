@@ -4787,3 +4787,10 @@ This is evidence for retained batch-661 source with two repaired fault definitio
 Public routes now preserve exact delayed residuals, equality branches, extrapolation, rolling extremes and band midpoint. The independent reference evaluates the original index-coordinate equation and two separate extrema windows, while production uses its reduced piecewise expression and composed window. Independent hand examples cover both startup stages, ties and extrema expiry. A minimum-subnormal difference prevents a false residual tie; opposing overflowing endpoints still yield a finite midpoint.
 
 **55/55 focused tests passed** (`stationary-levels699-focused.trx`), including five configurations/five routes, independent references, numerical fixtures, existing hand/shared/golden regressions, extreme/subnormal data, long derived periods, lazy history, preview/reset, selected inputs, callbacks and finite validation. **36 behavioral faults are prepared; mutation qualification is pending.** All8,874 manifest anchors resolve. Inventory: **6,589/7,131 enrolled**, **542 omissions across79 types**, complete independent references, no construction failures and an exact backlog match. Remaining scope decisions, queued qualifications and final project gates are incomplete.
+
+
+### Batch 662: explicit fast selected-source verification repair
+
+All 15 existing selected-source cases now compare each explicit fast output with the independent projected-price reference, using varying volumes and preserving original candle fields. The focused test-only run passed 15/15; the production DLL SHA256 remained unchanged. The initial test build failed on an interface member and is excluded from passing evidence.
+
+The native-guard mutation now validates only close, a compilable behavioral fault caught by the existing nonfinite candle-field assertions. Fresh paired mutation campaigns are required for all 39 faults; neither the original nor first-repaired snapshot may qualify this batch. This repair does not change production code or claim mutation qualification.

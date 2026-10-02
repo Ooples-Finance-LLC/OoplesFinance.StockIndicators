@@ -14,7 +14,25 @@ public sealed class MacZVwapNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentStandardization(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.MacZVwapOutputs(bars, (IBuiltInIndicator)c.Factory()), BuiltInFormulaReferences.MacZBudget);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var options = (OoplesFinance.StockIndicators.Builder.Specs.MacZVwapIndicatorSpecOptions)indicator.CreateOptions();
+        var bars = Enumerable.Range(0, Math.Max(64, c.Factory().WarmupBars + 8)).Select(i =>
+            new Bar(DateTime.UnixEpoch.AddMinutes(i), 20, 40, -5, 30 - i % 7, 1 + i % 5)).ToArray();
+        var selected = bars.Select((_, i) => 2d + i % 11).ToArray();
+        var projected = bars.Select((b, i) => new Bar(b.Time, b.Open, b.High, b.Low, selected[i], b.Volume)).ToArray();
+        var expected = BuiltInFormulaReferences.MacZVwapOutputs(projected, indicator);
+        foreach (var (key, series) in new[] { ("Macz", IndicatorCompute.MacdSeries.Line), ("Signal", IndicatorCompute.MacdSeries.Signal), ("Histogram", IndicatorCompute.MacdSeries.Histogram) })
+        {
+            var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+            using var actual = IndicatorCompute.ComputeMacZVwapIndicatorFast(data, context, options.FastLength, options.SlowLength, options.SignalLength, options.Length1, options.Length2, options.Gamma, options.MaType, series);
+            Assert.Equal(expected[key].Length, actual.Length);
+            for (var i = 0; i < actual.Length; i++) Equal(expected[key][i], actual.Span[i]);
+            Assert.Equal(selected, data.ChainedValues); Assert.Equal(bars.Select(b => b.High), data.HighPrices); Assert.Equal(bars.Select(b => b.Low), data.LowPrices); Assert.Equal(bars.Select(b => b.Volume), data.Volumes);
+        }
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]

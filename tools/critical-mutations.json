@@ -67845,7 +67845,7 @@
     "file": "src/Streaming/StatefulIndicators.Batch16.cs",
     "scope": "public sealed class MacZVwapIndicatorState",
     "before": "StreamingInputValidation.Validate(bar);",
-    "after": "StreamingInputValidation.Validate(default(OhlcvBar));",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
     "filter": "FullyQualifiedName~MacZVwapNumericalTests.NonfiniteInputsCannotAdvanceState"
   },
   {
