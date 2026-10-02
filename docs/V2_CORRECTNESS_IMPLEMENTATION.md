@@ -4962,3 +4962,12 @@ Inventory: **6,664/7,131 enrolled**, **467 omissions across 68 types**, all 7,13
 All **41/41 focused tests passed** in `uber-trend712-focused.trx`: four configurations across five public routes, explicit selected-price routing with original volume, independent value/signal hands, overflowing moves and subnormal volume ratios, signed-volume poles and neighbors, zero conventions, extreme periods, expiry, preview/reset, core span guards/in-place use and full-candle validation. Existing golden, hand and shared-route regressions passed. An initial unsupported unary operator failed compilation and was corrected before this passing run; it is not test evidence.
 
 Inventory: **6,668/7,131 enrolled**, **463 omissions across 67 types**, all 7,131 independent reference registrations, no construction failures and exact backlog agreement. All **9,264 mutation anchors resolve**; 35 new faults await isolated campaigns. Focused verification does not establish mutation, hosted-platform, performance or release qualification. Preserved TrendForce/Mobility files match recorded hashes.
+
+
+### Batch 669: Moving Average Adaptive Filter corrected mutation qualification
+
+The isolated campaigns `669-signal-repaired-a` and `669-signal-repaired-b` passed their baselines and caught **42/42 compiled behavioral faults**, alongside **36/36 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-669 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `af6bf2bddafee6afc00596ec41462fc12fc066273ae223b4ddfc1e2d9a1a4ac9`. Archive SHA256: `e097aabdb7d90eb62840ce8828b35f4c838dd1efe5cb245f6cefe231aad7c779` and `1effb59b8499219735dbf48f9b86c1ed507c974c611d46917622525ed69c26a8`.
+
+This is evidence for the isolated batch-669 source. Source was already published in the batch-669 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
