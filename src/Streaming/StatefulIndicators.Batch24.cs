@@ -561,91 +561,17 @@ public void Dispose()
 [PrimaryOutput("Tabf")]
 public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema;
-
-    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
-    // the rises and the other the falls, and they must not be crossed.
-    private readonly RollingStandardDeviation _bStdDev;
-    private readonly RollingStandardDeviation _cStdDev;
-    private readonly StreamingInputResolver _input;
-    private double _prevEma;
-    private double _prevUp;
-    private double _prevDn;
-    private bool _hasPrev;
-
-    public TopsAndBottomsFinderState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 50)
-    {
-        var resolved = Math.Max(1, length);
-        _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        // No moving-average type, and no selector: RollingStandardDeviation is handed the value itself, so
-        // neither series has to be smuggled in through a closure over a field.
-        _bStdDev = new RollingStandardDeviation(resolved);
-        _cStdDev = new RollingStandardDeviation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TopsBottomsWindow _window;
+    public TopsAndBottomsFinderState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 50)
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.TopsAndBottomsFinder;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _bStdDev.Reset();
-        _cStdDev.Reset();
-        _prevEma = 0;
-        _prevUp = 0;
-        _prevDn = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ema = _ema.Next(value, isFinal);
-        var prevEma = _hasPrev ? _prevEma : 0;
-        // Locals, not fields: each is computed and consumed within this one bar, and nothing carries them to
-        // the next. Held as fields they would read like the state above them - _prevEma and the rest do carry
-        // forward - which is state this indicator does not have. They were fields only because the deviation
-        // state they fed resolved its own input and had to be handed a closure over something.
-        var bValue = ema > prevEma ? ema : 0;
-        var cValue = ema < prevEma ? ema : 0;
-
-        // Each deviation is fed the series it measures: the rises, and the falls.
-        var bStd = _bStdDev.Next(bValue, isFinal);
-        var cStd = _cStdDev.Next(cValue, isFinal);
-
-        var prevUp = _hasPrev ? _prevUp : 0;
-        var prevDn = _hasPrev ? _prevDn : 0;
-        var up = ema + bStd != 0 ? ema / (ema + bStd) : 0;
-        var dn = ema + cStd != 0 ? ema / (ema + cStd) : 0;
-        var os = prevUp == 1 && up != 1 ? 1 : prevDn == 1 && dn != 1 ? -1 : 0;
-
-        if (isFinal)
-        {
-            _prevEma = ema;
-            _prevUp = up;
-            _prevDn = dn;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tabf", os }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(os, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Tabf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _bStdDev.Dispose();
-        _cStdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("TotalPower")]

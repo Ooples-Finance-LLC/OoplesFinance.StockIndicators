@@ -77863,5 +77863,311 @@
     "before": "values.Line.AsSpan().CopyTo(buffer.WritableSpan);",
     "after": "buffer.WritableSpan.Clear();",
     "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-rises",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "direction > 0 ? mean : default",
+    "after": "direction < 0 ? mean : default",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-falls",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "direction < 0 ? mean : default",
+    "after": "direction > 0 ? mean : default",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-mean-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "var direction =",
+    "after": "mean = Number.Of(mean.Publish()); var direction =",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.RoundedMovingAverageTiesCannotCreateFalseEndpoints"
+  },
+  {
+    "id": "tops-bottoms-wide-mean-zero-up",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "mean.Sign != 0 && risingConstant",
+    "after": "risingConstant",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ZeroMeansConstantWindowsAndLazyExtremePeriods"
+  },
+  {
+    "id": "tops-bottoms-wide-mean-zero-down",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "mean.Sign != 0 && fallingConstant",
+    "after": "fallingConstant",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.OneAverageCallbackIsUsedAndCallerSeriesIsPreserved"
+  },
+  {
+    "id": "tops-bottoms-wide-up-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previousUp && !up",
+    "after": "_previousUp && up",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-down-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previousDown && !down",
+    "after": "_previousDown && down",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-down-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "? -1d : 0",
+    "after": "? 1d : 0",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-precedence",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previousUp && !up ? 1d : _previousDown && !down ? -1d : 0",
+    "after": "_previousDown && !down ? -1d : _previousUp && !up ? 1d : 0",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ZeroMeansConstantWindowsAndLazyExtremePeriods"
+  },
+  {
+    "id": "tops-bottoms-wide-memory-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "if (final) { _previousMean",
+    "after": "if (true) { _previousMean",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-mean-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previousMean = mean;",
+    "after": "_previousMean = default;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-up-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previousUp = up;",
+    "after": "_previousUp = false;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-down-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previousDown = down;",
+    "after": "_previousDown = false;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "tops-bottoms-wide-callback-input",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "ComponentAverage.Take(prices.ToArray(), length)",
+    "after": "ComponentAverage.Take(data.InputValues.ToArray(), length)",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.OneAverageCallbackIsUsedAndCallerSeriesIsPreserved"
+  },
+  {
+    "id": "tops-bottoms-wide-callback-mean",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "window.FromMean(Number.Of(mean[i]), true)",
+    "after": "window.FromMean(Number.Of(prices[i]), true)",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.OneAverageCallbackIsUsedAndCallerSeriesIsPreserved"
+  },
+  {
+    "id": "tops-bottoms-wide-width",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "private sealed class ConstantWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 1;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-expiry-change",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "changes--;",
+    "after": "changes++;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-append-change",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "changes++;",
+    "after": "changes--;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "retained + 1 < _length || changes == 0",
+    "after": "changes == 0",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-equality",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "changes == 0",
+    "after": "changes <= 1",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-window-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (true) { if (full)",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-window-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_changes = changes;",
+    "after": "_changes = 0;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-reset-window",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_history.Clear(); _changes = 0;",
+    "after": "_changes = 0;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-reset-up-down",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previousUp = _previousDown = false;",
+    "after": "_previousUp = _previousDown = true;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ZeroMeansConstantWindowsAndLazyExtremePeriods"
+  },
+  {
+    "id": "tops-bottoms-wide-weighted-recurrence",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "weighted = weighted - sum + value.Times(_length);",
+    "after": "weighted = weighted - sum + value;",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ZeroMeansConstantWindowsAndLazyExtremePeriods"
+  },
+  {
+    "id": "tops-bottoms-wide-ema-seed",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_count < _length",
+    "after": "_count < 1",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-mean-state-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/TopsBottomsWindow.cs",
+    "scope": "internal sealed class TopsBottomsWindow",
+    "before": "_previous = result;",
+    "after": "_previous = Number.Of(result.Publish());",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.RoundedMovingAverageTiesCannotCreateFalseEndpoints"
+  },
+  {
+    "id": "tops-bottoms-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TopsAndBottomsFinderState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.NonfiniteCandlesCannotAdvanceMeansOrEndpointHistory"
+  },
+  {
+    "id": "tops-bottoms-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TopsAndBottomsFinderState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-native-value",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TopsAndBottomsFinderState",
+    "before": "new StreamingIndicatorStateResult(value,",
+    "after": "new StreamingIndicatorStateResult(0,",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TopsAndBottomsFinderState",
+    "before": "{ \"Tabf\", value }",
+    "after": "{ \"Tabf\", 0 }",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "tops-bottoms-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTopsAndBottomsFinderFast",
+    "before": "values.AsSpan().CopyTo(output.WritableSpan);",
+    "after": "output.WritableSpan.Clear();",
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
   }
 ]

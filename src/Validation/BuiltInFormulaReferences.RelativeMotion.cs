@@ -156,23 +156,7 @@ internal static partial class BuiltInFormulaReferences
                 // The obsolete Length option remains inert; public defaults are 200 and 14.
                 return new("Pdo", new[] { "Pdo" }, bars => PivotDetectorValues(bars, kind: kind).Outputs);
             case IndicatorName.TopsAndBottomsFinder:
-                return new("Tabf", new[] { "Tabf" }, bars =>
-                {
-                    var level = Average(Closes(bars), length, kind);
-                    double[] Ratio(bool rising)
-                    {
-                        var selected = level.Select((v, i) => (rising ? v > (i == 0 ? 0 : level[i - 1]) : v < (i == 0 ? 0 : level[i - 1])) ? v : 0).ToArray();
-                        return level.Select((v, i) =>
-                        {
-                            var sample = Window(selected, i, length).ToArray(); var mean = sample.Average();
-                            var sigma = i + 1 < length ? 0 : Math.Sqrt(sample.Average(x => (x - mean) * (x - mean)));
-                            return v + sigma == 0 ? 0 : v / (v + sigma);
-                        }).ToArray();
-                    }
-                    var up = Ratio(true); var down = Ratio(false);
-                    return Outputs(("Tabf", level.Select((_, i) => i == 0 ? 0d : up[i - 1] == 1 && up[i] != 1 ? 1 // NOSONAR: S1244 - The event contract detects departure from the exact endpoint.
-                        : down[i - 1] == 1 && down[i] != 1 ? -1 : 0).ToArray())); // NOSONAR: S1244 - The event contract detects departure from the exact endpoint.
-                });
+                return new("Tabf", new[] { "Tabf" }, bars => TopsBottomsOutputs(bars, indicator));
             case IndicatorName.TTMScalperIndicator:
                 return new("Sbs", new[] { "Sbs" }, bars =>
                 {

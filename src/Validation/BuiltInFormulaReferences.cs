@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TopsAndBottomsFinder)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => TopsBottomsOutputs(bars, builtIn)["Tabf"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SwamiStochastics)
         {
             yield return IndicatorValidationRule.Reference(0, bars => SwamiOutputs(bars, builtIn)["Ss"], IndicatorErrorBudget.Exact); yield break;

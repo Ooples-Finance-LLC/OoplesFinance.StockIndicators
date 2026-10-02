@@ -2018,68 +2018,11 @@ public static partial class Calculations
     public static StockData CalculateTopsAndBottomsFinder(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 50)
     {
-        List<double> bList = new(stockData.Count);
-        List<double> cList = new(stockData.Count);
-        List<double> upList = new(stockData.Count);
-        List<double> dnList = new(stockData.Count);
-        List<double> osList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var a = emaList[i];
-            var prevA = i >= 1 ? emaList[i - 1] : 0;
-
-            var b = a > prevA ? a : 0;
-            bList.Add(b);
-
-            var c = a < prevA ? a : 0;
-            cList.Add(c);
-        }
-
-        stockData.SetCustomValues(bList);
-
-        // The deviation of each window about its own mean, not the mean squared residual from a moving average
-        // of it. Each ratio is the average over itself plus a deviation, so sigma sets how far the ratio can
-        // fall below one; the quantity this replaces is about 55% wider on a typical price series.
-        //
-        // Taken over the two lists by name, which is what keeps them apart: bList holds the rises and cList
-        // the falls, and they are different series. Measuring one on the other's window is the redirection
-        // #190 warns about for chained sites. See #190.
-        var bStdDevList = GetStandardDeviationList(bList, length);
-        stockData.SetCustomValues(cList);
-        var cStdDevList = GetStandardDeviationList(cList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var a = emaList[i];
-            var b = bStdDevList[i];
-            var c = cStdDevList[i];
-
-            var prevUp = GetLastOrDefault(upList);
-            var up = a + b != 0 ? a / (a + b) : 0;
-            upList.Add(up);
-
-            var prevDn = GetLastOrDefault(dnList);
-            var dn = a + c != 0 ? a / (a + c) : 0;
-            dnList.Add(dn);
-
-            double os = prevUp == 1 && up != 1 ? 1 : prevDn == 1 && dn != 1 ? -1 : 0;
-            osList.Add(os);
-
-            var signal = GetConditionSignal(os > 0, os < 0);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tabf", osList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(osList);
-        stockData.IndicatorName = IndicatorName.TopsAndBottomsFinder;
-
+        var values = TopsBottomsWindow.Calculate(stockData, maType, length, true);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tabf", values.ToList() } });
+        var signals = CreateSignalsList(stockData);
+        signals?.AddRange(values.Select(v => GetConditionSignal(v > 0, v < 0))); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.ToList()); stockData.IndicatorName = IndicatorName.TopsAndBottomsFinder;
         return stockData;
     }
 

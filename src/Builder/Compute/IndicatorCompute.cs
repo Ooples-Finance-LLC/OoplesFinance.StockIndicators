@@ -22138,70 +22138,8 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTopsAndBottomsFinderFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // V1 Algorithm: EMA rising/falling with stddev-based thresholds for top/bottom detection
-        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
-        int count = data.Count;
-        length = Math.Max(1, length);
-
-        // Step 1: Compute EMA of close prices
-        var emaBuffer = context.Rent(count);
-        MovingAverage(data, maType, length, close, emaBuffer.WritableSpan);
-        var emaSpan = emaBuffer.Span;
-
-        // Step 2: Calculate b (EMA when rising) and c (EMA when falling)
-        var bBuffer = context.Rent(count);
-        var cBuffer = context.Rent(count);
-        var bSpan = bBuffer.WritableSpan;
-        var cSpan = cBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
-        {
-            double a = emaSpan[i];
-            double prevA = i >= 1 ? emaSpan[i - 1] : 0;
-            bSpan[i] = a > prevA ? a : 0;
-            cSpan[i] = a < prevA ? a : 0;
-        }
-
-        // Step 3: Compute stddev of b and c values
-        var bStdDevBuffer = context.Rent(count);
-        var cStdDevBuffer = context.Rent(count);
-        VolatilityCore.StandardDeviation(bBuffer.Span, bStdDevBuffer.WritableSpan, length);
-        VolatilityCore.StandardDeviation(cBuffer.Span, cStdDevBuffer.WritableSpan, length);
-        var bStdSpan = bStdDevBuffer.Span;
-        var cStdSpan = cStdDevBuffer.Span;
-
-        // Step 4: Calculate up, dn, and os (oscillator signal)
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-        double prevUp = 0;
-        double prevDn = 0;
-        for (int i = 0; i < count; i++)
-        {
-            double a = emaSpan[i];
-            double bStd = bStdSpan[i];
-            double cStd = cStdSpan[i];
-
-            double up = (a + bStd) != 0 ? a / (a + bStd) : 0;
-            double dn = (a + cStd) != 0 ? a / (a + cStd) : 0;
-
-            // Signal: 1 when up drops from 1, -1 when dn drops from 1
-            double os = 0;
-            if (prevUp == 1 && up != 1)
-                os = 1;
-            else if (prevDn == 1 && dn != 1)
-                os = -1;
-
-            resultSpan[i] = os;
-            prevUp = up;
-            prevDn = dn;
-        }
-
-        emaBuffer.Dispose();
-        bBuffer.Dispose();
-        cBuffer.Dispose();
-        bStdDevBuffer.Dispose();
-        cStdDevBuffer.Dispose();
-
-        return result;
+        var values = TopsBottomsWindow.Calculate(data, maType, length, true); var output = context.Rent(values.Length);
+        values.AsSpan().CopyTo(output.WritableSpan); return output;
     }
 
     internal static ComputeBuffer ComputeTraderPressureIndexFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 2, int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, string? outputKey = null)

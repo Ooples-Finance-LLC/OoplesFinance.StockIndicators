@@ -4845,3 +4845,12 @@ The four existing Market Direction selected-source cases now directly exercise t
 ### Batch 664 selected-source verification repair
 
 The 14 existing Mass Thrust selected-source cases now directly exercise indicator/alias, oscillator and signal fast methods against independent projected-price references, preserving original candle fields and volumes. All **14/14 passed** in `mass-thrust664-selected-fast-repair.trx`; the production assembly SHA256 remained unchanged. This strengthens the queued fast-source faults without changing production or their definitions. Fresh snapshots must overlay this test repair before mutation verification; the original snapshots remain unqualified.
+
+
+### Batch 705: Tops and Bottoms Finder numerical coverage
+
+The rise/fall event now tests the exact mathematical endpoint: nonzero mean and zero population variance. Exact SMA/WMA/EMA/Wilder means plus lazy equality histories avoid overflowing squares, roots and rounded ratios; other average kinds keep their existing smoother. Batch, explicit fast, verified builder and native/live routes share the kernel; one average callback remains supported. There is no separate core.
+
+All **49/49 focused checks passed** in `tops705-focused.trx`, covering five configurations across five routes, independent exact squared-distance references and hands, subnormal/overflowing variance, false moving-average ties, window expiry, preview/reset, normalized/extreme periods, selected input, callback semantics, nonfinite validation and existing hand/route/golden regressions. Production does not form variances; the independent reference proves positive variance with a squared-distance witness.
+
+Inventory: **6,610/7,131 enrolled**, **521 omissions across 75 types**, all 7,131 references registered, no construction failures and exact backlog match. **34 prepared faults** bring the manifest to **9,007 anchors**. A scale-only WMA fault was replaced before snapshotting because the event is invariant under positive scaling. Mutation qualification and final assurance gates remain outstanding.
