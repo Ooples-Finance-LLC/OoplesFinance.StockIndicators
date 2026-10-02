@@ -4854,3 +4854,12 @@ The rise/fall event now tests the exact mathematical endpoint: nonzero mean and 
 All **49/49 focused checks passed** in `tops705-focused.trx`, covering five configurations across five routes, independent exact squared-distance references and hands, subnormal/overflowing variance, false moving-average ties, window expiry, preview/reset, normalized/extreme periods, selected input, callback semantics, nonfinite validation and existing hand/route/golden regressions. Production does not form variances; the independent reference proves positive variance with a squared-distance witness.
 
 Inventory: **6,610/7,131 enrolled**, **521 omissions across 75 types**, all 7,131 references registered, no construction failures and exact backlog match. **34 prepared faults** bring the manifest to **9,007 anchors**. A scale-only WMA fault was replaced before snapshotting because the event is invariant under positive scaling. Mutation qualification and final assurance gates remain outstanding.
+
+
+### Batch 663: Market Direction mutation qualification
+
+The isolated campaigns `663-repaired-a` and `663-repaired-b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **42/42 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-663 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `889c7a23ae24f2bbae52c08cc92640c2ec64e33083c5091a38d130aaf8478e04`. Archive SHA256: `9cb26d4bf01697ac4b52e58423257e29f09d104738b2fde061689650d5e5192f` and `7282691d8a212d496ad7eb229eb30cfa0d38b9847094321675efbda83b3766cf`.
+
+This is evidence for the isolated batch-663 source. The retained source has only a repaired guard fault and strengthened explicit-fast selected-source test overlay; the original snapshots are excluded. Source was already published in the batch-663 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
