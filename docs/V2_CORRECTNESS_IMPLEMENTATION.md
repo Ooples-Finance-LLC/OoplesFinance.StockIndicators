@@ -4841,3 +4841,7 @@ Inventory: **6,605/7,131 enrolled**, **526 omissions across 76 types**, all 7,13
 ### Batch 663 verification repair
 
 The four existing Market Direction selected-source cases now directly exercise the fast route against independent projected-price references, while checking that selected input and original candle ranges are preserved. All **4/4 passed** in `market-direction663-selected-fast-repair.trx`; the production assembly SHA256 remained unchanged. The native guard fault now removes candle validation while retaining the finite-close check, avoiding a nullable compilation failure. Fresh isolated mutation campaigns are required; this repair does not qualify the original snapshots.
+
+### Batch 664 selected-source verification repair
+
+The 14 existing Mass Thrust selected-source cases now directly exercise indicator/alias, oscillator and signal fast methods against independent projected-price references, preserving original candle fields and volumes. All **14/14 passed** in `mass-thrust664-selected-fast-repair.trx`; the production assembly SHA256 remained unchanged. This strengthens the queued fast-source faults without changing production or their definitions. Fresh snapshots must overlay this test repair before mutation verification; the original snapshots remain unqualified.

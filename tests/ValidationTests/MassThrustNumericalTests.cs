@@ -17,7 +17,38 @@ public sealed class MassThrustNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentRatios(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.MassThrustOutputs(bars, (IBuiltInIndicator)c.Factory()), BuiltInFormulaReferences.MassThrustBudget);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var (length, kind) = indicator.CreateOptions() switch
+        {
+            MassThrustSpecOptions o => (o.Length, MovingAvgType.ExponentialMovingAverage),
+            MassThrustIndicatorSpecOptions o => (o.Length, o.MaType),
+            MassThrustOscillatorSpecOptions o => (o.Length, o.MaType),
+            _ => throw new InvalidOperationException()
+        };
+        var oscillator = indicator.BatchName == IndicatorName.MassThrustOscillator;
+        var bars = Enumerable.Range(0, Math.Max(64, c.Factory().WarmupBars + 8)).Select(i =>
+            new Bar(DateTime.UnixEpoch.AddMinutes(i), 20, 40, -5, 30 - i % 7, 1 + i % 5)).ToArray();
+        var selected = bars.Select((_, i) => 2d + i % 11).ToArray();
+        var projected = bars.Select((bar, i) => new Bar(bar.Time, bar.Open, bar.High, bar.Low, selected[i], bar.Volume)).ToArray();
+        var expected = BuiltInFormulaReferences.MassThrustOutputs(projected, indicator);
+        var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+        using var actual = oscillator ? IndicatorCompute.ComputeMassThrustOscillatorFast(data, context, length)
+            : c.IndicatorType == typeof(MassThrust) ? IndicatorCompute.ComputeMassThrustFast(data, context, length)
+            : IndicatorCompute.ComputeMassThrustIndicatorFast(data, context, length);
+        using var signal = IndicatorCompute.ComputeMassThrustSignalFast(data, context, length, kind, oscillator);
+        var line = actual.ToArray(); var smoothed = signal.ToArray();
+        for (var i = 0; i < bars.Length; i++)
+        {
+            Equal(expected[oscillator ? "Mto" : "Mti"][i], line[i]);
+            Equal(expected["Signal"][i], smoothed[i]);
+        }
+        Assert.Equal(selected, data.ChainedValues);
+        Assert.Equal(bars.Select(bar => bar.High), data.HighPrices); Assert.Equal(bars.Select(bar => bar.Low), data.LowPrices);
+        Assert.Equal(bars.Select(bar => bar.Volume), data.Volumes);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
