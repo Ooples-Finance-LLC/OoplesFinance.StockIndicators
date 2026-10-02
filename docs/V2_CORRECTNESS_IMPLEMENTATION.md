@@ -4748,3 +4748,10 @@ Public routes now retain exact arithmetic through price averaging, rolling range
 Ten SMA stages, their mean, the rolling-range quotient and subsequent EMA stages retain exact rational intermediates through publication and signal comparisons. Lazy history handles extreme periods. Output-specific callback graphs retain the required ten SMA stages and only the requested EMA stages. Both factories register the public state. Core alignment remains pending.
 
 **42/42 focused tests passed** on net10.0 (`rmo687-public.trx`), including independent hand, route, extreme, callback and existing golden regressions. Inventory: **6,528/7,131 enrolled**, **603 omissions across 89 types**, all independent references registered, no construction failures, backlog exact. The 43 prepared behavioral faults await isolated qualification; final readiness gates remain pending.
+
+
+### Integrated source checkpoint through batch 697
+
+Integrated the verified isolated chain (Parametric Kalman679 through Squeeze Momentum697), the separate RMO687 branch, and the retained test/manifest repairs after Periodic677 passed all64 focused tests and was frozen. Shared registration and reference lists preserve both branches; the numerical backlog is their remaining intersection. All **8,806 mutation anchors resolve**.
+
+**145/145 integration checks passed** (`integration697-focused.trx`): independent hands, core/span regressions, output registration checks, generated average slots, numerical enrollment, and strengthened RSING/Kwan selected-source cases. This supplements the retained individual batch runs; it is not full release assurance. The rebuilt combined assembly discovers **7,131 configurations**, all with independent references, with **6,579 enrolled** and **552 omissions across81 types**, no construction failures and an exact backlog match. Unrelated TrendForce and unfinished Mobility files remain uncommitted and unchanged by hash. Queued mutation qualifications, pending scope decisions and final hosted/platform/package/release/performance gates remain incomplete.
