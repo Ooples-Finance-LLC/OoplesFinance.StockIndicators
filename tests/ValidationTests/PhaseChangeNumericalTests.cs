@@ -15,7 +15,23 @@ public sealed class PhaseChangeNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentResiduals(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.PhaseChangeOutputs(bars, (IBuiltInIndicator)c.Factory()), IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var options = ((IBuiltInIndicator)c.Factory()).CreateOptions();
+        var length = (int)options.GetType().GetProperty("Length")!.GetValue(options)!;
+        var smooth = (int)options.GetType().GetProperty("SmoothLength")!.GetValue(options)!;
+        var kind = (MovingAvgType)options.GetType().GetProperty("MaType")!.GetValue(options)!;
+        var bars = Bars(Enumerable.Range(1, 48).Select(i => (double)i).ToArray());
+        var selected = Enumerable.Range(0, 48).Select(i => (double)(i * 7 % 13 - 6)).ToArray();
+        var expected = BuiltInFormulaReferences.PhaseChangeValues(bars, length, smooth, Kind(kind), selected: selected);
+        var data = Data(bars); data.SetCustomValues(selected.ToList());
+        using var context = new ComputeContext();
+        using var primary = IndicatorCompute.ComputePhaseChangeIndexFast(data, context, length);
+        using var signal = IndicatorCompute.ComputePhaseChangeIndexSignalFast(data, context, length, smooth, kind);
+        Assert.Equal(expected.Outputs["Pci"], primary.ToArray()); Assert.Equal(expected.Outputs["Signal"], signal.ToArray());
+        Assert.Equal(selected, data.ChainedValues); Assert.Equal(bars.Select(bar => bar.Close), data.ClosePrices);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
