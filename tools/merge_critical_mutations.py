@@ -76,7 +76,7 @@ def main():
     output = Path(args.output)
     if output.exists():
         raise ValueError("Use a fresh merged evidence path.")
-    manifest = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
+    manifest = json.loads(Path(args.manifest).read_text(encoding="utf-8-sig"))
     directories = sorted(path.parent for path in Path(args.input).glob("*/evidence.json"))
     result = merge_shards(directories, manifest)
     output.parent.mkdir(parents=True, exist_ok=True)

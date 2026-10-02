@@ -129,7 +129,7 @@ def main():
     if args.timeout <= 0 or args.baseline_timeout <= 0:
         raise ValueError("The per-run timeout must be positive.")
     repo = Path(__file__).resolve().parent.parent
-    entries = json.loads((repo / "tools/critical-mutations.json").read_text(encoding="utf-8"))
+    entries = json.loads((repo / "tools/critical-mutations.json").read_text(encoding="utf-8-sig"))
     if not entries or len({m["id"] for m in entries}) != len(entries):
         raise ValueError("Critical faults must be nonempty and uniquely named.")
     all_entries = entries

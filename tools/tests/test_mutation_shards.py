@@ -7,6 +7,8 @@ import unittest
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from unittest.mock import patch
+import merge_critical_mutations
 from merge_critical_mutations import merge_shards
 from run_critical_mutations import select_shard, shard_matrix
 
@@ -66,6 +68,19 @@ class MutationShardTests(unittest.TestCase):
         data = json.loads(path.read_text())
         edit(data)
         path.write_text(json.dumps(data))
+
+    def test_cli_merges_utf8_manifests_with_and_without_bom(self):
+        for encoding in ["utf-8", "utf-8-sig"]:
+            with self.subTest(encoding=encoding):
+                manifest = self.root / "manifest.json"
+                manifest.write_text(json.dumps(self.manifest), encoding=encoding)
+                output = self.root / (encoding + "-merged.json")
+                with patch("sys.argv", ["merge", "--input", str(self.root), "--output", str(output), "--manifest", str(manifest)]), patch("builtins.print"):
+                    merge_critical_mutations.main()
+                result = json.loads(output.read_text(encoding="utf-8"))
+                self.assertTrue(result["complete"])
+                self.assertEqual(self.manifest, result["manifest"])
+                self.assertEqual(2, len(result["mutations"]))
 
     def test_complete_shards_produce_full_evidence(self):
         result = merge_shards(self.directories, self.manifest)

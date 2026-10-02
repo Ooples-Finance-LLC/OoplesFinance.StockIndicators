@@ -11,6 +11,25 @@ spec.loader.exec_module(mutations)
 
 
 class MutationEvidenceTests(unittest.TestCase):
+    def test_cli_accepts_utf8_manifests_with_and_without_bom(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "tools").mkdir()
+            manifest = root / "tools/critical-mutations.json"
+            for encoding in ["utf-8", "utf-8-sig"]:
+                with self.subTest(encoding=encoding), \
+                     patch.object(mutations, "__file__", str(root / "tools/run_critical_mutations.py")), \
+                     patch("sys.argv", ["mutations", "--list-shards"]), \
+                     patch("builtins.print") as output, \
+                     patch.object(mutations.subprocess, "run") as build:
+                    manifest.write_text(json.dumps([{"id": "example"}]), encoding=encoding)
+                    self.assertEqual(0, mutations.main())
+                    self.assertEqual({"include": [{"shard": 0, "count": 1}]}, json.loads(output.call_args.args[0]))
+                    build.assert_not_called()
+                    manifest.write_text("not json", encoding=encoding)
+                    with self.assertRaises(json.JSONDecodeError):
+                        mutations.main()
+
     def test_selected_build_targets_the_runtime_whose_results_are_checked(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)
@@ -84,7 +103,7 @@ class MutationEvidenceTests(unittest.TestCase):
 
     def test_every_current_manifest_site_applies_uniquely(self):
         repo = Path(__file__).resolve().parents[2]
-        entries = json.loads((repo / "tools/critical-mutations.json").read_text(encoding="utf-8"))
+        entries = json.loads((repo / "tools/critical-mutations.json").read_text(encoding="utf-8-sig"))
         sources = {entry["file"]: (repo / entry["file"]).read_text(encoding="utf-8") for entry in entries}
         for entry in entries:
             with self.subTest(mutation=entry["id"]):

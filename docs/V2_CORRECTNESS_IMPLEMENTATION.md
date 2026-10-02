@@ -5135,3 +5135,10 @@ The local helper retains exact MACD differences and variance moments through fin
 The original 679a campaign passed its baseline and caught 14 of 15 faults; the zero startup-baseline fault survived the period-two hand. A new period-three hand keeps the lag unfilled for one more bar: prices [1,2,4] produce [1,1,2], while the faulty zero baseline produces a final 8/5. The regression checks the independent reference, batch, core, explicit fast, and native routes.
 
 **39/39 distinct focused checks passed**: 37 Parametric Kalman class checks (`parametric726-repair.trx`), plus the golden-file and shared minimum-period checks (`parametric726-shared.trx`), using the unchanged production assembly. No formula or production code changed. The original 679 snapshots are excluded from qualification; a fresh matched pair contains all 30 original behavioral faults and the strengthened hand. Replacement mutation campaigns remain pending. Numerical inventory remains 6,718/7,131 with 413 omissions across 58 types; final assurance is incomplete.
+
+
+### Batch 727: Optional UTF-8 BOM in mutation manifests
+
+The replacement Kalman launch stopped before building because the current manifest has a UTF-8 BOM. The runner and evidence merger now decode manifests with `utf-8-sig`, accepting either encoding while leaving malformed JSON rejection intact. CLI regressions exercise both encodings, including real source-identical shard aggregation. All 9 runner tests and 10 shard tests passed; the runner suite also validated all 9,572 manifest anchors. No .NET source or tests changed.
+
+New Kalman snapshot pairs include the corrected tools and retain byte-identical production/C# test sources from the 39-pass regression repair. The BOM-failed launch and older 679 snapshots remain excluded from qualification. Existing frozen pairs whose runner cannot decode their BOM must receive fresh matched snapshots with the tool correction before launch; retain prior snapshots and never claim the failed launch as mutation evidence. Numerical inventory remains 6,718/7,131; 413 omissions across 58 types, and final assurance remains incomplete.
