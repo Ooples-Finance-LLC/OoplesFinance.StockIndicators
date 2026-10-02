@@ -5091,3 +5091,12 @@ This is evidence for the isolated batch-676 source. Source was already published
 Exact gain/loss products and four standard means preserve over-range products, underflowed products, and tiny imbalances through final smoothing. A hand produces 100*epsilon/(2-epsilon), which publishes 50*epsilon for SMA, WMA, EMA, and Wilder. The approved core now uses the public centered formula with WMA and three-bar final smoothing. Typed native mapping and streaming selection are explicit. Independent rational net/absolute-flow references use direct finite windows; callback slots, selected inputs, previews/reset, period extremes, validation, span aliasing, and trading signals are covered.
 
 **43/43 focused tests passed** on net10.0 (`volume-weighted-rsi721-corrected.trx`, 48.18 seconds). The preceding run had 41 passes and one negative-period failure; its native/core normalization defect was corrected, and that run is excluded from qualification. Inventory: **6,701/7,131 enrolled**, **430 omissions across 61 types**, all references registered, no construction failures, exact backlog match. The 32 mutation candidates and final hosted/platform/package/performance gates remain pending.
+
+
+### Batch 678: Phase Change Index mutation qualification
+
+The isolated campaigns `678-repaired-a` and `678-repaired-b` passed their baselines and caught **31/31 compiled behavioral faults**, alongside **80/80 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-678 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `08253d52287c1dc04cc37121f7331a88e5322aeba309127b1b75369639f46c76`. Archive SHA256: `cae9f3fb3698cbf32ea6bc525f8cd9ac1a88985f28e991b9cd3ce6d5b7787d32` and `7551d8b08724ea320254adce0453abbc6be86fe1926d87703b41456567ce8158`.
+
+This is evidence for the isolated batch-678 source. Source was already published in the batch-678 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
