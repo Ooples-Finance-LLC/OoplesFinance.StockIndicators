@@ -5040,3 +5040,12 @@ The original hand test used equal lag and smoothing periods and did not distingu
 
 
 The same batch's selected-source test now explicitly exercises both fast functions, batch, native and kernel results with oscillating selected prices against rising original prices. **10/10 affected cases passed**, including the strengthened lag/smoothing hand, against the unchanged production DLL (`obv-reflex674-selected-hand-repair.trx`). The original campaigns remain excluded; this strengthens verification without changing production.
+
+
+### Batch 674: On Balance Volume Reflex mutation qualification
+
+The isolated campaigns `674-repaired-a` and `674-repaired-b` passed their baselines and caught **24/24 compiled behavioral faults**, alongside **83/83 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-674 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `ece10c95a95e3cf8ffbf0cd5b6c82a5cecc3951dd6c8efe86d36bce3aed824ce`. Archive SHA256: `87e0326bce5b5dd0518e400ee8e2304bd90aac8447023724dfff12799781c89d` and `2f862891f28eef9d4efaa4b98be0fde5e4f43c40b607647ac06e6fe653a88f28`.
+
+This is evidence for the isolated batch-674 source. Source was already published in the batch-674 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
