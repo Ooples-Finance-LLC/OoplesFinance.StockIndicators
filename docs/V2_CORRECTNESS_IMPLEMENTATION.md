@@ -5005,3 +5005,12 @@ Absolute candle bodies and their rolling sum now remain exact through the final 
 **49/49 distinct focused checks passed**. The first run passed 47/48; its new callback test incorrectly assumed a callback exists on this path. The corrected no-callback threshold hand and an explicit invocation of the existing streaming parity test passed 2/2, with the production DLL unchanged. The combined evidence includes the existing golden and volume/range reference checks. Logs: `ultimate-volatility715-final.trx` and `ultimate-volatility715-repair.trx`.
 
 This isolated source enrolls five configurations: **6,682/7,131 enrolled**, **449 omissions**, all 7,131 independent reference registrations, no construction failures, and exact backlog agreement. DLL SHA256: `d9749bdeb1af629bf45ddb8c986814e538cc1ee566bb546f2cb79c22c50e1b91`. UMA714 remains independently under verification and is not included in this count. All 9,330 manifest anchors resolve; the 24 new behavioral faults are queued and are not yet qualified. Hosted, platform, package and performance gates remain incomplete.
+
+
+### Batch 673: On Balance Volume Disparity mutation qualification
+
+The isolated campaigns `673-selected-repaired-a` and `673-selected-repaired-b-space-recovery` passed their baselines and caught **25/25 compiled behavioral faults**, alongside **75/75 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-673 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `fce6136a36c26cea2ebc6d04c81a982b6a1221790a8ec8ba71829feed58e63e1`. Archive SHA256: `1624f907c233005abf1976a3c967201c41e5143cd002d792333a42d0b207cc72` and `1c9abf4c8c57a921d60ab86c647bfd5ab33b28f4c347fbd5adc780523e305f54`.
+
+This is evidence for the isolated batch-673 source. Source was already published in the batch-673 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
