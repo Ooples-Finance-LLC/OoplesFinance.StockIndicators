@@ -1212,63 +1212,17 @@ public sealed class TironeLevelsState : IStreamingIndicatorState, IDisposable, I
 [PrimaryOutput("Tai")]
 public sealed class TrendAnalysisIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _inputSmoother;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public TrendAnalysisIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length1 = 28, int length2 = 5)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _inputSmoother = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _maxWindow = new RollingWindowMax(resolved2);
-        _minWindow = new RollingWindowMin(resolved2);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrendAnalysisIndexWindow _window;
+    public TrendAnalysisIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 28, int length2 = 5)
+        => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.TrendAnalysisIndex;
-
-    public void Reset()
-    {
-        _inputSmoother.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _inputSmoother.Next(value, isFinal);
-        var highest = isFinal ? _maxWindow.Add(sma, out _) : _maxWindow.Preview(sma, out _);
-        var lowest = isFinal ? _minWindow.Add(sma, out _) : _minWindow.Preview(sma, out _);
-        var tai = value != 0 ? (highest - lowest) * 100 / value : 0;
-        var signal = _signalSmoother.Next(tai, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Tai", tai },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tai, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Tai", value.Line }, { "Signal", value.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _inputSmoother.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tai")]

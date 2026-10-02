@@ -313,45 +313,10 @@ public static partial class Calculations
     public static StockData CalculateTrendAnalysisIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 28, int length2 = 5)
     {
-        List<double> taiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var (highestList, lowestList) = length2 <= 1 ? (smaList, smaList) : GetMaxAndMinValuesList(smaList, length2);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-
-            var tai = currentValue != 0 ? (highest - lowest) * 100 / currentValue : 0;
-            taiList.Add(tai);
-        }
-
-        var taiMaList = GetMovingAverageList(stockData, maType, length2, taiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentSma = smaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-            var tai = taiList[i];
-            var taiSma = taiMaList[i];
-
-            var signal = GetVolatilitySignal(currentValue - currentSma, prevValue - prevSma, tai, taiSma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tai", taiList },
-            { "Signal", taiMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(taiList);
-        stockData.IndicatorName = IndicatorName.TrendAnalysisIndex;
-
+        var values = TrendAnalysisIndexWindow.Calculate(stockData, maType, length1, length2);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tai", values.Line.ToList() }, { "Signal", values.SignalLine.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Line.ToList()); stockData.IndicatorName = IndicatorName.TrendAnalysisIndex;
         return stockData;
     }
 

@@ -4863,3 +4863,12 @@ The isolated campaigns `663-repaired-a` and `663-repaired-b` passed their baseli
 Source snapshot SHA256: `889c7a23ae24f2bbae52c08cc92640c2ec64e33083c5091a38d130aaf8478e04`. Archive SHA256: `9cb26d4bf01697ac4b52e58423257e29f09d104738b2fde061689650d5e5192f` and `7282691d8a212d496ad7eb229eb30cfa0d38b9847094321675efbda83b3766cf`.
 
 This is evidence for the isolated batch-663 source. The retained source has only a repaired guard fault and strengthened explicit-fast selected-source test overlay; the original snapshots are excluded. Source was already published in the batch-663 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 706: Trend Analysis Index numerical coverage
+
+Trend Analysis Index now retains exact means, rolling extrema, complete percentage quotients and signal smoothing across batch, explicit fast, builder and native/live routes. This preserves subnormal mean differences, finite quotients of overflowing ranges and finite smoothing after opposite published infinities cancel. Exact price-minus-mean slopes and inclusive volatility thresholds drive trading signals. Histories grow lazily; periods normalize to one. Tai fast output keeps one average callback slot, while batch and Signal fast output retain two. There is no separate core.
+
+All **81/81 focused checks passed** in `trend-analysis706-focused-final.trx` (52 seconds), including nine configurations across five routes, independent exact range and mean references, hand values and signals, signed/zero prices, overflow cancellation and recovery, subnormal extrema, threshold ties, expiry, preview/reset, extreme periods, selected inputs, callback counts and existing hand/golden regressions. The first run exposed a missing typed streaming factory mapping and the need for the existing overflow-aware reference rule; both were repaired before this complete rerun. The first run's partial passes are excluded. The reference still rejects overflow whenever its exact result is finite.
+
+Inventory: **6,619/7,131 enrolled**, **512 omissions across 74 types**, all 7,131 independent references registered, no construction failures and exact backlog match. **36 prepared faults** bring the resolving manifest to **9,043 anchors**. Mutation qualification and final assurance gates remain outstanding.

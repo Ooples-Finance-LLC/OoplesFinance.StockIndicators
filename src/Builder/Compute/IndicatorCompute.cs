@@ -2272,9 +2272,7 @@ internal static partial class IndicatorCompute
                 : ComputeTrendExhaustionIndicatorFast(data, context, tei.Length),
             TrendImpulseFilterSpecOptions tif => ComputeTrendImpulseFilterFast(data, context, tif.Length1, tif.Length2, tif.MaType),
             TrendDirectionForceIndexSpecOptions tdfi => ComputeTrendDirectionForceIndexFast(data, context, tdfi.Length1, tdfi.Length2, tdfi.MaType),
-            TrendAnalysisIndexSpecOptions tai => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType), tai.Length2, tai.MaType)
-                : ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType),
+            TrendAnalysisIndexSpecOptions tai => ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType, spec.OutputKey),
             TrendAnalysisIndicatorSpecOptions tai2 => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType), tai2.Length1, tai2.MaType)
                 : ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType),
@@ -20570,32 +20568,11 @@ internal static partial class IndicatorCompute
     }
 
     internal static ComputeBuffer ComputeTrendAnalysisIndexFast(StockData data, ComputeContext context, int length1 = 28, int length2 = 5,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateTrendAnalysisIndex measures how far the moving average has travelled over the short window,
-        // as a percentage of the current value - not the slope of a regression through the close, which is
-        // what this arm used to return. The moving average of the result is the separate Signal series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, Math.Max(length1, 1), input, smoothed.WritableSpan);
-        var sma = smoothed.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(Math.Max(length2, 1));
-        var lowWindow = new RollingMinMax(Math.Max(length2, 1));
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(sma[i]);
-            lowWindow.Add(sma[i]);
-            output[i] = input[i] != 0 ? (highWindow.Max - lowWindow.Min) * 100 / input[i] : 0;
-        }
-
-        return buffer;
+        var values = TrendAnalysisIndexWindow.Calculate(data, maType, length1, length2, outputKey == "Signal");
+        var selected = outputKey == "Signal" ? values.SignalLine : values.Line;
+        var output = context.Rent(selected.Length); selected.AsSpan().CopyTo(output.WritableSpan); return output;
     }
 
     internal static ComputeBuffer ComputeTrendAnalysisIndicatorFast(StockData data, ComputeContext context, int length1 = 21,

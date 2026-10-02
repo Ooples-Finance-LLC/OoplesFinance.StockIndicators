@@ -78169,5 +78169,329 @@
     "before": "values.AsSpan().CopyTo(output.WritableSpan);",
     "after": "output.WritableSpan.Clear();",
     "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+  },
+  {
+    "id": "trend-analysis-index-wide-width",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_width = Math.Max(1, length2)",
+    "after": "_width = Math.Max(1, length1)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.WindowExpiryZeroPriceAndExtremePeriodsRemainLazy"
+  },
+  {
+    "id": "trend-analysis-index-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_mean = new(kind, length1)",
+    "after": "_mean = new(kind, 1)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_signal = new(kind, length2)",
+    "after": "_signal = new(kind, 1)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "var expiry = _index - _width + 1",
+    "after": "var expiry = _index - _width",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "Extreme(_highs, mean, true, final)",
+    "after": "Extreme(_highs, mean, false, final)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "Extreme(_lows, mean, false, final)",
+    "after": "Extreme(_lows, mean, true, final)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-preview-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-percentage",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "(high - low).Times(100)",
+    "after": "(high - low)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-zero-price",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "price.Sign == 0 ? default :",
+    "after": "price.Sign == 0 ? Number.Of(1) :",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.WindowExpiryZeroPriceAndExtremePeriodsRemainLazy"
+  },
+  {
+    "id": "trend-analysis-index-wide-range-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "(high - low).Times(100)",
+    "after": "Number.Of((high - low).Publish()).Times(100)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.OverflowingRangesAndSubnormalMeansHaveFiniteQuotients"
+  },
+  {
+    "id": "trend-analysis-index-wide-mean-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "var high = Extreme",
+    "after": "mean = Number.Of(mean.Publish()); var high = Extreme",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.ExactMeanExtremaAndThresholdTiesRemainObservable"
+  },
+  {
+    "id": "trend-analysis-index-wide-index-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "if (final) _index++;",
+    "after": "_index++;",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-threshold-tie",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "(line - signal).Sign < 0",
+    "after": "(line - signal).Sign <= 0",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.ExactMeanExtremaAndThresholdTiesRemainObservable"
+  },
+  {
+    "id": "trend-analysis-index-wide-threshold-direction",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "(line - signal).Sign < 0",
+    "after": "(line - signal).Sign > 0",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-signal-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "slope - _previousSlope",
+    "after": "_previousSlope - slope",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "if (final) _previousSlope",
+    "after": "if (true) _previousSlope",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-native-signal-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_signal.Next(line, final)",
+    "after": "_signal.Next(Number.Of(line.Publish()), final)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.OpposingInfinitePublishedRatiosHaveFiniteSignalAndRecover"
+  },
+  {
+    "id": "trend-analysis-index-wide-batch-signal-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "window._signal.Next(values[i], true)",
+    "after": "window._signal.Next(Number.Of(line[i]), true)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.OpposingInfinitePublishedRatiosHaveFiniteSignalAndRecover"
+  },
+  {
+    "id": "trend-analysis-index-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "trend-analysis-index-wide-callback-mean-input",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "ComponentAverage.Take(prices.ToArray(), length1)",
+    "after": "ComponentAverage.Take(data.InputValues.ToArray(), length1)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.CallbackSlotsFollowRequestedOutputAndPreserveCallerInput"
+  },
+  {
+    "id": "trend-analysis-index-wide-callback-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "ComponentAverage.Take(line, length2)",
+    "after": "ComponentAverage.Take(prices.ToArray(), length2)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.CallbackSlotsFollowRequestedOutputAndPreserveCallerInput"
+  },
+  {
+    "id": "trend-analysis-index-wide-callback-signal-unrequested",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "includeSignal && ComponentAverage.HasOverrides",
+    "after": "ComponentAverage.HasOverrides",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.CallbackSlotsFollowRequestedOutputAndPreserveCallerInput"
+  },
+  {
+    "id": "trend-analysis-index-wide-mean-kind",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_mean = new(kind, length1)",
+    "after": "_mean = new(MovingAvgType.ExponentialMovingAverage, length1)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-signal-kind",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_signal = new(kind, length2)",
+    "after": "_signal = new(MovingAvgType.ExponentialMovingAverage, length2)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-reset-highs",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_highs.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-reset-lows",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_lows.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-reset-slope",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_previousSlope = default;",
+    "after": "_previousSlope = Number.Of(100);",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide(_length)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
+    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TrendAnalysisIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.NonfiniteCandlesCannotAdvanceMeansExtremaOrSignal"
+  },
+  {
+    "id": "trend-analysis-index-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TrendAnalysisIndexState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-native-value",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TrendAnalysisIndexState",
+    "before": "new StreamingIndicatorStateResult(value.Line,",
+    "after": "new StreamingIndicatorStateResult(value.SignalLine,",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-native-signal-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TrendAnalysisIndexState",
+    "before": "{ \"Signal\", value.SignalLine }",
+    "after": "{ \"Signal\", value.Line }",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTrendAnalysisIndexFast",
+    "before": "outputKey == \"Signal\" ? values.SignalLine : values.Line",
+    "after": "outputKey == \"Signal\" ? values.Line : values.Line",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
+  },
+  {
+    "id": "trend-analysis-index-wide-native-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new TrendAnalysisIndexState(trendIndex.MaType, trendIndex.Length1, trendIndex.Length2)",
+    "after": "new TrendAnalysisIndexState(trendIndex.MaType, trendIndex.Length1, 1)",
+    "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.SelectedSourcePreservesFormula"
   }
 ]

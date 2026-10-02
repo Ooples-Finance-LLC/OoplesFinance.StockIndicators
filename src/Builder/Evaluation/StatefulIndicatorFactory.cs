@@ -985,6 +985,7 @@ internal static partial class StatefulIndicatorFactory
             PremierStochasticSpecOptions premier => new PremierStochasticOscillatorState(length: premier.Length),
             PremierStochasticOscillatorSpecOptions premierFull => new PremierStochasticOscillatorState(premierFull.MaType, premierFull.Length, premierFull.SmoothLength),
             PivotDetectorOscillatorSpecOptions pivotDetector => new PivotDetectorOscillatorState(pivotDetector.MaType),
+            TrendAnalysisIndexSpecOptions trendIndex => new TrendAnalysisIndexState(trendIndex.MaType, trendIndex.Length1, trendIndex.Length2),
             TopsAndBottomsFinderSpecOptions topsBottoms => new TopsAndBottomsFinderState(topsBottoms.MaType, topsBottoms.Length),
             TTMScalperIndicatorSpecOptions => new TTMScalperIndicatorState(),
             HybridConvolutionFilterSpecOptions hybrid => new HybridConvolutionFilterState(hybrid.Length),
