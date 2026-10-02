@@ -88,6 +88,10 @@ public sealed class MacZVwapNumericalTests
     [Fact]
     public void TinyAndOverflowingProductsRetainCompleteQuotients()
     {
+        // Zero-volume VWAP is zero: five -2 prices give residual/root = -1 exactly.
+        // With gamma zero, the four filter weights are 1/6, 2/6, 2/6, 1/6.
+        var exactNegative = Check(Volumes(Enumerable.Repeat(-2d, 5).ToArray(), new double[5]), gamma: 0);
+        Assert.Equal(new[] { 0d, -1d / 6, -.5, -5d / 6, -1 }, exactNegative["Macz"]);
         foreach (var kind in Kinds) foreach (var scale in new[] { double.Epsilon, 1d, double.MaxValue / 4 })
         {
             var p = new[] { 0, scale, -scale, 2 * scale, scale, -2 * scale };

@@ -4812,3 +4812,10 @@ Public SVAMA retains the running-maximum volume gain, recurrence and price-minus
 All **44/44 focused checks passed** in `svama702-focused.trx`: four configurations across the five public routes, independent weighted-numerator references and hands, zero/signed volume, subnormal state and signal direction, overflow/recovery, selected input, preview/reset, no callback slots, empty/extreme-length behavior, nonfinite rejection, enrollment and the existing hand/route/golden regressions.
 
 Inventory: **6,597/7,131 enrolled**, **534 omissions across 77 types**, all 7,131 independent references registered, no construction failures and exact backlog match. **29 distinct prepared faults** bring the resolving manifest to **8,935 anchors**. Preflight replaced one duplicate fault and two ineffective guard-removal definitions before any campaign; shared number conversion already rejects nonfinite values. Mutation qualification and all final assurance gates remain outstanding.
+
+
+### Batch 662: negative exact-root regression repair
+
+The repaired2 MacZ VWAP pair finished with **38 compiled faults caught and one survivor**: dropping the sign in the exact-square-root branch. Those campaigns cannot qualify the batch. The existing filtered regression covered irrational negative roots but lacked the negative perfect-square case.
+
+The same regression now includes five prices of -2 with zero volumes and gamma zero. The exact standardized residual is -1 after warmup; independent filter weights give `[0, -1/6, -1/2, -5/6, -1]`. Batch, explicit fast and native/direct preview/reset paths agree with that hand calculation and the independent reference. The strengthened test passed **1/1** with an unchanged production DLL in `macz-vwap662-exact-root-repair.trx`. Fresh repaired3 snapshots preserve the original production source and require a complete new 39-fault pair; no earlier partial results may be pooled.
