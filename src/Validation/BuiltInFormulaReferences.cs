@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.Svama)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SvamaOutputs(bars)["Svama"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SupportAndResistanceOscillator)
         {
             yield return IndicatorValidationRule.Reference(0, bars => SupportResistanceOscillatorOutputs(bars)["Sro"], IndicatorErrorBudget.Exact); yield break;

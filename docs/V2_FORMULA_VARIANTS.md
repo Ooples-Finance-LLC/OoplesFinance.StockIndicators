@@ -847,3 +847,10 @@ The two trailing extrema filters compose into a single window of length+max(2,le
 `Sro = clamp((high - open + close - low) / (2 * TR), 0, 1)`, with zero for zero true range. True range is the maximum of `high-low`, `abs(high-previousClose)`, and `abs(low-previousClose)`; the first bar uses its own selected close. Selected prices replace close only; original open/high/low/volume remain candle inputs, including when the selected price lies outside the candle. The legacy length option remains inert.
 
 Batch, explicit fast, native/live and the core span path share exact unpublished differences, range, ratio and signal comparisons; only the public line is rounded. Equal published values may have different exact slopes. Strong buy/sell takes precedence when the exact slope accelerates in its direction; other nonzero slopes select buy/sell. The legacy 0.3/0.7 crossings imply that same slope direction. Preview does not commit price or signal history; reset clears both. Nonfinite input is rejected before native state advances.
+
+
+### SVAMA public recurrence: exact volume gain
+
+The public SVAMA line starts at the first selected price. Thereafter `H` is the running maximum volume, `g = volume/H` (zero when H is zero), and `y = previous + g*(price-previous)`. The existing length argument does not affect this formula. Finite signed and zero volumes retain their existing algebraic meaning; negative gains or gains above one can produce unbounded outputs. Exact unpublished gain, recurrence and price-minus-average comparisons avoid premature underflow, overflow and false signal ties. Only the published line rounds to binary64; a later gain of one can recover from a prior overflowing output. Preview does not commit running maximum or recurrence state.
+
+This correction covers public batch, explicit fast, native and builder/live routes. The price-only core and moving-average registry still compute a different adaptive average; their proposed volume-aware alignment is a separate pending scope decision. No core/registry alignment is claimed here.

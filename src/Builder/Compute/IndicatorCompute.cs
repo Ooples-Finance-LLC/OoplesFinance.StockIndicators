@@ -12816,42 +12816,12 @@ internal static partial class IndicatorCompute
 
 
     /// <summary>
-    /// Computes Svama using zero-allocation fast path.
+    /// Computes Svama using exact volume weights and selected prices.
     /// </summary>
     internal static ComputeBuffer ComputeSvamaFast(StockData data, ComputeContext context)
     {
-        // CalculateSvama weights each bar by where its volume sits between the running all-time high and low
-        // volume, and feeds that weight in as the smoothing factor of an exponential average of the chained
-        // series. The published series is the one driven by the high-volume weight. The routine this replaced
-        // used a windowed volume range, and the batch takes no length at all - its length parameter is unused.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double highestVolume = 0;
-        double lowestVolume = 0;
-        double prevCMax = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var volume = volumes[i];
-            highestVolume = i >= 1 ? Math.Max(volume, highestVolume) : volume;
-            lowestVolume = i >= 1 ? Math.Min(volume, lowestVolume) : volume;
-
-            var bMax = highestVolume != 0 ? volume / highestVolume : 0;
-            if (i == 0)
-            {
-                prevCMax = input[i];
-            }
-
-            prevCMax = (bMax * input[i]) + ((1 - bMax) * prevCMax);
-            output[i] = prevCMax;
-        }
-
-        return buffer;
+        var values = SvamaWindow.Calculate(data); var buffer = context.Rent(values.Line.Length);
+        values.Line.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

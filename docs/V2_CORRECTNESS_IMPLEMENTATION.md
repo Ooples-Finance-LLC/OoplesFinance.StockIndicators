@@ -4803,3 +4803,12 @@ The candle ratio now retains exact range, numerator, quotient and signal slopes 
 Independent rational references use candle width plus signed body. All **43/43 focused checks passed**, including four discovered configurations across all five public routes, hands, gaps, clamps, zero range, overflowing/subnormal cases, exact-slope signals, selected-source preservation, core empty/in-place/tail/short-span behavior, preview/reset, nonfinite guards, enrollment and existing hand/route/golden regressions. The initial build failed on a missing reference namespace and is excluded; the corrected run is `support-osc701-focused.trx`.
 
 Inventory: **6,593/7,131 enrolled**, **538 omissions across 78 types**, all 7,131 independent references registered, no construction failures and an exact backlog match. **32 prepared faults** bring the resolving manifest to **8,906 anchors**; mutation qualification and all final assurance gates remain outstanding. Stationary Extrapolated Levels Oscillator is a separate pending formula/core decision.
+
+
+### Batch 702: SVAMA public numerical coverage
+
+Public SVAMA retains the running-maximum volume gain, recurrence and price-minus-average signal comparisons exactly. Tiny gains retain representable price contributions; signed-volume recurrences can recover after an overflowing published value. The length parameter remains inert, native invalid candles cannot advance state, and selected input retains its volume stream. The price-only core/registry formula remains a separately identified pending alignment decision.
+
+All **44/44 focused checks passed** in `svama702-focused.trx`: four configurations across the five public routes, independent weighted-numerator references and hands, zero/signed volume, subnormal state and signal direction, overflow/recovery, selected input, preview/reset, no callback slots, empty/extreme-length behavior, nonfinite rejection, enrollment and the existing hand/route/golden regressions.
+
+Inventory: **6,597/7,131 enrolled**, **534 omissions across 77 types**, all 7,131 independent references registered, no construction failures and exact backlog match. **29 distinct prepared faults** bring the resolving manifest to **8,935 anchors**. Preflight replaced one duplicate fault and two ineffective guard-removal definitions before any campaign; shared number conversion already rejects nonfinite values. Mutation qualification and all final assurance gates remain outstanding.

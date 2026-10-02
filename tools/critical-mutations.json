@@ -77260,5 +77260,266 @@
     "before": "output[i] = window.Next(open[i], high[i], low[i], close[i], true).Line;",
     "after": "output[i] = 0;",
     "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.CoreHandlesEmptyInPlaceTailAndShortSpans"
+  },
+  {
+    "id": "svama-wide-max",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "Math.Max(_highestVolume, volume)",
+    "after": "Math.Min(_highestVolume, volume)",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-max-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "_highestVolume = highest;",
+    "after": "_highestVolume = volume;",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.ExtremePricesAndVolumeHistoriesRetainExactRecurrence"
+  },
+  {
+    "id": "svama-wide-negative-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "Math.Max(_highestVolume, volume) : volume",
+    "after": "Math.Max(_highestVolume, volume) : Math.Max(0, volume)",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.ZeroAndNegativeVolumeMaximaKeepDefinedCarry"
+  },
+  {
+    "id": "svama-wide-price-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "_hasPrevious ? _previous : current",
+    "after": "_hasPrevious ? _previous : default",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-zero-volume-high",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "highest == 0 ? previous",
+    "after": "highest == 0 ? current",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.ZeroAndNegativeVolumeMaximaKeepDefinedCarry"
+  },
+  {
+    "id": "svama-wide-gain-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "Number.Of(volume).Divide(Number.Of(highest))",
+    "after": "Number.Of(volume / highest)",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.TinyVolumeGainProducesRepresentablePriceContribution"
+  },
+  {
+    "id": "svama-wide-gain-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "Number.Of(volume).Divide(Number.Of(highest))",
+    "after": "Number.Of(highest).Divide(Number.Of(highest))",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-difference",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "(current - previous) *",
+    "after": "(current + previous) *",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-recurrence-state",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "_previous = line;",
+    "after": "_previous = current;",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-state-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "_previous = line;",
+    "after": "_previous = Number.Of(line.Publish());",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.UnpublishedSubnormalRecurrencePreservesSignalDirection"
+  },
+  {
+    "id": "svama-wide-overflow-state",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "return (line.Publish(), trade);",
+    "after": "return (Math.Min(double.MaxValue, line.Publish()), trade);",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.OverflowingSignedWeightRecoversWithoutReset"
+  },
+  {
+    "id": "svama-wide-comparison-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "var comparison = current - line;",
+    "after": "var comparison = current - Number.Of(line.Publish());",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.UnpublishedSubnormalRecurrencePreservesSignalDirection"
+  },
+  {
+    "id": "svama-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "_previousComparison = comparison;",
+    "after": "_previousComparison = default;",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.SignalAccelerationDistinguishesBuySellAndTies"
+  },
+  {
+    "id": "svama-wide-strong-buy-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "comparison.Sign > 0 && change.Sign > 0",
+    "after": "comparison.Sign > 0 && change.Sign >= 0",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.SignalAccelerationDistinguishesBuySellAndTies"
+  },
+  {
+    "id": "svama-wide-strong-sell-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "comparison.Sign < 0 && change.Sign < 0",
+    "after": "comparison.Sign < 0 && change.Sign <= 0",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.SignalAccelerationDistinguishesBuySellAndTies"
+  },
+  {
+    "id": "svama-wide-buy",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "comparison.Sign > 0 ? Signal.Buy",
+    "after": "comparison.Sign > 0 ? Signal.None",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.SignalAccelerationDistinguishesBuySellAndTies"
+  },
+  {
+    "id": "svama-wide-sell",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "comparison.Sign < 0 ? Signal.Sell",
+    "after": "comparison.Sign < 0 ? Signal.None",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.SignalAccelerationDistinguishesBuySellAndTies"
+  },
+  {
+    "id": "svama-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "if (final) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "_hasPrevious = false; _highestVolume = 0;",
+    "after": "_hasPrevious = true; _highestVolume = 0;",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.ZeroAndNegativeVolumeMaximaKeepDefinedCarry"
+  },
+  {
+    "id": "svama-wide-price-guard",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "StreamingInputValidation.Finite(price, nameof(price));",
+    "after": "if (double.IsNaN(price) || double.IsInfinity(price)) return (0, Signal.None);",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.NonfiniteInputsCannotAdvanceRunningMaximumOrRecurrence"
+  },
+  {
+    "id": "svama-wide-volume-guard",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "StreamingInputValidation.Finite(volume, nameof(volume));",
+    "after": "if (double.IsNaN(volume) || double.IsInfinity(volume)) return (0, Signal.None);",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.NonfiniteInputsCannotAdvanceRunningMaximumOrRecurrence"
+  },
+  {
+    "id": "svama-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "svama-wide-volume-source",
+    "module": "numerical",
+    "file": "src/Helpers/SvamaWindow.cs",
+    "scope": "internal sealed class SvamaWindow",
+    "before": "window.Next(prices[i], data.Volumes[i], true)",
+    "after": "window.Next(prices[i], 1, true)",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "svama-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SvamaState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.NonfiniteInputsCannotAdvanceRunningMaximumOrRecurrence"
+  },
+  {
+    "id": "svama-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SvamaState",
+    "before": "bar.Volume, isFinal",
+    "after": "bar.Volume, true",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-native-line",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SvamaState",
+    "before": "return new StreamingIndicatorStateResult(value,",
+    "after": "return new StreamingIndicatorStateResult(0,",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SvamaState",
+    "before": "{ \"Svama\", value }",
+    "after": "{ \"Svama\", 0 }",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-native-volume",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SvamaState",
+    "before": "_input.GetValue(bar), bar.Volume",
+    "after": "_input.GetValue(bar), 1",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
+  },
+  {
+    "id": "svama-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSvamaFast",
+    "before": "values.Line.AsSpan().CopyTo(buffer.WritableSpan);",
+    "after": "buffer.WritableSpan.Clear();",
+    "filter": "FullyQualifiedName~SvamaNumericalTests.IndependentHandUsesRunningMaximumAndZeroVolumeCarry"
   }
 ]

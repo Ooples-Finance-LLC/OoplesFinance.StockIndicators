@@ -829,69 +829,16 @@ public sealed class SurfaceRoughnessEstimatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Svama")]
 public sealed class SvamaState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private double _prevH;
-    private double _prevL;
-    private double _prevCMax;
-    private double _prevCMin;
-    private bool _hasPrev;
-
-    public SvamaState(int length = 14)
-    {
-        _ = length;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    private readonly SvamaWindow _window = new();
+    public SvamaState(int length = 14) { _ = length; }
     public IndicatorName Name => IndicatorName.Svama;
-
-    public void Reset()
-    {
-        _prevH = 0;
-        _prevL = 0;
-        _prevCMax = 0;
-        _prevCMin = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var a = bar.Volume;
-
-        var prevH = _hasPrev ? _prevH : a;
-        var h = a > prevH ? a : prevH;
-
-        var prevL = _hasPrev ? _prevL : a;
-        var l = a < prevL ? a : prevL;
-
-        var bMax = h != 0 ? a / h : 0;
-        var bMin = a != 0 ? l / a : 0;
-
-        var prevCMax = _hasPrev ? _prevCMax : value;
-        var cMax = (bMax * value) + ((1 - bMax) * prevCMax);
-
-        var prevCMin = _hasPrev ? _prevCMin : value;
-        var cMin = (bMin * value) + ((1 - bMin) * prevCMin);
-
-        if (isFinal)
-        {
-            _prevH = h;
-            _prevL = l;
-            _prevCMax = cMax;
-            _prevCMin = cMin;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Svama", cMax }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cMax, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), bar.Volume, isFinal).Line;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Svama", value } } : null);
     }
 }
 

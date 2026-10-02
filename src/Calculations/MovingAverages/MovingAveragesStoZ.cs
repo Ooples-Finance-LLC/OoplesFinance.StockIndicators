@@ -1570,49 +1570,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSvama(this StockData stockData, int length = 14)
     {
-        List<double> hList = new(stockData.Count);
-        List<double> lList = new(stockData.Count);
-        List<double> cMaxList = new(stockData.Count);
-        List<double> cMinList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var a = volumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevH = i >= 1 ? hList[i - 1] : a;
-            var h = a > prevH ? a : prevH;
-            hList.Add(h);
-
-            var prevL = i >= 1 ? lList[i - 1] : a;
-            var l = a < prevL ? a : prevL;
-            lList.Add(l);
-
-            var bMax = h != 0 ? a / h : 0;
-            var bMin = a != 0 ? l / a : 0;
-
-            var prevCMax = i >= 1 ? cMaxList[i - 1] : currentValue;
-            var cMax = (bMax * currentValue) + ((1 - bMax) * prevCMax);
-            cMaxList.Add(cMax);
-
-            var prevCMin = i >= 1 ? cMinList[i - 1] : currentValue;
-            var cMin = (bMin * currentValue) + ((1 - bMin) * prevCMin);
-            cMinList.Add(cMin);
-
-            var signal = GetCompareSignal(currentValue - cMax, prevValue - prevCMax);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Svama", cMaxList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(cMaxList);
-        stockData.IndicatorName = IndicatorName.Svama;
-
+        _ = length; // The public formula uses the running maximum volume, not a rolling period.
+        var values = SvamaWindow.Calculate(stockData);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Svama", values.Line.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Line.ToList()); stockData.IndicatorName = IndicatorName.Svama;
         return stockData;
     }
 

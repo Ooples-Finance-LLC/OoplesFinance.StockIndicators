@@ -38,15 +38,7 @@ internal static partial class BuiltInFormulaReferences
         if (name == IndicatorName.VariableMovingAverage)
             return new("Vma", new[] { "Vma" }, bars => Outputs(("Vma", VariableAverageReference(Closes(bars), length))));
         if (name == IndicatorName.Svama)
-            return new("Svama", new[] { "Svama" }, bars =>
-            {
-                var gains = bars.Select((b, i) =>
-                {
-                    var maximum = bars.Take(i + 1).Max(v => v.Volume);
-                    return maximum == 0 ? 0 : b.Volume / maximum;
-                }).ToArray();
-                return Outputs(("Svama", ExpandedGainTrajectory(Closes(bars), gains)));
-            });
+            return new("Svama", new[] { "Svama" }, bars => SvamaOutputs(bars));
         var variable = options.GetType().GetProperty("MaType")!.GetValue(options) is MovingAvgType.VariableMovingAverage;
         var kind = AverageKind(options, 0);
         if (!variable && kind == 0) return null;
