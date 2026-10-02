@@ -15,6 +15,8 @@ internal static partial class BuiltInFormulaReferences
             return new(name == IndicatorName.MassThrustIndicator ? "Mti" : "Mto", new[] { name == IndicatorName.MassThrustIndicator ? "Mti" : "Mto", "Signal" }, bars => MassThrustOutputs(bars, indicator));
         if (name == IndicatorName.SellGravitationIndex)
             return new("Sgi", new[] { "Sgi", "Signal" }, bars => SellGravitationOutputs(bars, indicator));
+        if (name == IndicatorName.TrendAnalysisIndicator)
+            return new("Tai", new[] { "Tai", "Signal" }, bars => TrendAnalysisIndicatorOutputs(bars, indicator));
         if (name == IndicatorName.TrendAnalysisIndex)
             return new("Tai", new[] { "Tai", "Signal" }, bars => TrendAnalysisIndexOutputs(bars, indicator));
         var trend = name == IndicatorName.TrendAnalysisIndex || name == IndicatorName.TrendAnalysisIndicator;

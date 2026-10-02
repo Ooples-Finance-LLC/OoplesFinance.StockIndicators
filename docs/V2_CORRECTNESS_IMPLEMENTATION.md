@@ -4893,3 +4893,10 @@ The next retained-source baseline exposed a test compatibility issue: its older 
 ### Batch 668 selected-source verification repair
 
 The four existing Morphed Sine selected-source cases now directly invoke the fast route against independent projected-price references and assert preservation of the selected series and original close/high/low fields. All **4/4 passed** in `morphed-sine668-selected-fast-repair.trx`, with the production assembly unchanged. Fresh test-only snapshot overlays are required for the queued 26-fault campaign; the original snapshots remain unqualified.
+
+
+### Batch 707: Trend Analysis Indicator numerical coverage
+
+All **81/81 focused tests passed** in `trend-analysis-indicator707-focused.trx`, covering nine configurations across five routes, explicit selected-source fast outputs, independent population-deviation and signal hands, overflowing squares, subnormal midpoint ties, expiry, preview/reset, extreme periods, full-candle guards and callback discovery/order/short results. The independent reference sums squared residuals about each window mean instead of using production rolling moments. Typed factory and native streaming routing are enrolled.
+
+Inventory: **6,628/7,131 enrolled**, **503 omissions across 73 types**, all 7,131 reference registrations, no construction failures and exact backlog agreement. All **9,077 mutation anchors resolve**; 34 new faults await isolated campaigns. Focused passes and source enrollment do not establish mutation or release qualification. Unrelated TrendForce/Mobility files retain their recorded hashes.

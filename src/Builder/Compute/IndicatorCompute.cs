@@ -2273,9 +2273,7 @@ internal static partial class IndicatorCompute
             TrendImpulseFilterSpecOptions tif => ComputeTrendImpulseFilterFast(data, context, tif.Length1, tif.Length2, tif.MaType),
             TrendDirectionForceIndexSpecOptions tdfi => ComputeTrendDirectionForceIndexFast(data, context, tdfi.Length1, tdfi.Length2, tdfi.MaType),
             TrendAnalysisIndexSpecOptions tai => ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType, spec.OutputKey),
-            TrendAnalysisIndicatorSpecOptions tai2 => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType), tai2.Length1, tai2.MaType)
-                : ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType),
+            TrendAnalysisIndicatorSpecOptions tai2 => ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType, spec.OutputKey),
             TrenderSpecOptions tr => spec.OutputKey switch
             {
                 null or "Trender" => ComputeTrenderFast(data, context, tr.Length, tr.AtrMult, tr.MaType),
@@ -20576,20 +20574,11 @@ internal static partial class IndicatorCompute
     }
 
     internal static ComputeBuffer ComputeTrendAnalysisIndicatorFast(StockData data, ComputeContext context, int length1 = 21,
-        int length2 = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        int length2 = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateTrendAnalysisIndicator publishes "Tai": the standard deviation, over the short length, of the
-        // long moving average of the chained series. The regression slope this replaced measured something else
-        // entirely, and over the wrong length.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-
-        using var slow = context.Rent(count);
-        MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(inputList), slow.WritableSpan);
-
-        var buffer = context.Rent(count);
-        VolatilityCore.StandardDeviation(slow.Span, buffer.WritableSpan, length2);
-        return buffer;
+        var values = TrendAnalysisIndicatorWindow.Calculate(data, maType, length1, length2, outputKey == "Signal", false);
+        var selected = outputKey == "Signal" ? values.SignalLine : values.Line;
+        var output = context.Rent(selected.Length); selected.AsSpan().CopyTo(output.WritableSpan); return output;
     }
 
     /// <summary>

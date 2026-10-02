@@ -333,43 +333,10 @@ public static partial class Calculations
     public static StockData CalculateTrendAnalysisIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 21, int length2 = 4)
     {
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var slowMaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var fastMaList = GetMovingAverageList(stockData, maType, length2, inputList);
-        stockData.SetCustomValues(slowMaList);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. This one publishes the deviation itself as Tai rather than using it in a band, so the change
-        // is directly visible in the indicator's own output rather than in something derived from it - about
-        // 55% narrower on a typical price series. The quantity the indicator is named for is a standard
-        // deviation, and that is the windowed one. Taken over slowMaList by name, which is the series it
-        // measures - the batch chained it in on purpose. See #190.
-        var taiList = GetStandardDeviationList(slowMaList, length2);
-        var taiSmaList = GetMovingAverageList(stockData, maType, length1, taiList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var tai = taiList[i];
-            var fastMa = fastMaList[i];
-            var slowMa = slowMaList[i];
-            var taiMa = taiSmaList[i];
-            var prevFastMa = i >= 1 ? fastMaList[i - 1] : 0;
-            var prevSlowMa = i >= 1 ? slowMaList[i - 1] : 0;
-
-            var signal = GetVolatilitySignal(fastMa - slowMa, prevFastMa - prevSlowMa, tai, taiMa);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tai", taiList },
-            { "Signal", taiSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(taiList);
-        stockData.IndicatorName = IndicatorName.TrendAnalysisIndicator;
-
+        var values = TrendAnalysisIndicatorWindow.Calculate(stockData, maType, length1, length2);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tai", values.Line.ToList() }, { "Signal", values.SignalLine.ToList() } });
+        stockData.SetSignals(values.Trades.ToList());
+        stockData.SetCustomValues(values.Line.ToList()); stockData.IndicatorName = IndicatorName.TrendAnalysisIndicator;
         return stockData;
     }
 

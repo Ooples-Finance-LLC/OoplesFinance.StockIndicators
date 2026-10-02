@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TrendAnalysisIndicator)
+        {
+            var trendIndicatorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Tai", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < trendIndicatorKeys.Length; slot++) { var key = trendIndicatorKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => TrendAnalysisIndicatorOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TrendAnalysisIndex)
         {
             var trendIndexKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Tai", "Signal" };
