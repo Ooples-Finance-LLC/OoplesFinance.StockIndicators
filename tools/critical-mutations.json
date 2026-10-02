@@ -84181,5 +84181,383 @@
     "before": "VolatilityBasedMomentum or ",
     "after": "",
     "filter": "FullyQualifiedName~VolatilityMomentumNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "volatility-average-wide-length-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "_length = Math.Max(1, length); _lookback",
+    "after": "_length = Math.Max(2, length); _lookback",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremePeriodsUseObservedHistory"
+  },
+  {
+    "id": "volatility-average-wide-score-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "(value - mean).Times(100)",
+    "after": "(value - mean).Times(50)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "if (final)\n        {\n            if (_history.Count",
+    "after": "if (true)\n        {\n            if (_history.Count",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-weight-current",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "var weighted = value.Times(period);",
+    "after": "var weighted = value;",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-native-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "_mean.Next(Radical.Of(value), final)",
+    "after": "_mean.Next(Radical.Of(value), true)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-native-score-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "_scores.Next(score, final)",
+    "after": "_scores.Next(score, true)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-native-output-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "_output.Next(Radical.Of(average), final)",
+    "after": "_output.Next(Radical.Of(average), true)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-round-score-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "level += level % 2",
+    "after": "level += 1",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "volatility-average-wide-round-window-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "quotient % 2 != 0",
+    "after": "quotient % 2 == 0",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "volatility-average-wide-reverse-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "(long)length * (10 - level)",
+    "after": "(long)length * level",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-absolute-score",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "if (score.Compare(default) < 0)",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "volatility-average-wide-trade-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "(margin - previous).Sign > 0",
+    "after": "(margin - previous).Sign >= 0",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.ChainedValues",
+    "after": "data.ChainedValues",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.DirectSelectedPricesAndInvalidFieldsPreserveContracts"
+  },
+  {
+    "id": "volatility-average-wide-batch-hooks",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "fast ? ComponentAverage.Take",
+    "after": "true ? ComponentAverage.Take",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ThreeFastCallbacksRetainOrderingAndBatchBypassesThem"
+  },
+  {
+    "id": "volatility-average-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ThreeFastCallbacksRetainOrderingAndBatchBypassesThem"
+  },
+  {
+    "id": "volatility-average-wide-selected-source",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.DirectSelectedPricesAndInvalidFieldsPreserveContracts"
+  },
+  {
+    "id": "volatility-average-wide-score-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "var smoothed = Mean(scores, smooth)",
+    "after": "var smoothed = Mean(scores, lookback)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ThreeFastCallbacksRetainOrderingAndBatchBypassesThem"
+  },
+  {
+    "id": "volatility-average-wide-output-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "var lines = Mean(weighted, smooth)",
+    "after": "var lines = Mean(weighted, lookback)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ThreeFastCallbacksRetainOrderingAndBatchBypassesThem"
+  },
+  {
+    "id": "volatility-average-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class VolatilityAverageWindow",
+    "before": "_history.Clear(); _previousMargin",
+    "after": "_previousMargin",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-moment-centering",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Moments",
+    "before": "squares.Times(count) - sum * sum",
+    "after": "squares.Times(count) + sum * sum",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-moment-count",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Moments",
+    "before": "Divide((long)count * count)",
+    "after": "Divide(count)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Moments",
+    "before": "var expired = full ? _values.Peek() : default",
+    "after": "var expired = default(Number)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-moment-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Moments",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-mean-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremePeriodsUseObservedHistory"
+  },
+  {
+    "id": "volatility-average-wide-weight-aging",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted - sum +",
+    "after": "weighted + sum +",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-weight-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+  },
+  {
+    "id": "volatility-average-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Number.Integer(_length - 1L)",
+    "after": "Number.Integer(_length)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
+  },
+  {
+    "id": "volatility-average-wide-radical-zero",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class Radical",
+    "before": "if (difference._terms.Count == 0) return 0",
+    "after": "if (difference._terms.Count == 0) return 1",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "volatility-average-wide-radical-conversion",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class Radical",
+    "before": "coefficient * Number.Integer(ar).Divide(Number.Integer(br))",
+    "after": "coefficient * Number.Integer(br).Divide(Number.Integer(ar))",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "volatility-average-wide-radical-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class Radical",
+    "before": "coefficient = coefficient.Times(prime)",
+    "after": "coefficient = coefficient.Divide(prime)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "volatility-average-wide-radical-upper-sign",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class Radical",
+    "before": "if (high.Sign < 0) return -1",
+    "after": "if (high.Sign < 0) return 1",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "volatility-average-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VolatilityMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.DirectSelectedPricesAndInvalidFieldsPreserveContracts"
+  },
+  {
+    "id": "volatility-average-wide-native-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "VolatilityMovingAverageSpecOptions volatility => new VolatilityMovingAverageState(volatility.MaType, volatility.Length),",
+    "after": "VolatilityMovingAverageSpecOptions volatility => null,",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SelectedPriceFeedsAdaptivePeriods"
+  },
+  {
+    "id": "volatility-average-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VolatilityMovingAverage(",
+    "before": "VolatilityMovingAverage(input, output, length, 10, 3)",
+    "after": "VolatilityMovingAverage(input, output, length, 2, 3)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.CoreRegistryAndOverlappingSpansUsePublicCausalFormula"
+  },
+  {
+    "id": "volatility-average-wide-core-span",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VolatilityMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length, int lookback, int smooth)",
+    "before": "values.AsSpan().CopyTo(output);",
+    "after": "values.AsSpan(1).CopyTo(output);",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.CoreRegistryAndOverlappingSpansUsePublicCausalFormula"
+  },
+  {
+    "id": "volatility-average-wide-registry-length",
+    "module": "numerical",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct VolMaCore",
+    "before": "MovingAverageCore.VolatilityMovingAverage(input, output, length)",
+    "after": "MovingAverageCore.VolatilityMovingAverage(input, output, 2)",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.CoreRegistryAndOverlappingSpansUsePublicCausalFormula"
+  },
+  {
+    "id": "volatility-average-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "VolatilityMovingAverage or ",
+    "after": "",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "volatility-average-wide-zero-root-bound",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityAverageWindow.cs",
+    "scope": "internal sealed class Radical",
+    "before": "var lower = quotient.IsZero ? BigInteger.Zero : ExactPopulationDeviation.IntegerRoot(quotient);",
+    "after": "var lower = ExactPopulationDeviation.IntegerRoot(quotient);",
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
   }
 ]

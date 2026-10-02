@@ -5199,3 +5199,13 @@ The local exact helper keeps true range, ATR, momentum and signal smoothing unpu
 **83/83 focused tests passed** on net10.0 (`volatilitymomentum735-final.trx`). Coverage includes hand outputs/signals, four standard means, extreme and subnormal prices, zero ranges, large/negative periods, selected direct/native prices, preview/reset, callback order and short overrides, invalid-field atomicity, numerical enrollment and injected output faults. The first build found a value-type default initializer error; it ran no tests, and the corrected build supplied this evidence.
 
 Inventory: **6,736/7,131 enrolled**, **395 omissions across 56 types**, all independent references registered, no construction failures, exact backlog match. WaveTrend, Wilson and Ultimate Moving Average remain separately unpublished. Thirty-seven mutation candidates are queued; final assurance is incomplete.
+
+
+
+### Batch 736: Volatility Moving Average numerical redesign
+
+**51/51 focused tests passed** on net10.0 (`volatilityaverage736-zero-bound.trx`) against the integrated VBM735 source. An independent reference uses pairwise price distances for variance, rational-radicand expressions and its own interval/root arithmetic. Five configurations are covered across batch, fast, armed, native and streaming routes, with selected prices, exact hand outputs/signals, numerical fixtures, injected faults, four means, extreme periods/prices, previews/reset, callback ordering, invalid-input atomicity, core/registry equivalence, overlapping spans and prefix invariance.
+
+The first compile attempt exposed a typed-option mapping mistake; those options expose length and mean type and use the established lookback/smoothing defaults. The initial executable run passed 25 tests and failed 26 on a local zero-bound call to the shared positive-only integer-root primitive. The local caller now handles a zero interval quotient directly; the shared helper is unchanged, and opposing subnormal radical terms have a focused regression. The corrected 51-case run passed in 4.4767 minutes.
+
+Inventory: **6,741/7,131 enrolled**, **390 omissions across 55 types**, all independent references registered, no construction failures, exact backlog match. Forty-two behavioral mutation candidates are queued. One tentative late-history-eviction candidate was removed before freezing: it retains one extra oldest sample, but the bounded period only reads newer samples, so numerical results are unchanged. It is not counted as a kill. WaveTrend, Wilson and Ultimate Moving Average remain separately unpublished; final assurance remains incomplete.

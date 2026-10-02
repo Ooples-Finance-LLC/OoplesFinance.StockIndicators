@@ -866,6 +866,14 @@ public static partial class Calculations
     public static StockData CalculateVolatilityMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, int lbLength = 10, int smoothLength = 3)
     {
+        length = Math.Max(1, length); lbLength = Math.Max(1, lbLength); smoothLength = Math.Max(1, smoothLength);
+        if (StrengthWindow.Supports(maType))
+        {
+            var exact = VolatilityAverageWindow.Calculate(stockData, maType, length, lbLength, smoothLength);
+            var line = exact.Values.ToList(); var trades = CreateSignalsList(stockData); trades?.AddRange(exact.Trades);
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { ["Vma"] = line }); stockData.SetSignals(trades);
+            stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VolatilityMovingAverage; return stockData;
+        }
         List<double> kList = new(stockData.Count);
         List<double> vma1List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

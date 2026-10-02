@@ -12766,10 +12766,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVolatilityMovingAverageFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int lbLength = 10, int smoothLength = 3)
     {
+        length = Math.Max(1, length); lbLength = Math.Max(1, lbLength); smoothLength = Math.Max(1, smoothLength);
+        if (StrengthWindow.Supports(maType))
+        {
+            var values = VolatilityAverageWindow.Calculate(data, maType, length, lbLength, smoothLength, true).Values;
+            var result = context.Rent(values.Length);
+            try { values.AsSpan().CopyTo(result.WritableSpan); return result; } catch { result.Dispose(); throw; }
+        }
         // CalculateVolatilityMovingAverage measures where the chained value sits inside a band one deviation
         // either side of its own lookback average, rescales the smoothed absolute reading into a window
         // length, and takes a linearly weighted average over that window before smoothing it once more.
-        // MovingAverageCore.VolatilityMovingAverage takes a single fixed length and cannot express any of it.
+        // Unsupported moving-average kinds retain their existing component dispatch.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;

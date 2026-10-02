@@ -1103,18 +1103,19 @@ public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndi
 [PrimaryOutput("Vma")]
 public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDisposable
 {
+    private readonly VolatilityAverageWindow? _exact;
     private readonly int _length;
     private readonly int _lbLength;
-    private readonly IMovingAverageSmoother _sma;
+    private readonly IMovingAverageSmoother _sma = null!;
 
     // The deviation of the window about its own mean, not the mean squared residual from the moving
     // average line; see the batch calculation and #190. The band here is sma +/- dev and k divides by
     // its width, so this has to be the one a band at k sigma is defined against.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _kSmoother;
-    private readonly IMovingAverageSmoother _vmaSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
+    private readonly RollingStandardDeviation _stdDev = null!;
+    private readonly IMovingAverageSmoother _kSmoother = null!;
+    private readonly IMovingAverageSmoother _vmaSmoother = null!;
+    private readonly PooledRingBuffer<double> _values = null!;
+    private readonly StreamingInputResolver _input = default;
 
     public VolatilityMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
         int lbLength = 10, int smoothLength = 3)
@@ -1122,6 +1123,7 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
         _length = Math.Max(1, length);
         _lbLength = Math.Max(1, lbLength);
         var resolvedSmooth = Math.Max(1, smoothLength);
+        if (StrengthWindow.Supports(maType)) { _exact = new(maType, _length, _lbLength, resolvedSmooth); return; }
         _sma = MovingAverageSmootherFactory.Create(maType, _lbLength);
         _stdDev = new RollingStandardDeviation(_lbLength);
         _kSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
@@ -1134,6 +1136,7 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
 
     public void Reset()
     {
+        if (_exact is not null) { _exact.Reset(); return; }
         _sma.Reset();
         _stdDev.Reset();
         _kSmoother.Reset();
@@ -1143,6 +1146,12 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_exact is not null)
+        {
+            var point = _exact.Next(bar.Close, isFinal);
+            return new(point.Value, includeOutputs ? new Dictionary<string, double> { ["Vma"] = point.Value } : null);
+        }
         var value = _input.GetValue(bar);
         var sma = _sma.Next(value, isFinal);
         var dev = _stdDev.Next(value, isFinal);
@@ -1187,6 +1196,7 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
 
     public void Dispose()
     {
+        if (_exact is not null) { _exact.Dispose(); return; }
         _sma.Dispose();
         _stdDev.Dispose();
         _kSmoother.Dispose();

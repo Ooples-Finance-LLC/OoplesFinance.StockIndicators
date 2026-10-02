@@ -3066,37 +3066,15 @@ internal static class MovingAverageCore
     /// Computes Volatility Moving Average using span-based computation.
     /// </summary>
     internal static void VolatilityMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+        => VolatilityMovingAverage(input, output, length, 10, 3);
+
+    internal static void VolatilityMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length, int lookback, int smooth)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            SimpleMovingAverage(input, smaBuffer.AsSpan(0, input.Length), length);
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Volatility-weighted SMA
-                var sma = smaBuffer[i];
-                var stdDev = stdDevBuffer[i];
-                var currentValue = input[i];
-
-                // Adjust based on current deviation from mean
-                var deviation = currentValue - sma;
-                var normalizedDev = stdDev > 0 ? deviation / stdDev : 0;
-                normalizedDev = Math.Max(-2, Math.Min(2, normalizedDev));
-
-                output[i] = sma + (normalizedDev * stdDev * 0.5);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-            ArrayPool<double>.Shared.Return(smaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VolatilityAverageWindow(MovingAvgType.SimpleMovingAverage, length, lookback, smooth);
+        var values = new double[input.Length];
+        for (var i = 0; i < input.Length; i++) values[i] = window.Next(input[i], true).Value;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>

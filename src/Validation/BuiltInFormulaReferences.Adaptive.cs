@@ -77,6 +77,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.VolatilityMovingAverage:
                 var volatilityKind = AverageKind(options, 1);
                 if (volatilityKind == 0) return null;
+                if (volatilityKind is 1 or 2 or 3 or 6) return new("Vma", new[] { "Vma" }, bars => VolatilityAverageOutputs(bars, indicator));
                 var lookback = Integer(options, "LbLength", 10);
                 var smooth = Integer(options, "SmoothLength", 3);
                 return new("Vma", new[] { "Vma" }, bars =>

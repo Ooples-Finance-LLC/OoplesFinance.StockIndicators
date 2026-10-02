@@ -1017,3 +1017,13 @@ Momentum is the close difference over length1 divided by the selected average of
 For closes [0,2,4,0,2] with each candle extending one unit above/below its close and both periods 2, true ranges are [2,3,3,5,3], momentum is [0,0,4/3,-1/2,-1/2], and its simple-average signal is [0,0,2/3,5/12,-1/2]. Signals are None, None, StrongBuy, StrongSell, None. Selected prices use the existing per-bar synthetic-range policy, and native history grows only with observed bars.
 
 Armed batch and fast primary consume the ATR callback once; fast Signal additionally consumes the signal callback. Unarmed standard batch/primary bypass mean callbacks, while fast Signal requests its one final mean. Short replacements are zero-padded. Extreme signed periods clamp consistently to at least one.
+
+
+
+### Batch 736: Volatility Moving Average
+
+The public formula measures 100*(price-selected mean)/population deviation, smooths that score, clamps its magnitude to 100, and rounds magnitude/lookback to an integer using ties-to-even. It then rounds max(1,length*(10-level)/10), again ties-to-even, selects a zero-padded linearly weighted average at that period, and applies final smoothing. The local implementation retains rational-coefficient square-root sums through the score mean. Exact square-class cancellation and adaptive outward integer bounds resolve period thresholds before rounding; price means and trading-signal margins remain rational.
+
+For prices [0,2,4,2,0,0], SMA means with length/lookback/smoothing 10/2/2 select periods [10,1,1,10,1,1] and publish [0,1,3,146/55,36/55,0]. The third and fifth trading signals are Buy and Sell because their respective margins exactly tie the prior margin. Tests also distinguish the threshold displaced by sqrt(2+epsilon)-sqrt(2), beyond fixed binary64 precision, from its exact tie.
+
+The internal core and VolMaCore registry now use the causal public formula. The existing length argument maps to output length, with default lookback 10 and smoothing 3; an additional internal overload accepts all three periods. Overlapping spans are safe. Typed public options keep their existing length/mean-type fields and defaults. SMA, WMA, EMA and Wilder paths use the exact local kernel; unsupported means preserve legacy dispatch. Fast computation requests its three component means in order; batch bypasses registered callbacks. History grows only with observed samples.

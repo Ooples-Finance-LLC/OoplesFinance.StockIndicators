@@ -32,6 +32,8 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.VolatilityMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilityAverageOutputs(bars, builtIn)["Vma"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VolatilityBasedMomentum)
         {
             var qualityKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Vbm", "Signal" };
