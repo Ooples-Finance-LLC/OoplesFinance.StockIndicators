@@ -66283,12 +66283,12 @@
     "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
   },
   {
-    "id": "kwan-wide-committed-expiry",
+    "id": "kwan-wide-committed-window-discard",
     "module": "numerical",
     "file": "src/Helpers/KwanWindow.cs",
     "scope": "internal sealed class KwanWindow",
-    "before": "deque.First.Value.Index <= _count - _length",
-    "after": "deque.First.Value.Index < _count - _length",
+    "before": "while (deque.First is not null && deque.First.Value.Index <= _count - _length) deque.RemoveFirst();",
+    "after": "while (deque.First is not null) deque.RemoveFirst();",
     "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
   },
   {
@@ -66481,21 +66481,21 @@
     "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
   },
   {
-    "id": "kwan-wide-weighted-divisor",
+    "id": "kwan-wide-weighted-current-weight",
     "module": "numerical",
     "file": "src/Helpers/KwanWindow.cs",
     "scope": "internal sealed class KwanWindow",
-    "before": "(long)_length * (_length + 1L) / 2",
-    "after": "(long)_length * (_length + 1L)",
+    "before": "value.AddTo(ref weighted, _length);",
+    "after": "value.AddTo(ref weighted, _length - 1L);",
     "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
   },
   {
-    "id": "kwan-wide-simple-warmup",
+    "id": "kwan-wide-simple-ready",
     "module": "numerical",
     "file": "src/Helpers/KwanWindow.cs",
     "scope": "internal sealed class KwanWindow",
-    "before": "_count + 1 < _length ? default",
-    "after": "_count < _length ? default",
+    "before": "_count + 1 < _length ? default : StrengthValue.Round(sum, _length)",
+    "after": "_count <= _length ? default : StrengthValue.Round(sum, _length)",
     "filter": "FullyQualifiedName~KwanNumericalTests.HandDelayedIntegralAndSignedRatios"
   },
   {
@@ -66535,12 +66535,12 @@
     "filter": "FullyQualifiedName~KwanNumericalTests.CustomGainAndLossSlotsRetainInputsAndPeriods"
   },
   {
-    "id": "kwan-wide-selected-range",
+    "id": "kwan-wide-selected-candle-collapse",
     "module": "numerical",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
     "scope": "internal static ComputeBuffer ComputeKwanIndicatorFast(",
     "before": "window.Next(highs[i], lows[i], prices[i]",
-    "after": "window.Next(data.HighPrices[i], data.LowPrices[i], prices[i]",
+    "after": "window.Next(prices[i], prices[i], prices[i]",
     "filter": "FullyQualifiedName~KwanNumericalTests.SelectedSourcePreservesCandles"
   },
   {
