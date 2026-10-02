@@ -22,6 +22,17 @@ public sealed class ParametricKalmanNumericalTests
         Assert.Equal(expected, BuiltInFormulaReferences.ParametricKalmanOutputs(bars, 2)["Pkf"]);
         Assert.Equal(expected, Data(bars).CalculateParametricKalmanFilter(2).CustomValuesList);
         var output = new double[3]; MovingAverageCore.ParametricKalmanFilter(new[] { 1d, 2, 4 }, output, 2); Assert.Equal(expected, output);
+        // Before a three-bar lag fills, the third measurement is |4 - previous price 2| = 2.
+        // Previous estimate/error are both 1, so (2*1 + 1*4)/(2+1) = 2.
+        // Using a zero startup baseline instead produces (4*1 + 1*4)/(4+1) = 8/5.
+        var startup = new[] { 1d, 1, 2 };
+        Assert.Equal(startup, BuiltInFormulaReferences.ParametricKalmanOutputs(bars, 3)["Pkf"]);
+        Assert.Equal(startup, Data(bars).CalculateParametricKalmanFilter(3).CustomValuesList);
+        MovingAverageCore.ParametricKalmanFilter(new[] { 1d, 2, 4 }, output, 3); Assert.Equal(startup, output);
+        using var context = new ComputeContext();
+        using var fast = IndicatorCompute.ComputeParametricKalmanFilterFast(Data(bars), context, 3); Assert.Equal(startup, fast.ToArray());
+        using var state = new ParametricKalmanFilterState(3);
+        for (var i = 0; i < bars.Length; i++) Assert.Equal(startup[i], state.Update(Native(bars[i]), true, false).Value);
     }
 
     [Fact]
