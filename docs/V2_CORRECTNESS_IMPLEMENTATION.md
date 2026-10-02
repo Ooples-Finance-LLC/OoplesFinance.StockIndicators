@@ -5023,3 +5023,12 @@ Value Chart retains the exact high/low midpoint, five-window range total, coordi
 **48/48 distinct focused checks passed**: 25 route cases, configuration enrollment and injected-fault checks, explicit selected-input coverage, independent +/-12.5 extreme/subnormal hands, callback replacement/signals, period normalization/cap/ceiling/expiry, and native preview/reset/invalid-input checks. The first run exposed a reference enum mapping error (16/47 passed); corrected mapping passed 47/47. Three boundary checks passed after adding the ceiling-period hand and invalid-volume rejection, reusing the unchanged production DLL. The old nonparameterized cap-test definition is excluded from the distinct total. Evidence: `value-chart716-reference-repair.trx` and `value-chart716-boundary-repair.trx`.
 
 Inventory: **6,687/7,131 configurations enrolled**, **444 omissions**, all 7,131 reference registrations, no construction failures, exact backlog agreement. DLL SHA256: `4d38dfa7a300d63f33b0b49ca189df5708d0154a82557845a470b812022c3843`. UMA714 remains independently under verification and is excluded. All 9,362 manifest anchors resolve; the 32 new mutation candidates are queued, not qualified. Hosted/platform/package/performance assurance remains incomplete.
+
+
+### Batch 672: Negative Volume Disparity mutation qualification
+
+Three isolated campaigns passed their baselines. The original repaired pair caught 20 faults; its enrollment fault failed compilation because disk space was exhausted and is excluded. A fresh enrollment-only recovery campaign caught that remaining fault, yielding **21/21 compiled behavioral faults**, alongside **84/84 distinct focused tests**. All three archives were compared byte-for-byte with the retained batch-672 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `77dd4d2fdfdd4a816d4ff10cbb59d9a19f8a297d81d8bded9329daa5ed8c645a`. Archive SHA256: `d72e20015e6ea76c9ffd52f99c918f832fc4d7016248a73ff61f85d07a253b56` , `6af8ace0335710a49d29a9e60370a2f6b216ac72cb152a8a74f9aef3767e7bec` and `6af8ace0335710a49d29a9e60370a2f6b216ac72cb152a8a74f9aef3767e7bec`.
+
+This is evidence for the isolated batch-672 source. Source was already published in the batch-672 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
