@@ -5142,3 +5142,10 @@ The original 679a campaign passed its baseline and caught 14 of 15 faults; the z
 The replacement Kalman launch stopped before building because the current manifest has a UTF-8 BOM. The runner and evidence merger now decode manifests with `utf-8-sig`, accepting either encoding while leaving malformed JSON rejection intact. CLI regressions exercise both encodings, including real source-identical shard aggregation. All 9 runner tests and 10 shard tests passed; the runner suite also validated all 9,572 manifest anchors. No .NET source or tests changed.
 
 New Kalman snapshot pairs include the corrected tools and retain byte-identical production/C# test sources from the 39-pass regression repair. The BOM-failed launch and older 679 snapshots remain excluded from qualification. Existing frozen pairs whose runner cannot decode their BOM must receive fresh matched snapshots with the tool correction before launch; retain prior snapshots and never claim the failed launch as mutation evidence. Numerical inventory remains 6,718/7,131; 413 omissions across 58 types, and final assurance remains incomplete.
+
+
+### Batch 730: Z Distance from VWAP verified output batch
+
+Batch, direct fast/arm, native and explicit streaming paths share local exact normalization. All **42/42 focused output tests passed** on net10.0 (`zdistance730-outputs.trx`): five configurations across five routes, selected-source cases, hand values, four standard means plus VWAP, signed/zero/extreme volumes, subnormal products, extreme periods, callback bypass, previews/reset, and invalid-original-field rejection.
+
+This is an independently completed output correction. Exact comparisons of square-root-based signals remain pending scope approval, and no numerical enrollment was added. Inventory stays **6,718/7,131 enrolled**, **413 omissions across 58 types**, with complete independent reference registrations, no construction failures and an exact backlog match. WaveTrend, Wilson, and Ultimate Moving Average remain separately unpublished. Thirty output mutation candidates are frozen for later isolated qualification; this batch does not claim final indicator or release readiness.

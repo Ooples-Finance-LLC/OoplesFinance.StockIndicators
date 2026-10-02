@@ -910,62 +910,18 @@ public sealed class WoodiePivotPointsState : IStreamingIndicatorState, ICustomIn
 [PrimaryOutput("Zscore")]
 public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly IMovingAverageSmoother? _meanMa;
-    private readonly RollingVolumeWeightedMean _vwapMean;
-    private readonly RollingZScore _zScore;
-    private StreamingInputResolver _input;
-
+    private readonly ZDistanceWindow _window;
     public ZDistanceFromVwapState(MovingAvgType maType = MovingAvgType.VolumeWeightedAveragePrice, int length = 20)
-        : this(maType, length, new StreamingInputResolver(InputName.Close, null))
-    {
-    }
-
-    private ZDistanceFromVwapState(MovingAvgType maType, int length, StreamingInputResolver input)
-    {
-        var resolved = Math.Max(1, length);
-        // LazyBear's calc_zvwap: a rolling volume-weighted mean for the VWAP type, the chosen average otherwise.
-        _meanMa = maType == MovingAvgType.VolumeWeightedAveragePrice ? null : MovingAverageSmootherFactory.Create(maType, resolved);
-        _vwapMean = new RollingVolumeWeightedMean(resolved);
-        _zScore = new RollingZScore(resolved);
-        _input = input;
-    }
-
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.ZDistanceFromVwap;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _meanMa?.Reset();
-        _vwapMean.Reset();
-        _zScore.Reset();
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() { }
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var mean = _meanMa is null ? _vwapMean.Next(value, bar.Volume, isFinal) : _meanMa.Next(value, isFinal);
-        var zscore = _zScore.Next(value, mean, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Zscore", zscore }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(zscore, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { ["Zscore"] = value } : null);
     }
-
-    public void Dispose()
-    {
-        _meanMa?.Dispose();
-        _vwapMean.Dispose();
-        _zScore.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Zema")]

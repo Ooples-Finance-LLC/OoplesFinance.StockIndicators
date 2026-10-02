@@ -896,6 +896,7 @@ internal static class BuilderVerifiedArms
         typeof(VolumePriceTrendSpecOptions),
         typeof(VrocSpecOptions),
         typeof(VolumeZoneOscillatorSpecOptions),
+        typeof(ZDistanceFromVwapSpecOptions),
         typeof(WaddahAttarExplosionSpecOptions),
         typeof(VortexBandsSpecOptions),
         typeof(VostroIndicatorSpecOptions),

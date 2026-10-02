@@ -2305,6 +2305,7 @@ internal static partial class IndicatorCompute
                 ? SmoothPublished(data, context, ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType), vbm.Length1, vbm.MaType)
                 : ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType),
             VolatilitySwitchIndicatorSpecOptions vsi => ComputeVolatilitySwitchIndicatorFast(data, context, vsi.Length, vsi.MaType),
+            ZDistanceFromVwapSpecOptions distance => ComputeZDistanceFromVwapFast(data, context, distance.Length, distance.MaType),
             WaddahAttarExplosionSpecOptions wae => ComputeWaddahAttarExplosionFast(data, context, wae.FastLength, wae.SlowLength, wae.Sensitivity, spec.OutputKey),
             VortexBandsSpecOptions vb => ComputeVortexBandsFast(data, context, vb.Length, vb.MaType, spec.OutputKey),
             VostroIndicatorSpecOptions vi => ComputeVostroIndicatorFast(data, context, vi.Length1, vi.Length2, vi.Level, vi.MaType),
@@ -21834,6 +21835,13 @@ internal static partial class IndicatorCompute
 
         smaBuffer.Dispose();
         return result;
+    }
+
+    internal static ComputeBuffer ComputeZDistanceFromVwapFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.VolumeWeightedAveragePrice)
+    {
+        var values = ZDistanceWindow.Calculate(data, maType, length); var output = context.Rent(values.Length);
+        try { values.AsSpan().CopyTo(output.WritableSpan); return output; } catch { output.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34,

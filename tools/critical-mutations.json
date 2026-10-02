@@ -83254,5 +83254,275 @@
     "before": "WaddahAttarExplosionSpecOptions wae => ComputeWaddahAttarExplosionFast(data, context, wae.FastLength, wae.SlowLength, wae.Sensitivity, spec.OutputKey),",
     "after": "",
     "filter": "FullyQualifiedName~WaddahNumericalTests.FiveOutputsMatchFourIndependentLaggedMacds"
+  },
+  {
+    "id": "z-distance-wide-volume-product",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "var product = current * weight;",
+    "after": "var product = current;",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-product-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "var product = current * weight;",
+    "after": "var product = Number.Of((current * weight).Publish());",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.SubnormalProductsAndResidualsRetainNormalizedMovement"
+  },
+  {
+    "id": "z-distance-wide-flow-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "if (_flow.Count == _length) { products -=",
+    "after": "if (_flow.Count > _length) { products -=",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-zero-volume",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "volumes.Sign == 0 ? default",
+    "after": "volumes.Sign == 0 ? current",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-volume-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "products.Divide(volumes)",
+    "after": "products.Divide(_length)",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-mean-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "var residual = current - mean;",
+    "after": "var residual = current - Number.Of(mean.Publish());",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.SubnormalProductsAndResidualsRetainNormalizedMovement"
+  },
+  {
+    "id": "z-distance-wide-residual-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "var residual = current - mean;",
+    "after": "var residual = current + mean;",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-square-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "var square = residual * residual;",
+    "after": "var square = Number.Of((residual * residual).Publish());",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.SubnormalProductsAndResidualsRetainNormalizedMovement"
+  },
+  {
+    "id": "z-distance-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "if (_squares.Count == _length) squares -=",
+    "after": "if (_squares.Count > _length) squares -=",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-width-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "_squares.Count + 1 < _length",
+    "after": "_squares.Count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-rms-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "square.Times(_length).Divide(squares)",
+    "after": "square.Divide(squares)",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-root-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "ratio.Numerator << 2148",
+    "after": "ratio.Numerator << 2146",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-score-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "var value = residual.Sign *",
+    "after": "var value = 1 *",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "input, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, volumes",
+    "after": "input, volumes",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.InvalidCandlesCannotAdvanceMeansOrResidualHistory"
+  },
+  {
+    "id": "z-distance-wide-reset-flow",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "_flow.Clear(); _squares.Clear();",
+    "after": "_squares.Clear();",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-reset-squares",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "_flow.Clear(); _squares.Clear();",
+    "after": "_flow.Clear();",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-reset-sums",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "internal sealed class ZDistanceWindow",
+    "before": "_product = _volume = _squareSum = default;",
+    "after": "_product = _volume = default;",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-mean-floor",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "z-distance-wide-weight-aging",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-weight-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.StandardMeansKeepSignedExtendedResiduals"
+  },
+  {
+    "id": "z-distance-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class ZDistanceFromVwapState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.InvalidCandlesCannotAdvanceMeansOrResidualHistory"
+  },
+  {
+    "id": "z-distance-wide-native-volume",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class ZDistanceFromVwapState",
+    "before": "_window.Next(bar.Close, bar.Volume, isFinal)",
+    "after": "_window.Next(bar.Close, 1, isFinal)",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "z-distance-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeZDistanceFromVwapFast(",
+    "before": "ZDistanceWindow.Calculate(data, maType, length)",
+    "after": "ZDistanceWindow.Calculate(data, maType, 1)",
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
   }
 ]

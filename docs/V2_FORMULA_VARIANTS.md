@@ -988,3 +988,12 @@ T1 is sensitivity times the difference between the current MACD and the MACD of 
 Exact means, products, and moment sums survive intermediate overflow and underflow. The deviation is scaled before its final square-root rounding. Signals retain the published conditions, with exact comparisons of nonnegative squared values replacing comparisons of rounded roots. For prices [1,3,0,4,2], fast=2, slow=3, sensitivity=6, T1 is [0,0,-9,1,-11/3], T2 is [0,0,2,7/3,-61/18], and E1 is [0,4,6,8,4]. For [0,epsilon], E1 is 2epsilon even though the unscaled deviation rounds to zero. At the final bar of [1,3,0,4], sensitivity=48 gives an exact trend/width tie; adjacent binary64 sensitivities select Buy or Sell.
 
 Original batch callback bypass, output order, selected inputs, and empty custom outputs are retained. Native previews/reset use lazy observed history for extreme periods. All 76 focused tests passed on net10.0; 37 mutation candidates await isolated qualification.
+
+
+### Batch 730: Z Distance from VWAP output normalization
+
+The output follows LazyBear calc_zvwap: each residual is price minus its own trailing volume-weighted mean (or selected moving average), divided by the root mean square of the last length residuals. Width is zero until the full residual window is observed. A zero sum of signed volumes defines a zero mean, and zero-volume observations remain in the residual history.
+
+Exact products, sums, means, and squared residuals survive intermediate overflow and underflow. The final signed root of length*currentResidualSquared/sumResidualSquared is rounded directly to binary64. Observed-history queues handle extreme periods. For prices [1,3,2], volumes [1,1,2], and length 2, means are [1,2,7/3], residuals [0,1,-1/3], and scores [0,sqrt(2),-sqrt(1/5)]. A one-ULP price move and subnormal volume-price products retain their normalized movement.
+
+The independent reference translates each price window by the current price and uses binary64 root bisection, separately from production's weighted sum and integer-root rounding. Registered means retain callback bypass; selected inputs retain original volumes. Signal comparisons still use published scores. Exact signal comparisons are a pending scope decision; these five configurations remain in the numerical backlog.

@@ -299,15 +299,7 @@ public static partial class Calculations
     {
         List<double> zscoreList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // LazyBear's calc_zvwap. The mean is a rolling volume-weighted mean over `length` (the chosen moving
-        // average, for any other type) and the width is sqrt(sma((price - mean)^2, length)). This used the VWAP
-        // fast path's cumulative average as the mean and the deviation of that mean series as the width.
-        var meanList = maType == MovingAvgType.VolumeWeightedAveragePrice
-            ? GetRollingVolumeWeightedMeanList(inputList, stockData.Volumes, length)
-            : GetMovingAverageList(stockData, maType, length, inputList);
-        var zscoreValues = GetZScoreList(inputList, meanList, length);
+        var zscoreValues = ZDistanceWindow.Calculate(stockData, maType, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
