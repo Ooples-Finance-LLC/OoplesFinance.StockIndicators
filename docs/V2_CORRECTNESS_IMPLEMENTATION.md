@@ -4617,3 +4617,10 @@ QQE retains the established RSI component, then carries exact smoothing and move
 The original pair caught42 compiled faults, left one equivalent fault alive and encountered one compiler failure; it does not qualify. The first-return fault now forces an opening return while still reading the previous-price flag, avoiding CS0414. The omitted callback reset was equivalent: the prepass changes only deviation state, and the callback replaces every deviation used by the second pass. Its replacement discards the callback result, testing an observable callback contract. Production and regression sources are unchanged.
 
 Fresh snapshots contain2,204 matching files, with only these two manifest definitions changed from the retained656 source. All8,488 current manifest anchors resolve. The replacement44-fault pair is running; qualification remains pending. Original partial results will not be pooled into its result.
+
+
+### Batch 688: Rainbow public numerical cascade
+
+Ten moving-average stages, their aggregate and extrema, and the complete range quotients retain rational intermediates through publication and signal comparisons. SMA startup zeros and weighted startup weights remain defined. Lazy history handles extreme periods; all three outputs and ten callback stages remain distinct. Both factories register the public state. Core alignment remains pending.
+
+**50/50 focused tests passed** on net10.0 (`rainbow688-public.trx`), including independent hand, five-route, extreme, callback, preview/reset, existing hand and golden regressions. Inventory: **6,529/7,131 enrolled**, **602 omissions across 89 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes unfinished RMO687 and Periodic677. The 35 prepared behavioral faults await isolated qualification; final readiness gates remain pending.

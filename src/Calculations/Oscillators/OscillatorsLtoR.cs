@@ -1792,68 +1792,11 @@ public static partial class Calculations
     public static StockData CalculateRainbowOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length1 = 2, int length2 = 10)
     {
-        List<double> rainbowOscillatorList = new(stockData.Count);
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length2);
-
-        var r1List = GetMovingAverageList(stockData, maType, length1, inputList);
-        var r2List = GetMovingAverageList(stockData, maType, length1, r1List); //-V3056
-        var r3List = GetMovingAverageList(stockData, maType, length1, r2List);
-        var r4List = GetMovingAverageList(stockData, maType, length1, r3List);
-        var r5List = GetMovingAverageList(stockData, maType, length1, r4List);
-        var r6List = GetMovingAverageList(stockData, maType, length1, r5List);
-        var r7List = GetMovingAverageList(stockData, maType, length1, r6List);
-        var r8List = GetMovingAverageList(stockData, maType, length1, r7List);
-        var r9List = GetMovingAverageList(stockData, maType, length1, r8List);
-        var r10List = GetMovingAverageList(stockData, maType, length1, r9List);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var currentValue = inputList[i];
-            var r1 = r1List[i];
-            var r2 = r2List[i];
-            var r3 = r3List[i];
-            var r4 = r4List[i];
-            var r5 = r5List[i];
-            var r6 = r6List[i];
-            var r7 = r7List[i];
-            var r8 = r8List[i];
-            var r9 = r9List[i];
-            var r10 = r10List[i];
-            var highestRainbow = Math.Max(r1, Math.Max(r2, Math.Max(r3, Math.Max(r4, Math.Max(r5, Math.Max(r6, Math.Max(r7, Math.Max(r8, 
-                Math.Max(r9, r10)))))))));
-            var lowestRainbow = Math.Min(r1, Math.Min(r2, Math.Min(r3, Math.Min(r4, Math.Min(r5, Math.Min(r6, Math.Min(r7, Math.Min(r8, 
-                Math.Min(r9, r10)))))))));
-
-            var prevRainbowOscillator = GetLastOrDefault(rainbowOscillatorList);
-            var rainbowOscillator = highest - lowest != 0 ? 100 * ((currentValue - ((r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10) / 10)) / 
-                                                                   (highest - lowest)) : 0;
-            rainbowOscillatorList.Add(rainbowOscillator);
-
-            var upperBand = highest - lowest != 0 ? 100 * ((highestRainbow - lowestRainbow) / (highest - lowest)) : 0;
-            upperBandList.Add(upperBand);
-
-            var lowerBand = -upperBand;
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetCompareSignal(rainbowOscillator, prevRainbowOscillator);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ro", rainbowOscillatorList },
-            { "UpperBand", upperBandList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rainbowOscillatorList);
-        stockData.IndicatorName = IndicatorName.RainbowOscillator;
-
+        var result = RainbowWindow.Calculate(stockData, maType, length1, length2, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> {
+            { "Ro", result.Line.ToList() }, { "UpperBand", result.Upper.ToList() }, { "LowerBand", result.Lower.ToList() } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades.ToList());
+        stockData.SetCustomValues(result.Line.ToList()); stockData.IndicatorName = IndicatorName.RainbowOscillator;
         return stockData;
     }
 

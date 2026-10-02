@@ -1215,110 +1215,19 @@ public sealed class RahulMohindarOscillatorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Ro")]
 public sealed class RainbowOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _r1;
-    private readonly IMovingAverageSmoother _r2;
-    private readonly IMovingAverageSmoother _r3;
-    private readonly IMovingAverageSmoother _r4;
-    private readonly IMovingAverageSmoother _r5;
-    private readonly IMovingAverageSmoother _r6;
-    private readonly IMovingAverageSmoother _r7;
-    private readonly IMovingAverageSmoother _r8;
-    private readonly IMovingAverageSmoother _r9;
-    private readonly IMovingAverageSmoother _r10;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-
+    private readonly RainbowWindow _window;
     public RainbowOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 2, int length2 = 10)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(2, length2);
-        _r1 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r2 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r3 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r4 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r5 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r6 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r7 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r8 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r9 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _r10 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _highWindow = new RollingWindowMax(resolved2);
-        _lowWindow = new RollingWindowMin(resolved2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new RainbowWindow(maType, length1, length2);
     public IndicatorName Name => IndicatorName.RainbowOscillator;
-
-    public void Reset()
-    {
-        _r1.Reset();
-        _r2.Reset();
-        _r3.Reset();
-        _r4.Reset();
-        _r5.Reset();
-        _r6.Reset();
-        _r7.Reset();
-        _r8.Reset();
-        _r9.Reset();
-        _r10.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(value, out _) : _highWindow.Preview(value, out _);
-        var lowest = isFinal ? _lowWindow.Add(value, out _) : _lowWindow.Preview(value, out _);
-        var r1 = _r1.Next(value, isFinal);
-        var r2 = _r2.Next(r1, isFinal);
-        var r3 = _r3.Next(r2, isFinal);
-        var r4 = _r4.Next(r3, isFinal);
-        var r5 = _r5.Next(r4, isFinal);
-        var r6 = _r6.Next(r5, isFinal);
-        var r7 = _r7.Next(r6, isFinal);
-        var r8 = _r8.Next(r7, isFinal);
-        var r9 = _r9.Next(r8, isFinal);
-        var r10 = _r10.Next(r9, isFinal);
-        var highestRainbow = Math.Max(r1, Math.Max(r2, Math.Max(r3, Math.Max(r4, Math.Max(r5, Math.Max(r6, Math.Max(r7,
-            Math.Max(r8, Math.Max(r9, r10)))))))));
-        var lowestRainbow = Math.Min(r1, Math.Min(r2, Math.Min(r3, Math.Min(r4, Math.Min(r5, Math.Min(r6, Math.Min(r7,
-            Math.Min(r8, Math.Min(r9, r10)))))))));
-        var avg = (r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10) / 10;
-        var ro = highest - lowest != 0 ? 100 * (value - avg) / (highest - lowest) : 0;
-        var upper = highest - lowest != 0 ? 100 * ((highestRainbow - lowestRainbow) / (highest - lowest)) : 0;
-        var lower = -upper;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Ro", ro },
-                { "UpperBand", upper },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ro, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> {
+            { "Ro", value.Line }, { "UpperBand", value.Upper }, { "LowerBand", value.Lower } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _r1.Dispose();
-        _r2.Dispose();
-        _r3.Dispose();
-        _r4.Dispose();
-        _r5.Dispose();
-        _r6.Dispose();
-        _r7.Dispose();
-        _r8.Dispose();
-        _r9.Dispose();
-        _r10.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("RwiHigh")]

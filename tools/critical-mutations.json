@@ -73498,5 +73498,320 @@
     "before": "QuantitativeQualitativeEstimation or ",
     "after": "",
     "filter": "FullyQualifiedName~QqeNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "rainbow-wide-cascade-count",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "Enumerable.Range(0, 10)",
+    "after": "Enumerable.Range(0, 9)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-range-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_range = Math.Max(2, range)",
+    "after": "_range = Math.Max(3, range)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExtremePeriodsAreLazyAndNormalizeConsistently"
+  },
+  {
+    "id": "rainbow-wide-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_count - _range + 1L",
+    "after": "_count - _range",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-line-mean",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "Number.Of(price).Times(10) - sum",
+    "after": "Number.Of(price).Times(9) - sum",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-line-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": ").Times(10).Divide(width)",
+    "after": ").Times(1).Divide(width)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-band-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "(high - low).Times(100)",
+    "after": "(high - low).Times(10)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-band-direction",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "(high - low).Times(100)",
+    "after": "(low - high).Times(100)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-lower-direction",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "upper, -upper, trade",
+    "after": "upper, upper, trade",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-signal-change",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "line - _previous",
+    "after": "_previous - line",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-signal-history",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_previous = line; _count++;",
+    "after": "_previous = default; _count++;",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-cascade-sum",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "value = _stages[i].Next(value, final); sum += value;",
+    "after": "value = _stages[i].Next(value, final); sum = value;",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-cascade-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_stages[i].Next(value, final)",
+    "after": "_stages[i].Next(value, true)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-cascade-min",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "(value - low).Sign < 0",
+    "after": "(value - low).Sign > 0",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-cascade-max",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "(value - high).Sign > 0",
+    "after": "(value - high).Sign < 0",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-period-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.UnitCascadePeriodCancelsBeforePublication"
+  },
+  {
+    "id": "rainbow-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "weighted - sum + value.Times(_length)",
+    "after": "weighted + value.Times(_length)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rainbow-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide((long)_length * (_length + 1L))",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "rainbow-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "sum -= _history.Peek();",
+    "after": "sum += _history.Peek();",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-ema-seed",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-recursive-retention",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-recursive-gain",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_sum = _weighted = _previous = default;",
+    "after": "_sum = _weighted = default;",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-high-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_highs.Clear();",
+    "after": "/* highs retained */",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-low-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "_lows.Clear();",
+    "after": "/* lows retained */",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-callback-order",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "ComponentAverage.Take(values, length)",
+    "after": "ComponentAverage.Take(prices, length)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.CallbackGraphUsesTenOrderedStagesForEveryOutput"
+  },
+  {
+    "id": "rainbow-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "ComponentAverage.Take(values, length)",
+    "after": "ComponentAverage.Take(values, Math.Max(1, length - 1))",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.CallbackGraphUsesTenOrderedStagesForEveryOutput"
+  },
+  {
+    "id": "rainbow-wide-callback-sum",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "sums[i] += value;",
+    "after": "sums[i] = value;",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.CallbackGraphUsesTenOrderedStagesForEveryOutput"
+  },
+  {
+    "id": "rainbow-wide-callback-min",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "(value - lows[i]).Sign < 0",
+    "after": "(value - lows[i]).Sign > 0",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.CallbackGraphUsesTenOrderedStagesForEveryOutput"
+  },
+  {
+    "id": "rainbow-wide-callback-max",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "(value - highs[i]).Sign > 0",
+    "after": "(value - highs[i]).Sign < 0",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.CallbackGraphUsesTenOrderedStagesForEveryOutput"
+  },
+  {
+    "id": "rainbow-wide-callback-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RainbowWindow.cs",
+    "scope": "internal sealed class RainbowWindow",
+    "before": "var value = Number.Of(values[i]); sums[i] += value;",
+    "after": "var value = Number.Of(values[i]); sums[i] = Number.Of(sums[i].Publish() + values[i]);",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.CallbackCascadeSumCannotOverflowBeforeCancellation"
+  },
+  {
+    "id": "rainbow-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class RainbowOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* finite guard removed */",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.InvalidBarsCannotAdvanceState"
+  },
+  {
+    "id": "rainbow-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class RainbowOscillatorState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "rainbow-wide-fast-upper",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRainbowOscillatorFast",
+    "before": "outputKey == \"UpperBand\" ? result.Upper",
+    "after": "outputKey == \"UpperBand\" ? result.Lower",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "rainbow-wide-fast-lower",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRainbowOscillatorFast",
+    "before": "outputKey == \"LowerBand\" ? result.Lower",
+    "after": "outputKey == \"LowerBand\" ? result.Upper",
+    "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
   }
 ]

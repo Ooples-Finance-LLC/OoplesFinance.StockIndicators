@@ -771,3 +771,8 @@ All 113 focused public-route regressions passed on net10.0. The 46 prepared beha
 ### Batch 685: QQE volatility widths
 
 QQE retains its published pair of scaled RSI-movement widths. The RSI component retains the established rounded gain/loss stages and unchanged-price carry rule. Subsequent signal smoothing, absolute movements and both width smoothing stages retain exact rational intermediates until scaling and publication; signal comparisons retain those intermediates as well. Lazy queues avoid period-sized allocation. Derived periods use 64-bit arithmetic (2*length-1), including 4,294,967,293 for the largest input period. Nonnegative finite factors follow the existing typed-option domain. Five callbacks retain gain, loss, RSI signal, first width and second width order; callback/legacy paths reject derived periods outside their int API instead of wrapping. Unsupported native smoothing retains batch fallback. All 82 focused tests passed on net10.0. The 40 prepared behavioral faults await isolated qualification.
+
+
+### Batch 688: Rainbow public numerical cascade
+
+Ten moving-average stages, their mean and extrema, and the complete rolling-range quotients retain exact intermediates until output publication. SMA full-window startup zeros and weighted startup weights remain defined. Lazy queues avoid period-sized storage. All three output names and ten callback stages remain explicit; both factories register the public state. Core alignment remains a separate pending decision. All 50 focused regressions passed on net10.0. The 35 prepared behavioral faults await isolated mutation qualification.

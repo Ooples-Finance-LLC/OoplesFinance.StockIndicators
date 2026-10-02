@@ -8411,75 +8411,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRainbowOscillatorFast(StockData data, ComputeContext context, int length1 = 2,
         int length2 = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateRainbowOscillator smooths the series ten times in succession - each pass over the one
-        // before it - and reports how far the series sits from the average of those ten, scaled by the range
-        // it has covered over length2 bars. The ten passes are held open at once because the average is taken
-        // across them bar by bar, so none of them can be folded away.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var pass1 = context.Rent(count);
-        using var pass2 = context.Rent(count);
-        using var pass3 = context.Rent(count);
-        using var pass4 = context.Rent(count);
-        using var pass5 = context.Rent(count);
-        using var pass6 = context.Rent(count);
-        using var pass7 = context.Rent(count);
-        using var pass8 = context.Rent(count);
-        using var pass9 = context.Rent(count);
-        using var pass10 = context.Rent(count);
-
-        MovingAverage(data, maType, length1, input, pass1.WritableSpan);
-        MovingAverage(data, maType, length1, pass1.Span, pass2.WritableSpan);
-        MovingAverage(data, maType, length1, pass2.Span, pass3.WritableSpan);
-        MovingAverage(data, maType, length1, pass3.Span, pass4.WritableSpan);
-        MovingAverage(data, maType, length1, pass4.Span, pass5.WritableSpan);
-        MovingAverage(data, maType, length1, pass5.Span, pass6.WritableSpan);
-        MovingAverage(data, maType, length1, pass6.Span, pass7.WritableSpan);
-        MovingAverage(data, maType, length1, pass7.Span, pass8.WritableSpan);
-        MovingAverage(data, maType, length1, pass8.Span, pass9.WritableSpan);
-        MovingAverage(data, maType, length1, pass9.Span, pass10.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingMinMax(Math.Max(length2, 2));
-        Span<double> layers = stackalloc double[10];
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(input[i]);
-            var range = window.Max - window.Min;
-
-            var sum = pass1.Span[i] + pass2.Span[i] + pass3.Span[i] + pass4.Span[i] + pass5.Span[i] +
-                pass6.Span[i] + pass7.Span[i] + pass8.Span[i] + pass9.Span[i] + pass10.Span[i];
-
-            if (outputKey is "UpperBand" or "LowerBand")
-            {
-                layers[0] = pass1.Span[i];
-                layers[1] = pass2.Span[i];
-                layers[2] = pass3.Span[i];
-                layers[3] = pass4.Span[i];
-                layers[4] = pass5.Span[i];
-                layers[5] = pass6.Span[i];
-                layers[6] = pass7.Span[i];
-                layers[7] = pass8.Span[i];
-                layers[8] = pass9.Span[i];
-                layers[9] = pass10.Span[i];
-                var low = layers[0];
-                var high = layers[0];
-                for (var j = 1; j < layers.Length; j++)
-                {
-                    low = Math.Min(low, layers[j]);
-                    high = Math.Max(high, layers[j]);
-                }
-                var band = range != 0 ? 100 * ((high - low) / range) : 0;
-                output[i] = outputKey == "LowerBand" ? -band : band;
-            }
-            else output[i] = range != 0 ? 100 * ((input[i] - (sum / 10)) / range) : 0;
-        }
-
-        return buffer;
+        var result = RainbowWindow.Calculate(data, maType, length1, length2, true);
+        var values = outputKey == "UpperBand" ? result.Upper : outputKey == "LowerBand" ? result.Lower : result.Line;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>
