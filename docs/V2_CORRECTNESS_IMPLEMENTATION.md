@@ -4624,3 +4624,12 @@ Fresh snapshots contain2,204 matching files, with only these two manifest defini
 Ten moving-average stages, their aggregate and extrema, and the complete range quotients retain rational intermediates through publication and signal comparisons. SMA startup zeros and weighted startup weights remain defined. Lazy history handles extreme periods; all three outputs and ten callback stages remain distinct. Both factories register the public state. Core alignment remains pending.
 
 **50/50 focused tests passed** on net10.0 (`rainbow688-public.trx`), including independent hand, five-route, extreme, callback, preview/reset, existing hand and golden regressions. Inventory: **6,529/7,131 enrolled**, **602 omissions across 89 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes unfinished RMO687 and Periodic677. The 35 prepared behavioral faults await isolated qualification; final readiness gates remain pending.
+
+
+### Batch 689: Random Walk complete root-scaled ratios
+
+Exact rational true ranges, ATR stages and lagged differences retain scale until the complete quotient is rounded with the exact square root of the period. The length-two opening hand now yields correctly rounded sqrt(2), rather than its lower neighboring double. Signals cancel the common positive root factor. Lazy history supports extreme periods; both output names, selected-close gaps, preview/reset and callback behavior remain explicit.
+
+**50/50 focused tests passed** on net10.0 (`random-walk689-focused-final.trx`), including independent root/lag hands, five routes, extreme/subnormal values, callbacks and the existing golden test. Inventory: **6,534/7,131 enrolled**, **597 omissions across 88 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes unfinished RMO687 and Periodic677. The 34 prepared behavioral faults await isolated qualification.
+
+A broader shared hand-example test passed its Random Walk entry but failed later on the separate Recursive Differenciator reference (0.19999999999999996 versus hand 0.2). That failure is preserved in `random-walk689-repaired-build.trx` and excluded from the 50 passing focused checks; its bounded follow-up is pending a scope decision. The initial compiler failure is also excluded. Final readiness gates remain pending.

@@ -1233,65 +1233,19 @@ public sealed class RainbowOscillatorState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("RwiHigh")]
 public sealed class RandomWalkIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _sqrtLength;
-    private readonly AverageTrueRangeSmoother _atrSmoother;
-    private readonly PooledRingBuffer<double> _highValues;
-    private readonly PooledRingBuffer<double> _lowValues;
-
+    private readonly RandomWalkWindow _window;
     public RandomWalkIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _sqrtLength = MathHelper.Sqrt(_length);
-        _atrSmoother = new AverageTrueRangeSmoother(maType, _length, InputName.Close);
-        _highValues = new PooledRingBuffer<double>(_length);
-        _lowValues = new PooledRingBuffer<double>(_length);
-    }
-
+        => _window = new RandomWalkWindow(maType, length);
     public IndicatorName Name => IndicatorName.RandomWalkIndex;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _highValues.Clear();
-        _lowValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var atr = _atrSmoother.Next(bar, isFinal);
-        var prevHigh = EhlersStreamingWindow.GetOffsetValue(_highValues, bar.High, _length);
-        var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, bar.Low, _length);
-        var bottom = atr * _sqrtLength;
-        var rwiLow = bottom != 0 ? (prevHigh - bar.Low) / bottom : 0;
-        var rwiHigh = bottom != 0 ? (bar.High - prevLow) / bottom : 0;
-
-        if (isFinal)
-        {
-            _highValues.TryAdd(bar.High, out _);
-            _lowValues.TryAdd(bar.Low, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "RwiHigh", rwiHigh },
-                { "RwiLow", rwiLow }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rwiHigh, outputs);
+        StreamingInputValidation.Validate(bar); var result = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> {
+            { "RwiHigh", result.High }, { "RwiLow", result.Low } } : null;
+        return new StreamingIndicatorStateResult(result.High, outputs);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-        _highValues.Dispose();
-        _lowValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ravi")]

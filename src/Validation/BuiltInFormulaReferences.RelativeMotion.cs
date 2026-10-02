@@ -902,14 +902,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.KasePeakOscillatorV2:
                 return new("Kpo", new[] { "Kpo" }, bars => KasePeakV2Outputs(bars, indicator));
             case IndicatorName.RandomWalkIndex:
-                return new("RwiHigh", new[] { "RwiHigh", "RwiLow" }, bars =>
-                {
-                    var scale = Average(TrueRanges(bars), length, kind).Select(v => v * Math.Sqrt(length)).ToArray();
-                    return Outputs(("RwiHigh", bars.Select((b, i) => scale[i] == 0 ? 0 :
-                        (b.High - (i < length ? 0 : bars[i - length].Low)) / scale[i]).ToArray()),
-                        ("RwiLow", bars.Select((b, i) => scale[i] == 0 ? 0 :
-                        ((i < length ? 0 : bars[i - length].High) - b.Low) / scale[i]).ToArray()));
-                });
+                return new("RwiHigh", new[] { "RwiHigh", "RwiLow" }, bars => RandomWalkOutputs(bars, indicator));
             case IndicatorName.RunningEquity:
                 return new("Req", new[] { "Req" }, bars =>
                 {

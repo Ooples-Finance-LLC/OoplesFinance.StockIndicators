@@ -73813,5 +73813,311 @@
     "before": "outputKey == \"LowerBand\" ? result.Lower",
     "after": "outputKey == \"LowerBand\" ? result.Upper",
     "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
+  },
+  {
+    "id": "random-walk-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExtremePeriodsAreLazyAndNormalizeConsistently"
+  },
+  {
+    "id": "random-walk-wide-opening-previous",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_hasPrevious ? _previousClose : close",
+    "after": "_hasPrevious ? _previousClose : 0",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.OpeningSelectedCloseAndGapsDefineTrueRange"
+  },
+  {
+    "id": "random-walk-wide-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "BigInteger.Abs(Units(high) - Units(previous))",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.OpeningSelectedCloseAndGapsDefineTrueRange"
+  },
+  {
+    "id": "random-walk-wide-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "BigInteger.Abs(Units(low) - Units(previous))",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.OpeningSelectedCloseAndGapsDefineTrueRange"
+  },
+  {
+    "id": "random-walk-wide-lag-low",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "Units(high) - Units(prior.Low)",
+    "after": "Units(high) - Units(prior.High)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.LagAndWilderStartupHaveIndependentRationalHand"
+  },
+  {
+    "id": "random-walk-wide-lag-high",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "Units(prior.High) - Units(low)",
+    "after": "Units(prior.Low) - Units(low)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.LagAndWilderStartupHaveIndependentRationalHand"
+  },
+  {
+    "id": "random-walk-wide-low-direction",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "Units(prior.High) - Units(low)",
+    "after": "Units(low) - Units(prior.High)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.LagAndWilderStartupHaveIndependentRationalHand"
+  },
+  {
+    "id": "random-walk-wide-root-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "Denominator * Denominator * length",
+    "after": "Denominator * Denominator * Math.Max(1, length - 1)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.CompleteRootRatioRoundsOnceAtIndependentSqrtTwoHand"
+  },
+  {
+    "id": "random-walk-wide-root-units",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "(_numerator * _numerator) << 2148",
+    "after": "(_numerator * _numerator) << 2146",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.CompleteRootRatioRoundsOnceAtIndependentSqrtTwoHand"
+  },
+  {
+    "id": "random-walk-wide-root-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "internal double RootScale(int length) => Sign *",
+    "after": "internal double RootScale(int length) => Math.Abs(Sign) *",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "random-walk-wide-spread",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "highRatio - lowRatio",
+    "after": "highRatio + lowRatio",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.LagAndWilderStartupHaveIndependentRationalHand"
+  },
+  {
+    "id": "random-walk-wide-signal-change",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "spread - _previousSpread",
+    "after": "_previousSpread - spread",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.LagAndWilderStartupHaveIndependentRationalHand"
+  },
+  {
+    "id": "random-walk-wide-signal-history",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_previousSpread = spread;",
+    "after": "_previousSpread = default;",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_previousClose = close;",
+    "after": "_previousClose = high;",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.OpeningSelectedCloseAndGapsDefineTrueRange"
+  },
+  {
+    "id": "random-walk-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_average.Next(new Fraction(range), final)",
+    "after": "_average.Next(new Fraction(range), true)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-finish-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "Finish(high, low, atr, final)",
+    "after": "Finish(high, low, atr, true)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "weighted - sum + value.Times(_length)",
+    "after": "weighted + value.Times(_length)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "random-walk-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide((long)_length * (_length + 1L))",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "random-walk-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "sum -= _history.Peek();",
+    "after": "sum += _history.Peek();",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
+  },
+  {
+    "id": "random-walk-wide-ema-seed",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-recursive-retention",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-recursive-gain",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_sum = _weighted = _previous = default;",
+    "after": "_weighted = _previous = default;",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_history.Clear(); _average.Reset();",
+    "after": "_average.Reset();",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "random-walk-wide-previous-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "_hasPrevious = false; _previousClose = 0;",
+    "after": "_previousClose = 0;",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.OpeningSelectedCloseAndGapsDefineTrueRange"
+  },
+  {
+    "id": "random-walk-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "ComponentAverage.Take(ranges.ToArray(), length)",
+    "after": "ComponentAverage.Take(ranges.ToArray(), length + 1)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.CallbackReceivesOneTrueRangeStageForEitherOutput"
+  },
+  {
+    "id": "random-walk-wide-callback-source",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "ComponentAverage.Take(ranges.ToArray(), length)",
+    "after": "ComponentAverage.Take(prices.ToArray(), length)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.CallbackReceivesOneTrueRangeStageForEitherOutput"
+  },
+  {
+    "id": "random-walk-wide-callback-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/RandomWalkWindow.cs",
+    "scope": "internal sealed class RandomWalkWindow",
+    "before": "new Fraction(Units(averages[i])), true",
+    "after": "new Fraction(Units(averages[i] / 2)), true",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.CallbackAtrAndUnpublishedPriceDifferenceCannotOverflow"
+  },
+  {
+    "id": "random-walk-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRandomWalkIndexFast",
+    "before": "outputKey == \"RwiLow\" ? result.Low : result.High",
+    "after": "outputKey == \"RwiLow\" ? result.High : result.Low",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.LagAndWilderStartupHaveIndependentRationalHand"
+  },
+  {
+    "id": "random-walk-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class RandomWalkIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* finite guard removed */",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.InvalidBarsCannotAdvanceState"
+  },
+  {
+    "id": "random-walk-wide-native-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class RandomWalkIndexState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, bar.Low, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.CompleteRootRatioRoundsOnceAtIndependentSqrtTwoHand"
+  },
+  {
+    "id": "random-walk-wide-native-low",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class RandomWalkIndexState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, bar.Close, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.CompleteRootRatioRoundsOnceAtIndependentSqrtTwoHand"
+  },
+  {
+    "id": "random-walk-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class RandomWalkIndexState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, bar.Low, bar.Close, true)",
+    "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
   }
 ]

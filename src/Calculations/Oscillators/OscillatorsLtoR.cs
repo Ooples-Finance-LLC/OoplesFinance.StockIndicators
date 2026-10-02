@@ -1812,44 +1812,11 @@ public static partial class Calculations
     public static StockData CalculateRandomWalkIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 14)
     {
-        List<double> rwiLowList = new(stockData.Count);
-        List<double> rwiHighList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-        var sqrt = Sqrt(length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentAtr = atrList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevHigh = i >= length ? highList[i - length] : 0;
-            var prevLow = i >= length ? lowList[i - length] : 0;
-            var bottom = currentAtr * sqrt;
-
-            var prevRwiLow = GetLastOrDefault(rwiLowList);
-            var rwiLow = bottom != 0 ? (prevHigh - currentLow) / bottom : 0;
-            rwiLowList.Add(rwiLow);
-
-            var prevRwiHigh = GetLastOrDefault(rwiHighList);
-            var rwiHigh = bottom != 0 ? (currentHigh - prevLow) / bottom : 0;
-            rwiHighList.Add(rwiHigh);
-
-            var signal = GetCompareSignal(rwiHigh - rwiLow, prevRwiHigh - prevRwiLow);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "RwiHigh", rwiHighList },
-            { "RwiLow", rwiLowList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.RandomWalkIndex;
-
-        return stockData;
+        var result = RandomWalkWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> {
+            { "RwiHigh", result.High.ToList() }, { "RwiLow", result.Low.ToList() } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades.ToList());
+        stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.RandomWalkIndex; return stockData;
     }
 
 

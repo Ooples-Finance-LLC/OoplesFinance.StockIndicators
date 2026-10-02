@@ -17407,31 +17407,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRandomWalkIndexFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, string? outputKey = null)
     {
-        // CalculateRandomWalkIndex publishes "RwiHigh": how far the high has travelled above the low of length
-        // bars ago, measured in average true ranges scaled by the square root of the length. The batch has no
-        // warmup guard, so the early bars compare against a zero prior low rather than returning zero, and its
-        // average true range takes the type it was given rather than always being a simple one.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-        var sqrt = MathHelper.Sqrt(length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevLow = i >= length ? lows[i - length] : 0;
-            var bottom = atr[i] * sqrt;
-
-            output[i] = bottom == 0 ? 0 : outputKey == "RwiLow"
-                ? ((i < length ? 0 : highs[i - length]) - lows[i]) / bottom : (highs[i] - prevLow) / bottom;
-        }
-
-        return buffer;
+        var result = RandomWalkWindow.Calculate(data, maType, length, true);
+        var values = outputKey == "RwiLow" ? result.Low : result.High;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

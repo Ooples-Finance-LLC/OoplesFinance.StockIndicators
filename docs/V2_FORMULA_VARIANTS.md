@@ -776,3 +776,8 @@ QQE retains its published pair of scaled RSI-movement widths. The RSI component 
 ### Batch 688: Rainbow public numerical cascade
 
 Ten moving-average stages, their mean and extrema, and the complete rolling-range quotients retain exact intermediates until output publication. SMA full-window startup zeros and weighted startup weights remain defined. Lazy queues avoid period-sized storage. All three output names and ten callback stages remain explicit; both factories register the public state. Core alignment remains a separate pending decision. All 50 focused regressions passed on net10.0. The 35 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 689: Random Walk complete root-scaled ratios
+
+The existing fixed-lag formula retains zero missing history and zero-ATR results. True ranges include opening gaps to the current selected close and later gaps to the previous selected close. Exact rational ATR stages and lagged differences remain unpublished until each complete ratio is rounded using the exact square root of the period. This corrects the length-two opening hand from the lower neighboring double to sqrt(2). Signals cancel the shared positive root factor before comparison. Lazy history supports extreme periods. Both factories register the state. Fast callbacks retain one true-range average; batch legacy ATR callback behavior remains. All 50 focused Random Walk regressions passed on net10.0. The 34 prepared behavioral faults await isolated mutation qualification.
