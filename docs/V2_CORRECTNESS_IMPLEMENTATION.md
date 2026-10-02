@@ -4622,3 +4622,12 @@ The isolated campaigns `659a` and `659b` passed their baselines and caught **40/
 Source snapshot SHA256: `abfe2bac39d628f3daa74a735538a28f29a7babe67d1aa9e798e8892a162965b`. Archive SHA256: `c94fa467613c26cddef21912e2e3f9a018fdb46e8de16ef37b72aea0eefc2621` and `672ce14bdaa817199f0cc29b91dfc80b4e72d45f18816391e4d4ca16919f5894`.
 
 This is evidence for the isolated batch-659 source. Source was already published in the batch-659 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 658: Kwan repaired mutation qualification
+
+The isolated campaigns `658-repaired2-a` and `658-repaired2-b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **82/82 distinct focused tests**. Both archives were compared byte-for-byte with the retained repaired batch-658 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `278217c07da0df6e7c8c8fa2ae14a4e88bbaf1e0759987b79733e1e9817b5019`. Archive SHA256: `fc6bc8a68409c8bf92c7d2e4d7c0ac6cf47ce6c28cfef28599c5c4f369efec6e` and `6551e0c4835cf99f8b4f55015df9972325ef5b74762c3760c94a3f6156407dff`.
+
+This is evidence for the isolated batch-658 source. Production and tests were already published in the batch-658 checkpoint. The four repaired fault definitions (`0fd86946`) and direct fast selected-source regression (`72bf573b`) are pushed separately and await integration. Only those manifest entries and the strengthened existing test differ from the original retained source. Both earlier partial campaign results are excluded. This update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
