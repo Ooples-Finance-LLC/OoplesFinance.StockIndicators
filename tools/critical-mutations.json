@@ -71169,12 +71169,12 @@
     "filter": "FullyQualifiedName~PeakValleyNumericalTests.ExpiryPreviewResetAndLazyPeriods"
   },
   {
-    "id": "peak-valley-wide-smooth-floor",
+    "id": "peak-valley-wide-smooth-floor-three",
     "module": "numerical",
     "file": "src/Helpers/PeakValleyWindow.cs",
     "scope": "internal sealed class PeakValleyWindow",
     "before": "_smooth = Math.Max(1, smooth)",
-    "after": "_smooth = Math.Max(2, smooth)",
+    "after": "_smooth = Math.Max(3, smooth)",
     "filter": "FullyQualifiedName~PeakValleyNumericalTests.IndependentThreeEventHands"
   },
   {

@@ -5063,3 +5063,10 @@ The four component means, gain clipping, recursive blend and signal margins now 
 Public and core routes now rank exact smoothed price-to-midpoint ratios, preserving distinct values previously erased by the tie tolerance, midpoint overflow, or underflow. The core has an OHLC-aware overload; its existing price-only overload uses flat candles. Typed native and streaming routes are explicitly enabled.
 
 **56/56 distinct focused checks passed** (`varadi719-final.trx`, updated by `varadi719-integrated-routes.trx`, `varadi719-extreme-mean-hands.trx`, and `varadi719-midpoint-hand.trx`). Independent hands distinguish true ties, adjacent binary64 values, subnormal terms beside MaxValue, and changed lows despite rising closes. Inventory: **6,697/7,131 configurations enrolled**, 434 omissions across 62 types, all references present, no construction failures, and an exact backlog match. The 34 mutation candidates are queued, not qualified.
+
+
+### Batch 676: Peak Valley mutation coverage repair
+
+The original campaigns caught 24 faults and left five behavioral gaps plus one equivalent mutation. Raising the regression smoothing floor from 1 to 2 is equivalent: the fitted endpoint of one or two points is exactly the latest residual. That mutation is excluded and replaced by the distinct `peak-valley-wide-smooth-floor-three` fault.
+
+The strengthened independent hand uses prices `[1,0,1]`, mean period 2 and regression period 4: absolute residuals `[1,1/2,1/2]` produce OLS endpoints `[1,1/2,5/12]` and normalized ratios `[1,1/2,5/6]`. It distinguishes the regression coefficients and the core smoothing argument. Selected-input tests now exercise all three explicit fast outputs. **11/11 affected checks passed** against the unchanged production DLL (`peak-valley676-repaired-hands-selected.trx`). Fresh matched repaired campaigns are required; the original campaigns do not qualify.

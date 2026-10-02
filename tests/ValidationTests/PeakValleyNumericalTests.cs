@@ -16,7 +16,25 @@ public sealed class PeakValleyNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentEvents(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.PeakValleyOutputs(bars, (IBuiltInIndicator)c.Factory()), IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var options = ((IBuiltInIndicator)c.Factory()).CreateOptions();
+        var length = (int)options.GetType().GetProperty("Length")!.GetValue(options)!;
+        var smooth = (int)options.GetType().GetProperty("SmoothLength")!.GetValue(options)!;
+        var kind = (MovingAvgType)options.GetType().GetProperty("MaType")!.GetValue(options)!;
+        var bars = Bars(Enumerable.Range(1, 32).Select(i => (double)i).ToArray());
+        var selected = Enumerable.Range(0, 32).Select(i => (double)(i * 7 % 13 - 6)).ToArray();
+        var expected = BuiltInFormulaReferences.PeakValleyValues(bars, length, smooth, Kind(kind), selected: selected);
+        foreach (var key in expected.Keys)
+        {
+            var data = Data(bars); data.SetCustomValues(selected.ToList());
+            using var context = new ComputeContext();
+            using var fast = IndicatorCompute.ComputePeakValleyEstimationFast(data, context, length, smooth, kind, key);
+            Assert.Equal(expected[key], fast.ToArray()); Assert.Equal(selected, data.ChainedValues);
+            Assert.Equal(bars.Select(bar => bar.Close), data.ClosePrices);
+        }
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
@@ -65,6 +83,10 @@ public sealed class PeakValleyNumericalTests
         Assert.Equal(new[] { -1d, 0, 1, 0, 0, 0 }, values["Sign1"]);
         Assert.Equal(new[] { 0d, -1, 0, 0, 0, -1 }, values["Sign2"]);
         Assert.Equal(new[] { 0d, -1, 0, 0, 0, -1 }, values["Sign3"]);
+        var single = Check(new[] { 1d, 0, 1 }, 2, 1);
+        Assert.Equal(new[] { -1d, 0, -1 }, single["Sign1"]);
+        Assert.Equal(new[] { 0d, 1, 0 }, single["Sign2"]);
+        Assert.Equal(new[] { 0d, 1, 0 }, single["Sign3"]);
     }
     [Fact]
     public void NegativeRegressionMaximumIsNotClippedToZero()
@@ -72,6 +94,13 @@ public sealed class PeakValleyNumericalTests
         var values = Check(new[] { 0d, 4, 0, 0, 0, 1 }, 2, 4);
         Assert.Equal(new[] { 0d, -1, 0, 0, 0, -1 }, values["Sign1"]);
         Assert.All(values["Sign2"], v => Assert.Equal(0, v)); Assert.All(values["Sign3"], v => Assert.Equal(0, v));
+        // Prices [1,0,1] have SMA residual magnitudes [1,1/2,1/2].
+        // Direct centered OLS gives endpoints [1,1/2,5/12], so the final
+        // ratio is 5/6: below the peak but strictly above the 4/5 threshold.
+        var startup = Check(new[] { 1d, 0, 1 }, 2, 4);
+        Assert.Equal(new[] { -1d, 0, 0 }, startup["Sign1"]);
+        Assert.Equal(new[] { 0d, 1, 0 }, startup["Sign2"]);
+        Assert.Equal(new[] { 0d, 1, 0 }, startup["Sign3"]);
     }
     [Fact]
     public void OverflowingResidualsAndFitsStillProduceExactVotes()
