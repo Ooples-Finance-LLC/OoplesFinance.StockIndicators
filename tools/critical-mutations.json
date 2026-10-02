@@ -70679,7 +70679,7 @@
     "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
     "scope": "internal OnBalanceVolumeDisparityWindow(",
     "before": "StreamingInputValidation.Finite(top, nameof(top));",
-    "after": "",
+    "after": "top = double.IsNaN(top) || double.IsInfinity(top) ? 1.1 : top; StreamingInputValidation.Finite(top, nameof(top));",
     "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.NonfiniteArgumentsAndCandlesCannotAdvanceState"
   },
   {
@@ -70688,7 +70688,7 @@
     "file": "src/Helpers/OnBalanceVolumeDisparityWindow.cs",
     "scope": "internal OnBalanceVolumeDisparityWindow(",
     "before": "StreamingInputValidation.Finite(bottom, nameof(bottom));",
-    "after": "",
+    "after": "bottom = double.IsNaN(bottom) || double.IsInfinity(bottom) ? .9 : bottom; StreamingInputValidation.Finite(bottom, nameof(bottom));",
     "filter": "FullyQualifiedName~OnBalanceVolumeDisparityNumericalTests.NonfiniteArgumentsAndCandlesCannotAdvanceState"
   },
   {

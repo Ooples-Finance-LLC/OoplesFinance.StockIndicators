@@ -17,7 +17,29 @@ public sealed class OnBalanceVolumeDisparityNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentCoordinates(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.OnBalanceVolumeDisparityOutputs(bars, (IBuiltInIndicator)c.Factory()), BuiltInFormulaReferences.OnBalanceVolumeDisparityBudget);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var options = (OnBalanceVolumeDisparityIndicatorSpecOptions)indicator.CreateOptions();
+        var bars = Bars(Enumerable.Range(0, 48).Select(i => 100d + i).ToArray(),
+            Enumerable.Range(0, 48).Select(i => (double)(1 + i % 5)).ToArray());
+        var selected = Enumerable.Range(0, bars.Length).Select(i => (double)(i * 7 % 13 - 6)).ToArray();
+        var expected = BuiltInFormulaReferences.OnBalanceVolumeDisparityValues(bars, options.Length, options.SignalLength,
+            Kind(options.MaType), options.Top, options.Bottom, selected).Outputs;
+        var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+        foreach (var key in expected.Keys)
+        {
+            using var actual = IndicatorCompute.TryComputeFast(data, new IndicatorSpec(IndicatorName.OnBalanceVolumeDisparityIndicator, options, key), context);
+            Assert.NotNull(actual);
+            for (var i = 0; i < selected.Length; i++) Equal(expected[key][i], actual.Value.Span[i]);
+        }
+        Assert.Equal(selected, data.ChainedValues);
+        data.CalculateOnBalanceVolumeDisparityIndicator(options.MaType, options.Length, options.SignalLength, options.Top, options.Bottom);
+        foreach (var key in expected.Keys)
+            for (var i = 0; i < selected.Length; i++) Equal(expected[key][i], data.OutputValues[key][i]);
+        Assert.Equal(bars.Select(b => b.Close), data.ClosePrices); Assert.Equal(bars.Select(b => b.Volume), data.Volumes);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
