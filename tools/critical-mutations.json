@@ -72267,15 +72267,6 @@
     "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
   },
   {
-    "id": "parametric-kalman-wide-reset-state",
-    "module": "numerical",
-    "file": "src/Helpers/ParametricKalmanWindow.cs",
-    "scope": "internal sealed class ParametricKalmanWindow",
-    "before": "_error = _previousPrice = _previousEstimate = _margin = BigInteger.Zero;",
-    "after": "_previousPrice = _previousEstimate = BigInteger.Zero;",
-    "filter": "FullyQualifiedName~ParametricKalmanNumericalTests.ExactErrorWeightsCoverLagExpiryExtendedRangeAndPreviewReset"
-  },
-  {
     "id": "parametric-kalman-wide-native-guard",
     "module": "numerical",
     "file": "src/Streaming/StatefulIndicators.Batch19.cs",
