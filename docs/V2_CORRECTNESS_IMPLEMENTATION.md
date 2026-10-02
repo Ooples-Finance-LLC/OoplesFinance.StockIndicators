@@ -4971,3 +4971,10 @@ The isolated campaigns `669-signal-repaired-a` and `669-signal-repaired-b` passe
 Source snapshot SHA256: `af6bf2bddafee6afc00596ec41462fc12fc066273ae223b4ddfc1e2d9a1a4ac9`. Archive SHA256: `e097aabdb7d90eb62840ce8828b35f4c838dd1efe5cb245f6cefe231aad7c779` and `1effb59b8499219735dbf48f9b86c1ed507c974c611d46917622525ed69c26a8`.
 
 This is evidence for the isolated batch-669 source. Source was already published in the batch-669 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 713: Variable Length numerical and causal-core coverage
+
+All **84/84 focused tests passed** in `variable-length713-core-final.trx`: nine configurations across five public routes, independent feedback/period/signal hands, exact inner/outer ties and neighboring means, overflow/subnormal decisions, extreme bounds, expiry, preview/reset, callback discovery/order/short means, primary-output identity, native guards and explicit selected-input routes. Core/registry mapping, prefix invariance, future-bar invariance, span guards and in-place use passed. Existing Variable Length and Ultimate Moving Average/bands golden fixtures and the shared bands route regression passed.
+
+An earlier build rejected a callback argument type; the next run passed 73/82 but exposed primary-output inference selecting Length. The final batch restores the explicit Vlma binding, adds its regression assertion and includes the approved core alignment. Earlier partial results are excluded from qualification. Inventory: **6,677/7,131 enrolled**, **454 omissions across 66 types**, all 7,131 reference registrations, no construction failures and exact backlog agreement. All **9,306 mutation anchors resolve**; 42 meaningful faults await isolated campaigns (an unobservable warmup fault was removed). Focused verification does not establish mutation, hosted-platform, performance or release qualification. Preserved TrendForce/Mobility files retain their hashes.

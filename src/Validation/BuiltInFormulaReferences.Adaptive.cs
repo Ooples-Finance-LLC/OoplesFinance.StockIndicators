@@ -247,31 +247,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Vwma", first.Select((value, i) => 2 * value - second[i]).ToArray()));
                 });
             case IndicatorName.VariableLengthMovingAverage:
-                var variableKind = AverageKind(options, 1);
-                if (variableKind == 0) return null;
-                var variableMax = Integer(options, "MaxLength", 50);
-                return new("Vlma", new[] { "Length", "Vlma" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var mean = Average(prices, variableMax, variableKind);
-                    var variance = PopulationVariance(prices, variableMax);
-                    var periods = new double[bars.Count];
-                    var result = new double[bars.Count];
-                    double period = variableMax;
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        if (variance[i] > 0)
-                        {
-                            var score = Math.Abs(prices[i] - mean[i]) / Math.Sqrt(variance[i]);
-                            period += score <= .25 ? 1 : score > 1.75 ? -1 : 0;
-                            period = Math.Max(length, Math.Min(variableMax, period));
-                        }
-                        periods[i] = period;
-                        var previous = i == 0 ? prices[i] : result[i - 1];
-                        result[i] = previous + 2 / (period + 1) * (prices[i] - previous);
-                    }
-                    return Outputs(("Length", periods), ("Vlma", result));
-                });
+                return new("Vlma", new[] { "Length", "Vlma" }, bars => VariableLengthOutputs(bars, indicator));
             case IndicatorName.EquityMovingAverage:
                 var equityKind = AverageKind(options, 1);
                 if (equityKind == 0) return null;

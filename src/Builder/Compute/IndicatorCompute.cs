@@ -12913,43 +12913,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVariableLengthMovingAverageFast(StockData data, ComputeContext context,
         int minLength = 5, int maxLength = 50, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateVariableLengthMovingAverage walks its own smoothing length between the two bounds by where
-        // the chained value sits relative to bands around its moving average, then smooths exponentially with
-        // that length. MovingAverageCore.VariableLengthMovingAverage takes a single length and so cannot
-        // express the bounds the batch call is given; the decision itself stays in MovingAverageCore.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        maxLength = Math.Max(maxLength, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, maxLength, input, average.WritableSpan);
-        var sma = average.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, maxLength);
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double previousLength = maxLength;
-        for (var i = 0; i < count; i++)
-        {
-            var value = input[i];
-            var adaptiveLength = MovingAverageCore.VariableLength(value, sma[i], stdDev[i], previousLength, minLength, maxLength);
-            previousLength = adaptiveLength;
-
-            if (outputKey == "Length") output[i] = adaptiveLength;
-            else
-            {
-                var sc = 2 / (adaptiveLength + 1);
-                var previous = i >= 1 ? output[i - 1] : value;
-                output[i] = (value * sc) + ((1 - sc) * previous);
-            }
-        }
-
-        return buffer;
+        var values = VariableLengthWindow.Calculate(data, maType, minLength, maxLength);
+        var selected = outputKey == "Length" ? values.Lengths : values.Values;
+        var output = context.Rent(selected.Length); selected.AsSpan().CopyTo(output.WritableSpan); return output;
     }
 
     /// <summary>

@@ -409,84 +409,16 @@ public sealed class VariableIndexDynamicAverageState : IStreamingIndicatorState,
 [PrimaryOutput("Vlma")]
 public sealed class VariableLengthMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _minLength;
-    private readonly int _maxLength;
-    private readonly IMovingAverageSmoother _sma;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190. The two have
-    // to move together or the engines put the four levels at different distances and disagree about when the
-    // length should change - a disagreement that then compounds, because each bar's length carries forward.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly StreamingInputResolver _input;
-    private double _prevLength;
-    private double _prevVlma;
-    private bool _hasPrev;
-
-    public VariableLengthMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int minLength = 5,
-        int maxLength = 50)
-    {
-        _minLength = Math.Max(1, minLength);
-        _maxLength = Math.Max(_minLength, maxLength);
-        _sma = MovingAverageSmootherFactory.Create(maType, _maxLength);
-
-        // No maType: a windowed deviation is taken about the window's own mean, so there is no moving average
-        // for a type to choose. maType still selects the average the levels are measured from, above.
-        _stdDev = new RollingStandardDeviation(_maxLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _prevLength = _maxLength;
-    }
-
+    private readonly VariableLengthWindow _window;
+    public VariableLengthMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int minLength = 5, int maxLength = 50) => _window = new(maType, minLength, maxLength);
     public IndicatorName Name => IndicatorName.VariableLengthMovingAverage;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _stdDev.Reset();
-        _prevLength = _maxLength;
-        _prevVlma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-
-        // Fed the resolved input rather than the bar, so this measures the same series the average above does.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var prevLength = _hasPrev ? _prevLength : _maxLength;
-
-        // The same decision the batch calculation takes, from the same place. See #190.
-        var length = MovingAverageCore.VariableLength(value, sma, stdDev, prevLength, _minLength, _maxLength);
-        var sc = 2 / (length + 1);
-        var prevVlma = _hasPrev ? _prevVlma : value;
-        var vlma = (value * sc) + ((1 - sc) * prevVlma);
-
-        if (isFinal)
-        {
-            _prevLength = length;
-            _prevVlma = vlma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Length", length },
-                { "Vlma", vlma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vlma, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Length", point.Length }, { "Vlma", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _stdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vma")]

@@ -376,51 +376,10 @@ public static partial class Calculations
     public static StockData CalculateVariableLengthMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int minLength = 5, int maxLength = 50)
     {
-        List<double> vlmaList = new(stockData.Count);
-        List<double> lengthList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, maxLength, inputList);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The four levels are bands at 0.25 and 1.75 sigma either side of the average, and sigma in a
-        // band is the windowed deviation; CalculateStandardDeviationVolatility is a different quantity, about
-        // 55% wider on a typical price series, so every level sat further from the average than the indicator
-        // places it and the length was held constant where it should have moved. See #190.
-        var stdDevList = GetStandardDeviationList(inputList, maxLength);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var sma = smaList[i];
-            var stdDev = stdDevList[i];
-            var prevLength = i >= 1 ? lengthList[i - 1] : maxLength;
-
-            // One decision, in one place: the streaming state and UltimateMovingAverageState take the same
-            // one, and a copy here could drift from theirs. See MovingAverageCore.VariableLength and #190.
-            var length = MovingAverageCore.VariableLength(currentValue, sma, stdDev, prevLength, minLength, maxLength);
-            lengthList.Add(length);
-
-            var sc = 2 / (length + 1);
-            var prevVlma = i >= 1 ? vlmaList[i - 1] : currentValue;
-            var vlma = (currentValue * sc) + ((1 - sc) * prevVlma);
-            vlmaList.Add(vlma);
-
-            var signal = GetCompareSignal(currentValue - vlma, prevValue - prevVlma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Length", lengthList },
-            { "Vlma", vlmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vlmaList);
-        stockData.IndicatorName = IndicatorName.VariableLengthMovingAverage;
-
-        return stockData;
+        var values = VariableLengthWindow.Calculate(stockData, maType, minLength, maxLength); var line = values.Values.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Length", values.Lengths.ToList() }, { "Vlma", line } });
+        stockData.SetSignals(values.Signals.ToList()); stockData.SetCustomValues(line);
+        stockData.IndicatorName = IndicatorName.VariableLengthMovingAverage; return stockData;
     }
 
 

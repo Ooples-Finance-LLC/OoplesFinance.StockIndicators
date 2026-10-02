@@ -80482,5 +80482,383 @@
     "before": "new UberTrendWindow(length)",
     "after": "new UberTrendWindow(1)",
     "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "variable-length-wide-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_minimum = Math.Max(1, minimum)",
+    "after": "_minimum = 1",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExtremeBoundsWarmupAndExpiryUseGrowingHistories"
+  },
+  {
+    "id": "variable-length-wide-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_maximum = Math.Max(_minimum, maximum)",
+    "after": "_maximum = _minimum",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_mean = new(kind, _maximum)",
+    "after": "_mean = new(kind, _minimum)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-mean-kind",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_mean = new(kind, _maximum)",
+    "after": "_mean = new(MovingAvgType.SimpleMovingAverage, _maximum)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_sum + value - expired",
+    "after": "_sum + value + expired",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_squares + value * value - expired * expired",
+    "after": "_squares + value * value + expired * expired",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-variance-center",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "squares.Times(size) - sum * sum",
+    "after": "squares.Times(size) + sum * sum",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-variance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": ".Divide(size).Divide(size)",
+    "after": ".Divide(size)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-variance-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "size < _maximum ? default",
+    "after": "size < 1 ? default",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExtremeBoundsWarmupAndExpiryUseGrowingHistories"
+  },
+  {
+    "id": "variable-length-wide-variance-projection",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "var period = _period;",
+    "after": "variance = Number.Of(variance.Publish()); var period = _period;",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.OverflowingVarianceAndSubnormalDecisionsRemainDefined"
+  },
+  {
+    "id": "variable-length-wide-threshold-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "(delta * delta).Times(16)",
+    "after": "(delta * delta).Times(4)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-inner-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "(distance - variance).Sign <= 0",
+    "after": "(distance - variance).Sign < 0",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-outer-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "(distance - variance.Times(49)).Sign > 0",
+    "after": "(distance - variance.Times(49)).Sign >= 0",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-outer-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "variance.Times(49)",
+    "after": "variance.Times(16)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-period-change",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "(long)_period + step",
+    "after": "(long)_period - step",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-recurrence-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_started ? _previous : value",
+    "after": "_started ? _previous : default",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-recurrence-gain",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "value.Times(2)",
+    "after": "value.Times(1)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-recurrence-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "Divide(period + 1L)",
+    "after": "Divide((long)(period + 1))",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExtremeBoundsWarmupAndExpiryUseGrowingHistories"
+  },
+  {
+    "id": "variable-length-wide-signal-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "difference - _previousDifference",
+    "after": "difference + _previousDifference",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_previousDifference = difference;",
+    "after": "_previousDifference = default;",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-remember-period",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_period = period;",
+    "after": "_period = _maximum;",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExactInnerOuterTiesAndNeighboringMeansChoosePeriods"
+  },
+  {
+    "id": "variable-length-wide-remember-line",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_previous = line;",
+    "after": "_previous = value;",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "variable-length-wide-callback-discovery",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "var custom = ComponentAverage.Take",
+    "after": "var custom = !ComponentAverage.HasOverrides ? null : ComponentAverage.Take",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CallbackDiscoveryShortMeansAndCallerPricesArePreserved"
+  },
+  {
+    "id": "variable-length-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "ComponentAverage.Take(prices.ToArray(), maximum)",
+    "after": "ComponentAverage.Take(prices.ToArray(), minimum)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CallbackDiscoveryShortMeansAndCallerPricesArePreserved"
+  },
+  {
+    "id": "variable-length-wide-callback-short",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "i < custom.Count ? custom[i] : 0",
+    "after": "i < custom.Count ? custom[i] : 17",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CallbackDiscoveryShortMeansAndCallerPricesArePreserved"
+  },
+  {
+    "id": "variable-length-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-reset-period",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_period = _maximum; _started = false;",
+    "after": "_period = _minimum; _started = false;",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.ExtremeBoundsWarmupAndExpiryUseGrowingHistories"
+  },
+  {
+    "id": "variable-length-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide(_length)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-recursive-gain",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/VariableLengthWindow.cs",
+    "scope": "internal sealed class VariableLengthWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VariableLengthMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.InvalidCandlesCannotAdvanceMeansMomentsOrPeriod"
+  },
+  {
+    "id": "variable-length-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VariableLengthMovingAverageState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-native-length",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VariableLengthMovingAverageState",
+    "before": "{ \"Length\", point.Length }",
+    "after": "{ \"Length\", 0 }",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-fast-maximum",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVariableLengthMovingAverageFast",
+    "before": "VariableLengthWindow.Calculate(data, maType, minLength, maxLength)",
+    "after": "VariableLengthWindow.Calculate(data, maType, minLength, minLength)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
+  },
+  {
+    "id": "variable-length-wide-core-mapping",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)",
+    "before": "2L * minimum",
+    "after": "3L * minimum",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CoreAndRegistryAreCausalAndMatchMappedPublicBounds"
+  },
+  {
+    "id": "variable-length-wide-core-overflow",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)",
+    "before": "2L * minimum",
+    "after": "(long)(2 * minimum)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CoreAndRegistryAreCausalAndMatchMappedPublicBounds"
+  },
+  {
+    "id": "variable-length-wide-core-length",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int minLength, int maxLength",
+    "before": "if (output.Length < input.Length)",
+    "after": "if (output.Length < 0)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CoreSpanValidationPreservesOutputsAndSupportsInPlace"
+  },
+  {
+    "id": "variable-length-wide-core-prevalidation",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int minLength, int maxLength",
+    "before": "for (var i = 0; i < input.Length; i++) Streaming.StreamingInputValidation",
+    "after": "for (var i = input.Length; i < input.Length; i++) Streaming.StreamingInputValidation",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CoreSpanValidationPreservesOutputsAndSupportsInPlace"
+  },
+  {
+    "id": "variable-length-wide-core-maximum",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int minLength, int maxLength",
+    "before": "new VariableLengthWindow(maType, minLength, maxLength)",
+    "after": "new VariableLengthWindow(maType, minLength, minLength)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CoreAndRegistryAreCausalAndMatchMappedPublicBounds"
+  },
+  {
+    "id": "variable-length-wide-core-future",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int minLength, int maxLength",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(input[input.Length - 1], true)",
+    "filter": "FullyQualifiedName~VariableLengthNumericalTests.CoreAndRegistryAreCausalAndMatchMappedPublicBounds"
   }
 ]

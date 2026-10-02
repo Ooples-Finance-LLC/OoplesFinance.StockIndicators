@@ -2370,42 +2370,16 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var minimum = Math.Max(1, length); var maximum = (int)Math.Min(int.MaxValue, 2L * minimum);
+        VariableLengthMovingAverage(input, output, minimum, maximum, MovingAvgType.SimpleMovingAverage);
+    }
 
-        var maxLength = length * 2;
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            // Get max stdDev for normalization
-            double maxStdDev = 0;
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (stdDevBuffer[i] > maxStdDev) maxStdDev = stdDevBuffer[i];
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Variable length based on volatility
-                var volatilityRatio = maxStdDev > 0 ? stdDevBuffer[i] / maxStdDev : 0;
-                var varLength = (int)Math.Max(2, length + (volatilityRatio * (maxLength - length)));
-
-                double sum = 0;
-                var n = Math.Min(i + 1, varLength);
-                for (var j = 0; j < n; j++)
-                {
-                    sum += input[i - j];
-                }
-
-                output[i] = sum / n;
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-        }
+    internal static void VariableLengthMovingAverage(ReadOnlySpan<double> input, Span<double> output, int minLength, int maxLength, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < input.Length; i++) Streaming.StreamingInputValidation.Finite(input[i], nameof(input));
+        using var window = new VariableLengthWindow(maType, minLength, maxLength);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>
