@@ -699,14 +699,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Kbw", result));
                 });
             case IndicatorName.QuantitativeQualitativeEstimation:
-                return new("FastAtrRsi", new[] { "FastAtrRsi", "SlowAtrRsi" }, bars =>
-                {
-                    var oscillator = Average(MotionRsi(Closes(bars), length, kind), Integer(options, "SmoothLength", 5), kind);
-                    var movements = oscillator.Select((v, i) => Math.Abs(v - (i == 0 ? 0 : oscillator[i - 1]))).ToArray();
-                    var width = Average(Average(movements, 2 * length - 1, kind), 2 * length - 1, kind);
-                    return Outputs(("FastAtrRsi", width.Select(v => v * Number(options, 2.618, "FastFactor")).ToArray()),
-                        ("SlowAtrRsi", width.Select(v => v * Number(options, 4.236, "SlowFactor")).ToArray()));
-                });
+                return new("FastAtrRsi", new[] { "FastAtrRsi", "SlowAtrRsi" }, bars => QqeOutputs(bars, indicator));
             case IndicatorName.PrimeNumberOscillator:
                 return new("Pno", new[] { "Pno" }, bars => Outputs(("Pno", PrimeOffsetsReference(Closes(bars), length))));
             case IndicatorName.PrimeNumberBands:

@@ -22,6 +22,12 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.QuantitativeQualitativeEstimation)
+        {
+            var qqeKeys = new[] { "FastAtrRsi", "SlowAtrRsi" };
+            for (var slot = 0; slot < qqeKeys.Length; slot++) { var key = qqeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => QqeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PremierStochasticOscillator)
         {
             yield return IndicatorValidationRule.Reference(0, bars => PremierOutputs(bars, builtIn)["Pso"], RsiInverseFisherBudget);

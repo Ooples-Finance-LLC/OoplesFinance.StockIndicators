@@ -8852,19 +8852,9 @@ internal static partial class IndicatorCompute
     private static ComputeBuffer ComputeQqeWidths(StockData data, ComputeContext context,
         QuantitativeQualitativeEstimationSpecOptions options, string? outputKey)
     {
-        using var rsi = ComputeRsiFast(data, context, options.Length, options.MaType);
-        using var smoothed = context.Rent(data.Count);
-        MovingAverage(data, options.MaType, options.SmoothLength, rsi.Span, smoothed.WritableSpan);
-        using var changes = context.Rent(data.Count);
-        for (var i = 0; i < data.Count; i++) changes.WritableSpan[i] = Math.Abs(smoothed.Span[i] - (i == 0 ? 0 : smoothed.Span[i - 1]));
-        using var first = context.Rent(data.Count);
-        var period = 2 * options.Length - 1;
-        MovingAverage(data, options.MaType, period, changes.Span, first.WritableSpan);
-        var result = context.Rent(data.Count);
-        MovingAverage(data, options.MaType, period, first.Span, result.WritableSpan);
-        var factor = outputKey == "SlowAtrRsi" ? options.SlowFactor : options.FastFactor;
-        for (var i = 0; i < data.Count; i++) result.WritableSpan[i] *= factor;
-        return result;
+        var values = QqeWindow.Calculate(data, options.MaType, options.Length, options.SmoothLength, options.FastFactor, options.SlowFactor, true);
+        var selected = outputKey == "SlowAtrRsi" ? values.Slow : values.Fast;
+        var result = context.Rent(selected.Length); selected.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     internal static ComputeBuffer ComputePrimeNumberOscillatorFast(StockData data, ComputeContext context, int length = 5)

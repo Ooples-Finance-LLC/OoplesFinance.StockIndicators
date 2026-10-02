@@ -73138,5 +73138,365 @@
     "before": "PremierStochastic or ",
     "after": "",
     "filter": "FullyQualifiedName~PremierStochasticNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "qqe-wide-derived-period",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "2L * Math.Max(1, length) - 1",
+    "after": "3L * Math.Max(1, length) - 1",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-derived-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "2L * Math.Max(1, length) - 1",
+    "after": "2 * Math.Max(1, length) - 1",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-fast-domain",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "fast < 0",
+    "after": "fast < -1",
+    "filter": "FullyQualifiedName~QqeNumericalTests.InvalidFactorsAreRejectedBeforeAnyCalculation"
+  },
+  {
+    "id": "qqe-wide-slow-domain",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "slow < 0",
+    "after": "slow < -1",
+    "filter": "FullyQualifiedName~QqeNumericalTests.InvalidFactorsAreRejectedBeforeAnyCalculation"
+  },
+  {
+    "id": "qqe-wide-length-floor",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-fast-factor",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "width * Number.Of(_fast)",
+    "after": "width * Number.Of(_slow)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-slow-factor",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "width * Number.Of(_slow)",
+    "after": "width * Number.Of(_fast)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-premature-width",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "var fast = width *",
+    "after": "var fast = Number.Of(width.Publish()) *",
+    "filter": "FullyQualifiedName~QqeNumericalTests.WeightedFractionIsRetainedUntilFinalScaling"
+  },
+  {
+    "id": "qqe-wide-signal-buy",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "(bull - _bull).Sign > 0",
+    "after": "(bull - _bull).Sign < 0",
+    "filter": "FullyQualifiedName~QqeNumericalTests.WeightedFractionIsRetainedUntilFinalScaling"
+  },
+  {
+    "id": "qqe-wide-signal-sell",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "(bear - _bear).Sign < 0",
+    "after": "(bear - _bear).Sign > 0",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-rsi-gain",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "change.Mantissa > 0 ? change : default",
+    "after": "change.Mantissa < 0 ? change.Absolute : default",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-rsi-loss",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "change.Mantissa < 0 ? change.Absolute : default",
+    "after": "change.Mantissa > 0 ? change : default",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-rsi-scale",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "gain.AddTo(ref numerator, 100)",
+    "after": "gain.AddTo(ref numerator, 99)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-opening-rsi",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "GainLossShare.Of(numerator, total, 100)",
+    "after": "GainLossShare.Of(numerator, total, 0)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-movement-sign",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "signal - _previousSignal",
+    "after": "signal + _previousSignal",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-movement-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "if (movement.Sign < 0)",
+    "after": "if (movement.Sign > 0)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.HandWidthsUseBothStagesAndOpeningMovement"
+  },
+  {
+    "id": "qqe-wide-first-width-stage",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "_first!.Next(movement, final)",
+    "after": "movement",
+    "filter": "FullyQualifiedName~QqeNumericalTests.WeightedFractionIsRetainedUntilFinalScaling"
+  },
+  {
+    "id": "qqe-wide-signal-stage",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "_signal!.Next(Number.Of(rsi), final)",
+    "after": "Number.Of(rsi)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.WeightedFractionIsRetainedUntilFinalScaling"
+  },
+  {
+    "id": "qqe-wide-callback-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "Average(rsi, Math.Max(1, smooth))",
+    "after": "Average(rsi, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~QqeNumericalTests.FiveCallbacksPreservePeriodsAndStageInputs"
+  },
+  {
+    "id": "qqe-wide-callback-width-period",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "Average(changes, period)",
+    "after": "Average(changes, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~QqeNumericalTests.FiveCallbacksPreservePeriodsAndStageInputs"
+  },
+  {
+    "id": "qqe-wide-callback-change",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "Number.Of(i == 0 ? 0 : signal[i - 1])",
+    "after": "Number.Of(i == 0 ? 0 : signal[i])",
+    "filter": "FullyQualifiedName~QqeNumericalTests.FiveCallbacksPreservePeriodsAndStageInputs"
+  },
+  {
+    "id": "qqe-wide-callback-slow",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "window.Finish(Number.Of(widths[i]), true)",
+    "after": "window.Finish(Number.Of(widths[0]), true)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.FiveCallbacksPreservePeriodsAndStageInputs"
+  },
+  {
+    "id": "qqe-wide-reset-price",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "_previousSignal = _bull = _bear = default;",
+    "after": "_bull = _bear = default;",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-price-preview",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "internal sealed class QqeWindow",
+    "before": "if (final) { _price = price",
+    "after": "if (final || price != 0) { _price = price",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-mean-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "weighted - sum",
+    "after": "weighted + sum",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (_history.Count == _period) sum -=",
+    "after": "if (_history.Count > _period) sum -=",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "(_period + 1) / 2",
+    "after": "(_period + 2) / 2",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count + 1 < _period",
+    "after": "_count + 1 < _period - 1",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count < _period",
+    "after": "_count < _period - 1",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_previous.Times(_period - 1)",
+    "after": "_previous.Times(_period)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-recursive-drive",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "? 2 : 1",
+    "after": "? 3 : 1",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (final)",
+    "after": "if (final || value.Sign != 0)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_sum = _weighted = _previous = default",
+    "after": "_weighted = _previous = default",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremePeriodsAreLazyAndDoNotWrap"
+  },
+  {
+    "id": "qqe-wide-rsi-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class RsiMean",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Subtract(default)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-rsi-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class RsiMean",
+    "before": "if (_history.Count == _length) _history.Peek().AddTo(ref sum, -1)",
+    "after": "if (_history.Count > _length) _history.Peek().AddTo(ref sum, -1)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/QqeWindow.cs",
+    "scope": "private sealed class RsiMean",
+    "before": "if (final)",
+    "after": "if (final || value.Mantissa != 0)",
+    "filter": "FullyQualifiedName~QqeNumericalTests.ExtremeAndSubnormalPricesPreserveWidthsAndSignals"
+  },
+  {
+    "id": "qqe-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class QuantitativeQualitativeEstimationState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (!isFinal && !includeOutputs) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~QqeNumericalTests.InvalidBarsCannotAdvanceState"
+  },
+  {
+    "id": "qqe-wide-streaming-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "QuantitativeQualitativeEstimationSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~QqeNumericalTests.EveryRouteMatchesIndependentWidths"
+  },
+  {
+    "id": "qqe-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "QuantitativeQualitativeEstimation or ",
+    "after": "",
+    "filter": "FullyQualifiedName~QqeNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

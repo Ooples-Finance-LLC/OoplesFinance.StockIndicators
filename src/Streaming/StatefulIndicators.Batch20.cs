@@ -877,80 +877,16 @@ public sealed class QuadrupleExponentialMovingAverageState : IStreamingIndicator
 [PrimaryOutput("FastAtrRsi")]
 public sealed class QuantitativeQualitativeEstimationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RsiState _rsi;
-    private readonly IMovingAverageSmoother _rsiSignal;
-    private readonly IMovingAverageSmoother _atrRsiEma;
-    private readonly IMovingAverageSmoother _atrRsiSmooth;
-    private readonly StreamingInputResolver _input;
-    private readonly double _fastFactor;
-    private readonly double _slowFactor;
-    private double _prevRsiSignal;
-    private bool _hasPrev;
-
+    private readonly QqeWindow _window;
     public QuantitativeQualitativeEstimationState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14,
-        int smoothLength = 5, double fastFactor = 2.618, double slowFactor = 4.236)
-    {
-        var resolvedLength = Math.Max(1, length);
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        var wildersLength = Math.Max(1, (resolvedLength * 2) - 1);
-        _rsi = new RsiState(maType, resolvedLength);
-        _rsiSignal = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _atrRsiEma = MovingAverageSmootherFactory.Create(maType, wildersLength);
-        _atrRsiSmooth = MovingAverageSmootherFactory.Create(maType, wildersLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _fastFactor = fastFactor;
-        _slowFactor = slowFactor;
-    }
-
+        int smoothLength = 5, double fastFactor = 2.618, double slowFactor = 4.236) => _window = new(maType, length, smoothLength, fastFactor, slowFactor);
     public IndicatorName Name => IndicatorName.QuantitativeQualitativeEstimation;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _rsiSignal.Reset();
-        _atrRsiEma.Reset();
-        _atrRsiSmooth.Reset();
-        _prevRsiSignal = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var rsi = _rsi.Next(value, isFinal);
-        var rsiSignal = _rsiSignal.Next(rsi, isFinal);
-        var prevRsiSignal = _hasPrev ? _prevRsiSignal : 0;
-        var atrRsi = Math.Abs(rsiSignal - prevRsiSignal);
-        var atrRsiEma = _atrRsiEma.Next(atrRsi, isFinal);
-        var atrRsiSmooth = _atrRsiSmooth.Next(atrRsiEma, isFinal);
-        var fastAtrRsi = atrRsiSmooth * _fastFactor;
-        var slowAtrRsi = atrRsiSmooth * _slowFactor;
-
-        if (isFinal)
-        {
-            _prevRsiSignal = rsiSignal;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "FastAtrRsi", fastAtrRsi },
-                { "SlowAtrRsi", slowAtrRsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fastAtrRsi, outputs);
-    }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _rsiSignal.Dispose();
-        _atrRsiEma.Dispose();
-        _atrRsiSmooth.Dispose();
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Fast, includeOutputs ? new Dictionary<string, double> { { "FastAtrRsi", point.Fast }, { "SlowAtrRsi", point.Slow } } : null);
     }
 }
 

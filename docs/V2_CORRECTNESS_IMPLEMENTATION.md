@@ -4603,3 +4603,10 @@ Exact centered range arithmetic preserves near-midpoint and extreme-range values
 ### Batch 662: pending mutation compiler repair
 
 The queued MacZ VWAP histogram-memory fault now resets the retained histogram to zero on committed bars instead of using a constant-false conditional. Both mutations leave the retained value at its initial/reset zero, but the replacement avoids an unreachable-code warning being treated as a compilation error. All 8,448 manifest anchors resolve. Production and test sources are unchanged; the 39-fault campaign remains unqualified and must use fresh matching snapshots containing this manifest repair. The original retained batch-662 snapshots remain untouched.
+
+
+### Batch 685: QQE volatility-width numerical arithmetic
+
+QQE retains the established RSI component, then carries exact smoothing and movement arithmetic through both width stages and final factors. Long derived periods and lazy storage avoid wraparound and eager allocation; five callbacks retain their order and supported integer-period contract. Nonnegative finite factors agree with typed options. Both factories route natively.
+
+**82/82 focused tests passed** on net10.0 (qqe685-repaired-build.trx), including nine configurations across five routes, exact rational references, opening/weighted hands, overflow/subnormal inputs, signals, preview/reset, lazy extreme periods, invalid inputs, callbacks, legacy fallback and existing hand/golden tests. The first attempt failed compilation and is excluded; the corrected build passed. Isolated inventory is **6,524/7,131 enrolled**, **607 omissions across 90 types**, with complete references and no construction failures. This branch includes679-682 and the662 manifest repair, but not unfinished Periodic677. The40 prepared faults and final readiness gates remain pending.

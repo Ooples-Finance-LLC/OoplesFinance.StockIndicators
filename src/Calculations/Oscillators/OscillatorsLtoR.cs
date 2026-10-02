@@ -353,54 +353,11 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14, int smoothLength = 5, double fastFactor = 2.618,
         double slowFactor = 4.236)
     {
-        List<double> atrRsiList = new(stockData.Count);
-        List<double> fastAtrRsiList = new(stockData.Count);
-        List<double> slowAtrRsiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var wildersLength = (length * 2) - 1;
-
-        var rsiValueList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength);
-        var rsiEmaList = rsiValueList.ChainedOutputs["Signal"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentRsiEma = rsiEmaList[i];
-            var prevRsiEma = i >= 1 ? rsiEmaList[i - 1] : 0;
-
-            var atrRsi = Math.Abs(currentRsiEma - prevRsiEma);
-            atrRsiList.Add(atrRsi);
-        }
-
-        var atrRsiEmaList = GetMovingAverageList(stockData, maType, wildersLength, atrRsiList);
-        var atrRsiEmaSmoothList = GetMovingAverageList(stockData, maType, wildersLength, atrRsiEmaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var atrRsiEmaSmooth = atrRsiEmaSmoothList[i];
-            var prevAtrRsiEmaSmooth = i >= 1 ? atrRsiEmaSmoothList[i - 1] : 0;
-
-            var prevFastTl = GetLastOrDefault(fastAtrRsiList);
-            var fastTl = atrRsiEmaSmooth * fastFactor;
-            fastAtrRsiList.Add(fastTl);
-
-            var prevSlowTl = GetLastOrDefault(slowAtrRsiList);
-            var slowTl = atrRsiEmaSmooth * slowFactor;
-            slowAtrRsiList.Add(slowTl);
-
-            var signal = GetBullishBearishSignal(atrRsiEmaSmooth - Math.Max(fastTl, slowTl), prevAtrRsiEmaSmooth - Math.Max(prevFastTl, prevSlowTl),
-                atrRsiEmaSmooth - Math.Min(fastTl, slowTl), prevAtrRsiEmaSmooth - Math.Min(prevFastTl, prevSlowTl));
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "FastAtrRsi", fastAtrRsiList },
-            { "SlowAtrRsi", slowAtrRsiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.QuantitativeQualitativeEstimation;
-
-        return stockData;
+        var values = QqeWindow.Calculate(stockData, maType, length, smoothLength, fastFactor, slowFactor, false);
+        var fast = values.Fast.ToList(); var slow = values.Slow.ToList();
+        List<Signal>? signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "FastAtrRsi", fast }, { "SlowAtrRsi", slow } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.QuantitativeQualitativeEstimation; return stockData;
     }
 
 
