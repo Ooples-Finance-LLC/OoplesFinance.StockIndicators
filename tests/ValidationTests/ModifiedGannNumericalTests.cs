@@ -14,7 +14,21 @@ public sealed class ModifiedGannNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentEnvelopeEvents(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.ModifiedGannOutputs(bars, (IBuiltInIndicator)c.Factory()), BuiltInFormulaReferences.ModifiedGannBudget);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var o = (OoplesFinance.StockIndicators.Builder.Specs.ModifiedGannHiloActivatorSpecOptions)indicator.CreateOptions();
+        var bars = Enumerable.Range(0, Math.Max(64, c.Factory().WarmupBars + 8)).Select(i => Candle(i, 40, -5, 20, 30)).ToArray();
+        var selected = bars.Select((_, i) => i % 2 == 0 ? -20d : 80d).ToArray();
+        var projected = bars.Select((b, i) => new Bar(b.Time, b.Open, b.High, b.Low, selected[i], b.Volume)).ToArray();
+        var expected = BuiltInFormulaReferences.ModifiedGannOutputs(projected, indicator)["Ghla"];
+        var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+        using var actual = IndicatorCompute.ComputeModifiedGannHiloActivatorFast(data, context, o.Length, 1, o.MaType);
+        var values = actual.ToArray(); for (var i = 0; i < values.Length; i++) Equal(expected[i], values[i]);
+        Assert.Equal(selected, data.ChainedValues); Assert.Equal(bars.Select(b => b.Open), data.OpenPrices);
+        Assert.Equal(bars.Select(b => b.High), data.HighPrices); Assert.Equal(bars.Select(b => b.Low), data.LowPrices);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
