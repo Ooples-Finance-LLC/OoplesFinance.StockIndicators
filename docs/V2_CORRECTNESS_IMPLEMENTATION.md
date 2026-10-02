@@ -4909,3 +4909,12 @@ The isolated campaigns `664-repaired3-a` and `664-repaired3-b` passed their base
 Source snapshot SHA256: `fdb1a89b6aeb950064b535e6d916992b0144fe0ba19a63d33023c04fddfa6b28`. Archive SHA256: `50f65113a5172494cab5e36804266e5d5f34556f6df378322aa99ae1438c0940` and `ffbd10daf90aeeaf136aa85d39064d168c1675ccb88ec209f61b71cdab7b5080`.
 
 This is evidence for retained batch-664 source with selected-source and cross-cancellation test repairs using retained-source-compatible constructors plus the compiled first-move fault definition; all superseded snapshots are excluded. Source was already published in the batch-664 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 667: Modified Gann Hilo mutation qualification
+
+The isolated campaigns `667-repaired-a` and `667-repaired-b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **78/78 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-667 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `6e4896fca58e00a707f6b523274fc978df71d7e37ee0be751adc5c0374372bf5`. Archive SHA256: `0ee2e6d0190c57023f7dd7c61098f3ffe6a9f194c0af31d31422e68eb71e234e` and `0a1453627e73a29aa4bf6c53a1c52581dda4780d27d8b51383375b450caaa109`.
+
+This is evidence for retained batch-667 source with only the selected-source test repair overlaid; original snapshots are excluded. Source was already published in the batch-667 checkpoint; this update does not restore older source files. Mutation verification for other batches and the remaining final gates is still incomplete.
