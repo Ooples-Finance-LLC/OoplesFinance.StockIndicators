@@ -4604,3 +4604,12 @@ The isolated campaigns `656-repaired-a` and `656-repaired-b` passed their baseli
 Source snapshot SHA256: `5d4d6f9129a7e661dbbe2b4a704fe1fb1d3f118482095ae46312d63410067624`. Archive SHA256: `02bc8ed4c945200cc38280632d892245dfc76546ec44da32ae4c12502981a3d5` and `4668d9b2eadb821c7eaf9028ddfbb28db5cff9ec1125bc37cda5bfa21013f991`.
 
 This is evidence for the isolated batch-656 source. Source was already published in the batch-656 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 657: Kaufman Regression repaired mutation qualification
+
+The isolated campaigns `657-repaired-a` and `657-repaired-b` passed their baselines and caught **40/40 compiled behavioral faults**, alongside **71/71 distinct focused tests**. Both archives were compared byte-for-byte with the retained repaired batch-657 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `fd26534d853e7d792248022110b5efc594af89ff45256a394ab8e55a25ab337c`. Archive SHA256: `14d0d4725e7f5314a4745897043bc267c40ddb834f7bec27cab7cc7f8715f69f` and `db135b1f234615c7c861934f0c0577bacc9e3a8db71556d5adbccfec19154688`.
+
+This is evidence for the isolated batch-657 source. Production was published in the batch-657 checkpoint. The strengthened native validation/input-selection regression is pushed separately in `7306f598` and awaits integration; only that test differs from the original retained source. The original partial mutation results are excluded. This update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
