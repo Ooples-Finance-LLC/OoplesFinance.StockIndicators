@@ -4595,3 +4595,12 @@ The isolated campaigns `655-repaired-a` and `655-repaired-b` passed their baseli
 Source snapshot SHA256: `a5313d10b91c1878dc99904643bf76d3a45953595acce56e7f7c74c1bffd2c64`. Archive SHA256: `f08ab2cdf1ec2b44f6d684ca1b91265200259fbc3efac2904801c94512ff86ef` and `049fd253be5132a51fc3110a7c06f77f4fc13460b5d792719693c853cfa162e7`.
 
 This is evidence for the isolated batch-655 source. Source was already published in the batch-655 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 656: Kase Peak V2 repaired mutation qualification
+
+The isolated campaigns `656-repaired-a` and `656-repaired-b` passed their baselines and caught **44/44 compiled behavioral faults**, alongside **53/53 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-656 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `5d4d6f9129a7e661dbbe2b4a704fe1fb1d3f118482095ae46312d63410067624`. Archive SHA256: `02bc8ed4c945200cc38280632d892245dfc76546ec44da32ae4c12502981a3d5` and `4668d9b2eadb821c7eaf9028ddfbb28db5cff9ec1125bc37cda5bfa21013f991`.
+
+This is evidence for the isolated batch-656 source. Source was already published in the batch-656 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
