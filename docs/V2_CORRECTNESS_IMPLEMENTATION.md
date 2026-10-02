@@ -4613,3 +4613,12 @@ The isolated campaigns `657-repaired-a` and `657-repaired-b` passed their baseli
 Source snapshot SHA256: `fd26534d853e7d792248022110b5efc594af89ff45256a394ab8e55a25ab337c`. Archive SHA256: `14d0d4725e7f5314a4745897043bc267c40ddb834f7bec27cab7cc7f8715f69f` and `db135b1f234615c7c861934f0c0577bacc9e3a8db71556d5adbccfec19154688`.
 
 This is evidence for the isolated batch-657 source. Production was published in the batch-657 checkpoint. The strengthened native validation/input-selection regression is pushed separately in `7306f598` and awaits integration; only that test differs from the original retained source. The original partial mutation results are excluded. This update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 659: LBR Paint Bars mutation qualification
+
+The isolated campaigns `659a` and `659b` passed their baselines and caught **40/40 compiled behavioral faults**, alongside **82/82 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-659 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `abfe2bac39d628f3daa74a735538a28f29a7babe67d1aa9e798e8892a162965b`. Archive SHA256: `c94fa467613c26cddef21912e2e3f9a018fdb46e8de16ef37b72aea0eefc2621` and `672ce14bdaa817199f0cc29b91dfc80b4e72d45f18816391e4d4ca16919f5894`.
+
+This is evidence for the isolated batch-659 source. Source was already published in the batch-659 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
