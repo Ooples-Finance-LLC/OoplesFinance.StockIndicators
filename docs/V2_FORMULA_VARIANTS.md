@@ -807,3 +807,10 @@ The raw oscillator remains a binary64 component before its signal average. If it
 The public formula divides selected-price minus original open by original high minus low, returning zero for zero range, then applies two configured averages. Exact rational body/range arithmetic and the first average avoid premature overflow. The first output remains a binary64 component before the second average; overflowing components retain 53 significant bits with an extended upper exponent, allowing finite later cancellation. The second average and spread-based signal decisions remain exact until publication. SMA/WMA queues allocate observed history; EMA/Wilder retain their startup definitions, and other kinds use the established smoother fallback.
 
 Batch consumes no override slots; fast primary consumes one and fast Signal consumes two. Generator metadata preserves both average slots. Native routing now registers the state and preserves original candles when selected prices fall outside their range. The unrelated internal core remains unchanged pending its separate scope decision.
+
+
+### Squeeze Momentum: exact residual regression (batch 697)
+
+The public formula fits a partial-window least-squares endpoint to selected price minus the average of its configured moving average and rolling high/low midpoint. SMA retains full-window startup zeros; the regression uses observed points. Exact rational means, midpoint, residuals and regression moments prevent premature rounding and overflowing differences. Lazy monotonic deques and queues allocate only observed history. Signals compare exact endpoint sign and change. Standard averages use exact trajectories; other average kinds retain the established smoother fallback.
+
+Original candle highs/lows remain unchanged for selected inputs, including direct-fast calls. Native state validates finite bars before committing any stage. Batch consumes no callback slots; fast consumes one price-average slot, and generator metadata retains that slot. No separate Squeeze Momentum core was found.

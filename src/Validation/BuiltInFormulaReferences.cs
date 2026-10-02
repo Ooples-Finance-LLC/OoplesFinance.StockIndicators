@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SqueezeMomentumIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SqueezeMomentumOutputs(bars, builtIn)["Smi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SellGravitationIndex)
         {
             var sellKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Sgi", "Signal" };

@@ -4666,3 +4666,10 @@ Public batch, fast and native routes now share exact candle-body/range arithmeti
 ### Batch 694 selected-candle regression follow-up
 
 Strengthened the five existing RSING selected-source cases with valid gapping candles whose SMA-selected prices fall outside the original high/low range. Static and live outputs must match the independent formula evaluated with unchanged original candle fields. **5/5 strengthened cases passed** (`rsing694-selected-range-repair.trx`), using the unchanged production DLL. These replace the earlier five selected-source results within the 52 distinct focused cases. Fresh mutation snapshots will overlay only this test repair onto retained batch-694 source; original snapshots will not be qualified.
+
+
+### Batch 697: Squeeze Momentum residual regression
+
+Public routes now retain exact arithmetic through price averaging, rolling range midpoint, residuals and the partial-window regression endpoint. The independent reference uses direct centered covariance and variance sums. Native and direct-fast selected inputs preserve original candles; observed-history storage avoids extreme-period allocation.
+
+**53/53 focused tests passed** on net10.0 (`squeeze697-final.trx`), covering five configurations/five routes, the independent hand and existing shared/golden regressions, numerical fixtures, extreme/subnormal inputs, preview/reset, huge periods, DEMA fallback, callback metadata and invalid inputs. The initial test-file compilation failure and the intermediate 51/53 run are excluded; that run exposed the fixed direct-fast range reconstruction and reference DEMA mapping. **33 behavioral faults are prepared; mutation qualification is pending.** All 8,726 manifest anchors resolve. Inventory: **6,567/7,131 enrolled**, **564 omissions across 83 types**, all references registered and backlog exact. This isolated chain excludes separate RMO687 and unfinished Periodic677. Integration and final project gates remain pending.

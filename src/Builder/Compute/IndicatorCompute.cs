@@ -21279,38 +21279,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeSqueezeMomentumIndicatorFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateSqueezeMomentumIndicator publishes "Smi": the linear regression of the chained series measured
-        // against the average of its moving average and the midpoint of the high/low range over the window.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var sma = average.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        using (var regression = new ExactLinearFitWindow(length))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                highWindow.Add(highs[i]);
-                lowWindow.Add(lows[i]);
-
-                var midprice = (highWindow.Max + lowWindow.Min) / 2;
-                var diff = input[i] - ((midprice + sma[i]) / 2);
-                output[i] = regression.Next(diff, isFinal: true).Last;
-            }
-        }
-
-        return buffer;
+        var values = SqueezeMomentumWindow.Calculate(data, maType, length, true).Values;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     internal static ComputeBuffer ComputeStochasticConnorsRsiFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 3,

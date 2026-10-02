@@ -75343,5 +75343,302 @@
     "before": "outputKey == \"Signal\" ? values.Signal : values.Line",
     "after": "outputKey == \"Signal\" ? values.Line : values.Signal",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.HandBodyRatioAndTwoAverages"
+  },
+  {
+    "id": "squeeze-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "_length = Math.Max(1, length); _average",
+    "after": "_length = Math.Max(1, length - 1); _average",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "var expiry = _count - _length + 1L;",
+    "after": "var expiry = _count - _length;",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-high-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "var highest = Extreme(_highs, high, true, final);",
+    "after": "var highest = Extreme(_highs, high, false, final);",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-low-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "var lowest = Extreme(_lows, low, false, final);",
+    "after": "var lowest = Extreme(_lows, low, true, final);",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-deque-prune",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "maximum ? last.Value.Value <= value : last.Value.Value >= value",
+    "after": "maximum ? last.Value.Value >= value : last.Value.Value <= value",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-residual-origin",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "var residual = Number.Of(price) -",
+    "after": "var residual = Number.Of(high) -",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "Number.Of(highest) + Number.Of(lowest) + mean.Times(2)",
+    "after": "Number.Of(highest) - Number.Of(lowest) + mean.Times(2)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-mean-weight",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "mean.Times(2)).Divide(4)",
+    "after": "mean.Times(1)).Divide(4)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-residual-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "mean.Times(2)).Divide(4)",
+    "after": "mean.Times(2)).Divide(2)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-midpoint-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "Number.Of(highest) + Number.Of(lowest)",
+    "after": "Number.Of(highest + lowest)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.ExactIntermediatesPreserveExtremeAndSubnormalPrices"
+  },
+  {
+    "id": "squeeze-wide-mean-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "+ mean.Times(2)).Divide(4)",
+    "after": "+ Number.Of(mean.Publish()).Times(2)).Divide(4)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.ExactIntermediatesPreserveExtremeAndSubnormalPrices"
+  },
+  {
+    "id": "squeeze-wide-residual-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "var full = _residuals.Count == _length;",
+    "after": "residual = Number.Of(residual.Publish()); var full = _residuals.Count == _length;",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.ExactIntermediatesPreserveExtremeAndSubnormalPrices"
+  },
+  {
+    "id": "squeeze-wide-regression-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "var sum = _sum + residual - expired;",
+    "after": "var sum = _sum + residual;",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-regression-shift",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "_weighted - _sum + expired + residual.Times(n - 1)",
+    "after": "_weighted + expired + residual.Times(n - 1)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-regression-new-weight",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "_weighted + residual.Times(n - 1);",
+    "after": "_weighted + residual.Times(n);",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-regression-slope",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "weighted.Times(6)",
+    "after": "weighted.Times(5)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-regression-intercept",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "sum.Times(4 - 2 * n)",
+    "after": "sum.Times(3 - 2 * n)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-regression-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": ".Divide(n * (n + 1))",
+    "after": ".Divide(n * (n + 2))",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "var change = value - _previous;",
+    "after": "var change = _previous - value;",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "_previous = value; _count++;",
+    "after": "_previous = default; _count++;",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "weighted = weighted - sum + value.Times(_length);",
+    "after": "weighted = weighted + value.Times(_length);",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "weighted - sum + value.Times(_length)",
+    "after": "weighted - sum + value.Times(_length - 1L)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count + 1 <= _length ? default",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
+  },
+  {
+    "id": "squeeze-wide-recursive-weight",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-recursive-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "Divide(ema ? _length + 1L : _length)",
+    "after": "Divide(ema ? _length + 2L : _length + 1L)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "before": "_residuals.Clear(); _sum = _weighted = _previous = default; _count = 0;",
+    "after": "_residuals.Clear(); _sum = _weighted = _previous = default; _count = 1;",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SqueezeMomentumIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* guard removed */",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.InvalidBarsCannotAdvanceAnyStage"
+  },
+  {
+    "id": "squeeze-wide-native-price",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SqueezeMomentumIndicatorState",
+    "before": "_window.Next(bar.Close, bar.High, bar.Low, isFinal)",
+    "after": "_window.Next(bar.Open, bar.High, bar.Low, isFinal)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
+  },
+  {
+    "id": "squeeze-wide-selected-policy",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SqueezeMomentumIndicatorState",
+    "before": "PreserveOriginalRange => true",
+    "after": "PreserveOriginalRange => false",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "squeeze-wide-fast-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSqueezeMomentumIndicatorFast",
+    "before": "Calculate(data, maType, length, true)",
+    "after": "Calculate(data, maType, length, false)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.CallbackUsesOnePriceAverageAndRestoresInput"
+  },
+  {
+    "id": "squeeze-wide-batch-callback",
+    "module": "numerical",
+    "file": "src/Calculations/Momentum/MomentumStoZ.cs",
+    "scope": "public static StockData CalculateSqueezeMomentumIndicator",
+    "before": "Calculate(stockData, maType, length, false)",
+    "after": "Calculate(stockData, maType, length, true)",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.BatchDoesNotConsumeFastCallback"
+  },
+  {
+    "id": "squeeze-wide-fast-selected-range",
+    "module": "numerical",
+    "file": "src/Helpers/SqueezeMomentumWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate",
+    "before": "var highs = data.HighPrices; var lows = data.LowPrices;",
+    "after": "var (_, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.ExplicitFastSelectedInputPreservesOriginalCandles"
   }
 ]

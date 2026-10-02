@@ -78,18 +78,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.Trender:
                 return new("Trender", new[] { "TrendUp", "TrendDn", "Trender" }, bars => TrenderOutputs(bars, indicator));
             case IndicatorName.SqueezeMomentumIndicator:
-                return new("Smi", new[] { "Smi" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var average = Average(prices, length, kind);
-                    var residual = prices.Select((price, i) =>
-                    {
-                        var window = Window(bars, i, length).ToArray();
-                        var rangeCenter = (window.Max(b => b.High) + window.Min(b => b.Low)) / 2;
-                        return price - (rangeCenter + average[i]) / 2;
-                    }).ToArray();
-                    return Outputs(("Smi", RegressionEndpoints(residual, length)));
-                });
+                return new("Smi", new[] { "Smi" }, bars => SqueezeMomentumOutputs(bars, indicator));
             case IndicatorName.PeakValleyEstimation:
                 return new("Sign1", new[] { "Sign1", "Sign2", "Sign3" }, bars => PeakValleyOutputs(bars, indicator));
             case IndicatorName.StationaryExtrapolatedLevelsOscillator:
