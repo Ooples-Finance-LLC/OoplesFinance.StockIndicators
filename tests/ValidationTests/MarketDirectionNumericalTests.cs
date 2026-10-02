@@ -16,7 +16,21 @@ public sealed class MarketDirectionNumericalTests
     public void EveryRouteMatchesIndependentCrossings(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route,
         bars => new Dictionary<string, double[]> { ["Mdi"] = BuiltInFormulaReferences.MarketDirectionOutputs(bars, (IBuiltInIndicator)c.Factory()) }, IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var options = (OoplesFinance.StockIndicators.Builder.Specs.MarketDirectionIndicatorSpecOptions)indicator.CreateOptions();
+        var bars = Enumerable.Range(0, Math.Max(64, c.Factory().WarmupBars + 8)).Select(i =>
+            new Bar(DateTime.UnixEpoch.AddMinutes(i), 20, 40, -5, 30 - i % 7, 1)).ToArray();
+        var selected = bars.Select((_, i) => 2d + i % 11).ToArray();
+        var projected = bars.Select((bar, i) => new Bar(bar.Time, bar.Open, bar.High, bar.Low, selected[i], bar.Volume)).ToArray();
+        var expected = BuiltInFormulaReferences.MarketDirectionOutputs(projected, indicator);
+        var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+        using var actual = IndicatorCompute.ComputeMarketDirectionIndicatorFast(data, context, options.Length);
+        Assert.Equal(expected, actual.ToArray()); Assert.Equal(selected, data.ChainedValues);
+        Assert.Equal(bars.Select(bar => bar.High), data.HighPrices); Assert.Equal(bars.Select(bar => bar.Low), data.LowPrices);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]

@@ -68214,7 +68214,7 @@
     "file": "src/Streaming/StatefulIndicators.Batch16.cs",
     "scope": "public sealed class MarketDirectionIndicatorState",
     "before": "StreamingInputValidation.Validate(bar);",
-    "after": "StreamingInputValidation.Validate(default(OhlcvBar));",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
     "filter": "FullyQualifiedName~MarketDirectionNumericalTests.NonfiniteInputCannotAdvanceStateOrPartiallyWriteCore"
   },
   {
