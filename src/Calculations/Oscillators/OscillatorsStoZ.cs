@@ -1167,120 +1167,14 @@ public static partial class Calculations
     public static StockData CalculateVaradiOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14)
     {
-        length = Math.Max(1, length);
-        var count = stockData.Count;
-        List<double> dvoList = new(count);
-        List<double> ratioList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        const int SmallWindowThreshold = 32;
-        var useLinearWindow = length <= SmallWindowThreshold;
-        using RollingOrderStatistic? aWindow = useLinearWindow ? null : new RollingOrderStatistic(length);
-        double[]? aRing = useLinearWindow ? new double[length] : null;
-        var aRingCount = 0;
-        var aRingIndex = 0;
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var median = (currentHigh + currentLow) / 2;
-
-            var ratio = median != 0 ? currentValue / median : 0;
-            ratioList.Add(ratio);
-        }
-
-        List<double> aList;
-        switch (maType)
-        {
-            case MovingAvgType.SimpleMovingAverage:
-            {
-                var ratioSpan = SpanCompat.AsReadOnlySpan(ratioList);
-                var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-                MovingAverageCore.SimpleMovingAverage(ratioSpan, outputBuffer.Span, length);
-                aList = outputBuffer.ToList();
-                break;
-            }
-            case MovingAvgType.WeightedMovingAverage:
-            {
-                var ratioSpan = SpanCompat.AsReadOnlySpan(ratioList);
-                var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-                MovingAverageCore.WeightedMovingAverage(ratioSpan, outputBuffer.Span, length);
-                aList = outputBuffer.ToList();
-                break;
-            }
-            case MovingAvgType.ExponentialMovingAverage:
-            {
-                var ratioSpan = SpanCompat.AsReadOnlySpan(ratioList);
-                var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-                MovingAverageCore.ExponentialMovingAverage(ratioSpan, outputBuffer.Span, length);
-                aList = outputBuffer.ToList();
-                break;
-            }
-            case MovingAvgType.WildersSmoothingMethod:
-            {
-                var ratioSpan = SpanCompat.AsReadOnlySpan(ratioList);
-                var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-                MovingAverageCore.WellesWilderMovingAverage(ratioSpan, outputBuffer.Span, length);
-                aList = outputBuffer.ToList();
-                break;
-            }
-            default:
-                aList = GetMovingAverageList(stockData, maType, length, ratioList);
-                break;
-        }
-
-        for (var i = 0; i < count; i++)
-        {
-            var a = aList[i];
-            var prevDvo1 = i >= 1 ? dvoList[i - 1] : 0;
-            var prevDvo2 = i >= 2 ? dvoList[i - 2] : 0;
-
-            var prevA = i >= 1 ? aList[i - 1] : 0;
-            int countLe;
-            if (useLinearWindow)
-            {
-                aRing![aRingIndex] = prevA;
-                aRingIndex++;
-                if (aRingIndex == length)
-                {
-                    aRingIndex = 0;
-                }
-                if (aRingCount < length)
-                {
-                    aRingCount++;
-                }
-
-                countLe = 0;
-                for (var j = 0; j < aRingCount; j++)
-                {
-                    if (aRing[j] <= VaradiRank.InclusiveBoundary(a))
-                    {
-                        countLe++;
-                    }
-                }
-            }
-            else
-            {
-                aWindow!.Add(prevA);
-                countLe = aWindow.CountLessThanOrEqual(VaradiRank.InclusiveBoundary(a));
-            }
-
-            var dvo = MinOrMax(countLe / (double)length * 100, 100, 0);
-            dvoList.Add(dvo);
-
-            var signal = GetRsiSignal(dvo - prevDvo1, prevDvo1 - prevDvo2, dvo, prevDvo1, 80, 20);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vo", dvoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dvoList);
+        var result = VaradiWindow.Calculate(stockData, maType, length, fast: false);
+        var values = result.Values.ToList();
+        var signals = CreateSignalsList(stockData, stockData.Count);
+        signals?.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vo", values } });
+        stockData.SetSignals(signals);
+        stockData.SetCustomValues(values);
         stockData.IndicatorName = IndicatorName.VaradiOscillator;
-
         return stockData;
     }
 

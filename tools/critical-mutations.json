@@ -81643,5 +81643,311 @@
     "before": "VariableAdaptiveMovingAverage or ",
     "after": "",
     "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "varadi-wide-midpoint-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private static Number Ratio(",
+    "before": "var sum = Number.Of(high) + Number.Of(low);",
+    "after": "var sum = Number.Of(high + low);",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.MidpointOverflowAndUnderflowCannotChangeTheRank"
+  },
+  {
+    "id": "varadi-wide-quotient-underflow",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private static Number Ratio(",
+    "before": "Number.Of(price).Times(2).Divide(sum)",
+    "after": "Number.Of(Number.Of(price).Times(2).Divide(sum).Publish())",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.MidpointOverflowAndUnderflowCannotChangeTheRank"
+  },
+  {
+    "id": "varadi-wide-ratio-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private static Number Ratio(",
+    "before": ".Times(2)",
+    "after": ".Times(1)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.FastCallbackAndBatchBypassKeepTheirExistingSlots"
+  },
+  {
+    "id": "varadi-wide-zero-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private static Number Ratio(",
+    "before": "sum.Sign == 0 ? default",
+    "after": "sum.Sign == 0 ? Number.Of(1)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.MidpointOverflowAndUnderflowCannotChangeTheRank"
+  },
+  {
+    "id": "varadi-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal VaradiWindow(",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "varadi-wide-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal VaradiWindow(",
+    "before": "_order.Add(default);",
+    "after": "// missing seed",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "varadi-wide-rank-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private (double Value, Signal Trade) Rank(",
+    "before": ".Times(100)",
+    "after": ".Times(99)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "varadi-wide-rank-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private (double Value, Signal Trade) Rank(",
+    "before": ".Divide(_length)",
+    "after": ".Divide(_length + 1L)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "varadi-wide-slope",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private (double Value, Signal Trade) Rank(",
+    "before": "count - _previousCount",
+    "after": "_previousCount - count",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "varadi-wide-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private (double Value, Signal Trade) Rank(",
+    "before": "slope - _previousSlope",
+    "after": "slope + _previousSlope",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "varadi-wide-rank-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "private (double Value, Signal Trade) Rank(",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-reset-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal sealed class VaradiWindow",
+    "before": "_order.Dispose();\n        _order.Add(default);",
+    "after": "_order.Dispose();",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal (double Value, Signal Trade) Next(",
+    "before": "_average.Next(Ratio(price, high, low), final)",
+    "after": "_average.Next(Ratio(price, high, low), true)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-rounded-means",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "            if (final)\n",
+    "after": "            result = result.Round();\n            if (final)\n",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-weighted-position",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "value.Times(_length)",
+    "after": "value.Times(_length + 1L)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "weighted - sum +",
+    "after": "weighted +",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "sum -= _history.Peek()",
+    "after": "sum += _history.Peek()",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(Math.Min(_count + 1, _length))",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-recursive-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-recursive-drive",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(1)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal Number Next(",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-exact-inclusive-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiOrderStatistic.cs",
+    "scope": "internal int CountLessThanOrEqual(",
+    "before": "(key - node.Key).Sign < 0",
+    "after": "(key - node.Key).Sign <= 0",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "varadi-wide-rank-subtree",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiOrderStatistic.cs",
+    "scope": "internal int CountLessThanOrEqual(",
+    "before": "Size(node.Left) + node.Count",
+    "after": "node.Count",
+    "filter": "FullyQualifiedName~VaradiNumericalTests"
+  },
+  {
+    "id": "varadi-wide-history-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiOrderStatistic.cs",
+    "scope": "internal void Add(",
+    "before": "_window.Count == _length",
+    "after": "_window.Count > _length",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-duplicate-count",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiOrderStatistic.cs",
+    "scope": "private Node Insert(",
+    "before": "node.Count++",
+    "after": "node.Count = 1",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-duplicate-removal",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiOrderStatistic.cs",
+    "scope": "private static Node? Remove(",
+    "before": "node.Count--",
+    "after": "node.Count = 1",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.StandardMeansRankExactFractions"
+  },
+  {
+    "id": "varadi-wide-callback-bypass",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "fast && ComponentAverage.HasOverrides",
+    "after": "ComponentAverage.HasOverrides",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.FastCallbackAndBatchBypassKeepTheirExistingSlots"
+  },
+  {
+    "id": "varadi-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.FastCallbackAndBatchBypassKeepTheirExistingSlots"
+  },
+  {
+    "id": "varadi-wide-selected-fast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVaradiOscillatorFast(",
+    "before": "var values = VaradiWindow.Calculate(data, maType, length, fast: true).Values;",
+    "after": "data.SetCustomValues(data.ClosePrices); var values = VaradiWindow.Calculate(data, maType, length, fast: true).Values;",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.SelectedInputUsesProjectedRanges"
+  },
+  {
+    "id": "varadi-wide-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VaradiOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// no full candle guard",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.InvalidNativeAndOriginalSelectedCandlesAreRejectedBeforeMutation"
+  },
+  {
+    "id": "varadi-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void VaradiOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> high,",
+    "before": "new VaradiWindow(maType, length)",
+    "after": "new VaradiWindow(maType, length + 1)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.CorePriceOnlyUsesFlatCandlesAndRejectsInvalidSpansAtomically"
+  },
+  {
+    "id": "varadi-wide-core-low",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void VaradiOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> high,",
+    "before": "window.Next(close[i], high[i], low[i], true)",
+    "after": "window.Next(close[i], high[i], high[i], true)",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.MidpointOverflowAndUnderflowCannotChangeTheRank"
+  },
+  {
+    "id": "varadi-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": "internal static bool IncludesNumericalFixtures(",
+    "before": "VaradiOscillator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "varadi-wide-tolerance-ties",
+    "module": "numerical",
+    "file": "src/Helpers/VaradiOrderStatistic.cs",
+    "scope": "internal int CountLessThanOrEqual(",
+    "before": "(key - node.Key).Sign < 0",
+    "after": "(key + Number.Of(1e-12) - node.Key).Sign < 0",
+    "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
   }
 ]

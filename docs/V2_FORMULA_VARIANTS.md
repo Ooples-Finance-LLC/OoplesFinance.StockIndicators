@@ -943,3 +943,12 @@ Four component averages are requested in close/open/high/low order. The close is
 Batch and fast routes preserve four callback slots and zero-fill short replacements. Periods normalize to at least one and standard mean histories grow only with observations. Native previews do not commit state; invalid candles are rejected before state mutation. Batch and fast validate original candle fields even when a selected series projects the ranges. The previous fast implementation used original ranges for selected input and is aligned with batch/native projection in this batch.
 
 The distinct price-only core/registry formula and its SVAMA delegation await the separately requested design decision. 48 distinct focused checks passed; 31 mutation candidates are queued for qualification.
+
+
+### Batch 719: Varadi Oscillator exact rank contract
+
+Varadi smooths selected price divided by the exact high/low midpoint, then reports 100 times the inclusive rank count among the preceding length means divided by the full period. Unavailable startup history contributes only the established single zero seed. A zero midpoint gives a zero ratio. SMA and WMA retain exact finite-window fractions; EMA and Wilder retain exact recursive fractions because even a subnormal contribution beside the largest finite value can change a later rank. Other smoothing kinds preserve their existing smoother fallback.
+
+Exact comparisons replace the former 1e-12 tie tolerance. Only the final bounded percentage is rounded to binary64; integer rank changes determine signals. A lazy order-statistic tree preserves window expiry, duplicate counts and previews without allocating by requested period. Batch retains its standard-mean callback bypass; fast retains its single callback and zero-filled short replacements. Selected ranges follow the shared projection, with original candle validation before calculation.
+
+The OHLC-aware core now uses this same formula. Its price-only overload treats each price as a flat candle; invalid spans are rejected before output writes. 56 distinct focused checks passed, including independent extreme-rank hands, core/span tests and existing spike-expiry/naive/golden contracts. 34 mutation candidates await qualification.

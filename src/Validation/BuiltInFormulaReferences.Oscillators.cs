@@ -34,17 +34,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Nrvi", line), ("Signal", Smooth(line)));
                 });
             case IndicatorName.VaradiOscillator:
-                var varadiKind = AverageKind(options, 1);
-                if (varadiKind == 0) return null;
-                return new("Vo", new[] { "Vo" }, bars =>
-                {
-                    var ratios = bars.Select(b => b.High + b.Low == 0 ? 0 : 2 * b.Close / (b.High + b.Low)).ToArray();
-                    var average = Average(ratios, length, varadiKind);
-                    // Rank against preceding observations; the available startup history includes a zero seed.
-                    var line = average.Select((a, i) => 100d / length * Enumerable.Range(Math.Max(-1, i - length), Math.Min(i + 1, length))
-                        .Count(j => (j < 0 ? 0 : average[j]) <= a + 1e-12 * Math.Max(1, Math.Abs(a)))).ToArray();
-                    return Outputs(("Vo", line));
-                });
+                return new("Vo", new[] { "Vo" }, bars => VaradiOutputs(bars, indicator));
             case IndicatorName.OceanIndicator:
                 if (kind == 0) return null;
                 return new("Oi", new[] { "Oi", "Signal" }, bars =>

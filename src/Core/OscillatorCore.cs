@@ -4334,64 +4334,26 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes Varadi Oscillator using percentage changes.
+    /// Computes the Varadi percentile rank, treating price-only input as flat candles.
     /// </summary>
     internal static void VaradiOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+        => VaradiOscillator(close, close, close, output, length);
+
+    internal static void VaradiOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> high,
+        ReadOnlySpan<double> low, Span<double> output, int length = 10,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        if (high.Length != close.Length || low.Length != close.Length)
+            throw new ArgumentException("Candle spans must have equal lengths.");
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var pctChangeArray = pool.Rent(close.Length);
-        var absChangeArray = pool.Rent(close.Length);
-        var sumPctArray = pool.Rent(close.Length);
-        var sumAbsArray = pool.Rent(close.Length);
-
-        try
-        {
-            var pctChange = pctChangeArray.AsSpan(0, close.Length);
-            var absChange = absChangeArray.AsSpan(0, close.Length);
-            var sumPct = sumPctArray.AsSpan(0, close.Length);
-            var sumAbs = sumAbsArray.AsSpan(0, close.Length);
-
-            // Calculate percentage changes
-            pctChange[0] = 0;
-            absChange[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                if (close[i - 1] != 0)
-                {
-                    pctChange[i] = (close[i] - close[i - 1]) / close[i - 1];
-                    absChange[i] = Math.Abs(pctChange[i]);
-                }
-            }
-
-            // Calculate rolling sums
-            MovingAverageCore.SimpleMovingAverage(pctChange, sumPct, length);
-            MovingAverageCore.SimpleMovingAverage(absChange, sumAbs, length);
-
-            // Calculate oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (sumAbs[i] != 0)
-                {
-                    output[i] = (sumPct[i] * length) / (sumAbs[i] * length);
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(pctChangeArray);
-            pool.Return(absChangeArray);
-            pool.Return(sumPctArray);
-            pool.Return(sumAbsArray);
-        }
+        foreach (var value in close) StreamingInputValidation.Finite(value, nameof(close));
+        foreach (var value in high) StreamingInputValidation.Finite(value, nameof(high));
+        foreach (var value in low) StreamingInputValidation.Finite(value, nameof(low));
+        using var window = new VaradiWindow(maType, length);
+        var values = new double[close.Length];
+        for (var i = 0; i < close.Length; i++) values[i] = window.Next(close[i], high[i], low[i], true).Value;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>

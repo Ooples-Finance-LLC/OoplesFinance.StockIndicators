@@ -32,6 +32,8 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.VaradiOscillator)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VaradiOutputs(bars, builtIn)["Vo"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.ValueChartIndicator)
         {
             var valueChartKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "vClose", "vOpen", "vHigh", "vLow" };

@@ -5056,3 +5056,10 @@ This is evidence for the isolated batch-674 source. Source was already published
 The four component means, gain clipping, recursive blend and signal margins now retain extended values, including feedback below the smallest published subnormal. Batch, fast and native routes share the formula; fast selected-input ranges now match batch/native projection. Raw invalid candles are rejected before projection can hide them. The distinct core/registry and SVAMA delegation remain pending their separate scope decision.
 
 **48/48 distinct focused checks passed** across `variable-adaptive717-final.trx` and the two Variable Adaptive cases in `oscar675-variable-adaptive717-isolated-repairs.trx`. The latter replaces the earlier callback check and adds gain-limit hands; it used an isolated test-only build against the unchanged production DLL. Inventory: **6,692/7,131 configurations enrolled**, 439 omissions, all independent references registered and no construction failures. The 31 mutation candidates await isolated qualification.
+
+
+### Batch 719: Varadi Oscillator numerical and core alignment
+
+Public and core routes now rank exact smoothed price-to-midpoint ratios, preserving distinct values previously erased by the tie tolerance, midpoint overflow, or underflow. The core has an OHLC-aware overload; its existing price-only overload uses flat candles. Typed native and streaming routes are explicitly enabled.
+
+**56/56 distinct focused checks passed** (`varadi719-final.trx`, updated by `varadi719-integrated-routes.trx`, `varadi719-extreme-mean-hands.trx`, and `varadi719-midpoint-hand.trx`). Independent hands distinguish true ties, adjacent binary64 values, subnormal terms beside MaxValue, and changed lows despite rising closes. Inventory: **6,697/7,131 configurations enrolled**, 434 omissions across 62 types, all references present, no construction failures, and an exact backlog match. The 34 mutation candidates are queued, not qualified.

@@ -8617,74 +8617,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVaradiOscillatorFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateVaradiOscillator is a percentile rank, not the oscillator OscillatorCore.VaradiOscillator
-        // computed off the close. It averages the ratio of the series to the bar's median price, then reports
-        // what fraction of the PREVIOUS length averages sit at or below today's - and it divides that count by
-        // the full length even while the window is still filling, so the opening bars read low by construction.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(1, length);
-
-        using var highBuffer = context.Rent(count);
-        using var lowBuffer = context.Rent(count);
-        CustomRange(data, input, highBuffer.WritableSpan, lowBuffer.WritableSpan);
-        var highs = highBuffer.Span;
-        var lows = lowBuffer.Span;
-
-        using var ratioBuffer = context.Rent(count);
-        var ratio = ratioBuffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var median = (highs[i] + lows[i]) / 2;
-            ratio[i] = median != 0 ? input[i] / median : 0;
-        }
-
-        using var averaged = context.Rent(count);
-        MovingAverage(data, maType, length, ratioBuffer.Span, averaged.WritableSpan);
-        var a = averaged.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var pool = ArrayPool<double>.Shared;
-        var ringArray = pool.Rent(length);
-        try
-        {
-            var ring = ringArray.AsSpan(0, length);
-            var ringCount = 0;
-            var ringIndex = 0;
-            for (var i = 0; i < count; i++)
-            {
-                ring[ringIndex] = i >= 1 ? a[i - 1] : 0;
-                ringIndex++;
-                if (ringIndex == length)
-                {
-                    ringIndex = 0;
-                }
-
-                if (ringCount < length)
-                {
-                    ringCount++;
-                }
-
-                var current = a[i];
-                var countLessOrEqual = 0;
-                for (var j = 0; j < ringCount; j++)
-                {
-                    if (ring[j] <= VaradiRank.InclusiveBoundary(current))
-                    {
-                        countLessOrEqual++;
-                    }
-                }
-
-                output[i] = MathHelper.MinOrMax(countLessOrEqual / (double)length * 100, 100, 0);
-            }
-        }
-        finally
-        {
-            pool.Return(ringArray);
-        }
-
+        var values = VaradiWindow.Calculate(data, maType, length, fast: true).Values;
+        var buffer = context.Rent(values.Length);
+        values.AsSpan().CopyTo(buffer.WritableSpan);
         return buffer;
     }
 

@@ -122,61 +122,19 @@ public sealed class VanillaABCDPatternState : IStreamingIndicatorState
 [PrimaryOutput("Vo")]
 public sealed class VaradiOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _ratioMa;
-    private readonly StreamingInputResolver _input;
-    private RollingOrderStatistic _order;
-
+    private readonly VaradiWindow _window;
     public VaradiOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _ratioMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _order = new RollingOrderStatistic(_length);
-        _order.Add(0);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.VaradiOscillator;
-
-    public void Reset()
-    {
-        _ratioMa.Reset();
-        _order.Dispose();
-        _order = new RollingOrderStatistic(_length);
-        _order.Add(0);
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var median = (bar.High + bar.Low) / 2d;
-        var ratio = median != 0 ? value / median : 0;
-        var a = _ratioMa.Next(ratio, isFinal);
-        var countLe = _order.CountLessThanOrEqual(VaradiRank.InclusiveBoundary(a));
-        var dvo = MathHelper.MinOrMax(countLe / (double)_length * 100, 100, 0);
-
-        if (isFinal)
-        {
-            _order.Add(a);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vo", dvo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dvo, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Value,
+            includeOutputs ? new Dictionary<string, double> { { "Vo", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ratioMa.Dispose();
-        _order.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vama")]

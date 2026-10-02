@@ -415,6 +415,7 @@ internal static partial class StatefulIndicatorFactory
             GroverLlorensActivatorSpecOptions activator => new GroverLlorensActivatorState(activator.MaType, activator.Length, activator.Mult),
             GroverLlorensCycleOscillatorSpecOptions cycle => new GroverLlorensCycleOscillatorState(cycle.MaType, cycle.Length),
             MovingAverageAdaptiveQSpecOptions adaptiveQ => new MovingAverageAdaptiveQState(adaptiveQ.Length),
+            VaradiOscillatorSpecOptions varadi => new VaradiOscillatorState(varadi.MaType, varadi.Length),
             OscarIndicatorSpecOptions oscar => new OscarIndicatorState(oscar.Length),
             KarobeinOscillatorSpecOptions karobein => new KarobeinOscillatorState(karobein.MaType, karobein.Length),
             ModularFilterSpecOptions modular => new ModularFilterState(modular.Length, modular.Beta, modular.Z),
