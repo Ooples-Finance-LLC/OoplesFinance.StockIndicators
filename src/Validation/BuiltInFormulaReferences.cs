@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SupportAndResistanceOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => SupportResistanceOscillatorOutputs(bars)["Sro"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.StationaryExtrapolatedLevels)
         {
             var stationaryKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "UpperBand", "MiddleBand", "LowerBand", "Deviation" };

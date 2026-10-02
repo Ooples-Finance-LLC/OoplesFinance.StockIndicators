@@ -796,12 +796,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs((inverseKey, smoothed.Select(Math.Tanh).ToArray()));
                 });
             case IndicatorName.SupportAndResistanceOscillator:
-                return new("Sro", new[] { "Sro" }, bars =>
-                {
-                    var range = TrueRanges(bars);
-                    return Outputs(("Sro", bars.Select((b, i) => range[i] == 0 ? 0 :
-                        Math.Max(0, Math.Min(1, (b.High - b.Open + b.Close - b.Low) / (2 * range[i])))).ToArray()));
-                });
+                return new("Sro", new[] { "Sro" }, bars => SupportResistanceOscillatorOutputs(bars));
             case IndicatorName.UberTrendIndicator:
                 return new("Uti", new[] { "Uti" }, bars =>
                 {

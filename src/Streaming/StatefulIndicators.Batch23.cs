@@ -794,51 +794,18 @@ public sealed class SuperTrendFilterState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Sro")]
-public sealed class SupportAndResistanceOscillatorState : IStreamingIndicatorState
+public sealed class SupportAndResistanceOscillatorState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public SupportAndResistanceOscillatorState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SupportResistanceOscillatorWindow _window = new();
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     public IndicatorName Name => IndicatorName.SupportAndResistanceOscillator;
-
-    public void Reset()
-    {
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevClose = _hasPrev ? _prevClose : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var sro = tr != 0
-            ? MathHelper.MinOrMax((bar.High - bar.Open + (value - bar.Low)) / (2 * tr), 1, 0)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Sro", sro }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sro, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Open, bar.High, bar.Low, _input.GetValue(bar), isFinal).Line;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Sro", value } } : null);
     }
 }
 

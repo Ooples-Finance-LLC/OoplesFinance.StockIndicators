@@ -840,3 +840,10 @@ Lazy queues allocate observed history. Other average kinds retain their establis
 The public formula projects residuals from one and two periods ago using their original bar indices, with zero missing history. It returns zero through index<=length and on exact equality of the two lagged residuals. Between the first and second lag the projection is recent*index/[2*(index-length)]; thereafter it is recent-older/2. Those branch decisions now use exact residuals before publication. Exact means, lagged projection, extrema, midpoint and signal comparisons preserve tiny differences and finite midpoints of overflowing bands.
 
 The two trailing extrema filters compose into a single window of length+max(2,length)-1. Long derived widths and lazy queues/deques replace period-sized storage. Other average kinds retain the established smoother fallback. All four output names/order remain unchanged; native primary is Deviation, and batch intentionally has no custom primary series. Batch consumes no override; fast uses one selected-price average. No change is made to the distinct Stationary Extrapolated Levels Oscillator.
+
+
+### Support and Resistance Oscillator: exact candle ratio
+
+`Sro = clamp((high - open + close - low) / (2 * TR), 0, 1)`, with zero for zero true range. True range is the maximum of `high-low`, `abs(high-previousClose)`, and `abs(low-previousClose)`; the first bar uses its own selected close. Selected prices replace close only; original open/high/low/volume remain candle inputs, including when the selected price lies outside the candle. The legacy length option remains inert.
+
+Batch, explicit fast, native/live and the core span path share exact unpublished differences, range, ratio and signal comparisons; only the public line is rounded. Equal published values may have different exact slopes. Strong buy/sell takes precedence when the exact slope accelerates in its direction; other nonzero slopes select buy/sell. The legacy 0.3/0.7 crossings imply that same slope direction. Preview does not commit price or signal history; reset clears both. Nonfinite input is rejected before native state advances.

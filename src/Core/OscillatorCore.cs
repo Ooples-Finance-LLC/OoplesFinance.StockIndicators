@@ -4813,20 +4813,11 @@ internal static class OscillatorCore
     /// </remarks>
     internal static void SupportAndResistanceOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            // The first bar has no previous close, so its true range is simply high - low.
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
-            var trueRange = CalculationsHelper.CalculateTrueRange(high[i], low[i], prevClose);
-            output[i] = trueRange != 0
-                ? MathHelper.MinOrMax((high[i] - open[i] + (close[i] - low[i])) / (2 * trueRange), 1, 0)
-                : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (open.Length < close.Length || high.Length < close.Length || low.Length < close.Length)
+            throw new ArgumentException("Candle spans must cover the close input.");
+        var window = new SupportResistanceOscillatorWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], high[i], low[i], close[i], true).Line;
     }
 
     /// <summary>

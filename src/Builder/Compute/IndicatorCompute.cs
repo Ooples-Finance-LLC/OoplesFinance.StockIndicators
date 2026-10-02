@@ -9093,18 +9093,13 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Support and Resistance Oscillator using zero-allocation fast path.
+    /// Computes Support and Resistance Oscillator from selected prices and original candle fields.
     /// </summary>
     internal static ComputeBuffer ComputeSupportAndResistanceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        _ = length; // The indicator reads one bar plus the previous close, so there is no lookback to set.
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SupportAndResistanceOscillator(open, high, low, close, buffer.WritableSpan);
-        return buffer;
+        _ = length; // No lookback: one candle and the previous selected close.
+        var values = SupportResistanceOscillatorWindow.Calculate(data); var buffer = context.Rent(values.Line.Length);
+        values.Line.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

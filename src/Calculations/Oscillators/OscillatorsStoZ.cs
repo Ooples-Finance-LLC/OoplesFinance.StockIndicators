@@ -2651,36 +2651,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSupportAndResistanceOscillator(this StockData stockData)
     {
-        List<double> sroList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
-            var prevSro1 = i >= 1 ? sroList[i - 1] : 0;
-            var prevSro2 = i >= 2 ? sroList[i - 2] : 0;
-
-            var sro = tr != 0 ? MinOrMax((currentHigh - currentOpen + (currentClose - currentLow)) / (2 * tr), 1, 0) : 0;
-            sroList.Add(sro);
-
-            var signal = GetRsiSignal(sro - prevSro1, prevSro1 - prevSro2, sro, prevSro1, 0.7, 0.3);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sro", sroList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sroList);
-        stockData.IndicatorName = IndicatorName.SupportAndResistanceOscillator;
-
+        var values = SupportResistanceOscillatorWindow.Calculate(stockData);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sro", values.Line.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Line.ToList()); stockData.IndicatorName = IndicatorName.SupportAndResistanceOscillator;
         return stockData;
     }
 

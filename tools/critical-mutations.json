@@ -76972,5 +76972,293 @@
     "before": "Calculate(stockData, maType, length, false)",
     "after": "Calculate(stockData, maType, length, true)",
     "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.BatchDoesNotConsumeFastSlots"
+  },
+  {
+    "id": "support-osc-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_hasPrevious ? _previousClose : close",
+    "after": "_hasPrevious ? _previousClose : 0",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_previousClose = close;",
+    "after": "_previousClose = open;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-has-previous",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_hasPrevious = true;",
+    "after": "_hasPrevious = false;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "range = highGap;",
+    "after": "range = default;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "range = lowGap;",
+    "after": "range = default;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "h - Number.Of(open) + (c - l)",
+    "after": "h - Number.Of(open) - (c - l)",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "range.Times(2)",
+    "after": "range.Times(3)",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-range-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "var line = range.Sign == 0",
+    "after": "range = Number.Of(range.Publish()); var line = range.Sign == 0",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.OverflowingRangesAndNumeratorsRetainBoundedRatios"
+  },
+  {
+    "id": "support-osc-wide-ratio-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "var slope = line - _previous;",
+    "after": "line = Number.Of(line.Publish()); var slope = line - _previous;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SubnormalSlopeSurvivesEqualPublishedValues"
+  },
+  {
+    "id": "support-osc-wide-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "if (line.Sign < 0) line = default;",
+    "after": "if (line.Sign < 0) line = Number.Of(1);",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "if ((line - Number.Of(1)).Sign > 0) line = Number.Of(1);",
+    "after": "if ((line - Number.Of(1)).Sign > 0) line = default;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "range.Sign == 0 ? default :",
+    "after": "range.Sign == 0 ? Number.Of(1) :",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-strong-buy-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "slope.Sign > 0 && acceleration.Sign > 0",
+    "after": "slope.Sign > 0 && acceleration.Sign >= 0",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SubnormalSlopeSurvivesEqualPublishedValues"
+  },
+  {
+    "id": "support-osc-wide-strong-sell-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "slope.Sign < 0 && acceleration.Sign < 0",
+    "after": "slope.Sign < 0 && acceleration.Sign <= 0",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SubnormalSlopeSurvivesEqualPublishedValues"
+  },
+  {
+    "id": "support-osc-wide-buy",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "slope.Sign > 0 ? Signal.Buy",
+    "after": "slope.Sign > 0 ? Signal.None",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SubnormalSlopeSurvivesEqualPublishedValues"
+  },
+  {
+    "id": "support-osc-wide-sell",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "slope.Sign < 0 ? Signal.Sell",
+    "after": "slope.Sign < 0 ? Signal.None",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SubnormalSlopeSurvivesEqualPublishedValues"
+  },
+  {
+    "id": "support-osc-wide-slope-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = line;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SubnormalSlopeSurvivesEqualPublishedValues"
+  },
+  {
+    "id": "support-osc-wide-line-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_previous = line;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "if (final) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-reset-line",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_previous = _previousSlope = default;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-reset-slope",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_previous = _previousSlope = default;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-reset-close",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "_hasPrevious = false; _previous",
+    "after": "_hasPrevious = true; _previous",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SelectedPricesOutsideCandlePreserveAllOriginalFields"
+  },
+  {
+    "id": "support-osc-wide-batch-candles",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "data.HighPrices[i], data.LowPrices[i]",
+    "after": "prices[i], prices[i]",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.SelectedPricesOutsideCandlePreserveAllOriginalFields"
+  },
+  {
+    "id": "support-osc-wide-batch-volume-guard",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceOscillatorWindow.cs",
+    "scope": "internal sealed class SupportResistanceOscillatorWindow",
+    "before": "StreamingInputValidation.Finite(data.Volumes[i], nameof(data));",
+    "after": "StreamingInputValidation.Finite(0, nameof(data));",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.NonfiniteCandlesCannotAdvancePreviewOrFinalState"
+  },
+  {
+    "id": "support-osc-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SupportAndResistanceOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.NonfiniteCandlesCannotAdvancePreviewOrFinalState"
+  },
+  {
+    "id": "support-osc-wide-native-line",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SupportAndResistanceOscillatorState",
+    "before": "return new StreamingIndicatorStateResult(value,",
+    "after": "return new StreamingIndicatorStateResult(0,",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SupportAndResistanceOscillatorState",
+    "before": "{ \"Sro\", value }",
+    "after": "{ \"Sro\", 0 }",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SupportAndResistanceOscillatorState",
+    "before": "_input.GetValue(bar), isFinal",
+    "after": "_input.GetValue(bar), true",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-native-range-policy",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SupportAndResistanceOscillatorState",
+    "before": "PreserveOriginalRange => true",
+    "after": "PreserveOriginalRange => false",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.BuilderAndLiveSelectedSourceOutsideCandleRetainRanges"
+  },
+  {
+    "id": "support-osc-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSupportAndResistanceOscillatorFast",
+    "before": "values.Line.AsSpan().CopyTo(buffer.WritableSpan);",
+    "after": "buffer.WritableSpan.Clear();",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.IndependentHandsCoverGapsClampsAndZeroRange"
+  },
+  {
+    "id": "support-osc-wide-core-output",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void SupportAndResistanceOscillator",
+    "before": "output[i] = window.Next(open[i], high[i], low[i], close[i], true).Line;",
+    "after": "output[i] = 0;",
+    "filter": "FullyQualifiedName~SupportResistanceOscillatorNumericalTests.CoreHandlesEmptyInPlaceTailAndShortSpans"
   }
 ]

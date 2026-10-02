@@ -4794,3 +4794,12 @@ Public routes now preserve exact delayed residuals, equality branches, extrapola
 All 15 existing selected-source cases now compare each explicit fast output with the independent projected-price reference, using varying volumes and preserving original candle fields. The focused test-only run passed 15/15; the production DLL SHA256 remained unchanged. The initial test build failed on an interface member and is excluded from passing evidence.
 
 The native-guard mutation now validates only close, a compilable behavioral fault caught by the existing nonfinite candle-field assertions. Fresh paired mutation campaigns are required for all 39 faults; neither the original nor first-repaired snapshot may qualify this batch. This repair does not change production code or claim mutation qualification.
+
+
+### Batch 701: Support and Resistance Oscillator numerical coverage
+
+The candle ratio now retains exact range, numerator, quotient and signal slopes across batch, explicit fast, core/span, native, builder and live paths. Selected close values use the original candle fields even outside the candle range. Overflowing ranges retain bounded ratios; unpublished subnormal differences retain signal direction. The obsolete length option remains inert, and no moving-average callback slots are consumed.
+
+Independent rational references use candle width plus signed body. All **43/43 focused checks passed**, including four discovered configurations across all five public routes, hands, gaps, clamps, zero range, overflowing/subnormal cases, exact-slope signals, selected-source preservation, core empty/in-place/tail/short-span behavior, preview/reset, nonfinite guards, enrollment and existing hand/route/golden regressions. The initial build failed on a missing reference namespace and is excluded; the corrected run is `support-osc701-focused.trx`.
+
+Inventory: **6,593/7,131 enrolled**, **538 omissions across 78 types**, all 7,131 independent references registered, no construction failures and an exact backlog match. **32 prepared faults** bring the resolving manifest to **8,906 anchors**; mutation qualification and all final assurance gates remain outstanding. Stationary Extrapolated Levels Oscillator is a separate pending formula/core decision.
