@@ -4880,3 +4880,10 @@ The nine existing Modified Gann selected-source cases now directly exercise the 
 ### Batch 664 cross-cancellation verification repair
 
 The first repaired campaign pair finished with 45 caught faults, one compilation failure and one survivor; it is excluded from qualification. The first-move fault now preserves its field read while intentionally treating the first price as a move. The existing exact-arithmetic test adds the independent hand (2/3)*(9/10)=3/5 in both operand orders and a negative-product case, exercising cancellation across both numerator/denominator pairs. The strengthened test passed **1/1** in `mass664-cross-cancel-repair.trx` with the production assembly unchanged. A fresh full 47-fault campaign is required; earlier partial results cannot be pooled.
+
+
+### Mass Thrust callback mutation qualification
+
+Both isolated campaigns passed their baselines and caught **5/5 compiled behavioral faults**, with **7/7 focused checks**. Callback use, source series, period, discovery requests and short-result zero fill are covered. The campaign archives match the retained callback snapshot byte-for-byte. Other queued batches and final assurance gates remain incomplete.
+
+Source snapshot SHA256: `cc791379e77ede302b9a9f5049a11d4c88df8c4d8a7a4c06ab5ef1250a3d3c0b`. Archive SHA256: `2747cdca6ec85454630c858d4bdaf01c02d397768e50209a18fadb79ebc5a1fe` and `17d6e3cf1a65eb9823dda389181fddee1a4adabb0f2dc0125cd717a3d77762b2`.
