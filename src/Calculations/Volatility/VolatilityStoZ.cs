@@ -37,92 +37,10 @@ public static partial class Calculations
     public static StockData CalculateStandardDeviationVolatility(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20)
     {
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-        List<double> smaList;
-        List<double> divisionOfSumList;
-        List<double> stdDevVolatilityList;
-        List<double> stdDevSmaList;
-
-        if (maType == MovingAvgType.SimpleMovingAverage)
-        {
-            var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-            var smaBuffer = SpanCompat.CreateOutputBuffer(count);
-            MovingAverageCore.SimpleMovingAverage(inputSpan, smaBuffer.Span, length);
-            smaList = smaBuffer.ToList();
-
-            var deviationSquared = new double[count];
-            for (var i = 0; i < count; i++)
-            {
-                var currentDeviation = inputList[i] - smaBuffer.Span[i];
-                deviationSquared[i] = Pow(currentDeviation, 2);
-            }
-
-            var varianceBuffer = SpanCompat.CreateOutputBuffer(count);
-            MovingAverageCore.SimpleMovingAverage(deviationSquared, varianceBuffer.Span, length);
-            divisionOfSumList = varianceBuffer.ToList();
-
-            var stdDevBuffer = SpanCompat.CreateOutputBuffer(count);
-            for (var i = 0; i < count; i++)
-            {
-                stdDevBuffer.Span[i] = Sqrt(varianceBuffer.Span[i]);
-            }
-
-            stdDevVolatilityList = stdDevBuffer.ToList();
-            var stdDevSmaBuffer = SpanCompat.CreateOutputBuffer(count);
-            MovingAverageCore.SimpleMovingAverage(stdDevBuffer.Span, stdDevSmaBuffer.Span, length);
-            stdDevSmaList = stdDevSmaBuffer.ToList();
-        }
-        else
-        {
-            var deviationSquaredList = new List<double>(count);
-            smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-            for (var i = 0; i < count; i++)
-            {
-                var currentValue = inputList[i];
-                var currentSma = smaList[i];
-                var currentDeviation = currentValue - currentSma;
-
-                var deviationSquared = Pow(currentDeviation, 2);
-                deviationSquaredList.Add(deviationSquared);
-            }
-
-            divisionOfSumList = GetMovingAverageList(stockData, maType, length, deviationSquaredList);
-            stdDevVolatilityList = new List<double>(count);
-            for (var i = 0; i < count; i++)
-            {
-                var divisionOfSum = divisionOfSumList[i];
-                var stdDevVolatility = Sqrt(divisionOfSum);
-                stdDevVolatilityList.Add(stdDevVolatility);
-            }
-
-            stdDevSmaList = GetMovingAverageList(stockData, maType, length, stdDevVolatilityList);
-        }
-
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentSma = smaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-            var stdDev = stdDevVolatilityList[i];
-            var stdDevMa = stdDevSmaList[i];
-
-            var signal = GetVolatilitySignal(currentValue - currentSma, prevValue - prevSma, stdDev, stdDevMa);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "StdDev", stdDevVolatilityList },
-            { "Variance", divisionOfSumList },
-            { "Signal", stdDevSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(stdDevVolatilityList);
-        stockData.IndicatorName = IndicatorName.StandardDeviationVolatility;
-
+        var values = ResidualVolatilityWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "StdDev", values.Deviation.ToList() }, { "Variance", values.Variance.ToList() }, { "Signal", values.SignalLine.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Deviation.ToList()); stockData.IndicatorName = IndicatorName.StandardDeviationVolatility;
         return stockData;
     }
 

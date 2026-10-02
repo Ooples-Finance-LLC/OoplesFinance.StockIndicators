@@ -558,6 +558,7 @@ internal static class BuilderVerifiedArms
         typeof(Spencer21PointMovingAverageSpecOptions),
         typeof(SquareRootWeightedMovingAverageSpecOptions),
         typeof(SqueezeMomentumIndicatorSpecOptions),
+        typeof(StandardDeviationVolatilitySpecOptions),
         typeof(StandardDevationSpecOptions),
         typeof(StandardDeviationChannelSpecOptions),
         typeof(StationaryExtrapolatedLevelsOscillatorSpecOptions),

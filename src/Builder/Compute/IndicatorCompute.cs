@@ -2343,6 +2343,7 @@ internal static partial class IndicatorCompute
             InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength,
                 ii.MfiLength, ii.BbLength, ii.CciLength, ii.DpoLength, ii.RocLength, ii.RsiLength, ii.StochLength,
                 ii.StochKLength, ii.StochDLength, ii.SmaLength, ii.StdDevMult, ii.Divisor),
+            StandardDeviationVolatilitySpecOptions residualVol => ComputeResidualVolatilityFast(data, context, residualVol.Length, residualVol.MaType, spec.OutputKey),
             SqueezeMomentumIndicatorSpecOptions smi => ComputeSqueezeMomentumIndicatorFast(data, context, smi.Length, smi.MaType),
             StochasticConnorsRelativeStrengthIndexSpecOptions scrsi => ComputeStochasticConnorsRsiFast(data, context, scrsi.Length1, scrsi.Length2, scrsi.Length3, scrsi.SmoothLength1, scrsi.SmoothLength2, scrsi.MaType, spec.OutputKey),
 
@@ -21215,6 +21216,14 @@ internal static partial class IndicatorCompute
         using var window = new InsyncWindow(fastLength, slowLength, mfiLength, bbLength, cciLength, dpoLength, rocLength, rsiLength, stochLength, stochKLength, stochDLength, smaLength, stdDevMult, divisor);
         var buffer = context.Rent(data.Count);
         window.Compute(data, buffer.WritableSpan); return buffer;
+    }
+
+    internal static ComputeBuffer ComputeResidualVolatilityFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
+    {
+        var result = ResidualVolatilityWindow.Calculate(data, maType, length, true, outputKey == "Signal");
+        var values = outputKey == "Signal" ? result.SignalLine : outputKey == "Variance" ? result.Variance : result.Deviation;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     internal static ComputeBuffer ComputeSqueezeMomentumIndicatorFast(StockData data, ComputeContext context, int length = 20,

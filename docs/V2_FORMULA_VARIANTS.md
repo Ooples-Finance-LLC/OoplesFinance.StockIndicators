@@ -826,3 +826,10 @@ Original candle highs/lows remain unchanged for selected inputs, including direc
 ### Batch 687: Rahul Mohindar public numerical cascade
 
 Ten SMA stages, their aggregate, the complete range quotient and subsequent EMA stages retain rational intermediates through output publication and signal comparisons. SMA startup zeros and EMA partial-mean seeds remain part of the formula. Lazy queues and monotone extrema handle large periods; range periods retain the public minimum of two. The four outputs stay distinct. Fast callback graphs preserve ten SMA slots and only the EMA slots required for the requested output. Both factories register the public state. Core alignment remains a separate pending decision. All 42 focused regressions passed on net10.0. The 43 prepared behavioral faults await isolated mutation qualification.
+
+
+### Standard Deviation Volatility: exact residual squares and root component (batch 698)
+
+This indicator smooths each price's squared residual from its own moving average, takes a square root, and smooths that deviation. It remains distinct from true population-window deviation. Exact mean/residual/square/variance arithmetic supports SMA, WMA, EMA and Wilder without premature overflow or underflow. The root is a binary64 component with an extended upper exponent; an approximate root only locates neighbors, while exact squared midpoint comparisons choose the rounded value, including ties and subnormals. The signal average and signal comparisons retain exact intermediates. Variance publication can overflow while deviation and signal stay finite; each output retains its own overflow contract.
+
+Lazy queues allocate observed history. Other average kinds retain their established smoother fallback and representable component boundaries, including the existing nonpositive-root clamp. Batch consumes no overrides; fast StdDev/Variance request two average slots and Signal requests three. Generated metadata preserves all three configurable averages. Native finite validation precedes selected-input evaluation and stage commitment. The unrelated population-deviation core is unchanged.

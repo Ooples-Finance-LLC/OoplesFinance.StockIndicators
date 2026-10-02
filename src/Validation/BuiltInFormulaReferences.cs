@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.StandardDeviationVolatility)
+        {
+            var residualKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "StdDev", "Variance", "Signal" };
+            for (var slot = 0; slot < residualKeys.Length; slot++) { var key = residualKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ResidualVolatilityOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SqueezeMomentumIndicator)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SqueezeMomentumOutputs(bars, builtIn)["Smi"], IndicatorErrorBudget.Exact);

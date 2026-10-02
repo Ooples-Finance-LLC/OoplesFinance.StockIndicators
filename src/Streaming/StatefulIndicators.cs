@@ -3371,84 +3371,25 @@ public sealed class BollingerBandsState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("StdDev")]
 public sealed class StandardDeviationVolatilityState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _inputMa;
-    private readonly IMovingAverageSmoother _varianceMa;
-    private readonly IMovingAverageSmoother _signalMa;
+    private readonly ResidualVolatilityWindow _window;
     private readonly StreamingInputResolver _input;
-
-    // Internal: the library composes this state on a named input other than its own default -
-    // a volatility of volume, a relative volatility of the high and of the low. Every parameter is
-    // required, so this can never be chosen in place of the public constructor.
     internal StandardDeviationVolatilityState(MovingAvgType maType, int length, InputName inputName)
-    {
-        var resolved = Math.Max(1, length);
-        _inputMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
+    { _window = new(maType, length); _input = new StreamingInputResolver(inputName, null); }
     public StandardDeviationVolatilityState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _inputMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        : this(maType, length, InputName.Close) { }
     internal StandardDeviationVolatilityState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
     {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _inputMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        if (selector is null) throw new ArgumentNullException(nameof(selector));
+        _window = new(maType, length); _input = new StreamingInputResolver(InputName.Close, selector);
     }
-
     public IndicatorName Name => IndicatorName.StandardDeviationVolatility;
-
-    public void Reset()
-    {
-        _inputMa.Reset();
-        _varianceMa.Reset();
-        _signalMa.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var mean = _inputMa.Next(value, isFinal);
-        var deviation = value - mean;
-        var variance = _varianceMa.Next(deviation * deviation, isFinal);
-        var stdDev = MathHelper.Sqrt(variance);
-        var signal = _signalMa.Next(stdDev, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "StdDev", stdDev },
-                { "Variance", variance },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(stdDev, outputs);
+        StreamingInputValidation.Validate(bar); var result = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(result.Deviation, includeOutputs ? new Dictionary<string, double> { { "StdDev", result.Deviation }, { "Variance", result.Variance }, { "Signal", result.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _inputMa.Dispose();
-        _varianceMa.Dispose();
-        _signalMa.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Std")]

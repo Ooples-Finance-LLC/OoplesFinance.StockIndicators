@@ -76360,5 +76360,293 @@
     "before": "RahulMohindarOscillator or ",
     "after": "",
     "filter": "FullyQualifiedName~RmoNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "residual-volatility-wide-root-upper-correction",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "if (above > 0 || above == 0 && (bits & 1) != 0)",
+    "after": "if (above > 1 || above == 0 && (bits & 1) != 0)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExactSquaredMidpointsDetermineRootRounding"
+  },
+  {
+    "id": "residual-volatility-wide-root-lower-correction",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "if (side < 0 || side == 0 && (bits & 1) != 0)",
+    "after": "if (side < -1 || side == 0 && (bits & 1) != 0)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExactSquaredMidpointsDetermineRootRounding"
+  },
+  {
+    "id": "residual-volatility-wide-root-extended-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "Root(square.Divide(4)).Times(2)",
+    "after": "Root(square.Divide(4)).Times(1)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExactSquaredMidpointsDetermineRootRounding"
+  },
+  {
+    "id": "residual-volatility-wide-root-square-first",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "var estimate = square.OverRoot(square).Publish();",
+    "after": "square = Number.Of(square.Publish()); var estimate = square.OverRoot(square).Publish();",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.SquaredOverflowDoesNotOverflowFiniteDeviationOrSignal"
+  },
+  {
+    "id": "residual-volatility-wide-root-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "if (square.Sign <= 0) return default;",
+    "after": "if (square.Sign <= 0) return Number.Of(1);",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.HandResidualSquaresAndThreeAverages"
+  },
+  {
+    "id": "residual-volatility-wide-residual-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "var residual = value - _mean.Next(value, final);",
+    "after": "var residual = _mean.Next(value, final) - value;",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-variance-product",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_variance.Next(residual * residual, final)",
+    "after": "_variance.Next(residual, final)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.HandResidualSquaresAndThreeAverages"
+  },
+  {
+    "id": "residual-volatility-wide-variance-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_variance.Next(residual * residual, final)",
+    "after": "_variance.Next(residual * residual, true)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_signal.Next(deviation, final)",
+    "after": "_signal.Next(deviation, true)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-signal-source",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_signal.Next(deviation, final)",
+    "after": "_signal.Next(variance, final)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.HandResidualSquaresAndThreeAverages"
+  },
+  {
+    "id": "residual-volatility-wide-volatility-gate",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "(deviation - signal).Sign < 0",
+    "after": "(deviation - signal).Sign > 0",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "var change = residual - _previousResidual;",
+    "after": "var change = _previousResidual - residual;",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "if (final) _previousResidual = residual;",
+    "after": "if (final) _previousResidual = default;",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-signal-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_signal.Reset(); _previousResidual = default;",
+    "after": "_previousResidual = default;",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-variance-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_variance.Reset(); _signal.Reset();",
+    "after": "_signal.Reset();",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "weighted = weighted - sum + value.Times(_length);",
+    "after": "weighted = weighted + value.Times(_length);",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "weighted - sum + value.Times(_length)",
+    "after": "weighted - sum + value.Times(_length - 1L)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count + 1 <= _length ? default",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.HandResidualSquaresAndThreeAverages"
+  },
+  {
+    "id": "residual-volatility-wide-simple-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-recursive-retention",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length - 2L)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-recursive-current",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_count + 2)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
+  },
+  {
+    "id": "residual-volatility-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "ComponentAverage.Take(published, length)",
+    "after": "ComponentAverage.Take(published, length + 1)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.CallbackSlotsRespectRequestedOutputs"
+  },
+  {
+    "id": "residual-volatility-wide-batch-squares",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "Mean(residual.Select(v => v * v).ToArray())",
+    "after": "Mean(residual)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.HandResidualSquaresAndThreeAverages"
+  },
+  {
+    "id": "residual-volatility-wide-selected-input",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExplicitFastSelectedInputIsPreserved"
+  },
+  {
+    "id": "residual-volatility-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class StandardDeviationVolatilityState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.NonfiniteCandlesCannotAdvanceAnyStage"
+  },
+  {
+    "id": "residual-volatility-wide-native-selector",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class StandardDeviationVolatilityState",
+    "before": "_window.Next(_input.GetValue(bar), isFinal)",
+    "after": "_window.Next(bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.NamedInputAndSelectorUseRequestedSeries"
+  },
+  {
+    "id": "residual-volatility-wide-fast-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeResidualVolatilityFast",
+    "before": "Calculate(data, maType, length, true,",
+    "after": "Calculate(data, maType, length, false,",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.CallbackSlotsRespectRequestedOutputs"
+  },
+  {
+    "id": "residual-volatility-wide-fast-variance",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeResidualVolatilityFast",
+    "before": "outputKey == \"Variance\" ? result.Variance : result.Deviation",
+    "after": "outputKey == \"Variance\" ? result.Deviation : result.Variance",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.HandResidualSquaresAndThreeAverages"
+  },
+  {
+    "id": "residual-volatility-wide-batch-callback",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityStoZ.cs",
+    "scope": "public static StockData CalculateStandardDeviationVolatility",
+    "before": "Calculate(stockData, maType, length, false)",
+    "after": "Calculate(stockData, maType, length, true)",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.BatchNeverConsumesFastOverrides"
+  },
+  {
+    "id": "residual-volatility-wide-residual-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualVolatilityWindow.cs",
+    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "before": "var variance = _variance.Next(residual * residual, final);",
+    "after": "residual = Number.Of(residual.Publish()); var variance = _variance.Next(residual * residual, final);",
+    "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.SubnormalAndExtendedInputsPreserveCompleteSquares"
   }
 ]

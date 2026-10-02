@@ -138,14 +138,7 @@ internal static partial class BuiltInFormulaReferences
                     return bars.Select((b, i) => b.Close == 0 ? 0 : 100 * atr[i] / b.Close).ToArray();
                 });
             case IndicatorName.StandardDeviationVolatility:
-                return new("StdDev", new[] { "StdDev", "Variance", "Signal" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var mean = Smooth(prices);
-                    var variance = Smooth(prices.Select((v, i) => (v - mean[i]) * (v - mean[i])).ToArray());
-                    var deviation = variance.Select(Math.Sqrt).ToArray();
-                    return Outputs(("StdDev", deviation), ("Variance", variance), ("Signal", Smooth(deviation)));
-                });
+                return new("StdDev", new[] { "StdDev", "Variance", "Signal" }, bars => ResidualVolatilityOutputs(bars, indicator));
             case IndicatorName.StandardDeviation:
                 return new("Std", new[] { "Std", "Signal" }, bars =>
                 {

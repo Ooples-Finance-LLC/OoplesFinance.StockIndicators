@@ -382,7 +382,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
         // The precision kernel owns the three built-in averages; the builder still exposes each
         // stage for callers supplying independent/custom components.
-        if (name.Groups[1].Value is "RelativeSpreadStrength" or "KaseDevStopV1" or "EhlersEmpiricalModeDecomposition") asks = 3;
+        if (name.Groups[1].Value is "StandardDeviationVolatility" or "RelativeSpreadStrength" or "KaseDevStopV1" or "EhlersEmpiricalModeDecomposition") asks = 3;
         if (name.Groups[1].Value is "KasePeakOscillatorV2" or "SqueezeMomentumIndicator") asks = 1;
         if (name.Groups[1].Value is "VariableMovingAverageBands" or "SortinoRatio" or "TwiggsMoneyFlow" or "RSINGIndicator" or "SellGravitationIndex") asks = 2;
         if (name.Groups[1].Value == "QuantitativeQualitativeEstimation") asks = 5;
