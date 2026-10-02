@@ -81076,5 +81076,293 @@
     "before": "UltimateVolatilityIndicator or ",
     "after": " ",
     "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "value-chart-wide-rounded-median",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal sealed class ValueChartWindow",
+    "before": "(Number.Of(high) + Number.Of(low)).Divide(2)",
+    "after": "Number.Of((high + low) / 2)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
+  },
+  {
+    "id": "value-chart-wide-range-ceiling",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal ValueChartWindow(",
+    "before": "(length + 4L) / 5",
+    "after": "(long)length / 5",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
+  },
+  {
+    "id": "value-chart-wide-range-cap",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal ValueChartWindow(",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(531,",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
+  },
+  {
+    "id": "value-chart-wide-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal ValueChartWindow(",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
+  },
+  {
+    "id": "value-chart-wide-rounded-range",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "private Number[] Coordinates(",
+    "before": "Number.Of(highest) - Number.Of(lowest)",
+    "after": "Number.Of(highest - lowest)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
+  },
+  {
+    "id": "value-chart-wide-range-history-total",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "private Number[] Coordinates(",
+    "before": "_rangeSum + range",
+    "after": "range",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
+  },
+  {
+    "id": "value-chart-wide-range-history-length",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "private Number[] Coordinates(",
+    "before": "_ranges.Count == 4",
+    "after": "_ranges.Count == 3",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
+  },
+  {
+    "id": "value-chart-wide-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "private Number[] Coordinates(",
+    "before": "_rangeSum -= _ranges.Dequeue();",
+    "after": "_ranges.Dequeue();",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
+  },
+  {
+    "id": "value-chart-wide-coordinate-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "private Number[] Coordinates(",
+    "before": ".Times(25).Divide(total)",
+    "after": ".Times(5).Divide(total)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
+  },
+  {
+    "id": "value-chart-wide-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "private Number[] Coordinates(",
+    "before": "total.Sign == 0 ? default",
+    "after": "total.Sign == 0 ? Number.Of(1)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.InvalidBarCannotAdvanceStateAndZeroRangePublishesZero"
+  },
+  {
+    "id": "value-chart-wide-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "private Number[] Coordinates(",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
+  },
+  {
+    "id": "value-chart-wide-native-selected",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal double[] Next(",
+    "before": "custom ? Number.Of(bar.Close) : Median(bar.High, bar.Low)",
+    "after": "Median(bar.High, bar.Low)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal double[] Next(",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.InvalidBarCannotAdvanceStateAndZeroRangePublishesZero"
+  },
+  {
+    "id": "value-chart-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "custom ? Number.Of(data.ChainedValues[i]) : Median(data.HighPrices[i], data.LowPrices[i])",
+    "after": "Median(data.HighPrices[i], data.LowPrices[i])",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-batch-selected-close",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "custom ? data.ChainedValues[i] : data.ClosePrices[i]",
+    "after": "data.ClosePrices[i]",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-original-open",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "window.Coordinates(data.OpenPrices[i],",
+    "after": "window.Coordinates(closes[i],",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-projected-high",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "highs[i], lows[i], closes[i], basis[i]",
+    "after": "data.HighPrices[i], lows[i], closes[i], basis[i]",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-projected-low",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "highs[i], lows[i], closes[i], basis[i]",
+    "after": "highs[i], data.LowPrices[i], closes[i], basis[i]",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), length)",
+    "after": "ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), length + 1)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.CallbackSlotsAndShortReplacementsArePreserved"
+  },
+  {
+    "id": "value-chart-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.CallbackSlotsAndShortReplacementsArePreserved"
+  },
+  {
+    "id": "value-chart-wide-signal-mean-source",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "Mean(outputs[0])",
+    "after": "Mean(input)",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.CallbackSlotsAndShortReplacementsArePreserved"
+  },
+  {
+    "id": "value-chart-wide-signal-buy",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "? Signal.StrongBuy",
+    "after": "? Signal.StrongSell",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-signal-sell",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal static (double[][] Outputs, Signal[] Trades) Calculate(",
+    "before": "? Signal.StrongSell",
+    "after": "? Signal.StrongBuy",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/ValueChartWindow.cs",
+    "scope": "internal void Reset()",
+    "before": "_rangeSum = default;",
+    "after": "_rangeSum = Number.Of(1);",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
+  },
+  {
+    "id": "value-chart-wide-fast-open",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeValueChartIndicatorFast(",
+    "before": "CandleSeries.Open => 1",
+    "after": "CandleSeries.Open => 0",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-fast-high",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeValueChartIndicatorFast(",
+    "before": "CandleSeries.High => 2",
+    "after": "CandleSeries.High => 0",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-fast-low",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeValueChartIndicatorFast(",
+    "before": "CandleSeries.Low => 3",
+    "after": "CandleSeries.Low => 0",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-fast-callback-count",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeValueChartIndicatorFast(",
+    "before": "maType, length, false",
+    "after": "maType, length, true",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.CallbackSlotsAndShortReplacementsArePreserved"
+  },
+  {
+    "id": "value-chart-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class ValueChartIndicatorState",
+    "before": "{ \"vOpen\", values[1] }",
+    "after": "{ \"vOpen\", values[0] }",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
+  },
+  {
+    "id": "value-chart-wide-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "internal static partial class StatefulIndicatorFactory",
+    "before": "ValueChartIndicatorSpecOptions valueChart => new ValueChartIndicatorState(valueChart.MaType, valueChart.Length),",
+    "after": "ValueChartIndicatorSpecOptions valueChart => throw new NotSupportedException(),",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-streaming",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(",
+    "before": "ValueChartIndicatorSpecOptions or",
+    "after": "",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
+  },
+  {
+    "id": "value-chart-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": "internal static bool IncludesNumericalFixtures(",
+    "before": "ValueChartIndicator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~ValueChartNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

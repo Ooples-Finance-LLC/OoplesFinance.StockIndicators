@@ -81,16 +81,8 @@ internal static partial class BuiltInFormulaReferences
                         ("OShort", bars.Select((b, i) => slowWidth[i] == 0 ? 0 : .5 + (b.Close - slowCenter[i]) / (2 * slowWidth[i])).ToArray()));
                 });
             case IndicatorName.ValueChartIndicator:
-                return new("vClose", new[] { "vClose", "vOpen", "vHigh", "vLow" }, bars =>
-                {
-                    var period = Math.Max(2, Math.Min(530, (int)Math.Ceiling(length / 5d)));
-                    var basis = Average(bars.Select(b => (b.High + b.Low) / 2).ToArray(), length, kind);
-                    var ranges = bars.Select((_, i) => Window(bars, i, period).Max(b => b.High) - Window(bars, i, period).Min(b => b.Low)).ToArray();
-                    var scale = ranges.Select((_, i) => Window(ranges, i, 5).Sum() / 25).ToArray();
-                    double[] Coordinate(Func<Bar, double> price) => bars.Select((b, i) => scale[i] == 0 ? 0 : (price(b) - basis[i]) / scale[i]).ToArray();
-                    return Outputs(("vClose", Coordinate(b => b.Close)), ("vOpen", Coordinate(b => b.Open)),
-                        ("vHigh", Coordinate(b => b.High)), ("vLow", Coordinate(b => b.Low)));
-                });
+                return new("vClose", new[] { "vClose", "vOpen", "vHigh", "vLow" },
+                    bars => ValueChartValues(bars, length, (MovingAvgType)options.GetType().GetProperty("MaType")!.GetValue(options)!).Outputs);
             case IndicatorName.WilsonRelativePriceChannel:
                 return new("S1", new[] { "S1", "S2", "U1", "U2" }, bars =>
                 {

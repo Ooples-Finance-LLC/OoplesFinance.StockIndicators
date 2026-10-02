@@ -925,3 +925,12 @@ Ultimate Volatility remains the rolling sum of absolute selected-close minus ori
 The moving-average choice affects batch signals only. This batch and its fast path retain their existing no-component-callback contract. Signals compare exact close-minus-mean differences and the unrounded volatility against one; a value immediately below one must not enable a signal merely because publication rounds it to one. Native preview/reset and invalid-bar rejection preserve state. Fast selected inputs retain the original opens. Typed native and streaming factories are now mapped.
 
 The independent oracle directly sums rational body sizes for each window. The 49 distinct focused checks passed, including the repaired no-callback threshold hand and the existing streaming parity case. The 24 compiled behavioral mutation checks remain queued; enrollment alone is not qualification. This records the repository formula convention, not independently authenticated external attribution.
+
+
+### Batch 716: Value Chart public numerical contract
+
+Value Chart subtracts the selected input moving average (exact high/low midpoint by default) from each candle coordinate and divides by one twenty-fifth of the five most recent rolling high/low ranges. The range period is ceil(normalized length / 5), clamped to 2..530; missing range history contributes zero. A zero total range publishes zero. The selected-input per-bar range projection and original open are preserved. Batch retains two component-average requests (basis, then coordinate signal mean); each fast output retains one. Short callback replacements are zero-filled. Batch continues to publish four named outputs and an empty custom-values list.
+
+Finite signed candles are supported. Exact fractions preserve the midpoint, range differences, and coordinate division across binary64 overflow and subnormal underflow. Standard finite-window averages are exact; EMA/Wilder feedback uses the existing 106-bit extended shared average. Genuine final binary64 overflow follows the overflow-rejection validation contract. Exact slope and threshold comparisons determine signals. Histories grow with observed data; extreme requested periods do not allocate period-sized arrays. Native previews do not commit state, and invalid bars are rejected before mutation.
+
+The distinct unused core formula is unchanged pending the separately requested alignment decision. 48 distinct focused checks passed; 32 mutation candidates are queued for qualification.

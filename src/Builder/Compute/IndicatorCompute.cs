@@ -14328,59 +14328,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeValueChartIndicatorFast(StockData data, ComputeContext context, int length = 5,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, CandleSeries series = CandleSeries.Close)
     {
-        // CalculateValueChartIndicator expresses each of the bar's four prices as a distance from the moving
-        // average of the median price, scaled by the mean high-to-low range of the last five windows. The
-        // window length is MathHelper.MinOrMax(ceil(length / 5)), which clamps to at least 2 - so the batch's
-        // `varp == 1` fallbacks onto the close-to-close change can never fire and are not reproduced.
-        var (inputList, highList, lowList, openList, closeList, _) =
-            CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(highList);
-        var lows = SpanCompat.AsReadOnlySpan(lowList);
-        var opens = SpanCompat.AsReadOnlySpan(openList);
-        var closes = SpanCompat.AsReadOnlySpan(closeList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var varp = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 5));
-
-        using var ranges = context.Rent(count);
-        var range = ranges.WritableSpan;
-        var highWindow = new RollingMinMax(varp);
-        var lowWindow = new RollingMinMax(varp);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-            range[i] = highWindow.Max - lowWindow.Min;
-        }
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var mba = average.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var total = 0d;
-            for (var back = 0; back < 5; back++)
-            {
-                total += i >= back ? range[i - back] : 0;
-            }
-
-            var lRange = total / 5 * 0.2;
-            var price = series switch
-            {
-                CandleSeries.Open => opens[i],
-                CandleSeries.High => highs[i],
-                CandleSeries.Low => lows[i],
-                _ => closes[i]
-            };
-            output[i] = lRange != 0 ? (price - mba[i]) / lRange : 0;
-        }
-
-        return buffer;
+        var values = ValueChartWindow.Calculate(data, maType, length, false);
+        var slot = series switch { CandleSeries.Open => 1, CandleSeries.High => 2, CandleSeries.Low => 3, _ => 0 };
+        var buffer = context.Rent(data.Count); values.Outputs[slot].AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

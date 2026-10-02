@@ -30,6 +30,13 @@ internal static partial class BuiltInFormulaReferences
         }
         if (builtIn.BatchName == IndicatorName.UberTrendIndicator)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.ValueChartIndicator)
+        {
+            var valueChartKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "vClose", "vOpen", "vHigh", "vLow" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < valueChartKeys.Length; slot++) { var key = valueChartKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => ValueChartOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.UltimateVolatilityIndicator)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UltimateVolatilityOutputs(bars, builtIn)["Uvi"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableLengthMovingAverage)

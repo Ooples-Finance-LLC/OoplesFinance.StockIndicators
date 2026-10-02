@@ -47,6 +47,7 @@ internal static class StreamingIndicatorFactory
             NaturalMarketMirrorSpecOptions or
             NaturalMarketRiverSpecOptions or
             NaturalMarketComboSpecOptions or
+            ValueChartIndicatorSpecOptions or
             NaturalMarketSlopeSpecOptions or
             McClellanOscillatorSpecOptions or
             DecisionPointBreadthSwenlinTradingOscillatorSpecOptions or

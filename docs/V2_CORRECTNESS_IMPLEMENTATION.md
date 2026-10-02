@@ -5014,3 +5014,12 @@ The isolated campaigns `673-selected-repaired-a` and `673-selected-repaired-b-sp
 Source snapshot SHA256: `fce6136a36c26cea2ebc6d04c81a982b6a1221790a8ec8ba71829feed58e63e1`. Archive SHA256: `1624f907c233005abf1976a3c967201c41e5143cd002d792333a42d0b207cc72` and `1c9abf4c8c57a921d60ab86c647bfd5ab33b28f4c347fbd5adc780523e305f54`.
 
 This is evidence for the isolated batch-673 source. Source was already published in the batch-673 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 716: Value Chart public numerical correction
+
+Value Chart retains the exact high/low midpoint, five-window range total, coordinates and signal comparisons until publication. This avoids overflow and loss of subnormal ratios. Batch/fast/native/streaming routes preserve the selected-input range projection and original open; batch retains two component callbacks, fast retains one, and the four-output batch custom list remains empty. Period histories are lazy, and the range window stays clamped to 2..530. The unused, distinct core formula awaits a separate alignment decision.
+
+**48/48 distinct focused checks passed**: 25 route cases, configuration enrollment and injected-fault checks, explicit selected-input coverage, independent +/-12.5 extreme/subnormal hands, callback replacement/signals, period normalization/cap/ceiling/expiry, and native preview/reset/invalid-input checks. The first run exposed a reference enum mapping error (16/47 passed); corrected mapping passed 47/47. Three boundary checks passed after adding the ceiling-period hand and invalid-volume rejection, reusing the unchanged production DLL. The old nonparameterized cap-test definition is excluded from the distinct total. Evidence: `value-chart716-reference-repair.trx` and `value-chart716-boundary-repair.trx`.
+
+Inventory: **6,687/7,131 configurations enrolled**, **444 omissions**, all 7,131 reference registrations, no construction failures, exact backlog agreement. DLL SHA256: `4d38dfa7a300d63f33b0b49ca189df5708d0154a82557845a470b812022c3843`. UMA714 remains independently under verification and is excluded. All 9,362 manifest anchors resolve; the 32 new mutation candidates are queued, not qualified. Hosted/platform/package/performance assurance remains incomplete.

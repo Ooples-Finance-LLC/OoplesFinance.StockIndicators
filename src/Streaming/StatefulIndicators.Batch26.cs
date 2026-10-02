@@ -41,116 +41,20 @@ public sealed class UpsidePotentialRatioState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("vClose")]
 public sealed class ValueChartIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly int _length;
-    private readonly int _varp;
-    private readonly IMovingAverageSmoother _ma;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly PooledRingBuffer<double> _highestValues;
-    private readonly PooledRingBuffer<double> _lowestValues;
-    private readonly PooledRingBuffer<double> _closeValues;
-    private StreamingInputResolver _input;
-
+    private readonly ValueChartWindow _window;
+    private bool _custom;
     public ValueChartIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5)
-    {
-        _length = Math.Max(1, length);
-        _varp = MathHelper.MinOrMax((int)Math.Ceiling((double)_length / 5));
-        _ma = MovingAverageSmootherFactory.Create(maType, _length);
-        _highWindow = new RollingWindowMax(_varp);
-        _lowWindow = new RollingWindowMin(_varp);
-        _highestValues = new PooledRingBuffer<double>(5);
-        _lowestValues = new PooledRingBuffer<double>(5);
-        _closeValues = new PooledRingBuffer<double>(6);
-        _input = new StreamingInputResolver(InputName.MedianPrice, null);
-    }
-
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.ValueChartIndicator;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _ma.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _highestValues.Clear();
-        _lowestValues.Clear();
-        _closeValues.Clear();
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _custom = true;
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var mba = _ma.Next(value, isFinal);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-
-        var prevHighest1 = EhlersStreamingWindow.GetOffsetValue(_highestValues, highest, 1);
-        var prevHighest2 = EhlersStreamingWindow.GetOffsetValue(_highestValues, highest, 2);
-        var prevHighest3 = EhlersStreamingWindow.GetOffsetValue(_highestValues, highest, 3);
-        var prevHighest4 = EhlersStreamingWindow.GetOffsetValue(_highestValues, highest, 4);
-
-        var prevLowest1 = EhlersStreamingWindow.GetOffsetValue(_lowestValues, lowest, 1);
-        var prevLowest2 = EhlersStreamingWindow.GetOffsetValue(_lowestValues, lowest, 2);
-        var prevLowest3 = EhlersStreamingWindow.GetOffsetValue(_lowestValues, lowest, 3);
-        var prevLowest4 = EhlersStreamingWindow.GetOffsetValue(_lowestValues, lowest, 4);
-
-        var close = bar.Close;
-        var prevClose1 = EhlersStreamingWindow.GetOffsetValue(_closeValues, close, 1);
-        var prevClose2 = EhlersStreamingWindow.GetOffsetValue(_closeValues, close, 2);
-        var prevClose3 = EhlersStreamingWindow.GetOffsetValue(_closeValues, close, 3);
-        var prevClose4 = EhlersStreamingWindow.GetOffsetValue(_closeValues, close, 4);
-        var prevClose5 = EhlersStreamingWindow.GetOffsetValue(_closeValues, close, 5);
-
-        var vara = highest - lowest;
-        var varr1 = vara == 0 && _varp == 1 ? Math.Abs(close - prevClose1) : vara;
-        var varb = prevHighest1 - prevLowest1;
-        var varr2 = varb == 0 && _varp == 1 ? Math.Abs(prevClose1 - prevClose2) : varb;
-        var varc = prevHighest2 - prevLowest2;
-        var varr3 = varc == 0 && _varp == 1 ? Math.Abs(prevClose2 - prevClose3) : varc;
-        var vard = prevHighest3 - prevLowest3;
-        var varr4 = vard == 0 && _varp == 1 ? Math.Abs(prevClose3 - prevClose4) : vard;
-        var vare = prevHighest4 - prevLowest4;
-        var varr5 = vare == 0 && _varp == 1 ? Math.Abs(prevClose4 - prevClose5) : vare;
-        var lRange = (varr1 + varr2 + varr3 + varr4 + varr5) / 5d * 0.2d;
-
-        var vClose = lRange != 0 ? (close - mba) / lRange : 0;
-        var vOpen = lRange != 0 ? (bar.Open - mba) / lRange : 0;
-        var vHigh = lRange != 0 ? (bar.High - mba) / lRange : 0;
-        var vLow = lRange != 0 ? (bar.Low - mba) / lRange : 0;
-
-        if (isFinal)
-        {
-            _highestValues.TryAdd(highest, out _);
-            _lowestValues.TryAdd(lowest, out _);
-            _closeValues.TryAdd(close, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "vClose", vClose },
-                { "vOpen", vOpen },
-                { "vHigh", vHigh },
-                { "vLow", vLow }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vClose, outputs);
+        var values = _window.Next(bar, _custom, isFinal);
+        return new StreamingIndicatorStateResult(values[0], includeOutputs ? new Dictionary<string, double>
+        { { "vClose", values[0] }, { "vOpen", values[1] }, { "vHigh", values[2] }, { "vLow", values[3] } } : null);
     }
-
-    public void Dispose()
-    {
-        _ma.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _highestValues.Dispose();
-        _lowestValues.Dispose();
-        _closeValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vabcd")]

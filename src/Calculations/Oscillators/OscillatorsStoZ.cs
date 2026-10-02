@@ -859,89 +859,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateValueChartIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5)
     {
-        List<double> vOpenList = new(stockData.Count);
-        List<double> vHighList = new(stockData.Count);
-        List<double> vLowList = new(stockData.Count);
-        List<double> vCloseList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
-
-        var varp = MinOrMax((int)Math.Ceiling((double)length / 5));
-
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, varp);
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var values = ValueChartWindow.Calculate(stockData, maType, length, true);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>
         {
-            var currentClose = closeList[i];
-            var prevClose1 = i >= 1 ? closeList[i - 1] : 0;
-            var prevHighest1 = i >= 1 ? highestList[i - 1] : 0;
-            var prevLowest1 = i >= 1 ? lowestList[i - 1] : 0;
-            var prevClose2 = i >= 2 ? closeList[i - 2] : 0;
-            var prevHighest2 = i >= 2 ? highestList[i - 2] : 0;
-            var prevLowest2 = i >= 2 ? lowestList[i - 2] : 0;
-            var prevClose3 = i >= 3 ? closeList[i - 3] : 0;
-            var prevHighest3 = i >= 3 ? highestList[i - 3] : 0;
-            var prevLowest3 = i >= 3 ? lowestList[i - 3] : 0;
-            var prevClose4 = i >= 4 ? closeList[i - 4] : 0;
-            var prevHighest4 = i >= 4 ? highestList[i - 4] : 0;
-            var prevLowest4 = i >= 4 ? lowestList[i - 4] : 0;
-            var prevClose5 = i >= 5 ? closeList[i - 5] : 0;
-            var mba = smaList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var vara = highest - lowest;
-            var varr1 = vara == 0 && varp == 1 ? Math.Abs(currentClose - prevClose1) : vara;
-            var varb = prevHighest1 - prevLowest1;
-            var varr2 = varb == 0 && varp == 1 ? Math.Abs(prevClose1 - prevClose2) : varb;
-            var varc = prevHighest2 - prevLowest2;
-            var varr3 = varc == 0 && varp == 1 ? Math.Abs(prevClose2 - prevClose3) : varc;
-            var vard = prevHighest3 - prevLowest3;
-            var varr4 = vard == 0 && varp == 1 ? Math.Abs(prevClose3 - prevClose4) : vard;
-            var vare = prevHighest4 - prevLowest4;
-            var varr5 = vare == 0 && varp == 1 ? Math.Abs(prevClose4 - prevClose5) : vare;
-            var cdelta = Math.Abs(currentClose - prevClose1);
-            var var0 = cdelta > currentHigh - currentLow || currentHigh == currentLow ? cdelta : currentHigh - currentLow;
-            var lRange = (varr1 + varr2 + varr3 + varr4 + varr5) / 5 * 0.2;
-
-            var vClose = lRange != 0 ? (currentClose - mba) / lRange : 0;
-            vCloseList.Add(vClose);
-
-            var vOpen = lRange != 0 ? (currentOpen - mba) / lRange : 0;
-            vOpenList.Add(vOpen);
-
-            var vHigh = lRange != 0 ? (currentHigh - mba) / lRange : 0;
-            vHighList.Add(vHigh);
-
-            var vLow = lRange != 0 ? (currentLow - mba) / lRange : 0;
-            vLowList.Add(vLow);
-        }
-
-        var vValueEmaList = GetMovingAverageList(stockData, maType, length, vCloseList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var vValue = vCloseList[i];
-            var vValueEma = vValueEmaList[i];
-            var prevVvalue = i >= 1 ? vCloseList[i - 1] : 0;
-            var prevVValueEma = i >= 1 ? vValueEmaList[i - 1] : 0;
-
-            var signal = GetRsiSignal(vValue - vValueEma, prevVvalue - prevVValueEma, vValue, prevVvalue, 4, -4);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "vClose", vCloseList },
-            { "vOpen", vOpenList },
-            { "vHigh", vHighList },
-            { "vLow", vLowList }
+            { "vClose", values.Outputs[0].ToList() }, { "vOpen", values.Outputs[1].ToList() },
+            { "vHigh", values.Outputs[2].ToList() }, { "vLow", values.Outputs[3].ToList() }
         });
-        stockData.SetSignals(signalsList);
+        stockData.SetSignals(values.Trades.ToList());
         stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.ValueChartIndicator;
-
         return stockData;
     }
 
