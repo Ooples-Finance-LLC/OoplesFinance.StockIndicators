@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using OoplesFinance.StockIndicators.Streaming;
 
 namespace OoplesFinance.StockIndicators.Core;
 
@@ -560,50 +561,13 @@ internal static class VolumeCore
     /// </summary>
     internal static void VolumeWeightedRsi(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        double avgGain = 0;
-        double avgLoss = 0;
-        output[0] = 50;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var change = close[i] - close[i - 1];
-            var weightedChange = change * volume[i];
-
-            var gain = weightedChange > 0 ? weightedChange : 0;
-            var loss = weightedChange < 0 ? -weightedChange : 0;
-
-            if (i <= length)
-            {
-                avgGain += gain;
-                avgLoss += loss;
-
-                if (i == length)
-                {
-                    avgGain /= length;
-                    avgLoss /= length;
-                }
-
-                output[i] = 50;
-            }
-            else
-            {
-                var k = 1.0 / length;
-                avgGain = (gain * k) + (avgGain * (1 - k));
-                avgLoss = (loss * k) + (avgLoss * (1 - k));
-
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-                output[i] = avgLoss == 0 ? 100 : 100 - (100 / (1 + rs));
-            }
-        }
+        if (volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Input lengths must agree and output must fit every input.");
+        foreach (var value in close) StreamingInputValidation.Finite(value, nameof(close));
+        foreach (var value in volume) StreamingInputValidation.Finite(value, nameof(volume));
+        using var window = new VolumeWeightedRsiWindow(MovingAvgType.WeightedMovingAverage, length, 3);
+        var values = new double[close.Length];
+        for (var i = 0; i < close.Length; i++) values[i] = window.Next(close[i], volume[i], true);
+        values.AsSpan().CopyTo(output);
     }
 }

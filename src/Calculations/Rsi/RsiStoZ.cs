@@ -17,38 +17,8 @@ public static partial class Calculations
     public static StockData CalculateVolumeWeightedRelativeStrengthIndex(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10, int smoothLength = 3)
     {
-        List<double> maxList = new(stockData.Count);
-        List<double> minList = new(stockData.Count);
-        List<double> rsiScaledList = new(stockData.Count);
+        var rsiList = VolumeWeightedRsiWindow.Calculate(stockData, maType, length, smoothLength).ToList();
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var volume = volumeList[i];
-
-            var max = Math.Max(MinPastValues(i, 1, currentValue - prevValue) * volume, 0);
-            maxList.Add(max);
-
-            var min = -Math.Min(MinPastValues(i, 1, currentValue - prevValue) * volume, 0);
-            minList.Add(min);
-        }
-
-        var upList = GetMovingAverageList(stockData, maType, length, maxList);
-        var dnList = GetMovingAverageList(stockData, maType, length, minList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var up = upList[i];
-            var dn = dnList[i];
-            var rsiRaw = dn == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + (up / dn)));
-
-            var rsiScale = (rsiRaw * 2) - 100;
-            rsiScaledList.Add(rsiScale);
-        }
-
-        var rsiList = GetMovingAverageList(stockData, maType, smoothLength, rsiScaledList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var rsi = rsiList[i];

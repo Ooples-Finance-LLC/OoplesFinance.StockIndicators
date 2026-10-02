@@ -52,15 +52,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.VolumeWeightedRelativeStrengthIndex:
                 var volumeRsiKind = AverageKind(options, 2);
                 if (volumeRsiKind == 0) return null;
-                return new("Vwrsi", new[] { "Vwrsi" }, bars =>
-                {
-                    var signed = bars.Select((b, i) => i == 0 ? 0 : b.Volume * (b.Close - bars[i - 1].Close)).ToArray();
-                    var net = Average(signed, length, volumeRsiKind);
-                    var total = Average(signed.Select(Math.Abs).ToArray(), length, volumeRsiKind);
-                    // Signed/absolute flow ratio is the centered RSI; no movement retains the published +100 convention.
-                    var centered = net.Select((v, i) => total[i] == 0 ? 100 : 100 * v / total[i]).ToArray();
-                    return Outputs(("Vwrsi", Average(centered, Integer(options, "SmoothLength", 3), volumeRsiKind)));
-                });
+                return new("Vwrsi", new[] { "Vwrsi" }, bars => VolumeWeightedRsiOutputs(bars, indicator));
             case IndicatorName.PolarizedFractalEfficiency:
                 var efficiencyKind = AverageKind(options, 3);
                 if (efficiencyKind == 0) return null;

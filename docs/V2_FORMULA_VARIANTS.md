@@ -952,3 +952,12 @@ Varadi smooths selected price divided by the exact high/low midpoint, then repor
 Exact comparisons replace the former 1e-12 tie tolerance. Only the final bounded percentage is rounded to binary64; integer rank changes determine signals. A lazy order-statistic tree preserves window expiry, duplicate counts and previews without allocating by requested period. Batch retains its standard-mean callback bypass; fast retains its single callback and zero-filled short replacements. Selected ranges follow the shared projection, with original candle validation before calculation.
 
 The OHLC-aware core now uses this same formula. Its price-only overload treats each price as a flat candle; invalid spans are rejected before output writes. 56 distinct focused checks passed, including independent extreme-rank hands, core/span tests and existing spike-expiry/naive/golden contracts. 34 mutation candidates await qualification.
+
+
+### Batch 721: Volume Weighted Relative Strength Index
+
+Finite signed price changes are multiplied by finite signed volume before gain/loss classification. Standard SMA, WMA, EMA, and Wilder component means retain exact rational values, including products beyond either binary64 exponent limit. The centered value is 100 times (up minus down) divided by (up plus down); zero down retains the published +100 precedence, including a motionless series. Final smoothing consumes unpublished centered values. WMA includes zero-filled warmup history; period arguments are floored at one and history grows only as observations arrive.
+
+Batch and fast calls preserve the three component callback slots (gains, losses, centered values), selected prices, and original volumes. Native previews do not commit price or smoother history. Original OHLCV is validated before selected inputs can hide invalid values. The approved internal core alignment uses the public WMA and three-bar final smoothing with its existing length argument/default 14; the public default length remains 10. Span outputs are written only after validation/calculation, including aliased inputs.
+
+Independent references use signed/absolute flow ratios and direct rational windows, separate from the production gain/loss recurrence. All 43 focused checks passed on net10.0. Inventory confirms four additional enrollments (6,701/7,131 total); the 32 prepared behavioral faults await isolated qualification.

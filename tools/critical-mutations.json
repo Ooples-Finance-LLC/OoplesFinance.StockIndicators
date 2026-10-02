@@ -81949,5 +81949,293 @@
     "before": "(key - node.Key).Sign < 0",
     "after": "(key + Number.Of(1e-12) - node.Key).Sign < 0",
     "filter": "FullyQualifiedName~VaradiNumericalTests.AdjacentValuesAreDistinctAndTrueTiesRemainInclusive"
+  },
+  {
+    "id": "volume-rsi-wide-zero-down",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "down.Sign == 0 ? Number.Integer(100)",
+    "after": "down.Sign == 0 ? Number.Integer(0)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-zero-up",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "up.Sign == 0 ? Number.Integer(-100)",
+    "after": "up.Sign == 0 ? Number.Integer(0)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-center-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "(up - down).Times(100)",
+    "after": "(up - down).Times(99)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-center-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "Divide(up + down)",
+    "after": "Divide(up + down.Times(2))",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-native-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "_hasPrevious ? (Number.Of(price)",
+    "after": "true ? (Number.Of(price)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-native-volume",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "* Number.Of(volume) : default",
+    "after": "* Number.Integer(1) : default",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-native-direction",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "_up.Next(flow.Sign > 0 ? flow",
+    "after": "_up.Next(flow.Sign < 0 ? flow",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "if (final) { _previousPrice",
+    "after": "if (price != 0 || final) { _previousPrice",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-native-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "_smooth = new(kind, smoothLength)",
+    "after": "_smooth = new(kind, length)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-reset-price-history",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "_hasPrevious = false; }",
+    "after": "_hasPrevious = true; }",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "volume-rsi-wide-batch-volume",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "* Number.Of(volumes[i]);",
+    "after": "* Number.Integer(1);",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-batch-loss-sign",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "losses[i] = flow.Times(-1)",
+    "after": "losses[i] = flow",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "var (prices, _, _, _, volumes) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var prices = data.ClosePrices; var volumes = data.Volumes;",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.SelectedPricesRetainOriginalVolumes"
+  },
+  {
+    "id": "volume-rsi-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), period)",
+    "after": "ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), length)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.CallbackSlotsUseGainLossAndCenteredInputsAndPadShortResults"
+  },
+  {
+    "id": "volume-rsi-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.CallbackSlotsUseGainLossAndCenteredInputsAndPadShortResults"
+  },
+  {
+    "id": "volume-rsi-wide-final-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "Mean(centered, smoothLength)",
+    "after": "Mean(centered, length)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal sealed class VolumeWeightedRsiWindow",
+    "before": "prices, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, volumes",
+    "after": "prices, volumes",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.InvalidNativeAndSelectedOriginalInputsCannotMutateState"
+  },
+  {
+    "id": "volume-rsi-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "volume-rsi-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.StandardMeansKeepExtremeProductsAndZeroVolume"
+  },
+  {
+    "id": "volume-rsi-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.StandardMeansKeepExtremeProductsAndZeroVolume"
+  },
+  {
+    "id": "volume-rsi-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.StandardMeansKeepExtremeProductsAndZeroVolume"
+  },
+  {
+    "id": "volume-rsi-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.StandardMeansKeepExtremeProductsAndZeroVolume"
+  },
+  {
+    "id": "volume-rsi-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.StandardMeansKeepExtremeProductsAndZeroVolume"
+  },
+  {
+    "id": "volume-rsi-wide-recursive-gain",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.StandardMeansKeepExtremeProductsAndZeroVolume"
+  },
+  {
+    "id": "volume-rsi-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.StandardMeansKeepExtremeProductsAndZeroVolume"
+  },
+  {
+    "id": "volume-rsi-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumeWeightedRelativeStrengthIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.InvalidNativeAndSelectedOriginalInputsCannotMutateState"
+  },
+  {
+    "id": "volume-rsi-wide-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumeWeightedRelativeStrengthIndexState",
+    "before": "[\"Vwrsi\"] = value",
+    "after": "[\"Vwrsi\"] = -value",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.IndependentHandsIncludeWeightedWarmupAndFinalSmoothing"
+  },
+  {
+    "id": "volume-rsi-wide-core-smooth",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "scope": "internal static void VolumeWeightedRsi(",
+    "before": "MovingAvgType.WeightedMovingAverage, length, 3",
+    "after": "MovingAvgType.WeightedMovingAverage, length, 1",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.CoreUsesPublicSmoothingAndValidatesSpansBeforeWriting"
+  },
+  {
+    "id": "volume-rsi-wide-core-volume",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "scope": "internal static void VolumeWeightedRsi(",
+    "before": "window.Next(close[i], volume[i], true)",
+    "after": "window.Next(close[i], 1, true)",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.CoreUsesPublicSmoothingAndValidatesSpansBeforeWriting"
+  },
+  {
+    "id": "volume-rsi-wide-recursive-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "result = (_previous.Times(_length - 1L) + value.Times(ema ? 2 : 1))",
+    "after": "result = (_previous.Round().Times(_length - 1L) + value.Round().Times(ema ? 2 : 1))",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.TinyImbalancesSurviveEachStandardMean"
+  },
+  {
+    "id": "volume-rsi-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "VolumeWeightedRsi or ",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

@@ -5084,3 +5084,10 @@ The isolated campaigns `676-repaired-a` and `676-repaired-b` passed their baseli
 Source snapshot SHA256: `1288189352d85bfe9f18b2a493c19cd85eb1b6b522698b8893570e968f58b274`. Archive SHA256: `6b9c3660ec559750e12516fd7bd71e2fcc8933797f93977e9934a4f51ee834f8` and `a50acc90cfeff0d535537f0d44ad2f3ea314e35cfed651931515a01e6f43e095`.
 
 This is evidence for the isolated batch-676 source. Source was already published in the batch-676 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 721: Volume Weighted Relative Strength Index numerical routes and core alignment
+
+Exact gain/loss products and four standard means preserve over-range products, underflowed products, and tiny imbalances through final smoothing. A hand produces 100*epsilon/(2-epsilon), which publishes 50*epsilon for SMA, WMA, EMA, and Wilder. The approved core now uses the public centered formula with WMA and three-bar final smoothing. Typed native mapping and streaming selection are explicit. Independent rational net/absolute-flow references use direct finite windows; callback slots, selected inputs, previews/reset, period extremes, validation, span aliasing, and trading signals are covered.
+
+**43/43 focused tests passed** on net10.0 (`volume-weighted-rsi721-corrected.trx`, 48.18 seconds). The preceding run had 41 passes and one negative-period failure; its native/core normalization defect was corrected, and that run is excluded from qualification. Inventory: **6,701/7,131 enrolled**, **430 omissions across 61 types**, all references registered, no construction failures, exact backlog match. The 32 mutation candidates and final hosted/platform/package/performance gates remain pending.

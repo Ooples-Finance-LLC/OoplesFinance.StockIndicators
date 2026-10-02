@@ -6075,44 +6075,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVolumeWeightedRsiFast(StockData data, ComputeContext context, int length = 10,
         int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // CalculateVolumeWeightedRelativeStrengthIndex weights each bar's change by its volume, smooths the
-        // two sides separately, rescales the ratio from 0..100 to -100..100 and smooths that again. It is
-        // therefore signed, where VolumeCore.VolumeWeightedRsi published an unscaled 0..100 reading.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        using var maximum = context.Rent(count);
-        using var minimum = context.Rent(count);
-        var max = maximum.WritableSpan;
-        var min = minimum.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var weightedChange = CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) * volumes[i];
-            max[i] = Math.Max(weightedChange, 0);
-            min[i] = -Math.Min(weightedChange, 0);
-        }
-
-        using var upside = context.Rent(count);
-        using var downside = context.Rent(count);
-        MovingAverage(data, maType, length, maximum.Span, upside.WritableSpan);
-        MovingAverage(data, maType, length, minimum.Span, downside.WritableSpan);
-        var up = upside.Span;
-        var dn = downside.Span;
-
-        using var scaled = context.Rent(count);
-        var rsiScaled = scaled.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var rsiRaw = dn[i] == 0 ? 100 : up[i] == 0 ? 0 : 100 - (100 / (1 + (up[i] / dn[i])));
-            rsiScaled[i] = (rsiRaw * 2) - 100;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, scaled.Span, buffer.WritableSpan);
-        return buffer;
+        var values = VolumeWeightedRsiWindow.Calculate(data, maType, length, smoothLength);
+        var buffer = context.Rent(values.Length);
+        try { values.AsSpan().CopyTo(buffer.WritableSpan); return buffer; }
+        catch { buffer.Dispose(); throw; }
     }
 
     #endregion

@@ -366,73 +366,18 @@ public sealed class VolumeWeightedMovingAverageState : IStreamingIndicatorState,
 [PrimaryOutput("Vwrsi")]
 public sealed class VolumeWeightedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _upMa;
-    private readonly IMovingAverageSmoother _downMa;
-    private readonly IMovingAverageSmoother _smoothMa;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
+    private readonly VolumeWeightedRsiWindow _window;
     public VolumeWeightedRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10,
-        int smoothLength = 3)
-    {
-        var resolved = Math.Max(1, length);
-        _upMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _downMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _smoothMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        int smoothLength = 3) => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.VolumeWeightedRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _upMa.Reset();
-        _downMa.Reset();
-        _smoothMa.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = _hasPrev ? value - prevValue : 0;
-        var max = Math.Max(diff * volume, 0);
-        var min = -Math.Min(diff * volume, 0);
-
-        var up = _upMa.Next(max, isFinal);
-        var dn = _downMa.Next(min, isFinal);
-        var rsiRaw = dn == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + (up / dn)));
-        var rsiScale = (rsiRaw * 2) - 100;
-        var rsi = _smoothMa.Next(rsiScale, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vwrsi", rsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rsi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { ["Vwrsi"] = value } : null);
     }
-
-    public void Dispose()
-    {
-        _upMa.Dispose();
-        _downMa.Dispose();
-        _smoothMa.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("UpperBand")]
