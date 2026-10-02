@@ -13,6 +13,8 @@ internal static partial class BuiltInFormulaReferences
             name != IndicatorName.MassThrustOscillator) return null;
         if (name is IndicatorName.MassThrustIndicator or IndicatorName.MassThrustOscillator)
             return new(name == IndicatorName.MassThrustIndicator ? "Mti" : "Mto", new[] { name == IndicatorName.MassThrustIndicator ? "Mti" : "Mto", "Signal" }, bars => MassThrustOutputs(bars, indicator));
+        if (name == IndicatorName.SellGravitationIndex)
+            return new("Sgi", new[] { "Sgi", "Signal" }, bars => SellGravitationOutputs(bars, indicator));
         var trend = name == IndicatorName.TrendAnalysisIndex || name == IndicatorName.TrendAnalysisIndicator;
         var kind = AverageKind(options, trend ? 1 : 3);
         if (kind == 0) return null;
@@ -34,11 +36,6 @@ internal static partial class BuiltInFormulaReferences
                         : 100 * (Window(average, i, fast).Max()
                             - Window(average, i, fast).Min()) / bars[i].Close).ToArray();
                 signalLength = name == IndicatorName.TrendAnalysisIndicator ? slow : fast;
-            }
-            else if (name == IndicatorName.SellGravitationIndex)
-            {
-                var bodies = bars.Select(b => b.High == b.Low ? 0 : (b.Close - b.Open) / (b.High - b.Low)).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                line = Average(bodies, length, kind);
             }
             else
             {

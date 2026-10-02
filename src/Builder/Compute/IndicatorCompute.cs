@@ -1431,9 +1431,7 @@ internal static partial class IndicatorCompute
                 "vLow" => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.MaType, CandleSeries.Low),
                 _ => null
             },
-            SellGravitationIndexSpecOptions sgi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeSellGravitationIndexFast(data, context, sgi.Length, sgi.MaType), sgi.Length, sgi.MaType)
-                : ComputeSellGravitationIndexFast(data, context, sgi.Length, sgi.MaType),
+            SellGravitationIndexSpecOptions sgi => ComputeSellGravitationIndexFast(data, context, sgi.Length, sgi.MaType, spec.OutputKey),
             TFSTetherLineIndicatorSpecOptions tfs => ComputeTFSTetherLineIndicatorFast(data, context, tfs.Length),
             EhlersSimpleCycleIndicatorSpecOptions esci => ComputeEhlersSimpleCycleIndicatorFast(data, context, esci.Alpha),
             EhlersFisherTransformSpecOptions eft => ComputeEhlersFisherTransformFast(data, context, eft.Length),
@@ -14599,28 +14597,11 @@ internal static partial class IndicatorCompute
     /// Computes Sell Gravitation Index using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeSellGravitationIndexFast(StockData data, ComputeContext context, int length = 20,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateSellGravitationIndex publishes "Sgi": the moving average of the body of each bar as a
-        // fraction of its range, measured against the chained series rather than the close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var count = inputList.Count;
-
-        using var ratio = context.Rent(count);
-        var v3 = ratio.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var range = highs[i] - lows[i];
-            v3[i] = range != 0 ? (input[i] - opens[i]) / range : 0;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, ratio.Span, buffer.WritableSpan);
-        return buffer;
+        var values = SellGravitationWindow.Calculate(data, maType, length, true, outputKey == "Signal");
+        var selected = outputKey == "Signal" ? values.Signal : values.Line;
+        var buffer = context.Rent(selected.Length); selected.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

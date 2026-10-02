@@ -290,6 +290,7 @@ internal static partial class StatefulIndicatorFactory
             DemarkRangeExpansionIndexSpecOptions dsi => new DemarkRangeExpansionIndexState(dsi.Length),
             DemarkPressureRatioV2SpecOptions pressure2 => new DemarkPressureRatioV2State(pressure2.Length),
             DemarkPressureRatioV1SpecOptions pressure => new DemarkPressureRatioV1State(pressure.Length),
+            SellGravitationIndexSpecOptions sell => new SellGravitationIndexState(sell.MaType, sell.Length),
             SentimentZoneOscillatorSpecOptions sentiment => new SentimentZoneOscillatorState(sentiment.MaType, sentiment.Length),
             SpearmanIndicatorSpecOptions spearman => new SpearmanIndicatorState(spearman.MaType, spearman.Length, spearman.SignalLength),
             PivotPointSpecOptions => new FloorPivotPointsState(),

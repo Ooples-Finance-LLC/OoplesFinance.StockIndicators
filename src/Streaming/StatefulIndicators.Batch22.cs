@@ -484,53 +484,20 @@ public sealed class SelfWeightedMovingAverageState : IStreamingIndicatorState, I
 }
 
 [PrimaryOutput("Sgi")]
-public sealed class SellGravitationIndexState : IStreamingIndicatorState, IDisposable
+public sealed class SellGravitationIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly IMovingAverageSmoother _sgiSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-
-    public SellGravitationIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _sgiSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly SellGravitationWindow _window;
+    public SellGravitationIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.SellGravitationIndex;
-
-    public void Reset()
-    {
-        _sgiSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var v1 = bar.Close - bar.Open;
-        var v2 = bar.High - bar.Low;
-        var v3 = v2 != 0 ? v1 / v2 : 0;
-        var sgi = _sgiSmoother.Next(v3, isFinal);
-        var signal = _signalSmoother.Next(sgi, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Sgi", sgi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sgi, outputs);
+        var values = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(values.Line, includeOutputs ? new Dictionary<string, double> { { "Sgi", values.Line }, { "Signal", values.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _sgiSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Szo")]

@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SellGravitationIndex)
+        {
+            var sellKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Sgi", "Signal" };
+            for (var slot = 0; slot < sellKeys.Length; slot++) { var key = sellKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SellGravitationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RSINGIndicator)
         {
             var rsingKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Rsing", "Signal" };

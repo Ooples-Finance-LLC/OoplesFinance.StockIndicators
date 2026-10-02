@@ -384,7 +384,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         // stage for callers supplying independent/custom components.
         if (name.Groups[1].Value is "RelativeSpreadStrength" or "KaseDevStopV1" or "EhlersEmpiricalModeDecomposition") asks = 3;
         if (name.Groups[1].Value == "KasePeakOscillatorV2") asks = 1;
-        if (name.Groups[1].Value is "VariableMovingAverageBands" or "SortinoRatio" or "TwiggsMoneyFlow" or "RSINGIndicator") asks = 2;
+        if (name.Groups[1].Value is "VariableMovingAverageBands" or "SortinoRatio" or "TwiggsMoneyFlow" or "RSINGIndicator" or "SellGravitationIndex") asks = 2;
         if (name.Groups[1].Value == "QuantitativeQualitativeEstimation") asks = 5;
         // Volume, nested ATR, then the published pressure signal each consume a component.
         if (name.Groups[1].Value == "VolumePositiveNegativeIndicator") asks = 3;
