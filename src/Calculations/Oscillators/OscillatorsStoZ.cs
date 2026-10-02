@@ -704,73 +704,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWaddahAttarExplosion(this StockData stockData, int fastLength = 20, int slowLength = 40, double sensitivity = 150)
     {
-        List<double> t1List = new(stockData.Count);
-        List<double> t2List = new(stockData.Count);
-        List<double> e1List = new(stockData.Count);
-        List<double> temp1List = new(stockData.Count);
-        List<double> temp2List = new(stockData.Count);
-        List<double> temp3List = new(stockData.Count);
-        List<double> trendUpList = new(stockData.Count);
-        List<double> trendDnList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var deviations = GetStandardDeviationList(inputList, fastLength);
-        var macd1List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            temp1List.Add(prevValue1);
-
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            temp2List.Add(prevValue2);
-
-            var prevValue3 = i >= 3 ? inputList[i - 3] : 0;
-            temp3List.Add(prevValue3);
-        }
-
-        stockData.SetCustomValues(temp1List);
-        var macd2List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).ChainedValues;
-        stockData.SetCustomValues(temp2List);
-        var macd3List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).ChainedValues;
-        stockData.SetCustomValues(temp3List);
-        var macd4List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentMacd1 = macd1List[i];
-            var currentMacd2 = macd2List[i];
-            var currentMacd3 = macd3List[i];
-            var currentMacd4 = macd4List[i];
-
-            var t1 = (currentMacd1 - currentMacd2) * sensitivity;
-            t1List.Add(t1);
-
-            var t2 = (currentMacd3 - currentMacd4) * sensitivity;
-            t2List.Add(t2);
-
-            var prevE1 = GetLastOrDefault(e1List);
-            var e1 = 4 * deviations[i];
-            e1List.Add(e1);
-
-            var prevTrendUp = GetLastOrDefault(trendUpList);
-            var trendUp = (t1 >= 0) ? t1 : 0;
-            trendUpList.Add(trendUp);
-
-            var trendDown = (t1 < 0) ? (-1 * t1) : 0;
-            trendDnList.Add(trendDown);
-
-            var signal = GetConditionSignal(trendUp > prevTrendUp && trendUp > e1 && e1 > prevE1 && trendUp > fastLength && e1 > fastLength,
-                trendUp < e1);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "T1", t1List },
-            { "T2", t2List },
-            { "E1", e1List },
-            { "TrendUp", trendUpList },
-            { "TrendDn", trendDnList }
+        var result = WaddahWindow.Calculate(stockData, fastLength, slowLength, sensitivity);
+        var signalsList = CreateSignalsList(stockData); signalsList?.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> {
+            { "T1", result.Outputs["T1"] }, { "T2", result.Outputs["T2"] }, { "E1", result.Outputs["E1"] },
+            { "TrendUp", result.Outputs["TrendUp"] }, { "TrendDn", result.Outputs["TrendDn"] }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());

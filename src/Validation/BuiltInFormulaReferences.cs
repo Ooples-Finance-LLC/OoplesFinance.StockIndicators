@@ -32,6 +32,13 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.WaddahAttarExplosion)
+        {
+            var waddahKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "T1", "T2", "E1", "TrendUp", "TrendDn" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < waddahKeys.Length; slot++) { var selected = waddahKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => WaddahOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VortexBands)
         {
             var vortexKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "UpperBand", "MiddleBand", "LowerBand" };

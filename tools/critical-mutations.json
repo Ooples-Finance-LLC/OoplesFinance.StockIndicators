@@ -82921,5 +82921,338 @@
     "before": "VortexBands or ",
     "after": "",
     "filter": "FullyQualifiedName~VortexBandsNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "waddah-wide-sensitivity-guard",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "StreamingInputValidation.Finite(sensitivity, nameof(sensitivity));",
+    "after": "",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.InvalidInputsCannotAdvanceCommittedState"
+  },
+  {
+    "id": "waddah-wide-fast-floor",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_length = Math.Max(1, fast)",
+    "after": "_length = Math.Max(2, fast)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.ExtremePeriodsUseObservedHistory"
+  },
+  {
+    "id": "waddah-wide-first-difference",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "var delta = p - _p1",
+    "after": "var delta = p + _p1",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-lag-difference",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "var lagDelta = _p2 - _p3",
+    "after": "var lagDelta = _p1 - _p3",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-first-sensitivity",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "var t1 = (_fast.Next(delta, final) - _slow.Next(delta, final)) * _sensitivity;",
+    "after": "var t1 = (_fast.Next(delta, final) - _slow.Next(delta, final));",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-lag-sensitivity",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "var t2 = (_lagFast.Next(lagDelta, final) - _lagSlow.Next(lagDelta, final)) * _sensitivity;",
+    "after": "var t2 = (_lagFast.Next(lagDelta, final) - _lagSlow.Next(lagDelta, final));",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-fast-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_fast.Next(delta, final)",
+    "after": "_fast.Next(delta, true)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-lag-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_lagFast.Next(lagDelta, final)",
+    "after": "_lagFast.Next(lagDelta, true)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "sum -= old; squares -= old * old;",
+    "after": "sum += old; squares += old * old;",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-variance-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-variance-centering",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_length * squares - sum * sum",
+    "after": "_length * squares + sum * sum",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-variance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "(BigInteger)_length * _length",
+    "after": "(BigInteger)_length",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-width-scale",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "RootRatio(16 * moment, denominator)",
+    "after": "RootRatio(4 * moment, denominator)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-up-sign",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "var up = t1.Sign > 0 ? t1 : default",
+    "after": "var up = t1.Sign < 0 ? t1 : default",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-down-sign",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "t1.Sign < 0 ? t1.Times(-1)",
+    "after": "t1.Sign > 0 ? t1.Times(-1)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-buy-width-tie",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "(upSquare - widthSquare).Sign > 0",
+    "after": "(upSquare - widthSquare).Sign >= 0",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.SignalThresholdsUseExactRootComparisons"
+  },
+  {
+    "id": "waddah-wide-sell-width-tie",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "(upSquare - widthSquare).Sign < 0",
+    "after": "(upSquare - widthSquare).Sign <= 0",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.SignalThresholdsUseExactRootComparisons"
+  },
+  {
+    "id": "waddah-wide-signal-width-scale",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "Number.Integer(16 * moment)",
+    "after": "Number.Integer(4 * moment)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.SignalThresholdsUseExactRootComparisons"
+  },
+  {
+    "id": "waddah-wide-state-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_p3 = _p2; _p2 = _p1; _p1 = p;",
+    "after": "_p3 = _p1; _p2 = _p1; _p1 = p;",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "var (prices, _, _, _, volumes) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var prices = data.ClosePrices; var volumes = data.Volumes;",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.SelectedPricesRetainOriginalFields"
+  },
+  {
+    "id": "waddah-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "prices, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, volumes",
+    "after": "prices, volumes",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.InvalidInputsCannotAdvanceCommittedState"
+  },
+  {
+    "id": "waddah-wide-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-lag-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_lagFast.Reset(); _lagSlow.Reset();",
+    "after": "_lagFast.Reset();",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-price-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "internal sealed class WaddahWindow",
+    "before": "_p1 = _p2 = _p3 = _previousUp",
+    "after": "_p1 = _p2 = _previousUp",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-ema-floor",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "private sealed class Ema",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.ExtremePeriodsUseObservedHistory"
+  },
+  {
+    "id": "waddah-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "private sealed class Ema",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-ema-startup-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "private sealed class Ema",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_count + 2)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-ema-pole",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "private sealed class Ema",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-ema-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "private sealed class Ema",
+    "before": "Divide(_length + 1L)",
+    "after": "Divide(_length + 2L)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-ema-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "private sealed class Ema",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-ema-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/WaddahWindow.cs",
+    "scope": "private sealed class Ema",
+    "before": "_count = 0;",
+    "after": "_count = 1;",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WaddahAttarExplosionState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.InvalidInputsCannotAdvanceCommittedState"
+  },
+  {
+    "id": "waddah-wide-native-second",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WaddahAttarExplosionState",
+    "before": "[\"T2\"] = point.T2",
+    "after": "[\"T2\"] = point.T1",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.IndependentLaggedMacdAndWidthHands"
+  },
+  {
+    "id": "waddah-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "WaddahAttarExplosion or ",
+    "after": "",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "waddah-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWaddahAttarExplosionFast(",
+    "before": "values.Outputs[outputKey ?? \"T1\"]",
+    "after": "values.Outputs[\"T1\"]",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.SelectedPricesRetainOriginalFields"
+  },
+  {
+    "id": "waddah-wide-builder-arm",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer? ComputeArm(",
+    "before": "WaddahAttarExplosionSpecOptions wae => ComputeWaddahAttarExplosionFast(data, context, wae.FastLength, wae.SlowLength, wae.Sensitivity, spec.OutputKey),",
+    "after": "",
+    "filter": "FullyQualifiedName~WaddahNumericalTests.FiveOutputsMatchFourIndependentLaggedMacds"
   }
 ]

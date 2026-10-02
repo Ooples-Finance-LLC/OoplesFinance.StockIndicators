@@ -400,91 +400,19 @@ public sealed class VostroIndicatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("T1")]
 public sealed class WaddahAttarExplosionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _sensitivity;
-    private readonly MacdEngine _macd1;
-    private readonly MacdEngine _macd2;
-    private readonly MacdEngine _macd3;
-    private readonly MacdEngine _macd4;
-    private readonly RollingStandardDeviation _bbWindow;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
+    private readonly WaddahWindow _window;
     public WaddahAttarExplosionState(int fastLength = 20, int slowLength = 40, double sensitivity = 150)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        _sensitivity = sensitivity;
-        _macd1 = new MacdEngine(MovingAvgType.ExponentialMovingAverage, resolvedFast, resolvedSlow, 9);
-        _macd2 = new MacdEngine(MovingAvgType.ExponentialMovingAverage, resolvedFast, resolvedSlow, 9);
-        _macd3 = new MacdEngine(MovingAvgType.ExponentialMovingAverage, resolvedFast, resolvedSlow, 9);
-        _macd4 = new MacdEngine(MovingAvgType.ExponentialMovingAverage, resolvedFast, resolvedSlow, 9);
-        _bbWindow = new RollingStandardDeviation(resolvedFast);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(3);
-    }
-
+        => _window = new(fastLength, slowLength, sensitivity);
     public IndicatorName Name => IndicatorName.WaddahAttarExplosion;
-
-    public void Reset()
-    {
-        _macd1.Reset();
-        _macd2.Reset();
-        _macd3.Reset();
-        _macd4.Reset();
-        _bbWindow.Reset();
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var stdDev = _bbWindow.Next(value, isFinal);
-
-        var prev1 = EhlersStreamingWindow.GetOffsetValue(_values, value, 1);
-        var prev2 = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prev3 = EhlersStreamingWindow.GetOffsetValue(_values, value, 3);
-
-        var macd1 = _macd1.Next(value, isFinal, out _, out _);
-        var macd2 = _macd2.Next(prev1, isFinal, out _, out _);
-        var macd3 = _macd3.Next(prev2, isFinal, out _, out _);
-        var macd4 = _macd4.Next(prev3, isFinal, out _, out _);
-
-        var t1 = (macd1 - macd2) * _sensitivity;
-        var t2 = (macd3 - macd4) * _sensitivity;
-        var e1 = 4 * stdDev;
-        var trendUp = t1 >= 0 ? t1 : 0;
-        var trendDn = t1 < 0 ? -t1 : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(5)
-            {
-                { "T1", t1 },
-                { "T2", t2 },
-                { "E1", e1 },
-                { "TrendUp", trendUp },
-                { "TrendDn", trendDn }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(t1, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.T1, includeOutputs ? new Dictionary<string, double>
+            { ["T1"] = point.T1, ["T2"] = point.T2, ["E1"] = point.E1, ["TrendUp"] = point.Up, ["TrendDn"] = point.Down } : null);
     }
-
-    public void Dispose()
-    {
-        _macd1.Dispose();
-        _macd2.Dispose();
-        _macd3.Dispose();
-        _macd4.Dispose();
-        _bbWindow.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Wami")]

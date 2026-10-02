@@ -36,25 +36,7 @@ internal static partial class BuiltInFormulaReferences
                         ("Histogram2", second.Zip(secondSignal, (a, b) => a - b).ToArray()));
                 });
             case IndicatorName.WaddahAttarExplosion:
-                return new("T1", new[] { "T1", "T2", "E1", "TrendUp", "TrendDn" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var fast = Integer(options, "FastLength", 20);
-                    var slow = Integer(options, "SlowLength", 40);
-                    var scale = Number(options, 150, "Sensitivity");
-                    // Linearity lets us filter price differences instead of subtracting four price filters.
-                    double[] Strength(int lag)
-                    {
-                        var differences = prices.Select((_, i) => (i < lag ? 0 : prices[i - lag])
-                            - (i <= lag ? 0 : prices[i - lag - 1])).ToArray();
-                        return Average(differences, fast, 3).Zip(Average(differences, slow, 3), (a, b) => scale * (a - b)).ToArray();
-                    }
-                    var current = Strength(0);
-                    return Outputs(("T1", current), ("T2", Strength(2)),
-                        ("E1", PopulationVariance(prices, fast).Select(v => 4 * Math.Sqrt(v)).ToArray()),
-                        ("TrendUp", current.Select(v => Math.Max(0, v)).ToArray()),
-                        ("TrendDn", current.Select(v => Math.Max(0, -v)).ToArray()));
-                });
+                return new("T1", new[] { "T1", "T2", "E1", "TrendUp", "TrendDn" }, bars => WaddahOutputs(bars, indicator));
             case IndicatorName.TrendForceHistogram:
                 return new("Tfh", new[] { "Tfh" }, bars =>
                 {

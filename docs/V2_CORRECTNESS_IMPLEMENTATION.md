@@ -5121,3 +5121,10 @@ The original batch moving-average helper dispatches directly to the standard cor
 Batch, fast, and native routes now retain exact standard-mean and McNicholl intermediates until each output is published. The explicit streaming gate uses the existing typed native state. Independent rational references cover all three bands. Checks include selected inputs, exact hand examples, subnormal residuals, finite lower bands after middle-band overflow, negative-width clamping, extreme periods, previews, reset, callback bypass, and invalid original fields.
 
 **53/53 focused tests passed** on net10.0 (`vortex724-final.trx`). An initial helper-name compilation typo was corrected before tests ran. Inventory: **6,710/7,131 enrolled**, **421 omissions across 59 types**, all references registered, no construction failures, exact backlog match. The 34 mutation candidates and final assurance gates remain pending.
+
+
+### Batch 725: Waddah Attar Explosion numerical routes
+
+The local helper retains exact MACD differences and variance moments through final publication; the explicit streaming gate uses the typed native state. Independent four-MACD references cover all five outputs. Tests include hand values, subnormal widths, tiny sensitivity recovering overflowing differences, signed/zero sensitivities, exact signal thresholds, preview/reset, selected fields, input rejection, and extreme periods.
+
+**76/76 focused tests passed** on net10.0 (`waddah725-routes-final.trx`). The initial test build needed an import; the first test run passed all 12 direct numerical checks but exposed output metadata loss in 64 route checks. Restoring the explicit batch output dictionary repaired generator discovery without changing the shared generator. A subsequent run passed 68 checks and exposed the missing direct builder arm in eight cases; the arm and direct selected-output regression checks were then added. Inventory: **6,718/7,131 enrolled**, **413 omissions across 58 types**, all independent references registered, no construction failures, exact backlog match. The 37 compiled-fault candidates and final assurance gates remain pending.

@@ -2305,6 +2305,7 @@ internal static partial class IndicatorCompute
                 ? SmoothPublished(data, context, ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType), vbm.Length1, vbm.MaType)
                 : ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType),
             VolatilitySwitchIndicatorSpecOptions vsi => ComputeVolatilitySwitchIndicatorFast(data, context, vsi.Length, vsi.MaType),
+            WaddahAttarExplosionSpecOptions wae => ComputeWaddahAttarExplosionFast(data, context, wae.FastLength, wae.SlowLength, wae.Sensitivity, spec.OutputKey),
             VortexBandsSpecOptions vb => ComputeVortexBandsFast(data, context, vb.Length, vb.MaType, spec.OutputKey),
             VostroIndicatorSpecOptions vi => ComputeVostroIndicatorFast(data, context, vi.Length1, vi.Length2, vi.Level, vi.MaType),
 
@@ -20436,6 +20437,16 @@ internal static partial class IndicatorCompute
         }
         else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Value(input[i], true);
         return result;
+    }
+
+    internal static ComputeBuffer ComputeWaddahAttarExplosionFast(StockData data, ComputeContext context,
+        int fastLength = 20, int slowLength = 40, double sensitivity = 150, string? outputKey = null)
+    {
+        var values = WaddahWindow.Calculate(data, fastLength, slowLength, sensitivity);
+        var selected = values.Outputs[outputKey ?? "T1"];
+        var result = context.Rent(selected.Count);
+        try { for (var i = 0; i < selected.Count; i++) result.WritableSpan[i] = selected[i]; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeVortexBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.McNichollMovingAverage, string? outputKey = null)

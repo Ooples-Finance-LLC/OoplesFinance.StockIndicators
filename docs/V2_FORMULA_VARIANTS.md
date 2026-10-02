@@ -979,3 +979,12 @@ The basis is the selected price mean; the half-width is twice the nonnegative pa
 For period two and prices [1,3,0], the final upper/middle/lower bands are 13/36, -1/6, and -25/36. For [0,epsilon], the second basis is 5/4 epsilon and width 5/16 epsilon, preserving the final rounded bands 2epsilon/epsilon/epsilon. An overflowing middle band can still have a finite lower band. Both original batch and explicit fast standard-mean dispatch bypass component override hooks; that behavior is preserved. Unsupported means retain existing dispatch. No shared McNicholl core is changed.
 
 All 53 focused checks passed on net10.0. The 34 prepared behavioral faults await isolated qualification.
+
+
+### Batch 725: Waddah Attar Explosion
+
+T1 is sensitivity times the difference between the current MACD and the MACD of the one-bar, zero-padded price lag. T2 applies the same construction to the two-/three-bar lags. Production uses exact EMA filters of price differences, while the independent reference subtracts four separately filtered lagged price series. E1 is four times the full-window population deviation, zero before the window fills. TrendUp and TrendDn are the nonnegative directional parts of T1.
+
+Exact means, products, and moment sums survive intermediate overflow and underflow. The deviation is scaled before its final square-root rounding. Signals retain the published conditions, with exact comparisons of nonnegative squared values replacing comparisons of rounded roots. For prices [1,3,0,4,2], fast=2, slow=3, sensitivity=6, T1 is [0,0,-9,1,-11/3], T2 is [0,0,2,7/3,-61/18], and E1 is [0,4,6,8,4]. For [0,epsilon], E1 is 2epsilon even though the unscaled deviation rounds to zero. At the final bar of [1,3,0,4], sensitivity=48 gives an exact trend/width tie; adjacent binary64 sensitivities select Buy or Sell.
+
+Original batch callback bypass, output order, selected inputs, and empty custom outputs are retained. Native previews/reset use lazy observed history for extreme periods. All 76 focused tests passed on net10.0; 37 mutation candidates await isolated qualification.
