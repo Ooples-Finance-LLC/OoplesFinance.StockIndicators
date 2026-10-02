@@ -1043,80 +1043,10 @@ public static partial class Calculations
     public static StockData CalculateTStepLeastSquaresMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100, double sc = 0.5)
     {
-        List<double> lsList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> chgList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> corrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingCorrelation corrWindow = new();
-        double chgSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var callerSeries = stockData.CaptureInputSeries();
-        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-        // The first deviation is of the prices, not of the KAMA just published onto CustomValuesList.
-        stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-
-            var efRatio = efRatioList[i];
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var er = 1 - efRatio;
-
-            var chg = Math.Abs(currentValue - prevB);
-            chgList.Add(chg);
-            chgSum += chg;
-
-            var a = chgSum / chgList.Count * (1 + er);
-            var b = currentValue > prevB + a ? currentValue : currentValue < prevB - a ? currentValue : prevB;
-            bList.Add(b);
-
-            corrWindow.Add(b, currentValue);
-            var corr = corrWindow.R(length);
-            corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-            corrList.Add((double)corr);
-        }
-
-        stockData.SetCustomValues(bList);
-        var bStdDevList = GetStandardDeviationList(bList, length);
-        var bSmaList = GetMovingAverageList(stockData, maType, length, bList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var corr = corrList[i];
-            var stdDev = stdDevList[i];
-            var bStdDev = bStdDevList[i];
-            var bSma = bSmaList[i];
-            var sma = smaList[i];
-            var currentValue = inputList[i];
-            var prevLs = i >= 1 ? lsList[i - 1] : currentValue;
-            var b = bList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var tslsma = (sc * currentValue) + ((1 - sc) * prevLs);
-            var alpha = bStdDev != 0 ? corr * stdDev / bStdDev : 0;
-            var beta = sma - (alpha * bSma);
-
-            var ls = (alpha * b) + beta;
-            lsList.Add(ls);
-
-            var signal = GetCompareSignal(currentValue - ls, prevValue - prevLs);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tslsma", lsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(lsList);
-        stockData.IndicatorName = IndicatorName.TStepLeastSquaresMovingAverage;
-
-        return stockData;
+        var values = TStepLeastSquaresWindow.Calculate(stockData, maType, length);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tslsma", values.Line.ToList() } });
+        stockData.SetSignals(values.Trades.ToList()); stockData.SetCustomValues(values.Line.ToList());
+        stockData.IndicatorName = IndicatorName.TStepLeastSquaresMovingAverage; return stockData;
     }
 
 

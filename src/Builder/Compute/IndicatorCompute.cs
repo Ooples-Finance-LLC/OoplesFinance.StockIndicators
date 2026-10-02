@@ -12862,67 +12862,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTStepLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateTStepLeastSquaresMovingAverage tracks the chained series with a stepped baseline whose
-        // threshold is the running mean absolute deviation from it, widened by one minus the Kaufman
-        // efficiency ratio, then fits the series onto that baseline by the rolling correlation of the two.
-        // MovingAverageCore.TStepLeastSquaresMovingAverage had no baseline and no correlation at all. The
-        // batch's sc smoothing feeds a local it never publishes, so there is nothing here for it to set.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var efficiency = context.Rent(count);
-        EfficiencyRatio(input, length, efficiency.WritableSpan);
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-
-        using var baseline = context.Rent(count);
-        using var correlations = context.Rent(count);
-        var stepped = baseline.WritableSpan;
-        var fit = correlations.WritableSpan;
-
-        var correlation = new RollingCorrelation();
-        double changeTotal = 0;
-        var changeCount = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousBaseline = i >= 1 ? stepped[i - 1] : currentValue;
-
-            changeTotal += Math.Abs(currentValue - previousBaseline);
-            changeCount++;
-            var threshold = changeTotal / changeCount * (1 + (1 - efficiency.Span[i]));
-
-            stepped[i] = currentValue > previousBaseline + threshold || currentValue < previousBaseline - threshold
-                ? currentValue
-                : previousBaseline;
-
-            correlation.Add(stepped[i], currentValue);
-            var r = correlation.R(length);
-            fit[i] = MathHelper.IsValueNullOrInfinity(r) ? 0 : r;
-        }
-
-        using var baselineDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(baseline.Span, baselineDeviation.WritableSpan, length);
-
-        using var baselineAverage = context.Rent(count);
-        MovingAverage(data, maType, length, baseline.Span, baselineAverage.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var slope = baselineDeviation.Span[i] != 0 ? fit[i] * deviation.Span[i] / baselineDeviation.Span[i] : 0;
-            var intercept = average.Span[i] - (slope * baselineAverage.Span[i]);
-            output[i] = (slope * stepped[i]) + intercept;
-        }
-
-        return buffer;
+        var values = TStepLeastSquaresWindow.Calculate(data, maType, length);
+        var result = context.Rent(values.Line.Length); values.Line.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

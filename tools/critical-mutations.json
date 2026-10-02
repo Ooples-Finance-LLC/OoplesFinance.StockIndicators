@@ -79105,5 +79105,365 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.InputValues",
     "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "tstep-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_length = Math.Max(1, length); _priceMean",
+    "after": "_length = 1; _priceMean",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-price-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_priceMean = new(kind, _length)",
+    "after": "_priceMean = new(kind, 1)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-step-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_stepMean = new(kind, _length)",
+    "after": "_stepMean = new(kind, 1)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-price-mean-kind",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_priceMean = new(kind, _length)",
+    "after": "_priceMean = new(MovingAvgType.ExponentialMovingAverage, _length)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-moves",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "Abs(price - _previousPrice)",
+    "after": "Abs(price - _previousPrice.Times(0))",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-travel-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_moves.Count == _length ? _moves.Peek() : default",
+    "after": "_moves.Count == _length ? default : default",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-efficiency-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_prices.Count == _length && travel.Sign > 0",
+    "after": "_prices.Count > 0 && travel.Sign > 0",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-efficiency-distance",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "Abs(price - _prices.Peek()).Divide(travel)",
+    "after": "Abs(price - _prices.Peek()).Divide(travel).Times(0)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-distance-total",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_distanceTotal + distance",
+    "after": "_distanceTotal.Times(0) + distance",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-threshold-width",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "Number.Of(2) - efficiency",
+    "after": "Number.Of(1) - efficiency",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.ExactThresholdTiesAndNeighboringPricesSelectDifferentSteps"
+  },
+  {
+    "id": "tstep-wide-threshold-count",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "total.Divide(_count + 1)",
+    "after": "total.Divide(_count + 2)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.ExactThresholdTiesAndNeighboringPricesSelectDifferentSteps"
+  },
+  {
+    "id": "tstep-wide-threshold-tie",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "(distance - threshold).Sign > 0",
+    "after": "(distance - threshold).Sign >= 0",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.ExactThresholdTiesAndNeighboringPricesSelectDifferentSteps"
+  },
+  {
+    "id": "tstep-wide-threshold-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "(distance - threshold).Sign > 0",
+    "after": "(distance - Number.Of(threshold.Publish())).Sign > 0",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.ExactThresholdTiesAndNeighboringPricesSelectDifferentSteps"
+  },
+  {
+    "id": "tstep-wide-step-square",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "var sxx = _sxx + step * step",
+    "after": "var sxx = _sxx + price * price",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-cross-product",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "var sxy = _sxy + step * price",
+    "after": "var sxy = _sxy + step * step",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-variance-center",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "sxx.Times(size) - sx * sx",
+    "after": "sxx.Times(size) + sx * sx",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-covariance-center",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "sxy.Times(size) - sx * sy",
+    "after": "sxy.Times(size) + sx * sy",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-variance-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "var slope = size < _length",
+    "after": "variance = Number.Of(variance.Publish()); var slope = size < _length",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.OverflowingMomentsAndSubnormalStepsRemainFinite"
+  },
+  {
+    "id": "tstep-wide-fit-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "size < _length || variance.Sign == 0",
+    "after": "variance.Sign == 0",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.ExtremePeriodsExpiryAndUnusedScParameterRemainDefined"
+  },
+  {
+    "id": "tstep-wide-pair-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "sxy -= old.Step * old.Price;",
+    "after": "sxy -= default;",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-preview-fit",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-line-origin",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "mean + slope * (step - stepMean)",
+    "after": "mean + slope * (price - stepMean)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-line-centering",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "mean + slope * (step - stepMean)",
+    "after": "mean + slope * (step + stepMean)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-first-signal",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_hasComparison ? _previousComparison : default(Number) - price",
+    "after": "_hasComparison ? _previousComparison : default",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.CallbackOrderDiscoveryShortArraysAndFirstSignalArePreserved"
+  },
+  {
+    "id": "tstep-wide-signal-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "comparison - previous",
+    "after": "previous - comparison",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_previousComparison = comparison;",
+    "after": "_previousComparison = default;",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-preview-signal",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "if (final) { _previousComparison",
+    "after": "if (true) { _previousComparison",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "tstep-wide-callback-input",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), length)",
+    "after": "ComponentAverage.Take(prices.ToArray(), length)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.CallbackOrderDiscoveryShortArraysAndFirstSignalArePreserved"
+  },
+  {
+    "id": "tstep-wide-callback-discovery",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "var custom = ComponentAverage.Take",
+    "after": "var custom = !ComponentAverage.HasOverrides ? null : ComponentAverage.Take",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.CallbackOrderDiscoveryShortArraysAndFirstSignalArePreserved"
+  },
+  {
+    "id": "tstep-wide-callback-short",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "i < custom.Count ? Number.Of(custom[i]) : default",
+    "after": "i < custom.Count ? Number.Of(custom[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.CallbackOrderDiscoveryShortArraysAndFirstSignalArePreserved"
+  },
+  {
+    "id": "tstep-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-reset-moves",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_moves.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-reset-pairs",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_pairs.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide(_length)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
+    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TStepLeastSquaresMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.InvalidCandlesCannotAdvanceStepMomentsOrMeans"
+  },
+  {
+    "id": "tstep-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TStepLeastSquaresMovingAverageState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TStepLeastSquaresMovingAverageState",
+    "before": "{ \"Tslsma\", point.Line }",
+    "after": "{ \"Tslsma\", 0 }",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "tstep-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTStepLeastSquaresMovingAverageFast",
+    "before": "TStepLeastSquaresWindow.Calculate(data, maType, length)",
+    "after": "TStepLeastSquaresWindow.Calculate(data, maType, 1)",
+    "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
   }
 ]

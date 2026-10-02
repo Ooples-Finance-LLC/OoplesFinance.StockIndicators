@@ -455,103 +455,17 @@ public sealed class TripleExponentialMovingAverageState : IStreamingIndicatorSta
 [PrimaryOutput("Tslsma")]
 public sealed class TStepLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly IMovingAverageSmoother _bSmoother;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly RollingStandardDeviation _bStdDev;
-    private readonly RollingWindowCorrelation _corrWindow;
-    private readonly EfficiencyRatioState _er;
-    private readonly StreamingInputResolver _input;
-    private double _bValue;
-    private double _prevB;
-    private double _chgSum;
-    private int _chgCount;
-    private bool _hasPrev;
-
-    public TStepLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 100, double sc = 0.5)
-    {
-        var resolved = Math.Max(1, length);
-        _ = sc;
-        _smaSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _bSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
-        _bStdDev = new RollingStandardDeviation(resolved);
-        _corrWindow = new RollingWindowCorrelation(resolved);
-        _er = new EfficiencyRatioState(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TStepLeastSquaresWindow _window;
+    public TStepLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100, double sc = 0.5)
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.TStepLeastSquaresMovingAverage;
-
-    public void Reset()
-    {
-        _smaSmoother.Reset();
-        _bSmoother.Reset();
-        _stdDev.Reset();
-        _bStdDev.Reset();
-        _corrWindow.Reset();
-        _er.Reset();
-        _bValue = 0;
-        _prevB = 0;
-        _chgSum = 0;
-        _chgCount = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var er = 1 - _er.Next(value, isFinal);
-        var prevB = _hasPrev ? _prevB : value;
-        var chg = Math.Abs(value - prevB);
-        var chgSum = _chgSum + chg;
-        var chgCount = _chgCount + 1;
-        var avgChg = chgCount > 0 ? chgSum / chgCount : 0;
-        var a = avgChg * (1 + er);
-        var b = value > prevB + a ? value : value < prevB - a ? value : prevB;
-
-        var corr = isFinal ? _corrWindow.Add(b, value, out _) : _corrWindow.Preview(b, value, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-
-        var sma = _smaSmoother.Next(value, isFinal);
-        var bSma = _bSmoother.Next(b, isFinal);
-        _bValue = b;
-        var stdDev = _stdDev.Next(value, isFinal);
-        var bStdDev = _bStdDev.Next(_bValue, isFinal);
-        var alpha = bStdDev != 0 ? corr * stdDev / bStdDev : 0;
-        var beta = sma - (alpha * bSma);
-        var ls = (alpha * b) + beta;
-
-        if (isFinal)
-        {
-            _prevB = b;
-            _chgSum = chgSum;
-            _chgCount = chgCount;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tslsma", ls }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ls, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Tslsma", point.Line } } : null);
     }
-
-    public void Dispose()
-    {
-        _smaSmoother.Dispose();
-        _bSmoother.Dispose();
-        _stdDev.Dispose();
-        _bStdDev.Dispose();
-        _corrWindow.Dispose();
-        _er.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sbs")]

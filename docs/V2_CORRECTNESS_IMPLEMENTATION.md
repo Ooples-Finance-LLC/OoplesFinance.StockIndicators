@@ -4934,3 +4934,10 @@ The isolated campaigns `668-repaired-a` and `668-repaired-b` passed their baseli
 Source snapshot SHA256: `e1be7be86ae32be312d8df56d991acb2cdbda4bece86be0ecb87b841ca0b47e1`. Archive SHA256: `061b306b9f86007e3b61d4c97050969df21f833b7ce6d0b34f36ee85cce9e531` and `9cb958ecac1040a6e77061cd5f83ad7db59129ead446bf0082976e390df7c5de`.
 
 This is evidence for retained batch-668 source with the selected-source test overlay; original snapshots are excluded. Source was already published in the batch-668 checkpoint; this update does not restore older source files. Mutation verification for other batches and the remaining final gates is still incomplete.
+
+
+### Batch 709: T-Step Least Squares public numerical coverage
+
+All **48/48 focused tests passed** in `tstep709-focused.trx`, covering five configurations across five public routes, explicit batch/fast selected inputs, independently derived step/regression/signal hands, overflow, subnormal moments, exact threshold ties and neighbors, expiry, extreme periods, preview/reset, callback discovery/order/short results and full-candle guards. The existing hand and golden tests also passed. The independent reference recomputes window-centered residual products rather than production rolling moments. Core/registry alignment remains a separate pending decision.
+
+Inventory: **6,637/7,131 enrolled**, **494 omissions across 71 types**, all 7,131 reference registrations, no construction failures and exact backlog agreement. All **9,151 mutation anchors resolve**; 40 new faults await isolated campaigns. These focused checks do not establish mutation, hosted-platform, performance or release qualification. Unrelated TrendForce/Mobility files retain their recorded hashes.

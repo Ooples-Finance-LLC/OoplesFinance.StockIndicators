@@ -217,31 +217,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Vabcd", regimes.Select((v, i) => v - (i == 0 ? 0 : regimes[i - 1])).ToArray()));
                 });
             case IndicatorName.TStepLeastSquaresMovingAverage:
-                return new("Tslsma", new[] { "Tslsma" }, bars =>
-                {
-                    var prices = Closes(bars); var efficiency = EfficiencyRatios(bars, length);
-                    var steps = new double[bars.Count]; var distances = new double[bars.Count];
-                    for (var i = 0; i < steps.Length; i++)
-                    {
-                        var previous = i == 0 ? prices[i] : steps[i - 1];
-                        distances[i] = Math.Abs(prices[i] - previous);
-                        var threshold = distances.Take(i + 1).Average() * (2 - efficiency[i]);
-                        // The step changes only outside the closed price interval. Comparing a
-                        // subtracted distance instead changes rounding at an exact boundary.
-                        var lower = previous - threshold; var upper = previous + threshold;
-                        steps[i] = prices[i] < lower || prices[i] > upper ? prices[i] : previous;
-                    }
-                    var mean = Average(prices, length, kind); var stepMean = Average(steps, length, kind);
-                    return Outputs(("Tslsma", prices.Select((_, i) =>
-                    {
-                        if (i + 1 < length) return mean[i];
-                        var x = Window(steps, i, length).ToArray(); var y = Window(prices, i, length).ToArray();
-                        var xm = x.Average(); var ym = y.Average();
-                        var variance = x.Sum(v => (v - xm) * (v - xm));
-                        var slope = variance == 0 ? 0 : x.Select((v, j) => (v - xm) * (y[j] - ym)).Sum() / variance;
-                        return mean[i] + slope * (steps[i] - stepMean[i]);
-                    }).ToArray()));
-                });
+                return new("Tslsma", new[] { "Tslsma" }, bars => TStepLeastSquaresOutputs(bars, indicator));
             case IndicatorName.EhlersMedianAverageAdaptiveFilter:
                 return new("Maaf", new[] { "Maaf" }, bars => MedianAdaptiveOutputs(bars, indicator));
             case IndicatorName.ElderSafeZoneStops:
