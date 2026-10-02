@@ -16,7 +16,21 @@ public sealed class MorphedSineNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentPhaseAndRationalOffset(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.MorphedSineOutputs(bars, (IBuiltInIndicator)c.Factory()), IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory();
+        var o = (OoplesFinance.StockIndicators.Builder.Specs.MorphedSineWaveSpecOptions)indicator.CreateOptions();
+        var bars = Candles(Enumerable.Range(0, 64).Select(i => 20d + i % 5).ToArray());
+        var selected = bars.Select((_, i) => i % 7 - 3d).ToArray();
+        var projected = bars.Select((b, i) => new Bar(b.Time, b.Open, b.High, b.Low, selected[i], b.Volume)).ToArray();
+        var expected = BuiltInFormulaReferences.MorphedSineOutputs(projected, indicator)["Msw"];
+        var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+        using var actual = IndicatorCompute.ComputeMorphedSineWaveFast(data, context, o.Length);
+        Assert.Equal(expected, actual.ToArray()); Assert.Equal(selected, data.ChainedValues);
+        Assert.Equal(bars.Select(b => b.Close), data.ClosePrices);
+        Assert.Equal(bars.Select(b => b.High), data.HighPrices); Assert.Equal(bars.Select(b => b.Low), data.LowPrices);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
