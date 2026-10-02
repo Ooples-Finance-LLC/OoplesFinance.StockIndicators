@@ -5037,3 +5037,6 @@ This is evidence for the isolated batch-672 source. Source was already published
 ### Batch 674: OBV Reflex hand-example coverage repair
 
 The original hand test used equal lag and smoothing periods and did not distinguish zero-filled lag warmup from an available partial lag. An added independent hand uses lag 3, smoothing 2, prices `[4,1,-1,5,0]` and volumes `[2,3,5,7,11]`: cumulative totals are `[2,5,0,7,-4]`, and two-bar SMA values are `[0,3.5,2.5,3.5,1.5]`. The existing checker exercises batch, both fast outputs, native previews/reset and the internal kernel. **1/1 affected test passed** against the unchanged production DLL (`obv-reflex674-hand-repair.trx`). The active original campaigns contain survivors and cannot qualify; fresh repaired snapshots/campaigns remain required.
+
+
+The same batch's selected-source test now explicitly exercises both fast functions, batch, native and kernel results with oscillating selected prices against rising original prices. **10/10 affected cases passed**, including the strengthened lag/smoothing hand, against the unchanged production DLL (`obv-reflex674-selected-hand-repair.trx`). The original campaigns remain excluded; this strengthens verification without changing production.

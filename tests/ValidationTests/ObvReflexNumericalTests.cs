@@ -17,7 +17,17 @@ public sealed class ObvReflexNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentCoordinates(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.ObvReflexOutputs(bars, (IBuiltInIndicator)c.Factory()), BuiltInFormulaReferences.ObvReflexBudget);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var options = ((IBuiltInIndicator)c.Factory()).CreateOptions();
+        var length = (int)options.GetType().GetProperty("Length")!.GetValue(options)!;
+        var signalLength = (int)options.GetType().GetProperty("SignalLength")!.GetValue(options)!;
+        var kind = (MovingAvgType)options.GetType().GetProperty("MaType")!.GetValue(options)!;
+        var bars = Bars(Enumerable.Range(0, 32).Select(i => 100d + i).ToArray());
+        var selected = bars.Select((_, i) => (double)(i * 7 % 13 - 6)).ToArray();
+        Check(bars, length, signalLength, kind, selected);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
