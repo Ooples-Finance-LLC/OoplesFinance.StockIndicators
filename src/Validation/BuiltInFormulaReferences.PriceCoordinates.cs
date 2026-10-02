@@ -17,22 +17,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.PeriodicChannel:
                 return new("K", new[] { "K", "Os", "Ap", "Bp", "Cp", "Al", "Bl", "Cl" }, bars => PeriodicOutputs(bars, indicator));
             case IndicatorName.VortexBands:
-                return new("UpperBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
-                {
-                    double[] Smooth(double[] values)
-                    {
-                        if (!mcNicholl) return Average(values, length, kind);
-                        var period = Math.Max(2, length);
-                        var first = Average(values, period, 3);
-                        var second = Average(first, period, 3);
-                        var correction = (period + 1d) / (period - 1d);
-                        return first.Select((v, i) => v + correction * (v - second[i])).ToArray();
-                    }
-                    var basis = Smooth(Closes(bars));
-                    var widths = Smooth(bars.Select((b, i) => Math.Abs(b.Close - basis[i])).ToArray());
-                    return Outputs(("MiddleBand", basis), ("UpperBand", basis.Select((v, i) => v + 2 * Math.Max(0, widths[i])).ToArray()),
-                        ("LowerBand", basis.Select((v, i) => v - 2 * Math.Max(0, widths[i])).ToArray()));
-                });
+                return new("UpperBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars => VortexBandsOutputs(bars, indicator));
             case IndicatorName.HirashimaSugitaRS:
                 return new("MiddleBand", new[] { "UpperBand1", "UpperBand2", "MiddleBand", "LowerBand1", "LowerBand2" }, bars =>
                 {

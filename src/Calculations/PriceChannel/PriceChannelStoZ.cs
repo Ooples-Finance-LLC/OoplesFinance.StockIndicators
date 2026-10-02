@@ -286,46 +286,9 @@ public static partial class Calculations
     public static StockData CalculateVortexBands(this StockData stockData, MovingAvgType maType = MovingAvgType.McNichollMovingAverage,
         int length = 20)
     {
-        List<double> upperList = new(stockData.Count);
-        List<double> lowerList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var basisList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var basis = basisList[i];
-            var currentValue = inputList[i];
-
-            // A band half-width is a distance, so this is the mean absolute deviation from the basis.
-            // Measured signed, its average sits near zero for a series that oscillates about its own
-            // average, and dev = 2 * diffMa then turns negative on every bar where price is below the
-            // basis - which put the upper band below the lower one on 135 of the 251 fixture bars.
-            // VortexBands is a variation on the same Better Bollinger Bands construction as DEnvelope,
-            // and DEnvelope measures its width the same way, as an average of |value - centre|.
-            var diff = Math.Abs(currentValue - basis);
-            diffList.Add(diff);
-        }
-
-        var diffMaList = GetMovingAverageList(stockData, maType, length, diffList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var diffMa = diffMaList[i];
-            var basis = basisList[i];
-            var dev = 2 * Math.Max(0, diffMa);
-
-            var upper = basis + dev;
-            upperList.Add(upper);
-
-            var lower = basis - dev;
-            lowerList.Add(lower);
-
-            var signal = GetConditionSignal(upper > lower && upper > basis, lower > upper && lower > basis);
-            signalsList?.Add(signal);
-        }
-
+        var result = VortexBandWindow.Calculate(stockData, maType, length);
+        var upperList = result.Upper.ToList(); var basisList = result.Middle.ToList(); var lowerList = result.Lower.ToList();
+        var signalsList = CreateSignalsList(stockData); signalsList?.AddRange(result.Trades);
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "UpperBand", upperList },
             { "MiddleBand", basisList },

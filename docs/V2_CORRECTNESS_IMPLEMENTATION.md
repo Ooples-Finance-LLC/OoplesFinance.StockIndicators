@@ -5114,3 +5114,10 @@ Exact component products and ratios now feed unpublished signal smoothing across
 The original batch moving-average helper dispatches directly to the standard cores, bypassing `ComponentAverage` override hooks. The batch-721/722 shared helpers incorrectly consumed those hooks. Batch calls now retain their original numerical results when hooks are armed; fast Volume Weighted RSI still uses three slots, and fast VPCI uses six primary or seven signal slots. The two callback facts verify independent batch hands alongside injected fast outputs and exact request counts.
 
 **88/88 focused checks passed** on net10.0 (`volume-callback723-final.trx`): all 43 Volume Weighted RSI and all 45 VPCI checks. Numerical formulas, core alignments, and enrollment are unchanged. Inventory remains **6,705/7,131**, **426 omissions across 60 types**, all references registered and no construction failures. The original queued 721/722 snapshots are excluded from future qualification; fresh matched snapshots contain 33 and 41 faults respectively, including a direct fault for each repaired bypass. Mutation and final assurance gates remain pending.
+
+
+### Batch 724: Vortex Bands numerical correction
+
+Batch, fast, and native routes now retain exact standard-mean and McNicholl intermediates until each output is published. The explicit streaming gate uses the existing typed native state. Independent rational references cover all three bands. Checks include selected inputs, exact hand examples, subnormal residuals, finite lower bands after middle-band overflow, negative-width clamping, extreme periods, previews, reset, callback bypass, and invalid original fields.
+
+**53/53 focused tests passed** on net10.0 (`vortex724-final.trx`). An initial helper-name compilation typo was corrected before tests ran. Inventory: **6,710/7,131 enrolled**, **421 omissions across 59 types**, all references registered, no construction failures, exact backlog match. The 34 mutation candidates and final assurance gates remain pending.

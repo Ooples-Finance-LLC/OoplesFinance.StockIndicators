@@ -970,3 +970,12 @@ VPCI multiplies (slow VWMA minus slow price MA), (fast VWMA divided by fast pric
 The approved core alignment replaces its difference-of-confirmations formula with the public three-factor SMA formula, retaining short/long arguments and atomic/aliased span handling. The typed length controls only signal smoothing. Batch retains its VWMA, volume, price, then signal evaluation order without consuming override hooks. Explicit fast routes retain price-before-volume order, six primary override slots and seven signal override slots. Native previews/reset and extreme periods use only observed history.
 
 All 45 focused checks passed on net10.0, including an independent 13/30 line and 13/60 signal hand, both selected-input fast outputs, exact subnormal signal preservation, signed-volume cancellation, and recovery after true overflow. The 41 targeted mutation candidates in the repaired snapshots await isolated qualification.
+
+
+### Batch 724: Vortex Bands
+
+The basis is the selected price mean; the half-width is twice the nonnegative part of the mean absolute price-to-basis deviation. Exact standard SMA/WMA/EMA/Wilder means and the default two-stage McNicholl correction retain the unpublished basis, residual, and width. McNicholl uses a period floor of two and (2*n*first - (n+1)*second)/(n-1). Its width can be negative; that width clamps to zero. Signals compare the exact width with zero: Buy for positive width, otherwise None. True unrepresentable final outputs publish signed infinity without poisoning subsequent history.
+
+For period two and prices [1,3,0], the final upper/middle/lower bands are 13/36, -1/6, and -25/36. For [0,epsilon], the second basis is 5/4 epsilon and width 5/16 epsilon, preserving the final rounded bands 2epsilon/epsilon/epsilon. An overflowing middle band can still have a finite lower band. Both original batch and explicit fast standard-mean dispatch bypass component override hooks; that behavior is preserved. Unsupported means retain existing dispatch. No shared McNicholl core is changed.
+
+All 53 focused checks passed on net10.0. The 34 prepared behavioral faults await isolated qualification.

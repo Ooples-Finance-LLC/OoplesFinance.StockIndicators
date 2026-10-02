@@ -20440,48 +20440,10 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeVortexBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.McNichollMovingAverage, string? outputKey = null)
     {
-        // V1 Algorithm: Vortex Bands
-        // 1. Calculate MA of price (basis)
-        // 2. Calculate diff = |price - basis|, a distance - see the batch calculation for why signed
-        //    is wrong: it averages to near zero and drives the half-width negative
-        // 3. Calculate MA of diff
-        // 4. dev = 2 * diffMa
-        // 5. upper = basis + dev (primary output)
-        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
-        int count = data.Count;
-
-        // Calculate basis (MA of close)
-        var basisBuffer = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, basisBuffer.WritableSpan, length);
-
-        // Calculate diff (close - basis)
-        var diffBuffer = context.Rent(count);
-        var diffSpan = diffBuffer.WritableSpan;
-        var basisSpan = basisBuffer.Span;
-        for (int i = 0; i < count; i++)
-        {
-            diffSpan[i] = Math.Abs(close[i] - basisSpan[i]);
-        }
-
-        // Calculate MA of diff
-        var diffMaBuffer = context.Rent(count);
-        maCore.Compute(diffBuffer.Span, diffMaBuffer.WritableSpan, length);
-
-        // Calculate upper band: basis + 2*diffMa
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-        var diffMaSpan = diffMaBuffer.Span;
-        for (int i = 0; i < count; i++)
-        {
-            double dev = 2 * Math.Max(0, diffMaSpan[i]);
-            resultSpan[i] = outputKey == "MiddleBand" ? basisSpan[i] : basisSpan[i] + (outputKey == "LowerBand" ? -dev : dev);
-        }
-
-        basisBuffer.Dispose();
-        diffBuffer.Dispose();
-        diffMaBuffer.Dispose();
-        return result;
+        var values = VortexBandWindow.Calculate(data, maType, length, fast: true);
+        var selected = outputKey == "MiddleBand" ? values.Middle : outputKey == "LowerBand" ? values.Lower : values.Upper;
+        var result = context.Rent(selected.Length);
+        try { selected.AsSpan().CopyTo(result.WritableSpan); return result; } catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeVostroIndicatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 100, double level = 8, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)

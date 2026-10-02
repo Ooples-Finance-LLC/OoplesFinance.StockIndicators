@@ -300,57 +300,18 @@ public sealed class VolumeWeightedRelativeStrengthIndexState : IStreamingIndicat
 [PrimaryOutput("UpperBand")]
 public sealed class VortexBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _basisMa;
-    private readonly IMovingAverageSmoother _diffMa;
-    private readonly StreamingInputResolver _input;
-
-    public VortexBandsState(MovingAvgType maType = MovingAvgType.McNichollMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _basisMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _diffMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VortexBandWindow _window;
+    public VortexBandsState(MovingAvgType maType = MovingAvgType.McNichollMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.VortexBands;
-
-    public void Reset()
-    {
-        _basisMa.Reset();
-        _diffMa.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var basis = _basisMa.Next(value, isFinal);
-        // A band half-width is a distance; see the batch calculation for the full reasoning. Measured
-        // signed it turns negative whenever price sits below the basis, inverting the two bands.
-        var diff = Math.Abs(value - basis);
-        var diffMa = _diffMa.Next(diff, isFinal);
-        var dev = 2 * Math.Max(0, diffMa);
-        var upper = basis + dev;
-        var lower = basis - dev;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", basis },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(upper, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Upper, includeOutputs ? new Dictionary<string, double>
+            { ["UpperBand"] = point.Upper, ["MiddleBand"] = point.Middle, ["LowerBand"] = point.Lower } : null);
     }
-
-    public void Dispose()
-    {
-        _basisMa.Dispose();
-        _diffMa.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vi")]
