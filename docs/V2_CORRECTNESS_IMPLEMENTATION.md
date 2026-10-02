@@ -5075,3 +5075,12 @@ The strengthened independent hand uses prices `[1,0,1]`, mean period 2 and regre
 ### Batch 678: Phase Change selected-input coverage repair
 
 The original campaigns caught 29 of 31 compiled behavioral faults; the primary and signal fast methods could each ignore selected input without failing the composed-builder test. The strengthened selected-source test directly compares both fast methods against the independent reference using oscillating selected prices and rising original closes, and checks caller input preservation. **9/9 affected configurations passed** against the unchanged production DLL (`phase-change678-selected-repair.trx`). Original survivor campaigns remain excluded; fresh matched repaired campaigns are required.
+
+
+### Batch 676: Peak Valley Estimation mutation qualification
+
+The isolated campaigns `676-repaired-a` and `676-repaired-b` passed their baselines and caught **30/30 compiled behavioral faults**, alongside **84/84 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-676 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `1288189352d85bfe9f18b2a493c19cd85eb1b6b522698b8893570e968f58b274`. Archive SHA256: `6b9c3660ec559750e12516fd7bd71e2fcc8933797f93977e9934a4f51ee834f8` and `a50acc90cfeff0d535537f0d44ad2f3ea314e35cfed651931515a01e6f43e095`.
+
+This is evidence for the isolated batch-676 source. Source was already published in the batch-676 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
