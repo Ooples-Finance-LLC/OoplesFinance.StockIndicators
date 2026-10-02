@@ -67827,7 +67827,7 @@
     "file": "src/Helpers/MacZVwapWindow.cs",
     "scope": "internal sealed class MacZVwapWindow",
     "before": "if (final) _previousHistogram = histogram",
-    "after": "if (false) _previousHistogram = histogram",
+    "after": "if (final) _previousHistogram = default",
     "filter": "FullyQualifiedName~MacZVwapNumericalTests.TinyAndOverflowingProductsRetainCompleteQuotients"
   },
   {

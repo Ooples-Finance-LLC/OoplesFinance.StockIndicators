@@ -4598,3 +4598,8 @@ Exact component means and RSI ratios preserve the long-average branch and output
 Exact centered range arithmetic preserves near-midpoint and extreme-range values before two once-rounded smoothing stages. The final tanh handles subnormal halfway values correctly. Core smoothing periods now use the public ceiling and clamp; both factories expose the alias and full specification. Regression coverage includes independent rational references, hands, callbacks, signals, previews/reset, extreme periods, legacy fallback and core spans.
 
 **113/113 focused tests passed** on net10.0 (premier682.trx), across 13 configurations and the existing golden test. This isolated branch includes batches 679-681; inventory is **6,515/7,131 enrolled**, **616 omissions across 91 types**, with complete independent references and no construction failures. Periodic677 is not included. The 46 prepared behavioral faults and final readiness gates remain pending.
+
+
+### Batch 662: pending mutation compiler repair
+
+The queued MacZ VWAP histogram-memory fault now resets the retained histogram to zero on committed bars instead of using a constant-false conditional. Both mutations leave the retained value at its initial/reset zero, but the replacement avoids an unreachable-code warning being treated as a compilation error. All 8,448 manifest anchors resolve. Production and test sources are unchanged; the 39-fault campaign remains unqualified and must use fresh matching snapshots containing this manifest repair. The original retained batch-662 snapshots remain untouched.
