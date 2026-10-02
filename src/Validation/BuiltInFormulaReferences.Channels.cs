@@ -69,25 +69,7 @@ internal static partial class BuiltInFormulaReferences
                         ("LowerBand", lower), ("Scalper", mean.Select((v, i) => atr[i] > 0 ? v - Math.Log(Math.PI * atr[i]) : v).ToArray()));
                 });
             case IndicatorName.StationaryExtrapolatedLevels:
-                return new("Deviation", new[] { "UpperBand", "MiddleBand", "LowerBand", "Deviation" }, bars =>
-                {
-                    var mean = Average(Closes(bars), length, kind);
-                    var residuals = bars.Select((b, i) => b.Close - mean[i]).ToArray();
-                    var extrapolated = bars.Select((_, i) =>
-                    {
-                        if (i <= length) return 0d;
-                        var recent = residuals[i - length];
-                        var older = i < 2 * length ? 0 : residuals[i - 2 * length];
-                        if (recent == older) return 0; // NOSONAR: S1244 - Exact endpoint ties select the defined zero-output branch.
-                        return i < 2 * length ? recent * i / (2d * (i - length)) : recent - older / 2;
-                    }).ToArray();
-                    // Two trailing extrema filters compose into one window of summed lengths minus one.
-                    var width = length + Math.Max(2, length) - 1;
-                    var upper = extrapolated.Select((_, i) => Window(extrapolated, i, width).Max()).ToArray();
-                    var lower = extrapolated.Select((_, i) => Window(extrapolated, i, width).Min()).ToArray();
-                    return Outputs(("UpperBand", upper), ("MiddleBand", upper.Zip(lower, (a, b) => (a + b) / 2).ToArray()),
-                        ("LowerBand", lower), ("Deviation", residuals));
-                });
+                return new("Deviation", new[] { "UpperBand", "MiddleBand", "LowerBand", "Deviation" }, bars => StationaryLevelsOutputs(bars, indicator));
             case IndicatorName.TironeLevels:
             case IndicatorName.ProjectedSupportAndResistance:
                 var tirone = name == IndicatorName.TironeLevels;

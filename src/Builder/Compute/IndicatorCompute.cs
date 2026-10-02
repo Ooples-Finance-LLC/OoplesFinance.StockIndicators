@@ -21802,77 +21802,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast(StockData data, ComputeContext context, int length = 200,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ExtrapolatedLevelSeries series = ExtrapolatedLevelSeries.Deviation)
     {
-        // CalculateStationaryExtrapolatedLevels measures how far each bar sits from the moving average of the
-        // chained series, then extrapolates that deviation from the two readings a window and two windows
-        // back. The bands are the running extremes of that extrapolation taken twice over; the deviation is a
-        // different quantity, and it is the one the streaming state publishes first. This read the close and
-        // the registry average directly, so it matched neither.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var ma = average.Span;
-
-        var deviations = context.Rent(count);
-        var y = deviations.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            y[i] = input[i] - ma[i];
-        }
-
-        if (series == ExtrapolatedLevelSeries.Deviation)
-        {
-            return deviations;
-        }
-
-        using (deviations)
-        {
-            using var extrapolation = context.Rent(count);
-            var ext = extrapolation.WritableSpan;
-            var deviation = deviations.Span;
-            for (var i = 0; i < count; i++)
-            {
-                // The bar index is its own series in the batch, so a reading that is not yet a window old
-                // extrapolates from zero rather than from a bar that does not exist.
-                double x = i;
-                var priorX = i >= length ? i - length : 0;
-                var priorX2 = i >= length * 2 ? i - (length * 2) : 0;
-                var priorY = i >= length ? deviation[i - length] : 0;
-                var priorY2 = i >= length * 2 ? deviation[i - (length * 2)] : 0;
-
-                ext[i] = priorX2 - priorX != 0 && priorY2 - priorY != 0
-                    ? (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2
-                    : 0;
-            }
-
-            var buffer = context.Rent(count);
-            var output = buffer.WritableSpan;
-
-            // The bands are the running extremes of the extrapolation taken twice: the inner window never
-            // runs shorter than two bars, while the outer pair take the length as given, which is why both
-            // publish a partial-window extreme from the first bar.
-            var window = new RollingMinMax(Math.Max(length, 2));
-            var highWindow = new RollingMinMax(length);
-            var lowWindow = new RollingMinMax(length);
-            for (var i = 0; i < count; i++)
-            {
-                window.Add(ext[i]);
-                highWindow.Add(window.Max);
-                lowWindow.Add(window.Min);
-
-                output[i] = series switch
-                {
-                    ExtrapolatedLevelSeries.Upper => highWindow.Max,
-                    ExtrapolatedLevelSeries.Lower => lowWindow.Min,
-                    _ => (highWindow.Max + lowWindow.Min) / 2
-                };
-            }
-
-            return buffer;
-        }
+        var result = StationaryLevelsWindow.Calculate(data, maType, length, true);
+        var values = series == ExtrapolatedLevelSeries.Upper ? result.Upper : series == ExtrapolatedLevelSeries.Lower ? result.Lower
+            : series == ExtrapolatedLevelSeries.Deviation ? result.Deviation : result.Middle;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     internal static ComputeBuffer ComputeSupportResistanceFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool resistance = false)

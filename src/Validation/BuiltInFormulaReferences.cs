@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.StationaryExtrapolatedLevels)
+        {
+            var stationaryKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "UpperBand", "MiddleBand", "LowerBand", "Deviation" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < stationaryKeys.Length; slot++) { var key = stationaryKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => StationaryLevelsOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.StandardDeviationVolatility)
         {
             var residualKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "StdDev", "Variance", "Signal" };

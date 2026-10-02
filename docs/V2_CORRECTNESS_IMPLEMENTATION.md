@@ -4780,3 +4780,10 @@ The isolated campaigns `661-repaired2-a` and `661-repaired2-b` passed their base
 Source snapshot SHA256: `e9b209b92bf99750f455a15f2896efec00fed70f2e9f70a5618a448db17454d1`. Archive SHA256: `96a178b3e614cf3c8a86f853a0f3d09621ee34519c6e76c2b8f95e1c2bb4be74` and `3b43cb16edc10e9daf32965cea5c510e305e11a5bd9427107fe39a4752f5e534`.
 
 This is evidence for retained batch-661 source with two repaired fault definitions and an explicit fast selected-source test overlay. The original partial campaign, its ineffective histogram-reset fault and its guard compilation failure are excluded. Source was already published in the batch-661 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 699: Stationary Extrapolated Levels numerical correction
+
+Public routes now preserve exact delayed residuals, equality branches, extrapolation, rolling extremes and band midpoint. The independent reference evaluates the original index-coordinate equation and two separate extrema windows, while production uses its reduced piecewise expression and composed window. Independent hand examples cover both startup stages, ties and extrema expiry. A minimum-subnormal difference prevents a false residual tie; opposing overflowing endpoints still yield a finite midpoint.
+
+**55/55 focused tests passed** (`stationary-levels699-focused.trx`), including five configurations/five routes, independent references, numerical fixtures, existing hand/shared/golden regressions, extreme/subnormal data, long derived periods, lazy history, preview/reset, selected inputs, callbacks and finite validation. **36 behavioral faults are prepared; mutation qualification is pending.** All8,874 manifest anchors resolve. Inventory: **6,589/7,131 enrolled**, **542 omissions across79 types**, complete independent references, no construction failures and an exact backlog match. Remaining scope decisions, queued qualifications and final project gates are incomplete.

@@ -1561,93 +1561,16 @@ public sealed class SupportResistanceState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Deviation")]
 public sealed class StationaryExtrapolatedLevelsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly RollingWindowMax _extMax1;
-    private readonly RollingWindowMin _extMin1;
-    private readonly RollingWindowMax _extMax2;
-    private readonly RollingWindowMin _extMin2;
-    private readonly PooledRingBuffer<double> _yBuffer;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public StationaryExtrapolatedLevelsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200)
-    {
-        _length = Math.Max(1, length);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _extMax1 = new RollingWindowMax(Math.Max(2, _length));
-        _extMin1 = new RollingWindowMin(Math.Max(2, _length));
-        _extMax2 = new RollingWindowMax(_length);
-        _extMin2 = new RollingWindowMin(_length);
-        _yBuffer = new PooledRingBuffer<double>(_length * 2 + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly StationaryLevelsWindow _window;
+    public StationaryExtrapolatedLevelsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.StationaryExtrapolatedLevels;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _extMax1.Reset();
-        _extMin1.Reset();
-        _extMax2.Reset();
-        _extMin2.Reset();
-        _yBuffer.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _smoother.Next(value, isFinal);
-        var y = value - sma;
-        var i = _index;
-        var priorY = i >= _length ? _yBuffer[_yBuffer.Count - _length] : 0;
-        var priorY2 = i >= _length * 2 ? _yBuffer[_yBuffer.Count - (_length * 2)] : 0;
-        var priorX = i >= _length ? i - _length : 0;
-        var priorX2 = i >= _length * 2 ? i - (_length * 2) : 0;
-        var x = (double)i;
-        var ext = priorX2 - priorX != 0 && priorY2 - priorY != 0
-            ? (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2
-            : 0;
-
-        var highest1 = isFinal ? _extMax1.Add(ext, out _) : _extMax1.Preview(ext, out _);
-        var lowest1 = isFinal ? _extMin1.Add(ext, out _) : _extMin1.Preview(ext, out _);
-        var upper = isFinal ? _extMax2.Add(highest1, out _) : _extMax2.Preview(highest1, out _);
-        var lower = isFinal ? _extMin2.Add(lowest1, out _) : _extMin2.Preview(lowest1, out _);
-
-        if (isFinal)
-        {
-            _yBuffer.TryAdd(y, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            // y is the deviation of price from its own average, not the centre of the extrapolation
-            // extremes these bands are; see the batch calculation.
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", (upper + lower) / 2 },
-                { "LowerBand", lower },
-                { "Deviation", y }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(y, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Deviation, includeOutputs ? new Dictionary<string, double> { { "UpperBand", value.Upper }, { "MiddleBand", value.Middle }, { "LowerBand", value.Lower }, { "Deviation", value.Deviation } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-        _extMax1.Dispose();
-        _extMin1.Dispose();
-        _extMax2.Dispose();
-        _extMin2.Dispose();
-        _yBuffer.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Scalper")]

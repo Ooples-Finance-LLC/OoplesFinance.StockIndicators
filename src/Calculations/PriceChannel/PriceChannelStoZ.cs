@@ -818,63 +818,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStationaryExtrapolatedLevels(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200)
     {
-        List<double> extList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var priorY = i >= length ? yList[i - length] : 0;
-            var priorY2 = i >= length * 2 ? yList[i - (length * 2)] : 0;
-            var priorX = i >= length ? xList[i - length] : 0;
-            var priorX2 = i >= length * 2 ? xList[i - (length * 2)] : 0;
-
-            double x = i;
-            xList.Add(i);
-
-            var y = currentValue - sma;
-            yList.Add(y);
-
-            var ext = priorX2 - priorX != 0 && priorY2 - priorY != 0 ? (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2 : 0;
-            extList.Add(ext);
-        }
-
-        var (highestList1, lowestList1) = GetMaxAndMinValuesList(extList, length);
-        var (upperBandList, lowerBandList) = GetMaxAndMinValuesList(highestList1, lowestList1, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var y = yList[i];
-            var ext = extList[i];
-            var prevY = i >= 1 ? yList[i - 1] : 0;
-            var prevExt = i >= 1 ? extList[i - 1] : 0;
-
-            // The centre of the two bands published, both of which are extremes of the extrapolation.
-            middleBandList.Add((upperBandList[i] + lowerBandList[i]) / 2);
-
-            var signal = GetCompareSignal(y - ext, prevY - prevExt);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            // The bands are the highest and lowest of the extrapolation; y is the deviation of price from
-            // its own average, a different quantity entirely, and it was above the upper band on 199 of
-            // the 251 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
-            { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList },
-            { "Deviation", yList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.StationaryExtrapolatedLevels;
-
+        var values = StationaryLevelsWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", values.Upper.ToList() }, { "MiddleBand", values.Middle.ToList() }, { "LowerBand", values.Lower.ToList() }, { "Deviation", values.Deviation.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.StationaryExtrapolatedLevels;
         return stockData;
     }
 

@@ -76648,5 +76648,329 @@
     "before": "var variance = _variance.Next(residual * residual, final);",
     "after": "residual = Number.Of(residual.Publish()); var variance = _variance.Next(residual * residual, final);",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.SubnormalAndExtendedInputsPreserveCompleteSquares"
+  },
+  {
+    "id": "stationary-levels-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_length = Math.Max(1, length); _width",
+    "after": "_length = Math.Max(1, length - 1); _width",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-combined-width",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_width = (long)_length + Math.Max(2, _length) - 1",
+    "after": "_width = (long)_length + Math.Max(2, _length)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "var expiry = _index - _width + 1;",
+    "after": "var expiry = _index - _width;",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-high-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "Extreme(_highs, ext, true, final)",
+    "after": "Extreme(_highs, ext, false, final)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-low-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "Extreme(_lows, ext, false, final)",
+    "after": "Extreme(_lows, ext, true, final)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-high-prune",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "(last.Value.Value - value).Sign <= 0",
+    "after": "(last.Value.Value - value).Sign >= 0",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-low-prune",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "(last.Value.Value - value).Sign >= 0)) deque.RemoveLast();",
+    "after": "(last.Value.Value - value).Sign <= 0)) deque.RemoveLast();",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-recent-lag",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_recent.Count == _length ? _recent.Peek() : default",
+    "after": "_recent.Count == _length ? _recent.Last() : default",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-older-lag",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_older.Count == _length ? _older.Peek() : default",
+    "after": "_older.Count == _length ? _recent.Peek() : default",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-early-boundary",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_index <= _length ||",
+    "after": "_index < _length ||",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-rounded-tie",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "(recent - older).Sign == 0",
+    "after": "recent.Publish() == older.Publish()",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.UnpublishedSubnormalDifferencePreventsFalseLagTie"
+  },
+  {
+    "id": "stationary-levels-wide-early-scale",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "recent.Times(_index).Divide",
+    "after": "recent.Times(_index - 1).Divide",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-early-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "Divide(2 * (_index - _length))",
+    "after": "Divide(_index - _length)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-late-projection",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "recent - older.Divide(2)",
+    "after": "recent - older.Divide(3)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "var midpoint = (upper + lower).Divide(2);",
+    "after": "var midpoint = (upper - lower).Divide(2);",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-midpoint-publication",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "(upper + lower).Divide(2)",
+    "after": "(Number.Of(upper.Publish()) + Number.Of(lower.Publish())).Divide(2)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.OpposingOverflowingBandsHaveFiniteMidpoint"
+  },
+  {
+    "id": "stationary-levels-wide-recent-memory",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_recent.Enqueue(residual);",
+    "after": "_recent.Enqueue(price);",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-older-memory",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_older.Enqueue(expired);",
+    "after": "_older.Enqueue(residual + expired.Times(0));",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-previous-signal",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_previous = comparison; _index++;",
+    "after": "_previous = default; _index++;",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "var change = comparison - _previous;",
+    "after": "var change = _previous - comparison;",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-signal-reset",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_index = 0; _previous = default;",
+    "after": "_index = 0; _previous = Number.Of(100);",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-mean-publication",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "var residual = price - mean;",
+    "after": "var residual = price - Number.Of(mean.Publish());",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExactIntermediatesRetainExtremeAndSubnormalData"
+  },
+  {
+    "id": "stationary-levels-wide-residual-publication",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_recent.Enqueue(residual); _previous",
+    "after": "_recent.Enqueue(Number.Of(residual.Publish())); _previous",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.UnpublishedSubnormalDifferencePreventsFalseLagTie"
+  },
+  {
+    "id": "stationary-levels-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "weighted = weighted - sum + value.Times(_length);",
+    "after": "weighted = weighted + value.Times(_length);",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count + 1 <= _length ? default",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-simple-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-recursive-current",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_count + 2)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-selected-input",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExplicitFastSelectedInputIsPreserved"
+  },
+  {
+    "id": "stationary-levels-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/StationaryLevelsWindow.cs",
+    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "before": "ComponentAverage.Take(prices.ToArray(), length)",
+    "after": "ComponentAverage.Take(prices.ToArray(), length + 1)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.CallbackConsumesOneSelectedPriceStage"
+  },
+  {
+    "id": "stationary-levels-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class StationaryExtrapolatedLevelsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.NonfiniteCandlesCannotAdvanceEitherLagOrExtrema"
+  },
+  {
+    "id": "stationary-levels-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class StationaryExtrapolatedLevelsState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
+  },
+  {
+    "id": "stationary-levels-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast",
+    "before": "series == ExtrapolatedLevelSeries.Deviation ? result.Deviation : result.Middle",
+    "after": "series == ExtrapolatedLevelSeries.Deviation ? result.Middle : result.Deviation",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
+  },
+  {
+    "id": "stationary-levels-wide-fast-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast",
+    "before": "Calculate(data, maType, length, true)",
+    "after": "Calculate(data, maType, length, false)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.CallbackConsumesOneSelectedPriceStage"
+  },
+  {
+    "id": "stationary-levels-wide-batch-callback",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelStoZ.cs",
+    "scope": "public static StockData CalculateStationaryExtrapolatedLevels(",
+    "before": "Calculate(stockData, maType, length, false)",
+    "after": "Calculate(stockData, maType, length, true)",
+    "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.BatchDoesNotConsumeFastSlots"
   }
 ]
