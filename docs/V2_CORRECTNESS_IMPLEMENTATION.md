@@ -4918,3 +4918,10 @@ The isolated campaigns `667-repaired-a` and `667-repaired-b` passed their baseli
 Source snapshot SHA256: `6e4896fca58e00a707f6b523274fc978df71d7e37ee0be751adc5c0374372bf5`. Archive SHA256: `0ee2e6d0190c57023f7dd7c61098f3ffe6a9f194c0af31d31422e68eb71e234e` and `0a1453627e73a29aa4bf6c53a1c52581dda4780d27d8b51383375b450caaa109`.
 
 This is evidence for retained batch-667 source with only the selected-source test repair overlaid; original snapshots are excluded. Source was already published in the batch-667 checkpoint; this update does not restore older source files. Mutation verification for other batches and the remaining final gates is still incomplete.
+
+
+### Batch 708: True Range Adjusted EMA numerical coverage
+
+The initial focused run passed **38/38 tests** in `true-range-adjusted708-focused.trx`. The strengthened flat-bar hand, four explicit batch/fast selected-source cases, and core input guards passed **6/6** in `true-range-adjusted708-strengthened.trx`, with the production assembly unchanged. There are **38 distinct focused cases** covering four configurations across five routes, exact gain/feedback/signal hands, overflowing ranges and recovery, subnormal contributions, extreme periods/multipliers, preview/reset, and core span contracts. The reference uses independently arranged convex/affine recurrences.
+
+Inventory: **6,632/7,131 enrolled**, **499 omissions across 72 types**, all 7,131 independent references, no construction failures and exact backlog agreement. All **9,111 mutation anchors resolve**; 34 new faults await isolated campaigns. The default numerical-fixture case took 11 minutes 34 seconds; a stack sample located the slowdown in exact production rational arithmetic. This is correctness evidence, not performance or release qualification. Registry fallback alignment and local arithmetic optimization remain pending decisions; unrelated local files are preserved.

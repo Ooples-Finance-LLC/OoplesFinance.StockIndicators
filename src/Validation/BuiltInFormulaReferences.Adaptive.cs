@@ -524,21 +524,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Sfma", result));
                 });
             case IndicatorName.TrueRangeAdjustedExponentialMovingAverage:
-                var rangeMultiplier = Number(options, 1.5, "Mult");
-                return new("Trema", new[] { "Trema" }, bars =>
-                {
-                    var range = TrueRanges(bars);
-                    var smoothedRange = Average(range, length, 3);
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var ratio = smoothedRange[i] == 0 ? 1 : range[i] / smoothedRange[i];
-                        var gain = 2d / (length + 1d) * Math.Min(2, rangeMultiplier * ratio);
-                        var previous = i == 0 ? bars[i].Close : result[i - 1];
-                        result[i] = (1 - gain) * previous + gain * bars[i].Close;
-                    }
-                    return Outputs(("Trema", result));
-                });
+                return new("Trema", new[] { "Trema" }, bars => TrueRangeAdjustedOutputs(bars, indicator));
             case IndicatorName.LightLeastSquaresMovingAverage:
                 var lightKind = AverageKind(options, 1);
                 if (lightKind == 0) return null;

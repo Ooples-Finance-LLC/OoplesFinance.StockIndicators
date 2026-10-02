@@ -17,6 +17,8 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TrueRangeAdjustedExponentialMovingAverage)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrueRangeAdjustedOutputs(bars, builtIn)["Trema"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.TrendAnalysisIndicator)
         {
             var trendIndicatorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Tai", "Signal" };

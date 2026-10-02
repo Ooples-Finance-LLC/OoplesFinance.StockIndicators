@@ -3476,60 +3476,16 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void TrueRangeAdjustedExponentialMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double mult = 1.5)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var trArray = pool.Rent(price.Length);
-        var atrArray = pool.Rent(price.Length);
-        var emaArray = pool.Rent(price.Length);
-
-        try
+        if (output.Length < price.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < price.Length || low.Length < price.Length) throw new ArgumentException("Range spans must be at least input length.", nameof(high));
+        var window = new TrueRangeAdjustedWindow(length, mult);
+        for (var i = 0; i < price.Length; i++)
         {
-            var tr = trArray.AsSpan(0, price.Length);
-            var atr = atrArray.AsSpan(0, price.Length);
-            var ema = emaArray.AsSpan(0, price.Length);
-
-            // Calculate True Range
-            for (var i = 0; i < price.Length; i++)
-            {
-                var prevClose = i >= 1 ? price[i - 1] : price[i];
-                var highLow = high[i] - low[i];
-                var highPrevClose = Math.Abs(high[i] - prevClose);
-                var lowPrevClose = Math.Abs(low[i] - prevClose);
-                tr[i] = Math.Max(highLow, Math.Max(highPrevClose, lowPrevClose));
-            }
-
-            // Calculate ATR
-            ExponentialMovingAverage(tr, atr, length);
-
-            // Calculate base EMA
-            ExponentialMovingAverage(price, ema, length);
-
-            // Apply TR adjustment
-            for (var i = 0; i < price.Length; i++)
-            {
-                var currentTr = tr[i];
-                var currentAtr = atr[i];
-                var ratio = currentAtr != 0 ? currentTr / currentAtr : 1;
-                var adjustedAlpha = 2.0 / (length + 1) * Math.Min(ratio * mult, 2);
-
-                if (i == 0)
-                {
-                    output[i] = price[i];
-                }
-                else
-                {
-                    output[i] = output[i - 1] + adjustedAlpha * (price[i] - output[i - 1]);
-                }
-            }
+            Streaming.StreamingInputValidation.Finite(price[i], nameof(price));
+            Streaming.StreamingInputValidation.Finite(high[i], nameof(high));
+            Streaming.StreamingInputValidation.Finite(low[i], nameof(low));
         }
-        finally
-        {
-            pool.Return(trArray);
-            pool.Return(atrArray);
-            pool.Return(emaArray);
-        }
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], high[i], low[i], true).Line;
     }
 
     /// <summary>

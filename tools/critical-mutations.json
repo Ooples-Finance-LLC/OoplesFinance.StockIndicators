@@ -78799,5 +78799,311 @@
     "before": "new TrendAnalysisIndicatorState(trendIndex.MaType, trendIndex.Length1, trendIndex.Length2)",
     "after": "new TrendAnalysisIndicatorState(trendIndex.MaType, 1, trendIndex.Length2)",
     "filter": "FullyQualifiedName~TrendAnalysisIndicatorNumericalTests.EveryRouteMatchesIndependentSquaredResiduals"
+  },
+  {
+    "id": "true-range-adjusted-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_mult = Number.Of(mult)",
+    "after": "_mult = Number.Of(1)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-range-previous",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_count == 0 ? current : _previousPrice",
+    "after": "_count == 0 ? current : _previousPrice.Times(0)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-range-max",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "(a - b).Sign >= 0 ? a : b",
+    "after": "(a - b).Sign >= 0 ? b : a",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-range-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "var sum = _sum;",
+    "after": "range = Number.Of(range.Publish()); var sum = _sum;",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.OverflowingRangesAndFeedbackRecoverWithoutReset"
+  },
+  {
+    "id": "true-range-adjusted-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-ema-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_average.Times(_length - 1L)",
+    "after": "_average.Times(_length)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-ema-current",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "range.Times(2)",
+    "after": "range.Times(1)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "average.Sign == 0 ? Number.Of(1)",
+    "after": "average.Sign == 0 ? Number.Of(0)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "range.Divide(average)",
+    "after": "average.Divide(range)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-gain-cap",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "(gain - Number.Of(2)).Sign > 0",
+    "after": "(gain - Number.Of(2)).Sign < 0",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-gain-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "gain.Times(2).Divide(_length + 1L)",
+    "after": "gain.Times(2).Divide(_length)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-gain-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "var line = _count == 0",
+    "after": "gain = Number.Of(gain.Publish()); var line = _count == 0",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.ExtremePeriodsAndMultiplierBoundariesRemainDefined"
+  },
+  {
+    "id": "true-range-adjusted-wide-feedback-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_line + gain * (current - _line)",
+    "after": "Number.Of(_line.Publish()) + gain * (current - Number.Of(_line.Publish()))",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.OverflowingRangesAndFeedbackRecoverWithoutReset"
+  },
+  {
+    "id": "true-range-adjusted-wide-first-price",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_count == 0 ? current : _line +",
+    "after": "_count == 0 ? default : _line +",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-slope",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "var slope = line - _line",
+    "after": "var slope = _line - line",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "slope - _previousSlope",
+    "after": "_previousSlope - slope",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-slope-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "var slope = line - _line",
+    "after": "var slope = Number.Of(line.Publish()) - Number.Of(_line.Publish())",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.SubnormalGainAndUnpublishedSlopesSurvive"
+  },
+  {
+    "id": "true-range-adjusted-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "if (final) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-mean-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_average = average;",
+    "after": "_average = default;",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_previousPrice = current;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-line-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_line = line;",
+    "after": "_line = default;",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-slope-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "_count = 0; _sum",
+    "after": "_count = 1; _sum",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/TrueRangeAdjustedWindow.cs",
+    "scope": "internal sealed class TrueRangeAdjustedWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "true-range-adjusted-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class TrueRangeAdjustedExponentialMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.InvalidCandlesAndMultipliersCannotAdvanceState"
+  },
+  {
+    "id": "true-range-adjusted-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class TrueRangeAdjustedExponentialMovingAverageState",
+    "before": "bar.Low, isFinal)",
+    "after": "bar.Low, true)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class TrueRangeAdjustedExponentialMovingAverageState",
+    "before": "new(length, mult)",
+    "after": "new(1, mult)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class TrueRangeAdjustedExponentialMovingAverageState",
+    "before": "{ \"Trema\", point.Line }",
+    "after": "{ \"Trema\", 0 }",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void TrueRangeAdjustedExponentialMovingAverage",
+    "before": "new TrueRangeAdjustedWindow(length, mult)",
+    "after": "new TrueRangeAdjustedWindow(1, mult)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.IndependentGainAndSignalHands"
+  },
+  {
+    "id": "true-range-adjusted-wide-core-low",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void TrueRangeAdjustedExponentialMovingAverage",
+    "before": "window.Next(price[i], high[i], low[i], true)",
+    "after": "window.Next(price[i], high[i], high[i], true)",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.OverflowingRangesAndFeedbackRecoverWithoutReset"
+  },
+  {
+    "id": "true-range-adjusted-wide-core-tail",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void TrueRangeAdjustedExponentialMovingAverage",
+    "before": "for (var i = 0; i < price.Length; i++) output[i]",
+    "after": "for (var i = 0; i < output.Length; i++) output[i]",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.CoreSpanGuardsPreserveOutputAndAllowInPlaceInput"
+  },
+  {
+    "id": "true-range-adjusted-wide-core-prevalidation",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void TrueRangeAdjustedExponentialMovingAverage",
+    "before": "Streaming.StreamingInputValidation.Finite(price[i], nameof(price));",
+    "after": "Streaming.StreamingInputValidation.Finite(0, nameof(price));",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.InvalidCandlesAndMultipliersCannotAdvanceState"
+  },
+  {
+    "id": "true-range-adjusted-wide-fast-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTrueRangeAdjustedExponentialMovingAverageFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TrueRangeAdjustedNumericalTests.SelectedSourcePreservesFormula"
   }
 ]

@@ -336,60 +336,13 @@ public sealed class VolumeZoneOscillatorState : IStreamingIndicatorState
 [PrimaryOutput("Trema")]
 public sealed class TrueRangeAdjustedExponentialMovingAverageState : IStreamingIndicatorState
 {
-    private readonly double _baseAlpha;
-    private readonly double _mult;
-    private readonly EmaState _averageTrueRange;
-    private readonly StreamingInputResolver _input;
-    private double _value;
-    private double _prevValue;
-    private int _barIndex;
-
-    public TrueRangeAdjustedExponentialMovingAverageState(int length = 14, double mult = 1.5)
-    {
-        var safeLength = Math.Max(1, length);
-        _baseAlpha = 2.0 / (safeLength + 1);
-        _mult = mult;
-        _averageTrueRange = new EmaState(safeLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrueRangeAdjustedWindow _window;
+    public TrueRangeAdjustedExponentialMovingAverageState(int length = 14, double mult = 1.5) => _window = new(length, mult);
     public IndicatorName Name => IndicatorName.TrueRangeAdjustedExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _averageTrueRange.Reset();
-        _value = 0;
-        _prevValue = 0;
-        _barIndex = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var previous = _barIndex >= 1 ? _prevValue : value;
-        var highLow = bar.High - bar.Low;
-        var highClose = Math.Abs(bar.High - previous);
-        var lowClose = Math.Abs(bar.Low - previous);
-        var trueRange = Math.Max(highLow, Math.Max(highClose, lowClose));
-
-        var averageTrueRange = _averageTrueRange.GetNext(trueRange, isFinal);
-        var ratio = averageTrueRange != 0 ? trueRange / averageTrueRange : 1;
-        var adjustedAlpha = _baseAlpha * Math.Min(ratio * _mult, 2);
-        var trema = _barIndex == 0 ? value : _value + (adjustedAlpha * (value - _value));
-
-        if (isFinal)
-        {
-            _value = trema;
-            _prevValue = value;
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Trema", trema } };
-        }
-
-        return new StreamingIndicatorStateResult(trema, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Trema", point.Line } } : null);
     }
 }
