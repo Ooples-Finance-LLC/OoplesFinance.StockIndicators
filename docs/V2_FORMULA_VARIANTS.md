@@ -1007,3 +1007,13 @@ Quality is half the sum of close-change/true-range and candle-body/range. Degene
 For OHLC candles (0,2,0,2), (2,4,1,3), (1,3,3,3), the cumulative line is [1/2,5/6,7/6], SMA2 is [0,2/3,1] and SMA3 is [0,0,5/6]. Final margins tie exactly at 1/6, so the third signal is Buy; subtracting separately rounded outputs would produce a false StrongBuy. Opposing MaxValue candles recover a finite line after an intermediate published infinity without contaminating smoothing state.
 
 Selected prices preserve the original open and use the existing per-bar synthetic-range policy; previews and reset preserve that selection. Batch registered mean callbacks remain bypassed. Fast primary consumes no mean callback; each fast signal consumes one, zero-padding short overrides. All 84 distinct focused checks passed; 37 mutation candidates await isolated qualification.
+
+
+
+### Batch 735: Volatility Based Momentum
+
+Momentum is the close difference over length1 divided by the selected average of true range over length2, with zero output until the lag is available or when ATR is zero. First-bar true range uses the current close as the previous close. The signal averages the unpublished momentum ratio over length1; trading signals compare exact current and previous line-minus-signal margins. SMA, WMA, EMA and Wilder means retain exact differences, ranges and ratios, avoiding premature overflow and subnormal loss. Unsupported moving-average dispatch remains on its existing path.
+
+For closes [0,2,4,0,2] with each candle extending one unit above/below its close and both periods 2, true ranges are [2,3,3,5,3], momentum is [0,0,4/3,-1/2,-1/2], and its simple-average signal is [0,0,2/3,5/12,-1/2]. Signals are None, None, StrongBuy, StrongSell, None. Selected prices use the existing per-bar synthetic-range policy, and native history grows only with observed bars.
+
+Armed batch and fast primary consume the ATR callback once; fast Signal additionally consumes the signal callback. Unarmed standard batch/primary bypass mean callbacks, while fast Signal requests its one final mean. Short replacements are zero-padded. Extreme signed periods clamp consistently to at least one.

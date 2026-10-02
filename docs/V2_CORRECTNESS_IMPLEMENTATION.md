@@ -5189,3 +5189,13 @@ The matched retained snapshots caught **29/29 compiled behavioral faults**, alon
 Every credited mutation has compiled, failing test results. The retired equivalent reset-state candidate remains excluded; no crash, equivalent survivor or compilation failure is counted as a kill. This qualifies the retained batch-732 snapshot without restoring older production files. Later numerical batches and final assurance remain unfinished.
 
 Source snapshot SHA256: `4a91b1bf1de1d2e9c25e799ce61fad586ad74ae7ca9c865c895031d4168ee77e`. Archive SHA256 values: `75bf43da9863e4d3bb77cbf6307b620f3d7ffeb8b5a46cb4dfff708d08468da9`, `75bf43da9863e4d3bb77cbf6307b620f3d7ffeb8b5a46cb4dfff708d08468da9`, `75bf43da9863e4d3bb77cbf6307b620f3d7ffeb8b5a46cb4dfff708d08468da9`.
+
+
+
+### Batch 735: Volatility Based Momentum numerical routes
+
+The local exact helper keeps true range, ATR, momentum and signal smoothing unpublished across batch, fast and native routes. The typed native factory and explicit streaming gate are registered. Independent fraction references and five-route regressions cover all nine configurations.
+
+**83/83 focused tests passed** on net10.0 (`volatilitymomentum735-final.trx`). Coverage includes hand outputs/signals, four standard means, extreme and subnormal prices, zero ranges, large/negative periods, selected direct/native prices, preview/reset, callback order and short overrides, invalid-field atomicity, numerical enrollment and injected output faults. The first build found a value-type default initializer error; it ran no tests, and the corrected build supplied this evidence.
+
+Inventory: **6,736/7,131 enrolled**, **395 omissions across 56 types**, all independent references registered, no construction failures, exact backlog match. WaveTrend, Wilson and Ultimate Moving Average remain separately unpublished. Thirty-seven mutation candidates are queued; final assurance is incomplete.

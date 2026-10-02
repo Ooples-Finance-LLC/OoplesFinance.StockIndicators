@@ -32,6 +32,13 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.VolatilityBasedMomentum)
+        {
+            var qualityKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Vbm", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < qualityKeys.Length; slot++) { var selected = qualityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VolatilityMomentumOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VolatilityQualityIndex)
         {
             var qualityKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Vqi", "FastSignal", "SlowSignal" };

@@ -3386,13 +3386,16 @@ public sealed class UltimateVolatilityIndicatorState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("Vbm")]
-public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDisposable
+public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
+    private readonly VolatilityMomentumWindow? _exact;
+    private bool _selected;
+    void ICustomInputConsumer.ReadCloseAsInput() => _selected = true;
     private readonly int _length1;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _window;
-    private readonly StreamingInputResolver _input;
+    private readonly IMovingAverageSmoother _atrSmoother = null!;
+    private readonly IMovingAverageSmoother _signalSmoother = null!;
+    private readonly PooledRingBuffer<double> _window = null!;
+    private readonly StreamingInputResolver _input = default;
     private double _prevValue;
     private bool _hasPrev;
 
@@ -3400,6 +3403,7 @@ public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDi
         int length2 = 65)
     {
         _length1 = Math.Max(1, length1);
+        if (StrengthWindow.Supports(maType)) { _exact = new(maType, _length1, length2); return; }
         _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length1);
         _window = new PooledRingBuffer<double>(_length1);
@@ -3410,6 +3414,7 @@ public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDi
 
     public void Reset()
     {
+        if (_exact is not null) { _exact.Reset(); return; }
         _atrSmoother.Reset();
         _signalSmoother.Reset();
         _window.Clear();
@@ -3419,6 +3424,12 @@ public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_exact is not null)
+        {
+            var point = _exact.Next(bar.High, bar.Low, bar.Close, isFinal, _selected);
+            return new(point.Line, includeOutputs ? new Dictionary<string, double> { ["Vbm"] = point.Line, ["Signal"] = point.Signal } : null);
+        }
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
@@ -3450,6 +3461,7 @@ public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDi
 
     public void Dispose()
     {
+        if (_exact is not null) { _exact.Dispose(); return; }
         _atrSmoother.Dispose();
         _signalSmoother.Dispose();
         _window.Dispose();

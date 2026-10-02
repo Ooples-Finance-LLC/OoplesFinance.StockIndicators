@@ -541,6 +541,14 @@ public static partial class Calculations
     public static StockData CalculateVolatilityBasedMomentum(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length1 = 22, int length2 = 65)
     {
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
+        if (StrengthWindow.Supports(maType))
+        {
+            var exact = VolatilityMomentumWindow.Calculate(stockData, maType, length1, length2);
+            stockData.SetOutputValues(() => exact.Outputs.ToDictionary(p => p.Key, p => p.Value.ToList()));
+            var trades = CreateSignalsList(stockData); trades?.AddRange(exact.Signals); stockData.SetSignals(trades);
+            stockData.SetCustomValues(exact.Outputs["Vbm"].ToList()); stockData.IndicatorName = IndicatorName.VolatilityBasedMomentum; return stockData;
+        }
         List<double> vbmList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);

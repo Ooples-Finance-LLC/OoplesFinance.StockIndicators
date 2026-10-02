@@ -11,14 +11,7 @@ internal static partial class BuiltInFormulaReferences
         {
             var kind = AverageKind(options, 6);
             if (kind == 0) return null;
-            return new("Vbm", new[] { "Vbm", "Signal" }, bars =>
-            {
-                var lag = Integer(options, "Length1");
-                var range = Average(TrueRanges(bars), Integer(options, "Length2"), kind);
-                var line = bars.Select((b, i) => i < lag || range[i] == 0 ? 0
-                    : (b.Close - bars[i - lag].Close) / range[i]).ToArray();
-                return Outputs(("Vbm", line), ("Signal", Average(line, lag, kind)));
-            });
+            return new("Vbm", new[] { "Vbm", "Signal" }, bars => VolatilityMomentumOutputs(bars, indicator));
         }
         if (indicator.BatchName == IndicatorName.VolatilityQualityIndex)
         {

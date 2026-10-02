@@ -2296,9 +2296,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             VolatilityQualityIndexSpecOptions vqi => ComputeVolatilityQualityIndexFast(data, context, vqi.FastLength, vqi.SlowLength, vqi.MaType, spec.OutputKey),
-            VolatilityBasedMomentumSpecOptions vbm => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType), vbm.Length1, vbm.MaType)
-                : ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType),
+            VolatilityBasedMomentumSpecOptions vbm => ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType, spec.OutputKey),
             VolatilitySwitchIndicatorSpecOptions vsi => ComputeVolatilitySwitchIndicatorFast(data, context, vsi.Length, vsi.MaType),
             ZDistanceFromVwapSpecOptions distance => ComputeZDistanceFromVwapFast(data, context, distance.Length, distance.MaType),
             WaddahAttarExplosionSpecOptions wae => ComputeWaddahAttarExplosionFast(data, context, wae.FastLength, wae.SlowLength, wae.Sensitivity, spec.OutputKey),
@@ -20366,8 +20364,17 @@ internal static partial class IndicatorCompute
     }
 
     internal static ComputeBuffer ComputeVolatilityBasedMomentumFast(StockData data, ComputeContext context, int length1 = 22, int length2 = 65,
-        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, string? outputKey = null)
     {
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
+        if (StrengthWindow.Supports(maType))
+        {
+            var key = outputKey == "Signal" ? "Signal" : "Vbm";
+            var values = VolatilityMomentumWindow.Calculate(data, maType, length1, length2, key).Outputs[key];
+            var result = context.Rent(values.Length);
+            try { values.AsSpan().CopyTo(result.WritableSpan); return result; } catch { result.Dispose(); throw; }
+        }
+        if (outputKey == "Signal") return SmoothPublished(data, context, ComputeVolatilityBasedMomentumFast(data, context, length1, length2, maType), length1, maType);
         // CalculateVolatilityBasedMomentum publishes the raw ratio: the rate of change of the chained series
         // over length1 divided by the average true range over length2. Its average of that ratio feeds only the
         // separately published signal, so this helper stops at the ratio.
