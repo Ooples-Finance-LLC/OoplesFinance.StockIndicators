@@ -67430,8 +67430,8 @@
     "module": "numerical",
     "file": "src/Helpers/MacZWindow.cs",
     "scope": "internal sealed class MacZWindow",
-    "before": "_previousHistogram = default; }",
-    "after": "_previousHistogram = Number.Of(100); }",
+    "before": "_signal.Reset(); _prices.Clear();",
+    "after": "_prices.Clear();",
     "filter": "FullyQualifiedName~MacZNumericalTests.HandValuesIncludeSignalHistogramAndWarmup"
   },
   {
@@ -67494,7 +67494,7 @@
     "file": "src/Streaming/StatefulIndicators.Batch16.cs",
     "scope": "public sealed class MacZIndicatorState",
     "before": "StreamingInputValidation.Validate(bar);",
-    "after": "StreamingInputValidation.Validate(default(OhlcvBar));",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
     "filter": "FullyQualifiedName~MacZNumericalTests.NonfiniteInputsCannotAdvanceState"
   },
   {
