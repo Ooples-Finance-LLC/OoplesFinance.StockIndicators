@@ -1,4 +1,4 @@
-﻿//     Ooples Finance Stock Indicator Library
+//     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
 //     Copyright © Franklin Moormann, 2020-2022
@@ -10,7 +10,6 @@
 
 namespace OoplesFinance.StockIndicators.Models;
 
-[Serializable]
 public class TickerData : ITickerData
 {
     public DateTime Date { get; set; }

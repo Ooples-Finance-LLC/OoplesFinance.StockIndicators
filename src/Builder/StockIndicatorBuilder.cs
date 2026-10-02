@@ -612,7 +612,9 @@ public sealed class StockIndicatorBuilder
     /// <summary>
     /// Builds the indicator runtime.
     /// </summary>
-    public IndicatorRuntime Build()
+    public IndicatorRuntime Build() => Build(System.Buffers.ArrayPool<double>.Shared);
+
+    internal IndicatorRuntime Build(System.Buffers.ArrayPool<double> computePool)
     {
         EnsureDefaults();
 
@@ -636,7 +638,8 @@ public sealed class StockIndicatorBuilder
             streamingOptions,
             _signalOptions,
             _backtestOptions,
-            _benchmarkOptions);
+            _benchmarkOptions,
+            computePool);
     }
 
     /// <summary>

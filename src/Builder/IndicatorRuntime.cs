@@ -47,7 +47,8 @@ public sealed class IndicatorRuntime : IDisposable
 
     // Object pooling for streaming hot-path allocations
     private Dictionary<SeriesHandle, double[]>? _streamingValues;
-    private Dictionary<SeriesHandle, double[]>? _snapshotPool;
+    // The snapshot's currency, so the reused per-handle buffers can be described to it without being copied.
+    private Dictionary<SeriesHandle, ReadOnlyMemory<double>>? _snapshotPool;
     private readonly object _poolLock = new();
 
     // Statistics
@@ -73,7 +74,8 @@ public sealed class IndicatorRuntime : IDisposable
         StreamingOptions? streamingOptions,
         SignalOptions? signalOptions,
         BacktestOptions? backtestOptions,
-        BenchmarkOptions? benchmarkOptions)
+        BenchmarkOptions? benchmarkOptions,
+        ArrayPool<double>? computePool = null)
     {
         _source = source;
         _nodes = nodes;
@@ -101,7 +103,7 @@ public sealed class IndicatorRuntime : IDisposable
         }
 
         // Initialize compute context for pooled fast-path computations
-        _computeContext = new ComputeContext();
+        _computeContext = new ComputeContext(computePool ?? ArrayPool<double>.Shared);
     }
 
     /// <summary>
@@ -333,18 +335,31 @@ public sealed class IndicatorRuntime : IDisposable
         var data = _source.BatchData ?? throw new InvalidOperationException("Batch source missing data.");
         var evaluator = new SeriesEvaluator(data, _nodes, _computeContext);
         var series = evaluator.Evaluate(_activeSeries);
-        Publish(new IndicatorSnapshot(series, _keys, handle =>
-        {
-            if (series.TryGetValue(handle, out var existing))
-            {
-                return existing;
-            }
 
-            var computed = evaluator.Evaluate(handle);
-            series[handle] = computed;
-            ActivateSeries(handle);
-            return computed;
-        }));
+        // A snapshot outlives this runtime. Everything inside it was computed into buffers the
+        // ComputeContext owns and hands back to the pool on Dispose, so publishing those views would give a
+        // caller memory that the next rental overwrites - a snapshot reporting whatever someone else wrote
+        // rather than what it computed. It keeps its own copy. Series that feed other indicators stay
+        // zero-copy inside the evaluator; this is only the boundary where results leave.
+        foreach (var handle in series.Keys.ToList())
+        {
+            series[handle] = series[handle].ToArray();
+        }
+
+        Publish(CreateBatchSnapshot(data, _nodes, _keys, series));
+    }
+
+    private static IndicatorSnapshot CreateBatchSnapshot(StockData data,
+        Dictionary<SeriesHandle, SeriesNode> nodes, Dictionary<IndicatorKey, SeriesHandle> keys,
+        Dictionary<SeriesHandle, ReadOnlyMemory<double>> series)
+    {
+        return new IndicatorSnapshot(series, keys, handle =>
+        {
+            if (!nodes.ContainsKey(handle)) return null;
+            // A deferred lookup owns its temporary buffers; it never calls back into the runtime.
+            using var context = new ComputeContext();
+            return new SeriesEvaluator(data, nodes, context).Evaluate(handle).ToArray();
+        });
     }
 
     private void StartStreaming()
@@ -359,7 +374,7 @@ public sealed class IndicatorRuntime : IDisposable
 
         // Initialize pooled objects for hot-path reuse
         _streamingValues = new Dictionary<SeriesHandle, double[]>(_nodes.Count);
-        _snapshotPool = new Dictionary<SeriesHandle, double[]>(_nodes.Count);
+        _snapshotPool = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>(_nodes.Count);
 
         // Store session as field to prevent premature disposal (Start() is non-blocking)
         _streamingSession = StreamingSession.Create(stream, symbols, options: options);
@@ -472,7 +487,7 @@ public sealed class IndicatorRuntime : IDisposable
         }
     }
 
-    private double[]? ResolveStreamingSeries(Dictionary<SeriesHandle, double[]> snapshotSeries, SeriesHandle handle)
+    private ReadOnlyMemory<double>? ResolveStreamingSeries(Dictionary<SeriesHandle, ReadOnlyMemory<double>> snapshotSeries, SeriesHandle handle)
     {
         if (snapshotSeries.TryGetValue(handle, out var existing))
         {
