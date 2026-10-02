@@ -2295,12 +2295,7 @@ internal static partial class IndicatorCompute
                     vfi.SignalLength, vfi.SmoothLength, vfi.Coef, vfi.Vcoef, vfi.MaType, MacdSeries.Histogram),
                 _ => null
             },
-            VolatilityQualityIndexSpecOptions vqi => spec.OutputKey switch
-            {
-                "FastSignal" => SmoothPublished(data, context, ComputeVolatilityQualityIndexFast(data, context), vqi.FastLength, vqi.MaType),
-                "SlowSignal" => SmoothPublished(data, context, ComputeVolatilityQualityIndexFast(data, context), vqi.SlowLength, vqi.MaType),
-                _ => ComputeVolatilityQualityIndexFast(data, context)
-            },
+            VolatilityQualityIndexSpecOptions vqi => ComputeVolatilityQualityIndexFast(data, context, vqi.FastLength, vqi.SlowLength, vqi.MaType, spec.OutputKey),
             VolatilityBasedMomentumSpecOptions vbm => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType), vbm.Length1, vbm.MaType)
                 : ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType),
@@ -20362,42 +20357,12 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeVolatilityQualityIndexFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeVolatilityQualityIndexFast(StockData data, ComputeContext context, int fastLength = 9, int slowLength = 200,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateVolatilityQualityIndex publishes a running total, not an average true range: each bar
-        // contributes the absolute of a true-range-normalised and body-normalised blend, scaled by the mean
-        // of the close change and the body. fastLength, slowLength and maType only smooth the FastSignal and
-        // SlowSignal keys, so the Vqi series this arm serves takes none of them.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double vqiSum = 0;
-        double vqiT = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentClose = input[i];
-            // The batch seeds the first bar's previous close with the current close so the true range is
-            // not inflated by an absent prior bar.
-            var prevClose = i >= 1 ? input[i - 1] : input[i];
-            var trueRange = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], prevClose);
-            var barRange = highs[i] - lows[i];
-
-            vqiT = trueRange != 0 && barRange != 0
-                ? (((currentClose - prevClose) / trueRange) + ((currentClose - opens[i]) / barRange)) * 0.5
-                : vqiT;
-
-            vqiSum += Math.Abs(vqiT) * ((currentClose - prevClose + (currentClose - opens[i])) * 0.5);
-            output[i] = vqiSum;
-        }
-
-        return buffer;
+        var key = outputKey is "FastSignal" or "SlowSignal" ? outputKey : "Vqi";
+        var values = VolatilityQualityWindow.Calculate(data, maType, fastLength, slowLength, key).Outputs[key]; var output = context.Rent(values.Length);
+        try { values.AsSpan().CopyTo(output.WritableSpan); return output; } catch { output.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeVolatilityBasedMomentumFast(StockData data, ComputeContext context, int length1 = 22, int length2 = 65,

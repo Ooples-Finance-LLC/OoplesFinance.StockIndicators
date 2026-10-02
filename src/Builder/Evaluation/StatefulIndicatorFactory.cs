@@ -235,6 +235,7 @@ internal static partial class StatefulIndicatorFactory
             EdgePreservingFilterSpecOptions edge => new EdgePreservingFilterState(edge.MaType, edge.Length),
             WellesWilderVolatilitySystemSpecOptions d => new WellesWilderVolatilitySystemState(d.MaType, d.Length1, d.Length2, d.Factor),
             UtBotAlertsSpecOptions d => new UtBotAlertsState(d.MaType, d.Length, d.KeyValue),
+            VolatilityQualityIndexSpecOptions quality => new VolatilityQualityIndexState(quality.MaType, quality.FastLength, quality.SlowLength),
             ZDistanceFromVwapSpecOptions d => new ZDistanceFromVwapState(d.MaType, d.Length),
             VolumeAdaptiveBandsSpecOptions bands => new VolumeAdaptiveBandsState(bands.MaType, bands.Length),
             VpciSpecOptions vpci => new VolumePriceConfirmationIndicatorState(length: vpci.Length),

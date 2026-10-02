@@ -997,3 +997,13 @@ The output follows LazyBear calc_zvwap: each residual is price minus its own tra
 Exact products, sums, means, and squared residuals survive intermediate overflow and underflow. The final signed root of length*currentResidualSquared/sumResidualSquared is rounded directly to binary64. Observed-history queues handle extreme periods. For prices [1,3,2], volumes [1,1,2], and length 2, means are [1,2,7/3], residuals [0,1,-1/3], and scores [0,sqrt(2),-sqrt(1/5)]. A one-ULP price move and subnormal volume-price products retain their normalized movement.
 
 The independent reference translates each price window by the current price and uses binary64 root bisection, separately from production's weighted sum and integer-root rounding. Registered means retain callback bypass; selected inputs retain original volumes. Signal comparisons still use published scores. Exact signal comparisons are a pending scope decision; these five configurations remain in the numerical backlog.
+
+
+
+### Batch 731: Volatility Quality Index
+
+Quality is half the sum of close-change/true-range and candle-body/range. Degenerate ranges carry the preceding quality. Each cumulative contribution is abs(quality)*(close-change+body)/2, and the two signal outputs smooth the unpublished cumulative line. The first previous close is the current close. Exact rational differences, ratios, accumulation and means preserve overflowing and underflowing intermediates; signal margins are compared before rounding.
+
+For OHLC candles (0,2,0,2), (2,4,1,3), (1,3,3,3), the cumulative line is [1/2,5/6,7/6], SMA2 is [0,2/3,1] and SMA3 is [0,0,5/6]. Final margins tie exactly at 1/6, so the third signal is Buy; subtracting separately rounded outputs would produce a false StrongBuy. Opposing MaxValue candles recover a finite line after an intermediate published infinity without contaminating smoothing state.
+
+Selected prices preserve the original open and use the existing per-bar synthetic-range policy; previews and reset preserve that selection. Batch registered mean callbacks remain bypassed. Fast primary consumes no mean callback; each fast signal consumes one, zero-padding short overrides. All 84 distinct focused checks passed; 37 mutation candidates await isolated qualification.

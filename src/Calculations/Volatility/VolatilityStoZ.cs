@@ -594,47 +594,9 @@ public static partial class Calculations
     public static StockData CalculateVolatilityQualityIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 9, int slowLength = 200)
     {
-        List<double> vqiList = new(stockData.Count);
-        List<double> vqiSumList = new(stockData.Count);
-        List<double> vqiTList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-        double vqiSum = 0;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentClose = inputList[i];
-            var currentOpen = openList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-            var trueRange = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
-
-            var prevVqiT = GetLastOrDefault(vqiTList);
-            var vqiT = trueRange != 0 && currentHigh - currentLow != 0 ?
-                (((currentClose - prevClose) / trueRange) + ((currentClose - currentOpen) / (currentHigh - currentLow))) * 0.5 : prevVqiT;
-            vqiTList.Add(vqiT);
-
-            var vqi = Math.Abs(vqiT) * ((currentClose - prevClose + (currentClose - currentOpen)) * 0.5);
-            vqiList.Add(vqi);
-
-            vqiSum += vqi;
-            vqiSumList.Add(vqiSum);
-        }
-
-        var vqiSumFastSmaList = GetMovingAverageList(stockData, maType, fastLength, vqiSumList);
-        var vqiSumSlowSmaList = GetMovingAverageList(stockData, maType, slowLength, vqiSumList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var vqiSumValue = vqiSumList[i];
-            var vqiSumFastSma = vqiSumFastSmaList[i];
-            var prevVqiSum = i >= 1 ? vqiSumList[i - 1] : 0;
-            var prevVqiSumFastSma = i >= 1 ? vqiSumFastSmaList[i - 1] : 0;      
-
-            var signal = GetCompareSignal(vqiSumValue - vqiSumFastSma, prevVqiSum - prevVqiSumFastSma);
-            signalsList?.Add(signal);
-        }
+        var result = VolatilityQualityWindow.Calculate(stockData, maType, fastLength, slowLength);
+        var vqiSumList = result.Outputs["Vqi"].ToList(); var vqiSumFastSmaList = result.Outputs["FastSignal"].ToList();
+        var vqiSumSlowSmaList = result.Outputs["SlowSignal"].ToList(); var signalsList = CreateSignalsList(stockData); signalsList?.AddRange(result.Signals);
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Vqi", vqiSumList },

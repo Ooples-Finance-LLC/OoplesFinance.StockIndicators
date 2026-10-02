@@ -5163,3 +5163,13 @@ The active manifest retires that candidate. Historical evidence remains unchange
 The runner-fixed PFE campaign exposed two surviving faults that substituted original closes for selected prices in the direct fast and batch methods. The existing selected-input test exercised only native builder routes, so those mutations were not reached. The same parameterized test now calls both methods directly with constant original closes and an oscillating selected series. It asserts a nonzero independent selected-series result, checks both outputs, and preserves the original closes and caller selection.
 
 Production code is unchanged. A test-only build passed all 110 PFE class tests; the existing Hannula golden-file test passed against the same binaries without rebuilding, preserving **111 distinct focused passes**. All 9,601 manifest anchors validated. Fresh matched snapshots contain the repaired test and the existing 40 behavioral fault candidates. Earlier survivor campaigns remain unqualified and are retained unchanged; replacement mutation qualification is queued. Numerical inventory remains 6,718/7,131, with 413 omissions across 58 types.
+
+
+
+### Batch 731: Volatility Quality Index numerical routes
+
+The local exact helper replaces rounded differences/ratios and premature signal smoothing across batch, fast, native and explicit streaming paths. The missing typed native factory mapping is registered. The independent reference combines quality terms into one fraction and uses separately implemented exact means. Three cached output references cover all nine configurations.
+
+**84/84 distinct focused tests passed** on net10.0: 83 initial class cases plus one native selected-price synthetic-range/preview/reset regression added after the initial build. The additional test used a test-only build with unchanged production outputs. Coverage includes all five routes, selected original candle fields, enrollment, injected faults, hand signal ties, four means, signed/extreme/subnormal inputs, zero-range carry, lazy extreme periods, callback behavior and invalid-field atomicity.
+
+Inventory: **6,727/7,131 enrolled**, **404 omissions across 57 types**, all independent references registered, no construction failures, exact backlog match. Wilson, WaveTrend and Ultimate Moving Average remain separately unpublished. Thirty-seven mutation candidates are frozen and queued; final assurance remains incomplete.

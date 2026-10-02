@@ -83515,5 +83515,338 @@
     "before": "ZDistanceWindow.Calculate(data, maType, length)",
     "after": "ZDistanceWindow.Calculate(data, maType, 1)",
     "filter": "FullyQualifiedName~ZDistanceNumericalTests.IndependentHandsUseHistoricalResidualsAndFullWidthWarmup"
+  },
+  {
+    "id": "volatility-quality-wide-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "var prior = _hasPrevious ? _previousPrice : close;",
+    "after": "var prior = _hasPrevious ? _previousPrice : 0;",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-selected-range",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "if (selected && !CalculationsHelper.IsWithinBarRange",
+    "after": "if (false && !CalculationsHelper.IsWithinBarRange",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.NativeSelectedPricesUseSyntheticRangesAndPreview"
+  },
+  {
+    "id": "volatility-quality-wide-body",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "price - Number.Of(open)",
+    "after": "price + Number.Of(open)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-true-range",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "(candidate - trueRange).Sign > 0",
+    "after": "(candidate - trueRange).Sign < 0",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-quality-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "body.Divide(range)).Divide(2)",
+    "after": "body.Divide(range)).Divide(4)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-quality-carry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": ": _quality;",
+    "after": ": default;",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.ZeroRangeCarryIncludesFirstBarAndGaps"
+  },
+  {
+    "id": "volatility-quality-wide-quality-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "_sum + Abs(quality) *",
+    "after": "_sum + quality *",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-contribution-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "(change + body).Divide(2)",
+    "after": "(change + body).Divide(4)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-sum-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "var sum = _sum +",
+    "after": "var sum = default(Number) +",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-line-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "if (final) { _sum",
+    "after": "if (true) { _sum",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-quality-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "_quality = quality;",
+    "after": "_quality = default;",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.ZeroRangeCarryIncludesFirstBarAndGaps"
+  },
+  {
+    "id": "volatility-quality-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "_previousPrice = close;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-trade-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "(margin - previous).Sign > 0",
+    "after": "(margin - previous).Sign >= 0",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-native-fast",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "_fast.Next(line, final)",
+    "after": "_fast.Next(line, true)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-native-slow",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "_slow.Next(line, final)",
+    "after": "_slow.Next(line, true)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.ChainedValues",
+    "after": "data.ChainedValues",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.InvalidFieldsCannotAdvanceQualityOrMeans"
+  },
+  {
+    "id": "volatility-quality-wide-batch-hooks",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "fastOutput is null ? null : ComponentAverage.Take",
+    "after": "false ? null : ComponentAverage.Take",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.FastSignalsConsumeOneCallbackAndBatchBypassesRegisteredCallbacks"
+  },
+  {
+    "id": "volatility-quality-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.FastSignalsConsumeOneCallbackAndBatchBypassesRegisteredCallbacks"
+  },
+  {
+    "id": "volatility-quality-wide-mean-publication",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "line.Select(v => mean.Next(v, true))",
+    "after": "line.Select(v => mean.Next(Number.Of(v.Publish()), true))",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-fast-route-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "fastOutput == \"FastSignal\" ? Mean(fast)",
+    "after": "fastOutput == \"FastSignal\" ? Mean(slow)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.FastSignalsConsumeOneCallbackAndBatchBypassesRegisteredCallbacks"
+  },
+  {
+    "id": "volatility-quality-wide-slow-route-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "fastOutput == \"SlowSignal\" ? Mean(slow)",
+    "after": "fastOutput == \"SlowSignal\" ? Mean(fast)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.FastSignalsConsumeOneCallbackAndBatchBypassesRegisteredCallbacks"
+  },
+  {
+    "id": "volatility-quality-wide-reset-fast",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "_fast.Reset(); _slow.Reset();",
+    "after": "_slow.Reset();",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-reset-quality",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "internal sealed class VolatilityQualityWindow",
+    "before": "_quality = _sum = _previousMargin = default;",
+    "after": "_sum = _previousMargin = default;",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.ZeroRangeCarryIncludesFirstBarAndGaps"
+  },
+  {
+    "id": "volatility-quality-wide-mean-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "volatility-quality-wide-weight-aging",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-weight-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityQualityWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.StandardMeansRetainExtendedTotalsAndSubnormalContributions"
+  },
+  {
+    "id": "volatility-quality-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class VolatilityQualityIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.InvalidFieldsCannotAdvanceQualityOrMeans"
+  },
+  {
+    "id": "volatility-quality-wide-native-selected",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class VolatilityQualityIndexState",
+    "before": "_selected = true",
+    "after": "_selected = false",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.NativeSelectedPricesUseSyntheticRangesAndPreview"
+  },
+  {
+    "id": "volatility-quality-wide-native-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "VolatilityQualityIndexSpecOptions quality => new VolatilityQualityIndexState(quality.MaType, quality.FastLength, quality.SlowLength),",
+    "after": "VolatilityQualityIndexSpecOptions quality => null,",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.SelectedPricesRetainCandleFieldsAndLocalRangeRule"
+  },
+  {
+    "id": "volatility-quality-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolatilityQualityIndexFast(",
+    "before": "var key = outputKey is \"FastSignal\" or \"SlowSignal\" ? outputKey : \"Vqi\";",
+    "after": "var key = \"Vqi\";",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.HandQualityCarryAndExactMarginTieDetermineSignals"
+  },
+  {
+    "id": "volatility-quality-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "VolatilityQualityIndex or ",
+    "after": "",
+    "filter": "FullyQualifiedName~VolatilityQualityNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

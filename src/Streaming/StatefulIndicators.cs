@@ -3457,78 +3457,22 @@ public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDi
 }
 
 [PrimaryOutput("Vqi")]
-public sealed class VolatilityQualityIndexState : IStreamingIndicatorState, IDisposable
+public sealed class VolatilityQualityIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _vqiSum;
-    private double _prevVqiT;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public VolatilityQualityIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 9,
-        int slowLength = 200)
-    {
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolatilityQualityWindow _window;
+    private bool _selected;
+    public VolatilityQualityIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 9, int slowLength = 200)
+        => _window = new(maType, fastLength, slowLength);
     public IndicatorName Name => IndicatorName.VolatilityQualityIndex;
-
-    public void Reset()
-    {
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-        _vqiSum = 0;
-        _prevVqiT = 0;
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _selected = true;
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For first bar, use current value as previous close (matches batch behavior)
-        var prevClose = _hasPrev ? _prevClose : value;
-        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var range = bar.High - bar.Low;
-        var vqiT = trueRange != 0 && range != 0
-            ? (((value - prevClose) / trueRange) + ((value - bar.Open) / range)) * 0.5
-            : _prevVqiT;
-        var vqi = Math.Abs(vqiT) * ((value - prevClose + (value - bar.Open)) * 0.5);
-        var vqiSum = _vqiSum + vqi;
-        var fast = _fastSmoother.Next(vqiSum, isFinal);
-        var slow = _slowSmoother.Next(vqiSum, isFinal);
-
-        if (isFinal)
-        {
-            _vqiSum = vqiSum;
-            _prevVqiT = vqiT;
-            _prevClose = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Vqi", vqiSum },
-                { "FastSignal", fast },
-                { "SlowSignal", slow }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vqiSum, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, isFinal, _selected);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double>
+            { ["Vqi"] = point.Line, ["FastSignal"] = point.Fast, ["SlowSignal"] = point.Slow } : null);
     }
-
-    public void Dispose()
-    {
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 [PrimaryOutput("Obv")]
 public sealed class OnBalanceVolumeState : IStreamingIndicatorState, IDisposable
