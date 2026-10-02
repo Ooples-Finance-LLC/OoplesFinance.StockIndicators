@@ -16523,40 +16523,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8, int smoothLength = 25,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculatePremierStochasticOscillator rescales the raw stochastic about its midline, smooths that
-        // twice over the square root of smoothLength, and maps the result through the hyperbolic tangent so it
-        // is bounded to [-1, 1]. The arm this replaced used neither the chained series nor either smoothing.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var len = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(smoothLength)));
-
-        using var fastK = context.Rent(count);
-        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length, fastK.WritableSpan);
-
-        using var normalized = context.Rent(count);
-        var nsk = normalized.WritableSpan;
-        var stochastic = fastK.Span;
-        for (var i = 0; i < count; i++)
-        {
-            nsk[i] = 0.1 * (stochastic[i] - 50);
-        }
-
-        using var firstPass = context.Rent(count);
-        MovingAverage(data, maType, len, normalized.Span, firstPass.WritableSpan);
-
-        using var secondPass = context.Rent(count);
-        MovingAverage(data, maType, len, firstPass.Span, secondPass.WritableSpan);
-        var ss = secondPass.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var expss = MathHelper.Exp(ss[i]);
-            output[i] = expss + 1 != 0 ? MathHelper.MinOrMax((expss - 1) / (expss + 1), 1, -1) : 0;
-        }
-
-        return buffer;
+        var values = PremierStochasticWindow.Calculate(data, maType, length, smoothLength, true);
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

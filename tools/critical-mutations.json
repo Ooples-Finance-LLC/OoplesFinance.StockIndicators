@@ -72724,5 +72724,419 @@
     "before": "PivotDetectorOscillator or ",
     "after": "",
     "filter": "FullyQualifiedName~PivotDetectorNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "premier-stochastic-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-smooth-ceiling",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "Math.Ceiling(Math.Sqrt(Math.Max(1, smooth)))",
+    "after": "Math.Floor(Math.Sqrt(Math.Max(1, smooth)))",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.IndependentMidlineAndSubnormalHands"
+  },
+  {
+    "id": "premier-stochastic-wide-smooth-cap",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(529,",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.IndependentMidlineAndSubnormalHands"
+  },
+  {
+    "id": "premier-stochastic-wide-smooth-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "Math.Max(2, Math.Min",
+    "after": "Math.Max(1, Math.Min",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "_count - _length + 1L",
+    "after": "_count - _length",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-extreme-high",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "Math.Max(value, first.Value.Value)",
+    "after": "Math.Min(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-extreme-low",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "Math.Min(value, first.Value.Value)",
+    "after": "Math.Max(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-history-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "if (final)\n        {",
+    "after": "if (final || value != 0)\n        {",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-flat-range",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "if (upper == lower) value = -5",
+    "after": "if (upper == lower) value = 0",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.IndependentMidlineAndSubnormalHands"
+  },
+  {
+    "id": "premier-stochastic-wide-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "price >= lower) value = -5",
+    "after": "price >= lower) value = 5",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "price <= upper) value = 5",
+    "after": "price <= upper) value = -5",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-center-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "top.Add(price, 10)",
+    "after": "top.Add(price, 9)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.IndependentMidlineAndSubnormalHands"
+  },
+  {
+    "id": "premier-stochastic-wide-center-lower",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "top.Add(lower, -5)",
+    "after": "top.Add(lower, -4)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.IndependentMidlineAndSubnormalHands"
+  },
+  {
+    "id": "premier-stochastic-wide-center-upper",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "top.Add(upper, -5)",
+    "after": "top.Add(upper, -4)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.IndependentMidlineAndSubnormalHands"
+  },
+  {
+    "id": "premier-stochastic-wide-published-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "value = top.Ratio(bottom);",
+    "after": "value = .1 * (ClampedRangePosition.Percent(price, lower, upper) - 50);",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.IndependentMidlineAndSubnormalHands"
+  },
+  {
+    "id": "premier-stochastic-wide-count-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "if (final) _count++;",
+    "after": "if (final || price != 0) _count++;",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-tiny-tie",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "(magnitude / 2)",
+    "after": "((magnitude + 1) / 2)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.HalfTanhResolvesEverySubnormalMidpointAndLargeCallbackValue"
+  },
+  {
+    "id": "premier-stochastic-wide-tiny-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "(bits & long.MinValue) | (magnitude / 2)",
+    "after": "magnitude / 2",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.HalfTanhResolvesEverySubnormalMidpointAndLargeCallbackValue"
+  },
+  {
+    "id": "premier-stochastic-wide-tanh-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "Math.Tanh(value / 2)",
+    "after": "Math.Tanh(value)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.HalfTanhResolvesEverySubnormalMidpointAndLargeCallbackValue"
+  },
+  {
+    "id": "premier-stochastic-wide-unstable-exp",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "Math.Tanh(value / 2)",
+    "after": "(Math.Exp(value) - 1) / (Math.Exp(value) + 1)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.HalfTanhResolvesEverySubnormalMidpointAndLargeCallbackValue"
+  },
+  {
+    "id": "premier-stochastic-wide-first-stage",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "_first!.Next(Raw(price, high, low, final), final)",
+    "after": "Raw(price, high, low, final)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "ComponentAverage.Take(values, period)",
+    "after": "ComponentAverage.Take(values, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.CallbacksPreserveBothStagesAndResolvedPeriod"
+  },
+  {
+    "id": "premier-stochastic-wide-callback-stage-input",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "var second = external ? Average(first)",
+    "after": "var second = external ? Average(raw)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.CallbacksPreserveBothStagesAndResolvedPeriod"
+  },
+  {
+    "id": "premier-stochastic-wide-signal-buy",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "slope.Sign > 0 && slope > oldSlope",
+    "after": "slope.Sign > 0 && slope < oldSlope",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-signal-sell",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "slope.Sign < 0 && slope < oldSlope",
+    "after": "slope.Sign < 0 && slope > oldSlope",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-reset-highs",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "_highs.Clear(); _lows.Clear(); _first?.Reset();",
+    "after": "_lows.Clear(); _first?.Reset();",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-reset-first",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "_first?.Reset(); _second?.Reset();",
+    "after": "_second?.Reset();",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "internal sealed class PremierStochasticWindow",
+    "before": "_second?.Reset(); _count = 0;",
+    "after": "_second?.Reset();",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Subtract(default);",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (_history.Count == _length) sum.Add(_history.Peek(), -1);",
+    "after": "if (_history.Count > _length) sum.Add(_history.Peek(), -1);",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "next.Add(_previous, _length - 1)",
+    "after": "next.Add(_previous, _length)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremeRangesAndReversedEndpointsStayBounded"
+  },
+  {
+    "id": "premier-stochastic-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "if (final)\n            {",
+    "after": "if (final || value != 0)\n            {",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PremierStochasticWindow.cs",
+    "scope": "private sealed class Mean",
+    "before": "_sum = _weighted = default;",
+    "after": "_weighted = default;",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+  },
+  {
+    "id": "premier-stochastic-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class PremierStochasticOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (!isFinal && !includeOutputs) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.InvalidCandlesCannotAdvanceState"
+  },
+  {
+    "id": "premier-stochastic-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PremierStochastic(",
+    "before": "length, smoothLength);",
+    "after": "length, length);",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.CoreSpanGuardsAndInPlaceReplay"
+  },
+  {
+    "id": "premier-stochastic-wide-core-high-span",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PremierStochastic(",
+    "before": "if (high.Length < close.Length)",
+    "after": "if (high.Length > close.Length)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.CoreSpanGuardsAndInPlaceReplay"
+  },
+  {
+    "id": "premier-stochastic-wide-core-low-span",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PremierStochastic(",
+    "before": "if (low.Length < close.Length)",
+    "after": "if (low.Length > close.Length)",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.CoreSpanGuardsAndInPlaceReplay"
+  },
+  {
+    "id": "premier-stochastic-wide-factory-alias-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "length: premier.Length",
+    "after": "length: 1",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "premier-stochastic-wide-factory-full-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "premierFull.Length, premierFull.SmoothLength",
+    "after": "1, premierFull.SmoothLength",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "premier-stochastic-wide-streaming-full",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "PremierStochasticOscillatorSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "premier-stochastic-wide-streaming-alias",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "PremierStochasticSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "premier-stochastic-wide-enrollment-full",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "PremierStochasticOscillator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "premier-stochastic-wide-enrollment-alias",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "PremierStochastic or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

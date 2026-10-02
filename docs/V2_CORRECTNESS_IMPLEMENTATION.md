@@ -4591,3 +4591,10 @@ PFE and its full-name indicator preserve finite signed distance/path ratios acro
 Exact component means and RSI ratios preserve the long-average branch and output rescaling across public routes. A one-ULP input hand proves why comparing against a rounded mean selects the wrong branch. Minimum-subnormal gain/loss means retain their ratio. Signals use exact differences; previews/reset, lazy periods and three callback slots are covered. The separate local-pivot core remains unchanged pending its alignment decision.
 
 **47/47 focused public tests passed** on net10.0 (pivot681-public.trx), across five typed configurations, including independent exact-fraction references, hand, extreme/subnormal, signal, preview/reset, input-selection, callback and legacy-fallback checks plus the existing golden test. This isolated branch includes Parametric679 and PFE680, based on 452e6973; inventory is **6,502/7,131 enrolled**, **629 omissions across 93 types**, with complete independent references and no construction failures. Periodic677 is not included. The 38 prepared behavioral faults, core-alignment decision and final readiness gates remain pending.
+
+
+### Batch 682: Premier Stochastic centered range and smoothing
+
+Exact centered range arithmetic preserves near-midpoint and extreme-range values before two once-rounded smoothing stages. The final tanh handles subnormal halfway values correctly. Core smoothing periods now use the public ceiling and clamp; both factories expose the alias and full specification. Regression coverage includes independent rational references, hands, callbacks, signals, previews/reset, extreme periods, legacy fallback and core spans.
+
+**113/113 focused tests passed** on net10.0 (premier682.trx), across 13 configurations and the existing golden test. This isolated branch includes batches 679-681; inventory is **6,515/7,131 enrolled**, **616 omissions across 91 types**, with complete independent references and no construction failures. Periodic677 is not included. The 46 prepared behavioral faults and final readiness gates remain pending.

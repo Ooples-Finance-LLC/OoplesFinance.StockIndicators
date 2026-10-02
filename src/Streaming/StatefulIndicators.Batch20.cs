@@ -8,55 +8,16 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Pso")]
 public sealed class PremierStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ssSmoother;
-    private readonly IMovingAverageSmoother _nskSmoother;
-    private readonly StochasticOscillatorState _stochastic;
-
-    public PremierStochasticOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 8, int smoothLength = 25)
-    {
-        var resolved = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(smoothLength)));
-        _stochastic = new StochasticOscillatorState(maType, Math.Max(1, length), 3, 3);
-        _nskSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ssSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-    }
-
+    private readonly PremierStochasticWindow _window;
+    public PremierStochasticOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 8, int smoothLength = 25)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.PremierStochasticOscillator;
-
-    public void Reset()
-    {
-        _stochastic.Reset();
-        _nskSmoother.Reset();
-        _ssSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var sk = _stochastic.Update(bar, isFinal, includeOutputs: false).Value;
-        var nsk = 0.1 * (sk - 50);
-        var nskEma = _nskSmoother.Next(nsk, isFinal);
-        var ss = _ssSmoother.Next(nskEma, isFinal);
-        var exp = MathHelper.Exp(ss);
-        var pso = exp + 1 != 0 ? MathHelper.MinOrMax((exp - 1) / (exp + 1), 1, -1) : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pso", pso }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pso, outputs);
-    }
-
-    public void Dispose()
-    {
-        _stochastic.Dispose();
-        _nskSmoother.Dispose();
-        _ssSmoother.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Pso", value } } : null);
     }
 }
 

@@ -759,3 +759,10 @@ All 111 focused regressions passed on net10.0. The 40 prepared behavioral faults
 The public formula is twice RSI minus 70 above the long moving average, otherwise minus 40. Price differences, finite-window and recursive component means, RSI ratios, price/mean branch decisions and signal differences remain exact until output publication. Zero loss gives RSI 100; the established EMA/Wilder unchanged-price carry rule remains. Periods clamp to one and queues grow only with observed history. Callback slots remain gain, loss and price mean, with respective RSI, RSI and long-average periods. The obsolete typed Length option remains inert, preserving the typed public defaults of 200 and 14. Both streaming factories register the public state.
 
 The separate local-pivot core remains unchanged pending the scope decision. All 47 focused public-route regressions passed on net10.0. The 38 prepared behavioral faults await isolated mutation qualification.
+
+
+### Batch 682: Premier Stochastic centered arithmetic
+
+The full indicator and alias center the exact clamped range position before rounding, then apply two once-rounded averages and tanh(x/2). Finite sums and recursive affine numerators are exact at each binary64 stage boundary. The final transform resolves subnormal half-input midpoint ties toward smaller magnitude, since tanh(x)<x for positive x. Independent rational subtraction and Taylor bounds verify the 15-epsilon input yielding seven epsilon after transformation. The core now uses the public ceiling square-root smoothing period clamped to 2..530. Extrema allocate history lazily; both factories register full and alias specifications. Two smoothing callbacks retain their inputs and resolved period. Signal comparisons use exact differences of published outputs.
+
+All 113 focused public-route regressions passed on net10.0. The 46 prepared behavioral faults await isolated mutation qualification. The shared reference tanh helper is unchanged; this reference has a local midpoint correction and the existing strict relative transform budget with same-sign enforcement.

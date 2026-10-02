@@ -981,6 +981,8 @@ internal static partial class StatefulIndicatorFactory
             RSINGIndicatorSpecOptions rsing => new RSINGIndicatorState(rsing.MaType, rsing.Length),
             QuadraticRegressionSpecOptions quadratic => new QuadraticRegressionState(quadratic.MaType, quadratic.Length),
             HerrickPayoffIndexSpecOptions payoff => new HerrickPayoffIndexState(payoff.PointValue),
+            PremierStochasticSpecOptions premier => new PremierStochasticOscillatorState(length: premier.Length),
+            PremierStochasticOscillatorSpecOptions premierFull => new PremierStochasticOscillatorState(premierFull.MaType, premierFull.Length, premierFull.SmoothLength),
             PivotDetectorOscillatorSpecOptions pivotDetector => new PivotDetectorOscillatorState(pivotDetector.MaType),
             TopsAndBottomsFinderSpecOptions topsBottoms => new TopsAndBottomsFinderState(topsBottoms.MaType, topsBottoms.Length),
             TTMScalperIndicatorSpecOptions => new TTMScalperIndicatorState(),

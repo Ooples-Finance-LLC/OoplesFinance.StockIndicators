@@ -72,46 +72,15 @@ public static partial class Calculations
     public static StockData CalculatePremierStochasticOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 8, int smoothLength = 25)
     {
-        List<double> nskList = new(stockData.Count);
-        List<double> psoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var len = MinOrMax((int)Math.Ceiling(Sqrt(smoothLength)));
-
-        var stochasticRsiList = CalculateStochasticOscillator(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var values = PremierStochasticWindow.Calculate(stockData, maType, length, smoothLength, false).ToList();
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Count; i++)
         {
-            var sk = stochasticRsiList[i];
-
-            var nsk = 0.1 * (sk - 50);
-            nskList.Add(nsk);
+            var previous = i == 0 ? 0 : values[i - 1]; var before = i < 2 ? 0 : values[i - 2];
+            signals?.Add(PremierStochasticWindow.Trade(values[i], previous, before));
         }
-
-        var nskEmaList = GetMovingAverageList(stockData, maType, len, nskList);
-        var ssList = GetMovingAverageList(stockData, maType, len, nskEmaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ss = ssList[i];
-            var prevPso1 = i >= 1 ? psoList[i - 1] : 0;
-            var prevPso2 = i >= 2 ? psoList[i - 2] : 0;
-            var expss = Exp(ss);
-
-            var pso = expss + 1 != 0 ? MinOrMax((expss - 1) / (expss + 1), 1, -1) : 0;
-            psoList.Add(pso);
-
-            var signal = GetRsiSignal(pso - prevPso1, prevPso1 - prevPso2, pso, prevPso1, 0.9, -0.9);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pso", psoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(psoList);
-        stockData.IndicatorName = IndicatorName.PremierStochasticOscillator;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pso", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.PremierStochasticOscillator; return stockData;
     }
 
 
