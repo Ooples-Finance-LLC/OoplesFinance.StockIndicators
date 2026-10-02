@@ -4987,3 +4987,12 @@ The isolated campaigns `670-selected-repaired-a` and `670-selected-repaired-b` p
 Source snapshot SHA256: `ef5a1e68cd71c760a67369f03bf709b7dcd4729e388de0bcbc585f636f4ccb3d`. Archive SHA256: `a8aa1b848d7892a4d5dbc421d50826bc9b682c1a8537892450ae14a62ebea699` and `1749ea4cee15f174d1edfd5e07df426fa4e0a0c91a28eeb50772a189001f5b52`.
 
 This is evidence for the isolated batch-670 source. Source was already published in the batch-670 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 671: Multi-Depth public mutation qualification
+
+The isolated campaigns `671-selected-repaired-a` and `671-selected-repaired-b` passed their baselines and caught **39/39 compiled behavioral faults**, alongside **40/40 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-671 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `6f8e09f7a9dab64902b096cece6aa48edf4a0f4ba207a22e5892900a327eba6a`. Archive SHA256: `b0adee5bc5465a8c6c4b8294a6ca473675ad0de7946f950240e0b03a06d137be` and `1a39caaf6a3f152d5a138a84c50772d8a6ddf815128342ea0d419de12dda59b4`.
+
+This is evidence for the isolated batch-671 source. Source was already published in the batch-671 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
