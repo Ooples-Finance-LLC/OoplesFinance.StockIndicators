@@ -36,6 +36,7 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
     }
 
     internal int Sign => _numerator.Sign;
+    internal (BigInteger Numerator, BigInteger Denominator) Components => (_numerator, _denominator);
     internal ReferenceFraction Abs() => new(BigInteger.Abs(_numerator), _denominator);
     internal static ReferenceFraction FromDouble(double value)
     {

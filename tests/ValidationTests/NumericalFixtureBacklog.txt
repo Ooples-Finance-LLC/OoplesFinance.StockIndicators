@@ -154,14 +154,6 @@ OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/default
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/shorter-periods
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/default
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/longer-length1
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/longer-length2
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/longer-periods
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/minimum-length1
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/minimum-length2
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PeriodicChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Pfe/default
 OoplesFinance.StockIndicators.Indicators.Pfe/longer-periods
 OoplesFinance.StockIndicators.Indicators.Pfe/minimum-periods

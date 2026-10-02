@@ -15,39 +15,7 @@ internal static partial class BuiltInFormulaReferences
         switch (indicator.BatchName)
         {
             case IndicatorName.PeriodicChannel:
-                return new("K", new[] { "K", "Os", "Ap", "Bp", "Cp", "Al", "Bl", "Cl" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var period = Integer(options, "Length1", 500);
-                    var lookback = Integer(options, "Length2", 2);
-                    var correlations = prices.Select((_, i) =>
-                    {
-                        var sample = Window(prices, i, lookback).ToArray();
-                        if (sample.Length < 2 || sample.Max() == sample.Min()) return 0d; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                        if (sample.Length == 2) return (double)Math.Sign(sample[1] - sample[0]);
-                        var average = sample.Average();
-                        var centeredIndex = Enumerable.Range(0, sample.Length).Select(j => j - (sample.Length - 1d) / 2).ToArray();
-                        var covariance = sample.Select((v, j) => (v - average) * centeredIndex[j]).Sum();
-                        return covariance / Math.Sqrt(sample.Sum(v => (v - average) * (v - average)) * centeredIndex.Sum(v => v * v));
-                    }).ToArray();
-                    var sine = prices.Select((_, i) => Math.Sin(i * Math.Sign(correlations.Take(i + 1).Sum()) / (double)period)).ToArray();
-                    // This channel deliberately divides its cumulative sums by bar index, not count.
-                    var priceMeans = prices.Select((_, i) => i == 0 ? 0 : prices.Take(i + 1).Sum() / i).ToArray();
-                    var sineOffsets = sine.Select((v, i) => i == 0 ? 0 : v - sine.Take(i + 1).Sum() / i).ToArray();
-                    var priceOffsets = prices.Select((v, i) => Math.Abs(v - priceMeans[i])).ToArray();
-                    var line = prices.Select((_, i) =>
-                    {
-                        if (i == 0) return 0;
-                        var sineDeviation = sineOffsets.Take(i + 1).Sum(Math.Abs) / i;
-                        var sineZ = sineDeviation == 0 ? 0 : sineOffsets[i] / sineDeviation;
-                        return priceMeans[i] + ((i > 1 ? 2 : 0) + sineZ) * priceOffsets.Take(i + 1).Sum() / i;
-                    }).ToArray();
-                    var errors = prices.Select((v, i) => Math.Abs(v - line[i])).ToArray();
-                    var width = errors.Select((_, i) => i == 0 ? 0 : errors.Take(i + 1).Sum() / i).ToArray();
-                    double[] Band(int multiple) => line.Select((v, i) => v + multiple * width[i]).ToArray();
-                    return Outputs(("K", line), ("Os", width), ("Ap", Band(1)), ("Bp", Band(2)), ("Cp", Band(3)),
-                        ("Al", Band(-1)), ("Bl", Band(-2)), ("Cl", Band(-3)));
-                });
+                return new("K", new[] { "K", "Os", "Ap", "Bp", "Cp", "Al", "Bl", "Cl" }, bars => PeriodicOutputs(bars, indicator));
             case IndicatorName.VortexBands:
                 return new("UpperBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
                 {

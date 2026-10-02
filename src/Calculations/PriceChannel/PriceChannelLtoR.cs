@@ -399,146 +399,24 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePeriodicChannel(this StockData stockData, int length1 = 500, int length2 = 2)
     {
-        List<double> tempList = new(stockData.Count);
-        List<double> indexList = new(stockData.Count);
-        List<double> corrList = new(stockData.Count);
-        List<double> absIndexCumDiffList = new(stockData.Count);
-        List<double> sinList = new(stockData.Count);
-        List<double> inSinList = new(stockData.Count);
-        List<double> absSinCumDiffList = new(stockData.Count);
-        List<double> absInSinCumDiffList = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        List<double> kList = new(stockData.Count);
-        RollingCorrelation corrWindow = new();
-        List<double> absKDiffList = new(stockData.Count);
-        List<double> osList = new(stockData.Count);
-        List<double> apList = new(stockData.Count);
-        List<double> bpList = new(stockData.Count);
-        List<double> cpList = new(stockData.Count);
-        List<double> alList = new(stockData.Count);
-        List<double> blList = new(stockData.Count);
-        List<double> clList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        double indexSum = 0;
-        double absIndexCumDiffSum = 0;
-        double corrSum = 0;
-        double sinSum = 0;
-        double inSinSum = 0;
-        double absSinCumDiffSum = 0;
-        double absInSinCumDiffSum = 0;
-        double tempSum = 0;
-        double absDiffSum = 0;
-        double absKDiffSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new PeriodicChannelWindow(length1, length2);
+        var outputs = PeriodicChannelWindow.Keys.ToDictionary(key => key, _ => new List<double>(stockData.Count));
+        var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var prevValue = GetLastOrDefault(tempList);
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSum += currentValue;
-
-            double index = i;
-            indexList.Add(index);
-            indexSum += index;
-            corrWindow.Add(index, currentValue);
-
-            var indexCum = i != 0 ? indexSum / i : 0;
-            var indexCumDiff = i - indexCum;
-            var absIndexCumDiff = Math.Abs(i - indexCum);
-            absIndexCumDiffList.Add(absIndexCumDiff);
-            absIndexCumDiffSum += absIndexCumDiff;
-
-            var absIndexCum = i != 0 ? absIndexCumDiffSum / i : 0;       
-            var z = absIndexCum != 0 ? indexCumDiff / absIndexCum : 0;
-
-            var corr = corrWindow.R(length2);
-            corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-            corrList.Add((double)corr);
-            corrSum += corr;
-
-            double s = i * Math.Sign(corrSum);
-            var sin = Math.Sin(s / length1);
-            sinList.Add(sin);
-            sinSum += sin;
-
-            var inSin = Math.Sin(s / length1) * -1;
-            inSinList.Add(inSin);
-            inSinSum += inSin;
-
-            var sinCum = i != 0 ? sinSum / i : 0;
-            var inSinCum = i != 0 ? inSinSum / i : 0;
-            var sinCumDiff = sin - sinCum;
-            var inSinCumDiff = inSin - inSinCum;
-
-            var absSinCumDiff = Math.Abs(sin - sinCum);
-            absSinCumDiffList.Add(absSinCumDiff);
-            absSinCumDiffSum += absSinCumDiff;
-
-            var absSinCum = i != 0 ? absSinCumDiffSum / i : 0;
-            var absInSinCumDiff = Math.Abs(inSin - inSinCum);
-            absInSinCumDiffList.Add(absInSinCumDiff);
-            absInSinCumDiffSum += absInSinCumDiff;
-
-            var absInSinCum = i != 0 ? absInSinCumDiffSum / i : 0;       
-            var zs = absSinCum != 0 ? sinCumDiff / absSinCum : 0;
-            var inZs = absInSinCum != 0 ? inSinCumDiff / absInSinCum : 0;       
-            var cum = i != 0 ? tempSum / i : 0;
-
-            var absDiff = Math.Abs(currentValue - cum);
-            absDiffList.Add(absDiff);
-            absDiffSum += absDiff;
-
-            var absDiffCum = i != 0 ? absDiffSum / i : 0;
-            var prevK = GetLastOrDefault(kList);
-            var k = cum + ((z + zs) * absDiffCum);
-            kList.Add(k);
-
-            var inK = cum + ((z + inZs) * absDiffCum);
-            var absKDiff = Math.Abs(currentValue - k);
-            absKDiffList.Add(absKDiff);
-            absKDiffSum += absKDiff;
-
-            var absInKDiff = Math.Abs(currentValue - inK);
-            var os = i != 0 ? absKDiffSum / i : 0;
-            osList.Add(os);
-
-            var ap = k + os;
-            apList.Add(ap);
-
-            var bp = ap + os;
-            bpList.Add(bp);
-
-            var cp = bp + os;
-            cpList.Add(cp);
-
-            var al = k - os;
-            alList.Add(al);
-
-            var bl = al - os;
-            blList.Add(bl);
-
-            var cl = bl - os;
-            clList.Add(cl);
-
-            var signal = GetCompareSignal(currentValue - k, prevValue - prevK);
-            signalsList?.Add(signal);
+            var point = window.Next(price, true);
+            for (var j = 0; j < PeriodicChannelWindow.Keys.Length; j++) outputs[PeriodicChannelWindow.Keys[j]].Add(point.Values[j]);
+            signals?.Add(point.Trade);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "K", kList },
-            { "Os", osList },
-            { "Ap", apList },
-            { "Bp", bpList },
-            { "Cp", cpList },
-            { "Al", alList },
-            { "Bl", blList },
-            { "Cl", clList }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>
+        {
+            { "K", outputs["K"] }, { "Os", outputs["Os"] }, { "Ap", outputs["Ap"] }, { "Bp", outputs["Bp"] },
+            { "Cp", outputs["Cp"] }, { "Al", outputs["Al"] }, { "Bl", outputs["Bl"] }, { "Cl", outputs["Cl"] }
         });
-        stockData.SetSignals(signalsList);
+        stockData.SetSignals(signals);
         stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.PeriodicChannel;
-
         return stockData;
     }
 

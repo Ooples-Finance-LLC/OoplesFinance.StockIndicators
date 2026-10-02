@@ -1185,140 +1185,19 @@ public sealed class DailyAveragePriceDeltaState : IStreamingIndicatorState, IDis
 [PrimaryOutput("K")]
 public sealed class PeriodicChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly RollingWindowCorrelation _corrWindow;
-    private readonly StreamingInputResolver _input;
-    private double _tempSum;
-    private double _indexSum;
-    private double _absIndexCumDiffSum;
-    private double _corrSum;
-    private double _sinSum;
-    private double _inSinSum;
-    private double _absSinCumDiffSum;
-    private double _absInSinCumDiffSum;
-    private double _absDiffSum;
-    private double _absKDiffSum;
-    private int _count;
-
-    public PeriodicChannelState(int length1 = 500, int length2 = 2)
-    {
-        _length1 = Math.Max(1, length1);
-        _corrWindow = new RollingWindowCorrelation(Math.Max(1, length2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PeriodicChannelWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public PeriodicChannelState(int length1 = 500, int length2 = 2) { _window = new(length1, length2); }
     public IndicatorName Name => IndicatorName.PeriodicChannel;
-
-    public void Reset()
-    {
-        _corrWindow.Reset();
-        _tempSum = 0;
-        _indexSum = 0;
-        _absIndexCumDiffSum = 0;
-        _corrSum = 0;
-        _sinSum = 0;
-        _inSinSum = 0;
-        _absSinCumDiffSum = 0;
-        _absInSinCumDiffSum = 0;
-        _absDiffSum = 0;
-        _absKDiffSum = 0;
-        _count = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var index = (double)_count;
-        var tempSum = _tempSum + value;
-        var indexSum = _indexSum + index;
-        var indexCum = index != 0 ? indexSum / index : 0;
-        var indexCumDiff = index - indexCum;
-        var absIndexCumDiff = Math.Abs(index - indexCum);
-        var absIndexCumDiffSum = _absIndexCumDiffSum + absIndexCumDiff;
-        var absIndexCum = index != 0 ? absIndexCumDiffSum / index : 0;
-        var z = absIndexCum != 0 ? indexCumDiff / absIndexCum : 0;
-
-        var corr = isFinal
-            ? _corrWindow.Add(index, value, out _)
-            : _corrWindow.Preview(index, value, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-        var corrSum = _corrSum + corr;
-
-        var s = index * Math.Sign(corrSum);
-        var sin = Math.Sin(s / _length1);
-        var sinSum = _sinSum + sin;
-        var inSin = -sin;
-        var inSinSum = _inSinSum + inSin;
-
-        var sinCum = index != 0 ? sinSum / index : 0;
-        var inSinCum = index != 0 ? inSinSum / index : 0;
-        var sinCumDiff = sin - sinCum;
-        var inSinCumDiff = inSin - inSinCum;
-
-        var absSinCumDiff = Math.Abs(sin - sinCum);
-        var absSinCumDiffSum = _absSinCumDiffSum + absSinCumDiff;
-        var absSinCum = index != 0 ? absSinCumDiffSum / index : 0;
-        var absInSinCumDiff = Math.Abs(inSin - inSinCum);
-        var absInSinCumDiffSum = _absInSinCumDiffSum + absInSinCumDiff;
-        var absInSinCum = index != 0 ? absInSinCumDiffSum / index : 0;
-        var zs = absSinCum != 0 ? sinCumDiff / absSinCum : 0;
-        var inZs = absInSinCum != 0 ? inSinCumDiff / absInSinCum : 0;
-        var cum = index != 0 ? tempSum / index : 0;
-
-        var absDiff = Math.Abs(value - cum);
-        var absDiffSum = _absDiffSum + absDiff;
-        var absDiffCum = index != 0 ? absDiffSum / index : 0;
-        var k = cum + ((z + zs) * absDiffCum);
-
-        var absKDiff = Math.Abs(value - k);
-        var absKDiffSum = _absKDiffSum + absKDiff;
-        var os = index != 0 ? absKDiffSum / index : 0;
-
-        var ap = k + os;
-        var bp = ap + os;
-        var cp = bp + os;
-        var al = k - os;
-        var bl = al - os;
-        var cl = bl - os;
-
-        if (isFinal)
-        {
-            _tempSum = tempSum;
-            _indexSum = indexSum;
-            _absIndexCumDiffSum = absIndexCumDiffSum;
-            _corrSum = corrSum;
-            _sinSum = sinSum;
-            _inSinSum = inSinSum;
-            _absSinCumDiffSum = absSinCumDiffSum;
-            _absInSinCumDiffSum = absInSinCumDiffSum;
-            _absDiffSum = absDiffSum;
-            _absKDiffSum = absKDiffSum;
-            _count++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(8)
-            {
-                { "K", k },
-                { "Os", os },
-                { "Ap", ap },
-                { "Bp", bp },
-                { "Cp", cp },
-                { "Al", al },
-                { "Bl", bl },
-                { "Cl", cl }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(k, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new(point.Values[0], includeOutputs
+            ? PeriodicChannelWindow.Keys.Select((key, i) => (key, value: point.Values[i])).ToDictionary(v => v.key, v => v.value) : null);
     }
-
-    public void Dispose()
-    {
-        _corrWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

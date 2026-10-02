@@ -71752,5 +71752,338 @@
     "before": "PhaseChangeIndex or ",
     "after": "",
     "filter": "FullyQualifiedName~PhaseChangeNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "periodic-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "Math.Max(1, period)",
+    "after": "Math.Max(6, period)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExpiryFlatWindowsAndExtremePeriodsRemainLazy"
+  },
+  {
+    "id": "periodic-wide-phase-direction",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "* direction / _period",
+    "after": "* -direction / _period",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-phase-period",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "/ _period));",
+    "after": "/ (_period + 1d)));",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-mean-count",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "prices.Divide(_count)",
+    "after": "prices.Divide(_count + 1)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-sine-mean",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "sines.Divide(_count)",
+    "after": "sines.Divide(_count + 1)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-sine-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "sineOffset.Times(_count)",
+    "after": "sineOffset.Times(_count + 1)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-sine-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_sineErrors + Abs(sineOffset)",
+    "after": "_sineErrors + sineOffset",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-price-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_priceErrors + Abs(current - mean)",
+    "after": "_priceErrors + current - mean",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-index-coordinate",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_count > 1 ? 2 : 0",
+    "after": "_count > 1 ? 1 : 0",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-price-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_priceErrors + Abs(current - mean)",
+    "after": "_priceErrors + (_count == 0 ? default : Abs(current - mean))",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-width-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_lineErrors + Abs(margin)",
+    "after": "_lineErrors + (_count == 0 ? default : Abs(margin))",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-width-count",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "lineErrors.Divide(_count)",
+    "after": "lineErrors.Divide(_count + 1)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-upper-outer",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "PublishRatio(basis + step * 3, denominator)",
+    "after": "PublishRatio(basis + step * 2, denominator)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-lower-outer",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "PublishRatio(basis - step * 3, denominator)",
+    "after": "PublishRatio(basis - step * 2, denominator)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.IndependentBarIndexAndBandHands"
+  },
+  {
+    "id": "periodic-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_previousMargin = margin;",
+    "after": "_previousMargin = default;",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "if (final)",
+    "after": "if (final || price != 0)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExpiryFlatWindowsAndExtremePeriodsRemainLazy"
+  },
+  {
+    "id": "periodic-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_direction.Reset(); _count = 0;",
+    "after": "_direction.Reset();",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExpiryFlatWindowsAndExtremePeriodsRemainLazy"
+  },
+  {
+    "id": "periodic-wide-reset-direction",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal sealed class PeriodicChannelWindow",
+    "before": "_direction.Reset(); _count = 0;",
+    "after": "_count = 0;",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-lookback-floor",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExpiryFlatWindowsAndExtremePeriodsRemainLazy"
+  },
+  {
+    "id": "periodic-wide-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "_sum - expired",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExactMomentsSurviveOverflowAndSubnormalScaling"
+  },
+  {
+    "id": "periodic-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "- expired * expired",
+    "after": "+ expired * expired",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExactMomentsSurviveOverflowAndSubnormalScaling"
+  },
+  {
+    "id": "periodic-wide-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "2 * weighted - n * sum",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-variance",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "n * squares - sum * sum",
+    "after": "n * squares + sum * sum",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-exact-zero",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "if (count == 0) return 0;",
+    "after": "if (count == 0) return 1;",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-adaptive-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "_precision = checked(_precision * 2);",
+    "after": "if (low.Sign != 0) return low.Sign; _precision = checked(_precision * 2);",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-preview-moments",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "if (final)\n        {\n            if (full)",
+    "after": "if (final || price != 0)\n        {\n            if (full)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExpiryFlatWindowsAndExtremePeriodsRemainLazy"
+  },
+  {
+    "id": "periodic-wide-preview-radicals",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "if (final)\n        {\n            _lower",
+    "after": "if (final || !numerator.IsZero)\n        {\n            _lower",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-moment-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicCorrelationSign.cs",
+    "scope": "internal sealed class PeriodicCorrelationSign",
+    "before": "_prices.Clear(); _buckets.Clear();",
+    "after": "_prices.Clear();",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-selected-batch",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "scope": "public static StockData CalculatePeriodicChannel(",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var input = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "periodic-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class PeriodicChannelState",
+    "before": "StreamingInputValidation.Validate(bar);\n        var point = _window.Next(_input.GetValue(bar), isFinal);",
+    "after": "var point = _window.Next(includeOutputs ? bar.Close : _input.GetValue(bar), isFinal);",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.RejectedCandlesDoNotAdvanceExactState"
+  },
+  {
+    "id": "periodic-wide-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class PeriodicChannelState",
+    "before": "_window = new(length1, length2)",
+    "after": "_window = new(length2, length1)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
+  },
+  {
+    "id": "periodic-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "PeriodicChannel or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "periodic-wide-generated-outputs",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "scope": "public static StockData CalculatePeriodicChannel(",
+    "before": "stockData.SetOutputValues(() => new Dictionary<string, List<double>>\n        {\n            { \"K\", outputs[\"K\"] }, { \"Os\", outputs[\"Os\"] }, { \"Ap\", outputs[\"Ap\"] }, { \"Bp\", outputs[\"Bp\"] },\n            { \"Cp\", outputs[\"Cp\"] }, { \"Al\", outputs[\"Al\"] }, { \"Bl\", outputs[\"Bl\"] }, { \"Cl\", outputs[\"Cl\"] }\n        });",
+    "after": "stockData.SetOutputValues(() => outputs);",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.EveryOutputRejectsInjectedFaults"
+  },
+  {
+    "id": "periodic-wide-rational-add-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal readonly struct Number",
+    "before": "left * (b.Denominator / reduction)",
+    "after": "left * b.Denominator",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.LocalRationalArithmeticMatchesIndependentUncancelledFractions"
+  },
+  {
+    "id": "periodic-wide-rational-multiply-cancel",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal readonly struct Number",
+    "before": "(a.Denominator / right) * (b.Denominator / left)",
+    "after": "a.Denominator * (b.Denominator / left)",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.LocalRationalArithmeticMatchesIndependentUncancelledFractions"
+  },
+  {
+    "id": "periodic-wide-rational-reciprocal-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PeriodicChannelWindow.cs",
+    "scope": "internal readonly struct Number",
+    "before": "value.Sign * value.Denominator",
+    "after": "value.Denominator",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.LocalRationalArithmeticMatchesIndependentUncancelledFractions"
+  },
+  {
+    "id": "periodic-wide-streaming-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": null,
+    "before": "PeriodicChannelSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.SelectedSourcePreservesFormula"
   }
 ]

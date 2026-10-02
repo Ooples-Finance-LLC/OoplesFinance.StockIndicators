@@ -4631,3 +4631,10 @@ The isolated campaigns `658-repaired2-a` and `658-repaired2-b` passed their base
 Source snapshot SHA256: `278217c07da0df6e7c8c8fa2ae14a4e88bbaf1e0759987b79733e1e9817b5019`. Archive SHA256: `fc6bc8a68409c8bf92c7d2e4d7c0ac6cf47ce6c28cfef28599c5c4f369efec6e` and `6551e0c4835cf99f8b4f55015df9972325ef5b74762c3760c94a3f6156407dff`.
 
 This is evidence for the isolated batch-658 source. Production and tests were already published in the batch-658 checkpoint. The four repaired fault definitions (`0fd86946`) and direct fast selected-source regression (`72bf573b`) are pushed separately and await integration. Only those manifest entries and the strengthened existing test differ from the original retained source. Both earlier partial campaign results are excluded. This update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 677: Periodic Channel exact correlation direction
+
+Exact rolling moments and rational square-class grouping distinguish proven cancellation from arbitrarily small nonzero correlation sums. Certified adaptive dyadic bounds preserve both signed minimum-subnormal perturbations. Downstream channel arithmetic stays exact after the Math.Sin sample. The independent centered-moment oracle and 2,160 exact algebra comparisons cover the derivation. All eight output names remain explicit for source generation, with an output-map assertion and independent hand and fault-injection checks.
+
+**64/64 focused tests passed** on net10.0 (`periodic677-registered.trx`), including the existing hand and golden tests. Inventory: **6,488/7,131 enrolled**, **643 omissions across 96 types**, all independent references registered, no construction failures, backlog exact. The 37 prepared behavioral faults await isolated qualification; final readiness gates remain pending.

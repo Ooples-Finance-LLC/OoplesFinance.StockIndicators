@@ -22,6 +22,13 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.PeriodicChannel)
+        {
+            var periodicKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "K" } : new[] { "K", "Os", "Ap", "Bp", "Cp", "Al", "Bl", "Cl" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, Dictionary<string, double[]>>();
+            for (var slot = 0; slot < periodicKeys.Length; slot++) { var key = periodicKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => PeriodicOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PhaseChangeIndex)
         {
             var phaseKeys = new[] { "Pci", "Signal" };
