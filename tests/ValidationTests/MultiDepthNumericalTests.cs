@@ -15,7 +15,26 @@ public sealed class MultiDepthNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryPublicRouteMatchesIndependentPoles(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.MultiDepthOutputs(bars, (IBuiltInIndicator)c.Factory()), BuiltInFormulaReferences.MultiDepthBudget);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = (IBuiltInIndicator)c.Factory(); var options = indicator.CreateOptions();
+        var length = (int)options.GetType().GetProperty("Length")!.GetValue(options)!;
+        var bars = Bars(Enumerable.Range(0, 48).Select(i => 100d + i).ToArray());
+        var selected = Enumerable.Range(0, bars.Length).Select(i => (double)(i * 7 % 13 - 6)).ToArray();
+        var expected = BuiltInFormulaReferences.MultiDepthValues(selected, length).Outputs;
+        var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+        foreach (var pole in new[] { IndicatorCompute.MultiDepthPole.OnePole, IndicatorCompute.MultiDepthPole.TwoPole, IndicatorCompute.MultiDepthPole.ThreePole })
+        {
+            using var actual = IndicatorCompute.ComputeMultiDepthZeroLagExponentialMovingAverageFast(data, context, length, pole);
+            var key = "Md" + ((int)pole + 1) + "Pole";
+            for (var i = 0; i < selected.Length; i++) Equal(expected[key][i], actual.Span[i]);
+        }
+        Assert.Equal(selected, data.ChainedValues); data.CalculateMultiDepthZeroLagExponentialMovingAverage(length);
+        foreach (var key in expected.Keys)
+            for (var i = 0; i < selected.Length; i++) Equal(expected[key][i], data.OutputValues[key][i]);
+        Assert.Equal(bars.Select(b => b.Close), data.ClosePrices); Assert.Equal(bars.Select(b => b.Volume), data.Volumes);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
