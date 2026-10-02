@@ -14038,7 +14038,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeUberTrendIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
         OscillatorCore.UberTrendIndicator(close, volume, buffer.WritableSpan, length);

@@ -750,21 +750,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.SupportAndResistanceOscillator:
                 return new("Sro", new[] { "Sro" }, bars => SupportResistanceOscillatorOutputs(bars));
             case IndicatorName.UberTrendIndicator:
-                return new("Uti", new[] { "Uti" }, bars =>
-                {
-                    var change = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                    var advance = change.Select((_, i) => Window(change, i, length).Sum(v => Math.Max(0, v))).ToArray();
-                    var decline = change.Select((_, i) => Window(change, i, length).Sum(v => Math.Max(0, -v))).ToArray();
-                    var upVolume = bars.Select((b, i) => change[i] <= 0 || advance[i] == 0 ? 0 : b.Volume / advance[i]).ToArray();
-                    var downVolume = bars.Select((b, i) => change[i] >= 0 || decline[i] == 0 ? 0 : b.Volume / decline[i]).ToArray();
-                    return Outputs(("Uti", bars.Select((_, i) =>
-                    {
-                        var up = Window(upVolume, i, length).Sum(); var down = Window(downVolume, i, length).Sum();
-                        // Preserve the published zero-denominator convention, including all-rising windows.
-                        var ratio = decline[i] == 0 || up == 0 || down == 0 ? 0 : advance[i] * down / (decline[i] * up);
-                        return ratio == -1 ? 0 : (ratio - 1) / (ratio + 1); // NOSONAR: S1244 - Only minus one makes the following denominator exactly zero.
-                    }).ToArray()));
-                });
+                return new("Uti", new[] { "Uti" }, bars => UberTrendOutputs(bars, indicator));
             case IndicatorName.KwanIndicator:
                 return new("Ki", new[] { "Ki" }, bars => KwanOutputs(bars, indicator));
             case IndicatorName.KaseSerialDependencyIndex:

@@ -80167,5 +80167,320 @@
     "before": "maType, length1, length2, turboLength",
     "after": "maType, length1, 1, turboLength",
     "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "uber-trend-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-first-move",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_started ? current - _previousPrice : default",
+    "after": "current - _previousPrice",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-move-projection",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "var advance = change.Sign",
+    "after": "change = Number.Of(change.Publish()); var advance = change.Sign",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.WideMovesAndSubnormalVolumesPreserveRatios"
+  },
+  {
+    "id": "uber-trend-wide-advance",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "change.Sign > 0 ? change : default",
+    "after": "change.Sign > 0 ? change.Times(2) : default",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-decline",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "change.Sign < 0 ? default(Number) - change : default",
+    "after": "change.Sign < 0 ? change : default",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "var old = full ? _history.Peek() : default",
+    "after": "var old = full ? default : _history.Peek()",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-advance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_up + advance - old.Up",
+    "after": "_up + advance + old.Up",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-decline-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_down + decline - old.Down",
+    "after": "_down + decline + old.Down",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-up-contribution",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "Number.Of(volume).Divide(up)",
+    "after": "Number.Of(volume).Divide(down.Sign == 0 ? Number.Of(1) : down)",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-down-contribution",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "Number.Of(volume).Divide(down)",
+    "after": "Number.Of(volume).Divide(up.Sign == 0 ? Number.Of(1) : up)",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-volume-projection",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "var upVolume = _upVolume",
+    "after": "upContribution = Number.Of(upContribution.Publish()); var upVolume = _upVolume",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.WideMovesAndSubnormalVolumesPreserveRatios"
+  },
+  {
+    "id": "uber-trend-wide-up-volume-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_upVolume + upContribution - old.UpVolume",
+    "after": "_upVolume + upContribution + old.UpVolume",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-down-volume-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_downVolume + downContribution - old.DownVolume",
+    "after": "_downVolume + downContribution + old.DownVolume",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-cross-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "var numerator = up * downVolume",
+    "after": "var numerator = down * downVolume",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-cross-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "var denominator = down * upVolume",
+    "after": "var denominator = up * upVolume",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-zero-convention",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "? Number.Of(-1)\n            :",
+    "after": "? Number.Of(0)\n            :",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.ExtremePeriodsZeroConventionsAndExpiry"
+  },
+  {
+    "id": "uber-trend-wide-up-volume-zero",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "down.Sign == 0 || upVolume.Sign == 0 || downVolume.Sign == 0",
+    "after": "down.Sign == 0 || downVolume.Sign == 0",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.ExtremePeriodsZeroConventionsAndExpiry"
+  },
+  {
+    "id": "uber-trend-wide-pole",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "(numerator + denominator).Sign == 0 ? default",
+    "after": "(numerator + denominator).Sign == 0 ? Number.Of(-1)",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.SignedVolumePoleAndExactNeighborDecisions"
+  },
+  {
+    "id": "uber-trend-wide-transform-origin",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "(numerator - denominator).Divide(numerator + denominator)",
+    "after": "(numerator + denominator).Divide(numerator + denominator)",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-signal-slope",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "value - _previousValue",
+    "after": "value + _previousValue",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-signal-change",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "slope - _previousSlope",
+    "after": "slope + _previousSlope",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-remember-price",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_previousPrice = current;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-remember-value",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_previousValue = value;",
+    "after": "_previousValue = default;",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-remember-slope",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-reset-start",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "_started = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/UberTrendWindow.cs",
+    "scope": "internal sealed class UberTrendWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.SelectedPricePreservesOriginalVolume"
+  },
+  {
+    "id": "uber-trend-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeUberTrendIndicatorFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.SelectedPricePreservesOriginalVolume"
+  },
+  {
+    "id": "uber-trend-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UberTrendIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.InvalidCandlesCannotAdvanceDirectionalHistory"
+  },
+  {
+    "id": "uber-trend-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UberTrendIndicatorState",
+    "before": "bar.Volume, isFinal)",
+    "after": "bar.Volume, true)",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-native-volume",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UberTrendIndicatorState",
+    "before": "bar.Close, bar.Volume,",
+    "after": "bar.Close, 1,",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
+  },
+  {
+    "id": "uber-trend-wide-core-volume-length",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void UberTrendIndicator",
+    "before": "if (volume.Length < close.Length)",
+    "after": "if (volume.Length < 0)",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.CoreSpanGuardsPreserveOutputAndSupportInPlace"
+  },
+  {
+    "id": "uber-trend-wide-core-prevalidate",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void UberTrendIndicator",
+    "before": "for (var i = 0; i < close.Length; i++) { Streaming.StreamingInputValidation",
+    "after": "for (var i = close.Length; i < close.Length; i++) { Streaming.StreamingInputValidation",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.CoreSpanGuardsPreserveOutputAndSupportInPlace"
+  },
+  {
+    "id": "uber-trend-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void UberTrendIndicator",
+    "before": "new UberTrendWindow(length)",
+    "after": "new UberTrendWindow(1)",
+    "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
   }
 ]

@@ -697,66 +697,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUberTrendIndicator(this StockData stockData, int length = 14)
     {
-        List<double> advList = new(stockData.Count);
-        List<double> decList = new(stockData.Count);
-        List<double> advVolList = new(stockData.Count);
-        List<double> decVolList = new(stockData.Count);
-        List<double> utiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum advSumWindow = new();
-        RollingSum decSumWindow = new();
-        RollingSum advVolSumWindow = new();
-        RollingSum decVolSumWindow = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentVolume = volumeList[i];
-            var prevUti1 = i >= 1 ? utiList[i - 1] : 0;
-            var prevUti2 = i >= 2 ? utiList[i - 2] : 0;
-
-            var adv = i >= 1 && currentValue > prevValue ? MinPastValues(i, 1, currentValue - prevValue) : 0;
-            advList.Add(adv);
-            advSumWindow.Add(adv);
-
-            var dec = i >= 1 && currentValue < prevValue ? MinPastValues(i, 1, prevValue - currentValue) : 0;
-            decList.Add(dec);
-            decSumWindow.Add(dec);
-
-            var advSum = advSumWindow.Sum(length);
-            var decSum = decSumWindow.Sum(length);
-
-            var advVol = i >= 1 && currentValue > prevValue && advSum != 0 ? currentVolume / advSum : 0;
-            advVolList.Add(advVol);
-            advVolSumWindow.Add(advVol);
-
-            var decVol = i >= 1 && currentValue < prevValue && decSum != 0 ? currentVolume / decSum : 0;
-            decVolList.Add(decVol);
-            decVolSumWindow.Add(decVol);
-
-            var advVolSum = advVolSumWindow.Sum(length);
-            var decVolSum = decVolSumWindow.Sum(length);
-            var top = decSum != 0 ? advSum / decSum : 0;
-            var bot = decVolSum != 0 ? advVolSum / decVolSum : 0;
-            var ut = bot != 0 ? top / bot : 0;
-
-            var uti = ut + 1 != 0 ? (ut - 1) / (ut + 1) : 0;
-            utiList.Add(uti);
-
-            var signal = GetCompareSignal(uti - prevUti1, prevUti1 - prevUti2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Uti", utiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(utiList);
-        stockData.IndicatorName = IndicatorName.UberTrendIndicator;
-
-        return stockData;
+        var values = UberTrendWindow.Calculate(stockData, length);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Uti", values.Values.ToList() } });
+        stockData.SetSignals(values.Signals.ToList()); stockData.SetCustomValues(values.Values.ToList());
+        stockData.IndicatorName = IndicatorName.UberTrendIndicator; return stockData;
     }
 
 

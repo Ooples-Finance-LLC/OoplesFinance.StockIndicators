@@ -6498,46 +6498,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void UberTrendIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var advSum = new RollingSum();
-        var decSum = new RollingSum();
-        var advVolSum = new RollingSum();
-        var decVolSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue = i >= 1 ? close[i - 1] : 0;
-            var currentVolume = volume[i];
-
-            var adv = i >= 1 && currentValue > prevValue ? currentValue - prevValue : 0.0;
-            advSum.Add(adv);
-
-            var dec = i >= 1 && currentValue < prevValue ? prevValue - currentValue : 0.0;
-            decSum.Add(dec);
-
-            var advSumVal = advSum.Sum(length);
-            var decSumVal = decSum.Sum(length);
-
-            var advVol = i >= 1 && currentValue > prevValue && advSumVal != 0 ? currentVolume / advSumVal : 0.0;
-            advVolSum.Add(advVol);
-
-            var decVol = i >= 1 && currentValue < prevValue && decSumVal != 0 ? currentVolume / decSumVal : 0.0;
-            decVolSum.Add(decVol);
-
-            var advVolSumVal = advVolSum.Sum(length);
-            var decVolSumVal = decVolSum.Sum(length);
-            var top = decSumVal != 0 ? advSumVal / decSumVal : 0;
-            var bot = decVolSumVal != 0 ? advVolSumVal / decVolSumVal : 0;
-            var ut = bot != 0 ? top / bot : 0;
-
-            output[i] = ut + 1 != 0 ? (ut - 1) / (ut + 1) : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < close.Length) throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        for (var i = 0; i < close.Length; i++) { Streaming.StreamingInputValidation.Finite(close[i], nameof(close)); Streaming.StreamingInputValidation.Finite(volume[i], nameof(volume)); }
+        var window = new UberTrendWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true).Value;
     }
 
     /// <summary>

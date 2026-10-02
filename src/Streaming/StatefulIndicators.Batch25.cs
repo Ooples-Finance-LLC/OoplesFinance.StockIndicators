@@ -621,80 +621,16 @@ public sealed class TwiggsMoneyFlowState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Uti")]
 public sealed class UberTrendIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _advSum;
-    private readonly RollingWindowSum _decSum;
-    private readonly RollingWindowSum _advVolSum;
-    private readonly RollingWindowSum _decVolSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public UberTrendIndicatorState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _advSum = new RollingWindowSum(resolved);
-        _decSum = new RollingWindowSum(resolved);
-        _advVolSum = new RollingWindowSum(resolved);
-        _decVolSum = new RollingWindowSum(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly UberTrendWindow _window;
+    public UberTrendIndicatorState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.UberTrendIndicator;
-
-    public void Reset()
-    {
-        _advSum.Reset();
-        _decSum.Reset();
-        _advVolSum.Reset();
-        _decVolSum.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var volume = bar.Volume;
-        var adv = _hasPrev && value > prevValue ? value - prevValue : 0;
-        var dec = _hasPrev && value < prevValue ? prevValue - value : 0;
-
-        var advSum = isFinal ? _advSum.Add(adv, out _) : _advSum.Preview(adv, out _);
-        var decSum = isFinal ? _decSum.Add(dec, out _) : _decSum.Preview(dec, out _);
-        var advVol = _hasPrev && value > prevValue && advSum != 0 ? volume / advSum : 0;
-        var decVol = _hasPrev && value < prevValue && decSum != 0 ? volume / decSum : 0;
-        var advVolSum = isFinal ? _advVolSum.Add(advVol, out _) : _advVolSum.Preview(advVol, out _);
-        var decVolSum = isFinal ? _decVolSum.Add(decVol, out _) : _decVolSum.Preview(decVol, out _);
-        var top = decSum != 0 ? advSum / decSum : 0;
-        var bot = decVolSum != 0 ? advVolSum / decVolSum : 0;
-        var ut = bot != 0 ? top / bot : 0;
-        var uti = ut + 1 != 0 ? (ut - 1) / (ut + 1) : 0;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Uti", uti }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(uti, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Uti", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _advSum.Dispose();
-        _decSum.Dispose();
-        _advVolSum.Dispose();
-        _decVolSum.Dispose();
-    }
+    public void Dispose() => Reset();
 }
 
 [PrimaryOutput("Cts")]

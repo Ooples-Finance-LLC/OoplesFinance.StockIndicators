@@ -28,6 +28,8 @@ internal static partial class BuiltInFormulaReferences
             for (var slot = 0; slot < turboStochKeys.Length; slot++) { var key = turboStochKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => TurboStochasticsOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.UberTrendIndicator)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.TurboScaler)
         {
             var turboKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Ts", "Trigger" };
