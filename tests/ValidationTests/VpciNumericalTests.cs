@@ -150,15 +150,15 @@ public sealed class VpciNumericalTests
             var data = Data(new[] { B(1, 2), B(2, 4), B(3, 6) });
             if (route == "batch")
             {
-                data.CalculateVolumePriceConfirmationIndicator(length: 2);
-                Assert.Equal(new[] { 3d, 3, 0 }, data.OutputValues["Vpci"]); Assert.Equal(new[] { 7d, 0, 0 }, data.OutputValues["Signal"]);
+                data.CalculateVolumePriceConfirmationIndicator(fastLength: 2, slowLength: 3, length: 2);
+                Assert.Equal(new[] { 0d, 0, 13d / 30 }, data.OutputValues["Vpci"]); Assert.Equal(new[] { 0d, 0, 13d / 60 }, data.OutputValues["Signal"]);
             }
             else
             {
                 using var result = route == "fast" ? IndicatorCompute.ComputeVpciFast(data, context) : IndicatorCompute.ComputeVpciSignalFast(data, context, 2);
                 Assert.Equal(route == "fast" ? new[] { 3d, 3, 0 } : new[] { 7d, 0, 0 }, result.ToArray());
             }
-            Assert.Equal(route == "fast" ? 6 : 7, ComponentAverage.Requests); Assert.Equal(ComponentAverage.Requests, ComponentAverage.Substitutions);
+            Assert.Equal(route == "batch" ? 0 : route == "fast" ? 6 : 7, ComponentAverage.Requests); Assert.Equal(ComponentAverage.Requests, ComponentAverage.Substitutions);
         }
     }
     [Fact]

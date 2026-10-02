@@ -82597,5 +82597,23 @@
     "before": "Vpci or ",
     "after": "",
     "filter": "FullyQualifiedName~VpciNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "volume-rsi-wide-batch-callback-bypass",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedRsiWindow.cs",
+    "scope": "internal static double[] Calculate(",
+    "before": "bool fast = false",
+    "after": "bool fast = true",
+    "filter": "FullyQualifiedName~VolumeWeightedRsiNumericalTests.CallbackSlotsUseGainLossAndCenteredInputsAndPadShortResults"
+  },
+  {
+    "id": "vpci-wide-batch-callback-bypass",
+    "module": "numerical",
+    "file": "src/Helpers/VpciWindow.cs",
+    "scope": "internal static (double[] Line, double[] SignalLine, Signal[] Trades) Calculate(",
+    "before": "var replacement = fastRoute ?",
+    "after": "var replacement = true ?",
+    "filter": "FullyQualifiedName~VpciNumericalTests.CallbackOrdersAndShortResultsPreserveTheirContracts"
   }
 ]

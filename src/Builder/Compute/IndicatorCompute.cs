@@ -6041,7 +6041,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVolumeWeightedRsiFast(StockData data, ComputeContext context, int length = 10,
         int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var values = VolumeWeightedRsiWindow.Calculate(data, maType, length, smoothLength);
+        var values = VolumeWeightedRsiWindow.Calculate(data, maType, length, smoothLength, fast: true);
         var buffer = context.Rent(values.Length);
         try { values.AsSpan().CopyTo(buffer.WritableSpan); return buffer; }
         catch { buffer.Dispose(); throw; }

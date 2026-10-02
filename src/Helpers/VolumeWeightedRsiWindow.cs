@@ -28,7 +28,7 @@ internal sealed class VolumeWeightedRsiWindow : IDisposable
         return result;
     }
 
-    internal static double[] Calculate(StockData data, MovingAvgType kind, int length, int smoothLength)
+    internal static double[] Calculate(StockData data, MovingAvgType kind, int length, int smoothLength, bool fast = false)
     {
         length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength);
         var (prices, _, _, _, volumes) = CalculationsHelper.GetInputValuesList(data);
@@ -42,7 +42,7 @@ internal sealed class VolumeWeightedRsiWindow : IDisposable
         }
         Number[] Mean(Number[] values, int period)
         {
-            var replacement = ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), period);
+            var replacement = fast ? ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), period) : null;
             if (replacement is not null)
                 return Enumerable.Range(0, prices.Count).Select(i => i < replacement.Count ? Number.Of(replacement[i]) : default).ToArray();
             if (!StrengthWindow.Supports(kind))

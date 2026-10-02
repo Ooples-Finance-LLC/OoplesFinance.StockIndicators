@@ -44,7 +44,7 @@ internal sealed class VpciWindow : IDisposable
         var p = prices.Select(Number.Of).ToArray(); var v = volumes.Select(Number.Of).ToArray();
         Number[] Mean(Number[] values, int period, bool weighted = false)
         {
-            var replacement = ComponentAverage.Take(values.Select(value => value.Publish()).ToArray(), period);
+            var replacement = fastRoute ? ComponentAverage.Take(values.Select(value => value.Publish()).ToArray(), period) : null;
             if (replacement is not null)
                 return Enumerable.Range(0, p.Length).Select(i => i < replacement.Count ? Number.Of(replacement[i]) : default).ToArray();
             if (weighted)
@@ -59,8 +59,8 @@ internal sealed class VpciWindow : IDisposable
         }
         var wf = Mean(p, fast, true); var ws = Mean(p, slow, true);
         Number[] pf, ps, vf, vs;
-        // The explicit fast path historically requests price means before volume
-        // means; batch requests volume first. Preserve the callback slot contracts.
+        // Only the explicit fast path consumes override slots. Batch retains
+        // its historical volume-before-price evaluation order without overrides.
         if (fastRoute) { pf = Mean(p, fast); ps = Mean(p, slow); vf = Mean(v, fast); vs = Mean(v, slow); }
         else { vf = Mean(v, fast); vs = Mean(v, slow); pf = Mean(p, fast); ps = Mean(p, slow); }
         var raw = Enumerable.Range(0, p.Length).Select(i => Combine(wf[i], ws[i], pf[i], ps[i], vf[i], vs[i])).ToArray();

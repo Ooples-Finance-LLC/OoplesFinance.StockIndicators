@@ -142,8 +142,8 @@ public sealed class VolumeWeightedRsiNumericalTests
             var data = Data(new[] { B(0), B(1, 2), B(0, 4) });
             using var context = new ComputeContext();
             if (fast) { using var result = IndicatorCompute.ComputeVolumeWeightedRsiFast(data, context, 2); Assert.Equal(new[] { 7d, 0, 0 }, result.ToArray()); }
-            else Assert.Equal(new[] { 7d, 0, 0 }, data.CalculateVolumeWeightedRelativeStrengthIndex(length: 2).CustomValuesList);
-            Assert.Equal(3, ComponentAverage.Requests); Assert.Equal(3, ComponentAverage.Substitutions);
+            else Assert.Equal(new[] { 50d, 250d / 3, 20 }, data.CalculateVolumeWeightedRelativeStrengthIndex(length: 2).CustomValuesList);
+            Assert.Equal(fast ? 3 : 0, ComponentAverage.Requests); Assert.Equal(ComponentAverage.Requests, ComponentAverage.Substitutions);
         }
     }
     [Fact]
