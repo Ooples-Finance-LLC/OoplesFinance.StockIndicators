@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.RelativeSpreadStrength)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RelativeSpreadOutputs(bars, builtIn)["Rss"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName is IndicatorName.FastandSlowRelativeStrengthIndexOscillator or IndicatorName.FastandSlowStochasticOscillator)
         {
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

@@ -918,20 +918,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Rosc", bars.Select((b, i) => fit[i] == 0 ? 0 : 100 * (b.Close - fit[i]) / fit[i]).ToArray()));
                 });
             case IndicatorName.RelativeSpreadStrength:
-                return new("Rss", new[] { "Rss" }, bars =>
-                {
-                    var prices = Closes(bars).Select(BinaryDecimal).ToArray();
-                    var fast = MotionDecimalAverage(prices, Integer(options, "FastLength", 10), kind);
-                    var slow = MotionDecimalAverage(prices, Integer(options, "SlowLength", 40), kind);
-                    var spread = fast.Zip(slow, (a, b) => a - b).ToArray();
-                    var changes = spread.Select((v, i) => i == 0 ? 0 : v - spread[i - 1]).ToArray();
-                    var gains = MotionDecimalAverage(changes.Select(v => Math.Max(0, v)).ToArray(), length, 6);
-                    var losses = MotionDecimalAverage(changes.Select(v => Math.Max(0, -v)).ToArray(), length, 6);
-                    var rsi = gains.Select((v, i) => losses[i] == 0 ? 100 : 100 * v / (v + losses[i])).ToArray();
-                    for (var i = 1; i < rsi.Length; i++)
-                        if (length > 1 && changes[i] == 0) rsi[i] = rsi[i - 1];
-                    return Outputs(("Rss", MotionDecimalAverage(rsi, Integer(options, "SmoothLength", 5), kind).Select(v => (double)v).ToArray()));
-                });
+                return new("Rss", new[] { "Rss" }, bars => RelativeSpreadOutputs(bars, indicator));
             case IndicatorName.RecursiveDifferenciator:
                 return new("Rd", new[] { "Rd" }, bars =>
                 {

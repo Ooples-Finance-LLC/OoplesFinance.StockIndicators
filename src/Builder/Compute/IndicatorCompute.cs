@@ -21376,12 +21376,15 @@ internal static partial class IndicatorCompute
         {
             using var fast = context.Rent(data.Count);
             using var slow = context.Rent(data.Count);
-            using var spread = context.Rent(data.Count);
             using var rsi = context.Rent(data.Count);
             MovingAverage(data, maType, fastLength, SpanCompat.AsReadOnlySpan(input), fast.WritableSpan);
             MovingAverage(data, maType, slowLength, SpanCompat.AsReadOnlySpan(input), slow.WritableSpan);
-            for (var i = 0; i < data.Count; i++) spread.WritableSpan[i] = fast.Span[i] - slow.Span[i];
-            OscillatorCore.RelativeStrengthIndex(spread.Span, rsi.WritableSpan, length);
+            using var strength = new Streaming.RelativeSpreadKernel(maType, fastLength, slowLength, length, smoothLength);
+            for (var i = 0; i < data.Count; i++)
+            {
+                Streaming.StreamingInputValidation.Finite(fast.Span[i], "fast"); Streaming.StreamingInputValidation.Finite(slow.Span[i], "slow");
+                rsi.WritableSpan[i] = strength.StrengthFromSpread(MacZWindow.Number.Of(fast.Span[i]) - MacZWindow.Number.Of(slow.Span[i]), true);
+            }
             var result = context.Rent(data.Count);
             MovingAverage(data, maType, smoothLength, rsi.Span, result.WritableSpan);
             return result;

@@ -786,3 +786,10 @@ The existing fixed-lag formula retains zero missing history and zero-ATR results
 ### Batch 690: Recursive RSI exact delayed direction votes
 
 Only the last iteration of the legacy inner loop survives: its midpoint is compared with the midpoint one period ago, producing a 100/0 nondecreasing vote. The published value averages the preceding window of votes, excluding the current vote. Exact lagged differences, component means, Wilder gain/loss ratios, midpoint comparisons and unpublished feedback prevent overflow and loss of tiny directions. Lazy history replaces period-sized buffers and the redundant inner loop. Signal threshold clauses add no behavior because each crossing already implies the corresponding exact slope sign. Fast callbacks retain source/gain/loss order; the legacy batch does not consume standard-average override slots. Both factories register the public state. All 54 focused regressions passed on net10.0. The 34 prepared behavioral faults await isolated mutation qualification.
+
+
+### Relative Spread Strength: exact spread and bounded RSI component (batch 691)
+
+Fast and slow averages, their difference, successive spread changes, and Wilder gain/loss moments now retain exact rational values. The bounded RSI is rounded to binary64 before the signal average, preserving the existing component boundary. A zero spread change carries the preceding RSI when its period exceeds one; zero loss otherwise yields 100. Signal averages retain exact arithmetic until publication. SMA/WMA windows allocate only observed history; EMA, Wilder, DEMA and TEMA preserve their startup definitions. Other average kinds retain the existing smoother fallback.
+
+Standard batch consumes no component override slots. The fast callback path retains three slots (fast average, slow average, signal average) and computes the intervening spread and RSI without overflowing finite callback results. No independent core exists. Shared SpreadNumber/SpreadAverage implementations are unchanged.

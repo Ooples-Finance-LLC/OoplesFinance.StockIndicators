@@ -1,3 +1,4 @@
+using Number = OoplesFinance.StockIndicators.Helpers.MacZWindow.Number;
 namespace OoplesFinance.StockIndicators.Streaming;
 
 // Keep the low part through the fast/slow subtraction and through its first difference.
@@ -113,31 +114,73 @@ internal sealed class SpreadAverage : IDisposable
     public void Dispose() { _first?.Dispose(); _second?.Dispose(); _third?.Dispose(); _fallback?.Dispose(); }
 }
 
+// Exact spread differences and Wilder moments avoid exponent loss before the bounded RSI.
+// RSI remains the binary64 component consumed by the signal average.
 internal sealed class RelativeSpreadKernel : IDisposable
 {
-    private readonly SpreadAverage _fast, _slow;
-    private readonly IMovingAverageSmoother _signal;
+    private readonly Average _fast, _slow, _signal;
     private readonly int _period;
-    private SpreadNumber _spread;
-    private double _gain, _loss, _rsi;
+    private Number _spread, _gain, _loss;
+    private double _rsi;
     private bool _hasPrevious;
     internal RelativeSpreadKernel(MovingAvgType kind, int fast, int slow, int period, int smooth)
+    { _fast = new(kind, fast); _slow = new(kind, slow); _period = Math.Max(1, period); _signal = new(kind, smooth); }
+    internal double StrengthFromSpread(Number spread, bool final)
     {
-        _fast = new(kind, fast); _slow = new(kind, slow); _period = Math.Max(1, period);
-        _signal = MovingAverageSmootherFactory.Create(kind, Math.Max(1, smooth));
+        var change = _hasPrevious ? spread - _spread : default;
+        var gain = (_gain.Times(_period - 1L) + (change.Sign > 0 ? change : default)).Divide(_period);
+        var loss = (_loss.Times(_period - 1L) + (change.Sign < 0 ? default(Number) - change : default)).Divide(_period);
+        var rsi = change.Sign == 0 && _hasPrevious && _period > 1 ? _rsi : loss.Sign == 0 ? 100 : gain.Times(100).Divide(gain + loss).Publish();
+        if (final) { _spread = spread; _gain = gain; _loss = loss; _rsi = rsi; _hasPrevious = true; }
+        return rsi;
     }
     internal double Next(double price, bool final)
     {
-        var spread = SpreadNumber.Subtract(_fast.Next(new(price), final), _slow.Next(new(price), final));
-        var change = _hasPrevious ? SpreadNumber.Subtract(spread, _spread).Value : 0;
-        var gain = _gain + (Math.Max(0, change) - _gain) / _period;
-        var loss = _loss + (Math.Max(0, -change) - _loss) / _period;
-        var rsi = change == 0 && _hasPrevious && _period > 1 ? _rsi : loss == 0 ? 100 : 100 * gain / (gain + loss);
-        var result = _signal.Next(rsi, final);
-        if (final) { _spread = spread; _gain = gain; _loss = loss; _rsi = rsi; _hasPrevious = true; }
-        return result;
+        StreamingInputValidation.Finite(price, nameof(price));
+        var value = Number.Of(price);
+        var spread = _fast.Next(value, final) - _slow.Next(value, final);
+        return _signal.Next(Number.Of(StrengthFromSpread(spread, final)), final).Publish();
     }
     internal void Reset()
-    { _fast.Reset(); _slow.Reset(); _signal.Reset(); _spread = new(0); _gain = _loss = _rsi = 0; _hasPrevious = false; }
+    { _fast.Reset(); _slow.Reset(); _signal.Reset(); _spread = _gain = _loss = default; _rsi = 0; _hasPrevious = false; }
     public void Dispose() { _fast.Dispose(); _slow.Dispose(); _signal.Dispose(); }
+    private sealed class Average : IDisposable
+    {
+        private readonly MovingAvgType _kind; private readonly int _length;
+        private readonly Queue<Number> _history = new();
+        private readonly IMovingAverageSmoother? _fallback;
+        private readonly Average? _first, _second, _third;
+        private Number _sum, _weighted, _previous; private long _count;
+        internal Average(MovingAvgType kind, int length)
+        {
+            _kind = kind; _length = Math.Max(1, length);
+            if (kind is MovingAvgType.DoubleExponentialMovingAverage or MovingAvgType.TripleExponentialMovingAverage)
+            { _first = new(MovingAvgType.ExponentialMovingAverage, _length); _second = new(MovingAvgType.ExponentialMovingAverage, _length); if (kind == MovingAvgType.TripleExponentialMovingAverage) _third = new(MovingAvgType.ExponentialMovingAverage, _length); }
+            else if (!Helpers.StrengthWindow.Supports(kind)) _fallback = MovingAverageSmootherFactory.Create(kind, _length);
+        }
+        internal Number Next(Number value, bool final)
+        {
+            if (_fallback is not null) return Number.Of(_fallback.Next(value.Publish(), final));
+            if (_first is not null)
+            { var first = _first.Next(value, final); var second = _second!.Next(first, final); return _third is null ? first.Times(2) - second : (first - second).Times(3) + _third.Next(second, final); }
+            if (_length == 1) return value;
+            var sum = _sum; var weighted = _weighted; Number result;
+            var window = _kind is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage;
+            if (window)
+            {
+                weighted = weighted - sum + value.Times(_length);
+                if (_history.Count == _length) sum -= _history.Peek(); sum += value;
+                result = _kind == MovingAvgType.WeightedMovingAverage ? weighted.Divide((long)_length * (_length + 1L) / 2)
+                    : _count + 1 < _length ? default : sum.Divide(_length);
+            }
+            else if (_kind == MovingAvgType.ExponentialMovingAverage && _count < _length)
+            { sum += value; result = sum.Divide(_count + 1); }
+            else
+            { var ema = _kind == MovingAvgType.ExponentialMovingAverage; result = (_previous.Times(_length - 1L) + value.Times(ema ? 2 : 1)).Divide(ema ? _length + 1L : _length); }
+            if (final) { if (window) { if (_history.Count == _length) _history.Dequeue(); _history.Enqueue(value); } _sum = sum; _weighted = weighted; _previous = result; _count++; }
+            return result;
+        }
+        internal void Reset() { _history.Clear(); _sum = _weighted = _previous = default; _count = 0; _fallback?.Reset(); _first?.Reset(); _second?.Reset(); _third?.Reset(); }
+        public void Dispose() { _fallback?.Dispose(); _first?.Dispose(); _second?.Dispose(); _third?.Dispose(); }
+    }
 }

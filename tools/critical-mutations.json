@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "id": "missing-formula-guard",
     "module": "validation",
@@ -74425,5 +74425,293 @@
     "before": "_window.Next(bar.Close, isFinal)",
     "after": "_window.Next(bar.Close, true)",
     "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_fast = new(kind, fast)",
+    "after": "_fast = new(kind, slow)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_slow = new(kind, slow)",
+    "after": "_slow = new(kind, fast)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-strength-period",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_period = Math.Max(1, period)",
+    "after": "_period = 1",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_signal = new(kind, smooth)",
+    "after": "_signal = new(kind, 1)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-direction",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_fast.Next(value, final) - _slow.Next(value, final)",
+    "after": "_slow.Next(value, final) - _fast.Next(value, final)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-difference",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "spread - _spread",
+    "after": "spread + _spread",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-opening",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_hasPrevious ? spread - _spread : default",
+    "after": "spread - _spread",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-gain",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "change.Sign > 0 ? change : default",
+    "after": "change.Sign < 0 ? default(Number) - change : default",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-loss",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "change.Sign < 0 ? default(Number) - change : default",
+    "after": "change.Sign > 0 ? change : default",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-gain-decay",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_gain.Times(_period - 1L)",
+    "after": "_gain.Times(_period)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-loss-decay",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_loss.Times(_period - 1L)",
+    "after": "_loss.Times(_period)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-ratio",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "gain.Times(100).Divide(gain + loss)",
+    "after": "gain.Times(100).Divide(gain + loss.Times(2))",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-zero-loss",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "loss.Sign == 0 ? 100",
+    "after": "loss.Sign == 0 ? 0",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-spread-memory",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_spread = spread;",
+    "after": "_spread = default;",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-gain-memory",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_gain = gain;",
+    "after": "_gain = default;",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-loss-memory",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_loss = loss;",
+    "after": "_loss = default;",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-preview",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "if (final) { _spread = spread;",
+    "after": "if (true) { _spread = spread;",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-reset",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_rsi = 0; _hasPrevious = false;",
+    "after": "_rsi = 0; /* preserve previous marker */",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-round-spread",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "StrengthFromSpread(spread, final)",
+    "after": "StrengthFromSpread(Number.Of(spread.Publish()), final)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.ExtremeAndSubnormalSpreadChangesRemainVisible"
+  },
+  {
+    "id": "relative-spread-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "value.Times(_length)",
+    "after": "value.Times(_length - 1L)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "weighted = weighted - sum",
+    "after": "weighted = weighted + sum",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide((long)_length * (_length + 1L))",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count + 1 <= _length ? default",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-expiry",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "sum -= _history.Peek();",
+    "after": "sum -= default(Number);",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-ema-start",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-ema-alpha",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(1)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.EveryRouteMatchesIndependentSpread"
+  },
+  {
+    "id": "relative-spread-wide-dema",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "first.Times(2) - second",
+    "after": "first + second",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-tema",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "(first - second).Times(3) + _third.Next(second, final)",
+    "after": "(first - second).Times(2) + _third.Next(second, final)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-average-preview",
+    "module": "numerical",
+    "file": "src/Streaming/RelativeSpreadPrecision.cs",
+    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
+    "before": "if (final) { if (window)",
+    "after": "if (true) { if (window)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "relative-spread-wide-callback-spread",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRelativeSpreadStrengthFast",
+    "before": "MacZWindow.Number.Of(fast.Span[i]) - MacZWindow.Number.Of(slow.Span[i])",
+    "after": "MacZWindow.Number.Of(fast.Span[i]) + MacZWindow.Number.Of(slow.Span[i])",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.CallbackGraphPreservesFastSlowAndSignalSlots"
+  },
+  {
+    "id": "relative-spread-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RelativeSpreadStrengthState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* guard removed */",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.InvalidBarsCannotAdvanceState"
+  },
+  {
+    "id": "relative-spread-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RelativeSpreadStrengthState",
+    "before": "_kernel.Next(bar.Close, isFinal)",
+    "after": "_kernel.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.TiesExpiryAndTransitionsPreservePreviewsAndReset"
   }
 ]
