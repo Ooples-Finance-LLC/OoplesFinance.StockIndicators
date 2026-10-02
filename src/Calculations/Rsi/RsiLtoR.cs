@@ -231,73 +231,10 @@ public static partial class Calculations
     public static StockData CalculateRecursiveRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14)
     {
-        List<double> chgList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> avgRsiList = new(stockData.Count);
-        List<double> avgList = new(stockData.Count);
-        List<double> gainList = new(stockData.Count);
-        List<double> lossList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum avgRsiSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-
-            var chg = MinPastValues(i, length, currentValue - prevValue);
-            chgList.Add(chg);
-        }
-
-        var srcList = GetMovingAverageList(stockData, maType, length, chgList);
-        stockData.SetCustomValues(srcList);
-        var rsiList = CalculateRelativeStrengthIndex(stockData, length: length).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var rsi = rsiList[i];
-            var src = srcList[i];
-            var prevB1 = i >= 1 ? bList[i - 1] : 0;
-            var prevB2 = i >= 2 ? bList[i - 2] : 0;
-
-            double b = 0, avg = 0, gain = 0, loss = 0, avgRsi = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevB = i >= j ? bList[i - j] : src;
-                var prevAvg = i >= j ? avgList[i - j] : 0;
-                var prevGain = i >= j ? gainList[i - j] : 0;
-                var prevLoss = i >= j ? lossList[i - j] : 0;
-                var k = (double)j / length;
-                var a = rsi * ((double)length / j);
-                avg = (a + prevB) / 2;
-                var avgChg = avg - prevAvg;
-                gain = avgChg > 0 ? avgChg : 0;
-                loss = avgChg < 0 ? Math.Abs(avgChg) : 0;
-                var avgGain = (gain * k) + (prevGain * (1 - k));
-                var avgLoss = (loss * k) + (prevLoss * (1 - k));
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-                avgRsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 1, 0);
-                b = avgRsiList.Count >= length ? avgRsiSum.Average(length) : avgRsi;
-            }
-            bList.Add(b);
-            avgList.Add(avg);
-            gainList.Add(gain);
-            lossList.Add(loss);
-            avgRsiList.Add(avgRsi);
-            avgRsiSum.Add(avgRsi);
-
-            var signal = GetRsiSignal(b - prevB1, prevB1 - prevB2, b, prevB1, 0.8, 0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rrsi", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bList);
-        stockData.IndicatorName = IndicatorName.RecursiveRelativeStrengthIndex;
-
-        return stockData;
+        var result = RecursiveRsiWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rrsi", result.Values.ToList() } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades.ToList());
+        stockData.SetCustomValues(result.Values.ToList()); stockData.IndicatorName = IndicatorName.RecursiveRelativeStrengthIndex; return stockData;
     }
 
 

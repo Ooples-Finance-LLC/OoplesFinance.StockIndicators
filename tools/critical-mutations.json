@@ -74119,5 +74119,311 @@
     "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
     "after": "_window.Next(bar.High, bar.Low, bar.Close, true)",
     "filter": "FullyQualifiedName~RandomWalkNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_length = Math.Max(1, length); _source",
+    "after": "_length = Math.Max(2, length); _source",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.ExtremePeriodsAreLazyAndNormalizeConsistently"
+  },
+  {
+    "id": "recursive-rsi-wide-lag-direction",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "Number.Of(price) - Number.Of(_prices.Peek())",
+    "after": "Number.Of(_prices.Peek()) - Number.Of(price)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-vote-tie",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": ").Sign >= 0;",
+    "after": ").Sign > 0;",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-output-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "Number.Integer(_positive).Times(100)",
+    "after": "Number.Integer(_positive).Times(10)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-output-current",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "Number.Integer(_positive).Times(100)",
+    "after": "Number.Integer(_positive + (rising ? 1 : 0)).Times(100)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-feedback-source",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "ready ? _outputs.Peek() : source",
+    "after": "ready ? source : source",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-midpoint-lag",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "ready ? _midpoints.Peek() : default",
+    "after": "ready ? default(Number) : default",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-signal-change",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "change - _previousChange",
+    "after": "_previousChange - change",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-signal-history",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_previousChange = change;",
+    "after": "_previousChange = default;",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-vote-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "if (_votes.Dequeue()) _positive--;",
+    "after": "if (_votes.Dequeue()) _positive++;",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-vote-count",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "if (rising) _positive++;",
+    "after": "if (!rising) _positive++;",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-gain-retention",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_gain.Times(_length - 1L)",
+    "after": "_gain.Times(_length)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-loss-retention",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_loss.Times(_length - 1L)",
+    "after": "_loss.Times(_length)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-gain-selection",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "difference.Sign > 0 ? difference : default",
+    "after": "difference.Sign < 0 ? difference : default",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.ExtremeAndSubnormalChangesRetainExactDirection"
+  },
+  {
+    "id": "recursive-rsi-wide-loss-selection",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "difference.Sign < 0 ? default(Number) - difference : default",
+    "after": "difference.Sign > 0 ? difference : default",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.ExtremeAndSubnormalChangesRetainExactDirection"
+  },
+  {
+    "id": "recursive-rsi-wide-strength-zero-loss",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "if (loss.Sign == 0) return Number.Of(100);",
+    "after": "if (loss.Sign == 0) return default;",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-strength-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "gain.Times(100).Divide(total)",
+    "after": "gain.Times(1).Divide(total)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.IndependentDelayedVoteHandsExcludeCurrentVote"
+  },
+  {
+    "id": "recursive-rsi-wide-strength-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "var total = gain + loss;",
+    "after": "var total = Number.Of(gain.Publish() + loss.Publish());",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.CallbackGainLossSumCannotOverflowBeforeBoundedStrength"
+  },
+  {
+    "id": "recursive-rsi-wide-source-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_source.Next(change, final)",
+    "after": "_source.Next(change, true)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-finish-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "Finish(source, Strength(gain, loss), final)",
+    "after": "Finish(source, Strength(gain, loss), true)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-source-history",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_previousSource = source;",
+    "after": "_previousSource = default;",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "weighted - sum + value.Times(_length)",
+    "after": "weighted + value.Times(_length)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.ExtremeAndSubnormalChangesRetainExactDirection"
+  },
+  {
+    "id": "recursive-rsi-wide-weighted-current",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "value.Times(_length);",
+    "after": "value.Times(_length - 1L);",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.ExtremeAndSubnormalChangesRetainExactDirection"
+  },
+  {
+    "id": "recursive-rsi-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "sum -= _history.Peek();",
+    "after": "sum += _history.Peek();",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-source-retention",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_positive = 0;",
+    "after": "/* count retained */",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-price-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_prices.Clear();",
+    "after": "/* price history retained */",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-output-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "_outputs.Clear();",
+    "after": "/* outputs retained */",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
+  },
+  {
+    "id": "recursive-rsi-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "ComponentAverage.Take(values, length)",
+    "after": "ComponentAverage.Take(values, length + 1)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.CallbackGraphUsesSourceThenGainThenLoss"
+  },
+  {
+    "id": "recursive-rsi-wide-callback-source",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "var source = Average(changes, kind);",
+    "after": "var source = Average(prices.ToArray(), kind);",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.CallbackGraphUsesSourceThenGainThenLoss"
+  },
+  {
+    "id": "recursive-rsi-wide-callback-gain",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "Average(gains, MovingAvgType.WildersSmoothingMethod)",
+    "after": "Average(losses, MovingAvgType.WildersSmoothingMethod)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.CallbackGraphUsesSourceThenGainThenLoss"
+  },
+  {
+    "id": "recursive-rsi-wide-callback-loss",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveRsiWindow.cs",
+    "scope": "internal sealed class RecursiveRsiWindow",
+    "before": "Average(losses, MovingAvgType.WildersSmoothingMethod)",
+    "after": "Average(gains, MovingAvgType.WildersSmoothingMethod)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.CallbackGraphUsesSourceThenGainThenLoss"
+  },
+  {
+    "id": "recursive-rsi-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RecursiveRelativeStrengthIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* finite guard removed */",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.InvalidBarsCannotAdvanceState"
+  },
+  {
+    "id": "recursive-rsi-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RecursiveRelativeStrengthIndexState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
   }
 ]

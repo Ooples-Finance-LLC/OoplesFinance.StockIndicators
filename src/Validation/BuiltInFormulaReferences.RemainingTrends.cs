@@ -37,25 +37,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.RecursiveRelativeStrengthIndex:
-                return new("Rrsi", new[] { "Rrsi" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var source = Average(prices.Select((v, i) => i < length ? 0 : v-prices[i-length]).ToArray(), length, kind);
-                    var strength = MotionRsi(source, length);
-                    var output = new double[bars.Count]; var midpoint = new double[bars.Count];
-                    var rising = new bool[bars.Count];
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        // Only the j=length endpoint survives the legacy inner loop.
-                        // At that endpoint k=1, so gain/loss smoothing collapses to a
-                        // binary nondecreasing test, followed by a delayed moving count.
-                        midpoint[i] = (strength[i]+(i < length ? source[i] : output[i-length]))/2;
-                        rising[i] = midpoint[i] >= (i < length ? 0 : midpoint[i-length]);
-                        output[i] = i < length ? (rising[i] ? 100 : 0)
-                            : 100d*Enumerable.Range(i-length, length).Count(j => rising[j])/length;
-                    }
-                    return Outputs(("Rrsi", output));
-                });
+                return new("Rrsi", new[] { "Rrsi" }, bars => RecursiveRsiOutputs(bars, indicator));
             case IndicatorName.R2AdaptiveRegression:
                 return new("R2ar", new[] { "R2ar" }, bars =>
                 {

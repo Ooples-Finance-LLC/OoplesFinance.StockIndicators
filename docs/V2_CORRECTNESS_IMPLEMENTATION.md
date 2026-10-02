@@ -4633,3 +4633,10 @@ Exact rational true ranges, ATR stages and lagged differences retain scale until
 **50/50 focused tests passed** on net10.0 (`random-walk689-focused-final.trx`), including independent root/lag hands, five routes, extreme/subnormal values, callbacks and the existing golden test. Inventory: **6,534/7,131 enrolled**, **597 omissions across 88 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes unfinished RMO687 and Periodic677. The 34 prepared behavioral faults await isolated qualification.
 
 A broader shared hand-example test passed its Random Walk entry but failed later on the separate Recursive Differenciator reference (0.19999999999999996 versus hand 0.2). That failure is preserved in `random-walk689-repaired-build.trx` and excluded from the 50 passing focused checks; its bounded follow-up is pending a scope decision. The initial compiler failure is also excluded. Final readiness gates remain pending.
+
+
+### Batch 690: Recursive RSI exact delayed direction votes
+
+The legacy inner loop reduces to a midpoint comparison and delayed count of nondecreasing votes. Exact lagged changes, source smoothing, Wilder gain/loss ratios, midpoint decisions and unpublished feedback preserve tiny directions and avoid overflowing intermediates. Lazy queues replace period-sized buffers and eliminate the redundant inner loop. Signals retain slope/acceleration semantics. Fast callbacks preserve source/gain/loss order; standard legacy batch averages consume no override slots. Both factories register the public state.
+
+**54/54 focused tests passed** on net10.0 (`recursive-rsi690-public.trx`), including independent delayed-vote hands, five routes, extreme/subnormal values, exact ties, callbacks, preview/reset, existing four-period shared regressions and the golden test. Inventory: **6,539/7,131 enrolled**, **592 omissions across 87 types**, all independent references registered, no construction failures, backlog exact. This isolated branch excludes RMO687 and unfinished Periodic677. The 34 prepared behavioral faults await isolated qualification; final readiness gates remain pending.

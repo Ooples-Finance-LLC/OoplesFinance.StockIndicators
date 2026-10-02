@@ -21365,60 +21365,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRecursiveRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateRecursiveRelativeStrengthIndex smooths the length-bar change, takes Wilders' relative
-        // strength index of that, and then recurses: each bar's average blends the index with the published
-        // value a full length back, and the series published is the running mean of the recursed index.
-        //
-        // The batch wraps that in `for (var j = 1; j <= length; j++)`, but the loop accumulates nothing -
-        // avg, gain, loss, avgRsi and b are each recomputed from j and history alone, so only the final pass
-        // j = length survives. There k is 1 and a is rsi, which is what this arm writes. The prevGain and
-        // prevLoss the batch reads carry weight (1 - k), which is zero on that pass, so they cannot matter.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var changes = context.Rent(count);
-        var change = changes.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            change[i] = CalculationsHelper.MinPastValues(i, length, input[i] - (i >= length ? input[i - length] : 0));
-        }
-
-        using var smoothedChange = context.Rent(count);
-        MovingAverage(data, maType, length, changes.Span, smoothedChange.WritableSpan);
-        var source = smoothedChange.Span;
-
-        using var strength = context.Rent(count);
-        RelativeStrengthIndex(data, context, source, length, MovingAvgType.WildersSmoothingMethod, strength.WritableSpan);
-        var rsi = strength.Span;
-
-        using var averages = context.Rent(count);
-        var average = averages.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var recursed = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            // The opening length bars have no value a length back, so they seed from the smoothed change.
-            var previousValue = i >= length ? output[i - length] : source[i];
-            var previousAverage = i >= length ? average[i - length] : 0;
-
-            average[i] = (rsi[i] + previousValue) / 2;
-            var averageChange = average[i] - previousAverage;
-            var gain = averageChange > 0 ? averageChange : 0;
-            var loss = averageChange < 0 ? Math.Abs(averageChange) : 0;
-
-            var rs = loss != 0 ? gain / loss : 0;
-            var recursedRsi = loss == 0 ? 100 : gain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 1, 0);
-
-            output[i] = i >= length ? recursed.Average(length) : recursedRsi;
-            recursed.Add(recursedRsi);
-        }
-
-        return buffer;
+        var result = RecursiveRsiWindow.Calculate(data, maType, length, true);
+        var buffer = context.Rent(result.Values.Length); result.Values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     internal static ComputeBuffer ComputeRelativeSpreadStrengthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
