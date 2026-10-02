@@ -3371,48 +3371,18 @@ public sealed class StandardDeviationState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Uvi")]
 public sealed class UltimateVolatilityIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _absSum;
-    private readonly StreamingInputResolver _input;
-
+    private readonly UltimateVolatilityWindow _window;
     public UltimateVolatilityIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _absSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new(length);
     public IndicatorName Name => IndicatorName.UltimateVolatilityIndicator;
-
-    public void Reset()
-    {
-        _absSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var abs = Math.Abs(value - bar.Open);
-        int countAfter;
-        var sum = isFinal ? _absSum.Add(abs, out countAfter) : _absSum.Preview(abs, out countAfter);
-        var uvi = sum / _length;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Uvi", uvi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(uvi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Open, isFinal).Value;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Uvi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _absSum.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Vbm")]

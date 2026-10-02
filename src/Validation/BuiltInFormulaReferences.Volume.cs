@@ -115,7 +115,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray();
                 });
             case IndicatorName.UltimateVolatilityIndicator:
-                return Single("Uvi", bars => bars.Select((_, i) => Window(bars, i, length).Sum(b => Math.Abs(b.Close - b.Open)) / length).ToArray());
+                return Single("Uvi", bars => UltimateVolatilityValues(bars, length));
             case IndicatorName.VolatilityRatio:
                 return Single("Vr", bars =>
                 {

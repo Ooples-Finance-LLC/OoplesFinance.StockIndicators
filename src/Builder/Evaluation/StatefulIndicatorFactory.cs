@@ -525,6 +525,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersHpLpRoofingFilterSpecOptions roof => new EhlersHpLpRoofingFilterState(roof.Length1, roof.Length2),
             SupportAndResistanceOscillatorSpecOptions => new SupportAndResistanceOscillatorState(),
             UberTrendIndicatorSpecOptions uber => new UberTrendIndicatorState(uber.Length),
+            UltimateVolatilityIndicatorSpecOptions volatility => new UltimateVolatilityIndicatorState(volatility.MaType, volatility.Length),
             VariableLengthMovingAverageSpecOptions variable => new VariableLengthMovingAverageState(variable.MaType, variable.Length, variable.MaxLength),
             KwanIndicatorSpecOptions kwan => new KwanIndicatorState(kwan.MaType, kwan.Length, kwan.SmoothLength),
             KaseSerialDependencyIndexSpecOptions serial => new KaseSerialDependencyIndexState(serial.Length),

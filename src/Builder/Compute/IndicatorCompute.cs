@@ -22031,35 +22031,8 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeUltimateVolatilityIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // V1 Algorithm: abs(close - open) rolling sum averaged
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        int count = data.Count;
-
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-
-        // Rolling sum of abs(close - open)
-        double absSum = 0;
-        double invLength = 1.0 / length;
-
-        for (int i = 0; i < count; i++)
-        {
-            double absVal = Math.Abs(close[i] - open[i]);
-            absSum += absVal;
-
-            // Remove old value from rolling sum
-            if (i >= length)
-            {
-                double oldAbs = Math.Abs(close[i - length] - open[i - length]);
-                absSum -= oldAbs;
-            }
-
-            // UVI = average of abs values over length
-            resultSpan[i] = invLength * absSum;
-        }
-
-        return result;
+        var values = UltimateVolatilityWindow.Calculate(data, length).Values;
+        var result = context.Rent(values.Length); values.AsSpan().CopyTo(result.WritableSpan); return result;
     }
 
     internal static ComputeBuffer ComputeUniChannelFast(StockData data, ComputeContext context, int length = 10,

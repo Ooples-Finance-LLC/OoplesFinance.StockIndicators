@@ -80860,5 +80860,221 @@
     "before": "window.Next(input[i], true)",
     "after": "window.Next(input[input.Length - 1], true)",
     "filter": "FullyQualifiedName~VariableLengthNumericalTests.CoreAndRegistryAreCausalAndMatchMappedPublicBounds"
+  },
+  {
+    "id": "ultimate-volatility-wide-rounded-subtraction",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "BigInteger.Abs(ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open))",
+    "after": "BigInteger.Abs(ExactVarianceWindow.Units(close - open))",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WideSubtractionExpiresWithoutLosingSubnormals"
+  },
+  {
+    "id": "ultimate-volatility-wide-absolute-body",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "BigInteger.Abs(ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open))",
+    "after": "ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open)",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.SelectedFastPricesRetainOriginalOpen"
+  },
+  {
+    "id": "ultimate-volatility-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "_bodies.Peek()",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-period-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "UnitRatio(sum, _length)",
+    "after": "UnitRatio(sum, _length + 1L)",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-warmup-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "UnitRatio(sum, _length)",
+    "after": "UnitRatio(sum, Math.Min(_length, _bodies.Count + 1))",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-threshold-equality",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "sum >=",
+    "after": "sum >",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.CallbackAndExactVolatilityGateControlSignals"
+  },
+  {
+    "id": "ultimate-volatility-wide-rounded-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "sum >= ((BigInteger)_length << 1074)",
+    "after": "value >= 1",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.CallbackAndExactVolatilityGateControlSignals"
+  },
+  {
+    "id": "ultimate-volatility-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal (double Value, bool Active) Next(",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-reset-total",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal void Reset()",
+    "before": "_sum = BigInteger.Zero;",
+    "after": "_sum = BigInteger.One;",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WideSubtractionExpiresWithoutLosingSubnormals"
+  },
+  {
+    "id": "ultimate-volatility-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal void Reset()",
+    "before": "_bodies.Clear();",
+    "after": "if (_bodies.Count > _length) _bodies.Clear();",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal UltimateVolatilityWindow(",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.ExtremePeriodIsLazyAndNonpositivePeriodsNormalize"
+  },
+  {
+    "id": "ultimate-volatility-wide-selected-close",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal static (double[] Values, bool[] Active) Calculate(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.SelectedFastPricesRetainOriginalOpen"
+  },
+  {
+    "id": "ultimate-volatility-wide-original-open",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateVolatilityWindow.cs",
+    "scope": "internal static (double[] Values, bool[] Active) Calculate(",
+    "before": "window.Next(input[i], data.OpenPrices[i], true)",
+    "after": "window.Next(input[i], input[i], true)",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-signal-mean-period",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityStoZ.cs",
+    "scope": "public static StockData CalculateUltimateVolatilityIndicator(",
+    "before": "maType, length, input",
+    "after": "maType, length + 1, input",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.CallbackAndExactVolatilityGateControlSignals"
+  },
+  {
+    "id": "ultimate-volatility-wide-signal-gate",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityStoZ.cs",
+    "scope": "public static StockData CalculateUltimateVolatilityIndicator(",
+    "before": "!result.Active[i]",
+    "after": "result.Active[i]",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.CallbackAndExactVolatilityGateControlSignals"
+  },
+  {
+    "id": "ultimate-volatility-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityStoZ.cs",
+    "scope": "public static StockData CalculateUltimateVolatilityIndicator(",
+    "before": "slope.Sign > 0 ? Signal.Buy",
+    "after": "slope.Sign > 0 ? Signal.Sell",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.CallbackAndExactVolatilityGateControlSignals"
+  },
+  {
+    "id": "ultimate-volatility-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeUltimateVolatilityIndicatorFast(",
+    "before": "Calculate(data, length)",
+    "after": "Calculate(data, length + 1)",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-native-open",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class UltimateVolatilityIndicatorState",
+    "before": "bar.Close, bar.Open, isFinal",
+    "after": "bar.Close, bar.Close, isFinal",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class UltimateVolatilityIndicatorState",
+    "before": "bar.Close, bar.Open, isFinal",
+    "after": "bar.Close, bar.Open, true",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class UltimateVolatilityIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.InvalidBarCannotAdvanceNativeState"
+  },
+  {
+    "id": "ultimate-volatility-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class UltimateVolatilityIndicatorState",
+    "before": "{ \"Uvi\", value }",
+    "after": "{ \"Uvi\", value / 2 }",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.WarmupExpiryAndPreviewMatchHand"
+  },
+  {
+    "id": "ultimate-volatility-wide-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "internal static partial class StatefulIndicatorFactory",
+    "before": "UltimateVolatilityIndicatorSpecOptions volatility => new UltimateVolatilityIndicatorState(volatility.MaType, volatility.Length),",
+    "after": "UltimateVolatilityIndicatorSpecOptions volatility => throw new NotSupportedException(),",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.SelectedFastPricesRetainOriginalOpen"
+  },
+  {
+    "id": "ultimate-volatility-wide-streaming",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(",
+    "before": "UltimateVolatilityIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.SelectedFastPricesRetainOriginalOpen"
+  },
+  {
+    "id": "ultimate-volatility-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": "internal static bool IncludesNumericalFixtures(",
+    "before": "UltimateVolatilityIndicator or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~UltimateVolatilityNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

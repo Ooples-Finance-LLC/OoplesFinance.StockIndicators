@@ -4996,3 +4996,12 @@ The isolated campaigns `671-selected-repaired-a` and `671-selected-repaired-b` p
 Source snapshot SHA256: `6f8e09f7a9dab64902b096cece6aa48edf4a0f4ba207a22e5892900a327eba6a`. Archive SHA256: `b0adee5bc5465a8c6c4b8294a6ca473675ad0de7946f950240e0b03a06d137be` and `1a39caaf6a3f152d5a138a84c50772d8a6ddf815128342ea0d419de12dda59b4`.
 
 This is evidence for the isolated batch-671 source. Source was already published in the batch-671 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 715: Ultimate Volatility numerical correction
+
+Absolute candle bodies and their rolling sum now remain exact through the final full-period division. Selected-input fast computation retains original opens; native state validates bars and uses lazy history. Typed native/streaming mappings and exact signal-threshold decisions are covered by independent rational references.
+
+**49/49 distinct focused checks passed**. The first run passed 47/48; its new callback test incorrectly assumed a callback exists on this path. The corrected no-callback threshold hand and an explicit invocation of the existing streaming parity test passed 2/2, with the production DLL unchanged. The combined evidence includes the existing golden and volume/range reference checks. Logs: `ultimate-volatility715-final.trx` and `ultimate-volatility715-repair.trx`.
+
+This isolated source enrolls five configurations: **6,682/7,131 enrolled**, **449 omissions**, all 7,131 independent reference registrations, no construction failures, and exact backlog agreement. DLL SHA256: `d9749bdeb1af629bf45ddb8c986814e538cc1ee566bb546f2cb79c22c50e1b91`. UMA714 remains independently under verification and is not included in this count. All 9,330 manifest anchors resolve; the 24 new behavioral faults are queued and are not yet qualified. Hosted, platform, package and performance gates remain incomplete.

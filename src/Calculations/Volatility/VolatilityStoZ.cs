@@ -339,41 +339,25 @@ public static partial class Calculations
     public static StockData CalculateUltimateVolatilityIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        List<double> uviList = new(stockData.Count);
-        List<double> absList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum absSumWindow = new();
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        var maList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length);
+        var input = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues;
+        var result = UltimateVolatilityWindow.Calculate(stockData, length);
+        var means = GetMovingAverageList(stockData, maType, length, input);
+        var signals = CreateSignalsList(stockData); System.Numerics.BigInteger previous = 0;
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-            var currentMa = maList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevMa = i >= 1 ? maList[i - 1] : 0;
-
-            var abs = Math.Abs(currentClose - currentOpen);
-            absList.Add(abs);
-            absSumWindow.Add(abs);
-
-            var uvi = (double)1 / length * absSumWindow.Sum(length);
-            uviList.Add(uvi);
-
-            var signal = GetVolatilitySignal(currentClose - currentMa, prevClose - prevMa, uvi, 1);
-            signalsList?.Add(signal);
+            var mean = i < means.Count ? means[i] : 0;
+            var slope = ExactVarianceWindow.Units(input[i]) - ExactVarianceWindow.Units(mean);
+            var signal = !result.Active[i] ? Signal.None
+                : slope.Sign > 0 && slope > previous ? Signal.StrongBuy
+                : slope.Sign < 0 && slope < previous ? Signal.StrongSell
+                : slope.Sign > 0 ? Signal.Buy : slope.Sign < 0 ? Signal.Sell : Signal.None;
+            signals?.Add(signal); previous = slope;
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Uvi", uviList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(uviList);
-        stockData.IndicatorName = IndicatorName.UltimateVolatilityIndicator;
-
-        return stockData;
+        var line = result.Values.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Uvi", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line);
+        stockData.IndicatorName = IndicatorName.UltimateVolatilityIndicator; return stockData;
     }
 
 
