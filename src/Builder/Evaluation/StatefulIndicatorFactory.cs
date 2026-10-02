@@ -392,6 +392,7 @@ internal static partial class StatefulIndicatorFactory
             ElderSafeZoneStopsSpecOptions safeZone => new ElderSafeZoneStopsState(safeZone.MaType, length2: safeZone.Length, factor: safeZone.Mult),
             EhlersMedianAverageAdaptiveFilterSpecOptions medianAdaptive => new EhlersMedianAverageAdaptiveFilterState(medianAdaptive.Length, medianAdaptive.Threshold),
             TStepLeastSquaresMovingAverageSpecOptions tstep => new TStepLeastSquaresMovingAverageState(tstep.MaType, tstep.Length),
+            TurboScalerSpecOptions turbo => new TurboScalerState(turbo.MaType, turbo.Length),
             EhlersSmoothedAdaptiveMomentumSpecOptions adaptiveMomentum => new EhlersSmoothedAdaptiveMomentumIndicatorState(adaptiveMomentum.MaType, adaptiveMomentum.Length1, adaptiveMomentum.Length2),
             GrandTrendForecastingSpecOptions grand => new GrandTrendForecastingState(grand.Length, grand.ForecastLength, grand.Mult),
             VanillaABCDPatternSpecOptions => new VanillaABCDPatternState(),

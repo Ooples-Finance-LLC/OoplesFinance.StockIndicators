@@ -538,80 +538,17 @@ public sealed class TTMScalperIndicatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Ts")]
 public sealed class TurboScalerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly IMovingAverageSmoother _sma2Smoother;
-    private readonly RollingWindowMax _smoMaxWindow;
-    private readonly RollingWindowMin _smoMinWindow;
-    private readonly RollingWindowMax _smoSmaMaxWindow;
-    private readonly RollingWindowMin _smoSmaMinWindow;
-    private readonly StreamingInputResolver _input;
-    private readonly double _alpha;
-
-    public TurboScalerState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50,
-        double alpha = 0.5)
-    {
-        var resolved = Math.Max(1, length);
-        _smaSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _sma2Smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _smoMaxWindow = new RollingWindowMax(resolved);
-        _smoMinWindow = new RollingWindowMin(resolved);
-        _smoSmaMaxWindow = new RollingWindowMax(resolved);
-        _smoSmaMinWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _alpha = alpha;
-    }
-
+    private readonly TurboScalerWindow _window;
+    public TurboScalerState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50, double alpha = 0.5)
+        => _window = new(maType, length, alpha);
     public IndicatorName Name => IndicatorName.TurboScaler;
-
-    public void Reset()
-    {
-        _smaSmoother.Reset();
-        _sma2Smoother.Reset();
-        _smoMaxWindow.Reset();
-        _smoMinWindow.Reset();
-        _smoSmaMaxWindow.Reset();
-        _smoSmaMinWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _smaSmoother.Next(value, isFinal);
-        var sma2 = _sma2Smoother.Next(sma, isFinal);
-
-        var smoSma = (_alpha * sma) + ((1 - _alpha) * sma2);
-        var smo = (_alpha * value) + ((1 - _alpha) * sma);
-
-        var smoSmaHighest = isFinal ? _smoSmaMaxWindow.Add(smoSma, out _) : _smoSmaMaxWindow.Preview(smoSma, out _);
-        var smoSmaLowest = isFinal ? _smoSmaMinWindow.Add(smoSma, out _) : _smoSmaMinWindow.Preview(smoSma, out _);
-        var smoHighest = isFinal ? _smoMaxWindow.Add(smo, out _) : _smoMaxWindow.Preview(smo, out _);
-        var smoLowest = isFinal ? _smoMinWindow.Add(smo, out _) : _smoMinWindow.Preview(smo, out _);
-
-        var a = smoHighest - smoLowest != 0 ? (value - smoLowest) / (smoHighest - smoLowest) : 0;
-        var b = smoSmaHighest - smoSmaLowest != 0 ? (sma - smoSmaLowest) / (smoSmaHighest - smoSmaLowest) : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ts", a },
-                { "Trigger", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Ts", point.Line }, { "Trigger", point.Trigger } } : null);
     }
-
-    public void Dispose()
-    {
-        _smaSmoother.Dispose();
-        _sma2Smoother.Dispose();
-        _smoMaxWindow.Dispose();
-        _smoMinWindow.Dispose();
-        _smoSmaMaxWindow.Dispose();
-        _smoSmaMinWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tsf")]

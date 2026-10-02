@@ -21,6 +21,13 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TStepLeastSquaresOutputs(bars, builtIn)["Tslsma"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.TrueRangeAdjustedExponentialMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrueRangeAdjustedOutputs(bars, builtIn)["Trema"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.TurboScaler)
+        {
+            var turboKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Ts", "Trigger" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < turboKeys.Length; slot++) { var key = turboKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => TurboScalerOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TrendAnalysisIndicator)
         {
             var trendIndicatorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Tai", "Signal" };

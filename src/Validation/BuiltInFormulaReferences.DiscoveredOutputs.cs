@@ -75,27 +75,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("SaRsi", slow), ("Signal", Average(slow, Integer(options, "SmoothLength2", 3), kind)));
                 });
             case IndicatorName.TurboScaler:
-                kind = AverageKind(options, 1);
-                if (kind == 0) return null;
-                var turboPeriod = Integer(options, "Length", 50);
-                return new("Ts", new[] { "Ts", "Trigger" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var mean = Average(prices, turboPeriod, kind);
-                    var second = Average(mean, turboPeriod, kind);
-                    double[] Position(double[] input, double[] center)
-                    {
-                        var blend = input.Select((v, i) => (v + center[i]) / 2).ToArray();
-                        return input.Select((v, i) =>
-                        {
-                            var window = Window(blend, i, turboPeriod).ToArray();
-                            var low = window.Min();
-                            var range = window.Max() - low;
-                            return range == 0 ? 0 : (v - low) / range;
-                        }).ToArray();
-                    }
-                    return Outputs(("Ts", Position(prices, mean)), ("Trigger", Position(mean, second)));
-                });
+                return new("Ts", new[] { "Ts", "Trigger" }, bars => TurboScalerOutputs(bars, indicator));
             case IndicatorName.MoveTracker:
                 return new("Mt", new[] { "Mt", "Signal" }, bars =>
                 {

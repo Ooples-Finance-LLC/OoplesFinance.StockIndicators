@@ -1708,66 +1708,10 @@ public static partial class Calculations
     public static StockData CalculateTurboScaler(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50,
         double alpha = 0.5)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> smoList = new(stockData.Count);
-        List<double> smoSmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var smoWindow = new RollingMinMax(length);
-        var smoSmaWindow = new RollingMinMax(length);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var sma2List = GetMovingAverageList(stockData, maType, length, smaList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var sma2 = sma2List[i];
-
-            var smoSma = (alpha * sma) + ((1 - alpha) * sma2);
-            smoSmaList.Add(smoSma);
-            smoSmaWindow.Add(smoSma);
-
-            var smo = (alpha * currentValue) + ((1 - alpha) * sma);
-            smoList.Add(smo);
-            smoWindow.Add(smo);
-
-            var smoSmaHighest = smoSmaWindow.Max;
-            var smoSmaLowest = smoSmaWindow.Min;
-            var smoHighest = smoWindow.Max;
-            var smoLowest = smoWindow.Min;
-
-            var a = smoHighest - smoLowest != 0 ? (currentValue - smoLowest) / (smoHighest - smoLowest) : 0;
-            aList.Add(a);
-
-            var b = smoSmaHighest - smoSmaLowest != 0 ? (sma - smoSmaLowest) / (smoSmaHighest - smoSmaLowest) : 0;
-            bList.Add(b);
-        }
-
-        var aSmaList = GetMovingAverageList(stockData, maType, length, aList);
-        var bSmaList = GetMovingAverageList(stockData, maType, length, bList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var a = aSmaList[i];
-            var b = bSmaList[i];
-            var prevA = i >= 1 ? aSmaList[i - 1] : 0;
-            var prevB = i >= 1 ? bSmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(a - b, prevA - prevB);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ts", aList },
-            { "Trigger", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(aList);
-        stockData.IndicatorName = IndicatorName.TurboScaler;
-
-        return stockData;
+        var values = TurboScalerWindow.Calculate(stockData, maType, length, alpha);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ts", values.Line.ToList() }, { "Trigger", values.Trigger.ToList() } });
+        stockData.SetSignals(values.Trades.ToList()); stockData.SetCustomValues(values.Line.ToList());
+        stockData.IndicatorName = IndicatorName.TurboScaler; return stockData;
     }
 
 

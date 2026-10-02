@@ -79465,5 +79465,329 @@
     "before": "TStepLeastSquaresWindow.Calculate(data, maType, length)",
     "after": "TStepLeastSquaresWindow.Calculate(data, maType, 1)",
     "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "_alpha = Number.Of(alpha)",
+    "after": "_alpha = Number.Of(1)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-blend",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "mean + _alpha * (value - mean)",
+    "after": "mean + _alpha * (value + mean)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-blend-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "=> mean + _alpha * (value - mean);",
+    "after": "=> Number.Of((mean + _alpha * (value - mean)).Publish());",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.OverflowingBlendsAndRangesRetainFiniteRatios"
+  },
+  {
+    "id": "turbo-scaler-wide-signal-change",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "comparison - _previousComparison",
+    "after": "comparison + _previousComparison",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "if (final) _previousComparison = comparison;",
+    "after": "if (final) _previousComparison = default;",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "if (final) _previousComparison",
+    "after": "if (true) _previousComparison",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-second-mean",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "_second.Next(first, final)",
+    "after": "_second.Next(value, final)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-line-mean",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "_lineMean.Next(line, final)",
+    "after": "_lineMean.Next(trigger, final)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-signal-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "_lineMean.Next(line, final)",
+    "after": "_lineMean.Next(Number.Of(line.Publish()), final)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.SubnormalBlendsAndOpposingInfiniteRatiosRetainSignal"
+  },
+  {
+    "id": "turbo-scaler-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.SelectedSourcePreservesFormula"
+  },
+  {
+    "id": "turbo-scaler-wide-callback-input",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), length)",
+    "after": "ComponentAverage.Take(prices.ToArray(), length)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.CallbackSlotsDiscoveryShortArraysAndCallerInputArePreserved"
+  },
+  {
+    "id": "turbo-scaler-wide-callback-discovery",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "var custom = ComponentAverage.Take",
+    "after": "var custom = !ComponentAverage.HasOverrides ? null : ComponentAverage.Take",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.CallbackSlotsDiscoveryShortArraysAndCallerInputArePreserved"
+  },
+  {
+    "id": "turbo-scaler-wide-callback-short",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "i < custom.Count ? Number.Of(custom[i]) : default",
+    "after": "i < custom.Count ? Number.Of(custom[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.CallbackSlotsDiscoveryShortArraysAndCallerInputArePreserved"
+  },
+  {
+    "id": "turbo-scaler-wide-batch-second",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "var second = Mean(first)",
+    "after": "var second = Mean(source)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-batch-trigger",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "window.Blend(first[i], second[i])",
+    "after": "window.Blend(source[i], second[i])",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "internal Range(int length) => _length = Math.Max(1, length);",
+    "after": "internal Range(int length) => _length = 1;",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "var expiry = _index - _length + 1",
+    "after": "var expiry = _index - _length",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.ExtremePeriodsAlphaEndpointsAndExpiryRemainDefined"
+  },
+  {
+    "id": "turbo-scaler-wide-deque-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "if (final)\n            {\n                while (deque.First",
+    "after": "if (true)\n            {\n                while (deque.First",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "Extreme(_highs, blend, true, final)",
+    "after": "Extreme(_highs, blend, false, final)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "Extreme(_lows, blend, false, final)",
+    "after": "Extreme(_lows, blend, true, final)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-ratio-origin",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "(value - low).Divide(width)",
+    "after": "(value - high).Divide(width)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-ratio-width",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "var width = high - low",
+    "after": "var width = high + low",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-zero-width",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "width.Sign == 0 ? default",
+    "after": "width.Sign == 0 ? Number.Of(1)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.ExtremePeriodsAlphaEndpointsAndExpiryRemainDefined"
+  },
+  {
+    "id": "turbo-scaler-wide-index-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "if (final) _index++;",
+    "after": "if (true) _index++;",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-reset-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "_highs.Clear();",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide(_length)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "weighted = weighted - sum",
+    "after": "weighted = weighted + sum",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "sum -= _history.Peek();",
+    "after": "sum -= default;",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-ema-seed",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "result = sum.Divide(_count + 1)",
+    "after": "result = sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-recursive-gain",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/TurboScalerWindow.cs",
+    "scope": "internal sealed class TurboScalerWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboScalerState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.InvalidCandlesAndAlphaCannotAdvanceMeansOrExtrema"
+  },
+  {
+    "id": "turbo-scaler-wide-native-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboScalerState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboScalerState",
+    "before": "{ \"Trigger\", point.Trigger }",
+    "after": "{ \"Trigger\", point.Line }",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-scaler-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTurboScalerFast",
+    "before": "TurboScalerWindow.Calculate(data, maType, length, alpha, false)",
+    "after": "TurboScalerWindow.Calculate(data, maType, 1, alpha, false)",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
   }
 ]

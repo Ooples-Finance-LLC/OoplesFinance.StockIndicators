@@ -4941,3 +4941,10 @@ This is evidence for retained batch-668 source with the selected-source test ove
 All **48/48 focused tests passed** in `tstep709-focused.trx`, covering five configurations across five public routes, explicit batch/fast selected inputs, independently derived step/regression/signal hands, overflow, subnormal moments, exact threshold ties and neighbors, expiry, extreme periods, preview/reset, callback discovery/order/short results and full-candle guards. The existing hand and golden tests also passed. The independent reference recomputes window-centered residual products rather than production rolling moments. Core/registry alignment remains a separate pending decision.
 
 Inventory: **6,637/7,131 enrolled**, **494 omissions across 71 types**, all 7,131 reference registrations, no construction failures and exact backlog agreement. All **9,151 mutation anchors resolve**; 40 new faults await isolated campaigns. These focused checks do not establish mutation, hosted-platform, performance or release qualification. Unrelated TrendForce/Mobility files retain their recorded hashes.
+
+
+### Batch 710: Turbo Scaler public numerical coverage
+
+All **47/47 focused tests passed** in `turbo-scaler710-focused.trx`: five configurations across five public routes, selected inputs through batch and explicit fast, independent raw-ratio and smoothed-signal hands, overflow, subnormal cancellation, alpha boundaries, extreme periods, expiry, preview/reset, callback order/discovery/short results, invalid candles and the existing golden fixture. The independent oracle recomputes extrema and arranges affine blends separately from production.
+
+Inventory: **6,642/7,131 enrolled**, **489 omissions across 70 types**, all 7,131 independent reference registrations, no construction failures and exact backlog agreement. All **9,187 mutation anchors resolve**; 36 new faults await isolated campaigns. Focused verification does not establish mutation, hosted-platform, performance or release qualification. Preserved TrendForce/Mobility files match their recorded hashes.

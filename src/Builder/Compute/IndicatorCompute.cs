@@ -14318,37 +14318,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTurboScalerFast(StockData data, ComputeContext context, int length = 50,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double alpha = 0.5, string? outputKey = null)
     {
-        // CalculateTurboScaler blends the series with its own moving average, and that average with its second
-        // pass, then ranges the series within the window of the first blend. The published "Ts" is that raw
-        // ranging, not the smoothed copy the signals are drawn from. The spec's PctMultiplier is not this
-        // alpha - it scaled a percentile in the core routine this replaces, which the batch has no notion of -
-        // so it stays obsolete, while alpha keeps the paper's 0.5 and remains settable here.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var first = context.Rent(count);
-        using var second = context.Rent(count);
-        MovingAverage(data, maType, length, input, first.WritableSpan);
-        MovingAverage(data, maType, length, first.Span, second.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var blendWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            var value = outputKey == "Trigger" ? first.Span[i] : input[i];
-            var average = outputKey == "Trigger" ? second.Span[i] : first.Span[i];
-            var blend = (alpha * value) + ((1 - alpha) * average);
-            blendWindow.Add(blend);
-
-            var highest = blendWindow.Max;
-            var lowest = blendWindow.Min;
-            output[i] = highest - lowest != 0 ? (value - lowest) / (highest - lowest) : 0;
-        }
-
-        return buffer;
+        var values = TurboScalerWindow.Calculate(data, maType, length, alpha, false);
+        var selected = outputKey == "Trigger" ? values.Trigger : values.Line;
+        var output = context.Rent(selected.Length); selected.AsSpan().CopyTo(output.WritableSpan); return output;
     }
 
     /// <summary>
