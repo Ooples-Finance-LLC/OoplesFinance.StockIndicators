@@ -4900,3 +4900,12 @@ The four existing Morphed Sine selected-source cases now directly invoke the fas
 All **81/81 focused tests passed** in `trend-analysis-indicator707-focused.trx`, covering nine configurations across five routes, explicit selected-source fast outputs, independent population-deviation and signal hands, overflowing squares, subnormal midpoint ties, expiry, preview/reset, extreme periods, full-candle guards and callback discovery/order/short results. The independent reference sums squared residuals about each window mean instead of using production rolling moments. Typed factory and native streaming routing are enrolled.
 
 Inventory: **6,628/7,131 enrolled**, **503 omissions across 73 types**, all 7,131 reference registrations, no construction failures and exact backlog agreement. All **9,077 mutation anchors resolve**; 34 new faults await isolated campaigns. Focused passes and source enrollment do not establish mutation or release qualification. Unrelated TrendForce/Mobility files retain their recorded hashes.
+
+
+### Batch 664: Mass Thrust and shared arithmetic mutation qualification
+
+The isolated campaigns `664-repaired3-a` and `664-repaired3-b` passed their baselines and caught **47/47 compiled behavioral faults**, alongside **142/142 distinct focused tests**. Both archives were compared byte-for-byte with the retained batch-664 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `fdb1a89b6aeb950064b535e6d916992b0144fe0ba19a63d33023c04fddfa6b28`. Archive SHA256: `50f65113a5172494cab5e36804266e5d5f34556f6df378322aa99ae1438c0940` and `ffbd10daf90aeeaf136aa85d39064d168c1675ccb88ec209f61b71cdab7b5080`.
+
+This is evidence for retained batch-664 source with selected-source and cross-cancellation test repairs using retained-source-compatible constructors plus the compiled first-move fault definition; all superseded snapshots are excluded. Source was already published in the batch-664 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
