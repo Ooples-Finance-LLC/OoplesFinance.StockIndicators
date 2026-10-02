@@ -65541,7 +65541,7 @@
     "file": "src/Helpers/KasePeakV2Window.cs",
     "scope": "internal sealed class KasePeakV2Window",
     "before": "if (_hasPrevious)\n        {",
-    "after": "if (true)\n        {",
+    "after": "if (_hasPrevious || _returns.Count == 0)\n        {",
     "filter": "FullyQualifiedName~KasePeakV2NumericalTests.HandGenuineReturnWindowAndPartialMeansHaveKnownValues"
   },
   {
@@ -65716,12 +65716,12 @@
     "filter": "FullyQualifiedName~KasePeakV2NumericalTests.SelectedRangesAndDeviationCallbackRemainExplicit"
   },
   {
-    "id": "kase-peak-v2-wide-callback-reset",
+    "id": "kase-peak-v2-wide-callback-discard",
     "module": "numerical",
     "file": "src/Helpers/KasePeakV2Window.cs",
     "scope": "internal sealed class KasePeakV2Window",
     "before": "window.Reset();",
-    "after": "// omitted reset",
+    "after": "window.Reset(); external = null;",
     "filter": "FullyQualifiedName~KasePeakV2NumericalTests.SelectedRangesAndDeviationCallbackRemainExplicit"
   },
   {

@@ -4610,3 +4610,10 @@ The queued MacZ VWAP histogram-memory fault now resets the retained histogram to
 QQE retains the established RSI component, then carries exact smoothing and movement arithmetic through both width stages and final factors. Long derived periods and lazy storage avoid wraparound and eager allocation; five callbacks retain their order and supported integer-period contract. Nonnegative finite factors agree with typed options. Both factories route natively.
 
 **82/82 focused tests passed** on net10.0 (qqe685-repaired-build.trx), including nine configurations across five routes, exact rational references, opening/weighted hands, overflow/subnormal inputs, signals, preview/reset, lazy extreme periods, invalid inputs, callbacks, legacy fallback and existing hand/golden tests. The first attempt failed compilation and is excluded; the corrected build passed. Isolated inventory is **6,524/7,131 enrolled**, **607 omissions across 90 types**, with complete references and no construction failures. This branch includes679-682 and the662 manifest repair, but not unfinished Periodic677. The40 prepared faults and final readiness gates remain pending.
+
+
+### Batch 656: repair two mutation definitions
+
+The original pair caught42 compiled faults, left one equivalent fault alive and encountered one compiler failure; it does not qualify. The first-return fault now forces an opening return while still reading the previous-price flag, avoiding CS0414. The omitted callback reset was equivalent: the prepass changes only deviation state, and the callback replaces every deviation used by the second pass. Its replacement discards the callback result, testing an observable callback contract. Production and regression sources are unchanged.
+
+Fresh snapshots contain2,204 matching files, with only these two manifest definitions changed from the retained656 source. All8,488 current manifest anchors resolve. The replacement44-fault pair is running; qualification remains pending. Original partial results will not be pooled into its result.
