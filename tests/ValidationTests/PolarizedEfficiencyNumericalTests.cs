@@ -23,7 +23,28 @@ public sealed class PolarizedEfficiencyNumericalTests
     [Theory, MemberData(nameof(Routes))]
     public void EveryRouteMatchesIndependentGeometry(IndicatorValidationCase c, string route) => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => Expected(bars, (IBuiltInIndicator)c.Factory()), IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
-    public Task SelectedSourcePreservesFormula(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+    public async Task SelectedSourcePreservesFormula(IndicatorValidationCase c)
+    {
+        await new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
+        var indicator = c.Factory(); var builtIn = (IBuiltInIndicator)indicator;
+        var (length, smooth, kind) = builtIn.CreateOptions() switch
+        {
+            PfeSpecOptions alias => (alias.Length, 5, MovingAvgType.ExponentialMovingAverage),
+            PolarizedFractalEfficiencySpecOptions full => (full.Length, full.SmoothLength, full.MaType),
+            _ => throw new InvalidOperationException()
+        };
+        var count = Math.Max(64, indicator.WarmupBars + 8);
+        var selected = Enumerable.Range(0, count).Select(i => i % 2 == 0 ? -(double)i : i + 1d).ToArray();
+        var bars = Bars(Enumerable.Repeat(100d, count).ToArray());
+        var expected = Expected(Bars(selected), builtIn)["Pfe"];
+        Assert.Contains(expected, value => value != 0); // Constant original closes have zero directional efficiency.
+        var data = Data(bars); data.SetCustomValues(selected.ToList());
+        using var context = new ComputeContext(); using var fast = IndicatorCompute.ComputePolarizedFractalEfficiencyFast(data, context, length, smooth, kind);
+        Assert.Equal(expected, fast.ToArray()); Assert.Equal(selected, data.ChainedValues);
+        data.CalculatePolarizedFractalEfficiency(kind, length, smooth);
+        Assert.Equal(expected, data.CustomValuesList); Assert.Equal(expected, data.OutputValues["Pfe"]);
+        Assert.Equal(bars.Select(b => b.Close), data.ClosePrices);
+    }
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsInjectedFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]
