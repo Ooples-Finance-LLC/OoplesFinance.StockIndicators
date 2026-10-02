@@ -12872,39 +12872,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVariableAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateVariableAdaptiveMovingAverage sets its smoothing factor from how much of the averaged
-        // high-to-low range the averaged open-to-close body fills, so it needs averages of all four series.
-        // The core routine saw only the chained one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var closeAverage = context.Rent(count);
-        MovingAverage(data, maType, length, input, closeAverage.WritableSpan);
-        using var openAverage = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.OpenPrices), openAverage.WritableSpan);
-        using var highAverage = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.HighPrices), highAverage.WritableSpan);
-        using var lowAverage = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.LowPrices), lowAverage.WritableSpan);
-
-        var c = closeAverage.Span;
-        var o = openAverage.Span;
-        var h = highAverage.Span;
-        var l = lowAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var lv = h[i] - l[i] != 0 ? MathHelper.MinOrMax(Math.Abs(c[i] - o[i]) / (h[i] - l[i]), 0.99, 0.01) : 0;
-
-            var prevVma = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = (lv * currentValue) + ((1 - lv) * prevVma);
-        }
-
-        return buffer;
+        var values = VariableAdaptiveWindow.Calculate(data, maType, length).Values;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

@@ -934,3 +934,12 @@ Value Chart subtracts the selected input moving average (exact high/low midpoint
 Finite signed candles are supported. Exact fractions preserve the midpoint, range differences, and coordinate division across binary64 overflow and subnormal underflow. Standard finite-window averages are exact; EMA/Wilder feedback uses the existing 106-bit extended shared average. Genuine final binary64 overflow follows the overflow-rejection validation contract. Exact slope and threshold comparisons determine signals. Histories grow with observed data; extreme requested periods do not allocate period-sized arrays. Native previews do not commit state, and invalid bars are rejected before mutation.
 
 The distinct unused core formula is unchanged pending the separately requested alignment decision. 48 distinct focused checks passed; 32 mutation candidates are queued for qualification.
+
+
+### Batch 717: Variable Adaptive Moving Average public contract
+
+Four component averages are requested in close/open/high/low order. The close is the selected series; open remains original, and high/low retain the shared per-bar selected-range projection. The adaptive gain is zero for an exactly zero averaged range; otherwise it is the absolute averaged candle body divided by the averaged range, clamped to the existing binary64 constants 0.01 and 0.99. Negative ranges therefore choose the lower gain. The first output is seeded with the current price. The recursive blend and signal margins remain extended exact fractions, retaining feedback even when its published value rounds to zero. Finite-window component means are exact; the shared EMA/Wilder component means use 106-bit feedback. Unsupported average kinds retain their existing smoother fallback.
+
+Batch and fast routes preserve four callback slots and zero-fill short replacements. Periods normalize to at least one and standard mean histories grow only with observations. Native previews do not commit state; invalid candles are rejected before state mutation. Batch and fast validate original candle fields even when a selected series projects the ranges. The previous fast implementation used original ranges for selected input and is aligned with batch/native projection in this batch.
+
+The distinct price-only core/registry formula and its SVAMA delegation await the separately requested design decision. 48 distinct focused checks passed; 31 mutation candidates are queued for qualification.

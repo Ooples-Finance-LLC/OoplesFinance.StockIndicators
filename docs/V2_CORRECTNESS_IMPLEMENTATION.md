@@ -5049,3 +5049,10 @@ The isolated campaigns `674-repaired-a` and `674-repaired-b` passed their baseli
 Source snapshot SHA256: `ece10c95a95e3cf8ffbf0cd5b6c82a5cecc3951dd6c8efe86d36bce3aed824ce`. Archive SHA256: `87e0326bce5b5dd0518e400ee8e2304bd90aac8447023724dfff12799781c89d` and `2f862891f28eef9d4efaa4b98be0fde5e4f43c40b607647ac06e6fe653a88f28`.
 
 This is evidence for the isolated batch-674 source. Source was already published in the batch-674 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 717: Variable Adaptive Moving Average public numerical correction
+
+The four component means, gain clipping, recursive blend and signal margins now retain extended values, including feedback below the smallest published subnormal. Batch, fast and native routes share the formula; fast selected-input ranges now match batch/native projection. Raw invalid candles are rejected before projection can hide them. The distinct core/registry and SVAMA delegation remain pending their separate scope decision.
+
+**48/48 distinct focused checks passed** across `variable-adaptive717-final.trx` and the two Variable Adaptive cases in `oscar675-variable-adaptive717-isolated-repairs.trx`. The latter replaces the earlier callback check and adds gain-limit hands; it used an isolated test-only build against the unchanged production DLL. Inventory: **6,692/7,131 configurations enrolled**, 439 omissions, all independent references registered and no construction failures. The 31 mutation candidates await isolated qualification.

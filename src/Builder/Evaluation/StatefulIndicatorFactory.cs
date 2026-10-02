@@ -268,6 +268,7 @@ internal static partial class StatefulIndicatorFactory
             TraderPressureIndexSpecOptions pressure => new TraderPressureIndexState(pressure.MaType, pressure.Length1, pressure.Length2, pressure.SmoothLength),
             StrengthOfMovementSpecOptions strength => new StrengthOfMovementState(strength.MaType, strength.Length1, strength.Length2),
             TrendTriggerFactorSpecOptions trigger => new TrendTriggerFactorState(trigger.Length),
+            VariableAdaptiveMovingAverageSpecOptions adaptive => new VariableAdaptiveMovingAverageState(adaptive.MaType, adaptive.Length),
             ValueChartIndicatorSpecOptions valueChart => new ValueChartIndicatorState(valueChart.MaType, valueChart.Length),
             TimeAndMoneyChannelSpecOptions timeMoney => new TimeAndMoneyChannelState(timeMoney.MaType, timeMoney.Length1, timeMoney.Length2),
             WilsonRelativePriceChannelSpecOptions wilson => new WilsonRelativePriceChannelState(wilson.MaType, wilson.Length, wilson.SmoothLength,

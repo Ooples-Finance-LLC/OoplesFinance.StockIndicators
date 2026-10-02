@@ -81364,5 +81364,284 @@
     "before": "ValueChartIndicator or ",
     "after": "",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "variable-adaptive-wide-rounded-width",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "var width = high - low",
+    "after": "var width = Number.Of(high.Publish() - low.Publish())",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.OverflowingRangeStillHasHalfGain"
+  },
+  {
+    "id": "variable-adaptive-wide-body-sign",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "if (body.Sign < 0)",
+    "after": "if (body.Sign > 0)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-gain-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "body.Divide(width)",
+    "after": "body.Divide(width.Times(2))",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-gain-upper",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "var maximum = Number.Of(.99)",
+    "after": "var maximum = Number.Of(.9)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.GainLimitsHaveIndependentHands"
+  },
+  {
+    "id": "variable-adaptive-wide-gain-lower",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "var minimum = Number.Of(.01)",
+    "after": "var minimum = Number.Of(.1)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.GainLimitsHaveIndependentHands"
+  },
+  {
+    "id": "variable-adaptive-wide-zero-range-gain",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "Number gain = default;",
+    "after": "Number gain = Number.Of(.01);",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.ExtremePeriodsAreLazyAndFlatCandlesHoldFirstPrice"
+  },
+  {
+    "id": "variable-adaptive-wide-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "_hasPrevious ? _previous : price",
+    "after": "_hasPrevious ? _previous : default",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-rounded-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "_previous = value;",
+    "after": "_previous = Number.Of(value.Publish());",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.PublishedZeroRetainsSubnormalFeedback"
+  },
+  {
+    "id": "variable-adaptive-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-signal-buy",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "? Signal.StrongBuy",
+    "after": "? Signal.StrongSell",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-signal-sell",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "? Signal.StrongSell",
+    "after": "? Signal.StrongBuy",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-signal-history",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "private (double Value, Signal Trade) Finish(",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal (double Value, Signal Trade) Next(",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.InvalidBarCannotAdvanceState"
+  },
+  {
+    "id": "variable-adaptive-wide-native-open",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal (double Value, Signal Trade) Next(",
+    "before": "Number.Of(bar.Open)",
+    "after": "Number.Of(bar.Close)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-native-high",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal (double Value, Signal Trade) Next(",
+    "before": "Number.Of(bar.High)",
+    "after": "Number.Of(bar.Close)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-native-low",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal (double Value, Signal Trade) Next(",
+    "before": "Number.Of(bar.Low)",
+    "after": "Number.Of(bar.Close)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "ComponentAverage.Take(values.ToArray(), length)",
+    "after": "ComponentAverage.Take(values.ToArray(), length + 1)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.FourCallbackSlotsAndShortReplacementArePreserved"
+  },
+  {
+    "id": "variable-adaptive-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.FourCallbackSlotsAndShortReplacementArePreserved"
+  },
+  {
+    "id": "variable-adaptive-wide-close-slot",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "var c = Mean(prices)",
+    "after": "var c = Mean(opens)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.FourCallbackSlotsAndShortReplacementArePreserved"
+  },
+  {
+    "id": "variable-adaptive-wide-open-slot",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "var o = Mean(opens)",
+    "after": "var o = Mean(prices)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.FourCallbackSlotsAndShortReplacementArePreserved"
+  },
+  {
+    "id": "variable-adaptive-wide-high-slot",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "var h = Mean(highs)",
+    "after": "var h = Mean(data.HighPrices)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-low-slot",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "var l = Mean(lows)",
+    "after": "var l = Mean(data.LowPrices)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-batch-price",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal static (double[] Values, Signal[] Trades) Calculate(",
+    "before": "window.Finish(Number.Of(prices[i])",
+    "after": "window.Finish(Number.Of(data.ClosePrices[i])",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-reset-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VariableAdaptiveWindow.cs",
+    "scope": "internal sealed class VariableAdaptiveWindow",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVariableAdaptiveMovingAverageFast(",
+    "before": "Calculate(data, maType, length)",
+    "after": "Calculate(data, maType, length + 1)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-fast-kind",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVariableAdaptiveMovingAverageFast(",
+    "before": "Calculate(data, maType, length)",
+    "after": "Calculate(data, MovingAvgType.SimpleMovingAverage, length)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VariableAdaptiveMovingAverageState",
+    "before": "{ \"Vama\", point.Value }",
+    "after": "{ \"Vama\", point.Value / 2 }",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VariableAdaptiveMovingAverageState",
+    "before": "_window.Next(bar, isFinal)",
+    "after": "_window.Next(bar, true)",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
+  },
+  {
+    "id": "variable-adaptive-wide-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "internal static partial class StatefulIndicatorFactory",
+    "before": "VariableAdaptiveMovingAverageSpecOptions adaptive => new VariableAdaptiveMovingAverageState(adaptive.MaType, adaptive.Length),",
+    "after": "VariableAdaptiveMovingAverageSpecOptions adaptive => throw new NotSupportedException(),",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-streaming",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(",
+    "before": "VariableAdaptiveMovingAverageSpecOptions or",
+    "after": "",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.SelectedPricesUseProjectedRanges"
+  },
+  {
+    "id": "variable-adaptive-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": "internal static bool IncludesNumericalFixtures(",
+    "before": "VariableAdaptiveMovingAverage or ",
+    "after": "",
+    "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

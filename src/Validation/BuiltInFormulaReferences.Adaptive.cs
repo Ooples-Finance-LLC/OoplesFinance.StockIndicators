@@ -454,22 +454,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.VariableAdaptiveMovingAverage:
-                var bodyKind = AverageKind(options, 1);
-                if (bodyKind == 0) return null;
-                return new("Vama", new[] { "Vama" }, bars =>
-                {
-                    // Linearity lets us smooth body and range directly instead of four OHLC streams.
-                    var bodies = Average(bars.Select(b => b.Close - b.Open).ToArray(), length, bodyKind);
-                    var ranges = Average(bars.Select(b => b.High - b.Low).ToArray(), length, bodyKind);
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var gain = ranges[i] == 0 ? 0 : Math.Max(.01, Math.Min(.99, Math.Abs(bodies[i]) / ranges[i]));
-                        var previous = i == 0 ? bars[i].Close : result[i - 1];
-                        result[i] = previous + gain * (bars[i].Close - previous);
-                    }
-                    return Outputs(("Vama", result));
-                });
+                return new("Vama", new[] { "Vama" }, bars => VariableAdaptiveOutputs(bars, indicator));
             case IndicatorName.CompoundRatioMovingAverage:
                 var compoundKind = AverageKind(options, 2);
                 if (compoundKind == 0) return null;

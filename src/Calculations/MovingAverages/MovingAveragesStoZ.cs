@@ -816,40 +816,11 @@ public static partial class Calculations
     public static StockData CalculateVariableAdaptiveMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14)
     {
-        List<double> vmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        var cList = GetMovingAverageList(stockData, maType, length, inputList);
-        var oList = GetMovingAverageList(stockData, maType, length, openList);
-        var hList = GetMovingAverageList(stockData, maType, length, highList);
-        var lList = GetMovingAverageList(stockData, maType, length, lowList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var c = cList[i];
-            var o = oList[i];
-            var h = hList[i];
-            var l = lList[i];
-            var lv = h - l != 0 ? MinOrMax(Math.Abs(c - o) / (h - l), 0.99, 0.01) : 0;
-
-            var prevVma = i >= 1 ? vmaList[i - 1] : currentValue;
-            var vma = (lv * currentValue) + ((1 - lv) * prevVma);
-            vmaList.Add(vma);
-
-            var signal = GetCompareSignal(currentValue - vma, prevValue - prevVma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vama", vmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vmaList);
+        var result = VariableAdaptiveWindow.Calculate(stockData, maType, length);
+        var values = result.Values.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vama", values } });
+        stockData.SetSignals(result.Trades.ToList()); stockData.SetCustomValues(values);
         stockData.IndicatorName = IndicatorName.VariableAdaptiveMovingAverage;
-
         return stockData;
     }
 

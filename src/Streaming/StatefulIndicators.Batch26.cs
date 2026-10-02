@@ -182,73 +182,17 @@ public sealed class VaradiOscillatorState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Vama")]
 public sealed class VariableAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _closeMa;
-    private readonly IMovingAverageSmoother _openMa;
-    private readonly IMovingAverageSmoother _highMa;
-    private readonly IMovingAverageSmoother _lowMa;
-    private readonly StreamingInputResolver _input;
-    private double _prevVma;
-    private bool _hasPrev;
-
+    private readonly VariableAdaptiveWindow _window;
     public VariableAdaptiveMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _closeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _openMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _highMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _lowMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.VariableAdaptiveMovingAverage;
-
-    public void Reset()
-    {
-        _closeMa.Reset();
-        _openMa.Reset();
-        _highMa.Reset();
-        _lowMa.Reset();
-        _prevVma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var c = _closeMa.Next(value, isFinal);
-        var o = _openMa.Next(bar.Open, isFinal);
-        var h = _highMa.Next(bar.High, isFinal);
-        var l = _lowMa.Next(bar.Low, isFinal);
-        var lv = h - l != 0 ? MathHelper.MinOrMax(Math.Abs(c - o) / (h - l), 0.99, 0.01) : 0;
-
-        var prevVma = _hasPrev ? _prevVma : value;
-        var vma = (lv * value) + ((1 - lv) * prevVma);
-
-        if (isFinal)
-        {
-            _prevVma = vma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vama", vma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vma, outputs);
+        var point = _window.Next(bar, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Vama", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _closeMa.Dispose();
-        _openMa.Dispose();
-        _highMa.Dispose();
-        _lowMa.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vidya")]
