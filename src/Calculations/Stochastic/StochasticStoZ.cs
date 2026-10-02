@@ -83,37 +83,10 @@ public static partial class Calculations
     public static StockData CalculateTurboStochasticsFast(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 10, int turboLength = 2)
     {
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
-
-        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length1).ChainedValues;
-        var fastDList = GetMovingAverageList(stockData, maType, length1, fastKList);
-        stockData.SetCustomValues(fastKList);
-        var tsfKList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
-        stockData.SetCustomValues(fastDList);
-        var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var tsfD = tsfDList[i];
-            var tsfK = tsfKList[i];
-            var prevTsfk = i >= 1 ? tsfKList[i - 1] : 0;
-            var prevTsfd = i >= 1 ? tsfDList[i - 1] : 0;
-
-            var signal = GetRsiSignal(tsfK - tsfD, prevTsfk - prevTsfd, tsfK, prevTsfk, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tsf", tsfKList },
-            { "Signal", tsfDList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tsfKList);
-        stockData.IndicatorName = IndicatorName.TurboStochasticsFast;
-
-        return stockData;
+        var values = TurboStochasticsWindow.Calculate(stockData, maType, length1, length2, turboLength, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tsf", values.Line.ToList() }, { "Signal", values.SignalLine.ToList() } });
+        stockData.SetSignals(values.Trades.ToList()); stockData.SetCustomValues(values.Line.ToList());
+        stockData.IndicatorName = IndicatorName.TurboStochasticsFast; return stockData;
     }
 
 
@@ -130,38 +103,10 @@ public static partial class Calculations
     public static StockData CalculateTurboStochasticsSlow(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 10, int turboLength = 2)
     {
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
-
-        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length1).ChainedValues;
-        var slowKList = GetMovingAverageList(stockData, maType, length1, fastKList);
-        var slowDList = GetMovingAverageList(stockData, maType, length1, slowKList);
-        stockData.SetCustomValues(slowKList);
-        var tsfKList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
-        stockData.SetCustomValues(slowDList);
-        var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var tssD = tsfDList[i];
-            var tssK = tsfKList[i];
-            var prevTssk = i >= 1 ? tsfKList[i - 1] : 0;
-            var prevTssd = i >= 1 ? tsfDList[i - 1] : 0;
-
-            var signal = GetRsiSignal(tssK - tssD, prevTssk - prevTssd, tssK, prevTssk, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tsf", tsfKList },
-            { "Signal", tsfDList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tsfKList);
-        stockData.IndicatorName = IndicatorName.TurboStochasticsSlow;
-
-        return stockData;
+        var values = TurboStochasticsWindow.Calculate(stockData, maType, length1, length2, turboLength, true);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tsf", values.Line.ToList() }, { "Signal", values.SignalLine.ToList() } });
+        stockData.SetSignals(values.Trades.ToList()); stockData.SetCustomValues(values.Line.ToList());
+        stockData.IndicatorName = IndicatorName.TurboStochasticsSlow; return stockData;
     }
 
 

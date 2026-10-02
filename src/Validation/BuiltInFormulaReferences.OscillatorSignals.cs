@@ -37,23 +37,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.TurboStochasticsFast:
             case IndicatorName.TurboStochasticsSlow:
-                return new("Tsf", new[] { "Tsf", "Signal" }, bars =>
-                {
-                    var period = Integer(options, "Length1", 20);
-                    var fitPeriod = Integer(options, "Length2", 10);
-                    var turbo = Integer(options, "TurboLength", 2);
-                    fitPeriod = Math.Max(1, fitPeriod + Math.Max(-fitPeriod, Math.Min(fitPeriod, turbo)));
-                    var raw = bars.Select((b, i) =>
-                    {
-                        var window = Window(bars, i, period).ToArray();
-                        var low = window.Min(v => v.Low);
-                        var range = window.Max(v => v.High) - low;
-                        return range == 0 ? 0 : Math.Max(0, Math.Min(100, 100 * (b.Close - low) / range));
-                    }).ToArray();
-                    var k = indicator.BatchName == IndicatorName.TurboStochasticsSlow ? Average(raw, period, kind) : raw;
-                    return Outputs(("Tsf", RegressionEndpoints(k, fitPeriod)),
-                        ("Signal", RegressionEndpoints(Average(k, period, kind), fitPeriod)));
-                });
+                return new("Tsf", new[] { "Tsf", "Signal" }, bars => TurboStochasticsOutputs(bars, indicator));
             case IndicatorName.StochasticCustomOscillator:
                 return new("Sco", new[] { "Sco", "Signal" }, bars =>
                 {

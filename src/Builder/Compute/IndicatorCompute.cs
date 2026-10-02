@@ -20525,30 +20525,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10,
         int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateTurboStochasticsFast fits a linear regression to the raw stochastic over a window the turbo
-        // length shortens or lengthens, clamped so it can never invert the window. The published Tsf is that
-        // fit of K; Signal fits the independently smoothed D line.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
-
-        using var fastK = context.Rent(count);
-        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length1, fastK.WritableSpan);
-        using var fastD = context.Rent(count);
-        if (outputKey == "Signal") MovingAverage(data, maType, length1, fastK.Span, fastD.WritableSpan);
-        var stochastic = outputKey == "Signal" ? fastD.Span : fastK.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(Math.Max(length2 + turbo, 1)))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                output[i] = regression.Next(stochastic[i], isFinal: true).Last;
-            }
-        }
-
-        return buffer;
+        var values = TurboStochasticsWindow.Calculate(data, maType, length1, length2, turboLength, false, false, outputKey == "Signal");
+        var selected = outputKey == "Signal" ? values.SignalLine : values.Line;
+        var output = context.Rent(selected.Length); selected.AsSpan().CopyTo(output.WritableSpan); return output;
     }
 
     // Batch 28 - Volume and Volatility Indicators
@@ -20556,32 +20535,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTurboStochasticsSlowFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10,
         int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateTurboStochasticsSlow differs from the fast form in what it fits: the slow K line, which is
-        // the raw stochastic smoothed once over length1, rather than the raw stochastic itself.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
-
-        using var fastK = context.Rent(count);
-        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length1, fastK.WritableSpan);
-
-        using var slowK = context.Rent(count);
-        MovingAverage(data, maType, length1, fastK.Span, slowK.WritableSpan);
-        using var slowD = context.Rent(count);
-        if (outputKey == "Signal") MovingAverage(data, maType, length1, slowK.Span, slowD.WritableSpan);
-        var smoothed = outputKey == "Signal" ? slowD.Span : slowK.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(Math.Max(length2 + turbo, 1)))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                output[i] = regression.Next(smoothed[i], isFinal: true).Last;
-            }
-        }
-
-        return buffer;
+        var values = TurboStochasticsWindow.Calculate(data, maType, length1, length2, turboLength, true, false, outputKey == "Signal");
+        var selected = outputKey == "Signal" ? values.SignalLine : values.Line;
+        var output = context.Rent(selected.Length); selected.AsSpan().CopyTo(output.WritableSpan); return output;
     }
 
     internal static ComputeBuffer ComputeVolumeFlowIndicatorFast(StockData data, ComputeContext context, int length1 = 130,

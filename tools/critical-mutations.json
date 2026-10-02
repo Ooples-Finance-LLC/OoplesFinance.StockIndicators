@@ -69484,7 +69484,7 @@
     "scope": "internal sealed class MovingAverageAdaptiveFilterWindow",
     "before": "var change = slope - _previousSlope;",
     "after": "var change = slope;",
-    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.AdaptiveHistoryExpiryAndScaleRetainPopulationDeviation"
+    "filter": "FullyQualifiedName~MovingAverageAdaptiveFilterNumericalTests.HandGainBoundariesAndEfficiencyWarmup"
   },
   {
     "id": "moving-adaptive-filter-wide-volatility-direction",
@@ -79789,5 +79789,383 @@
     "before": "TurboScalerWindow.Calculate(data, maType, length, alpha, false)",
     "after": "TurboScalerWindow.Calculate(data, maType, 1, alpha, false)",
     "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+  },
+  {
+    "id": "turbo-stoch-wide-slow-selection",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_slow = slow",
+    "after": "_slow = !slow",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "(long)resolved + Math.Max",
+    "after": "resolved + Math.Max",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.SignedExtremePeriodsAreLazyAndDoNotOverflow"
+  },
+  {
+    "id": "turbo-stoch-wide-period-turbo",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "Math.Max(-resolved, Math.Min(resolved, turbo))",
+    "after": "Math.Max(-resolved, Math.Min(resolved, -turbo))",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.SignedExtremePeriodsAreLazyAndDoNotOverflow"
+  },
+  {
+    "id": "turbo-stoch-wide-raw-origin",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "(Number.Of(price) - Number.Of(lower)).Times(100)",
+    "after": "(Number.Of(price) - Number.Of(upper)).Times(100)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-raw-projection",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "Number.Of(upper) - Number.Of(lower)",
+    "after": "Number.Of(upper - lower)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.WideSubnormalAndReversedRangesPreserveOrientation"
+  },
+  {
+    "id": "turbo-stoch-wide-raw-scale",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": ".Times(100).Divide(Number.Of(upper)",
+    "after": ".Times(1).Divide(Number.Of(upper)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "if (upper == lower) return default;",
+    "after": "if (upper == lower) return Number.Of(100);",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.WideSubnormalAndReversedRangesPreserveOrientation"
+  },
+  {
+    "id": "turbo-stoch-wide-reversed-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "if (price >= lower) return default;",
+    "after": "if (price >= lower) return Number.Of(100);",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.WideSubnormalAndReversedRangesPreserveOrientation"
+  },
+  {
+    "id": "turbo-stoch-wide-signal-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "difference - _previousDifference",
+    "after": "difference + _previousDifference",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_previousDifference = difference;",
+    "after": "_previousDifference = default;",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "if (final) { _previousLine",
+    "after": "if (true) { _previousLine",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-line-input",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_lineFit.Next(_slow ? first : raw, final)",
+    "after": "_lineFit.Next(raw, final)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-second-input",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_second.Next(first, final)",
+    "after": "_second.Next(raw, final)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.SelectedSourcePreservesOriginalExtrema"
+  },
+  {
+    "id": "turbo-stoch-wide-callback-input",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), period)",
+    "after": "ComponentAverage.Take(prices.ToArray(), period)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.CallbackCountsOrderShortArraysAndDiscoveryRemainDefined"
+  },
+  {
+    "id": "turbo-stoch-wide-callback-discovery",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "var custom = ComponentAverage.Take",
+    "after": "var custom = !ComponentAverage.HasOverrides ? null : ComponentAverage.Take",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.CallbackCountsOrderShortArraysAndDiscoveryRemainDefined"
+  },
+  {
+    "id": "turbo-stoch-wide-callback-short",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "i < custom.Count ? Number.Of(custom[i]) : default",
+    "after": "i < custom.Count ? Number.Of(custom[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.CallbackCountsOrderShortArraysAndDiscoveryRemainDefined"
+  },
+  {
+    "id": "turbo-stoch-wide-nested-callbacks",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "if (batch && kind != MovingAvgType.SimpleMovingAverage)",
+    "after": "if (!batch && kind != MovingAvgType.SimpleMovingAverage)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.CallbackCountsOrderShortArraysAndDiscoveryRemainDefined"
+  },
+  {
+    "id": "turbo-stoch-wide-fast-extra-callback",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "slow || batch || signalOutput ? Mean",
+    "after": "slow || batch || signalOutput || raw.Length >= 0 ? Mean",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.CallbackCountsOrderShortArraysAndDiscoveryRemainDefined"
+  },
+  {
+    "id": "turbo-stoch-wide-batch-slow",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "slow ? first[i] : raw[i]",
+    "after": "raw[i]",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-extrema-period",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_length = Math.Max(1, length); _maximum",
+    "after": "_length = 1; _maximum",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.ExpiringExtremaRegressionAndExactSignalThresholds"
+  },
+  {
+    "id": "turbo-stoch-wide-extrema-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "var expiry = _index - _length + 1",
+    "after": "var expiry = _index - _length",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.ExpiringExtremaRegressionAndExactSignalThresholds"
+  },
+  {
+    "id": "turbo-stoch-wide-extrema-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "if (final)\n            {\n                while (_deque.First",
+    "after": "if (true)\n            {\n                while (_deque.First",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-extrema-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_deque.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fit-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "var sum = _sum + value - old",
+    "after": "var sum = _sum + value + old",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fit-weight-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_weighted - _sum + old",
+    "after": "_weighted + _sum + old",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fit-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "weighted.Times(2) - sum.Times(count - 1L)",
+    "after": "weighted.Times(2) + sum.Times(count - 1L)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fit-slope",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "covariance.Times(3).Divide(count)",
+    "after": "covariance.Times(2).Divide(count)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fit-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "Divide(count + 1L)",
+    "after": "Divide(count + 2L)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fit-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (true) { if (full)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fit-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_values.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide(_length)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_count + 1 < _length ? default : sum.Divide(_length)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-ema-seed",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "sum.Divide(_count + 1)",
+    "after": "sum.Divide(_length)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-recursive-gain",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(ema ? 1 : 2)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TurboStochasticsWindow.cs",
+    "scope": "internal sealed class TurboStochasticsWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fast-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboStochasticsFastState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.InvalidCandlesCannotAdvanceAnyHistory"
+  },
+  {
+    "id": "turbo-stoch-wide-fast-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboStochasticsFastState",
+    "before": "bar.Low, isFinal)",
+    "after": "bar.Low, true)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-fast-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTurboStochasticsFastFast",
+    "before": "maType, length1, length2, turboLength",
+    "after": "maType, length1, 1, turboLength",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-slow-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboStochasticsSlowState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.InvalidCandlesCannotAdvanceAnyHistory"
+  },
+  {
+    "id": "turbo-stoch-wide-slow-final",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboStochasticsSlowState",
+    "before": "bar.Low, isFinal)",
+    "after": "bar.Low, true)",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
+  },
+  {
+    "id": "turbo-stoch-wide-slow-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTurboStochasticsSlowFast",
+    "before": "maType, length1, length2, turboLength",
+    "after": "maType, length1, 1, turboLength",
+    "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
   }
 ]

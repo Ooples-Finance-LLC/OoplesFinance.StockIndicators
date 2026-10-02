@@ -554,166 +554,33 @@ public sealed class TurboScalerState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Tsf")]
 public sealed class TurboStochasticsFastState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly LinearRegressionState _fastKRegression;
-    private readonly LinearRegressionState _fastDRegression;
-    private readonly StreamingInputResolver _input;
-    private double _fastKValue;
-    private double _fastDValue;
-
-    public TurboStochasticsFastState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length1 = 20, int length2 = 10, int turboLength = 2)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
-        var regressionLength = Math.Max(1, length2 + turbo);
-        _highWindow = new RollingWindowMax(resolvedLength1);
-        _lowWindow = new RollingWindowMin(resolvedLength1);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength1);
-        _fastKRegression = new LinearRegressionState(regressionLength, _ => _fastKValue);
-        _fastDRegression = new LinearRegressionState(regressionLength, _ => _fastDValue);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TurboStochasticsWindow _window;
+    public TurboStochasticsFastState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 20, int length2 = 10, int turboLength = 2)
+        => _window = new(maType, length1, length2, turboLength, false);
     public IndicatorName Name => IndicatorName.TurboStochasticsFast;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _fastSmoother.Reset();
-        _fastKRegression.Reset();
-        _fastDRegression.Reset();
-        _fastKValue = 0;
-        _fastDValue = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var close = _input.GetValue(bar);
-
-        var highestHigh = isFinal ? _highWindow.Add(high, out _) : _highWindow.Preview(high, out _);
-        var lowestLow = isFinal ? _lowWindow.Add(low, out _) : _lowWindow.Preview(low, out _);
-        var range = highestHigh - lowestLow;
-        var fastK = range != 0 ? MathHelper.MinOrMax((close - lowestLow) / range * 100, 100, 0) : 0;
-        var fastD = _fastSmoother.Next(fastK, isFinal);
-
-        _fastKValue = fastK;
-        _fastDValue = fastD;
-        var tsfK = _fastKRegression.Update(bar, isFinal, includeOutputs: false).Value;
-        var tsfD = _fastDRegression.Update(bar, isFinal, includeOutputs: false).Value;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Tsf", tsfK },
-                { "Signal", tsfD }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tsfK, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Tsf", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _fastSmoother.Dispose();
-        _fastKRegression.Dispose();
-        _fastDRegression.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tsf")]
 public sealed class TurboStochasticsSlowState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _slowKSmoother;
-    private readonly IMovingAverageSmoother _slowDSmoother;
-    private readonly LinearRegressionState _slowKRegression;
-    private readonly LinearRegressionState _slowDRegression;
-    private readonly StreamingInputResolver _input;
-    private double _slowKValue;
-    private double _slowDValue;
-
-    public TurboStochasticsSlowState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length1 = 20, int length2 = 10, int turboLength = 2)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
-        var regressionLength = Math.Max(1, length2 + turbo);
-        _highWindow = new RollingWindowMax(resolvedLength1);
-        _lowWindow = new RollingWindowMin(resolvedLength1);
-        _slowKSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength1);
-        _slowDSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength1);
-        _slowKRegression = new LinearRegressionState(regressionLength, _ => _slowKValue);
-        _slowDRegression = new LinearRegressionState(regressionLength, _ => _slowDValue);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TurboStochasticsWindow _window;
+    public TurboStochasticsSlowState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 20, int length2 = 10, int turboLength = 2)
+        => _window = new(maType, length1, length2, turboLength, true);
     public IndicatorName Name => IndicatorName.TurboStochasticsSlow;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _slowKSmoother.Reset();
-        _slowDSmoother.Reset();
-        _slowKRegression.Reset();
-        _slowDRegression.Reset();
-        _slowKValue = 0;
-        _slowDValue = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var close = _input.GetValue(bar);
-
-        var highestHigh = isFinal ? _highWindow.Add(high, out _) : _highWindow.Preview(high, out _);
-        var lowestLow = isFinal ? _lowWindow.Add(low, out _) : _lowWindow.Preview(low, out _);
-        var range = highestHigh - lowestLow;
-        var fastK = range != 0 ? MathHelper.MinOrMax((close - lowestLow) / range * 100, 100, 0) : 0;
-        var slowK = _slowKSmoother.Next(fastK, isFinal);
-        var slowD = _slowDSmoother.Next(slowK, isFinal);
-
-        _slowKValue = slowK;
-        _slowDValue = slowD;
-        var tsfK = _slowKRegression.Update(bar, isFinal, includeOutputs: false).Value;
-        var tsfD = _slowDRegression.Update(bar, isFinal, includeOutputs: false).Value;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Tsf", tsfK },
-                { "Signal", tsfD }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tsfK, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Tsf", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _slowKSmoother.Dispose();
-        _slowDSmoother.Dispose();
-        _slowKRegression.Dispose();
-        _slowDRegression.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("BullLine")]
