@@ -41,6 +41,14 @@ public sealed class KarobeinNumericalTests
         Assert.Equal(new[] { 0d, 0, 0 }, Check(new[] { 0d, 0, 0 }).OutputValues["Ko"]);
         Assert.Equal(new[] { 0d, 1, 1 }, Check(new[] { 2d, 2, 2 }).OutputValues["Ko"]);
     }
+    [Fact]
+    public void SmaWarmupRequiresTheCompleteWindow()
+    {
+        // SMA(2) prices are [0,3/2,3/2], so ratios are [0,0,1].
+        // No mean change is nonzero once a valid prior mean exists: both
+        // directional averages stay zero and the final nonzero ratio folds to 1.
+        Assert.Equal(new[] { 0d, 0, 1 }, Check(new[] { 1d, 2, 1 }, 2, MovingAvgType.SimpleMovingAverage).OutputValues["Ko"]);
+    }
     [Theory, InlineData(1), InlineData(2), InlineData(int.MaxValue)]
     public void ExtremeRatiosAndPeriodsStayBounded(int length)
     {

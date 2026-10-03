@@ -5402,3 +5402,10 @@ The isolated campaigns `747a` and `747b` passed their baselines and caught **6/6
 Source snapshot SHA256: `e7c7029ed4288a2e0ae31cab26f412c61dc64945d090d05ea45cf6e68e5f44b8`. Archive SHA256: `fb47f5dd92154d7c9148148a6e272776705c877a181c8f0f9be13b7db95c74e9` and `fb47f5dd92154d7c9148148a6e272776705c877a181c8f0f9be13b7db95c74e9`.
 
 This is evidence for the isolated batch-747 source. Source was already published in the batch-747 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 777: Karobein SMA startup survivor regression
+
+The SMA-startup fault survived its original route filter because the five enrolled configurations exercise EMA and WMA, not SMA. A new independent SMA(2) hand asserts that prices [1,2,1] yield [0,0,1]: means [0,3/2,3/2] produce ratios [0,0,1], with zero directional averages. The hand checks batch, fast and native routes against a separate rational reference.
+
+The new regression passed on net10.0 using the unchanged production DLL; its mutation filter now targets that check. The original campaign remains unqualified while its remaining outcomes are collected. No production or enrollment changes are included, and a repaired mutation qualification is still required.
