@@ -21,9 +21,10 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 /// arms are deliberately left in rather than dropped, because "no incremental API" is the finding, and an
 /// omitted row would read as an oversight.</para>
 ///
-/// <para>The stateful arms feed the same next bar on every invocation. Their work per call is constant - a
-/// rolling window does not grow - so this measures one update, while resetting the state per iteration would
-/// measure the reset.</para>
+/// <para>Iteration setup rebuilds state through the original history outside the timed operation.
+/// BenchmarkDotNet runs one invocation with no unrolling when iteration setup is present, so every measured
+/// update appends the same next bar to the same history. Single-update timings can be noisy; setup cost is
+/// excluded, and these results must not be compared with earlier continuously advancing runs.</para>
 /// </summary>
 [MemoryDiagnoser]
 [CategoriesColumn]
@@ -58,8 +59,6 @@ public class IncrementalBenchmarks
     public void Setup()
     {
         var full = CompetitorData.Create(History + 1);
-        // Only the states' warm-up reads this, so it stays inside Setup; the arms read _withNextBar.
-        var history = full.Take(History);
         _withNextBar = full;
         _output = new double[History + 1];
 
@@ -68,7 +67,14 @@ public class IncrementalBenchmarks
         _nextBar = new OhlcvBar("BENCH", BarTimeframe.Minutes(1), full.Dates[last], full.Dates[last],
             full.Opens[last], full.Highs[last], full.Lows[last], full.Closes[last], full.Volumes[last], true);
         _nextQuanTAlibBar = full.Bars[last];
+        ResetHistory();
+    }
 
+    [IterationSetup]
+    public void ResetHistory()
+    {
+        _sma.Dispose();
+        var history = _withNextBar;
         _sma = new SimpleMovingAverageState(SmaLength);
         _rsi = new RelativeStrengthIndexState(RsiLength);
         _atr = new AverageTrueRangeState(AtrLength);
