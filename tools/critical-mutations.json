@@ -84099,7 +84099,7 @@
     "scope": "private sealed class Average",
     "before": "_count + 1 < _length",
     "after": "_count + 1 < _length - 1",
-    "filter": "FullyQualifiedName~VolatilityMomentumNumericalTests.HandLagTrueRangeAndSignalUseDistinctPeriods"
+    "filter": "FullyQualifiedName~VolatilityMomentumNumericalTests.AtrSmaWarmupWaitsForFullRangeWindow"
   },
   {
     "id": "volatility-momentum-wide-ema-warmup",

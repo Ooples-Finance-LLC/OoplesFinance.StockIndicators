@@ -74,6 +74,15 @@ public sealed class VolatilityMomentumNumericalTests
         Assert.Equal(new[] { 0d, .5 }, result.Outputs["Vbm"]);
         Assert.Equal(new[] { 0d, .5 }, result.Outputs["Signal"]);
     }
+    [Fact]
+    public void AtrSmaWarmupWaitsForFullRangeWindow()
+    {
+        // True ranges are [2,2,2]; SMA3 ATR must remain zero until bar three.
+        // Lag 1 exposes premature ATR publication: the second output would be 3/4.
+        var result = Check(new[] { B(10, 8, 9), B(11, 9, 10, 1), B(12, 10, 11, 2) }, lag: 1, range: 3);
+        Assert.Equal(new[] { 0d, 0, .5 }, result.Outputs["Vbm"]);
+        Assert.Equal(new[] { 0d, 0, .5 }, result.Outputs["Signal"]);
+    }
     [Theory]
     [InlineData(MovingAvgType.SimpleMovingAverage)]
     [InlineData(MovingAvgType.WeightedMovingAverage)]
