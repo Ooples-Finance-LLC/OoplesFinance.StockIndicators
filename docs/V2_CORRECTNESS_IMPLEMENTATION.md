@@ -5352,3 +5352,8 @@ The runner selects a separate baseline filter union for each half. The first hal
 Source snapshot SHA256: `042d7ca6ccf6f19b5c05cf897428e34041be91bca5d9428eb0c5e8010eed36d8`. Archive SHA256: `3de65b5fa61f4e5776dc9ca8a981ae922a05b22d620e3b0d00e0f92f3d8dab4a` and `3de65b5fa61f4e5776dc9ca8a981ae922a05b22d620e3b0d00e0f92f3d8dab4a`.
 
 This is evidence for the isolated batch-681 source. Source was already published in the batch-681 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 756: competitor allocation observations
+
+The existing EMA allocation probe completed against the same net10.0 production DLL verified in package batch 751. Both copied-input and adopted-column v2 routes allocated 81,752 bytes for 1,000 bars and 729,752 bytes for 10,000 bars; all five adopted-column repeats agreed at each size. Counts and comparison limits are recorded in `docs/V2_COMPETITOR756_ALLOCATIONS.md`. This is allocation evidence only; competitor timing and full release assurance remain outstanding. No production or benchmark code changed.
