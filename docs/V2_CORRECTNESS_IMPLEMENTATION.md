@@ -5277,3 +5277,8 @@ Four configurations enrolled. Inventory: **6,775/7,131 enrolled**, **356 omissio
 Integration with published commit 45a9d050 preserved helpers, reference and tests byte-for-byte; **8/8 integration checks passed** (`volatilitywave737-integrated665.trx`), including neighboring McGinley, Hampel and Pivot regressions. Combined evidence has 56 distinct checks, not 61. The power-weight helper and its independent reference arithmetic were promoted byte-for-byte from preserved Ultimate Moving Average work; this batch does not qualify the still-running Ultimate Moving Average batch.
 
 Five configurations enrolled. Inventory: **6,780/7,131 enrolled**, **351 omissions across 48 types**, all references registered, no construction failures and exact backlog match. **33 behavioral mutation candidates are frozen and queued**. Remaining mutation campaigns and final hosted/package/platform/performance assurance are incomplete.
+
+
+### Batch 745: Premier translated-center survivor regression
+
+The first Premier mutation half caught 22 of 23 compiled faults; changing the centered price coefficient from 10 to 9 survived the original zero-midpoint/subnormal hand examples. Added positive and negative translated midpoints, an interior price, and reversed endpoints to the same independent hand test. The strengthened test passed on net10.0 (`premier745-translated-hands.trx`). Production and numerical enrollment are unchanged. The original campaign remains unqualified; collect the second half before freezing replacement evidence with the strengthened test.

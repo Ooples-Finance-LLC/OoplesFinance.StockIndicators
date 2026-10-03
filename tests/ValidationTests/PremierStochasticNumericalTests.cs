@@ -58,6 +58,11 @@ public sealed class PremierStochasticNumericalTests
     public void IndependentMidlineAndSubnormalHands()
     {
         Assert.Equal(0, Check(new[] { B(1, -1, 0) })[0]);
+        // Translation must preserve centered geometry; a zero midpoint alone cannot detect a bad price coefficient.
+        Assert.Equal(0, Check(new[] { B(3, 1, 2) })[0]);
+        Assert.Equal(0, Check(new[] { B(-1, -3, -2) })[0]);
+        Equal(ReferenceFraction.FromDouble(1.25).TanhToDouble(), Check(new[] { B(3, 1, 2.5) })[0]);
+        Equal(ReferenceFraction.FromDouble(-1.25).TanhToDouble(), Check(new[] { B(1, 3, 2.5) })[0]);
         Assert.Equal(7 * double.Epsilon, Check(new[] { B(1, -1, 3 * double.Epsilon) })[0]);
         Assert.Equal(-7 * double.Epsilon, Check(new[] { B(1, -1, -3 * double.Epsilon) })[0]);
         Equal(ReferenceFraction.FromDouble(2.5).TanhToDouble(), Check(new[] { B(1, -1, 1) })[0]);
