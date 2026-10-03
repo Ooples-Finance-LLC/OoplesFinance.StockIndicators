@@ -494,69 +494,22 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Wto")]
 public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly IMovingAverageSmoother _esaMa;
-    private readonly IMovingAverageSmoother _dMa;
-    private readonly IMovingAverageSmoother _tciMa;
-    private readonly IMovingAverageSmoother _wt2Ma;
-    private StreamingInputResolver _input;
-    private readonly SeededEmaResidual? _stableResidual;
-
-    public WaveTrendOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21,
-        int smoothLength = 4)
-    {
-        _stableResidual = maType == MovingAvgType.ExponentialMovingAverage ? new SeededEmaResidual(length1) : null;
-        _esaMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _dMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _tciMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _wt2Ma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.FullTypicalPrice, null);
-    }
-
+    private readonly WaveTrendWindow _window;
+    private bool _selected;
+    public WaveTrendOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21, int smoothLength = 4)
+        => _window = new(maType, length1, length2, smoothLength);
     public IndicatorName Name => IndicatorName.WaveTrendOscillator;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _esaMa.Reset();
-        _stableResidual?.Reset();
-        _dMa.Reset();
-        _tciMa.Reset();
-        _wt2Ma.Reset();
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _selected = true;
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var ap = _input.GetValue(bar);
-        var esa = _esaMa.Next(ap, isFinal);
-        var residual = _stableResidual?.Next(ap, isFinal) ?? ap - esa;
-        var absApEsa = Math.Abs(residual);
-        var d = _dMa.Next(absApEsa, isFinal);
-        var ci = d != 0 ? residual / (0.015 * d) : 0;
-        var tci = _tciMa.Next(ci, isFinal);
-        var wt2 = _wt2Ma.Next(tci, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Wto", tci },
-                { "Signal", wt2 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tci, outputs);
+        StreamingInputValidation.Validate(bar);
+        var price = _selected ? MacZWindow.Number.Of(bar.Close) : WaveTrendWindow.Price(bar.Open, bar.High, bar.Low, bar.Close);
+        var point = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double>
+            { ["Wto"] = point.Line, ["Signal"] = point.SignalLine } : null);
     }
-
-    public void Dispose()
-    {
-        _esaMa.Dispose();
-        _dMa.Dispose();
-        _tciMa.Dispose();
-        _wt2Ma.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Wws")]

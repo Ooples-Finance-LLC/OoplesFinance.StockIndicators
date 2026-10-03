@@ -912,12 +912,7 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - Sentiment/Zone oscillators
             SentimentZoneOscillatorSpecOptions szo => ComputeSentimentZoneOscillatorFast(data, context, szo.Length, szo.MaType),
-            WaveTrendOscillatorSpecOptions wto => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context, ComputeWaveTrendOscillatorFast(data, context, wto.Length),
-                    4, MovingAvgType.ExponentialMovingAverage),
-                _ => ComputeWaveTrendOscillatorFast(data, context, wto.Length)
-            },
+            WaveTrendOscillatorSpecOptions wto => ComputeWaveTrendOscillatorFast(data, context, wto.Length, outputKey: spec.OutputKey),
             WamiOscillatorSpecOptions wami => ComputeWamiOscillatorFast(data, context, wami.Length, maType: wami.MaType),
 
             // Batch 6 - Kase oscillators
@@ -8362,56 +8357,12 @@ internal static partial class IndicatorCompute
     /// Computes Wave Trend Oscillator using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeWaveTrendOscillatorFast(StockData data, ComputeContext context, int length1 = 10,
-        int length2 = 21, int smoothLength = 4, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        int length2 = 21, int smoothLength = 4, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateWaveTrendOscillator reads the full typical price - OHLC4, not the close and not the chained
-        // series, because the batch replaces its input with InputName.FullTypicalPrice. It is a commodity
-        // channel index over that series, taken against an exponential average rather than a simple one, then
-        // smoothed over length2. Its Wto key is that smoothed reading; the further average over smoothLength
-        // is the Signal series.
-        var count = data.Count;
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-
-        using var typicalPrice = context.Rent(count);
-        var ap = typicalPrice.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            ap[i] = (opens[i] + highs[i] + lows[i] + closes[i]) / 4;
-        }
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length1, typicalPrice.Span, average.WritableSpan);
-        var esa = average.Span;
-
-        using var absolute = context.Rent(count);
-        var absApEsa = absolute.WritableSpan;
-        using var residualBuffer = context.Rent(count);
-        var residual = residualBuffer.WritableSpan;
-        var stableResidual = new SeededEmaResidual(length1);
-        for (var i = 0; i < count; i++)
-        {
-            residual[i] = maType == MovingAvgType.ExponentialMovingAverage
-                ? stableResidual.Next(ap[i], true) : ap[i] - esa[i];
-            absApEsa[i] = Math.Abs(residual[i]);
-        }
-
-        using var deviation = context.Rent(count);
-        MovingAverage(data, maType, length1, absolute.Span, deviation.WritableSpan);
-        var d = deviation.Span;
-
-        using var channelIndex = context.Rent(count);
-        var ci = channelIndex.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            ci[i] = d[i] != 0 ? residual[i] / (0.015 * d[i]) : 0;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length2, channelIndex.Span, buffer.WritableSpan);
-        return buffer;
+        var signal = outputKey == "Signal";
+        var values = WaveTrendWindow.Calculate(data, maType, length1, length2, smoothLength, fast: true, includeSignal: signal);
+        var selected = signal ? values.SignalLine : values.Line; var output = context.Rent(selected.Length);
+        try { selected.AsSpan().CopyTo(output.WritableSpan); return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>

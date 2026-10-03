@@ -1037,3 +1037,10 @@ The four channels retain exact selected-price RSI distances through smoothing an
 For prices [10,12,9], EMA length 2 and smoothing 1, the final RSI is 100/7. Final S1/S2/U1/U2 are 729/70, 1647/140, 981/70 and 1773/140; signals are StrongBuy, StrongBuy, StrongSell. Exact intermediate products retain finite channel results at MaxValue. Arbitrary finite thresholds and signed prices remain supported, with observed-history allocation for extreme periods. Batch mean callbacks remain bypassed; the fast path consumes one distance slot when unarmed and gain/loss/distance slots when armed, padding short replacements with zero.
 
 All 83 focused tests passed on net10.0. The 32 mutation candidates remain queued for isolated qualification.
+
+
+### Batch 728: WaveTrend price conventions and numerical arithmetic
+
+Public batch, fast and streaming WaveTrend use OHLC4. The OHLC-aware internal core now shares that formula; the retained three-price overload explicitly uses HLC3. Exact candle sums, residuals, deviation normalization and smoothing avoid intermediate overflow and preserve cancellation and subnormal movement. Selected inputs preserve original candle fields and feed the selected price through the shared formula. Core span writes are atomic and support overlapping inputs.
+
+Independent references and hand checks cover normalization, signal smoothing, four supported averages, extreme periods and input values, preview/reset behavior, callbacks and invalid candles. All 44 focused tests passed. The 36 behavioral mutation candidates remain queued; enrollment does not establish release readiness.

@@ -32,6 +32,13 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.WaveTrendOscillator)
+        {
+            var waveKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Wto", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < waveKeys.Length; slot++) { var selected = waveKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => WaveTrendOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.WilsonRelativePriceChannel)
         {
             var wilsonKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "S1", "S2", "U1", "U2" };

@@ -717,49 +717,9 @@ public static partial class Calculations
     public static StockData CalculateWaveTrendOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21, int smoothLength = 4)
     {
-        List<double> absApEsaList = new(stockData.Count);
-        List<double> ciList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var residuals = new double[inputList.Count];
-        var stableResidual = new SeededEmaResidual(length1);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ap = inputList[i];
-            var esa = emaList[i];
-
-            residuals[i] = maType == MovingAvgType.ExponentialMovingAverage
-                ? stableResidual.Next(ap, true) : ap - esa;
-            var absApEsa = Math.Abs(residuals[i]);
-            absApEsaList.Add(absApEsa);
-        }
-
-        var dList = GetMovingAverageList(stockData, maType, length1, absApEsaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ap = inputList[i];
-            var esa = emaList[i];
-            var d = dList[i];
-
-            var ci = d != 0 ? residuals[i] / (0.015 * d) : 0;
-            ciList.Add(ci);
-        }
-
-        var tciList = GetMovingAverageList(stockData, maType, length2, ciList);
-        var wt2List = GetMovingAverageList(stockData, maType, smoothLength, tciList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var tci = tciList[i];
-            var wt2 = wt2List[i];
-            var prevTci = i >= 1 ? tciList[i - 1] : 0;
-            var prevWt2 = i >= 1 ? wt2List[i - 1] : 0;
-
-            var signal = GetRsiSignal(tci - wt2, prevTci - prevWt2, tci, prevTci, 53, -53);
-            signalsList?.Add(signal);
-        }
+        var result = WaveTrendWindow.Calculate(stockData, maType, length1, length2, smoothLength);
+        var tciList = result.Line.ToList(); var wt2List = result.SignalLine.ToList();
+        var signalsList = CreateSignalsList(stockData); signalsList?.AddRange(result.Trades);
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Wto", tciList },

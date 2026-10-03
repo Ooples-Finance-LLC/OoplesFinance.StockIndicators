@@ -4193,73 +4193,29 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Wave Trend Oscillator.
     /// </summary>
-    internal static void WaveTrendOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int channelLength = 10, int avgLength = 21)
+    internal static void WaveTrendOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        Span<double> output, int channelLength = 10, int avgLength = 21)
+        => WaveTrendCore(ReadOnlySpan<double>.Empty, high, low, close, output, channelLength, avgLength, false);
+
+    // OHLC-aware public-formula overload. The three-price overload remains an HLC3 variant.
+    internal static void WaveTrendOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        ReadOnlySpan<double> close, Span<double> output, int channelLength = 10, int avgLength = 21)
+        => WaveTrendCore(open, high, low, close, output, channelLength, avgLength, true);
+
+    private static void WaveTrendCore(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        ReadOnlySpan<double> close, Span<double> output, int channel, int average, bool ohlc)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var hlc3Array = pool.Rent(close.Length);
-        var emaHlc3Array = pool.Rent(close.Length);
-        var absDevArray = pool.Rent(close.Length);
-        var emaDevArray = pool.Rent(close.Length);
-        var ciArray = pool.Rent(close.Length);
-        var tciArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hlc3 = hlc3Array.AsSpan(0, close.Length);
-            var emaHlc3 = emaHlc3Array.AsSpan(0, close.Length);
-            var absDev = absDevArray.AsSpan(0, close.Length);
-            var emaDev = emaDevArray.AsSpan(0, close.Length);
-            var ci = ciArray.AsSpan(0, close.Length);
-            var tci = tciArray.AsSpan(0, close.Length);
-
-            // Calculate HLC/3
-            for (var i = 0; i < close.Length; i++)
-            {
-                hlc3[i] = (high[i] + low[i] + close[i]) / 3;
-            }
-
-            // Calculate EMA of HLC/3
-            MovingAverageCore.ExponentialMovingAverage(hlc3, emaHlc3, channelLength);
-
-            // Calculate absolute deviation
-            for (var i = 0; i < close.Length; i++)
-            {
-                absDev[i] = Math.Abs(hlc3[i] - emaHlc3[i]);
-            }
-
-            // Calculate EMA of deviation
-            MovingAverageCore.ExponentialMovingAverage(absDev, emaDev, channelLength);
-
-            // Calculate CI
-            for (var i = 0; i < close.Length; i++)
-            {
-                var d = emaDev[i] * 0.015;
-                ci[i] = d != 0 ? (hlc3[i] - emaHlc3[i]) / d : 0;
-            }
-
-            // Calculate TCI (Wave Trend)
-            MovingAverageCore.ExponentialMovingAverage(ci, tci, avgLength);
-
-            // Output
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = tci[i];
-            }
-        }
-        finally
-        {
-            pool.Return(hlc3Array);
-            pool.Return(emaHlc3Array);
-            pool.Return(absDevArray);
-            pool.Return(emaDevArray);
-            pool.Return(ciArray);
-            pool.Return(tciArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length || ohlc && open.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Input lengths must agree and output must fit every input.");
+        foreach (var value in open) StreamingInputValidation.Finite(value, nameof(open));
+        foreach (var value in high) StreamingInputValidation.Finite(value, nameof(high));
+        foreach (var value in low) StreamingInputValidation.Finite(value, nameof(low));
+        foreach (var value in close) StreamingInputValidation.Finite(value, nameof(close));
+        using var window = new WaveTrendWindow(MovingAvgType.ExponentialMovingAverage, channel, average, 4);
+        var values = new double[close.Length];
+        for (var i = 0; i < values.Length; i++)
+            values[i] = window.Next(ohlc ? WaveTrendWindow.Price(open[i], high[i], low[i], close[i]) : WaveTrendWindow.Price(high[i], low[i], close[i]), true).Line;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>

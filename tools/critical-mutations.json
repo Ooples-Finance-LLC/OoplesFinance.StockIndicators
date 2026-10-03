@@ -84847,5 +84847,328 @@
     "before": "WilsonRelativePriceChannel or ",
     "after": "",
     "filter": "FullyQualifiedName~WilsonNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "wave-trend-wide-ohlc-open",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "Number.Of(open) + Number.Of(high)",
+    "after": "Number.Of(close) + Number.Of(high)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.CoreOverloadsRetainDistinctPriceInputsAndAtomicAliasing"
+  },
+  {
+    "id": "wave-trend-wide-ohlc-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": ")).Divide(4);",
+    "after": ")).Divide(3);",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.ExactOhlcMeanPreservesCancellationAndTinyMovement"
+  },
+  {
+    "id": "wave-trend-wide-channel-scale",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "Number.Of(.015) * deviation",
+    "after": "Number.Of(.03) * deviation",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-zero-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "deviation.Sign == 0 ? default",
+    "after": "deviation.Sign == 0 ? Number.Of(1)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-trade-margin",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "var margin = line - signal;",
+    "after": "var margin = line + signal;",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-trade-change",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "var change = margin - previousMargin;",
+    "after": "var change = margin + previousMargin;",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-native-residual",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "price - _basis.Next(price, final)",
+    "after": "price + _basis.Next(price, final)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-native-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "residual.Sign < 0 ? residual.Times(-1) : residual",
+    "after": "residual.Sign > 0 ? residual.Times(-1) : residual",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-native-line-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "_line.Next(ci, final)",
+    "after": "_line.Next(ci, true)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-native-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "_signal.Next(line, final)",
+    "after": "_signal.Next(line, true)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-signal-memory-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "if (final) { _previousLine = line;",
+    "after": "if (true) { _previousLine = line;",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "var selected = data.ChainedValues.Count > 0;",
+    "after": "var selected = false;",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SelectedPricesFeedBothDirectOutputs"
+  },
+  {
+    "id": "wave-trend-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.ChainedValues",
+    "after": "data.ChainedValues",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.InvalidCandlesDoNotAdvanceMeans"
+  },
+  {
+    "id": "wave-trend-wide-batch-hook-bypass",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "fast ? ComponentAverage.Take",
+    "after": "true ? ComponentAverage.Take",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.CallbackSlotsPaddingAndEmaResidualBypassRemainExplicit"
+  },
+  {
+    "id": "wave-trend-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.CallbackSlotsPaddingAndEmaResidualBypassRemainExplicit"
+  },
+  {
+    "id": "wave-trend-wide-ema-residual-bypass",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "if (fast && kind == MovingAvgType.ExponentialMovingAverage)",
+    "after": "if (!fast && kind == MovingAvgType.ExponentialMovingAverage)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.CallbackSlotsPaddingAndEmaResidualBypassRemainExplicit"
+  },
+  {
+    "id": "wave-trend-wide-line-period",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "var line = Mean(ci, average);",
+    "after": "var line = Mean(ci, channel);",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "Mean(line, signal)",
+    "after": "Mean(line, channel)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-signal-publication",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "Mean(line, signal)",
+    "after": "Mean(line.Select(v => Number.Of(v.Publish())).ToArray(), signal)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-signal-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "internal sealed class WaveTrendWindow",
+    "before": "_signal.Reset(); _previousLine",
+    "after": "_previousLine",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-mean-floor",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.ExtremePeriodsUseObservedHistory"
+  },
+  {
+    "id": "wave-trend-wide-weight-aging",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-weight-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WaveTrendWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SupportedMeansPreserveExtremeInputs"
+  },
+  {
+    "id": "wave-trend-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WaveTrendOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.InvalidCandlesDoNotAdvanceMeans"
+  },
+  {
+    "id": "wave-trend-wide-native-selection",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WaveTrendOscillatorState",
+    "before": "_selected = true",
+    "after": "_selected = false",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SelectedPricesFeedBothDirectOutputs"
+  },
+  {
+    "id": "wave-trend-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWaveTrendOscillatorFast(",
+    "before": "signal ? values.SignalLine : values.Line",
+    "after": "signal ? values.Line : values.Line",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+  },
+  {
+    "id": "wave-trend-wide-core-open",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "private static void WaveTrendCore(",
+    "before": "WaveTrendWindow.Price(open[i], high[i], low[i], close[i])",
+    "after": "WaveTrendWindow.Price(close[i], high[i], low[i], close[i])",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.CoreOverloadsRetainDistinctPriceInputsAndAtomicAliasing"
+  },
+  {
+    "id": "wave-trend-wide-core-legacy",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "private static void WaveTrendCore(",
+    "before": "WaveTrendWindow.Price(high[i], low[i], close[i])",
+    "after": "WaveTrendWindow.Price(close[i], high[i], low[i], close[i])",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.CoreOverloadsRetainDistinctPriceInputsAndAtomicAliasing"
+  },
+  {
+    "id": "wave-trend-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "WaveTrendOscillator or ",
+    "after": "",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "wave-trend-wide-native-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "WaveTrendOscillatorSpecOptions wave => new WaveTrendOscillatorState(length1: wave.Length),",
+    "after": "",
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.SelectedPricesFeedBothDirectOutputs"
   }
 ]

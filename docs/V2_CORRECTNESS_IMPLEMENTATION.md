@@ -5226,3 +5226,10 @@ The fresh `680-selectedfix-a-retry` campaign (20 faults), the retained completed
 Source snapshot SHA256: `8d854322bb4f7dd48ab495b3e514fcefdd116cc2d15f255c35ab1c0d92cd6ed6`. Archive SHA256: `fe02e273e1162d08d67b0d1d1c5a7b1ee080dd5af2b53b8e070ff25ba4ba88c9`, `fd378d130e15e8c048162965fd2ccdc8c418daeb2a54192b3b28c5bd7680c73c`, and `fd378d130e15e8c048162965fd2ccdc8c418daeb2a54192b3b28c5bd7680c73c`.
 
 The original first half failed while writing evidence after disk exhaustion and is excluded. The second half lost its temporary source directory after 14 recorded kills; its remaining six faults were rerun with a new baseline. No incomplete fault or failed compilation is credited. This is evidence for the isolated batch-680 source. Source was already published in the batch-680 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 728: WaveTrend numerical routes and OHLC-aware core
+
+**44/44 focused tests passed** on net10.0 (`wave728-integrated734.trx`). Integration with published commit 968f96f2 preserved the numerical helper, independent reference and tests byte-for-byte; **8/8 integration checks passed** (`wave728-integrated740.trx`), covering selected inputs, normalization, core aliasing, callbacks and neighboring Wilson behavior. These are 45 distinct cases including the Wilson integration check, not 52 distinct tests.
+
+The shared formula now serves batch, fast, native streaming and the approved OHLC-aware core overload. The original HLC3 overload remains explicit. Four configurations enrolled. Verified inventory: **6,754/7,131 enrolled**, **377 omissions across 53 types**, all references registered, no construction failures and exact backlog match. **36 mutation candidates are frozen and queued**, with qualification and final hosted/package/platform/performance gates still outstanding.

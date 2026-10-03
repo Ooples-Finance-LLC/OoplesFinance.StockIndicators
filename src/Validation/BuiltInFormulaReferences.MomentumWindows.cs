@@ -23,22 +23,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Spz", line));
                 });
             case IndicatorName.WaveTrendOscillator:
-                return new("Wto", new[] { "Wto", "Signal" }, bars =>
-                {
-                    var prices = bars.Select(b => (b.Open + b.High + b.Low + b.Close) / 4).ToArray();
-                    // Expand residual weights over price increments; no subtraction of near-equal price levels.
-                    var displacement = prices.Select((_, i) => Enumerable.Range(1, i).Sum(j =>
-                    {
-                        var weight = i < length ? (double)j / (i + 1) : j < length
-                            ? (double)j / length * Math.Pow(1 - 2d / (length + 1), i - length + 1)
-                            : Math.Pow(1 - 2d / (length + 1), i - j + 1);
-                        return weight * (prices[j] - prices[j - 1]);
-                    })).ToArray();
-                    var deviation = Average(displacement.Select(Math.Abs).ToArray(), length, 3);
-                    var channel = displacement.Select((d, i) => deviation[i] == 0 ? 0 : d / deviation[i] / .015).ToArray();
-                    var line = Average(channel, 21, 3);
-                    return Outputs(("Wto", line), ("Signal", Average(line, 4, 3)));
-                });
+                return new("Wto", new[] { "Wto", "Signal" }, bars => WaveTrendOutputs(bars, indicator));
             case IndicatorName.WamiOscillator:
                 var wamiKind = AverageKind(options, 3);
                 if (wamiKind == 0) return null;

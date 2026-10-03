@@ -227,6 +227,7 @@ internal static partial class StatefulIndicatorFactory
             MirroredMovingAverageConvergenceDivergenceSpecOptions d => new MirroredMovingAverageConvergenceDivergenceState(d.MaType, d.Length, d.SignalLength),
             _4MovingAverageConvergenceDivergenceSpecOptions d => new _4MovingAverageConvergenceDivergenceState(d.MaType, d.Length1, d.Length2, d.Length3, d.Length4, d.Length5, d.Length6, d.BlueMult, d.YellowMult),
             _4PercentagePriceOscillatorSpecOptions d => new _4PercentagePriceOscillatorState(d.MaType, d.Length1, d.Length2, d.Length3, d.Length4, d.Length5, d.Length6, d.BlueMult, d.YellowMult),
+            WaveTrendOscillatorSpecOptions wave => new WaveTrendOscillatorState(length1: wave.Length),
             WaddahAttarExplosionSpecOptions d => new WaddahAttarExplosionState(d.FastLength, d.SlowLength, d.Sensitivity),
             DetrendedSyntheticPriceSpecOptions synthetic => new DetrendedSyntheticPriceState(synthetic.Length),
             TrendForceHistogramSpecOptions d => new TrendForceHistogramState(d.Length),
