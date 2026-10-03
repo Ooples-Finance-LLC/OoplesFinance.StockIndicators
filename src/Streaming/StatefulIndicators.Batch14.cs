@@ -680,68 +680,16 @@ public sealed class HalfTrendState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Hf")]
 public sealed class HampelFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _alpha;
-    private readonly double _scalingFactor;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly double[] _medianScratch;
-    private readonly double[] _absMedianScratch;
-    private readonly StreamingInputResolver _input;
-    private double _prevHfEma;
-
-    public HampelFilterState(int length = 14, double scalingFactor = 3)
-    {
-        _length = Math.Max(1, length);
-        _alpha = (double)2 / (_length + 1);
-        _scalingFactor = scalingFactor;
-        _values = new PooledRingBuffer<double>(_length);
-        _medianScratch = new double[_length];
-        _absMedianScratch = new double[_length];
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HampelWindow _window;
+    public HampelFilterState(int length = 14, double scalingFactor = 3) => _window = new(length, scalingFactor);
     public IndicatorName Name => IndicatorName.HampelFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevHfEma = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sampleMedian = EhlersStreamingWindow.GetMedian(_values, value, _medianScratch);
-        var absDiff = Math.Abs(value - sampleMedian);
-        var used = Math.Min(_values.Count + 1, _length);
-        for (var i = 0; i < used; i++) _absMedianScratch[i] = Math.Abs(_medianScratch[i] - sampleMedian);
-        Array.Sort(_absMedianScratch, 0, used);
-        var mad = (_absMedianScratch[(used - 1) / 2] + _absMedianScratch[used / 2]) / 2;
-        var hf = absDiff <= _scalingFactor * mad ? value : sampleMedian;
-        var hfEma = (_alpha * hf) + ((1 - _alpha) * _prevHfEma);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevHfEma = hfEma;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Hf", hfEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hfEma, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { ["Hf"] = value } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Up")]

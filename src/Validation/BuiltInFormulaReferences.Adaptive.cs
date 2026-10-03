@@ -589,26 +589,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Rmta", result));
                 });
             case IndicatorName.HampelFilter:
-                var scalingFactor = Number(options, 3, "ScalingFactor");
-                return new("Hf", new[] { "Hf" }, bars =>
-                {
-                    static double Median(IEnumerable<double> values)
-                    {
-                        var sorted = values.OrderBy(v => v).ToArray();
-                        return (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2;
-                    }
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var window = Window(bars, i, length).Select(b => b.Close).ToArray();
-                        var median = Median(window);
-                        var mad = Median(window.Select(v => Math.Abs(v - median)));
-                        var value = Math.Abs(bars[i].Close - median) > scalingFactor * mad ? median : bars[i].Close;
-                        var previous = i == 0 ? 0 : result[i - 1];
-                        result[i] = previous + 2d / (length + 1d) * (value - previous);
-                    }
-                    return Outputs(("Hf", result));
-                });
+                return new("Hf", new[] { "Hf" }, bars => HampelOutputs(bars, indicator));
             case IndicatorName.WellesWilderSummation:
                 return new("Wws", new[] { "Wws" }, bars => Outputs(("Wws",
                     Average(Closes(bars), length, 6).Select(v => length * v).ToArray())));

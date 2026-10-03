@@ -1058,3 +1058,10 @@ The batch and native routes share exact arithmetic with an independent rational 
 ZigZag uses exact midpoint seeds, absolute pivot magnitudes for reversal thresholds, strict reversal comparisons and exact interpolation between final extrema. A threshold equality holds the current leg; the adjacent representable price can reverse it. Signals compare exact unpublished path slopes, preserving subnormal movements and avoiding artificial acceleration from rounded outputs. Extreme finite candles and deviations are validated before output writes; helper spans support overlapping input/output.
 
 ZigZag intentionally redraws prior legs when a later extreme extends them. Its selected-input builder path therefore computes the complete series through the same batch calculation and custom candle-range policy; it does not claim streaming parity or prefix invariance. The internal TrendCore variant remains unchanged pending its separate scope decision.
+
+
+### Batch 741: Hampel public raw-MAD and EMA variant
+
+Public Hampel uses the median of observed prices, the median of absolute distances from that same median, and a raw-MAD threshold. Equality accepts the current price; larger distances replace it with the median. The published result is a zero-seeded EMA with alpha=2/(length+1). Exact rational medians, deviations, thresholds, EMA memory and signal margins preserve tiny values and avoid intermediate overflow. History grows only with observations, including Int32.MaxValue periods.
+
+For [0,2,100], length 3 and factor 3, outputs are [0,1,1.5]. For [0,1,2], factor 1 gives final 1.25; the immediately smaller binary64 factor gives 0.625 because it also changes the prior two-point decision. Constant [2,2,2] gives signals StrongBuy, Buy, Buy as the positive margins decline. All finite factors remain supported. The internal core/registry retains its distinct Gaussian-scaled unsmoothed variant pending the separate alignment decision.

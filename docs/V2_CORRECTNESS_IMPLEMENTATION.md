@@ -5247,3 +5247,10 @@ Nine configurations enrolled. Inventory: **6,763/7,131 enrolled**, **368 omissio
 **41/41 focused checks passed** on net10.0 (`zigzag740-selected-route.trx`): 31 new numerical cases, four existing ZigZag regression cases and six custom-indicator graph cases. The first run's four selected-source failures exposed missing whole-series graph dispatch; the repaired route passes all four configurations. **13/13 integration checks passed** after combining published WaveTrend and Volume Positive/Negative (`zigzag740-integrated738.trx`), producing 43 distinct passing checks across both runs. Numerical helper, independent reference, regression tests and graph dispatch were preserved byte-for-byte through integration.
 
 Four configurations enrolled. Inventory: **6,767/7,131 enrolled**, **364 omissions across 51 types**, all references registered, no construction failures and exact backlog match. **24 behavioral mutation candidates are frozen and queued**. Core alignment remains a separate pending scope decision; mutation qualification and final assurance gates remain incomplete.
+
+
+### Batch 741: Hampel public numerical routes
+
+**41/41 focused tests passed** on net10.0 (`hampel741-output-metadata.trx`), covering four configurations across batch, fast, typed arm, native and streaming routes; independent references and enrollment; injected faults; selected input; hand-derived threshold and signal cases; extreme/subnormal inputs; huge periods; preview/reset; invalid candles and factors; and callback bypass. The original run had 17 passes and 24 metadata failures after an output-dictionary initializer was not recognized by source generation. Restoring the recognized initializer regenerated the Hf output; the passing full rerun supersedes those failures.
+
+Four configurations enrolled. Inventory: **6,771/7,131 enrolled**, **360 omissions across 50 types**, all references registered, no construction failures and exact backlog match. **24 behavioral mutation candidates are frozen and queued**. Core/registry alignment remains a separate pending decision. Mutation qualification and final assurance gates are incomplete.

@@ -85665,5 +85665,221 @@
     "before": "data.SetCustomValues(Compute(indicator.Source)[IndicatorContract.PrimaryOutput(indicator.Source).Slot].ToList());",
     "after": "data.SetCustomValues(new List<double>());",
     "filter": "FullyQualifiedName~ZigZagNumericalTests.SelectedSourceUsesResolvedRangesInWholeSeries"
+  },
+  {
+    "id": "hampel-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "_factor = Number.Of(factor);",
+    "after": "_factor = Number.Of(1);",
+    "filter": "FullyQualifiedName~HampelNumericalTests.ExactThresholdEqualityDiffersFromAdjacentFactor"
+  },
+  {
+    "id": "hampel-wide-length-floor",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = Math.Max(2, length);",
+    "filter": "FullyQualifiedName~HampelNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "hampel-wide-even-median",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "(sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]).Divide(2)",
+    "after": "sorted[(sorted.Length - 1) / 2]",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-deviation-center",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "Abs(v - median)",
+    "after": "Abs(v - current)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-mad-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "var mad = Median(deviations);",
+    "after": "var mad = deviations[deviations.Length - 1];",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-threshold-tie",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "_factor * mad).Sign <= 0",
+    "after": "_factor * mad).Sign < 0",
+    "filter": "FullyQualifiedName~HampelNumericalTests.ExactThresholdEqualityDiffersFromAdjacentFactor"
+  },
+  {
+    "id": "hampel-wide-gaussian-scale",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "_factor * mad).Sign <= 0",
+    "after": "_factor * mad * Number.Of(1.4826)).Sign <= 0",
+    "filter": "FullyQualifiedName~HampelNumericalTests.ExactThresholdEqualityDiffersFromAdjacentFactor"
+  },
+  {
+    "id": "hampel-wide-outlier-replacement",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "? current : median;",
+    "after": "? current : default;",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-ema-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "filtered.Times(2)",
+    "after": "filtered",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-ema-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "Divide(_length + 1L)",
+    "after": "Divide(_length)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-ema-memory-weight",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-ema-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "_previous = result;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-window-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "Skip(expired ? 1 : 0)",
+    "after": "Skip(0)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "hampel-wide-queue-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "if (expired) _history.Dequeue();",
+    "after": "if (expired && price < 0) _history.Dequeue();",
+    "filter": "FullyQualifiedName~HampelNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "hampel-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "if (final) { if (expired)",
+    "after": "if (final || price != 0) { if (expired)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.PreviewExpiryAndResetPreserveCommittedHistory"
+  },
+  {
+    "id": "hampel-wide-reset-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "_history.Clear(); _previous = default;",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~HampelNumericalTests.PreviewExpiryAndResetPreserveCommittedHistory"
+  },
+  {
+    "id": "hampel-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~HampelNumericalTests.DirectSelectedInputAndCallbackBypassAreDiscriminating"
+  },
+  {
+    "id": "hampel-wide-signal-margin",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "Number.Of(prices[i]) - value",
+    "after": "value - Number.Of(prices[i])",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "previousMargin = margin;",
+    "after": "previousMargin = default;",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-signal-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/HampelWindow.cs",
+    "scope": "internal sealed class HampelWindow",
+    "before": "var margin = Number.Of(prices[i]) - value;",
+    "after": "var margin = Number.Of(prices[i]) - Number.Of(values[i]);",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-native-fields",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class HampelFilterState",
+    "before": "StreamingInputValidation.Validate(bar); var value = _window.Next",
+    "after": "var value = _window.Next",
+    "filter": "FullyQualifiedName~HampelNumericalTests.InvalidParametersAndCandlesAreRejectedWithoutAdvancing"
+  },
+  {
+    "id": "hampel-wide-batch-length",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesEtoL.cs",
+    "scope": "public static StockData CalculateHampelFilter(",
+    "before": "HampelWindow.Calculate(stockData, length, scalingFactor)",
+    "after": "HampelWindow.Calculate(stockData, 2, scalingFactor)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-fast-factor",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHampelFilterFast(",
+    "before": "HampelWindow.Calculate(data, length, scalingFactor)",
+    "after": "HampelWindow.Calculate(data, length, 0)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.IndependentOutlierWarmupAndSignalHands"
+  },
+  {
+    "id": "hampel-wide-native-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "internal static partial class StatefulIndicatorFactory",
+    "before": "new HampelFilterState(hampel.Length, hampel.ScalingFactor)",
+    "after": "new HampelFilterState(2, hampel.ScalingFactor)",
+    "filter": "FullyQualifiedName~HampelNumericalTests.EveryRouteMatchesIndependentRationalReference"
   }
 ]

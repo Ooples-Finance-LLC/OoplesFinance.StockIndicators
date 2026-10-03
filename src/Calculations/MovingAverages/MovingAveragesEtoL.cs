@@ -796,48 +796,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateHampelFilter(this StockData stockData, int length = 14, double scalingFactor = 3)
     {
-        length = Math.Max(1, length);
-        List<double> tempList = new(stockData.Count);
-        List<double> hfList = new(stockData.Count);
-        List<double> hfEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        using var tempMedian = new RollingMedian(length);
-        var deviations = new double[length];
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevValue = GetLastOrDefault(tempList);
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-
-            tempMedian.Add(currentValue);
-            var sampleMedian = tempMedian.Median;
-            var absDiff = Math.Abs(currentValue - sampleMedian);
-            var used = Math.Min(i + 1, length);
-            for (var j = 0; j < used; j++) deviations[j] = Math.Abs(inputList[i - j] - sampleMedian);
-            Array.Sort(deviations, 0, used);
-            var mad = (deviations[(used - 1) / 2] + deviations[used / 2]) / 2;
-            var hf = absDiff <= scalingFactor * mad ? currentValue : sampleMedian;
-            hfList.Add(hf);
-
-            var prevHfEma = GetLastOrDefault(hfEmaList);
-            var hfEma = (alpha * hf) + ((1 - alpha) * prevHfEma);
-            hfEmaList.Add(hfEma);
-
-            var signal = GetCompareSignal(currentValue - hfEma, prevValue - prevHfEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Hf", hfEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(hfEmaList);
+        var result = HampelWindow.Calculate(stockData, length, scalingFactor);
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Signals);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Hf", result.Values.ToList() } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Values.ToList());
         stockData.IndicatorName = IndicatorName.HampelFilter;
-
         return stockData;
     }
 

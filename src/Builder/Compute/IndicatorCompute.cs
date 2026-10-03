@@ -12063,41 +12063,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeHampelFilterFast(StockData data, ComputeContext context, int length = 14, double scalingFactor = 3)
     {
-        // CalculateHampelFilter replaces a value with the window median whenever it sits further from that
-        // median than the scaled median absolute deviation, then smooths the result exponentially. The
-        // published series is that smoothed one, which the core routine this replaced never produced.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-        var alpha = (double)2 / (length + 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        using var sampleMedianWindow = new RollingMedian(length);
-        var deviations = ArrayPool<double>.Shared.Rent(length);
-        try
-        {
-            double prevHfEma = 0;
-            for (var i = 0; i < count; i++)
-            {
-                sampleMedianWindow.Add(input[i]);
-                var sampleMedian = sampleMedianWindow.Median;
-                var absDiff = Math.Abs(input[i] - sampleMedian);
-                var used = Math.Min(i + 1, length);
-                for (var j = 0; j < used; j++) deviations[j] = Math.Abs(input[i - j] - sampleMedian);
-                Array.Sort(deviations, 0, used);
-                var mad = (deviations[(used - 1) / 2] + deviations[used / 2]) / 2;
-                var hf = absDiff <= scalingFactor * mad ? input[i] : sampleMedian;
-
-                prevHfEma = (alpha * hf) + ((1 - alpha) * prevHfEma);
-                output[i] = prevHfEma;
-            }
-        }
-        finally { ArrayPool<double>.Shared.Return(deviations); }
-
-        return buffer;
+        var values = HampelWindow.Calculate(data, length, scalingFactor).Values;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>
