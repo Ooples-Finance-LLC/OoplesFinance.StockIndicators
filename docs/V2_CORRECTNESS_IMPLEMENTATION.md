@@ -5307,3 +5307,10 @@ The upstream competitor project built with existing production binaries. Its cov
 ### Batch 748: Premier reset-index survivor regression
 
 The original Premier pair finished with **43/46 compiled faults caught** and three survivors. Two now have the published translated-center and period-one regressions. The remaining reset-index fault is not globally equivalent: keeping a prior ordinal near signed rollover can retain an expired high after reset. A focused test seeds that lifetime boundary, calls reset, and compares the subsequent output trajectory to the independent reference rather than asserting private storage. **1/1 test passed** (`premier748-reset-ordinal.trx`) using existing production binaries. Production is unchanged; the reset-count mutation now targets this test. Both original source archives match byte-for-byte, and their unqualified evidence is retained. All 46 faults remain in the repaired campaign; none was retired or counted as caught without test evidence.
+
+
+### Platform compatibility repair 749
+
+Replaced two unavailable `Enumerable.Append` calls with equivalent singleton concatenations in Adaptive Cyber Cycle and Hampel, and replaced `Math.Clamp` with long-valued min/max in the Turbo Stochastics independent reference. These three substitutions preserve ordering, bounds, and formulas on .NET Framework 4.6.1.
+
+Verification: `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net461 --no-restore -p:GeneratePackageOnBuild=false` passed with zero errors and nine dependency-support warnings. Six focused net10.0 tests passed (`platform749-compatibility.trx`): Adaptive Cyber startup/median periods, Hampel hand/preview-expiry-reset checks, and Turbo Stochastics hand/extreme signed periods. This establishes compilation and focused behavior; net461 runtime assurance remains outstanding. Enrollment is unchanged at 6,784/7,131; mutation campaigns remain separately tracked.

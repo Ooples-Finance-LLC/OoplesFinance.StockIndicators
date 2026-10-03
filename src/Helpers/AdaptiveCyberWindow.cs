@@ -66,7 +66,7 @@ internal sealed class AdaptiveCyberWindow
             var denominator = new ExactMeanAccumulator(); Product(ref denominator, quadrature, _quadrature, 1); Product(ref denominator, inPhase, _inPhase, 1);
             advance = denominator.IsExactlyZero ? numerator.Sign * Math.Sign(quadrature.Mantissa) * Math.Sign(_quadrature.Mantissa) > 0 ? 1.1 : .1 : Math.Max(.1, Math.Min(1.1, numerator.Ratio(denominator)));
         }
-        var ordered = _phases.Skip(_phases.Count == _length ? 1 : 0).Append(advance).OrderBy(v => v).ToArray();
+        var ordered = _phases.Skip(_phases.Count == _length ? 1 : 0).Concat(new[] { advance }).OrderBy(v => v).ToArray();
         var middle = ordered.Length / 2; var median = (ordered[(ordered.Length - 1) / 2] + ordered[middle]) / 2;
         var dominant = 6.28318 / median + .5;
         var instantSum = new ExactMeanAccumulator(); instantSum.AddProduct(.33, dominant); instantSum.AddProduct(.67, _instant); var instant = instantSum.Mean(1);

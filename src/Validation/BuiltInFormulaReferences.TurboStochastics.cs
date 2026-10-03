@@ -7,7 +7,7 @@ internal static partial class BuiltInFormulaReferences
     internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) TurboStochasticsValues(IReadOnlyList<Bar> bars, int length, int fitLength, int turbo, MovingAvgType kind, bool slow)
     {
         length = Math.Max(1, length); fitLength = Math.Max(1, fitLength);
-        var fitPeriod = Math.Max(1L, (long)fitLength + Math.Clamp((long)turbo, -fitLength, fitLength));
+        var fitPeriod = Math.Max(1L, (long)fitLength + Math.Max(-(long)fitLength, Math.Min((long)fitLength, turbo)));
         ReferenceFraction R(double x) => ReferenceFraction.FromDouble(x); var zero = R(0);
         ReferenceFraction[] Mean(ReferenceFraction[] values, int length)
         {

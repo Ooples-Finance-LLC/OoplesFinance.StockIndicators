@@ -17,7 +17,7 @@ internal sealed class HampelWindow : IDisposable
     {
         StreamingInputValidation.Finite(price, nameof(price)); var current = Number.Of(price);
         var expired = _history.Count == _length;
-        var window = _history.Skip(expired ? 1 : 0).Append(current).ToArray();
+        var window = _history.Skip(expired ? 1 : 0).Concat(new[] { current }).ToArray();
         Array.Sort(window, (a, b) => (a - b).Sign); var median = Median(window);
         var deviations = window.Select(v => Abs(v - median)).ToArray();
         Array.Sort(deviations, (a, b) => (a - b).Sign); var mad = Median(deviations);
