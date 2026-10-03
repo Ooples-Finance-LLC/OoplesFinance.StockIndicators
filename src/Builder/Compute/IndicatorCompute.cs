@@ -7760,52 +7760,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeKarobeinOscillatorFast(StockData data, ComputeContext context, int length = 50,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateKarobeinOscillator smooths the chained series, splits the bar-to-bar ratio of that average
-        // into its falling and rising halves, smooths each of those again and folds them back into the ratio.
-        // OscillatorCore.KarobeinOscillator worked from the close and skipped the second pair of averages.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var ema = average.Span;
-
-        using var fallingRatio = context.Rent(count);
-        using var risingRatio = context.Rent(count);
-        var a = fallingRatio.WritableSpan;
-        var b = risingRatio.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevEma = i >= 1 ? ema[i - 1] : 0;
-            a[i] = ema[i] < prevEma && prevEma != 0 ? ema[i] / prevEma : 0;
-            b[i] = ema[i] > prevEma && prevEma != 0 ? ema[i] / prevEma : 0;
-        }
-
-        using var smoothedFalling = context.Rent(count);
-        using var smoothedRising = context.Rent(count);
-        MovingAverage(data, maType, length, fallingRatio.Span, smoothedFalling.WritableSpan);
-        MovingAverage(data, maType, length, risingRatio.Span, smoothedRising.WritableSpan);
-        var aEma = smoothedFalling.Span;
-        var bEma = smoothedRising.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevEma = i >= 1 ? ema[i - 1] : 0;
-            if (prevEma == 0 || ema[i] == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var ratio = ema[i] / prevEma;
-            var c = MathHelper.MinOrMax(ratio / (ratio + bEma[i]), 1, 0);
-            output[i] = MathHelper.MinOrMax((2 * (ratio / (ratio + (c * aEma[i])))) - 1, 1, 0);
-        }
-
-        return buffer;
+        var values = KarobeinWindow.Calculate(data, maType, length, true).Values;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

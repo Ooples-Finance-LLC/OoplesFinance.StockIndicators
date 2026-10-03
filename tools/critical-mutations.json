@@ -86601,5 +86601,284 @@
     "before": "return CloseSpan;",
     "after": "return _closeMemory.HasValue ? _closeMemory.Value.Span : CloseSpan;",
     "filter": "FullyQualifiedName~AdoptedInputTests.FirstDefaultInputReadUsesEditedCloseList"
+  },
+  {
+    "id": "karobein-wide-zero-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "if (ratio.Sign == 0) return default;",
+    "after": "if (ratio.Sign == 0) return Number.Integer(1);",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-rising-pole",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "if (first.Sign == 0) throw",
+    "after": "if (false) throw",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.BothExactPolesAreRejectedWithoutCommittingAnyStage"
+  },
+  {
+    "id": "karobein-wide-falling-pole",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "if (second.Sign == 0) throw",
+    "after": "if (false) throw",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.BothExactPolesAreRejectedWithoutCommittingAnyStage"
+  },
+  {
+    "id": "karobein-wide-near-tie",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "if (first.Sign == 0) throw",
+    "after": "if (Math.Abs(first.Publish()) < 1e-12) throw",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.NearPolesAreNotCollapsedIntoTies"
+  },
+  {
+    "id": "karobein-wide-rising-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "var first = ratio + rise;",
+    "after": "var first = ratio + fall;",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-falling-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "var second = ratio + c * fall;",
+    "after": "var second = ratio + c * rise;",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-fold-scale",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "ratio.Times(2).Divide(second)",
+    "after": "ratio.Divide(second)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-fold-offset",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "Divide(second) - Number.Integer(1)",
+    "after": "Divide(second)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "value.Sign < 0 ? default",
+    "after": "value.Sign > 0 ? default",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "? Number.Integer(1) : value",
+    "after": "? Number.Integer(0) : value",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.NearPolesAreNotCollapsedIntoTies"
+  },
+  {
+    "id": "karobein-wide-premature-price-commit",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "var mean = _price.Next(input, false);",
+    "after": "var mean = _price.Next(input, true);",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.BothExactPolesAreRejectedWithoutCommittingAnyStage"
+  },
+  {
+    "id": "karobein-wide-premature-fall-commit",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "var fall = _fall.Next(falling, false);",
+    "after": "var fall = _fall.Next(falling, true);",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.BothExactPolesAreRejectedWithoutCommittingAnyStage"
+  },
+  {
+    "id": "karobein-wide-premature-rise-commit",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "var rise = _rise.Next(rising, false);",
+    "after": "var rise = _rise.Next(rising, true);",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.BothExactPolesAreRejectedWithoutCommittingAnyStage"
+  },
+  {
+    "id": "karobein-wide-native-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "mean.Divide(_previous)",
+    "after": "_previous.Divide(mean)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-native-fall-tie",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "delta.Sign < 0 ? ratio",
+    "after": "delta.Sign <= 0 ? ratio",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-batch-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "mean[i].Divide(mean[i - 1])",
+    "after": "mean[i - 1].Divide(mean[i])",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-batch-fall-tie",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "if (delta.Sign < 0) falls",
+    "after": "if (delta.Sign <= 0) falls",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "if (final)\n        {\n            _price.Next",
+    "after": "if (final || price != 0)\n        {\n            _price.Next",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.PreviewResetAndSignedInputsRemainCausal"
+  },
+  {
+    "id": "karobein-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "_previous = _line = _slope = default;",
+    "after": "_line = _slope = default;",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.PreviewResetAndSignedInputsRemainCausal"
+  },
+  {
+    "id": "karobein-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.ThreeCallbacksPreserveStageOrderShortMeansAndSelectedInput"
+  },
+  {
+    "id": "karobein-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "ToArray(), length) : null",
+    "after": "ToArray(), 1) : null",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.ThreeCallbacksPreserveStageOrderShortMeansAndSelectedInput"
+  },
+  {
+    "id": "karobein-wide-short-callback",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Integer(1)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.ThreeCallbacksPreserveStageOrderShortMeansAndSelectedInput"
+  },
+  {
+    "id": "karobein-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.ExtremeRatiosAndPeriodsStayBounded"
+  },
+  {
+    "id": "karobein-wide-weighted-aging",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "weighted = weighted - sum + value.Times(_length);",
+    "after": "weighted = weighted + value.Times(_length);",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "karobein-wide-finite-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "karobein-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "_count + 1 < _length ? default",
+    "after": "_count + 1 < _length ? value",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "karobein-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "result = sum.Divide(_count + 1);",
+    "after": "result = sum.Divide(_length);",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/KarobeinWindow.cs",
+    "scope": "internal sealed class KarobeinWindow",
+    "before": "ema ? _length + 1L : _length",
+    "after": "ema ? _length + 2L : _length",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-native-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KarobeinOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar); var value",
+    "after": "var value",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.InvalidCandlesDoNotAdvance"
+  },
+  {
+    "id": "karobein-wide-batch-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "scope": "public static StockData CalculateKarobeinOscillator(",
+    "before": "KarobeinWindow.Calculate(stockData, maType, length, false)",
+    "after": "KarobeinWindow.Calculate(stockData, maType, 2, false)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "karobein-wide-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KarobeinOscillatorState",
+    "before": "_window = new(maType, length);",
+    "after": "_window = new(maType, 2);",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
   }
 ]

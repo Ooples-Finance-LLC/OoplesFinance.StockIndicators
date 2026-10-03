@@ -526,72 +526,15 @@ public sealed class KalmanSmootherState : IStreamingIndicatorState
 [PrimaryOutput("Ko")]
 public sealed class KarobeinOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema;
-    private readonly IMovingAverageSmoother _aSmoother;
-    private readonly IMovingAverageSmoother _bSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevEma;
-    private bool _hasPrev;
-
-    public KarobeinOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 50)
-    {
-        var resolved = Math.Max(1, length);
-        _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        _aSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _bSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KarobeinWindow _window;
+    public KarobeinOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 50) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.KarobeinOscillator;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _aSmoother.Reset();
-        _bSmoother.Reset();
-        _prevEma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ema = _ema.Next(value, isFinal);
-        var prevEma = _hasPrev ? _prevEma : 0;
-        var aRaw = ema < prevEma && prevEma != 0 ? ema / prevEma : 0;
-        var bRaw = ema > prevEma && prevEma != 0 ? ema / prevEma : 0;
-        var a = _aSmoother.Next(aRaw, isFinal);
-        var b = _bSmoother.Next(bRaw, isFinal);
-        var ratio = prevEma != 0 && ema != 0 ? ema / prevEma : 0;
-        var c = prevEma != 0 && ema != 0 ? MathHelper.MinOrMax(ratio / (ratio + b), 1, 0) : 0;
-        var d = prevEma != 0 && ema != 0
-            ? MathHelper.MinOrMax((2 * (ratio / (ratio + (c * a)))) - 1, 1, 0)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevEma = ema;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ko", d }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(d, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _aSmoother.Dispose();
-        _bSmoother.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Line;
+        return new(value, includeOutputs ? new Dictionary<string, double> { ["Ko"] = value } : null);
     }
 }
 

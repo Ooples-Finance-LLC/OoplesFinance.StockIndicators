@@ -1086,3 +1086,12 @@ The core/registry now uses the causal public WMA formula with factor 2.5; future
 For q=max(1,length)/10000 and g=sqrt(2q), the public formula seeds its level with the first price and velocity with zero. Each step uses d=price-level, velocity+=q*d, level+=g*d+velocity. Values retain exact rational coefficients a+b*sqrt(2q); only published outputs round to binary64. Opposite-sign comparisons reduce to rational squares; publication refines outward root bounds until both endpoints round identically. This preserves cancellation, signal direction and recovery after overflowing intermediate publications. Signals compare the exact price-minus-level margin and its change.
 
 The independent oracle eliminates velocity, using y[n]=(2-q-g)y[n-1]+(g-1)y[n-2]+(q+g)x[n]-g*x[n-1], with independently computed root bounds. Batch, fast and native/streaming routes share the corrected public recurrence. The separate internal core/registry formula remains unchanged pending its distinct scope decision.
+
+
+### Batch 746: Karobein Oscillator
+
+The public formula smooths selected prices, forms the ratio to the previous smoothed price (zero when that previous value is zero), splits ratios by the exact direction of the mean change, and smooths each half. With ratio r, falling average a and rising average b, c = clamp(r/(r+b),0,1) and Ko = clamp(2r/(r+c*a)-1,0,1). A zero ratio retains the existing zero-output convention. All three moving-average stages, for supported SMA, WMA, EMA and Wilder kinds, retain exact rational intermediate values, with exact mean-direction and signal comparisons; published outputs alone round to binary64. Other average kinds retain their existing fallback.
+
+Exact nonzero-ratio poles in r+b or r+c*a throw ArgumentException, as explicitly approved. The native path previews every stage before committing, so rejected preview or final bars cannot advance a partial state. SMA(2) prices [1,1,3,-7] exercise the rising pole; [-3,2,-1,-1,-1] exercise the falling pole. Adjacent representable inputs remain distinct and valid where their exact denominators are nonzero.
+
+The independent reference uses separate fractions and direct finite-window sums, evaluating the final fold as (r-c*a)/(r+c*a). Length-one [1,2,1] gives [0,1,0]; EMA(2) gives [0,1,385/1169]. Fast routing preserves all three component callback slots and zero-pads short replacements; captured caller input is restored. Period storage grows with consumed history. The distinct internal core remains unchanged pending its separate alignment decision.

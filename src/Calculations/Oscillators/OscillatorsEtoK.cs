@@ -1318,52 +1318,10 @@ public static partial class Calculations
     public static StockData CalculateKarobeinOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 50)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> dList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ema = emaList[i];
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var a = ema < prevEma && prevEma != 0 ? ema / prevEma : 0;
-            aList.Add(a);
-
-            var b = ema > prevEma && prevEma != 0 ? ema / prevEma : 0;
-            bList.Add(b);
-        }
-
-        var aEmaList = GetMovingAverageList(stockData, maType, length, aList);
-        var bEmaList = GetMovingAverageList(stockData, maType, length, bList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ema = emaList[i];
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-            var a = aEmaList[i];
-            var b = bEmaList[i];
-            var prevD1 = i >= 1 ? dList[i - 1] : 0;
-            var prevD2 = i >= 2 ? dList[i - 2] : 0;
-            var c = prevEma != 0 && ema != 0 ? MinOrMax(ema / prevEma / ((ema / prevEma) + b), 1, 0) : 0;
-
-            var d = prevEma != 0 && ema != 0 ? MinOrMax((2 * (ema / prevEma / ((ema / prevEma) + (c * a)))) - 1, 1, 0) : 0;
-            dList.Add(d);
-
-            var signal = GetRsiSignal(d - prevD1, prevD1 - prevD2, d, prevD1, 0.8, 0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ko", dList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dList);
-        stockData.IndicatorName = IndicatorName.KarobeinOscillator;
-
+        var result = KarobeinWindow.Calculate(stockData, maType, length, false);
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Signals);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ko", result.Values.ToList() } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Values.ToList()); stockData.IndicatorName = IndicatorName.KarobeinOscillator;
         return stockData;
     }
 

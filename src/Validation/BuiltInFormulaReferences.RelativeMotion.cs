@@ -393,19 +393,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.OscarIndicator:
                 return new("Oscar", new[] { "Oscar" }, bars => OscarOutputs(bars, indicator));
             case IndicatorName.KarobeinOscillator:
-                return new("Ko", new[] { "Ko" }, bars =>
-                {
-                    var mean = Average(Closes(bars), length, kind);
-                    var ratio = mean.Select((v, i) => i == 0 || mean[i - 1] == 0 ? 0 : v / mean[i - 1]).ToArray();
-                    var falls = Average(ratio.Select((v, i) => i > 0 && mean[i] < mean[i - 1] ? v : 0).ToArray(), length, kind);
-                    var rises = Average(ratio.Select((v, i) => i > 0 && mean[i] > mean[i - 1] ? v : 0).ToArray(), length, kind);
-                    return Outputs(("Ko", ratio.Select((v, i) =>
-                    {
-                        if (v == 0) return 0d;
-                        var c = Math.Max(0, Math.Min(1, v / (v + rises[i])));
-                        return Math.Max(0, Math.Min(1, (v - c * falls[i]) / (v + c * falls[i])));
-                    }).ToArray()));
-                });
+                return new("Ko", new[] { "Ko" }, bars => KarobeinOutputs(bars, indicator));
             case IndicatorName.ModularFilter:
                 return new("Mf", new[] { "Mf" }, bars =>
                 {

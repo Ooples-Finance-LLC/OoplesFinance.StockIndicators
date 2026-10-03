@@ -5357,3 +5357,12 @@ This is evidence for the isolated batch-681 source. Source was already published
 ### Batch 756: competitor allocation observations
 
 The existing EMA allocation probe completed against the same net10.0 production DLL verified in package batch 751. Both copied-input and adopted-column v2 routes allocated 81,752 bytes for 1,000 bars and 729,752 bytes for 10,000 bars; all five adopted-column repeats agreed at each size. Counts and comparison limits are recorded in `docs/V2_COMPETITOR756_ALLOCATIONS.md`. This is allocation evidence only; competitor timing and full release assurance remain outstanding. No production or benchmark code changed.
+
+
+### Batch 746: public Karobein numerical correction
+
+Corrected exact price/rise/fall means, ratio folding, zero guards, signed signal comparisons and approved exact-pole rejection across batch, fast, builder, native and streaming routes. Preview-before-commit protects all three stages from partial advancement on rejected poles. Independent hand, signed near-pole, extreme-period, callback, selected-input, preview/reset, and invalid-input coverage accompanies the correction; the separate core alignment remains pending.
+
+All **50 focused tests passed**, followed by **19 integration checks** after incorporating published changes through 7749c694: **69 distinct passes**. All 11 Karobein source/test edits were preserved byte-for-byte through integration; the rebuilt checks cover existing hand/route/golden contracts plus the adopted-input and compatibility boundaries. The 31 behavioral mutation candidates are frozen and queued, not yet qualified; all 9,975 manifest anchors validate.
+
+Inventory: **6,789/7,131 configurations enrolled**, **342 omissions across 46 types**, all independent references registered, no construction failures, and exact backlog agreement. Enrollment does not establish release readiness. Final numerical, mutation, hosted, package, platform and performance gates remain incomplete; PR246 stays draft.
