@@ -5483,3 +5483,10 @@ The new hand passed on net10.0 across batch, fast and native routes with preview
 The SMA warmup fault survived the first repaired campaign because the selected hand did not expose momentum before the ATR window completed. A new three-bar hand uses ranges [2,2,2], SMA3 ATR and lag 1. Both momentum and signal must publish [0,0,1/2]; premature ATR publication instead gives 3/4 at the second bar.
 
 The new hand passed on net10.0 across batch, fast and native routes with preview/reset/replay checks (`volatilitymomentum829-warmup.trx`), reusing the unchanged production DLL. Its mutation filter now targets this hand. Production and enrollment are unchanged. The first repaired mutation pair remains unqualified; remaining outcomes must be collected before a consolidated replacement snapshot.
+
+
+### Batch 736: Volatility Moving Average warmup mutation qualification
+
+Both isolated campaign baselines passed, and all **42/42 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and the 51 retained focused checks and two added hand regressions passed. The original first half and first repaired pair (41/42 kills) remain excluded. This snapshot adds only the SMA warmup regression and its filter to the first repaired source; all prior repairs are retained. This qualifies the batch-736 numerical correction; broader release gates remain incomplete.
+
+Source snapshot SHA256: `50dc18d98782e60b82a3ac84b08acd40e5ebfd044c69503e5a74ef626f5c16eb`. Archives: `ea01dcd5c017263bfe6f7c027ee285f840cc1de7f2aee088885305bf73318534` and `ea01dcd5c017263bfe6f7c027ee285f840cc1de7f2aee088885305bf73318534`.
