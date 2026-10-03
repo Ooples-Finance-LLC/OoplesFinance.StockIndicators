@@ -5393,3 +5393,12 @@ The isolated campaigns `677-regressions-a` and `677-regressions-b-recovery` pass
 Source snapshot SHA256: `e7d1f94a0ac81cb0a8045f6582685b75804b3caf7ccb087bd027f9d0a240fcbc`. Archive SHA256: `4a5dcd804930fe58d13904374403d928fc72ed0400809b6a6f5564d3ae3428eb` and `f66d9251c5ee559ed8760a4f83f8c70329add25552e130e540ff7240686e4e59`.
 
 This is evidence for the isolated batch-677 repaired source. Source was already published in the batch-677 repaired checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 747: upstream integration mutation qualification
+
+The isolated campaigns `747a` and `747b` passed their baselines and caught **6/6 compiled behavioral faults**, alongside **116/116 distinct focused and integration checks**. Both archives were compared byte-for-byte with the retained batch-747 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `e7c7029ed4288a2e0ae31cab26f412c61dc64945d090d05ea45cf6e68e5f44b8`. Archive SHA256: `fb47f5dd92154d7c9148148a6e272776705c877a181c8f0f9be13b7db95c74e9` and `fb47f5dd92154d7c9148148a6e272776705c877a181c8f0f9be13b7db95c74e9`.
+
+This is evidence for the isolated batch-747 source. Source was already published in the batch-747 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
