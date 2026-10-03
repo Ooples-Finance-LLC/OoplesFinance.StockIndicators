@@ -5453,3 +5453,10 @@ The new hand passed on net10.0 across batch, fast and native routes with preview
 Both isolated campaign baselines passed, and all **33/33 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and the 56 retained focused checks and new interior-factor regression passed. The original first-half 13/17 result remains excluded; the repaired snapshot changes only the interior-factor regression and four fault filters. This qualifies the batch-737 numerical correction; broader release gates remain incomplete.
 
 Source snapshot SHA256: `69078922968f0360bef3ffed5b5187a6fe7c5c565689379c798065a4e4af079d`. Archives: `0b4132891405fe0a72d8e7eb6e056357e1a9de112829a9ca8c837227375f1bec` and `0b4132891405fe0a72d8e7eb6e056357e1a9de112829a9ca8c837227375f1bec`.
+
+
+### Batch 798: Volatility Based Momentum startup survivor regression
+
+Replacing the initial previous close with zero survived the original hand: its main case began at zero, while its nonzero-start case did not emit momentum until the startup range expired. The new hand uses candles (high,low,close)=(10,8,9),(11,9,10), lag 1 and SMA range 2. True ranges [2,2] give ATR 2 and momentum/signal [0,1/2]. The fictitious zero previous close instead gives startup range 10, ATR 6 and second output 1/6.
+
+The new hand passed on net10.0 across batch, fast and native routes with preview/reset checks using the unchanged production DLL. The startup fault now targets this regression. Production and enrollment are unchanged; the original campaign remains excluded pending collection of its remaining outcomes and repaired mutation verification.

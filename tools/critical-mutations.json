@@ -83865,7 +83865,7 @@
     "scope": "internal sealed class VolatilityMomentumWindow",
     "before": "_hasPrevious ? _previous : close",
     "after": "_hasPrevious ? _previous : 0",
-    "filter": "FullyQualifiedName~VolatilityMomentumNumericalTests.HandLagTrueRangeAndSignalUseDistinctPeriods"
+    "filter": "FullyQualifiedName~VolatilityMomentumNumericalTests.FirstRangeUsesCurrentCloseBeforeLaggedMomentumBegins"
   },
   {
     "id": "volatility-momentum-wide-selected-range",

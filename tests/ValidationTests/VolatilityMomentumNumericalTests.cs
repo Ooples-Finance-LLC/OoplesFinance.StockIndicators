@@ -64,6 +64,16 @@ public sealed class VolatilityMomentumNumericalTests
         Check(new[] { B(10, 8, 9), B(11, 9, 10), B(15, 13, 14), B(3, 1, 2) });
         Check(Hands, lag: 3, range: 2); Check(Hands, lag: 2, range: 3);
     }
+    [Fact]
+    public void FirstRangeUsesCurrentCloseBeforeLaggedMomentumBegins()
+    {
+        // The first bar has no preceding close: ranges are [2,2], so SMA2 ATR is 2.
+        // With lag 1 the second price move is 1, hence momentum and signal are 1/2.
+        // A fictitious previous close of zero gives first range 10 and output 1/6.
+        var result = Check(new[] { B(10, 8, 9), B(11, 9, 10, 1) }, lag: 1, range: 2);
+        Assert.Equal(new[] { 0d, .5 }, result.Outputs["Vbm"]);
+        Assert.Equal(new[] { 0d, .5 }, result.Outputs["Signal"]);
+    }
     [Theory]
     [InlineData(MovingAvgType.SimpleMovingAverage)]
     [InlineData(MovingAvgType.WeightedMovingAverage)]
