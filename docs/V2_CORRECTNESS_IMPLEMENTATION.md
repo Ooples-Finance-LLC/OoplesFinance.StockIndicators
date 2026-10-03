@@ -5460,3 +5460,12 @@ Source snapshot SHA256: `69078922968f0360bef3ffed5b5187a6fe7c5c565689379c798065a
 Replacing the initial previous close with zero survived the original hand: its main case began at zero, while its nonzero-start case did not emit momentum until the startup range expired. The new hand uses candles (high,low,close)=(10,8,9),(11,9,10), lag 1 and SMA range 2. True ranges [2,2] give ATR 2 and momentum/signal [0,1/2]. The fictitious zero previous close instead gives startup range 10, ATR 6 and second output 1/6.
 
 The new hand passed on net10.0 across batch, fast and native routes with preview/reset checks using the unchanged production DLL. The startup fault now targets this regression. Production and enrollment are unchanged; the original campaign remains excluded pending collection of its remaining outcomes and repaired mutation verification.
+
+
+### Batch 799: Volatility Moving Average consolidated mutation repairs
+
+The original first half finished with 18 compiled kills, two survivors (score scale and variance centering), and one compile-inconclusive absolute-score fault. It remains excluded from qualification. The centered-variance fault now uses the passing [0,2] EMA hand: adding instead of subtracting the squared sum makes variance 3, score 100/sqrt(3), selected period 7 and output 1/2 instead of 2/3.
+
+The absolute-score mutation replaces a compile-time false guard with length < 0 after length has been normalized to at least 1. This preserves the intended removal of absolute-value normalization without a constant unreachable branch. Its compilation and behavioral detection still require repaired campaign evidence.
+
+The repaired frozen snapshot differs only by the published hand test and three mutation repairs. It retains 51 prior focused passes plus the new passing hand, totaling 52 distinct checks. The replacement campaign is running; production and enrollment are unchanged.

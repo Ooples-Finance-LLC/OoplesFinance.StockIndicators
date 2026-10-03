@@ -84278,7 +84278,7 @@
     "file": "src/Helpers/VolatilityAverageWindow.cs",
     "scope": "internal sealed class VolatilityAverageWindow",
     "before": "if (score.Compare(default) < 0)",
-    "after": "if (false)",
+    "after": "if (length < 0)",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
   },
   {
@@ -84360,7 +84360,7 @@
     "scope": "private sealed class Moments",
     "before": "squares.Times(count) - sum * sum",
     "after": "squares.Times(count) + sum * sum",
-    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ScoreScaleChangesSelectedPeriod"
   },
   {
     "id": "volatility-average-wide-moment-count",
