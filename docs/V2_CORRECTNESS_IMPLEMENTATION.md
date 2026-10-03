@@ -5321,3 +5321,16 @@ Verification: `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release 
 Default InputValues, InputSpan and InputMemory now honor an already-materialized ClosePrices list before an adopted memory view. Explicit input and an independently materialized input copy retain precedence; untouched adopted columns still avoid extra list materialization.
 
 All 47 focused tests passed on net10.0 (adopted750-current-close.trx), including ten new accessor, precedence and batch/fast/builder regressions, existing adopted-column/lazy-view checks and catalog input validation. Three compiled-behavior mutation candidates are frozen and queued, not yet qualified. All 9,944 manifest anchors validate. Numerical enrollment is unchanged at 6,784/7,131 with 347 omissions across 47 types.
+
+
+### Batch 751: packaged cross-framework runtime smoke
+
+Packed source `da9da71f` as local candidate `2.0.0-correctness.da9da71f`; no package was published. `dotnet pack src/OoplesFinance.StockIndicators.csproj -c Release --no-restore -p:GeneratePackageOnBuild=false -p:PackageVersion=2.0.0-correctness.da9da71f` built all three target frameworks successfully. Package SHA256: `8e61cae58bd3865fdd0bb0a3da417762fb7a81c164736c78ebeb03364536e500`. The package contains the matching source-generator DLL under `analyzers/dotnet/cs`.
+
+An isolated copy of the unchanged CorrectnessVerifier consumed the exact package through its IndicatorPackageVersion option. Four selected configurations passed on each target: Sma/default, HampelFilter/minimum-periods, EhlersAdaptiveCyberCycle/minimum-periods, and TurboStochasticsFast/minimum-periods. The three runs explicitly report filtered evidence; each loaded assembly hash matches both its package entry and source-build DLL.
+
+- net10.0: 4/4 configurations passed; runtime `10.0.12`; assembly SHA256 `87d88aeaa56f4f12eb44201689a87584a3d918c6aa02fa7a87962e4506d0a305`.
+- net8.0: 4/4 configurations passed; runtime `8.0.31`; assembly SHA256 `f8a873f8418da38c64bf5444a6efca23437402755dd10cccfc381dfa31c4c152`.
+- net461: 4/4 configurations passed; runtime `4.0.30319.42000`; assembly SHA256 `be44269a2d459a5f409fafeaa80aa7225acca0fd520f712c34d133b0e2090491`.
+
+The net461 consumer ran on the installed .NET Framework runtime (CLR 4.0.30319.42000), not a certified minimum-version host; dependency-support warnings remain. These 12 configuration executions establish bounded package loading/runtime behavior, not the all-discovered-configurations release gate, minimum-runtime support, competitor performance, or final hosted readiness. PR246 was draft and mergeable but blocked at da9da71f, with required CI queued. Enrollment remains unchanged.
