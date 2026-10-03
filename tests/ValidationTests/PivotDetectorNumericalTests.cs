@@ -48,6 +48,22 @@ public sealed class PivotDetectorNumericalTests
         return expected.Outputs["Pdo"];
     }
     [Fact]
+    public void DirectSelectedPricesReachBatchAndFast()
+    {
+        var bars = Bars(new[] { 100d, 107, 94, 105, 90, 110 }); var selected = new[] { 3d, 2, 1, 4, 0, 5 };
+        foreach (var kind in new[] { MovingAvgType.SimpleMovingAverage, MovingAvgType.WeightedMovingAverage, MovingAvgType.ExponentialMovingAverage, MovingAvgType.WildersSmoothingMethod })
+        {
+            var expected = BuiltInFormulaReferences.PivotDetectorValues(Bars(selected), 3, 2, Kind(kind));
+            var original = BuiltInFormulaReferences.PivotDetectorValues(bars, 3, 2, Kind(kind));
+            Assert.False(expected.Outputs["Pdo"].SequenceEqual(original.Outputs["Pdo"]));
+            var data = Data(bars); data.SetCustomValues(selected.ToList()); using var context = new ComputeContext();
+            using var fast = IndicatorCompute.ComputePivotDetectorOscillatorFast(data, context, kind, 3, 2);
+            Assert.Equal(expected.Outputs["Pdo"], fast.ToArray()); Assert.Equal(selected, data.ChainedValues);
+            data.CalculatePivotDetectorOscillator(kind, 3, 2); Assert.Equal(expected.Outputs["Pdo"], data.OutputValues["Pdo"]);
+            Assert.Equal(expected.Signals, data.SignalsList); Assert.Equal(bars.Select(b => b.Close), data.ClosePrices);
+        }
+    }
+    [Fact]
     public void IndependentRsiRescalingAndExactBranchHands()
     {
         Assert.Equal(new[] { 130d, -40, -40 }, Check(new[] { 3d, 2, 1 }, 2, 2));

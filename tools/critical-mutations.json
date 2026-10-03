@@ -73020,7 +73020,7 @@
     "scope": "internal static ComputeBuffer ComputePivotDetectorOscillatorFast(",
     "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
     "after": "var input = data.ClosePrices;",
-    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.SelectedSourcePreservesFormula"
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.DirectSelectedPricesReachBatchAndFast"
   },
   {
     "id": "pivot-detector-wide-batch-source",
@@ -73029,7 +73029,7 @@
     "scope": "public static StockData CalculatePivotDetectorOscillator(",
     "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
     "after": "var input = stockData.ClosePrices;",
-    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.SelectedSourcePreservesFormula"
+    "filter": "FullyQualifiedName~PivotDetectorNumericalTests.DirectSelectedPricesReachBatchAndFast"
   },
   {
     "id": "pivot-detector-wide-streaming-registration",
