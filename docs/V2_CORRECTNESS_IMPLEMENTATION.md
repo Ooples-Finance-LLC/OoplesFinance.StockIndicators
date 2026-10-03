@@ -5490,3 +5490,12 @@ The new hand passed on net10.0 across batch, fast and native routes with preview
 Both isolated campaign baselines passed, and all **42/42 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and the 51 retained focused checks and two added hand regressions passed. The original first half and first repaired pair (41/42 kills) remain excluded. This snapshot adds only the SMA warmup regression and its filter to the first repaired source; all prior repairs are retained. This qualifies the batch-736 numerical correction; broader release gates remain incomplete.
 
 Source snapshot SHA256: `50dc18d98782e60b82a3ac84b08acd40e5ebfd044c69503e5a74ef626f5c16eb`. Archives: `ea01dcd5c017263bfe6f7c027ee285f840cc1de7f2aee088885305bf73318534` and `ea01dcd5c017263bfe6f7c027ee285f840cc1de7f2aee088885305bf73318534`.
+
+
+### Batch 735: Volatility Based Momentum recovered warmup qualification
+
+All **37/37 compiled behavioral faults** were caught, with passing baselines and matching source archives. The first half caught 19 faults. The second half caught 16 before disk exhaustion interrupted its final two faults and left its summary JSON empty; those 16 results are retained through the exact runner disposition log, complete failing test reports and verified archived runner/source. The empty final test report is excluded. Two fresh recovery campaigns, each with a passing baseline, caught the remaining fast-output and enrollment faults. No missing timings or process results were fabricated. All four source archives match the frozen source, and all **85 distinct focused checks passed**, including startup-range and SMA warmup hand regressions.
+
+The original first half and earlier repaired pair with survivors remain excluded. This qualifies the batch-735 numerical correction; broader release gates remain incomplete.
+
+Source snapshot SHA256: `9c96e529ee506b94a64b490764a0acd638f2937c8e2f1bf0847b6eadb5d50900`. Matching archives: `25e50ab40f620097d12b98d5f39b0790e25a3572b7a2cff6b49fafb5d684313a`.
