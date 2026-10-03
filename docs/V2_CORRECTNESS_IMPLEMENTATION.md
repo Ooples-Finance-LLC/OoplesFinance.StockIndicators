@@ -5384,3 +5384,12 @@ This is evidence for the isolated batch-682 source. Source was already published
 Both isolated campaign baselines passed, and all **3/3 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and all 47 focused checks passed. The original first-half campaign is excluded: one candidate failed compilation. The repaired manifest uses a runtime condition to bypass the current close list for adopted data; production and tests are identical to the original frozen source. This qualifies the batch-750 accessor regressions; broader release gates remain incomplete.
 
 Source snapshot SHA256: `5b0f091549de06a8ac8e17d4544de48c4d6e5d3789a32450eeb6c5f661de28ca`. Archives: `58d3751fb5c61d2ab35fef0e088ae232cba5a86d4231a89e4a3908c3dd557fc3` and `58d3751fb5c61d2ab35fef0e088ae232cba5a86d4231a89e4a3908c3dd557fc3`.
+
+
+### Batch 677: Periodic Channel repaired mutation qualification
+
+The isolated campaigns `677-regressions-a` and `677-regressions-b-recovery` passed their baselines and caught **37/37 compiled behavioral faults**, alongside **64 retained focused passes and 2 additional regression passes**. Both archives were compared byte-for-byte with the retained batch-677 repaired snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `e7d1f94a0ac81cb0a8045f6582685b75804b3caf7ccb087bd027f9d0a240fcbc`. Archive SHA256: `4a5dcd804930fe58d13904374403d928fc72ed0400809b6a6f5564d3ae3428eb` and `f66d9251c5ee559ed8760a4f83f8c70329add25552e130e540ff7240686e4e59`.
+
+This is evidence for the isolated batch-677 repaired source. Source was already published in the batch-677 repaired checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
