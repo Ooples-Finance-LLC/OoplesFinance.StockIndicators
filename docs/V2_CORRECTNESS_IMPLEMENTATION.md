@@ -5341,3 +5341,14 @@ The net461 consumer ran on the installed .NET Framework runtime (CLR 4.0.30319.4
 Source `9f43d68f` built successfully in an isolated checkout using installed SDK **10.0.101**, selected with a local, untracked global.json and rollForward disabled. The SDK version was checked before and after the build. `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 -p:GeneratePackageOnBuild=false` restored dependencies, built the netstandard2.0 generator, and compiled the net10.0 library with **zero warnings and zero errors**. No production files changed.
 
 This is Windows evidence for the existing minimum-SDK build requirement. It does not replace the required hosted Linux job, full numerical validation, or the remaining package/release/performance gates.
+
+
+### Batch 681: Pivot Detector selected-input mutation qualification
+
+The isolated campaigns `681-selectedfix-a` and `681-selectedfix-b` passed their baselines and caught **38/38 compiled behavioral faults**, alongside **47 retained focused passes plus one new selected-input regression**. Both archives were compared byte-for-byte with the retained batch-681 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+The runner selects a separate baseline filter union for each half. The first half did not initially include the selected-input regression, so a supplemental first-half baseline reran its three original tests plus that regression against byte-identical frozen source; all four passed. The second half included the regression in its original baseline. All original campaign artifacts are retained.
+
+Source snapshot SHA256: `042d7ca6ccf6f19b5c05cf897428e34041be91bca5d9428eb0c5e8010eed36d8`. Archive SHA256: `3de65b5fa61f4e5776dc9ca8a981ae922a05b22d620e3b0d00e0f92f3d8dab4a` and `3de65b5fa61f4e5776dc9ca8a981ae922a05b22d620e3b0d00e0f92f3d8dab4a`.
+
+This is evidence for the isolated batch-681 source. Source was already published in the batch-681 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
