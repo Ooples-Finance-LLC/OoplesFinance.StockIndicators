@@ -64,6 +64,20 @@ public sealed class VolatilityWaveNumericalTests
         Assert.Equal(Check(new[] { -2d, 5, 0, 9 }, factor: 0), Check(new[] { -2d, 5, 0, 9 }, factor: -double.MaxValue));
     }
     [Fact]
+    public void InteriorFactorChangesPowerWeights()
+    {
+        // For [3,5], variance=1 and price=5. At factor=1/4,
+        // p^4=10000*(1/4)^4/25=25/16, so p=sqrt(5)/2.
+        var weight = Math.Pow(2, Math.Sqrt(5) / 2);
+        var mean = (5 * weight + 3) / (weight + 1);
+        var interior = Check(new[] { 3d, 5 }, factor: .25);
+        // The first power mean is 2; two WMA(2) stages give these hands.
+        Near(16d / 9, interior[0]); Near((8 * mean + 4) / 9, interior[1]);
+        var clamped = Check(new[] { 3d, 5 }, factor: .125);
+        Near(16d / 9, clamped[0]); Near(116d / 27, clamped[1]);
+        Assert.NotEqual(clamped[1], interior[1]);
+    }
+    [Fact]
     public void FractionalWeightsAndBillionBarSumsHaveIndependentBounds()
     {
         var point = new VolatilityWaveWindow.PowerMean(new Fraction[] { 1, 0 }, 2, 4);

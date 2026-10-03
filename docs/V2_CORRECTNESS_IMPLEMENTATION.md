@@ -5418,3 +5418,10 @@ The isolated campaigns `744a` and `744b` passed their baselines and caught **22/
 Source snapshot SHA256: `a998448ca5ce816f30195544b53f6f72004078e99142ef30b0183bc8acec7855`. Archive SHA256: `c97b88c38be8998caffdc436dd9ab970da0b17d90e711b292e346416ca98beec` and `c97b88c38be8998caffdc436dd9ab970da0b17d90e711b292e346416ca98beec`.
 
 This is evidence for the isolated batch-744 source. Source was already published in the batch-744 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 784: Volatility Wave factor survivor regression
+
+Halving the factor survived the original signed/extreme-input filter because its cases kept the exponent at a clamp. A new independent hand uses [3,5], population variance 1 and factor 1/4: p^4 = 25/16, hence p = sqrt(5)/2 lies inside the range. Factor 1/8 instead clamps to p=1. The resulting two-stage WMA outputs are checked by explicit weights and differ between these factors.
+
+The new hand passed on net10.0 across batch, fast and native routes with preview/reset checks, using the unchanged production DLL. The factor mutation now targets this discriminating regression. Production and enrollment are unchanged; the original campaign remains unqualified while remaining outcomes are collected, and repaired mutation evidence is still required.

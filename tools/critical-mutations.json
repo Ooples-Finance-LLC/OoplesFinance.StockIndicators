@@ -86078,7 +86078,7 @@
     "scope": "internal sealed class VolatilityWaveWindow",
     "before": "_factor = Fraction.Of(factor);",
     "after": "_factor = Fraction.Of(factor) / 2;",
-    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.InteriorFactorChangesPowerWeights"
   },
   {
     "id": "volatility-wave-wide-variance-expiry",
