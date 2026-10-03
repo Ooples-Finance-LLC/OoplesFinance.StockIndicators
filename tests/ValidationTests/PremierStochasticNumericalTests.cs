@@ -86,6 +86,8 @@ public sealed class PremierStochasticNumericalTests
     [Fact]
     public void ExtremeRangesAndReversedEndpointsStayBounded()
     {
+        // A one-bar range must expire the preceding wider candle immediately.
+        Assert.Equal(new[] { 0d, 0d }, Check(new[] { B(10, 0, 5), B(4, 2, 3) }, 1));
         foreach (var kind in new[] { MovingAvgType.SimpleMovingAverage, MovingAvgType.WeightedMovingAverage, MovingAvgType.ExponentialMovingAverage, MovingAvgType.WildersSmoothingMethod })
         {
             Check(new[] { B(double.MaxValue, -double.MaxValue, 0), B(double.MaxValue, -double.MaxValue, double.MaxValue / 2), B(1, -1, 3 * double.Epsilon), B(1, -1, -3 * double.Epsilon), B(0, 0, 0), B(1, -1, 0) }, 2, 10, kind);
