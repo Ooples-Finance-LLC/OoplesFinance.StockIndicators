@@ -86358,5 +86358,203 @@
     "before": "double.IsInfinity(result[i]) ? line : Expression.Of(Fraction.Of(result[i]))",
     "after": "Expression.Of(Fraction.Of(result[i]))",
     "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.OverflowedLineRetainsSignalsAndRecoversOnLaterBars"
+  },
+  {
+    "id": "kalman-smoother-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "(F)Math.Max(1, length) / 10000",
+    "after": "(F)200 / 10000",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-period-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.DirectSelectedInputsBypassCallbacksAndPreserveCandles"
+  },
+  {
+    "id": "kalman-smoother-wide-gain-scale",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "/ 10000; _r",
+    "after": "/ 1000; _r",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-radicand",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "_r = 2 * _q",
+    "after": "_r = _q",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-root-product",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "new(B * r, A)",
+    "after": "new(B, A)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "kalman-smoother-wide-seed",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "_started ? _level : x",
+    "after": "_started ? _level : default",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-velocity-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "_velocity + delta.Scale(_q)",
+    "after": "delta.Scale(_q)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-velocity-gain",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "delta.Scale(_q)",
+    "after": "delta.Scale(_r)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-level-velocity",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "prior + delta.RootTimes(_r) + velocity",
+    "after": "prior + delta.RootTimes(_r)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-level-root",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "prior + delta.RootTimes(_r) + velocity",
+    "after": "prior + delta.Scale(_r) + velocity",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "kalman-smoother-wide-rounded-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "_level = level;",
+    "after": "_level = new Value(F.Of(output), 0);",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.CancellationSubnormalsAndUnboundedIntermediates"
+  },
+  {
+    "id": "kalman-smoother-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "if (final) { _level",
+    "after": "if (final || price != 0) { _level",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.PreviewResetAndPrefixInvariance"
+  },
+  {
+    "id": "kalman-smoother-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "_started = false; }",
+    "after": "_started = true; }",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.PreviewResetAndPrefixInvariance"
+  },
+  {
+    "id": "kalman-smoother-wide-margin-direction",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "var margin = x - level",
+    "after": "var margin = level - x",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-margin-memory",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "_margin = margin;",
+    "after": "_margin = default;",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-sign-square",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "A.Sign * (A * A).CompareTo(B * B * r)",
+    "after": "A.Sign * (A * A).CompareTo(B * B * r * r)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.ExactQuadraticSignAndMidpointRounding"
+  },
+  {
+    "id": "kalman-smoother-wide-sign-tie",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "if (Sign(r) == 0) return 0;",
+    "after": "if (Sign(r) <= 0) return 0;",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.CancellationSubnormalsAndUnboundedIntermediates"
+  },
+  {
+    "id": "kalman-smoother-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/KalmanSmootherWindow.cs",
+    "scope": "internal sealed class KalmanSmootherWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.DirectSelectedInputsBypassCallbacksAndPreserveCandles"
+  },
+  {
+    "id": "kalman-smoother-wide-batch-period",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesEtoL.cs",
+    "scope": "public static StockData CalculateKalmanSmoother(",
+    "before": "KalmanSmootherWindow.Calculate(stockData, length)",
+    "after": "KalmanSmootherWindow.Calculate(stockData, 200)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeKalmanSmootherFast(",
+    "before": "KalmanSmootherWindow.Calculate(data, length)",
+    "after": "KalmanSmootherWindow.Calculate(data, 200)",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KalmanSmootherState",
+    "before": "_window = new(length);",
+    "after": "_window = new(200);",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.RationalRootAndVelocityHands"
+  },
+  {
+    "id": "kalman-smoother-wide-native-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KalmanSmootherState",
+    "before": "StreamingInputValidation.Validate(bar); var value",
+    "after": "var value",
+    "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.InvalidCandlesDoNotAdvance"
   }
 ]

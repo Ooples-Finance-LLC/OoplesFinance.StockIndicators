@@ -512,56 +512,14 @@ public sealed class JurikMovingAverageState : IStreamingIndicatorState
 [PrimaryOutput("Ks")]
 public sealed class KalmanSmootherState : IStreamingIndicatorState
 {
-    private readonly double _smoothFactor;
-    private readonly double _veloFactor;
-    private readonly StreamingInputResolver _input;
-    private double _prevVelo;
-    private double _prevKf;
-    private bool _hasPrev;
-
-    public KalmanSmootherState(int length = 200)
-    {
-        var resolved = Math.Max(1, length);
-        _smoothFactor = MathHelper.Sqrt((resolved / 10000d) * 2);
-        _veloFactor = resolved / 10000d;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KalmanSmootherWindow _window;
+    public KalmanSmootherState(int length = 200) => _window = new(length);
     public IndicatorName Name => IndicatorName.KalmanSmoother;
-
-    public void Reset()
-    {
-        _prevVelo = 0;
-        _prevKf = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevKf = _hasPrev ? _prevKf : value;
-        var dk = value - prevKf;
-        var smooth = prevKf + (dk * _smoothFactor);
-        var velo = _prevVelo + (_veloFactor * dk);
-        var kf = smooth + velo;
-
-        if (isFinal)
-        {
-            _prevVelo = velo;
-            _prevKf = kf;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ks", kf }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kf, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Line;
+        return new(value, includeOutputs ? new Dictionary<string, double> { ["Ks"] = value } : null);
     }
 }
 

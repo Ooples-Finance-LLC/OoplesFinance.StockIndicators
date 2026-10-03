@@ -1055,37 +1055,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKalmanSmoother(this StockData stockData, int length = 200)
     {
-        List<double> veloList = new(stockData.Count);
-        List<double> kfList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevKf = i >= 1 ? kfList[i - 1] : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var dk = currentValue - prevKf;
-            var smooth = prevKf + (dk * Sqrt((double)length / 10000 * 2));
-
-            var prevVelo = i >= 1 ? veloList[i - 1] : 0;
-            var velo = prevVelo + ((double)length / 10000 * dk);
-            veloList.Add(velo);
-
-            var kf = smooth + velo;
-            kfList.Add(kf);
-
-            var signal = GetCompareSignal(currentValue - kf, prevValue - prevKf);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ks", kfList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kfList);
-        stockData.IndicatorName = IndicatorName.KalmanSmoother;
-
+        var result = KalmanSmootherWindow.Calculate(stockData, length);
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Signals);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ks", result.Values.ToList() } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Values.ToList()); stockData.IndicatorName = IndicatorName.KalmanSmoother;
         return stockData;
     }
 

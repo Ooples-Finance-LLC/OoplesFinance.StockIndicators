@@ -11659,29 +11659,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeKalmanSmootherFast(StockData data, ComputeContext context, int length = 200)
     {
-        // CalculateKalmanSmoother carries a velocity term alongside the smoothed level, both driven by the gap
-        // between the chained series and the previous estimate, and seeds that estimate at the first value
-        // rather than zero. The core routine this replaced produced a different curve.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var gain = (double)length / 10000;
-        var smoothGain = MathHelper.Sqrt(gain * 2);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        double velocity = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousEstimate = i >= 1 ? output[i - 1] : currentValue;
-            var gap = currentValue - previousEstimate;
-
-            velocity += gain * gap;
-            output[i] = previousEstimate + (gap * smoothGain) + velocity;
-        }
-
-        return buffer;
+        var values = KalmanSmootherWindow.Calculate(data, length).Values;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

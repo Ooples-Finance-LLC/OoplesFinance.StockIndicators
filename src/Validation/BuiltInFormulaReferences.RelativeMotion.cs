@@ -320,14 +320,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.MultiDepthZeroLagExponentialMovingAverage:
                 return new("Md2Pole", new[] { "Md2Pole", "Md1Pole", "Md3Pole" }, bars => MultiDepthOutputs(bars, indicator));
             case IndicatorName.KalmanSmoother:
-                return new("Ks", new[] { "Ks" }, bars =>
-                {
-                    var q = length / 10000d; var g = Math.Sqrt(2 * q);
-                    var impulse = SecondOrderImpulse(bars.Count, 2 - g - q, g - 1);
-                    var prices = Closes(bars);
-                    return Outputs(("Ks", prices.Select((_, i) => prices[0] + Enumerable.Range(1, i).Sum(j =>
-                        (prices[j] - prices[0]) * ((g + q) * impulse[i - j] - (i > j ? g * impulse[i - j - 1] : 0)))).ToArray()));
-                });
+                return new("Ks", new[] { "Ks" }, bars => KalmanSmootherOutputs(bars, indicator));
             case IndicatorName.IIRLeastSquaresEstimate:
                 return new("IIRLse", new[] { "IIRLse" }, bars =>
                 {

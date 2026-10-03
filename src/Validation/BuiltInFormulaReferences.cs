@@ -32,6 +32,8 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.KalmanSmoother)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => KalmanSmootherOutputs(bars, builtIn)["Ks"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.McGinleyDynamicIndicator)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => McGinleyOutputs(bars, builtIn)["Mdi"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.HampelFilter)
