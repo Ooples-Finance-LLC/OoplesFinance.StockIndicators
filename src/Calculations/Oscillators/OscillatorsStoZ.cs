@@ -382,68 +382,12 @@ public static partial class Calculations
     public static StockData CalculateUltimateTraderOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 10, int lbLength = 5, int smoothLength = 4, int rangeLength = 2)
     {
-        List<double> dxiList = new(stockData.Count);
-        List<double> trList = new(stockData.Count);
+        var dxiList = UltimateTraderWindow.Raw(stockData, lbLength, rangeLength).ToList();
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, rangeLength);
 
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
-            trList.Add(tr);
-        }
-
-        List<double> NormalizeSeries(List<double> values)
-        {
-            var result = new List<double>(values.Count);
-            var window = new RollingMinMax(Math.Max(1, lbLength));
-            foreach (var value in values)
-            {
-                window.Add(value);
-                var range = window.Max - window.Min;
-                result.Add(range == 0 ? 0 : 100 * (value - window.Min) / range);
-            }
-            return result;
-        }
-        var trStoList = NormalizeSeries(trList);
-        var vStoList = NormalizeSeries(volumeList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var close = inputList[i];
-            var body = close - openList[i];
-            var high = highList[i];
-            var low = lowList[i];
-            var range = high - low;
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var c = close - prevClose;
-            double sign = Math.Sign(c);
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var vSto = vStoList[i];
-            var trSto = trStoList[i];
-            var k1 = range != 0 ? body / range * 100 : 0;
-            var k2 = range == 0 ? 0 : ((close - low) / range * 100 * 2) - 100;
-            var k3 = c == 0 || highest - lowest == 0 ? 0 : ((close - lowest) / (highest - lowest) * 100 * 2) - 100;
-            var k4 = highest - lowest != 0 ? c / (highest - lowest) * 100 : 0;
-            var k5 = sign * trSto;
-            var k6 = sign * vSto;
-            var bullScore = Math.Max(0, k1) + Math.Max(0, k2) + Math.Max(0, k3) + Math.Max(0, k4) + Math.Max(0, k5) + Math.Max(0, k6);
-            var bearScore = -1 * (Math.Min(0, k1) + Math.Min(0, k2) + Math.Min(0, k3) + Math.Min(0, k4) + Math.Min(0, k5) + Math.Min(0, k6));
-
-            var totalScore = bullScore + bearScore;
-            var dxi = totalScore == 0 ? 0 : 100 * (bullScore - bearScore) / totalScore;
-            dxiList.Add(dxi);
-        }
-
-        var dxiavgList = GetMovingAverageList(stockData, maType, lbLength, dxiList);
-        var dxisList = GetMovingAverageList(stockData, maType, smoothLength, dxiavgList);
-        var dxissList = GetMovingAverageList(stockData, maType, smoothLength, dxisList);
+        var dxiavgList = UltimateTraderWindow.Smooth(stockData, maType, lbLength, dxiList, false);
+        var dxisList = UltimateTraderWindow.Smooth(stockData, maType, smoothLength, dxiavgList, false);
+        var dxissList = UltimateTraderWindow.Smooth(stockData, maType, smoothLength, dxisList, false);
         for (var i = 0; i < stockData.Count; i++)
         {
             var dxis = dxisList[i];
@@ -451,7 +395,11 @@ public static partial class Calculations
             var prevDxis = i >= 1 ? dxisList[i - 1] : 0;
             var prevDxiss = i >= 1 ? dxissList[i - 1] : 0;
 
-            var signal = GetCompareSignal(dxis - dxiss, prevDxis - prevDxiss);
+            var margin = ExactVarianceWindow.Units(dxis) - ExactVarianceWindow.Units(dxiss);
+            var previous = ExactVarianceWindow.Units(prevDxis) - ExactVarianceWindow.Units(prevDxiss);
+            var signal = margin.Sign > 0 && margin > previous ? Signal.StrongBuy
+                : margin.Sign < 0 && margin < previous ? Signal.StrongSell
+                : margin.Sign > 0 ? Signal.Buy : margin.Sign < 0 ? Signal.Sell : Signal.None;
             signalsList?.Add(signal);
         }
 

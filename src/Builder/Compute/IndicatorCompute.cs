@@ -8553,82 +8553,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeUltimateTraderOscillatorFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int lbLength = 5, int smoothLength = 4, int rangeLength = 2)
     {
-        // CalculateUltimateTraderOscillator scores each bar on six measures - its body, its close within the
-        // bar, its close within the rangeLength window, its change over that window, and the signed
-        // stochastics of its true range and its volume - then publishes the smoothed ratio of the bullish
-        // half of those scores to the bearish half. Its length parameter reaches none of that; the windows
-        // are lbLength, smoothLength and rangeLength. OscillatorCore.UltimateTraderOscillator took three
-        // lengths derived from one and measured something else entirely.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        using var trueRanges = context.Rent(count);
-        var trueRange = trueRanges.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            trueRange[i] = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], i >= 1 ? input[i - 1] : input[i]);
-        }
-
-        // Normalize each quantity in its own units; no price-bar range participates.
-        using var trueRangeStochastic = context.Rent(count);
-        using var volumeStochastic = context.Rent(count);
-        var trWindow = new RollingMinMax(Math.Max(1, lbLength));
-        var volumeWindow = new RollingMinMax(Math.Max(1, lbLength));
-        for (var i = 0; i < count; i++)
-        {
-            trWindow.Add(trueRange[i]);
-            volumeWindow.Add(volumes[i]);
-            var trRange = trWindow.Max - trWindow.Min;
-            var volumeRange = volumeWindow.Max - volumeWindow.Min;
-            trueRangeStochastic.WritableSpan[i] = trRange == 0 ? 0 : 100 * (trueRange[i] - trWindow.Min) / trRange;
-            volumeStochastic.WritableSpan[i] = volumeRange == 0 ? 0 : 100 * (volumes[i] - volumeWindow.Min) / volumeRange;
-        }
-        var trSto = trueRangeStochastic.Span;
-        var vSto = volumeStochastic.Span;
-
-        using var ratios = context.Rent(count);
-        var index = ratios.WritableSpan;
-
-        var rangeHighs = new RollingMinMax(rangeLength);
-        var rangeLows = new RollingMinMax(rangeLength);
-        for (var i = 0; i < count; i++)
-        {
-            rangeHighs.Add(highs[i]);
-            rangeLows.Add(lows[i]);
-
-            var close = input[i];
-            var barRange = highs[i] - lows[i];
-            var change = close - (i >= 1 ? input[i - 1] : 0);
-            double sign = Math.Sign(change);
-            var lowest = rangeLows.Min;
-            var span = rangeHighs.Max - lowest;
-
-            var k1 = barRange != 0 ? (close - opens[i]) / barRange * 100 : 0;
-            var k2 = barRange == 0 ? 0 : ((close - lows[i]) / barRange * 100 * 2) - 100;
-            var k3 = change == 0 || span == 0 ? 0 : ((close - lowest) / span * 100 * 2) - 100;
-            var k4 = span != 0 ? change / span * 100 : 0;
-            var k5 = sign * trSto[i];
-            var k6 = sign * vSto[i];
-
-            var bullScore = Math.Max(0, k1) + Math.Max(0, k2) + Math.Max(0, k3) + Math.Max(0, k4) + Math.Max(0, k5)
-                + Math.Max(0, k6);
-            var bearScore = -1 * (Math.Min(0, k1) + Math.Min(0, k2) + Math.Min(0, k3) + Math.Min(0, k4)
-                + Math.Min(0, k5) + Math.Min(0, k6));
-
-            var totalScore = bullScore + bearScore;
-            index[i] = totalScore == 0 ? 0 : 100 * (bullScore - bearScore) / totalScore;
-        }
-
-        using var averaged = context.Rent(count);
-        MovingAverage(data, maType, lbLength, ratios.Span, averaged.WritableSpan);
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, averaged.Span, buffer.WritableSpan);
+        // The legacy length is inert; these three periods define the public formula.
+        var raw = UltimateTraderWindow.Raw(data, lbLength, rangeLength).ToList();
+        var first = UltimateTraderWindow.Smooth(data, maType, lbLength, raw, true);
+        var line = UltimateTraderWindow.Smooth(data, maType, smoothLength, first, true);
+        var buffer = context.Rent(line.Count);
+        line.ToArray().AsSpan().CopyTo(buffer.WritableSpan);
 
         return buffer;
     }

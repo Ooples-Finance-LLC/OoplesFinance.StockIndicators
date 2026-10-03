@@ -87231,5 +87231,268 @@
     "before": "UltimateMovingAverageBandsSpecOptions or ",
     "after": " ",
     "filter": "FullyQualifiedName~UltimateRouteNumericalTests.SelectedInputPreservesOriginalCandleFlow"
+  },
+  {
+    "id": "ultimate-trader-body",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "var body = Ratio(c - o, range);",
+    "after": "var body = Ratio(c - l, range);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.IndependentHandsIncludeMixedScoresFlatChangeAndZeroMagnitude"
+  },
+  {
+    "id": "ultimate-trader-position",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "2 * Ratio(c - l, range) - 100",
+    "after": "Ratio(c - l, range) - 100",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.IndependentHandsIncludeMixedScoresFlatChangeAndZeroMagnitude"
+  },
+  {
+    "id": "ultimate-trader-rolling-position",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "2 * Ratio(c - bottom, extent) - 100",
+    "after": "2 * Ratio(c - l, extent) - 100",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.IndependentHandsIncludeMixedScoresFlatChangeAndZeroMagnitude"
+  },
+  {
+    "id": "ultimate-trader-flat-change",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "change.IsZero || extent.IsZero",
+    "after": "extent.IsZero",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.IndependentHandsIncludeMixedScoresFlatChangeAndZeroMagnitude"
+  },
+  {
+    "id": "ultimate-trader-momentum",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "var momentum = Ratio(change, extent);",
+    "after": "var momentum = Ratio(change, range);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.IndependentHandsIncludeMixedScoresFlatChangeAndZeroMagnitude"
+  },
+  {
+    "id": "ultimate-trader-tr-direction",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "change.Sign * Ratio(tr - trBounds.Low",
+    "after": "Ratio(tr - trBounds.Low",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.IndependentHandsIncludeMixedScoresFlatChangeAndZeroMagnitude"
+  },
+  {
+    "id": "ultimate-trader-volume-direction",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "change.Sign * Ratio(v - volumeBounds.Low",
+    "after": "Ratio(v - volumeBounds.Low",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-tr-gap",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "var tr = BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - prior), BigInteger.Abs(l - prior)));",
+    "after": "var tr = h - l;",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-first-momentum",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "var change = c - (_started ? _previous : BigInteger.Zero);",
+    "after": "var change = c - (_started ? _previous : c);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-score-magnitude",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "body.Abs() + position.Abs() + rollingPosition.Abs() + momentum.Abs() + trueRange.Abs() + size.Abs()",
+    "after": "body.Abs() + position.Abs() + rollingPosition.Abs() + momentum.Abs() + trueRange.Abs()",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-zero-magnitude",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "total.Sign == 0 ? 0 :",
+    "after": "total.Sign == 0 ? 50 :",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.IndependentHandsIncludeMixedScoresFlatChangeAndZeroMagnitude"
+  },
+  {
+    "id": "ultimate-trader-round-before-normalization",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "(100 * (body + position + rollingPosition + momentum + trueRange + size) / total).Publish()",
+    "after": "100 * (body + position + rollingPosition + momentum + trueRange + size).Publish() / total.Publish()",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.ExtremeAndSubnormalCandlesKeepExactNormalizedScores"
+  },
+  {
+    "id": "ultimate-trader-lookback",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "_ranges = new(lookback); _volumes = new(lookback);",
+    "after": "_ranges = new(rangeLength); _volumes = new(rangeLength);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-range-period",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "_highs = new(rangeLength); _lows = new(rangeLength);",
+    "after": "_highs = new(lookback); _lows = new(lookback);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-preview-expiry",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "var cutoff = _index - _length;",
+    "after": "var cutoff = _index - _length - 1;",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-preview-price",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "if (final) { _previous = c; _started = true; }",
+    "after": "{ _previous = c; _started = true; }",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-reset-extrema",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "_ranges.Reset(); _volumes.Reset(); _highs.Reset(); _lows.Reset();",
+    "after": "_ranges.Reset(); _volumes.Reset(); _highs.Reset();",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-sma-warmup",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "_count < _length - 1 ? 0 : sum.Mean(_length)",
+    "after": "_count < _length ? 0 : sum.Mean(_length)",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-wma-denominator",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "weighted.Mean((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Mean((long)_length * (_length + 1L))",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-weighted-expiry",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "weighted.Subtract(sum); weighted.Add(value, _length);",
+    "after": "weighted.Add(value, _length);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-ema-seed",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "result = sum.Mean(_count + 1);",
+    "after": "result = sum.Mean(_length);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-recursive-gain",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "next.Add(value, ema ? 2 : 1);",
+    "after": "next.Add(value, 1);",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals"
+  },
+  {
+    "id": "ultimate-trader-raw-original-close",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "prices[i], data.Volumes[i], true",
+    "after": "data.ClosePrices[i], data.Volumes[i], true",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.DirectChainedPricesPreserveOriginalCandles"
+  },
+  {
+    "id": "ultimate-trader-callback-period",
+    "module": "ultimate-trader",
+    "file": "src/Helpers/UltimateTraderWindow.cs",
+    "before": "Builder.Compute.ComponentAverage.Take(values.ToArray(), length)",
+    "after": "Builder.Compute.ComponentAverage.Take(values.ToArray(), length + 1)",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.FastCallbacksPreservePeriodsAndThreeStageOrder"
+  },
+  {
+    "id": "ultimate-trader-native-signal",
+    "module": "ultimate-trader",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "[\"Signal\"] = signal",
+    "after": "[\"Signal\"] = line",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals",
+    "scope": "public sealed class UltimateTraderOscillatorState"
+  },
+  {
+    "id": "ultimate-trader-native-price",
+    "module": "ultimate-trader",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "bar.Low, close, bar.Volume, isFinal)",
+    "after": "bar.Low, bar.Open, bar.Volume, isFinal)",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals",
+    "scope": "public sealed class UltimateTraderOscillatorState"
+  },
+  {
+    "id": "ultimate-trader-native-reset",
+    "module": "ultimate-trader",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "_second.Reset(); _third.Reset();",
+    "after": "_second.Reset();",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals",
+    "scope": "public sealed class UltimateTraderOscillatorState"
+  },
+  {
+    "id": "ultimate-trader-core-volume",
+    "module": "ultimate-trader",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "close[i], volume[i], true",
+    "after": "close[i], 1, true",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals",
+    "scope": "internal static void UltimateTraderOscillator("
+  },
+  {
+    "id": "ultimate-trader-core-smoothing",
+    "module": "ultimate-trader",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "second.Next(first.Next(raw[i], true), true)",
+    "after": "first.Next(raw[i], true)",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals",
+    "scope": "internal static void UltimateTraderOscillator("
+  },
+  {
+    "id": "ultimate-trader-batch-signal",
+    "module": "ultimate-trader",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "margin.Sign > 0 && margin > previous",
+    "after": "margin.Sign > 0 && margin < previous",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals",
+    "scope": "public static StockData CalculateUltimateTraderOscillator("
+  },
+  {
+    "id": "ultimate-trader-fast-range",
+    "module": "ultimate-trader",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "Raw(data, lbLength, rangeLength)",
+    "after": "Raw(data, lbLength, lbLength)",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.PeriodsSmoothingPreviewResetAndSignals",
+    "scope": "internal static ComputeBuffer ComputeUltimateTraderOscillatorFast("
+  },
+  {
+    "id": "ultimate-trader-reference-kind-boundary",
+    "module": "ultimate-trader",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "before": "        if (builtIn.BatchName == IndicatorName.UltimateTraderOscillator &&\n            (AverageKind(builtIn.CreateOptions(), 0) is 1 or 2 or 3 or 6))",
+    "after": "        if (builtIn.BatchName == IndicatorName.UltimateTraderOscillator)",
+    "filter": "FullyQualifiedName~UltimateTraderNumericalTests.UnsupportedAverageDoesNotAcquireAnInventedReference"
   }
 ]

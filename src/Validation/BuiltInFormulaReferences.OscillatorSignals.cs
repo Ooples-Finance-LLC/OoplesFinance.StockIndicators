@@ -63,34 +63,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Macd", line), ("Signal", signal), ("Histogram", line.Zip(signal, (v, m) => v - m).ToArray()));
                 });
             case IndicatorName.UltimateTraderOscillator:
-                return new("Uto", new[] { "Uto", "Signal" }, bars =>
-                {
-                    var tr = TrueRanges(bars);
-                    var volume = bars.Select(b => b.Volume).ToArray();
-                    double Position(double[] values, int i)
-                    {
-                        var window = Window(values, i, 5).ToArray();
-                        return window.Max() == window.Min() ? 0 : 100 * (values[i] - window.Min()) / (window.Max() - window.Min()); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    }
-                    var raw = bars.Select((b, i) =>
-                    {
-                        var window = Window(bars, i, 2).ToArray();
-                        var low = window.Min(v => v.Low);
-                        var extent = window.Max(v => v.High) - low;
-                        var range = b.High - b.Low;
-                        var change = b.Close - (i == 0 ? 0 : bars[i - 1].Close);
-                        var terms = new[] {
-                            range == 0 ? 0 : 100 * (b.Close - b.Open) / range,
-                            range == 0 ? 0 : 200 * (b.Close - b.Low) / range - 100,
-                            change == 0 || extent == 0 ? 0 : 200 * (b.Close - low) / extent - 100,
-                            extent == 0 ? 0 : 100 * change / extent,
-                            Math.Sign(change) * Position(tr, i), Math.Sign(change) * Position(volume, i) };
-                        var magnitude = terms.Sum(Math.Abs);
-                        return magnitude == 0 ? 0 : 100 * terms.Sum() / magnitude;
-                    }).ToArray();
-                    var line = Average(Average(raw, 5, kind), 4, kind);
-                    return Outputs(("Uto", line), ("Signal", Average(line, 4, kind)));
-                });
+                return new("Uto", new[] { "Uto", "Signal" }, bars => UltimateTraderValues(bars,
+                    (MovingAvgType)options.GetType().GetProperty("MaType")!.GetValue(options)!));
             case IndicatorName.TraderPressureIndex:
                 if (kind is 1 or 2 or 3 or 6) return new("Tpx", new[] { "Tpx", "Bulls", "Bears" }, bars => ResidualPressureOutputs(bars, indicator));
                 return new("Tpx", new[] { "Tpx", "Bulls", "Bears" }, bars =>

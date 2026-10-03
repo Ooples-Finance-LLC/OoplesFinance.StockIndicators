@@ -1385,6 +1385,19 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.UltimateTraderOscillator &&
+            (AverageKind(builtIn.CreateOptions(), 0) is 1 or 2 or 3 or 6))
+        {
+            var traderOptions = builtIn.CreateOptions();
+            var traderKind = (MovingAvgType)traderOptions.GetType().GetProperty("MaType")!.GetValue(traderOptions)!;
+            var traderKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Uto", "Signal" };
+            for (var slot = 0; slot < traderKeys.Length; slot++)
+            {
+                var key = traderKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => UltimateTraderValues(bars, traderKind)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.UltimateOscillator)
         {
             var ultimateOptions = builtIn.CreateOptions();

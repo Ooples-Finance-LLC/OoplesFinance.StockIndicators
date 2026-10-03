@@ -5510,3 +5510,12 @@ Verification: **144 distinct focused cases passed**, including the completed 99-
 Source snapshot SHA256: `050a08799b85882f2fde5cffddfba104fcdb76df7ea705a4485d198fcb097f2c`. Archives: `3edafcaa4ccef214eadeb2045d9d19d0687cc30286b16df1a75a0b7ab40404ad` and `3edafcaa4ccef214eadeb2045d9d19d0687cc30286b16df1a75a0b7ab40404ad`. Both archives match all 2,433 frozen files. Evidence: `ultimate714-cached-grid-final.trx` plus `ultimate714-integrated729-repair.trx`, `ultimate881-integration.trx`, `ultimate881-enrollment-coverage.trx`, and the two `si-uma881-mutations-*` campaigns.
 
 The compiled inventory is **6,803/7,131 enrolled**, with **328 omissions across 44 indicator types**, no construction failures, and an exact numerical-backlog match. Hosted gates, remaining formulas/core decisions, final package/platform verification and competitor timing evidence remain outstanding.
+
+
+### Batch 890: Ultimate Trader numerical qualification
+
+The six-score formula now preserves exact differences and normalization, lazy extrema and basic smoothing, original candles for selected inputs, and consistent public/native/core outputs. The unused RSI-blend core has been replaced by an OHLCV-aware core. Verification passed **54 distinct focused cases** (including direct chained inputs, reference-kind boundaries and strengthened startup/gap cases) and **2 enrollment checks**. The existing bullish hand was independently corrected for binary64 rounding at each WMA stage, without loosening assertions.
+
+The first pair exposed a missing direct chained-input regression and one analyzer-rejected candidate; it is excluded from final qualification. Both corrected isolated mutation baselines passed (6 and 8 tests); all **32/32 compiled behavioral faults** were caught by complete failing test reports. Both source archives match the 2,436-file frozen source. Snapshot SHA256: `ff7995d9568e2e8acb5b1d4828622c0a32d7113d233c62a9bf7d2f6f6b79d70c`. Archives: `3842e957a9780e621da2b1db25ca7941e9ec6dfea90fa66b8162f037c207f64d` and `3842e957a9780e621da2b1db25ca7941e9ec6dfea90fa66b8162f037c207f64d`. Evidence: `ultimate-trader890-final.trx`, and `si-uto890-mutations-a/b`.
+
+Compiled enrollment is **6,808/7,131**, with **323 omissions across 43 indicator types**, no construction failures, and an exact backlog match. This batch does not establish completion of remaining numerical, hosted, package/platform or competitor-performance requirements. PR246 remains draft.

@@ -864,133 +864,35 @@ public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Uto")]
 public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _trMax;
-    private readonly RollingWindowMin _trMin;
-    private readonly RollingWindowMax _volMax;
-    private readonly RollingWindowMin _volMin;
-    private readonly RollingWindowMax _rangeHigh;
-    private readonly RollingWindowMin _rangeLow;
-    private readonly IMovingAverageSmoother _dxiAvgSmoother;
-    private readonly IMovingAverageSmoother _dxisSmoother;
-    private readonly IMovingAverageSmoother _dxissSmoother;
+    private readonly UltimateTraderWindow _window;
+    private readonly UltimateTraderWindow.Average _first, _second, _third;
     private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
 
     public UltimateTraderOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10,
         int lbLength = 5, int smoothLength = 4, int rangeLength = 2)
-        : this(maType, length, lbLength, smoothLength, rangeLength, InputName.Close, null)
-    {
-    }
+        : this(maType, length, lbLength, smoothLength, rangeLength, InputName.Close, null) { }
 
-    /// <summary>
-    /// The one place the windows and smoothers are built.
-    /// </summary>
     private UltimateTraderOscillatorState(MovingAvgType maType, int length, int lbLength, int smoothLength,
         int rangeLength, InputName inputName, Func<OhlcvBar, double>? selector)
     {
-        var resolvedLb = Math.Max(1, lbLength);
-        var resolvedRange = Math.Max(1, rangeLength);
-        _ = length;
-        _trMax = new RollingWindowMax(resolvedLb);
-        _trMin = new RollingWindowMin(resolvedLb);
-        _volMax = new RollingWindowMax(resolvedLb);
-        _volMin = new RollingWindowMin(resolvedLb);
-        _rangeHigh = new RollingWindowMax(resolvedRange);
-        _rangeLow = new RollingWindowMin(resolvedRange);
-        _dxiAvgSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLb);
-        _dxisSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _dxissSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(inputName, selector);
+        _window = new(lbLength, rangeLength);
+        _first = new(maType, lbLength);
+        _second = new(maType, smoothLength);
+        _third = new(maType, smoothLength);
+        _input = new(inputName, selector);
     }
-
     public IndicatorName Name => IndicatorName.UltimateTraderOscillator;
-
-    public void Reset()
-    {
-        _trMax.Reset();
-        _trMin.Reset();
-        _volMax.Reset();
-        _volMin.Reset();
-        _rangeHigh.Reset();
-        _rangeLow.Reset();
-        _dxiAvgSmoother.Reset();
-        _dxisSmoother.Reset();
-        _dxissSmoother.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var close = _input.GetValue(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var open = bar.Open;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        // The first bar's true range uses the bar's own close, as the batch does, so it is High - Low rather
-        // than the whole high. The momentum term c below keeps the batch's zero.
-        var tr = CalculationsHelper.CalculateTrueRange(high, low, _hasPrev ? _prevClose : close);
-        var trHigh = isFinal ? _trMax.Add(tr, out _) : _trMax.Preview(tr, out _);
-        var trLow = isFinal ? _trMin.Add(tr, out _) : _trMin.Preview(tr, out _);
-        var trRange = trHigh - trLow;
-        var trSto = trRange != 0 ? MathHelper.MinOrMax((tr - trLow) / trRange * 100, 100, 0) : 0;
-
-        var volume = bar.Volume;
-        var volHigh = isFinal ? _volMax.Add(volume, out _) : _volMax.Preview(volume, out _);
-        var volLow = isFinal ? _volMin.Add(volume, out _) : _volMin.Preview(volume, out _);
-        var volRange = volHigh - volLow;
-        var vSto = volRange != 0 ? MathHelper.MinOrMax((volume - volLow) / volRange * 100, 100, 0) : 0;
-
-        var highest = isFinal ? _rangeHigh.Add(high, out _) : _rangeHigh.Preview(high, out _);
-        var lowest = isFinal ? _rangeLow.Add(low, out _) : _rangeLow.Preview(low, out _);
-        var body = close - open;
-        var range = high - low;
-        var c = close - prevClose;
-        var sign = Math.Sign(c);
-        var k1 = range != 0 ? body / range * 100 : 0;
-        var k2 = range == 0 ? 0 : ((close - low) / range * 100 * 2) - 100;
-        var k3 = c == 0 || highest - lowest == 0 ? 0 : ((close - lowest) / (highest - lowest) * 100 * 2) - 100;
-        var k4 = highest - lowest != 0 ? c / (highest - lowest) * 100 : 0;
-        var k5 = sign * trSto;
-        var k6 = sign * vSto;
-        var bullScore = Math.Max(0, k1) + Math.Max(0, k2) + Math.Max(0, k3) + Math.Max(0, k4) + Math.Max(0, k5) + Math.Max(0, k6);
-        var bearScore = -1 * (Math.Min(0, k1) + Math.Min(0, k2) + Math.Min(0, k3) + Math.Min(0, k4) + Math.Min(0, k5) + Math.Min(0, k6));
-        var totalScore = bullScore + bearScore;
-        var dxi = totalScore == 0 ? 0 : 100 * (bullScore - bearScore) / totalScore;
-        var dxiAvg = _dxiAvgSmoother.Next(dxi, isFinal);
-        var dxis = _dxisSmoother.Next(dxiAvg, isFinal);
-        var dxiss = _dxissSmoother.Next(dxis, isFinal);
-
-        if (isFinal)
-        {
-            _prevClose = close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Uto", dxis },
-                { "Signal", dxiss }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dxis, outputs);
+        StreamingInputValidation.Finite(close, nameof(close));
+        var raw = _window.Next(bar.Open, bar.High, bar.Low, close, bar.Volume, isFinal);
+        var first = _first.Next(raw, isFinal);
+        var line = _second.Next(first, isFinal);
+        var signal = _third.Next(line, isFinal);
+        return new(line, includeOutputs ? new Dictionary<string, double> { ["Uto"] = line, ["Signal"] = signal } : null);
     }
-
-    public void Dispose()
-    {
-        _trMax.Dispose();
-        _trMin.Dispose();
-        _volMax.Dispose();
-        _volMin.Dispose();
-        _rangeHigh.Dispose();
-        _rangeLow.Dispose();
-        _dxiAvgSmoother.Dispose();
-        _dxisSmoother.Dispose();
-        _dxissSmoother.Dispose();
-    }
+    public void Reset() { _window.Reset(); _first.Reset(); _second.Reset(); _third.Reset(); }
+    public void Dispose() { _window.Reset(); _first.Dispose(); _second.Dispose(); _third.Dispose(); }
 }

@@ -4400,41 +4400,21 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Ultimate Trader Oscillator combining multiple momentum measures.
     /// </summary>
-    internal static void UltimateTraderOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int shortLength = 5, int mediumLength = 10, int longLength = 20)
+    internal static void UltimateTraderOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high,
+        ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output,
+        int lbLength = 5, int smoothLength = 4, int rangeLength = 2,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rsiShortArray = pool.Rent(close.Length);
-        var rsiMediumArray = pool.Rent(close.Length);
-        var rsiLongArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rsiShort = rsiShortArray.AsSpan(0, close.Length);
-            var rsiMedium = rsiMediumArray.AsSpan(0, close.Length);
-            var rsiLong = rsiLongArray.AsSpan(0, close.Length);
-
-            // Calculate RSI at different timeframes
-            RelativeStrengthIndex(close, rsiShort, shortLength);
-            RelativeStrengthIndex(close, rsiMedium, mediumLength);
-            RelativeStrengthIndex(close, rsiLong, longLength);
-
-            // Weighted average (4-2-1 weighting)
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = (rsiShort[i] * 4 + rsiMedium[i] * 2 + rsiLong[i]) / 7.0;
-            }
-        }
-        finally
-        {
-            pool.Return(rsiShortArray);
-            pool.Return(rsiMediumArray);
-            pool.Return(rsiLongArray);
-        }
+        if (output.Length < close.Length || open.Length != close.Length || high.Length != close.Length ||
+            low.Length != close.Length || volume.Length != close.Length)
+            throw new ArgumentException("OHLCV spans must have equal lengths and the output must fit the input.");
+        var raw = new double[close.Length];
+        var window = new UltimateTraderWindow(lbLength, rangeLength);
+        // Read the complete input before writing, including shifted aliases.
+        for (var i = 0; i < raw.Length; i++) raw[i] = window.Next(open[i], high[i], low[i], close[i], volume[i], true);
+        using var first = new UltimateTraderWindow.Average(maType, lbLength);
+        using var second = new UltimateTraderWindow.Average(maType, smoothLength);
+        for (var i = 0; i < raw.Length; i++) output[i] = second.Next(first.Next(raw[i], true), true);
     }
 
     /// <summary>

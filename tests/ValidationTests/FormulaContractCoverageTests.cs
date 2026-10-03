@@ -1166,7 +1166,10 @@ public sealed class FormulaContractCoverageTests
         // WMA5 of a constant 100, then WMA4 twice, has these first two startup values.
         var rules = BuiltInFormulaReferences.For(new UltimateTraderOscillator(10)).ToArray();
         Assert.Equal(2, rules.Length);
-        double[][] expected = [[40d / 3, 34], [16d / 3, 88d / 5]];
+        // Each WMA publishes binary64 before the next stage consumes it.
+        // The first signal is round(round(round(100 / 3) * 2 / 5) * 2 / 5),
+        // one representable step above a single rounding of 16/3.
+        double[][] expected = [[40d / 3, 34], [5.333333333333334, 88d / 5]];
         foreach (var rule in rules) rule.Check(new IndicatorValidationContext("ultimate-bull-endpoint", bars.Take(2).ToArray(), expected, 0));
     }
 

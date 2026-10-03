@@ -1108,3 +1108,12 @@ The public formula smooths selected prices, forms the ratio to the previous smoo
 Exact nonzero-ratio poles in r+b or r+c*a throw ArgumentException, as explicitly approved. The native path previews every stage before committing, so rejected preview or final bars cannot advance a partial state. SMA(2) prices [1,1,3,-7] exercise the rising pole; [-3,2,-1,-1,-1] exercise the falling pole. Adjacent representable inputs remain distinct and valid where their exact denominators are nonzero.
 
 The independent reference uses separate fractions and direct finite-window sums, evaluating the final fold as (r-c*a)/(r+c*a). Length-one [1,2,1] gives [0,1,0]; EMA(2) gives [0,1,385/1169]. Fast routing preserves all three component callback slots and zero-pads short replacements; captured caller input is restored. Period storage grows with consumed history. The distinct internal core remains unchanged pending its separate alignment decision.
+
+
+### Batch 890: Ultimate Trader six-score normalization and OHLCV core
+
+The public formula combines body/range, close position, rolling close position, momentum/range, signed true-range stochastic and signed volume stochastic as 100*sum(scores)/sum(abs(scores)); zero total magnitude produces zero. Finite inputs can yield unrepresentable differences or individual scores, so the six terms and their normalization now use exact arithmetic, rounding only the bounded raw result. First-bar true range uses the current close; first-bar momentum uses zero. A flat close suppresses rolling position and the two signed stochastics. Selected prices preserve the original OHLCV fields.
+
+The raw result is smoothed by lookback, smoothing, then smoothing again; Uto is the second stage and Signal is the third. Each stage publishes binary64, and recursive feedback retains that publication boundary. SMA/WMA/EMA/Wilder use local lazy history; other average kinds retain their existing fallback. The public length parameter remains inert. Fast callbacks retain their order and zero-pad short replacements. Trading signals compare exact differences of published lines.
+
+The unused three-RSI internal core is replaced by an OHLCV-aware implementation with explicit lookback, smoothing and range periods. It validates span lengths and reads all input before writing overlapping output. Independent references use direct rational candle windows and separate smoothing. The one-bar extreme signed-candle example produces exactly 100; the mixed-score hand -25,-50,100/3,-100/9,-100,0 produces -5500/79 before smoothing.
