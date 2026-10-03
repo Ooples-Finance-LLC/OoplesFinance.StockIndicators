@@ -231,6 +231,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.VolatilityWaveMovingAverage:
                 var waveKind = AverageKind(options, 2);
                 if (waveKind == 0) return null;
+                if (waveKind is 1 or 2 or 3 or 6) return new("Vwma", new[] { "Vwma" }, bars => VolatilityWaveOutputs(bars, indicator));
                 var waveSmooth = Math.Max(2, Math.Min(530, (int)Math.Ceiling(Math.Sqrt(length))));
                 return new("Vwma", new[] { "Vwma" }, bars =>
                 {

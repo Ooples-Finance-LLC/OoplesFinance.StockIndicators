@@ -51,6 +51,8 @@ internal static partial class BuiltInFormulaReferences
             for (var slot = 0; slot < vpnKeys.Length; slot++) { var key = vpnKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VolumePositiveNegativeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.VolatilityWaveMovingAverage && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilityWaveOutputs(bars, builtIn)["Vwma"], VolatilityWaveBudget); yield break; }
         if (builtIn.BatchName == IndicatorName.WilsonRelativePriceChannel)
         {
             var wilsonKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "S1", "S2", "U1", "U2" };

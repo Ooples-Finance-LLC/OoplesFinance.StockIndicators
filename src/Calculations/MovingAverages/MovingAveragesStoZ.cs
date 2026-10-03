@@ -734,6 +734,15 @@ public static partial class Calculations
     public static StockData CalculateVolatilityWaveMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 20, double kf = 2.5)
     {
+        length = Math.Max(1, length);
+        OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(kf, nameof(kf));
+        if (StrengthWindow.Supports(maType))
+        {
+            var exact = VolatilityWaveWindow.Calculate(stockData, maType, length, kf);
+            var line = exact.Values.ToList(); var trades = CreateSignalsList(stockData); trades?.AddRange(exact.Signals);
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { ["Vwma"] = line }); stockData.SetSignals(trades);
+            stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VolatilityWaveMovingAverage; return stockData;
+        }
         List<double> zlmapList = new(stockData.Count);
         List<double> pmaList = new(stockData.Count);
         List<double> pList = new(stockData.Count);

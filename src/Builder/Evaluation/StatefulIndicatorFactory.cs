@@ -237,6 +237,7 @@ internal static partial class StatefulIndicatorFactory
             EdgePreservingFilterSpecOptions edge => new EdgePreservingFilterState(edge.MaType, edge.Length),
             WellesWilderVolatilitySystemSpecOptions d => new WellesWilderVolatilitySystemState(d.MaType, d.Length1, d.Length2, d.Factor),
             UtBotAlertsSpecOptions d => new UtBotAlertsState(d.MaType, d.Length, d.KeyValue),
+            VolatilityWaveMovingAverageSpecOptions wave => new VolatilityWaveMovingAverageState(wave.MaType, wave.Length),
             VolatilityMovingAverageSpecOptions volatility => new VolatilityMovingAverageState(volatility.MaType, volatility.Length),
             VolatilityBasedMomentumSpecOptions momentum => new VolatilityBasedMomentumState(momentum.MaType, momentum.Length1, momentum.Length2),
             VolatilityQualityIndexSpecOptions quality => new VolatilityQualityIndexState(quality.MaType, quality.FastLength, quality.SlowLength),

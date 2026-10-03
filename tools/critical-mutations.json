@@ -86061,5 +86061,302 @@
     "before": "previousMargin = margin;",
     "after": "previousMargin = default;",
     "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
+  },
+  {
+    "id": "volatility-wave-wide-period-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = Math.Max(2, length);",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.ExtremePeriodsAllocateOnlyObservedHistory"
+  },
+  {
+    "id": "volatility-wave-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_factor = Fraction.Of(factor);",
+    "after": "_factor = Fraction.Of(factor) / 2;",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_squares + value * value - expired * expired",
+    "after": "_squares + value * value",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-centered-variance",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "(squares * count - sum * sum)",
+    "after": "(squares * count)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-population-count",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "/ ((Fraction)count * count)",
+    "after": "/ ((Fraction)count)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-exponent-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "10000 * _factor.Pow(4)",
+    "after": "100 * _factor.Pow(4)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-negative-price",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "value.Sign > 0 && _factor.Sign > 0",
+    "after": "value.Sign != 0 && _factor.Sign > 0",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-negative-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "value.Sign > 0 && _factor.Sign > 0",
+    "after": "value.Sign > 0 && _factor.Sign != 0",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "else if (fourth > 256) fourth = 256;",
+    "after": "else if (fourth > 16) fourth = 16;",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "if (fourth < 1) fourth = 1;",
+    "after": "if (fourth < 1) fourth = 16;",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-price-order",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "prices.Add(history[i]);",
+    "after": "prices.Add(history[history.Length - i - 1]);",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "if (final)\n        {\n            if (full)",
+    "after": "if (true)\n        {\n            if (full)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-sum-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_sum = sum; _squares = squares;",
+    "after": "_sum = 0; _squares = squares;",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-square-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_sum = sum; _squares = squares;",
+    "after": "_sum = sum; _squares = 0;",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-native-extrapolation",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "first.Scale(2) - _second.Next(first, final)",
+    "after": "first - _second.Next(first, final)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_history.Clear(); _sum = _squares = 0;",
+    "after": "_sum = _squares = 0;",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-reset-first",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_first.Reset(); _second.Reset();",
+    "after": "_second.Reset();",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-reset-second",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_first.Reset(); _second.Reset();",
+    "after": "_first.Reset();",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-batch-extrapolation",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "first[i].Scale(2) - second[i]",
+    "after": "first[i] - second[i]",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-second-input",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "var second = Mean(first);",
+    "after": "var second = Mean(weighted);",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "i < replacement.Count ? Fraction.Of(replacement[i]) : 0",
+    "after": "i < replacement.Count ? Fraction.Of(replacement[i]) : 1",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.TwoFastCallbacksKeepOrderingAndShortReplacements"
+  },
+  {
+    "id": "volatility-wave-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "Array.Empty<double>(), period)",
+    "after": "Array.Empty<double>(), period + 1)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.TwoFastCallbacksKeepOrderingAndShortReplacements"
+  },
+  {
+    "id": "volatility-wave-wide-weighted-step",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "weighted - sum + value.Scale(_length)",
+    "after": "weighted + value.Scale(_length)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "(Fraction)2 / ((Fraction)_length * (_length + 1L))",
+    "after": "(Fraction)1 / ((Fraction)_length * (_length + 1L))",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_count + 1 < _length ? Expression.Of(0)",
+    "after": "false ? Expression.Of(0)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_count < _length)",
+    "after": "_count < 1)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-ema-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "value.Scale(ema ? 2 : 1)",
+    "after": "value.Scale(1)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-wilder-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "_previous.Scale(_length - 1L)",
+    "after": "_previous.Scale(_length - 2L)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+  },
+  {
+    "id": "volatility-wave-wide-final-publication",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "return new(lower, upper);",
+    "after": "return new(lower + 1, upper + 1);",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.IndependentImpulseHandsRetainZeroFilledDenominators"
+  },
+  {
+    "id": "volatility-wave-wide-core-length",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void VolatilityWaveMovingAverage(",
+    "before": "MovingAvgType.WeightedMovingAverage, length, 2.5",
+    "after": "MovingAvgType.WeightedMovingAverage, 2, 2.5",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.CoreRegistryAndOverlappingSpansAreCausal"
+  },
+  {
+    "id": "volatility-wave-wide-native-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VolatilityWaveMovingAverageState",
+    "before": "        StreamingInputValidation.Validate(bar);\n        if (_exact is not null)",
+    "after": "        if (_exact is not null)",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.InvalidParametersAndCandlesDoNotAdvanceState"
+  },
+  {
+    "id": "volatility-wave-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.DirectSelectedBatchAndFastPathsUseTheSuppliedSeries"
+  },
+  {
+    "id": "volatility-wave-wide-overflow-margin",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityWaveWindow.cs",
+    "scope": "internal sealed class VolatilityWaveWindow",
+    "before": "double.IsInfinity(result[i]) ? line : Expression.Of(Fraction.Of(result[i]))",
+    "after": "Expression.Of(Fraction.Of(result[i]))",
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.OverflowedLineRetainsSignalsAndRecoversOnLaterBars"
   }
 ]

@@ -1226,21 +1226,24 @@ public sealed class VolatilityRatioState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Vwma")]
 public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
+    private readonly VolatilityWaveWindow? _exact;
     private readonly int _length;
     private readonly double _kf;
 
     // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _wmap1;
-    private readonly IMovingAverageSmoother _wmap2;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
+    private readonly RollingStandardDeviation _stdDev = null!;
+    private readonly IMovingAverageSmoother _wmap1 = null!;
+    private readonly IMovingAverageSmoother _wmap2 = null!;
+    private readonly PooledRingBuffer<double> _values = null!;
+    private readonly StreamingInputResolver _input = default;
 
     public VolatilityWaveMovingAverageState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20,
         double kf = 2.5)
     {
         _length = Math.Max(1, length);
+        StreamingInputValidation.Finite(kf, nameof(kf));
         _kf = kf;
+        if (StrengthWindow.Supports(maType)) { _exact = new(maType, _length, kf); return; }
         var s = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(_length)));
         // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
         // selects the averages that smooth the weighted mean, below.
@@ -1255,6 +1258,7 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
 
     public void Reset()
     {
+        if (_exact is not null) { _exact.Reset(); return; }
         _stdDev.Reset();
         _wmap1.Reset();
         _wmap2.Reset();
@@ -1263,6 +1267,12 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_exact is not null)
+        {
+            var point = _exact.Next(bar.Close, isFinal);
+            return new(point, includeOutputs ? new Dictionary<string, double> { ["Vwma"] = point } : null);
+        }
         var value = _input.GetValue(bar);
         // Fed the resolved input rather than the bar, matching the batch calculation.
         var stdDev = _stdDev.Next(value, isFinal);
@@ -1303,6 +1313,7 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
 
     public void Dispose()
     {
+        if (_exact is not null) { _exact.Dispose(); return; }
         _stdDev.Dispose();
         _wmap1.Dispose();
         _wmap2.Dispose();

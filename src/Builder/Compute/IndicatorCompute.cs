@@ -12753,6 +12753,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVolatilityWaveMovingAverageFast(StockData data, ComputeContext context, int length = 20,
         double kf = 2.5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        length = Math.Max(1, length);
+        OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(kf, nameof(kf));
+        if (StrengthWindow.Supports(maType))
+        {
+            var values = VolatilityWaveWindow.Calculate(data, maType, length, kf, true).Values;
+            var result = context.Rent(values.Length);
+            try { values.AsSpan().CopyTo(result.WritableSpan); return result; } catch { result.Dispose(); throw; }
+        }
         // CalculateVolatilityWaveMovingAverage sets each bar's weighting exponent from the deviation of the
         // window taken as a percentage of price, weights the window by (length - j) raised to it, then removes
         // the lag by doubling one short average of that and subtracting a second taken over it.

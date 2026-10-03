@@ -3082,39 +3082,11 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VolatilityWaveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            double avgStdDev = 0;
-            for (var i = 0; i < input.Length; i++)
-            {
-                avgStdDev += stdDevBuffer[i];
-            }
-            avgStdDev /= input.Length;
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var prevVwma = i >= 1 ? output[i - 1] : currentValue;
-
-                // Wave-like adaptive response
-                var volatilityRatio = avgStdDev > 0 ? stdDevBuffer[i] / avgStdDev : 1;
-                var wave = Math.Sin(volatilityRatio * Math.PI / 2);
-                var alpha = 2.0 / (length + 1) * (1 + wave * 0.5);
-                alpha = Math.Min(Math.Max(alpha, 0.01), 0.99);
-
-                output[i] = prevVwma + (alpha * (currentValue - prevVwma));
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VolatilityWaveWindow(MovingAvgType.WeightedMovingAverage, length, 2.5);
+        var values = new double[input.Length];
+        for (var i = 0; i < input.Length; i++) values[i] = window.Next(input[i], true);
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>
