@@ -5446,3 +5446,10 @@ Source snapshot SHA256: `bad566bb11ea204b83c8cf71becdb2105ef4457bb122c8a8781bcdb
 Halving the native score scale survived the original cancellation hand because its nonzero smoothed scores still selected the minimum period. A new independent hand uses prices [0,2], EMA startup, length 10, lookback 20 and smoothing 1. The mean and population deviation are both 1, so score 100 selects period 5 and output 2/3. Halving the score selects period 8 after ties-to-even rounding, giving 4/9.
 
 The new hand passed on net10.0 across batch, fast and native routes with preview/reset checks, reusing the unchanged production DLL. The fault now targets this hand. Production and enrollment are unchanged; the original campaign remains unqualified and continues to collect its remaining outcomes. Repaired mutation verification is still required.
+
+
+### Batch 737: Volatility Wave repaired mutation qualification
+
+Both isolated campaign baselines passed, and all **33/33 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and the 56 retained focused checks and new interior-factor regression passed. The original first-half 13/17 result remains excluded; the repaired snapshot changes only the interior-factor regression and four fault filters. This qualifies the batch-737 numerical correction; broader release gates remain incomplete.
+
+Source snapshot SHA256: `69078922968f0360bef3ffed5b5187a6fe7c5c565689379c798065a4e4af079d`. Archives: `0b4132891405fe0a72d8e7eb6e056357e1a9de112829a9ca8c837227375f1bec` and `0b4132891405fe0a72d8e7eb6e056357e1a9de112829a9ca8c837227375f1bec`.
