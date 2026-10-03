@@ -73299,7 +73299,7 @@
     "scope": "internal sealed class PremierStochasticWindow",
     "before": "_second?.Reset(); _count = 0;",
     "after": "_second?.Reset();",
-    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ExtremePeriodsStayLazyAndExpiryPreservesPreviews"
+    "filter": "FullyQualifiedName~PremierStochasticNumericalTests.ResetNearOrdinalRolloverRestoresIndependentWindowExpiry"
   },
   {
     "id": "premier-stochastic-wide-weighted-aging",

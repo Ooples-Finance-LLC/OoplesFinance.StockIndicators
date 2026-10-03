@@ -106,6 +106,21 @@ public sealed class PremierStochasticNumericalTests
         Check(Bars(Enumerable.Range(0, 1065).Select(i => (double)(i % 17 - 6)).ToArray()), 7, int.MaxValue);
     }
     [Fact]
+    public void ResetNearOrdinalRolloverRestoresIndependentWindowExpiry()
+    {
+        var bars = new[] { B(100, 0, 50), B(10, 0, 5), B(10, 0, 5), B(10, 0, 5) };
+        var expected = BuiltInFormulaReferences.PremierValues(bars, 2, 2, 3)["Pso"];
+        using var window = new PremierStochasticWindow(MovingAvgType.ExponentialMovingAverage, 2, 2);
+        // Reach the lifetime boundary without issuing 2^63 updates. Assert observable
+        // post-reset outputs, not the private counter value: an origin retained near
+        // rollover keeps the first high in the deque beyond its two-bar lifetime.
+        var ordinal = typeof(PremierStochasticWindow).GetField("_count", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        Assert.NotNull(ordinal); ordinal.SetValue(window, long.MaxValue);
+        window.Reset();
+        for (var i = 0; i < bars.Length; i++)
+            Equal(expected[i], window.Next(bars[i].Close, bars[i].High, bars[i].Low, true));
+    }
+    [Fact]
     public void CallbacksPreserveBothStagesAndResolvedPeriod()
     {
         var bars = new[] { B(1, -1, 0), B(1, -1, 1), B(1, -1, -1), B(1, -1, 0) }; var first = new[] { 1d, 2, 3, 4 }; var second = new[] { 3 * double.Epsilon, -3 * double.Epsilon, .25, double.MaxValue };
