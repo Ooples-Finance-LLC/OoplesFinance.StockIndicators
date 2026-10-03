@@ -84432,7 +84432,7 @@
     "scope": "private sealed class Average",
     "before": "_count + 1 < _length",
     "after": "_count + 1 < _length - 1",
-    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SmaOutputWaitsForCompleteWarmup"
   },
   {
     "id": "volatility-average-wide-ema-warmup",

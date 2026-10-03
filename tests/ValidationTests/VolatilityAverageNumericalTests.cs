@@ -71,6 +71,16 @@ public sealed class VolatilityAverageNumericalTests
         Assert.Equal(new[] { 0d, 2d / 3 }, result.Outputs["Vma"]);
     }
     [Fact]
+    public void SmaOutputWaitsForCompleteWarmup()
+    {
+        // Constant prices give zero deviation and period 10. Zero-filled WMA
+        // values are 2 and 19/5; SMA2 must wait, then publish (2+19/5)/2=29/10.
+        // Publishing one bar early would instead emit 1 on the first bar.
+        var result = Check(new[] { B(11), B(11, 1) });
+        Assert.Equal(new[] { 10, 10 }, result.Periods);
+        Assert.Equal(new[] { 0d, 29d / 10 }, result.Outputs["Vma"]);
+    }
+    [Fact]
     public void SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies()
     {
         // sqrt(2) - 2/sqrt(2) is exactly zero; the smallest binary64 displacement

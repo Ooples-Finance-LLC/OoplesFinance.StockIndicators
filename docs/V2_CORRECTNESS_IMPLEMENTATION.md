@@ -5469,3 +5469,10 @@ The original first half finished with 18 compiled kills, two survivors (score sc
 The absolute-score mutation replaces a compile-time false guard with length < 0 after length has been normalized to at least 1. This preserves the intended removal of absolute-value normalization without a constant unreachable branch. Its compilation and behavioral detection still require repaired campaign evidence.
 
 The repaired frozen snapshot differs only by the published hand test and three mutation repairs. It retains 51 prior focused passes plus the new passing hand, totaling 52 distinct checks. The replacement campaign is running; production and enrollment are unchanged.
+
+
+### Batch 812: Volatility Moving Average SMA warmup survivor regression
+
+The SMA warmup mutation survived the first repaired campaign because its hand began at zero: publishing the first partial average early still produced zero. A new constant-price hand [11,11] has zero deviation and period 10; zero-filled weighted means are 2 and 19/5. SMA2 must publish [0,29/10], while the fault emits 1 on the first bar.
+
+The new hand passed on net10.0 across batch, fast and native routes with preview/reset checks, reusing the unchanged production DLL. Its mutation filter now targets the new hand. Production and enrollment are unchanged. The first repaired pair remains unqualified; the running second half continues collecting its remaining outcomes before another consolidated replacement snapshot.
