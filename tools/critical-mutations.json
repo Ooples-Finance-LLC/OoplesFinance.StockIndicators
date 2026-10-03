@@ -1443,8 +1443,8 @@
     "module": "stochastic-numerics",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
     "scope": "internal static ComputeBuffer ComputeStochasticKFast(",
-    "before": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
-    "after": "var input = data.ClosePrices;",
+    "before": "var input = data.ChainedSpanOrInput;",
+    "after": "var input = data.CloseSpan;",
     "filter": "FullyQualifiedName~StochasticNumericalTests.LegacySelectedSeriesUsesItsOwnRangeWhenOutsidePriceBars"
   },
   {
@@ -1587,8 +1587,8 @@
     "module": "williams-representability",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
     "scope": "internal static ComputeBuffer ComputeWilliamsRFast(",
-    "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
-    "after": "var values = data.ClosePrices;",
+    "before": "var input = data.ChainedSpanOrInput;",
+    "after": "var input = data.CloseSpan;",
     "filter": "FullyQualifiedName~WilliamsNumericalTests.LegacySelectedInputRetainsItsOwnRange"
   },
   {
@@ -5814,8 +5814,8 @@
     "id": "price-rsi-raw-selected-input-ignored",
     "module": "numerical",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
-    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
-    "after": "var inputList = data.InputValues;",
+    "before": "var inputList = data.ChainedSpanOrInput;",
+    "after": "var inputList = data.InputSpan;",
     "filter": "FullyQualifiedName~PriceRsiNumericalTests",
     "scope": "internal static ComputeBuffer ComputeRsiFast("
   },
@@ -6133,8 +6133,8 @@
     "id": "cct-rsi-raw-selected-input-ignored",
     "module": "numerical",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
-    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
-    "after": "data.InputValues",
+    "before": "data.ChainedSpanOrInput",
+    "after": "data.InputSpan",
     "filter": "FullyQualifiedName~CctRsiNumericalTests.RawAllOutputsUseSelectedPricesAndNativeSignalRetainsItsOwnPeriod",
     "scope": "internal static ComputeBuffer ComputeRsiFast("
   },
@@ -86556,5 +86556,23 @@
     "before": "StreamingInputValidation.Validate(bar); var value",
     "after": "var value",
     "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.InvalidCandlesDoNotAdvance"
+  },
+  {
+    "id": "upstream-747-deferred-named-source",
+    "module": "integration",
+    "file": "src/Builder/IndicatorRuntime.cs",
+    "scope": "private static IndicatorSnapshot CreateBatchSnapshot(",
+    "before": "new SeriesEvaluator(batchSources, data, nodes, context)",
+    "after": "new SeriesEvaluator(data, nodes, context)",
+    "filter": "FullyQualifiedName~SnapshotLifetimeTests.DeferredNamedSourceSurvivesRuntimeDisposal"
+  },
+  {
+    "id": "upstream-747-snapshot-pool-ownership",
+    "module": "integration",
+    "file": "src/Builder/IndicatorRuntime.cs",
+    "scope": "private void StartBatch()",
+    "before": "series[handle] = series[handle].ToArray();",
+    "after": "series[handle] = series[handle];",
+    "filter": "FullyQualifiedName~SnapshotLifetimeTests.ASnapshotKeepsItsValuesAfterTheRuntimeIsDisposed"
   }
 ]

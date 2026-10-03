@@ -651,7 +651,9 @@ public sealed class StockIndicatorBuilder
     /// <summary>
     /// Builds the indicator runtime.
     /// </summary>
-    public IndicatorRuntime Build()
+    public IndicatorRuntime Build() => Build(System.Buffers.ArrayPool<double>.Shared);
+
+    internal IndicatorRuntime Build(System.Buffers.ArrayPool<double> computePool)
     {
         EnsureDefaults();
 
@@ -678,7 +680,8 @@ public sealed class StockIndicatorBuilder
             _benchmarkOptions,
             Source.Kind == IndicatorSourceKind.Batch ? _namedSources.ToDictionary(
                 pair => new SeriesKey(new SymbolId(pair.Key), timeframe),
-                pair => pair.Value.BatchData ?? throw new InvalidOperationException("Batch evaluation requires batch data for named source '"+pair.Key+"'.")) : null);
+                pair => pair.Value.BatchData ?? throw new InvalidOperationException("Batch evaluation requires batch data for named source '"+pair.Key+"'.")) : null,
+            computePool);
     }
 
     /// <summary>
