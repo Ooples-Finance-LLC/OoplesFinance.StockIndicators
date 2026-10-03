@@ -28,8 +28,7 @@ public static partial class Calculations
                 var hh = i >= j ? highestList[i - j] : 0;
                 var ll = i >= j ? lowestList[i - j] : 0;
                 var c = i >= j ? inputList[i - j] : 0;
-                var range = hh - ll;
-                var frac = range != 0 ? (c - ll) / range : 0;
+                var frac = ExactRangePosition.Fraction(c, ll, hh);
                 var ratio = 1 / Sqrt(j + 1);
                 weightSum += frac * ratio;
                 denomSum += ratio;
@@ -73,46 +72,15 @@ public static partial class Calculations
     public static StockData CalculatePremierStochasticOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 8, int smoothLength = 25)
     {
-        List<double> nskList = new(stockData.Count);
-        List<double> psoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var len = MinOrMax((int)Math.Ceiling(Sqrt(smoothLength)));
-
-        var stochasticRsiList = CalculateStochasticOscillator(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var values = PremierStochasticWindow.Calculate(stockData, maType, length, smoothLength, false).ToList();
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Count; i++)
         {
-            var sk = stochasticRsiList[i];
-
-            var nsk = 0.1 * (sk - 50);
-            nskList.Add(nsk);
+            var previous = i == 0 ? 0 : values[i - 1]; var before = i < 2 ? 0 : values[i - 2];
+            signals?.Add(PremierStochasticWindow.Trade(values[i], previous, before));
         }
-
-        var nskEmaList = GetMovingAverageList(stockData, maType, len, nskList);
-        var ssList = GetMovingAverageList(stockData, maType, len, nskEmaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ss = ssList[i];
-            var prevPso1 = i >= 1 ? psoList[i - 1] : 0;
-            var prevPso2 = i >= 2 ? psoList[i - 2] : 0;
-            var expss = Exp(ss);
-
-            var pso = expss + 1 != 0 ? MinOrMax((expss - 1) / (expss + 1), 1, -1) : 0;
-            psoList.Add(pso);
-
-            var signal = GetRsiSignal(pso - prevPso1, prevPso1 - prevPso2, pso, prevPso1, 0.9, -0.9);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pso", psoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(psoList);
-        stockData.IndicatorName = IndicatorName.PremierStochasticOscillator;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pso", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.PremierStochasticOscillator; return stockData;
     }
 
 
@@ -126,44 +94,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRecursiveStochastic(this StockData stockData, int length = 200, double alpha = 0.1)
     {
-        List<double> kList = new(stockData.Count);
-        List<double> maList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax maWindow = new(length);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new RecursiveStochasticWindow(length, alpha); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var stoch = highest - lowest != 0 ? (currentValue - lowest) / (highest - lowest) * 100 : 0;
-            var prevK1 = i >= 1 ? kList[i - 1] : 0;
-            var prevK2 = i >= 2 ? kList[i - 2] : 0;
-
-            var ma = (alpha * stoch) + ((1 - alpha) * prevK1);
-            maList.Add(ma);
-            maWindow.Add(ma);
-
-            var highestMa = maWindow.Max;
-            var lowestMa = maWindow.Min;
-
-            var k = highestMa - lowestMa != 0 ? MinOrMax((ma - lowestMa) / (highestMa - lowestMa) * 100, 100, 0) : 0;
-            kList.Add(k);
-
-            var signal = GetRsiSignal(k - prevK1, prevK1 - prevK2, k, prevK1, 80, 20);
-            signalsList?.Add(signal);
+            var value = window.Next(price, true); var previous = line.Count > 0 ? line[line.Count - 1] : 0; var prior = line.Count > 1 ? line[line.Count - 2] : 0;
+            signals?.Add(GetRsiSignal(value - previous, previous - prior, value, previous, 80, 20)); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rsto", kList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kList);
-        stockData.IndicatorName = IndicatorName.RecursiveStochastic;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rsto", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RecursiveStochastic; return stockData;
     }
 
 }

@@ -15,102 +15,19 @@ public static partial class Calculations
     public static StockData CalculateParabolicSAR(this StockData stockData, double start = 0.02, double increment = 0.02, double maximum = 0.2)
     {
         List<double> sarList = new(stockData.Count);
-        List<double> nextSarList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
+        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var kernel = new Streaming.ParabolicSarKernel(start, increment, maximum);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
-            var prevLow1 = i >= 1 ? lowList[i - 1] : 0;
-            var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
-            var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
-
-            bool uptrend;
-            double ep, prevSAR, prevEP, SAR, af = start;
-            if (currentValue > prevValue)
-            {
-                uptrend = true;
-                ep = currentHigh;
-                prevSAR = prevLow1;
-                prevEP = currentHigh;
-            }
-            else
-            {
-                uptrend = false;
-                ep = currentLow;
-                prevSAR = prevHigh1;
-                prevEP = currentLow;
-            }
-            SAR = prevSAR + (start * (prevEP - prevSAR));
-
-            if (uptrend)
-            {
-                if (SAR > currentLow)
-                {
-                    uptrend = false;
-                    SAR = Math.Max(ep, currentHigh);
-                    ep = currentLow;
-                    af = start;
-                }
-            }
-            else
-            {
-                if (SAR < currentHigh)
-                {
-                    uptrend = true;
-                    SAR = Math.Min(ep, currentLow);
-                    ep = currentHigh;
-                    af = start;
-                }
-            }
-
-            if (uptrend)
-            {
-                if (currentHigh > ep)
-                {
-                    ep = currentHigh;
-                    af = Math.Min(af + increment, maximum);
-                }
-            }
-            else
-            {
-                if (currentLow < ep)
-                {
-                    ep = currentLow;
-                    af = Math.Min(af + increment, maximum);
-                }
-            }
-
-            if (uptrend)
-            {
-                SAR = i > 1 ? Math.Min(SAR, prevLow2) : Math.Min(SAR, prevLow1);
-            }
-            else
-            {
-                SAR = i > 1 ? Math.Max(SAR, prevHigh2) : Math.Max(SAR, prevHigh1);
-            }
-            sarList.Add(SAR);
-
-            var prevNextSar = GetLastOrDefault(nextSarList);
-            var nextSar = SAR + (af * (ep - SAR));
-            nextSarList.Add(nextSar);
-
-            var signal = GetCompareSignal(currentHigh - nextSar, prevHigh1 - prevNextSar);
-            signalsList?.Add(signal);
+            var sar = kernel.Next(highList[i], lowList[i], true);
+            sarList.Add(sar);
+            signalsList?.Add(kernel.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sar", nextSarList }
-        });
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sar", sarList } });
         stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(nextSarList);
+        stockData.SetCustomValues(sarList);
         stockData.IndicatorName = IndicatorName.ParabolicSAR;
-
         return stockData;
     }
 
@@ -158,7 +75,7 @@ public static partial class Calculations
             lowerList.Add(lower);
 
             var prevOs = GetLastOrDefault(osList);
-            var os = currentValue > upper ? 1 : currentValue > lower ? 0 : prevOs;
+            var os = currentValue > upper ? 1 : currentValue < lower ? 0 : prevOs;
             osList.Add(os);
 
             var prevTs = GetLastOrDefault(tsList);
@@ -189,6 +106,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateNickRypockTrailingReverse(this StockData stockData, int length = 2)
     {
+        length = Math.Max(1, length);
         List<double> nrtrList = new(stockData.Count);
         List<double> hpList = new(stockData.Count);
         List<double> lpList = new(stockData.Count);
@@ -196,7 +114,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var pct = length * 0.01;
+        var pct = (double)length;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -207,29 +125,29 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevNrtr = GetLastOrDefault(nrtrList);
-            double nrtr, hp = 0, lp = 0, trend = 0;
+            double nrtr, hp = 0, lp = 0, trend = prevTrend;
             if (prevTrend >= 0)
             {
                 hp = currentValue > prevHp ? currentValue : prevHp;
-                nrtr = hp * (1 - pct);
+                nrtr = RoundedPercentageBand.Percent(hp, pct, -1);
 
                 if (currentValue <= nrtr)
                 {
                     trend = -1;
                     lp = currentValue;
-                    nrtr = lp * (1 + pct);
+                    nrtr = RoundedPercentageBand.Percent(lp, pct, 1);
                 }
             }
             else
             {
                 lp = currentValue < prevLp ? currentValue : prevLp;
-                nrtr = lp * (1 + pct);
+                nrtr = RoundedPercentageBand.Percent(lp, pct, 1);
 
                 if (currentValue > nrtr)
                 {
                     trend = 1;
                     hp = currentValue;
-                    nrtr = hp * (1 - pct);
+                    nrtr = RoundedPercentageBand.Percent(hp, pct, -1);
                 }
             }
             trendList.Add(trend);
@@ -280,10 +198,10 @@ public static partial class Calculations
             var pSS = i >= 1 ? GetLastOrDefault(stopSList) : currentClose;
             var pSL = i >= 1 ? GetLastOrDefault(stopLList) : currentClose;
 
-            var stopL = currentHigh > prevHH ? currentHigh - (pct * currentHigh) : pSL;
+            var stopL = currentHigh > prevHH ? RoundedPercentageBand.Percent(currentHigh, pct, -1) : pSL;
             stopLList.Add(stopL);
 
-            var stopS = currentLow < prevLL ? currentLow + (pct * currentLow) : pSS;
+            var stopS = currentLow < prevLL ? RoundedPercentageBand.Percent(currentLow, pct, 1) : pSS;
             stopSList.Add(stopS);
 
             var signal = GetConditionSignal(prevHigh < stopS && currentHigh > stopS, prevLow > stopL && currentLow < stopL);
@@ -311,44 +229,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMotionToAttractionTrailingStop(this StockData stockData, int length = 14)
     {
-        List<double> osList = new(stockData.Count);
-        List<double> tsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var mtaList = CalculateMotionToAttractionChannels(stockData, length);
-        var aList = mtaList.ChainedOutputs["UpperBand"];
-        var bList = mtaList.ChainedOutputs["LowerBand"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevA = i >= 1 ? aList[i - 1] : currentValue;
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var a = aList[i];
-            var b = bList[i];
-
-            var prevOs = GetLastOrDefault(osList);
-            var os = currentValue > prevA ? 1 : currentValue < prevB ? 0 : prevOs;
-            osList.Add(os);
-
-            var prevTs = GetLastOrDefault(tsList);
-            var ts = (os * b) + ((1 - os) * a);
-            tsList.Add(ts);
-
-            var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ts", tsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tsList);
-        stockData.IndicatorName = IndicatorName.MotionToAttractionTrailingStop;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new MotionAttractionWindow(length); List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true).Stop; signals?.Add(GetCompareSignal(input[i] - value, i > 0 ? input[i - 1] - values[i - 1] : 0)); values.Add(value); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ts", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.MotionToAttractionTrailingStop; return stockData;
     }
 
 
@@ -378,82 +261,12 @@ public static partial class Calculations
     public static StockData CalculateUtBotAlerts(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10, double keyValue = 1)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> trailingStopList = new(stockData.Count);
-        List<double> positionList = new(stockData.Count);
-        List<double> buyList = new(stockData.Count);
-        List<double> sellList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // Taken before any moving average runs against stockData: GetMovingAverageList writes into
-        // CustomValuesList, which the true-range helper would then read as the close series.
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : currentValue;
-            var nLoss = keyValue * atrList[i];
-            var prevStop = i >= 1 ? trailingStopList[i - 1] : 0;
-
-            double trailingStop;
-            if (currentValue > prevStop && prevValue > prevStop)
-            {
-                // Still above the stop: raise it, never lower it.
-                trailingStop = Math.Max(prevStop, currentValue - nLoss);
-            }
-            else if (currentValue < prevStop && prevValue < prevStop)
-            {
-                // Still below the stop: lower it, never raise it.
-                trailingStop = Math.Min(prevStop, currentValue + nLoss);
-            }
-            else
-            {
-                // Price crossed the stop, so it flips to the other side of price.
-                trailingStop = currentValue > prevStop ? currentValue - nLoss : currentValue + nLoss;
-            }
-
-            trailingStopList.Add(trailingStop);
-
-            var prevPosition = i >= 1 ? positionList[i - 1] : 0;
-            double position;
-            if (prevValue < prevStop && currentValue > prevStop)
-            {
-                position = 1;
-            }
-            else if (prevValue > prevStop && currentValue < prevStop)
-            {
-                position = -1;
-            }
-            else
-            {
-                position = prevPosition;
-            }
-
-            positionList.Add(position);
-
-            var crossedAbove = prevValue <= prevStop && currentValue > trailingStop;
-            var crossedBelow = prevValue >= prevStop && currentValue < trailingStop;
-            buyList.Add(i >= 1 && crossedAbove ? 1 : 0);
-            sellList.Add(i >= 1 && crossedBelow ? 1 : 0);
-
-            var signal = GetCompareSignal(currentValue - trailingStop, prevValue - prevStop);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "TrailingStop", trailingStopList },
-            { "Position", positionList },
-            { "Buy", buyList },
-            { "Sell", sellList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trailingStopList);
-        stockData.IndicatorName = IndicatorName.UtBotAlerts;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new UtBotWindow(maType, length, keyValue, external); List<double>? atr = null;
+        if (external) { var caller = stockData.CaptureInputSeries(); var ranges = GetTrueRangeList(stockData); atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, ranges); stockData.RestoreInputSeries(caller); }
+        var stops = new List<double>(input.Count); var positions = new List<double>(input.Count); var buys = new List<double>(input.Count); var sells = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? atr![i] : null); stops.Add(point.Stop); positions.Add(point.Position); buys.Add(point.Buy); sells.Add(point.Sell); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "TrailingStop", stops }, { "Position", positions }, { "Buy", buys }, { "Sell", sells } }); stockData.SetSignals(signals); stockData.SetCustomValues(stops); stockData.IndicatorName = IndicatorName.UtBotAlerts; return stockData;
     }
 
 }

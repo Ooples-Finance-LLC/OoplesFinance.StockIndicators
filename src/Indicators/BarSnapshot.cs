@@ -36,10 +36,11 @@ public interface IBarSnapshot
     int Index { get; }
 
     /// <summary>
-    /// Whether every configured indicator has had at least its <see cref="IIndicator.WarmupBars"/> inputs.
+    /// Whether every configured indicator has had at least its <see cref="IIndicator.WarmupBars"/> inputs
+    /// and every published output is available.
     /// </summary>
     /// <remarks>
-    /// False means the values on this snapshot are arithmetic over too little history to mean anything. A
+    /// False means there is insufficient declared history or an unavailable output on this snapshot. A
     /// live run suppresses these bars unless it was asked for them, so a caller who never opted in only ever
     /// sees true.
     /// </remarks>
@@ -57,12 +58,12 @@ internal sealed class BarSnapshot : IBarSnapshot
     private readonly IReadOnlyDictionary<IIndicatorOutput, double[]>? _series;
     private readonly IReadOnlyDictionary<IIndicatorOutput, double>? _values;
 
-    internal BarSnapshot(Bar bar, int index, IReadOnlyDictionary<IIndicatorOutput, double[]> series)
+    internal BarSnapshot(Bar bar, int index, IReadOnlyDictionary<IIndicatorOutput, double[]> series, bool isWarmedUp)
     {
         Bar = bar;
         Index = index;
         _series = series;
-        IsWarmedUp = true;
+        IsWarmedUp = isWarmedUp;
     }
 
     internal BarSnapshot(Bar bar, int index, IReadOnlyDictionary<IIndicatorOutput, double> values,
@@ -89,7 +90,7 @@ internal sealed class BarSnapshot : IBarSnapshot
         get
         {
             if (indicator is null) throw new ArgumentNullException(nameof(indicator));
-            return this[indicator.Outputs[0]];
+            return this[IndicatorContract.PrimaryOutput(indicator)];
         }
     }
 

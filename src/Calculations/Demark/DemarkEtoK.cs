@@ -13,50 +13,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDemarker(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
-        List<double> demarkerList = new(stockData.Count);
-        List<double> dMaxList = new(stockData.Count);
-        List<double> dMinList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (_, high, low, _, _) = GetInputValuesList(stockData); List<double> values = new(high.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentLow = lowList[i];
-            var currentHigh = highList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-
-            var dMax = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
-            dMaxList.Add(dMax);
-
-            var dMin = currentLow < prevLow ? prevLow - currentLow : 0;
-            dMinList.Add(dMin);
+            var ups = new List<double>(high.Count); var downs = new List<double>(high.Count);
+            for (var i = 0; i < high.Count; i++) { var up = DemarkerWindow.PositiveDifference(high[i], i > 0 ? high[i - 1] : high[i]); var down = DemarkerWindow.PositiveDifference(i > 0 ? low[i - 1] : low[i], low[i]); ups.Add(up.Mantissa * (up.Doubled ? 2 : 1)); downs.Add(down.Mantissa * (down.Doubled ? 2 : 1)); }
+            var upMean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ups), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ups);
+            var downMean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(downs), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, downs);
+            for (var i = 0; i < high.Count; i++) values.Add(DemarkerWindow.Ratio(new StrengthValue(upMean[i]), new StrengthValue(downMean[i])));
         }
-
-        var maxMaList = GetMovingAverageList(stockData, maType, length, dMaxList);
-        var minMaList = GetMovingAverageList(stockData, maType, length, dMinList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var maxMa = maxMaList[i];
-            var minMa = minMaList[i];
-            var prevDemarker1 = i >= 1 ? demarkerList[i - 1] : 0;
-            var prevDemarker2 = i >= 2 ? demarkerList[i - 2] : 0;
-
-            var demarker = maxMa + minMa != 0 ? MinOrMax(maxMa / (maxMa + minMa) * 100, 100, 0) : 0;
-            demarkerList.Add(demarker);
-
-            var signal = GetRsiSignal(demarker - prevDemarker1, prevDemarker1 - prevDemarker2, demarker, prevDemarker1, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dm", demarkerList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(demarkerList);
-        stockData.IndicatorName = IndicatorName.Demarker;
-
-        return stockData;
+        else { using var window = new DemarkerWindow(maType, length, high.Count); for (var i = 0; i < high.Count; i++) values.Add(window.Next(high[i], low[i], true)); }
+        for (var i = 0; i < high.Count; i++) { var previous = i > 0 ? values[i - 1] : 0; var older = i > 1 ? values[i - 2] : 0; signals?.Add(GetRsiSignal(values[i] - previous, previous - older, values[i], previous, 70, 30)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dm", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.Demarker; return stockData;
     }
 }
 

@@ -613,6 +613,13 @@ internal sealed class RollingOrderStatistic : IDisposable
         return _tree.CountLessThan(value);
     }
 
+    /// <summary>Strict rank after inserting the pending value, without committing or counting an evicted value.</summary>
+    public int PreviewCountLessThan(double value) => PreviewCountLessThan(value, value);
+
+    public int PreviewCountLessThan(double threshold, double pending)
+        => CountLessThan(threshold) - (_window.Count == _length && _window[0].CompareTo(threshold) < 0 ? 1 : 0)
+            + (pending.CompareTo(threshold) < 0 ? 1 : 0);
+
     public int CountLessThanOrEqual(double value)
     {
         if (_useLinear)

@@ -42,52 +42,11 @@ public static partial class Calculations
     private static StockData CalculateVolatilityIndexDynamicAverage(StockData stockData, MovingAvgType maType, int length,
         double alpha1, double alpha2, IndicatorName indicatorName, string vidya1Key, string vidya2Key)
     {
-        List<double> vidya1List = new(stockData.Count);
-        List<double> vidya2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. Chande's volatility index is a ratio of standard deviations - here the deviation against its
-        // own average - so sigma is the windowed deviation of the prices. The ratio is scale-invariant, which
-        // softens how far the published values move but does not make the other quantity the right one: the
-        // two do not differ by a constant factor bar to bar. See #190.
-        //
-        // This helper serves two indicators, VolatilityIndexDynamicAverageIndicator and its Chande-named
-        // twin, so both move together here.
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        var stdDevEmaList = GetMovingAverageList(stockData, maType, length, stdDevList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentStdDev = stdDevList[i];
-            var currentStdDevEma = stdDevEmaList[i];
-            var prevVidya1 = i >= 1 ? GetLastOrDefault(vidya1List) : currentValue;
-            var prevVidya2 = i >= 1 ? GetLastOrDefault(vidya2List) : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ratio = currentStdDevEma != 0 ? currentStdDev / currentStdDevEma : 0;
-
-            var vidya1 = (alpha1 * ratio * currentValue) + ((1 - (alpha1 * ratio)) * prevVidya1);
-            vidya1List.Add(vidya1);
-
-            var vidya2 = (alpha2 * ratio * currentValue) + ((1 - (alpha2 * ratio)) * prevVidya2);
-            vidya2List.Add(vidya2);
-
-            var signal = GetBullishBearishSignal(currentValue - Math.Max(vidya1, vidya2), prevValue - Math.Max(prevVidya1, prevVidya2),
-                currentValue - Math.Min(vidya1, vidya2), prevValue - Math.Min(prevVidya1, prevVidya2));
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { vidya1Key, vidya1List },
-            { vidya2Key, vidya2List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = indicatorName;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new VolatilityIndexWindow(maType, length, alpha1, alpha2, external); var component = external ? VolatilityIndexWindow.Component(stockData, input, maType, length) : null;
+        var first = new List<double>(input.Count); var second = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, component?[i]); first.Add(point.First); second.Add(point.Second); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { vidya1Key, first }, { vidya2Key, second } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = indicatorName; return stockData;
     }
 
 

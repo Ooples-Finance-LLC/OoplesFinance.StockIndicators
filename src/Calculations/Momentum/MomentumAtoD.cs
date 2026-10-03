@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Compatibility;
 
 namespace OoplesFinance.StockIndicators;
 
@@ -71,49 +72,15 @@ public static partial class Calculations
     public static StockData CalculateAnchoredMomentum(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength = 7,
         int signalLength = 8, int momentumLength = 10)
     {
-        List<double> tempList = new(stockData.Count);
-        List<double> amomList = new(stockData.Count);
-        List<double> amomsList = new(stockData.Count);
-        var tempSumWindow = new RollingSum();
-        var amomSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var p = MinOrMax((2 * momentumLength) + 1);
-
-        var emaList = GetMovingAverageList(stockData, maType, smoothLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        smoothLength=Math.Max(1,smoothLength);signalLength=Math.Max(1,signalLength);var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;List<double> values=new(input.Count),signal=new(input.Count);var signals=CreateSignalsList(stockData);using var window=new AnchoredMomentumWindow(maType,smoothLength,signalLength,momentumLength,input.Count);
+        if(Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentEma = emaList[i];
-
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSumWindow.Add(currentValue);
-
-            var sma = tempSumWindow.Average(p);
-            var prevAmom = GetLastOrDefault(amomList);
-            var amom = sma != 0 ? 100 * ((currentEma / sma) - 1) : 0;
-            amomList.Add(amom);
-            amomSumWindow.Add(amom);
-
-            var prevAmoms = GetLastOrDefault(amomsList);
-            var amoms = amomSumWindow.Average(signalLength);
-            amomsList.Add(amoms);
-
-            var signal = GetCompareSignal(amom - amoms, prevAmom - prevAmoms);
-            signalsList?.Add(signal);
+            var smooth=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input),smoothLength)?.ToList()??GetMovingAverageList(stockData,maType,smoothLength,input);
+            for(var i=0;i<input.Count;i++){var r=window.Finish(input[i],smooth[i],true);values.Add(r.Value);signal.Add(r.Signal);}
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Amom", amomList },
-            { "Signal", amomsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(amomList);
-        stockData.IndicatorName = IndicatorName.AnchoredMomentum;
-
-        return stockData;
+        else foreach(var price in input){var r=window.Next(price,true);values.Add(r.Value);signal.Add(r.Signal);}
+        for(var i=0;i<input.Count;i++)signals?.Add(GetCompareSignal(values[i]-signal[i],i>0?values[i-1]-signal[i-1]:0));
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Amom",values},{"Signal",signal}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.AnchoredMomentum;return stockData;
     }
 
 
@@ -177,29 +144,35 @@ public static partial class Calculations
     public static StockData CalculateDecisionPointPriceMomentumOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 35, int length2 = 20, int signalLength = 10)
     {
-        List<double> pmol2List = new(stockData.Count);
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (stableInput, _, _, _, _) = GetInputValuesList(stockData);
+            var stableLine = new List<double>(stockData.Count);
+            var stableSignal = new List<double>(stockData.Count);
+            var stableHistogram = new List<double>(stockData.Count);
+            var stableSignals = CreateSignalsList(stockData);
+            using var stableWindow = new PriceMomentumWindow(maType, length1, length2, signalLength, stockData.Count);
+            double previousDifference = 0;
+            foreach (var price in stableInput)
+            {
+                var next = stableWindow.Next(price, true);
+                stableLine.Add(next.Value); stableSignal.Add(next.Signal); stableHistogram.Add(next.Histogram);
+                stableSignals?.Add(GetCompareSignal(next.Histogram, previousDifference));
+                previousDifference = next.Histogram;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dppmo", stableLine }, { "Signal", stableSignal }, { "Histogram", stableHistogram } });
+            stockData.SetSignals(stableSignals); stockData.SetCustomValues(stableLine);
+            stockData.IndicatorName = IndicatorName.DecisionPointPriceMomentumOscillator;
+            return stockData;
+        }
+
         List<double> pmolList = new(stockData.Count);
         List<double> dList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smPmol2 = (double)2 / length1;
-        var smPmol = (double)2 / length2;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ival = prevValue != 0 ? currentValue / prevValue * 100 : 100;
-            var prevPmol = GetLastOrDefault(pmolList);
-            var prevPmol2 = GetLastOrDefault(pmol2List);
-
-            var pmol2 = ((ival - 100 - prevPmol2) * smPmol2) + prevPmol2;
-            pmol2List.Add(pmol2);
-
-            var pmol = (((10 * pmol2) - prevPmol) * smPmol) + prevPmol;
-            pmolList.Add(pmol);
-        }
+        using var fixedStages = new PriceMomentumWindow(MovingAvgType.ExponentialMovingAverage, length1, length2, 1, stockData.Count);
+        foreach (var price in inputList) pmolList.Add(fixedStages.Next(price, true).Value);
 
         var pmolsList = GetMovingAverageList(stockData, maType, signalLength, pmolList);
         for (var i = 0; i < stockData.Count; i++)
@@ -243,80 +216,13 @@ public static partial class Calculations
     public static StockData CalculateDynamicMomentumIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5,
         int length2 = 10, int length3 = 14, int upLimit = 30, int dnLimit = 5)
     {
-        List<double> lossList = new(stockData.Count);
-        List<double> gainList = new(stockData.Count);
-        List<double> dmiSmaList = new(stockData.Count);
-        List<double> dmiSignalSmaList = new(stockData.Count);
-        List<double> dmiHistogramSmaList = new(stockData.Count);
-        var lossSumWindow = new RollingSum();
-        var gainSumWindow = new RollingSum();
-        var dmiSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The smoothed deviation is divided into length3 to choose the momentum period, so a deviation
-        // that reads about 55% high - which is what CalculateStandardDeviationVolatility is on a typical price
-        // series - shortens that period by the same factor. See #190.
-        var standardDeviationList = GetStandardDeviationList(inputList, length1);
-        var stdDeviationSmaList = GetMovingAverageList(stockData, maType, length2, standardDeviationList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var asd = stdDeviationSmaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            int dTime;
-            try
-            {
-                dTime = asd != 0 ? Math.Min(upLimit, (int)Math.Ceiling(length3 / asd)) : 0;
-            }
-            catch
-            {
-                dTime = upLimit;
-            }
-
-            var dmiLength = Math.Max(Math.Min(dTime, upLimit), dnLimit);
-            var priceChg = MinPastValues(i, 1, currentValue - prevValue);
-
-            var loss = i >= 1 && priceChg < 0 ? Math.Abs(priceChg) : 0;
-            lossList.Add(loss);
-            lossSumWindow.Add(loss);
-
-            var gain = i >= 1 && priceChg > 0 ? priceChg : 0;
-            gainList.Add(gain);
-            gainSumWindow.Add(gain);
-
-            var avgGainSma = gainSumWindow.Average(dmiLength);
-            var avgLossSma = lossSumWindow.Average(dmiLength);
-            var rsSma = avgLossSma != 0 ? avgGainSma / avgLossSma : 0;
-
-            var prevDmiSma = GetLastOrDefault(dmiSmaList);
-            var dmiSma = avgLossSma == 0 ? 100 : avgGainSma == 0 ? 0 : 100 - (100 / (1 + rsSma));
-            dmiSmaList.Add(dmiSma);
-            dmiSumWindow.Add(dmiSma);
-
-            var dmiSignalSma = dmiSumWindow.Average(dmiLength);
-            dmiSignalSmaList.Add(dmiSignalSma);
-
-            var prevDmiHistogram = GetLastOrDefault(dmiHistogramSmaList);
-            var dmiHistogramSma = dmiSma - dmiSignalSma;
-            dmiHistogramSmaList.Add(dmiHistogramSma);
-
-            var signal = GetRsiSignal(dmiHistogramSma, prevDmiHistogram, dmiSma, prevDmiSma, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dmi", dmiSmaList },
-            { "Signal", dmiSignalSmaList },
-            { "Histogram", dmiHistogramSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dmiSmaList);
-        stockData.IndicatorName = IndicatorName.DynamicMomentumIndex;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var line = new List<double>(input.Count); var signal = new List<double>(input.Count); var histogram = new List<double>(input.Count); var trades = CreateSignalsList(stockData, input.Count);
+        var means = StrengthWindow.Supports(maType) ? null : DynamicMomentumWindow.Components(stockData, input, maType, length1, length2, false);
+        using var window = new DynamicMomentumWindow(maType, length1, length2, length3, dnLimit, upLimit);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, means?[i]); line.Add(point.Line); signal.Add(point.SignalLine); histogram.Add(point.Histogram); trades?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dmi", line }, { "Signal", signal }, { "Histogram", histogram } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DynamicMomentumIndex;
         return stockData;
     }
 

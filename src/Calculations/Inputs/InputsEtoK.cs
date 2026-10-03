@@ -20,7 +20,7 @@ public static partial class Calculations
             fullTpList = new List<double>(seriesList.Count);
             for (var i = 0; i < seriesList.Count; i++)
             {
-                fullTpList.Add((seriesOpenList[i] + seriesHighList[i] + seriesLowList[i] + seriesList[i]) / 4);
+                fullTpList.Add(PriceMean.Of(seriesOpenList[i], seriesHighList[i], seriesLowList[i], seriesList[i]));
             }
         }
         else

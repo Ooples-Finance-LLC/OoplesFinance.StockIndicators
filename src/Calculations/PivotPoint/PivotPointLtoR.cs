@@ -18,7 +18,7 @@ public static partial class Calculations
         List<double> pp2List = new(stockData.Count);
         List<double> pp3List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData, inputLength);
+        var (inputList, highList, lowList, openList, _) = PivotPeriodInputs.Read(stockData, inputLength);
 
         for (var i = 0; i < inputList.Count; i++)
         {
@@ -27,19 +27,20 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
-            var pp1 = (prevHigh + prevLow + prevClose) / 3;
+            var (pp1,pp2,pp3) = PivotAverageMath.Values(prevHigh,prevLow,prevClose,currentOpen);
             pp1List.Add(pp1);
 
-            var pp2 = (prevHigh + prevLow + prevClose + currentOpen) / 4;
             pp2List.Add(pp2);
 
-            var pp3 = (prevHigh + prevLow + currentOpen) / 3;
             pp3List.Add(pp3);
         }
 
-        var ppav1List = GetMovingAverageList(stockData, maType, length, pp1List);
-        var ppav2List = GetMovingAverageList(stockData, maType, length, pp2List);
-        var ppav3List = GetMovingAverageList(stockData, maType, length, pp3List);
+        var ppav1List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(pp1List), Math.Max(1, length))?.ToList()
+            ?? (maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(pp1List, Math.Max(1, length)) : GetMovingAverageList(stockData, maType, length, pp1List));
+        var ppav2List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(pp2List), Math.Max(1, length))?.ToList()
+            ?? (maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(pp2List, Math.Max(1, length)) : GetMovingAverageList(stockData, maType, length, pp2List));
+        var ppav3List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(pp3List), Math.Max(1, length))?.ToList()
+            ?? (maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(pp3List, Math.Max(1, length)) : GetMovingAverageList(stockData, maType, length, pp3List));
         // The series above hold one entry per PERIOD, not per bar. Iterating to stockData.Count here read
         // past the end of them and threw ArgumentOutOfRangeException for any input whose bar count exceeds
         // its period count - which is every intraday series grouped by day.

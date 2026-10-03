@@ -14,14 +14,12 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Cv")]
 public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactCoefficientWindow _window;
     private readonly StreamingInputResolver _input;
 
     public CoefficientOfVariationState(int length = 20)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactCoefficientWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -29,45 +27,14 @@ public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDis
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double cv = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
-            var start = _window.Count - (_length - 1);
-            double sum = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                sum += _window[i];
-            }
-
-            sum += value;
-
-            var mean = sum / _length;
-            double variance = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var diff = _window[i] - mean;
-                variance += diff * diff;
-            }
-
-            var currentDiff = value - mean;
-            variance += currentDiff * currentDiff;
-
-            var stdDev = Sqrt(variance / _length);
-            cv = mean != 0 ? stdDev / mean * 100 : 0;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var cv = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -94,16 +61,12 @@ public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Dd")]
 public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _targetReturn;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactDownsideWindow _window;
     private readonly StreamingInputResolver _input;
 
     public DownsideDeviationState(int length = 20, double targetReturn = 0)
     {
-        _length = Math.Max(1, length);
-        _targetReturn = targetReturn;
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactDownsideWindow(length, targetReturn);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -111,38 +74,14 @@ public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposab
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double downsideDeviation = 0;
-        if (_window.Count >= _length)
-        {
-            double sumSquaredDownside = 0;
-            var shortfalls = 0;
-            for (var i = 1; i <= _length; i++)
-            {
-                var prevValue = _window[i - 1];
-                var currentValue = i < _length ? _window[i] : value;
-                var ret = prevValue > 0 ? (currentValue - prevValue) / prevValue : 0;
-                if (ret < _targetReturn)
-                {
-                    var shortfall = ret - _targetReturn;
-                    sumSquaredDownside += shortfall * shortfall;
-                    shortfalls++;
-                }
-            }
-
-            downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var downsideDeviation = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -169,14 +108,12 @@ public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Skewness")]
 public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactSkewnessWindow _window;
     private readonly StreamingInputResolver _input;
 
     public SkewnessState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactSkewnessWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -184,48 +121,14 @@ public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double skewness = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
-            var start = _window.Count - (_length - 1);
-            double sum = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                sum += _window[i];
-            }
-
-            sum += value;
-
-            var mean = sum / _length;
-            double sumSquaredDev = 0;
-            double sumCubedDev = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var dev = _window[i] - mean;
-                sumSquaredDev += dev * dev;
-                sumCubedDev += dev * dev * dev;
-            }
-
-            var currentDev = value - mean;
-            sumSquaredDev += currentDev * currentDev;
-            sumCubedDev += currentDev * currentDev * currentDev;
-
-            var stdDev = Sqrt(sumSquaredDev / _length);
-            skewness = stdDev != 0 ? sumCubedDev / _length / (stdDev * stdDev * stdDev) : 0;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var skewness = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -252,14 +155,12 @@ public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("RSquared")]
 public sealed class RSquaredState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactRSquaredWindow _window;
     private readonly StreamingInputResolver _input;
 
     public RSquaredState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactRSquaredWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -267,39 +168,14 @@ public sealed class RSquaredState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double rSquared = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            var start = _window.Count - (_length - 1);
-            double sumX = 0, sumY = 0, sumXy = 0, sumX2 = 0, sumY2 = 0;
-            for (var j = 0; j < _length; j++)
-            {
-                double x = j;
-                var y = j < _length - 1 ? _window[start + j] : value;
-                sumX += x;
-                sumY += y;
-                sumXy += x * y;
-                sumX2 += x * x;
-                sumY2 += y * y;
-            }
-
-            var numerator = (_length * sumXy) - (sumX * sumY);
-            var denominator = Sqrt(((_length * sumX2) - (sumX * sumX)) * ((_length * sumY2) - (sumY * sumY)));
-            var r = denominator != 0 ? numerator / denominator : 0;
-            rSquared = r * r;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var rSquared = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -360,7 +236,7 @@ public sealed class PercentRankState : IStreamingIndicatorState, IDisposable
                 }
             }
 
-            percentRank = (double)below / _length * 100;
+            percentRank = 100d * below / _length;
         }
 
         if (isFinal)
@@ -432,7 +308,7 @@ public sealed class MedianValueState : IStreamingIndicatorState, IDisposable
 
             _sorted[_length - 1] = value;
             Array.Sort(_sorted);
-            median = _length % 2 == 0 ? (_sorted[(_length / 2) - 1] + _sorted[_length / 2]) / 2 : _sorted[_length / 2];
+            median = _length % 2 == 0 ? PriceMean.Of(_sorted[(_length / 2) - 1], _sorted[_length / 2]) : _sorted[_length / 2];
         }
 
         if (isFinal)

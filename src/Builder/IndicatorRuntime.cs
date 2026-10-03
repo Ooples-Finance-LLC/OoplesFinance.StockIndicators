@@ -15,6 +15,7 @@ namespace OoplesFinance.StockIndicators.Builder;
 public sealed class IndicatorRuntime : IDisposable
 {
     private readonly IndicatorDataSource _source;
+    private readonly Dictionary<SeriesKey, StockData> _batchSources;
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
     private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
     private readonly IReadOnlyList<SignalRule> _signals;
@@ -75,9 +76,11 @@ public sealed class IndicatorRuntime : IDisposable
         SignalOptions? signalOptions,
         BacktestOptions? backtestOptions,
         BenchmarkOptions? benchmarkOptions,
+        Dictionary<SeriesKey, StockData>? batchSources = null,
         ArrayPool<double>? computePool = null)
     {
         _source = source;
+        _batchSources = batchSources is null ? new() : new(batchSources);
         _nodes = nodes;
         _keys = keys;
         _signals = signals;
@@ -333,7 +336,10 @@ public sealed class IndicatorRuntime : IDisposable
     private void StartBatch()
     {
         var data = _source.BatchData ?? throw new InvalidOperationException("Batch source missing data.");
-        var evaluator = new SeriesEvaluator(data, _nodes, _computeContext);
+        // Validate once per source before any graph evaluation or snapshot publication.
+        foreach (var source in _batchSources.Values.Concat(new[] { data }).Distinct())
+            Validation.BatchInputValidation.Validate(source);
+        var evaluator = new SeriesEvaluator(_batchSources, data, _nodes, _computeContext);
         var series = evaluator.Evaluate(_activeSeries);
 
         // A snapshot outlives this runtime. Everything inside it was computed into buffers the
@@ -346,10 +352,11 @@ public sealed class IndicatorRuntime : IDisposable
             series[handle] = series[handle].ToArray();
         }
 
-        Publish(CreateBatchSnapshot(data, _nodes, _keys, series));
+        Publish(CreateBatchSnapshot(data, _batchSources, _nodes, _keys, series));
     }
 
     private static IndicatorSnapshot CreateBatchSnapshot(StockData data,
+        Dictionary<SeriesKey, StockData> batchSources,
         Dictionary<SeriesHandle, SeriesNode> nodes, Dictionary<IndicatorKey, SeriesHandle> keys,
         Dictionary<SeriesHandle, ReadOnlyMemory<double>> series)
     {
@@ -358,7 +365,7 @@ public sealed class IndicatorRuntime : IDisposable
             if (!nodes.ContainsKey(handle)) return null;
             // A deferred lookup owns its temporary buffers; it never calls back into the runtime.
             using var context = new ComputeContext();
-            return new SeriesEvaluator(data, nodes, context).Evaluate(handle).ToArray();
+            return new SeriesEvaluator(batchSources, data, nodes, context).Evaluate(handle).ToArray();
         });
     }
 

@@ -18,7 +18,8 @@ public sealed class MultiStockIndicatorTests : GlobalTestData
 
         for (var i = 0; i < count; i++)
         {
-            var date = DateTime.Today.AddDays(-count + i);
+            // These are paired historical observations, not today's unrelated benchmark dates.
+            var date = StockTestData[i].Date;
             var change = (i % 2 == 0 ? 1 : -1) * (i % 10 + 1);
             var price = basePrice + change;
             tickerList.Add(new TickerData

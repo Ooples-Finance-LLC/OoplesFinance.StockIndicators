@@ -59,13 +59,15 @@ internal sealed class IndicatorRun : IIndicatorRun
     private readonly Dictionary<IIndicatorOutput, double[]> _series;
     private readonly IndicatorRuntime _runtime;
     private readonly IReadOnlyList<Bar> _bars;
+    private readonly int _warmupBarsSeen, _warmupRequired;
 
     internal IndicatorRun(IndicatorRuntime runtime, Dictionary<IIndicatorOutput, double[]> series,
-        IReadOnlyList<Bar> bars)
+        IReadOnlyList<Bar> bars, int warmupBarsSeen, int warmupRequired)
     {
         _runtime = runtime;
         _series = series;
         _bars = bars;
+        _warmupBarsSeen = warmupBarsSeen; _warmupRequired = warmupRequired;
         BarCount = bars.Count;
     }
 
@@ -80,7 +82,7 @@ internal sealed class IndicatorRun : IIndicatorRun
             // caller naming one. A multi-output indicator names the series it stands for, because the batch's
             // key order does not always publish that one first: Outputs[0] is the efficiency ratio on Kaufman's
             // adaptive average and the positive directional indicator on the average directional index.
-            return this[indicator is IPrimaryOutputIndicator named ? named.PrimaryOutput : indicator.Outputs[0]];
+            return this[IndicatorContract.PrimaryOutput(indicator)];
         }
     }
 
@@ -110,7 +112,7 @@ internal sealed class IndicatorRun : IIndicatorRun
 
     /// <inheritdoc/>
     public IBarSnapshot Latest => BarCount > 0
-        ? new BarSnapshot(_bars[BarCount - 1], BarCount - 1, _series)
+        ? new BarSnapshot(_bars[BarCount - 1], BarCount - 1, _series, IsWarmedUp(BarCount - 1))
         : throw new InvalidOperationException("No bars have arrived yet.");
 
     /// <summary>
@@ -126,7 +128,7 @@ internal sealed class IndicatorRun : IIndicatorRun
         for (var i = 0; i < BarCount; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            yield return new BarSnapshot(_bars[i], i, _series);
+            yield return new BarSnapshot(_bars[i], i, _series, IsWarmedUp(i));
         }
 
         await Task.CompletedTask.ConfigureAwait(false);
@@ -134,4 +136,7 @@ internal sealed class IndicatorRun : IIndicatorRun
 
     /// <inheritdoc/>
     public void Dispose() => _runtime.Dispose();
+
+    private bool IsWarmedUp(int index) => _warmupBarsSeen + index + 1 >= _warmupRequired
+        && _series.Values.All(values => !double.IsNaN(values[index]));
 }

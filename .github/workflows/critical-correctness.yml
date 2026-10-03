@@ -1,0 +1,95 @@
+name: Critical correctness mutations
+
+on:
+  workflow_call:
+    inputs:
+      source-ref:
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  mutation-plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.source-ref }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - id: plan
+        shell: bash
+        run: |
+          matrix=$(python tools/run_critical_mutations.py --list-shards)
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  mutation-shards:
+    needs: mutation-plan
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.mutation-plan.outputs.matrix) }}
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.source-ref }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.x
+            10.x
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify mutation evidence accounting
+        run: python -m unittest discover -s tools/tests -v
+      - name: Require every critical fault to be detected
+        run: python tools/run_critical_mutations.py --output artifacts/correctness/mutations --shard-index ${{ matrix.shard }} --shard-count ${{ matrix.count }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: critical-mutation-shard-${{ matrix.shard }}
+          path: artifacts/correctness/mutations
+          if-no-files-found: error
+
+  # Keep the required gate name stable. Partial shard success cannot satisfy it.
+  critical-mutations:
+    needs: [mutation-plan, mutation-shards]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.source-ref }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: critical-mutation-shard-*
+          path: artifacts/correctness/shards
+      - name: Require every shard job to succeed
+        env:
+          PLAN_RESULT: ${{ needs.mutation-plan.result }}
+          SHARD_RESULT: ${{ needs.mutation-shards.result }}
+        run: test "$PLAN_RESULT" = success && test "$SHARD_RESULT" = success
+      - name: Verify complete mutation coverage and source identity
+        run: python tools/merge_critical_mutations.py --input artifacts/correctness/shards --output artifacts/correctness/mutations/evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: critical-mutation-evidence
+          path: artifacts/correctness/mutations
+          if-no-files-found: error

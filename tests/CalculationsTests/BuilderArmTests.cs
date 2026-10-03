@@ -471,6 +471,15 @@ public sealed class BuilderArmTests : GlobalTestData
 
     internal static IIndicatorSpecOptions? Create(Type type, bool alternate)
     {
+        // This factor is a convex weight, so multiplying its default by 1.5 leaves its domain.
+        if (type == typeof(SuperTrendFilterSpecOptions))
+            return new SuperTrendFilterSpecOptions(alternate ? 203 : 200, alternate ? .45 : .9);
+
+        // Adaptive gains are bounded; the generic 1.5 multiplier takes .667 outside [0, 1].
+        if (type == typeof(MovingAverageAdaptiveFilterSpecOptions))
+            return alternate ? new MovingAverageAdaptiveFilterSpecOptions(13, .225, .8, .09675)
+                : new MovingAverageAdaptiveFilterSpecOptions();
+
         var ctor = type.GetConstructors()
             .OrderByDescending(c => c.GetParameters().Length)
             .FirstOrDefault(c => c.GetParameters().All(p => p.HasDefaultValue || Value(p.ParameterType, null, false) is not null));

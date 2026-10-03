@@ -58,13 +58,13 @@ public sealed class YangZhangVolatilityState : IStreamingIndicatorState, IDispos
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var overnight = _hasPrev && _prevClose != 0 ? Log(bar.Open / _prevClose) : double.NaN;
-        var openToClose = bar.Open != 0 ? Log(value / bar.Open) : double.NaN;
+        var overnight = _hasPrev && _prevClose != 0 ? StableLogRatio.OfSameSign(bar.Open, _prevClose) : double.NaN;
+        var openToClose = bar.Open != 0 ? StableLogRatio.OfSameSign(value, bar.Open) : double.NaN;
 
-        var logHc = value != 0 ? Log(bar.High / value) : 0;
-        var logHo = bar.Open != 0 ? Log(bar.High / bar.Open) : 0;
-        var logLc = value != 0 ? Log(bar.Low / value) : 0;
-        var logLo = bar.Open != 0 ? Log(bar.Low / bar.Open) : 0;
+        var logHc = value != 0 ? StableLogRatio.OfSameSign(bar.High, value) : 0;
+        var logHo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Open) : 0;
+        var logLc = value != 0 ? StableLogRatio.OfSameSign(bar.Low, value) : 0;
+        var logLo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.Low, bar.Open) : 0;
         var rogersSatchell = (logHc * logHo) + (logLc * logLo);
 
         double volatility = 0;
@@ -161,46 +161,21 @@ public sealed class YangZhangVolatilityState : IStreamingIndicatorState, IDispos
 /// The average true range as a percentage of the price, bar by bar.
 /// </summary>
 /// <remarks>
-/// The streaming twin of <c>Calculations.CalculateNormalizedAverageTrueRange</c>. It wraps
-/// <see cref="AverageTrueRangeState"/> rather than smoothing a true range of its own, so the range it
-/// divides is the one the batch engine averages.
+/// Normalizes the batch engine's zero-seeded Wilder average before publishing,
+/// preserving finite percentages when the unpublished range exceeds binary64.
 /// </remarks>
 [PrimaryOutput("Natr")]
 public sealed class NormalizedAverageTrueRangeState : IStreamingIndicatorState, IDisposable
 {
-    private readonly AverageTrueRangeState _averageTrueRange;
-    private readonly StreamingInputResolver _input;
+    private readonly AtrDerivedWindow _window;
 
-    public NormalizedAverageTrueRangeState(int length = 14)
-    {
-        _averageTrueRange = new AverageTrueRangeState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public NormalizedAverageTrueRangeState(int length = 14) { _window = new(length);  }
     public IndicatorName Name => IndicatorName.NormalizedAverageTrueRange;
-
-    public void Reset()
-    {
-        _averageTrueRange.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var atr = _averageTrueRange.Update(bar, isFinal, includeOutputs: false).Value;
-        var natr = value != 0 ? atr / value * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Natr", natr } };
-        }
-
-        return new StreamingIndicatorStateResult(natr, outputs);
+        StreamingInputValidation.Validate(bar); var atr = _window.Next(bar.High, bar.Low, bar.Close, isFinal); var value = AtrDerivedWindow.Percent(atr, bar.Close);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Natr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _averageTrueRange.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }

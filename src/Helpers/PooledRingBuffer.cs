@@ -84,7 +84,11 @@ internal sealed class PooledRingBuffer<T> : IDisposable
             return;
         }
 
-        ArrayPool<T>.Shared.Return(_buffer, clearArray: true);
+        // The finalizer can run when Rent throws before assigning the buffer.
+        if (_buffer is not null)
+        {
+            ArrayPool<T>.Shared.Return(_buffer, clearArray: true);
+        }
         _buffer = Array.Empty<T>();
         _disposed = true;
         GC.SuppressFinalize(this);
@@ -97,6 +101,10 @@ internal sealed class PooledRingBuffer<T> : IDisposable
             return;
         }
 
-        ArrayPool<T>.Shared.Return(_buffer, clearArray: true);
+        // The finalizer can run when Rent throws before assigning the buffer.
+        if (_buffer is not null)
+        {
+            ArrayPool<T>.Shared.Return(_buffer, clearArray: true);
+        }
     }
 }

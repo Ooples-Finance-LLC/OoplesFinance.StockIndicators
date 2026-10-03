@@ -1,0 +1,3833 @@
+﻿using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Builder.Specs;
+using OoplesFinance.StockIndicators.Indicators;
+
+namespace OoplesFinance.StockIndicators.Validation;
+
+/// <summary>Deliberately direct reference arithmetic; never calls calculation engines or states.</summary>
+internal static partial class BuiltInFormulaReferences
+{
+    private static double ExactPriceMean(params double[] values)
+    {
+        var sum = new ReferenceFraction(0);
+        foreach (var value in values) sum += ReferenceFraction.FromDouble(value);
+        return (sum / new ReferenceFraction(values.Length)).ToDouble();
+    }
+
+    internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
+    {
+        if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.UltimateMovingAverage or IndicatorName.UltimateMovingAverageBands)
+        {
+            var ultimateKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected }
+                : builtIn.BatchName == IndicatorName.UltimateMovingAverage ? new[] { "Uma" } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < ultimateKeys.Length; slot++)
+            { var key = ultimateKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => UltimateOutputs(b, builtIn))[key], UltimateBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TStepLeastSquaresMovingAverage)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TStepLeastSquaresOutputs(bars, builtIn)["Tslsma"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.TrueRangeAdjustedExponentialMovingAverage)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrueRangeAdjustedOutputs(bars, builtIn)["Trema"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName is IndicatorName.TurboStochasticsFast or IndicatorName.TurboStochasticsSlow)
+        {
+            var turboStochKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Tsf", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < turboStochKeys.Length; slot++) { var key = turboStochKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => TurboStochasticsOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.UberTrendIndicator)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.KarobeinOscillator)
+        { yield return IndicatorValidationRule.Reference(0, bars => KarobeinOutputs(bars, builtIn)["Ko"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.KalmanSmoother)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => KalmanSmootherOutputs(bars, builtIn)["Ks"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.McGinleyDynamicIndicator)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => McGinleyOutputs(bars, builtIn)["Mdi"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.HampelFilter)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HampelOutputs(bars, builtIn)["Hf"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.ZigZag)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZigZagOutputs(bars, builtIn)["ZigZag"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.WaveTrendOscillator)
+        {
+            var waveKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Wto", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < waveKeys.Length; slot++) { var selected = waveKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => WaveTrendOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumePositiveNegativeIndicator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var vpnKeys = new[] { "Vpni", "Signal" };
+            for (var slot = 0; slot < vpnKeys.Length; slot++) { var key = vpnKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VolumePositiveNegativeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolatilityWaveMovingAverage && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilityWaveOutputs(bars, builtIn)["Vwma"], VolatilityWaveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.WilsonRelativePriceChannel)
+        {
+            var wilsonKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "S1", "S2", "U1", "U2" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < wilsonKeys.Length; slot++) { var selected = wilsonKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => WilsonOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolatilityMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilityAverageOutputs(bars, builtIn)["Vma"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.VolatilityBasedMomentum)
+        {
+            var qualityKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Vbm", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < qualityKeys.Length; slot++) { var selected = qualityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VolatilityMomentumOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolatilityQualityIndex)
+        {
+            var qualityKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Vqi", "FastSignal", "SlowSignal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < qualityKeys.Length; slot++) { var selected = qualityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VolatilityQualityOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ZDistanceFromVwap)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZDistanceOutputs(bars, builtIn)["Zscore"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WaddahAttarExplosion)
+        {
+            var waddahKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "T1", "T2", "E1", "TrendUp", "TrendDn" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < waddahKeys.Length; slot++) { var selected = waddahKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => WaddahOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VortexBands)
+        {
+            var vortexKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < vortexKeys.Length; slot++) { var selected = vortexKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VortexBandsOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumePriceConfirmationIndicator)
+        {
+            var vpciKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Vpci", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < vpciKeys.Length; slot++) { var selected = vpciKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VpciOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeWeightedRelativeStrengthIndex)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolumeWeightedRsiOutputs(bars, builtIn)["Vwrsi"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.VaradiOscillator)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VaradiOutputs(bars, builtIn)["Vo"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.ValueChartIndicator)
+        {
+            var valueChartKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "vClose", "vOpen", "vHigh", "vLow" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < valueChartKeys.Length; slot++) { var key = valueChartKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => ValueChartOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.UltimateVolatilityIndicator)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UltimateVolatilityOutputs(bars, builtIn)["Uvi"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName == IndicatorName.VariableLengthMovingAverage)
+        {
+            var variableKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Length", "Vlma" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < variableKeys.Length; slot++) { var key = variableKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VariableLengthOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TurboScaler)
+        {
+            var turboKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Ts", "Trigger" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < turboKeys.Length; slot++) { var key = turboKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => TurboScalerOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendAnalysisIndicator)
+        {
+            var trendIndicatorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Tai", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < trendIndicatorKeys.Length; slot++) { var key = trendIndicatorKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => TrendAnalysisIndicatorOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendAnalysisIndex)
+        {
+            var trendIndexKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Tai", "Signal" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < trendIndexKeys.Length; slot++) { var key = trendIndexKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => TrendAnalysisIndexOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TopsAndBottomsFinder)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => TopsBottomsOutputs(bars, builtIn)["Tabf"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SwamiStochastics)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => SwamiOutputs(bars, builtIn)["Ss"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.Svama)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SvamaOutputs(bars)["Svama"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SupportAndResistanceOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => SupportResistanceOscillatorOutputs(bars)["Sro"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StationaryExtrapolatedLevels)
+        {
+            var stationaryKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "UpperBand", "MiddleBand", "LowerBand", "Deviation" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < stationaryKeys.Length; slot++) { var key = stationaryKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => StationaryLevelsOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StandardDeviationVolatility)
+        {
+            var residualKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "StdDev", "Variance", "Signal" };
+            for (var slot = 0; slot < residualKeys.Length; slot++) { var key = residualKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ResidualVolatilityOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SqueezeMomentumIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SqueezeMomentumOutputs(bars, builtIn)["Smi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SellGravitationIndex)
+        {
+            var sellKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Sgi", "Signal" };
+            for (var slot = 0; slot < sellKeys.Length; slot++) { var key = sellKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SellGravitationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RSINGIndicator)
+        {
+            var rsingKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Rsing", "Signal" };
+            for (var slot = 0; slot < rsingKeys.Length; slot++) { var key = rsingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RsingOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RelativeSpreadStrength)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RelativeSpreadOutputs(bars, builtIn)["Rss"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.FastandSlowRelativeStrengthIndexOscillator or IndicatorName.FastandSlowStochasticOscillator)
+        {
+            var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PeriodicChannel)
+        {
+            var periodicKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "K" } : new[] { "K", "Os", "Ap", "Bp", "Cp", "Al", "Bl", "Cl" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, Dictionary<string, double[]>>();
+            for (var slot = 0; slot < periodicKeys.Length; slot++) { var key = periodicKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => PeriodicOutputs(b, builtIn))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RecursiveRelativeStrengthIndex)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RecursiveRsiOutputs(bars, builtIn)["Rrsi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RandomWalkIndex)
+        {
+            var walkKeys = new[] { "RwiHigh", "RwiLow" };
+            for (var slot = 0; slot < walkKeys.Length; slot++) { var key = walkKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RandomWalkOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RainbowOscillator)
+        {
+            var rainbowKeys = new[] { "Ro", "UpperBand", "LowerBand" };
+            for (var slot = 0; slot < rainbowKeys.Length; slot++) { var key = rainbowKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RainbowOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RahulMohindarOscillator)
+        {
+            var rmoKeys = new[] { "Rmo", "SwingTrade1", "SwingTrade2", "SwingTrade3" };
+            for (var slot = 0; slot < rmoKeys.Length; slot++) { var key = rmoKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RmoOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.QuantitativeQualitativeEstimation)
+        {
+            var qqeKeys = new[] { "FastAtrRsi", "SlowAtrRsi" };
+            for (var slot = 0; slot < qqeKeys.Length; slot++) { var key = qqeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => QqeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PremierStochasticOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => PremierOutputs(bars, builtIn)["Pso"], RsiInverseFisherBudget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PhaseChangeIndex)
+        {
+            var phaseKeys = new[] { "Pci", "Signal" };
+            for (var slot = 0; slot < phaseKeys.Length; slot++) { var key = phaseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PhaseChangeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PeakValleyEstimation)
+        {
+            var peakKeys = new[] { "Sign1", "Sign2", "Sign3" };
+            for (var slot = 0; slot < peakKeys.Length; slot++) { var key = peakKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PeakValleyOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OscarIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OscarOutputs(bars, builtIn)["Oscar"], OscarBudget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OnBalanceVolumeReflex)
+        {
+            var reflexKeys = new[] { "Obvr", "Signal" };
+            for (var slot = 0; slot < reflexKeys.Length; slot++) { var key = reflexKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ObvReflexOutputs(bars, builtIn)[key], ObvReflexBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OnBalanceVolumeDisparityIndicator)
+        {
+            var obvdiKeys = new[] { "Obvdi", "Signal" };
+            for (var slot = 0; slot < obvdiKeys.Length; slot++) { var key = obvdiKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => OnBalanceVolumeDisparityOutputs(bars, builtIn)[key], OnBalanceVolumeDisparityBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NegativeVolumeDisparityIndicator)
+        {
+            var nvdiKeys = new[] { "Nvdi", "Signal" };
+            for (var slot = 0; slot < nvdiKeys.Length; slot++) { var key = nvdiKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => NegativeVolumeDisparityOutputs(bars, builtIn)[key], NegativeVolumeDisparityBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MultiDepthZeroLagExponentialMovingAverage)
+        {
+            var depthKeys = new[] { "Md2Pole", "Md1Pole", "Md3Pole" };
+            for (var slot = 0; slot < depthKeys.Length; slot++) { var key = depthKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MultiDepthOutputs(bars, builtIn)[key], MultiDepthBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MovingAverageAdaptiveQ)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MovingAverageAdaptiveQOutputs(bars, builtIn)["Maaq"], MovingAverageAdaptiveQBudget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MovingAverageAdaptiveFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MovingAverageAdaptiveFilterOutputs(bars, builtIn)["Maaf"], MovingAverageAdaptiveFilterBudget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MorphedSineWave)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MorphedSineOutputs(bars, builtIn)["Msw"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ModifiedGannHiloActivator)
+        {
+            if (AverageKind(builtIn.CreateOptions(), 1) == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ModifiedGannOutputs(bars, builtIn)["Ghla"], ModifiedGannBudget);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.MassThrustIndicator or IndicatorName.MassThrustOscillator)
+        {
+            if (AverageKind(builtIn.CreateOptions(), 3) == 0) yield break;
+            var massKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? (builtIn.BatchName == IndicatorName.MassThrustOscillator ? "Mto" : "Mti") } : new[] { builtIn.BatchName == IndicatorName.MassThrustOscillator ? "Mto" : "Mti", "Signal" };
+            for (var slot = 0; slot < massKeys.Length; slot++) { var key = massKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MassThrustOutputs(bars, builtIn)[key], MassThrustBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MarketDirectionIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MarketDirectionOutputs(bars, builtIn), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MacZVwapIndicator)
+        {
+            if (AverageKind(builtIn.CreateOptions(), 1) == 0) yield break;
+            var maczKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Macz" } : new[] { "Macz", "Signal", "Histogram" };
+            for (var slot = 0; slot < maczKeys.Length; slot++) { var key = maczKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MacZVwapOutputs(bars, builtIn)[key], MacZBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MacZIndicator)
+        {
+            if (AverageKind(builtIn.CreateOptions(), 1) == 0) yield break;
+            var maczKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Macz" } : new[] { "Macz", "Signal", "Histogram" };
+            for (var slot = 0; slot < maczKeys.Length; slot++) { var key = maczKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MacZOutputs(bars, builtIn)[key], MacZBudget); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LiquidRelativeStrengthIndex)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => LiquidRsiOutputs(bars, builtIn)["Lrsi"], LiquidRsiBudget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LBRPaintBars)
+        {
+            var paintKeys = builtIn.BatchOutputKey is { } selectedPaint ? new[] { selectedPaint } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < paintKeys.Length; slot++) { var key = paintKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => LbrPaintOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KwanIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => KwanOutputs(bars, builtIn)["Ki"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.KaufmanAdaptiveCorrelationOscillator or IndicatorName.KaufmanAdaptiveLeastSquaresMovingAverage)
+        {
+            var regressionLength = Integer(builtIn.CreateOptions(), "Length");
+            var regressionKeys = builtIn.BatchOutputKey is { } selectedRegression ? new[] { selectedRegression }
+                : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            var regressionFixtures = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, Dictionary<string, double[]>>();
+            for (var slot = 0; slot < regressionKeys.Length; slot++)
+            {
+                var key = regressionKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => regressionFixtures.GetValue(bars, b => KaufmanRegressionOutputs(b, regressionLength, builtIn.BatchName == IndicatorName.KaufmanAdaptiveLeastSquaresMovingAverage))[key],
+                    new IndicatorErrorBudget(0, 1e-12, requireSameSign: true));
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KasePeakOscillatorV2 && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => KasePeakV2Outputs(bars, builtIn)["Kpo"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KaseIndicator && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var kaseKeys = builtIn.BatchOutputKey is { } kaseSelected ? new[] { kaseSelected } : new[] { "KaseUp", "KaseDn" };
+            for (var slot = 0; slot < kaseKeys.Length; slot++) { var key = kaseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KaseRatioOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KaseConvergenceDivergence && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => KaseConvergenceOutputs(bars, builtIn)["Kcd"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.JrcFractalDimension && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var jrcKeys = builtIn.BatchOutputKey is { } jrcSelected ? new[] { jrcSelected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < jrcKeys.Length; slot++) { var key = jrcKeys[slot]; yield return IndicatorValidationRule.Reference(slot, bars => JrcOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.JmaRsxClone)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RsxOutputs(bars, builtIn)["Rsx"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.InsyncIndex)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => InsyncOutputs(bars, builtIn)["Iidx"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.JurikMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => JmaOutputs(bars, builtIn)["Jma"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.InertiaIndicator && InertiaReferenceKind(builtIn.CreateOptions()) is 0 or 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => InertiaOutputs(bars, builtIn)["Inertia"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HirashimaSugitaRS && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            var hirashimaKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < hirashimaKeys.Length; slot++) { var key = hirashimaKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HirashimaOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HawkeyeVolumeIndicator)
+        {
+            var hawkeyeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < hawkeyeKeys.Length; slot++) { var key = hawkeyeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HawkeyeOutputs(bars, builtIn, indicator.Source is not null)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.GroverLlorensActivator or IndicatorName.GroverLlorensCycleOscillator && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var groverKey = builtIn.BatchName == IndicatorName.GroverLlorensCycleOscillator ? "Glco" : "Gla";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => GroverOutputs(bars, builtIn)[groverKey], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GrandTrendForecasting)
+        {
+            var grandKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < grandKeys.Length; slot++) { var key = grandKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GrandForecastOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FunctionToCandles && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var candleKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < candleKeys.Length; slot++) { var key = candleKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FunctionCandlesOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FreedomOfMovement && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var freedomKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < freedomKeys.Length; slot++) { var key = freedomKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FreedomOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FisherTransformStochasticOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FisherStochOutputs(bars, builtIn)["Ftso"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FisherLeastSquaresMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FisherLsOutputs(bars, builtIn)["Flsma"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FireflyOscillator && FireflyKind(builtIn.CreateOptions()) is 1 or 2 or 3 or 4 or 6)
+        {
+            var fireflyKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < fireflyKeys.Length; slot++) { var key = fireflyKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FireflyOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FibonacciRetrace && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            var retraceKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < retraceKeys.Length; slot++) { var key = retraceKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FibonacciRetraceOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FearAndGreedIndicator && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            var fearKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < fearKeys.Length; slot++) { var key = fearKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FearGreedOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FastSlowDegreeOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var degreeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < degreeKeys.Length; slot++) { var key = degreeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowDegreeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FXSniperIndicator && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FxSniperOutputs(bars, builtIn)["FXSniper"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ErgodicCommoditySelectionIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var selectionKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < selectionKeys.Length; slot++) { var key = selectionKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ErgodicSelectionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EnhancedWilliamsR && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var williamsKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < williamsKeys.Length; slot++) { var key = williamsKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EnhancedWilliamsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EnhancedIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var enhancedKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < enhancedKeys.Length; slot++) { var key = enhancedKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EnhancedIndexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersMedianAverageAdaptiveFilter)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => MedianAdaptiveOutputs(bars, builtIn)["Maaf"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersConvolutionIndicator)
+        {
+            var convolutionKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < convolutionKeys.Length; slot++) { var key = convolutionKeys[slot]; yield return IndicatorValidationRule.Reference(slot, bars => ConvolutionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersHurstCoefficient)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => HurstCoefficientOutputs(bars, builtIn)["Ehc"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EdgePreservingFilter && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => EdgePreservingOutputs(bars, builtIn)["Epf"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DynamicMomentumIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var dynamicKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < dynamicKeys.Length; slot++) { var key = dynamicKeys[slot]; yield return IndicatorValidationRule.Reference(slot, bars => DynamicMomentumOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DrunkardWalk)
+        {
+            var walkKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < walkKeys.Length; slot++) { var key = walkKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DrunkardWalkOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DemandOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var demandKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < demandKeys.Length; slot++) { var key = demandKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DemandOscillatorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DemandIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DemandIndexValues(bars).Outputs["Di"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DTOscillator && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var dtKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < dtKeys.Length; slot++) { var key = dtKeys[slot]; yield return IndicatorValidationRule.Reference(slot, bars => DtOscillatorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CorrectedMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CorrectedAverageOutputs(bars, builtIn)["Cma"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CoralTrendIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CoralTrendOutputs(bars, builtIn)["Cti"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ConstanceBrownCompositeIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var brownKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < brownKeys.Length; slot++) { var key = brownKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => BrownCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CommoditySelectionIndex)
+        {
+            var commodityKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < commodityKeys.Length; slot++) { var key = commodityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => CommoditySelectionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ClosedFormDistanceVolatility)
+        { yield return IndicatorValidationRule.Reference(0, bars => ClosedDistanceOutputs(bars, builtIn)["Cfdv"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName is IndicatorName.ChandeVolatilityIndexDynamicAverageIndicator or IndicatorName.VolatilityIndexDynamicAverageIndicator)
+        {
+            var volatilityKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < volatilityKeys.Length; slot++) { var key = volatilityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VolatilityIndexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeMomentumOscillatorAverageDisparityIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ChandeDisparityOutputs(bars, builtIn)["Cmoadi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeKrollRSquaredIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ChandeKrollOutputs(bars, builtIn)["Ckrsi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeCompositeMomentumIndex)
+        {
+            var chandeCompositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < chandeCompositeKeys.Length; slot++) { var key = chandeCompositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ChandeCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BryantAdaptiveMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BryantOutputs(bars, builtIn)["Bama"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BreakoutRelativeStrengthIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BreakoutRsiOutputs(bars, builtIn, indicator.Source is not null)["Brsi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BetterVolumeIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BetterVolumeOutputs(bars, builtIn)["Bvi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BayesianOscillator)
+        {
+            var bayesianKeys = new[] { "SigmaProbsDown", "SigmaProbsUp", "ProbPrime" };
+            for (var slot = 0; slot < bayesianKeys.Length; slot++) { var key = bayesianKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => BayesianOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AverageMoneyFlowOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AverageMoneyFlowOutputs(bars, builtIn)["Amfo"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AutonomousRecursiveMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutonomousRecursiveOutputs(bars, builtIn)["Arma"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AutoFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutoFilterOutputs(bars, builtIn)["Af"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptiveStochastic)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AdaptiveStochasticOutputs(bars, builtIn)["Ast"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DoubleSmoothedStochastic)
+        {
+            var doubleStochasticKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < doubleStochasticKeys.Length; slot++) { var key = doubleStochasticKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DoubleStochasticOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BilateralStochasticOscillator)
+        {
+            var bilateralKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < bilateralKeys.Length; slot++) { var key = bilateralKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => BilateralOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SchaffTrendCycleShk)
+        {
+            var shkKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < shkKeys.Length; slot++) { var key = shkKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SchaffShkOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SchaffTrendCycle)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => SchaffFirstPassOutputs(bars, builtIn)["Stc"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OptimizedTrendTracker)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OptimizedTrendOutputs(bars, builtIn)["Ott"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.Trender)
+        {
+            var trenderKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < trenderKeys.Length; slot++) { var key = trenderKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrenderOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HalfTrend)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HalfTrendOutputs(bars, builtIn)["Ht"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ParabolicSAR)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ParabolicSarOutputs(bars, builtIn)["Sar"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KaseDevStopV1)
+        {
+            var kaseOneKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < kaseOneKeys.Length; slot++) { var key = kaseOneKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KaseStopV1Outputs(bars, builtIn, indicator.Source is not null)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KaseDevStopV2)
+        {
+            var kaseKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < kaseKeys.Length; slot++) { var key = kaseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KaseStopV2Outputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ElderSafeZoneStops)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ElderSafeZoneOutputs(bars, builtIn), IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SuperTrendFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SuperTrendFilterOutputs(bars, builtIn), IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SuperTrend)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SuperTrendOutputs(bars, builtIn), IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.UtBotAlerts)
+        {
+            var utKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < utKeys.Length; slot++) { var key = utKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => UtBotOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolatilityStop)
+        {
+            var stopOptions = builtIn.CreateOptions(); var stopLength = Integer(stopOptions, "Length", 14); var stopMultiplier = Number(stopOptions, 2, "Multiplier");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilityStopValues(bars, stopLength, stopMultiplier).Outputs["Vs"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WellesWilderVolatilitySystem)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => WilderVolatilityOutputs(bars, builtIn)["Wwvs"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandelierExit)
+        {
+            var chandelierKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < chandelierKeys.Length; slot++) { var key = chandelierKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ChandelierOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CalmarRatio)
+        {
+            var calmarLength = Integer(builtIn.CreateOptions(), "Length", 30);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CalmarValues(bars, calmarLength).Outputs["Cr"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AtrFilteredExponentialMovingAverage)
+        {
+            var atrOptions = builtIn.CreateOptions(); var atrPriceLength = Integer(atrOptions, "Length", 45); var atrRangeLength = Integer(atrOptions, "AtrLength", 20); var atrDeviationLength = Integer(atrOptions, "StdDevLength", 10); var atrFloorLength = Integer(atrOptions, "LbLength", 20); var atrGainCap = Number(atrOptions, 5, "Min");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrFilterValues(bars, atrPriceLength, atrRangeLength, atrDeviationLength, atrFloorLength, atrGainCap).Outputs["Afp"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName._1LCLeastSquaresMovingAverage)
+        {
+            var oneLcOptions = builtIn.CreateOptions(); var oneLcLength = Integer(oneLcOptions, "Length", 14); var oneLcKind = AverageKind(oneLcOptions, 1);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OneLcValues(bars, oneLcLength, oneLcKind).Outputs["1lsma"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptiveLeastSquares)
+        {
+            var adaptiveFitLength = Integer(builtIn.CreateOptions(), "Length", 500);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AdaptiveFitValues(bars, adaptiveFitLength).Outputs["Als"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSwissArmyKnifeIndicator)
+        {
+            var swissOptions = builtIn.CreateOptions(); var swissLength = Integer(swissOptions, "Length", 20); var swissDelta = Number(swissOptions, .1, "Delta"); var swissKeys = new[] { "EmaFilter", "SmaFilter", "GaussFilter", "ButterFilter", "SmoothFilter", "HpFilter", "PhpFilter", "BpFilter", "BsFilter" };
+            for (var slot = 0; slot < swissKeys.Length; slot++) { var key = swissKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SwissArmyValues(bars, swissLength, swissDelta).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSuperSmootherFilter)
+        {
+            var superLength = Integer(builtIn.CreateOptions(), "Length", 10);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SuperSmootherValues(bars, superLength).Outputs["Essf"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ZeroLagSmoothedCycle)
+        {
+            var zeroCycleLength = Integer(builtIn.CreateOptions(), "Length", 100); var zeroCycleKeys = new[] { "Lco", "Filter" };
+            for (var slot = 0; slot < zeroCycleKeys.Length; slot++) { var key = zeroCycleKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ZeroLagCycleValues(bars, zeroCycleLength).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAdaptiveBandPassFilter)
+        {
+            var bandOptions = builtIn.CreateOptions(); var bandUpper = Integer(bandOptions, "Length1", 48); var bandLower = Integer(bandOptions, "Length2", 10); var bandLag = Integer(bandOptions, "Length3", 3); var bandWidth = Number(bandOptions, .3, "Bw"); var bandKeys = new[] { "Eabpf", "Signal" };
+            for (var slot = 0; slot < bandKeys.Length; slot++) { var key = bandKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveBandPassValues(bars, bandUpper, bandLower, bandLag, bandWidth).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveStochasticIndicatorV2 or IndicatorName.EhlersAdaptiveStochasticInverseFisherTransform or IndicatorName.EhlersAdaptiveCommodityChannelIndexV2)
+        {
+            var rangeOptions = builtIn.CreateOptions(); var rangeUpper = Integer(rangeOptions, "Length1", 48); var rangeLower = Integer(rangeOptions, "Length2", 10); var rangeLag = Integer(rangeOptions, "Length3", 3); var rangeKind = AverageKind(rangeOptions, 3); var rangeMode = builtIn.BatchName == IndicatorName.EhlersAdaptiveCommodityChannelIndexV2 ? 2 : builtIn.BatchName == IndicatorName.EhlersAdaptiveStochasticInverseFisherTransform ? 1 : 0; var rangeKeys = new[] { rangeMode == 2 ? "Eacci" : rangeMode == 1 ? "Easift" : "Easi", "Signal" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++) { var key = rangeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRangeV2Values(bars, rangeUpper, rangeLower, rangeLag, rangeKind, rangeMode).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2 or IndicatorName.EhlersAdaptiveRsiFisherTransformV2)
+        {
+            var rsiOptions = builtIn.CreateOptions(); var rsiUpper = Integer(rsiOptions, "Length1", 48); var rsiLower = Integer(rsiOptions, "Length2", 10); var rsiLag = Integer(rsiOptions, "Length3", 3); var rsiKind = AverageKind(rsiOptions, 3); var rsiFisher = builtIn.BatchName == IndicatorName.EhlersAdaptiveRsiFisherTransformV2; var rsiKeys = rsiFisher ? new[] { "Earsift" } : new[] { "Earsi", "Signal" };
+            for (var slot = 0; slot < rsiKeys.Length; slot++) { var key = rsiKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRsiV2Values(bars, rsiUpper, rsiLower, rsiLag, rsiKind, rsiFisher).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAutoCorrelationReversals)
+        {
+            var reversalOptions = builtIn.CreateOptions(); var reversalLength = Integer(reversalOptions, "Length1", 48); var reversalSmoothing = Integer(reversalOptions, "Length2", 10); var reversalLag = Integer(reversalOptions, "Length3", 3); var reversalKind = AverageKind(reversalOptions, 3);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutocorrelationReversalValues(bars, reversalLength, reversalSmoothing, reversalLag, reversalKind).Outputs["Eacr"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAutoCorrelationPeriodogram)
+        {
+            var spectrumOptions = builtIn.CreateOptions(); var spectrumUpper = Integer(spectrumOptions, "Length1", 48); var spectrumLower = Integer(spectrumOptions, "Length2", 10); var spectrumLag = Integer(spectrumOptions, "Length3", 3);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutocorrelationSpectrumValues(bars, spectrumUpper, spectrumLower, spectrumLag).Outputs["Eacp"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAutoCorrelationIndicator)
+        {
+            var correlationOptions = builtIn.CreateOptions(); var correlationLength = Integer(correlationOptions, "Length1", 48); var correlationSmoothing = Integer(correlationOptions, "Length2", 10);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoofAutocorrelationValues(bars, correlationLength, correlationSmoothing).Outputs["Eaci"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersZeroCrossingsDominantCycle)
+        {
+            var crossingOptions = builtIn.CreateOptions(); var crossingLength = Integer(crossingOptions, "Length", 20); var bandwidth = Number(crossingOptions, .7, "Bw");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZeroCrossingCycleValues(bars, crossingLength, bandwidth).Outputs["Ezcdc"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersPhaseCalculation)
+        {
+            var settings = builtIn.CreateOptions(); var period = Integer(settings, "Length", 15); var fourierKind = AverageKind(settings, 3);
+            var fourierKeys = new[] { "Phase", "Signal" }; for (var slot = 0; slot < fourierKeys.Length; slot++) { var key = fourierKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FourierPhaseValues(bars, period, fourierKind).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSignalToNoiseRatioV1)
+        {
+            var noiseOptions = builtIn.CreateOptions(); var noiseLength = Integer(noiseOptions, "Length", 7); var noiseKind = AverageKind(noiseOptions, 3);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HilbertNoiseValues(bars, noiseLength, noiseKind).Outputs["Esnr"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersAlternateSignalToNoiseRatio or IndicatorName.EhlersEnhancedSignalToNoiseRatio or IndicatorName.EhlersSignalToNoiseRatioV2)
+        {
+            var noiseMode = builtIn.BatchName == IndicatorName.EhlersAlternateSignalToNoiseRatio ? 0 : builtIn.BatchName == IndicatorName.EhlersSignalToNoiseRatioV2 ? 1 : 2; var noiseLength = Integer(builtIn.CreateOptions(), "Length", 6); var noiseKeys = noiseMode == 2 ? new[] { "Esnr", "I3", "Q3", "SmoothPeriod" } : new[] { "Esnr" };
+            for (var slot = 0; slot < noiseKeys.Length; slot++) { var key = noiseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MamaNoiseValues(bars, noiseLength, noiseMode).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveStochasticIndicatorV1 or IndicatorName.EhlersAdaptiveCommodityChannelIndexV1)
+        {
+            var commodity = builtIn.BatchName == IndicatorName.EhlersAdaptiveCommodityChannelIndexV1; var rangeOptions = builtIn.CreateOptions(); var fraction = Number(rangeOptions, commodity ? 1 : .5, "CycPart"); var constant = Number(rangeOptions, .015, "Constant"); var rangeKeys = new[] { commodity ? "Eacci" : "Easi", "Signal" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++) { var key = rangeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRangeV1Values(bars, fraction, commodity, constant, indicator.Source is not null).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveRelativeStrengthIndexV1 or IndicatorName.EhlersAdaptiveRsiFisherTransformV1)
+        {
+            var rsiFisher = builtIn.BatchName == IndicatorName.EhlersAdaptiveRsiFisherTransformV1; var fraction = Number(builtIn.CreateOptions(), .5, "CycPart"); var rsiKeys = rsiFisher ? new[] { "Earsift" } : new[] { "Earsi", "Signal" };
+            for (var slot = 0; slot < rsiKeys.Length; slot++) { var key = rsiKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRsiV1Values(bars, fraction, rsiFisher).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersSineWaveIndicatorV1 or IndicatorName.EhlersHilbertOscillator or IndicatorName.EhlersInstantaneousTrendlineV1)
+        {
+            var derivedMode = builtIn.BatchName == IndicatorName.EhlersSineWaveIndicatorV1 ? 0 : builtIn.BatchName == IndicatorName.EhlersHilbertOscillator ? 1 : 2; var derivedKeys = derivedMode == 0 ? new[] { "Sine", "LeadSine" } : derivedMode == 1 ? new[] { "I3", "IQ" } : new[] { "Eit", "Signal" };
+            for (var slot = 0; slot < derivedKeys.Length; slot++) { var key = derivedKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MamaDerivedValues(bars, derivedMode).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersMotherOfAdaptiveMovingAverages)
+        {
+            var mamaOptions = builtIn.CreateOptions(); var mamaFast = Number(mamaOptions, .5, "FastLimit"); var mamaSlow = Number(mamaOptions, .05, "SlowLimit"); var mamaKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Mama" } : new[] { "Fama", "Mama", "I1", "Q1", "SmoothPeriod", "Smooth", "Real", "Imag" };
+            for (var slot = 0; slot < mamaKeys.Length; slot++) { var key = mamaKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MamaValues(bars.Select(b => b.Close).ToArray(), mamaFast, mamaSlow).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSineWaveIndicatorV2)
+        {
+            var sineOptions = (EhlersSineWaveIndicatorV2SpecOptions)builtIn.CreateOptions(); var sineKeys = new[] { "Sine", "LeadSine" };
+            for (var slot = 0; slot < sineKeys.Length; slot++) { var key = sineKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => CyberSineValues(bars, sineOptions.Length, sineOptions.Alpha).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersDualDifferentiatorDominantCycle or IndicatorName.EhlersHomodyneDominantCycle or IndicatorName.EhlersPhaseAccumulationDominantCycle)
+        {
+            var cycleOptions = builtIn.CreateOptions(); var cycleMode = builtIn.BatchName == IndicatorName.EhlersDualDifferentiatorDominantCycle ? 0 : builtIn.BatchName == IndicatorName.EhlersHomodyneDominantCycle ? 1 : 2;
+            var cycleUpper = Integer(cycleOptions, "Length1", 48); var cycleLower = Integer(cycleOptions, "Length2", 20); var cycleMinimum = Integer(cycleOptions, "Length3", 10); var cycleHorizon = Integer(cycleOptions, "Length4", 40);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HilbertCycleValues(bars, cycleUpper, cycleLower, cycleMinimum, cycleHorizon, cycleMode).Values, IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersClassicHilbertTransformer)
+        {
+            var classicOptions = (EhlersClassicHilbertTransformerSpecOptions)builtIn.CreateOptions(); var classicKeys = new[] { "Real", "Imag" };
+            for (var slot = 0; slot < classicKeys.Length; slot++) { var key = classicKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ClassicHilbertValues(bars, classicOptions.Length1, classicOptions.Length2).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersHilbertTransformer or IndicatorName.EhlersHilbertTransformerIndicator)
+        {
+            var transformOptions = builtIn.CreateOptions(); var transformSmooth = transformOptions is EhlersHilbertTransformerIndicatorSpecOptions; var transformUpper = Integer(transformOptions, "Length1", 48); var transformLower = Integer(transformOptions, "Length2", 20); var transformSmoothing = Integer(transformOptions, "Length3", 10);
+            var transformKeys = new[] { "Real", "Imag" }; for (var slot = 0; slot < transformKeys.Length; slot++) { var key = transformKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HilbertTransformerValues(bars, transformUpper, transformLower, transformSmoothing, transformSmooth).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersHilbertTransformIndicator or IndicatorName.EhlersInstantaneousPhaseIndicator)
+        {
+            var phaseOptions = builtIn.CreateOptions(); var measureCycle = phaseOptions is EhlersInstantaneousPhaseIndicatorSpecOptions; var phaseLag = measureCycle ? ((EhlersInstantaneousPhaseIndicatorSpecOptions)phaseOptions).Length1 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).Length; var phaseHorizon = measureCycle ? ((EhlersInstantaneousPhaseIndicatorSpecOptions)phaseOptions).Length2 : 1; var realGain = measureCycle ? .635 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).IMult; var imaginaryGain = measureCycle ? .338 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).QMult;
+            var phaseKeys = measureCycle ? new[] { "Eipi" } : new[] { "Quad", "Inphase" }; for (var slot = 0; slot < phaseKeys.Length; slot++) { var key = phaseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HilbertPhaseValues(bars, phaseLag, realGain, imaginaryGain, phaseHorizon, measureCycle).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSquelchIndicator)
+        {
+            var squelchOptions = (EhlersSquelchIndicatorSpecOptions)builtIn.CreateOptions(); yield return IndicatorValidationRule.Reference(0, bars => SquelchValues(bars, squelchOptions.Length1, squelchOptions.Length2, squelchOptions.Length3).Values, IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersUniversalTradingFilter or IndicatorName.EhlersSnakeUniversalTradingFilter)
+        {
+            var tradingOptions = builtIn.CreateOptions(); var tradingSnake = tradingOptions is EhlersSnakeUniversalTradingFilterSpecOptions;
+            var tradingKind = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).MaType : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).MaType;
+            if (tradingKind is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
+            {
+                var tradingLength = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).Length1 : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).Length1; var tradingRms = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).Length2 : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).Length2; var tradingParameter = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).Bw : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).Mult;
+                var tradingKeys = tradingSnake ? new[] { "UpperBand", "Erf", "LowerBand" } : new[] { "Eutf", "UpperBand", "LowerBand" }; for (var slot = 0; slot < tradingKeys.Length; slot++) { var key = tradingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => UniversalTradingValues(bars, tradingLength, tradingRms, tradingParameter, tradingKind, tradingSnake)[key], IndicatorErrorBudget.Exact); }
+                yield break;
+            }
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersEmpiricalModeDecomposition && builtIn.CreateOptions() is EhlersEmpiricalModeDecompositionSpecOptions decomposition && decomposition.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
+        {
+            var decompositionKeys = new[] { "Trend", "Peak", "Valley" }; for (var slot = 0; slot < decompositionKeys.Length; slot++) { var key = decompositionKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EmpiricalDecompositionValues(bars, decomposition.Length1, decomposition.Length2, decomposition.Delta, decomposition.Fraction, decomposition.MaType)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersTrendExtraction && builtIn.CreateOptions() is EhlersTrendExtractionSpecOptions trendExtraction && trendExtraction.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
+        {
+            foreach (var slot in new[] { 0, 1 }) { var key = slot == 0 ? "Trend" : "Bp"; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrendExtractionValues(bars, trendExtraction.Length, trendExtraction.Delta, trendExtraction.MaType)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersModifiedStochasticIndicator or IndicatorName.EhlersStochastic)
+        {
+            var stochasticOptions = builtIn.CreateOptions(); var stochasticKind = (MovingAvgType)stochasticOptions.GetType().GetProperty("MaType")!.GetValue(stochasticOptions)!;
+            if (stochasticKind is MovingAvgType.Ehlers2PoleSuperSmootherFilterV1 or MovingAvgType.WeightedMovingAverage)
+            {
+                var modifiedStochastic = stochasticOptions is EhlersModifiedStochasticIndicatorSpecOptions;
+                var high = modifiedStochastic ? ((EhlersModifiedStochasticIndicatorSpecOptions)stochasticOptions).Length1 : 48; var low = modifiedStochastic ? ((EhlersModifiedStochasticIndicatorSpecOptions)stochasticOptions).Length2 : 10; var length = modifiedStochastic ? ((EhlersModifiedStochasticIndicatorSpecOptions)stochasticOptions).Length3 : ((EhlersStochasticSpecOptions)stochasticOptions).Length;
+                yield return IndicatorValidationRule.Reference(0, bars => RoofingStochasticValues(bars, high, low, length, stochasticKind, modifiedStochastic), IndicatorErrorBudget.Exact); yield break;
+            }
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersModifiedRelativeStrengthIndex)
+        {
+            var modified = (EhlersModifiedRelativeStrengthIndexSpecOptions)builtIn.CreateOptions();
+            foreach (var slot in new[] { 0, 1 }) { var key = slot == 0 ? "Emrsi" : "Signal"; yield return IndicatorValidationRule.Reference(slot, bars => ModifiedRsiValues(bars, modified.Length1, modified.Length2, modified.Length3)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersRocketRelativeStrengthIndex && builtIn.CreateOptions() is EhlersRocketRelativeStrengthIndexSpecOptions rocket && rocket.MaType is MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 or MovingAvgType.WeightedMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RocketRsiValues(bars, rocket.Length1, rocket.Length2, rocket.MaType, rocket.Mult), new IndicatorErrorBudget(1e-12, 1e-12, true));
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator && builtIn.CreateOptions() is EhlersSmoothedAdaptiveMomentumSpecOptions momentum && momentum.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage)
+        {
+            foreach (var slot in new[] { 0, 1 }) { var key = slot == 0 ? "Esam" : "Signal"; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SmoothedAdaptiveMomentumValues(bars, momentum.Length1, momentum.Length2, momentum.MaType)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DominantCycleTunedRelativeStrengthIndex)
+        {
+            var cycleTunedRsiOptions = (DominantCycleTunedRelativeStrengthIndexSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => CycleTunedRsiValues(bars, cycleTunedRsiOptions.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAdaptiveCenterOfGravityOscillator)
+        {
+            var adaptiveGravityOptions = (EhlersAdaptiveCenterOfGravityOscillatorSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AdaptiveGravityValues(bars, adaptiveGravityOptions.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAdaptiveCyberCycle)
+        {
+            var adaptiveCyberOptions = (EhlersAdaptiveCyberCycleSpecOptions)builtIn.CreateOptions();
+            var adaptiveCyberKeys = builtIn.BatchOutputKey is { } cyberKey ? new[] { cyberKey } : new[] { "Eacc", "Period" };
+            for (var slot = 0; slot < adaptiveCyberKeys.Length; slot++)
+            { var key = adaptiveCyberKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveCyberValues(bars, adaptiveCyberOptions.Length, adaptiveCyberOptions.Alpha)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersDeviationScaledSuperSmoother)
+        {
+            var superDeviationOptions = (EhlersDeviationScaledSuperSmootherSpecOptions)builtIn.CreateOptions();
+            if (superDeviationOptions.MaType is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DeviationSuperValues(bars, superDeviationOptions.Length, 50, superDeviationOptions.MaType), IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersDeviationScaledMovingAverage or IndicatorName.EhlersFisherizedDeviationScaledOscillator)
+        {
+            var fisherDeviation = builtIn.BatchName == IndicatorName.EhlersFisherizedDeviationScaledOscillator;
+            var deviationOptions = builtIn.CreateOptions(); var scaledFastPeriod = Math.Max(1, fisherDeviation ? ((EhlersFisherizedDeviationScaledOscillatorSpecOptions)deviationOptions).Length : ((EhlersDeviationScaledMovingAverageSpecOptions)deviationOptions).Length);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DeviationScaledValues(bars, scaledFastPeriod, fisherDeviation ? 40 : checked(2 * scaledFastPeriod), fisherDeviation), fisherDeviation ? FisherBudget : IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersFractalAdaptiveMovingAverage)
+        {
+            var framaOptions = builtIn.CreateOptions(); var period = framaOptions is EhlersFramaSpecOptions ehlers ? ehlers.Length : ((FramaSpecOptions)framaOptions).Length;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FramaValues(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAdaptiveLaguerreFilter)
+        {
+            var adaptive = (EhlersAdaptiveLaguerreFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AdaptiveLaguerreValues(bars, adaptive.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha)
+        {
+            var adaptive = (EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SelfAdjustingLaguerreValues(bars, adaptive.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersLaguerreRelativeStrengthIndex)
+        {
+            var laguerre = (EhlersLaguerreRsiSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LaguerreRsiValues(bars, 1 - 2d / (Math.Max(1, laguerre.Length) + 1d)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersEvenBetterSineWaveIndicator)
+        {
+            var sine = (EhlersEvenBetterSineWaveIndicatorSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EvenBetterSineValues(bars, sine.Length1, sine.Length2), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersEarlyOnsetTrendIndicator)
+        {
+            var onset = (EhlersEarlyOnsetTrendIndicatorSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EarlyOnsetValues(bars, onset.Length1, onset.Length2, onset.K), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersUniversalOscillator)
+        {
+            var universal = (EhlersUniversalOscillatorSpecOptions)builtIn.CreateOptions(); var universalKind = AverageKind(universal, 3);
+            if (Helpers.StrengthWindow.Supports(universal.MaType))
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UniversalOscillatorOutputs(bars, universal.Length, universalKind)["Euo"], IndicatorErrorBudget.Exact);
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => UniversalOscillatorOutputs(bars, universal.Length, universalKind)["Signal"], IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSuperPassbandFilter)
+        {
+            var pass = (EhlersSuperPassbandFilterSpecOptions)builtIn.CreateOptions(); var passKeys = new[] { "Espf", "UpperBand", "LowerBand" };
+            for (var index = 0; index < passKeys.Length; index++) { var key = passKeys[index]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(index, bars => SuperPassbandOutputs(bars, pass.FastLength, pass.SlowLength, pass.Length1, pass.Length2)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersRoofingFilterV1)
+        {
+            var v1 = RoofingV1Options(builtIn.CreateOptions());
+            if (v1.Kind != 0) { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoofingV1Values(bars, v1.High, v1.Low, v1.Kind), IndicatorErrorBudget.Exact); yield break; }
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersRoofingFilterV2 or IndicatorName.EhlersRoofingFilterIndicator)
+        {
+            var roofOriginal = builtIn.BatchName == IndicatorName.EhlersRoofingFilterIndicator; var roofOptions = builtIn.CreateOptions();
+            var roofUpper = Integer(roofOptions, roofOriginal ? "Length1" : "UpperLength", 80); var roofLower = Integer(roofOptions, roofOriginal ? "Length2" : "LowerLength", 40);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoofingValues(bars, roofUpper, roofLower, roofOriginal), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersReflexIndicator)
+        {
+            var reflexLength = Integer(builtIn.CreateOptions(), "Length", 20);
+            yield return IndicatorValidationRule.Reference(0, bars => ReflexValues(bars, reflexLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersTrendflexIndicator)
+        {
+            var flexLength = Integer(builtIn.CreateOptions(), "Length", 20);
+            yield return IndicatorValidationRule.Reference(0, bars => TrendflexValues(bars, flexLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersInstantaneousTrendlineV2)
+        {
+            var trendOptions = (EhlersInstantaneousTrendlineV2SpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => InstantaneousTrendOutputs(bars, trendOptions.Alpha)["Eit"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => InstantaneousTrendOutputs(bars, trendOptions.Alpha)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersTripleDelayLineDetrender)
+        {
+            var delayOptions = (EhlersTripleDelayLineDetrenderSpecOptions)builtIn.CreateOptions();
+            var delayKind = delayOptions.MaType == MovingAvgType.EhlersModifiedOptimumEllipticFilter ? 7 : AverageKind(delayOptions, 1);
+            if (Helpers.TripleDelayWindow.Supports(delayOptions.MaType))
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TripleDelayOutputs(bars, delayOptions.Length, delayKind)["Etdld"], IndicatorErrorBudget.Exact);
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => TripleDelayOutputs(bars, delayOptions.Length, delayKind)["Signal"], IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAMDetector)
+        {
+            var detectorOptions = (EhlersAMDetectorSpecOptions)builtIn.CreateOptions(); var detectorKind = AverageKind(detectorOptions, 1);
+            if (Helpers.StrengthWindow.Supports(detectorOptions.MaType))
+            {
+                foreach (var key in new[] { "Eamd", "Signal" })
+                { var outputKey = key; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(Array.IndexOf(new[] { "Eamd", "Signal" }, key), bars => AmDetectorOutputs(bars, detectorOptions.Length1, detectorOptions.Length2, detectorKind)[outputKey], IndicatorErrorBudget.Exact); }
+                yield break;
+            }
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersRecursiveMedianOscillator)
+        {
+            var oscillatorOptions = (EhlersRecursiveMedianOscillatorSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RecursiveMedianOscillatorValues(bars, oscillatorOptions.Length1, oscillatorOptions.Length2, oscillatorOptions.Length3), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersRecursiveMedianFilter)
+        {
+            var medianOptions = (EhlersRecursiveMedianFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RecursiveMedianValues(bars, medianOptions.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if(builtIn.BatchName==IndicatorName.EhlersDistanceCoefficientFilter)
+        {
+            var coefficientOptions=(EhlersDistanceCoefficientFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>DistanceCoefficientValues(bars,coefficientOptions.Length),IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if(builtIn.BatchName==IndicatorName.EhlersFilter)
+        {
+            var distanceOptions=(EhlersFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>EhlersDistanceFilterValues(bars,distanceOptions.Length),IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersStochasticCyberCycle)
+        {
+            var stochasticCyber = (EhlersStochasticCyberCycleSpecOptions)builtIn.CreateOptions();
+            var stochasticCyberKeys = builtIn.BatchOutputKey is { } stochasticCyberSelected ? new[] { stochasticCyberSelected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<stochasticCyberKeys.Length;slot++) {var key=stochasticCyberKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>StochasticCyberValues(bars,stochasticCyber.Length,stochasticCyber.Alpha)[key],IndicatorErrorBudget.Exact);}
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersCyberCycle)
+        {
+            var cyberOptions = builtIn.CreateOptions(); var cyberAlpha = Number(cyberOptions, 2d / (Integer(cyberOptions, "Length", 14) + 1d), "Alpha");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CyberCycleValues(bars, cyberAlpha), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersImpulseResponse)
+        {
+            var impulseOptions = (EhlersImpulseResponseSpecOptions)builtIn.CreateOptions();
+            var impulseKind = impulseOptions.MaType == MovingAvgType.EhlersHannMovingAverage ? 7 : AverageKind(impulseOptions, 0);
+            if (impulseKind is 1 or 2 or 3 or 6 or 7)
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ImpulseResponseValues(bars, impulseOptions.Length, impulseOptions.Bw, impulseKind), IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersChebyshevLowPassFilter)
+        {
+            var chebyshevKeys = builtIn.BatchOutputKey is { } chebyshevSelected ? new[] { chebyshevSelected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < chebyshevKeys.Length; slot++) { var key = chebyshevKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ChebyshevWaveValues(bars, key)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersVossPredictiveFilter)
+        {
+            var voss = (EhlersVossPredictiveFilterSpecOptions)builtIn.CreateOptions();
+            var vossKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < vossKeys.Length; slot++) { var key = vossKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VossPredictiveValues(bars, voss.Length, voss.Predict, voss.Bandwidth)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersTruncatedBandPassFilter)
+        {
+            var truncated = (EhlersTruncatedBandPassFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TruncatedBandPassValues(bars, truncated.Length1, truncated.Length2, truncated.Bandwidth), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DynamicallyAdjustableFilter)
+        {
+            var dynamicFilter = (DynamicallyAdjustableFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DynamicFilterValues(bars, dynamicFilter.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PercentageTrend)
+        {
+            var percentageOptions = (PercentageTrendSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => PercentageTrendValues(bars, percentageOptions.Length, percentageOptions.Pct), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersHammingWindowIndicator)
+        {
+            var hammingOptions = (EhlersHammingWindowIndicatorSpecOptions)builtIn.CreateOptions();
+            var hammingKind = hammingOptions.MaType == MovingAvgType.EhlersHammingMovingAverage ? 7 : AverageKind(hammingOptions, 1); if (hammingKind == 0) yield break;
+            var hammingKeys = builtIn.BatchOutputKey is { } selectedHamming ? new[] { selectedHamming } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < hammingKeys.Length; slot++)
+            { var key = hammingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HammingIndicatorOutputs(bars, hammingOptions.Length, hammingKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersHannWindowIndicator)
+        {
+            var hannOptions = (EhlersHannWindowIndicatorSpecOptions)builtIn.CreateOptions();
+            var hannKind = hannOptions.MaType == MovingAvgType.EhlersHannMovingAverage ? 7 : AverageKind(hannOptions, 1); if (hannKind == 0) yield break;
+            var hannKeys = builtIn.BatchOutputKey is { } selectedHann ? new[] { selectedHann } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < hannKeys.Length; slot++)
+            { var key = hannKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HannIndicatorOutputs(bars, hannOptions.Length, hannKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersTriangleWindowIndicator)
+        {
+            var triangleOptions = (EhlersTriangleWindowIndicatorSpecOptions)builtIn.CreateOptions();
+            var triangleKind = triangleOptions.MaType == MovingAvgType.EhlersTriangleMovingAverage ? 7 : AverageKind(triangleOptions, 1); if (triangleKind == 0) yield break;
+            var triangleKeys = builtIn.BatchOutputKey is { } selectedTriangle ? new[] { selectedTriangle } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < triangleKeys.Length; slot++)
+            { var key = triangleKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TriangleIndicatorOutputs(bars, triangleOptions.Length, triangleKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RecursiveDifferenciator)
+        {
+            var recursiveOptions = builtIn.CreateOptions(); var recursiveKind = AverageKind(recursiveOptions, 3); if (recursiveKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RecursiveDifferenciatorTrajectory(bars, Integer(recursiveOptions, "Length", 14), Number(recursiveOptions, .6, "Alpha"), recursiveKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersDecyclerOscillatorV2)
+        {
+            var decyclerOptions = builtIn.CreateOptions(); var decyclerKind = AverageKind(decyclerOptions, 2); if (decyclerKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DecyclerV2Trajectory(Closes(bars), Integer(decyclerOptions, "FastLength", 10), Integer(decyclerOptions, "SlowLength", 20), decyclerKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersHighPassFilterV2)
+        {
+            var highPassOptions = builtIn.CreateOptions(); var highPassKind = AverageKind(highPassOptions, 2); if (highPassKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HighPassV2Trajectory(Closes(bars), Integer(highPassOptions, "Length", 20), highPassKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FastandSlowKurtosisOscillator)
+        {
+            var fskOptions = builtIn.CreateOptions(); var fskKind = AverageKind(fskOptions, 2); if (fskKind == 0) yield break;
+            var fskKeys = builtIn.BatchOutputKey is { } selectedKey ? new[] { selectedKey } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < fskKeys.Length; slot++)
+            { var key = fskKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowKurtosisOutputs(bars, Integer(fskOptions, "Length", 3), Number(fskOptions, .03, "Ratio"), fskKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OnBalanceVolumeModified)
+        {
+            var modifiedObvOptions = builtIn.CreateOptions(); var modifiedObvKind = AverageKind(modifiedObvOptions, 3); if (modifiedObvKind == 0) yield break;
+            var modifiedObvKeys = builtIn.BatchOutputKey is { } selectedOnBalanceVolumeModified ? new[] { selectedOnBalanceVolumeModified } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < modifiedObvKeys.Length; slot++)
+            { var key = modifiedObvKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ModifiedObvOutputs(bars, Integer(modifiedObvOptions, "Length1", 7), Integer(modifiedObvOptions, "Length2", 10), modifiedObvKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.Repulse)
+        {
+            var repulseOptions = builtIn.CreateOptions(); var repulseKind = AverageKind(repulseOptions, 3); if (repulseKind == 0) yield break;
+            var repulseKeys = builtIn.BatchOutputKey is { } selectedRepulse ? new[] { selectedRepulse } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < repulseKeys.Length; slot++)
+            { var key = repulseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RepulseOutputs(bars, Integer(repulseOptions, "Length", 5), repulseKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSimpleDerivIndicator)
+        {
+            var derivOptions = builtIn.CreateOptions(); var derivKind = AverageKind(derivOptions, 3); if (derivKind == 0) yield break;
+            var derivKeys = builtIn.BatchOutputKey is { } selectedDeriv ? new[] { selectedDeriv } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < derivKeys.Length; slot++)
+            { var key = derivKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersDerivOutputs(bars, Integer(derivOptions, "Length", 2), Integer(derivOptions, "SignalLength", 8), derivKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSimpleWindowIndicator)
+        {
+            var simpleWindowOptions = builtIn.CreateOptions(); var simpleWindowKind = AverageKind(simpleWindowOptions, 1); if (simpleWindowKind == 0) yield break;
+            var simpleWindowKeys = builtIn.BatchOutputKey is { } selectedSimpleWindow ? new[] { selectedSimpleWindow } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < simpleWindowKeys.Length; slot++)
+            { var key = simpleWindowKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersSimpleWindowOutputs(bars, Integer(simpleWindowOptions, "Length", 20), simpleWindowKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SimpleCycle)
+        {
+            var cycleOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SimpleCycleOutputs(bars, Integer(cycleOptions, "Length", 50)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SimpleLines)
+        {
+            var linesOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => SimpleLinesOutputs(bars, Integer(linesOptions, "Length", 10), Number(linesOptions, 10, "Multiplier")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StiffnessIndicator)
+        {
+            var stiffnessOptions = builtIn.CreateOptions(); var stiffnessKind = AverageKind(stiffnessOptions, 1); if (stiffnessKind == 0) yield break;
+            yield return IndicatorValidationRule.Reference(0, bars => StiffnessOutputs(bars, Integer(stiffnessOptions, "Length1", 100), Integer(stiffnessOptions, "Length2", 60), Integer(stiffnessOptions, "SmoothingLength", 3), stiffnessKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FiniteVolumeElements)
+        {
+            var finiteVolumeOptions = builtIn.CreateOptions(); var finiteVolumeKind = AverageKind(finiteVolumeOptions, 1); if (finiteVolumeKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FiniteVolumeOutputs(bars, Integer(finiteVolumeOptions, "Length", 22), Number(finiteVolumeOptions, .3, "Factor"), finiteVolumeKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ReallySimpleIndicator)
+        {
+            var simpleOptions = builtIn.CreateOptions(); var simpleKind = AverageKind(simpleOptions, 3); if (simpleKind == 0) yield break;
+            var simpleKeys = builtIn.BatchOutputKey is { } selectedSimple ? new[] { selectedSimple } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var simpleSlot = 0; simpleSlot < simpleKeys.Length; simpleSlot++)
+            {
+                var simpleKey = simpleKeys[simpleSlot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(simpleSlot, bars => ReallySimpleOutputs(bars, Integer(simpleOptions, "Length", 21), Integer(simpleOptions, "SmoothLength", 10), simpleKind)[simpleKey], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SurfaceRoughnessEstimator)
+        {
+            var surfaceLength = Integer(builtIn.CreateOptions(), "Length", 100);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SurfaceRoughnessOutputs(bars, surfaceLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSimpleClipIndicator)
+        {
+            var clipOptions = builtIn.CreateOptions(); var clipKind = AverageKind(clipOptions, 3); if (clipKind == 0) yield break;
+            var clipKeys = builtIn.BatchOutputKey is { } selectedClip ? new[] { selectedClip } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < clipKeys.Length; slot++)
+            { var key = clipKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersClipOutputs(bars, Integer(clipOptions, "Length1", 2), Integer(clipOptions, "Length3", 50), Integer(clipOptions, "SignalLength", 22), clipKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrigonometricOscillator)
+        {
+            var trigonometricLength = Integer(builtIn.CreateOptions(), "Length", 200);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrigonometricOutputs(bars, trigonometricLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendStep)
+        {
+            var trendStepLength = Integer(builtIn.CreateOptions(), "Length", 50);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrendStepOutputs(bars, trendStepLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StrengthOfMovement)
+        {
+            var movementOptions = builtIn.CreateOptions(); var movementKind = AverageKind(movementOptions, 2); if (movementKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MovementStrengthOutputs(bars, Integer(movementOptions, "Length1", 10), Integer(movementOptions, "Length2", 3), 3, movementKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SettingLessTrendStepFiltering)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, SettingLessStepOutputs, IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SigmaSpikes)
+        {
+            var sigmaOptions = builtIn.CreateOptions(); var sigmaKind = AverageKind(sigmaOptions, 3); if (sigmaKind == 0) yield break;
+            var sigmaKeys = builtIn.BatchOutputKey is { } selectedSigma ? new[] { selectedSigma } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < sigmaKeys.Length; slot++)
+            { var key = sigmaKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SigmaSpikesOutputs(bars, Integer(sigmaOptions, "Length", 20), sigmaKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolatilitySwitchIndicator)
+        {
+            var volatilitySwitchOptions = builtIn.CreateOptions(); var volatilitySwitchKind = AverageKind(volatilitySwitchOptions, 2); if (volatilitySwitchKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilitySwitchOutputs(bars, Integer(volatilitySwitchOptions, "Length", 14), volatilitySwitchKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersDetrendedLeadingIndicator)
+        {
+            var leadingOptions = builtIn.CreateOptions(); var leadingKeys = builtIn.BatchOutputKey is { } selectedLeading ? new[] { selectedLeading } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < leadingKeys.Length; slot++)
+            { var key = leadingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DetrendedLeadingOutputs(bars, Integer(leadingOptions, "Length", 14))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MotionSmoothnessIndex)
+        {
+            var motionOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MotionSmoothnessOutputs(bars, Integer(motionOptions, "Length", 50)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FallingRisingFilter)
+        {
+            var fallingOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FallingRisingOutputs(bars, Integer(fallingOptions, "Length", 14)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RunningEquity)
+        {
+            var equityOptions = builtIn.CreateOptions(); var equityKind = AverageKind(equityOptions, 1); if (equityKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RunningEquityOutputs(bars, Integer(equityOptions, "Length", 100), equityKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MultiLevelIndicator)
+        {
+            var multiLevelOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MultiLevelOutputs(bars, Integer(multiLevelOptions, "Length", 14), Number(multiLevelOptions, 10000, "Factor")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ModularFilter)
+        {
+            var modularOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ModularOutputs(bars, Integer(modularOptions, "Length", 200), Number(modularOptions, .8, "Beta")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSimpleCycleIndicator)
+        {
+            var simpleCycleOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SimpleCycleIndicatorOutputs(bars, Number(simpleCycleOptions, .07, "Alpha")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAllPassPhaseShifter)
+        {
+            var allPassOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AllPassPhaseOutputs(bars, Integer(allPassOptions, "Length", 20)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersHpLpRoofingFilter or IndicatorName.EhlersZeroMeanRoofingFilter)
+        {
+            var roofOptions = builtIn.CreateOptions(); var zeroRoof = builtIn.BatchName == IndicatorName.EhlersZeroMeanRoofingFilter;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => { var result = HpLpRoofingOutputs(bars, Integer(roofOptions, "Length1", 48), Integer(roofOptions, "Length2", 10)); return zeroRoof ? result.Zero : result.Roof; }, IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV1 or IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV2)
+        {
+            var reverseOptions = builtIn.CreateOptions(); var version2 = builtIn.BatchName == IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV2;
+            var reverseKeys = builtIn.BatchOutputKey is { } selectedReverse ? new[] { selectedReverse } : version2 ? new[] { "EremaCycle", "EremaTrend" } : new[] { "Erema" };
+            for (var output = 0; output < reverseKeys.Length; output++)
+            {
+                var alpha = version2 ? reverseKeys[output] == "EremaTrend" ? Number(reverseOptions, .05, "TrendAlpha") : Number(reverseOptions, .3, "CycleAlpha") : Number(reverseOptions, .1, "Alpha");
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(output, bars => ReverseEmaOutputs(bars, alpha), IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersImpulseReaction)
+        {
+            var reactionOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ImpulseReactionOutputs(bars, Integer(reactionOptions, "Length1", 2), Integer(reactionOptions, "Length2", 20), Number(reactionOptions, .9, "Q")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersAverageErrorFilter)
+        {
+            var errorOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AverageErrorOutputs(bars, Integer(errorOptions, "Length", 27)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GeneralFilterEstimator)
+        {
+            var filterOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => GeneralFilterOutputs(bars, Integer(filterOptions, "Length", 100)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolatilityRatio)
+        {
+            var ratioOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilityRatioOutputs(bars, Integer(ratioOptions, "Length", 14)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
+        {
+            var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < kurtosisKeys.Length; slot++)
+            { var key = kurtosisKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KurtosisOutputs(bars)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RecursiveStochastic)
+        {
+            var recursiveOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => RecursiveStochasticOutputs(bars, Integer(recursiveOptions, "Length", 200), Number(recursiveOptions, .1, "Alpha")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChopZone)
+        {
+            var chopOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => ChopZoneOutputs(bars, Integer(chopOptions, "Length", 30), 34, AverageKind(chopOptions, 3), indicator.Source is not null), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GopalakrishnanRangeIndex)
+        {
+            var gapoOptions = builtIn.CreateOptions(); var gapoKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < gapoKeys.Length; slot++)
+            { var key = gapoKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GopalakrishnanOutputs(bars, Integer(gapoOptions, "Length", 5), AverageKind(gapoOptions, 2))[key], new IndicatorErrorBudget(1e-10, 1e-12, true)); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChoppinessIndex)
+        {
+            var choppinessOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ChoppinessOutputs(bars, Integer(choppinessOptions, "Length", 14)), new IndicatorErrorBudget(1e-9, 1e-12, true));
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BelkhayateTiming)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, BelkhayateOutputs, IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DampingIndex)
+        {
+            var dampingOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DampingOutputs(bars, Integer(dampingOptions, "Length", 5), AverageKind(dampingOptions, 1)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChartmillValueIndicator)
+        {
+            var chartmillOptions = builtIn.CreateOptions(); var chartmillKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < chartmillKeys.Length; slot++)
+            {
+                var key = chartmillKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => ChartmillOutputs(bars, Integer(chartmillOptions, "Length", 5), AverageKind(chartmillOptions, 1), indicator.Source is not null)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.UltimateOscillator)
+        {
+            var ultimateOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => UltimatePressureOutputs(bars, Integer(ultimateOptions, "Length1", 7), Integer(ultimateOptions, "Length2", 14), Integer(ultimateOptions, "Length3", 28)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GatorOscillator)
+        {
+            var gatorOptions = builtIn.CreateOptions(); var gatorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < gatorKeys.Length; slot++)
+            {
+                var key = gatorKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GatorOutputs(bars, Integer(gatorOptions, "Length", 13), selected: indicator.Source is not null)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DerivativeOscillator)
+        {
+            var derivativeOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => DerivativeOutputs(bars, Integer(derivativeOptions, "Length", 14), 9, 5, 3, AverageKind(derivativeOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ErgodicCandlestickOscillator)
+        {
+            var candleOptions = builtIn.CreateOptions(); var candleKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < candleKeys.Length; slot++)
+            {
+                var key = candleKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ErgodicCandleOutputs(bars, 32, Integer(candleOptions, "Length", 12), AverageKind(candleOptions, 3))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SMIErgodicIndicator)
+        {
+            var smiOptions = builtIn.CreateOptions(); var smiKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < smiKeys.Length; slot++)
+            {
+                var key = smiKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => SmiErgodicOutputs(bars, Integer(smiOptions, "FastLength", 5), Integer(smiOptions, "SlowLength", 20), Integer(smiOptions, "SignalLength", 5), AverageKind(smiOptions, 3))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SmoothedWilliamsR)
+        {
+            var swrOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SmoothedWilliamsOutputs(bars, Integer(swrOptions, "Length", 14), Integer(swrOptions, "SmoothLength", 3))["Swr"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TurboTrigger)
+        {
+            var turboOptions = builtIn.CreateOptions(); var turboKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < turboKeys.Length; slot++)
+            {
+                var key = turboKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TurboTriggerOutputs(bars, Integer(turboOptions, "Length", 100), kind: AverageKind(turboOptions, 1))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TheRangeIndicator)
+        {
+            var rangeOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => RangeIndicatorOutputs(bars, Integer(rangeOptions, "Length", 10), AverageKind(rangeOptions, 3))["Tri"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TradingMadeMoreSimplerOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => TradingAgreementOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Tmmso"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BuffAverage)
+        {
+            var buffKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < buffKeys.Length; slot++)
+            {
+                var key = buffKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => BuffOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 5))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AutoLineWithDrift)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutoDriftOutputs(bars,Integer(builtIn.CreateOptions(),"Length",500))["Alwd"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AutoLine)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => AutoLineOutputs(bars,Integer(builtIn.CreateOptions(),"Length",500))["Al"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SimplePriceZone)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => SimplePriceZoneOutputs(bars,Integer(builtIn.CreateOptions(),"Length",14))["Spz"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AverageAbsoluteErrorNormalization)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => AbsoluteErrorOutputs(bars,Integer(builtIn.CreateOptions(),"Length",14))["Aaen"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RetrospectiveCandlestickChart)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RetrospectiveCandleOutputs(bars,Integer(builtIn.CreateOptions(),"Length",100))["Rcc"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DemarkRangeExpansionIndex)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => DemarkRangeOutputs(bars,Integer(builtIn.CreateOptions(),"Length",5))["Drei"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EarningSupportResistanceLevels)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => EarningLevelsOutputs(bars)["Esr"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ParametricCorrectiveLinearMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ParametricCorrectiveOutputs(bars, builtIn)["Pclma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersDecyclerOscillatorV1)
+        {
+            var decyclerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < decyclerKeys.Length; slot++)
+            {
+                var key = decyclerKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DecyclerOscillatorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersRelativeVigorIndex)
+        {
+            var ehlersVigorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < ehlersVigorKeys.Length; slot++) { var key = ehlersVigorKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersVigorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NormalizedRelativeVigorIndex)
+        {
+            var normalizedVigorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < normalizedVigorKeys.Length; slot++) { var key = normalizedVigorKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => NormalizedVigorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.RangeActionVerificationIndex or IndicatorName.EhlersMovingAverageDifferenceIndicator)
+        {
+            var key=builtIn.BatchName==IndicatorName.RangeActionVerificationIndex?"Ravi":"Emad";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>AverageGapOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChaikinMoneyFlow)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>ChaikinFlowOutputs(bars,builtIn)["Cmf"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptiveMovingAverage)
+        {
+            yield return IndicatorValidationRule.Reference(0,bars=>AdaptiveRangeMeanOutputs(bars,builtIn)["Ama"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DailyAveragePriceDelta)
+        {
+            var dailyDeltaKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<dailyDeltaKeys.Length;slot++){var key=dailyDeltaKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>DailyDeltaOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChaikinVolatility)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>ChaikinVolatilityOutputs(bars,builtIn)["Cv"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CenterOfLinearity)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>CenterLinearityOutputs(bars,builtIn)["Col"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PrettyGoodOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>PrettyGoodOutputs(bars,builtIn)["Pgo"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PriceCycleOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>PriceCycleOutputs(bars,builtIn)["Pco"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.InternalBarStrengthIndicator)
+        {
+            var ibsKeys=new[]{"Ibs","Signal"};for(var slot=0;slot<ibsKeys.Length;slot++){var key=ibsKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>InternalBarStrengthOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RatioOCHLAverager)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>RatioOchlOutputs(bars)["Rochla"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ProjectedSupportAndResistance)
+        {
+            var projectedKeys=new[]{"Support1","Support2","Resistance1","Resistance2","MiddleBand"};var projectedLength=Integer(builtIn.CreateOptions(),"Length",25);
+            for(var slot=0;slot<projectedKeys.Length;slot++){var key=projectedKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>ProjectedLevelsOutputs(bars,projectedLength)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TironeLevels)
+        {
+            var tironeKeys=new[]{"Tlh","Clh","Blh","Am","Eh","El","Rh","Rl"};var tironeLength=Integer(builtIn.CreateOptions(),"Length",20);
+            for(var slot=0;slot<tironeKeys.Length;slot++){var key=tironeKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>TironeOutputs(bars,tironeLength)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FibonacciPivotPoints)
+        {
+            var fibonacciKeys=new[]{"Pivot","S1","S2","S3","R1","R2","R3","M1","M2","M3","M4","M5","M6"};
+            for(var slot=0;slot<fibonacciKeys.Length;slot++){var key=fibonacciKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>FibonacciPivotOutputs(bars)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DemarkPivotPoints)
+        {
+            var demarkKeys=new[]{"Pivot","S1","R1"};
+            for(var slot=0;slot<demarkKeys.Length;slot++){var key=demarkKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>DemarkPivotOutputs(bars)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PivotPointAverage && AverageKind(builtIn.CreateOptions(),1) is 1 or 2 or 3 or 6)
+        {
+            var pivotAverageKeys=new[]{"Pivot1","Signal1","Pivot2","Signal2","Pivot3","Signal3"};
+            for(var slot=0;slot<pivotAverageKeys.Length;slot++){var key=pivotAverageKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>PivotAverageOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FloorPivotPoints)
+        {
+            var floorKeys=builtIn.BatchOutputKey is { } selected?new[]{selected}:new[]{"Pivot","S1","S2","S3","R1","R2","R3","M1","M2","M3","M4","M5","M6"};
+            for(var slot=0;slot<floorKeys.Length;slot++){var key=floorKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>FloorPivotOutputs(bars)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CamarillaPivotPoints)
+        {
+            var camarillaKeys=new[]{"Pivot","S1","S2","S3","S4","S5","R1","R2","R3","R4","R5","M1","M2","M3","M4","M5","M6"};
+            for(var slot=0;slot<camarillaKeys.Length;slot++){var key=camarillaKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>CamarillaPivotOutputs(bars)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WoodiePivotPoints)
+        {
+            var woodieKeys=new[]{"Pivot","S1","S2","S3","S4","R1","R2","R3","R4","M1","M2","M3","M4"};
+            for(var slot=0;slot<woodieKeys.Length;slot++){var key=woodieKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>WoodiePivotOutputs(bars)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.StandardPivotPoints or IndicatorName.DynamicPivotPoints)
+        {
+            var dailyPivotKeys=builtIn.BatchName==IndicatorName.StandardPivotPoints?new[]{"Pivot","S1","S2","S3","R1","R2","R3","M1","M2","M3","M4","M5","M6"}:new[]{"Pivot","S1","R1"};
+            for(var slot=0;slot<dailyPivotKeys.Length;slot++){var key=dailyPivotKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>DailyPivotOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MassIndex)
+        {
+            var massKeys=new[]{"Mi","Signal"};for(var slot=0;slot<massKeys.Length;slot++){var key=massKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>MassIndexOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PpoMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>PpoMaOutputs(bars,builtIn)["PpoMa"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AnchoredMomentum)
+        {
+            var anchorKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<anchorKeys.Length;slot++){var key=anchorKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>AnchoredMomentumOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersCenterofGravityOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>CenterGravityOutputs(bars,builtIn)["Ecog"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersStochasticCenterOfGravityOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0,bars=>StochasticGravityOutputs(bars,builtIn)["Escog"],IndicatorErrorBudget.Exact);yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RexOscillator)
+        {
+            var rexKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < rexKeys.Length; slot++) { var key = rexKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NthOrderDifferencingOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => NthDifferenceOutputs(bars, builtIn)["Nodo"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RelativeVigorIndex)
+        {
+            var vigorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < vigorKeys.Length; slot++) { var key = vigorKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RelativeVigorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.RelativeVolatilityIndexHigh or IndicatorName.RelativeVolatilityIndexLow)
+        {
+            var key = builtIn.BatchName == IndicatorName.RelativeVolatilityIndexHigh ? "RviHigh" : "RviLow";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SeededRelativeVolatilityOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.RelativeVolatilityIndexV1 or IndicatorName.RelativeVolatilityIndexV2)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RelativeVolatilityOutputs(bars, builtIn)["Rvi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ForecastOscillator or IndicatorName.PercentChangeOscillator)
+        {
+            var returnKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < returnKeys.Length; slot++) { var key = returnKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => OneBarReturnOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TimeSeriesForecast)
+        {
+            var forecastKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < forecastKeys.Length; slot++) { var key = forecastKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TimeSeriesForecastOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.Demarker)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DemarkerOutputs(bars, builtIn)["Dm"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.BullPowerIndicator or IndicatorName.BearPowerIndicator)
+        {
+            var powerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < powerKeys.Length; slot++) { var key = powerKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => CandlePowerOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersCycleAmplitude)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CycleAmplitudeOutputs(bars, builtIn)["Eca"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersBandPassFilterV1 or IndicatorName.EhlersBandPassFilterV2 or IndicatorName.EhlersCycleBandPassFilter)
+        {
+            var bandPassKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < bandPassKeys.Length; slot++) { var key = bandPassKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ClampedBandPassOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.KirshenbaumBands)
+        {
+            var kirshenbaumKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < kirshenbaumKeys.Length; slot++) { var key = kirshenbaumKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KirshenbaumOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AutoDispersionBands)
+        {
+            var dispersionKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < dispersionKeys.Length; slot++) { var key = dispersionKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AutoDispersionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PseudoPolynomialChannel)
+        {
+            var polynomialKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < polynomialKeys.Length; slot++) { var key = polynomialKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PseudoPolynomialOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EfficientTrendStepChannel)
+        {
+            var stepKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < stepKeys.Length; slot++) { var key = stepKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EfficientTrendStepOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HurstCycleChannel)
+        {
+            var cycleKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < cycleKeys.Length; slot++) { var key = cycleKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HurstCycleOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeAdaptiveBands)
+        {
+            var volumeBandKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < volumeBandKeys.Length; slot++) { var key = volumeBandKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VolumeAdaptiveBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RootMovingAverageSquaredErrorBands)
+        {
+            var rmseKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < rmseKeys.Length; slot++) { var key = rmseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RmseBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HurstBands)
+        {
+            var hurstKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < hurstKeys.Length; slot++) { var key = hurstKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HurstBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.UniChannel)
+        {
+            var uniKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < uniKeys.Length; slot++) { var key = uniKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => UniChannelOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NarrowSidewaysChannel)
+        {
+            var narrowKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < narrowKeys.Length; slot++) { var key = narrowKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => NarrowSidewaysOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendTraderBands)
+        {
+            var trendKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < trendKeys.Length; slot++) { var key = trendKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrendTraderOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ScalpersChannel)
+        {
+            var scalperKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < scalperKeys.Length; slot++) { var key = scalperKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ScalperChannelOutputs(bars, builtIn)[key], key == "Scalper" ? ScalperBudget : IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FlaggingBands)
+        {
+            var flaggingKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < flaggingKeys.Length; slot++) { var key = flaggingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FlaggingBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FractalChaosBands)
+        {
+            var fractalKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < fractalKeys.Length; slot++) { var key = fractalKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FractalBandOutputs(bars)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.PriceLineChannel or IndicatorName.PriceCurveChannel)
+        {
+            var driftKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < driftKeys.Length; slot++) { var key = driftKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PriceDriftOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.MotionToAttractionChannels or IndicatorName.MotionToAttractionTrailingStop)
+        {
+            var motionKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < motionKeys.Length; slot++) { var key = motionKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MotionAttractionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ExtendedRecursiveBands)
+        {
+            var extendedKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < extendedKeys.Length; slot++) { var key = extendedKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ExtendedBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SmartEnvelope)
+        {
+            var smartKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < smartKeys.Length; slot++) { var key = smartKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SmartEnvelopeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DEnvelope)
+        {
+            var envelopeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < envelopeKeys.Length; slot++) { var key = envelopeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DEnvelopeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GChannels)
+        {
+            var gChannelKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < gChannelKeys.Length; slot++) { var key = gChannelKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GChannelOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RateOfChangeBands)
+        {
+            var rocBandKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < rocBandKeys.Length; slot++) { var key = rocBandKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RocBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PriceHeadleyAccelerationBands)
+        {
+            var headleyKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < headleyKeys.Length; slot++) { var key = headleyKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HeadleyBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DonchianChannelWidth)
+        {
+            var widthKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < widthKeys.Length; slot++) { var key = widthKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DonchianWidthOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SmoothedVolatilityBands)
+        {
+            var volatilityKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < volatilityKeys.Length; slot++) { var key = volatilityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SmoothedVolatilityOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DynamicSupportAndResistance)
+        {
+            var supportKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < supportKeys.Length; slot++) { var key = supportKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DynamicSupportOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BollingerBandsWithAtrPct)
+        {
+            var atrPercentKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < atrPercentKeys.Length; slot++) { var key = atrPercentKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AtrPercentBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AverageTrueRangeTrailingStops)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrTrailingOutputs(bars, builtIn)["Atrts"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BollingerBandsAverageTrueRange)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BollingerAtrOutputs(bars, builtIn)["AtrDev"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.AverageTrueRangeChannel or IndicatorName.StollerAverageRangeChannels or IndicatorName.BollingerBandsFibonacciRatios)
+        {
+            var channelKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < channelKeys.Length; slot++) { var key = channelKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RangeChannelOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AverageTrueRange)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrOutputs(bars, builtIn)["Atr"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.NormalizedAverageTrueRange or IndicatorName.AtrChannelWidth)
+        {
+            var key = builtIn.BatchName == IndicatorName.AtrChannelWidth ? "Acw" : "Natr";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrDerivedOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.KeltnerChannels or IndicatorName.KeltnerChannelWidth)
+        {
+            var keltnerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < keltnerKeys.Length; slot++) { var key = keltnerKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KeltnerOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptiveErgodicCandlestickOscillator)
+        {
+            var candleKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < candleKeys.Length; slot++) { var key = candleKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveCandleOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptivePriceZoneIndicator)
+        {
+            var zoneKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < zoneKeys.Length; slot++) { var key = zoneKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveZoneOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AverageDirectionalIndex)
+        {
+            var directionalKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < directionalKeys.Length; slot++) { var key = directionalKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DirectionalIndexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.QuadraticRegression)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.QuadraticLeastSquaresMovingAverage)
+        {
+            var quadraticKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < quadraticKeys.Length; slot++)
+            {
+                var key = quadraticKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => QuadraticFitOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptiveExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AdaptiveEmaOutputs(bars, builtIn)["Aema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.PoweredKaufmanAdaptiveMovingAverage or IndicatorName.AdaptiveTrailingStop)
+        {
+            var poweredKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < poweredKeys.Length; slot++)
+            {
+                var key = poweredKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PoweredKaufmanOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.AdaptiveAutonomousRecursiveMovingAverage or IndicatorName.AdaptiveAutonomousRecursiveTrailingStop)
+        {
+            var autonomousKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < autonomousKeys.Length; slot++)
+            {
+                var key = autonomousKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveAutonomousOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.SwingIndex or IndicatorName.AccumulativeSwingIndex)
+        {
+            var swingKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < swingKeys.Length; slot++)
+            {
+                var key = swingKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SwingOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AbsoluteStrengthMTFIndicator)
+        {
+            var strengthKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < strengthKeys.Length; slot++)
+            {
+                var key = strengthKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AbsoluteStrengthMtfOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AbsoluteStrengthIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AbsoluteStrengthOutputs(bars, builtIn)["Asi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NarrowBandpassFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => NarrowBandpassOutputs(bars, builtIn)["Nbpf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ShapeshiftingMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ShapeshiftingOutputs(bars, builtIn)["Sma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GainLossMovingAverage)
+        {
+            var gainLossKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < gainLossKeys.Length; slot++)
+            {
+                var key = gainLossKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GainLossAverageOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VerticalHorizontalMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VerticalHorizontalAverageOutputs(bars, builtIn)["Vhma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VerticalHorizontalFilter)
+        {
+            var verticalKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < verticalKeys.Length; slot++)
+            {
+                var key = verticalKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VerticalHorizontalOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OvershootReductionMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OvershootOutputs(bars, builtIn)["Orma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LightLeastSquaresMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LightLeastSquaresOutputs(bars, builtIn)["Llsma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersLeadingIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LeadingOutputs(bars, builtIn)["Eli"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersDecycler)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DecyclerOutputs(bars, builtIn)["Ed"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersSimpleDecycler)
+        {
+            var decyclerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < decyclerKeys.Length; slot++)
+            {
+                var key = decyclerKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SimpleDecyclerOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersHighPassFilterV1)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HighPassOutputs(bars, builtIn)["Hp"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (ThreePoleVariant(builtIn.BatchName) >= 0)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ThreePoleOutputs(bars, builtIn).Values.First(), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (TwoPoleVariant(builtIn.BatchName) >= 0)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TwoPoleOutputs(bars, builtIn).Values.First(), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LinearExtrapolation)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LinearExtrapolationOutputs(bars, builtIn)["LinExt"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RightSidedRickerMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RickerOutputs(bars, builtIn)["Rsrma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PolynomialLeastSquaresMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => PolynomialCellOutputs(bars, builtIn)["Plsma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DynamicallyAdjustableMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DynamicAverageOutputs(bars, builtIn)["Dama"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeWeightedMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolumeWeightedOutputs(bars, builtIn)["Vwma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeAdjustedMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolumeAdjustedOutputs(bars, builtIn)["Vama"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EfficientPrice or IndicatorName.EfficientAutoLine)
+        {
+            var key = builtIn.BatchName == IndicatorName.EfficientPrice ? "Ep" : "Eal";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EfficiencyDerivedOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersKaufmanAdaptiveMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EhlersKaufmanOutputs(bars, builtIn)["Ekama"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WellRoundedMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => WellRoundedOutputs(bars, builtIn)["Wrma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersBetterExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BetterEmaOutputs(bars, builtIn)["Ebema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MovingAverageSupportResistance && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var supportKeys = builtIn.BatchOutputKey is { } supportKey ? new[] { supportKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < supportKeys.Length; slot++)
+            {
+                var key = supportKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SupportResistanceOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MovingAverageV3 && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MovingAverageV3Outputs(bars, builtIn)["Mav3"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.MovingAverageBands or IndicatorName.MovingAverageBandWidth && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var averageBandKeys = builtIn.BatchName == IndicatorName.MovingAverageBandWidth ? new[] { "Mabw" } : new[] { "UpperBand", "MiddleBand", "LowerBand", "FastMa" };
+            for (var slot = 0; slot < averageBandKeys.Length; slot++)
+            {
+                var key = averageBandKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MovingAverageBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MovingAverageChannel && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var channelKeys = builtIn.BatchOutputKey is { } channelKey ? new[] { channelKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < channelKeys.Length; slot++)
+            {
+                var key = channelKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PriceAverageChannelOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AlligatorIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var alligatorKeys = builtIn.BatchOutputKey is { } alligatorKey ? new[] { alligatorKey } : new[] { "Lips", "Teeth", "Jaws" };
+            for (var slot = 0; slot < alligatorKeys.Length; slot++)
+            {
+                var key = alligatorKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AlligatorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TillsonIE2 && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TillsonIe2Outputs(bars, builtIn)["Ie2"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TillsonT3MovingAverage && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TillsonOutputs(bars, builtIn)["T3"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HighLowBands && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var bandKeys = builtIn.BatchOutputKey is { } bandKey ? new[] { bandKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < bandKeys.Length; slot++)
+            {
+                var key = bandKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HighLowBandsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HighLowMovingAverage && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            var highLowKeys = builtIn.BatchOutputKey is { } outputKey ? new[] { outputKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < highLowKeys.Length; slot++)
+            {
+                var key = highLowKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HighLowAverageOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EquityMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EquityOutputs(bars, builtIn)["Eqma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersLaguerreFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LaguerreFilterOutputs(bars, 2d / (Integer(builtIn.CreateOptions(), "Length", 9) + 1d))["Elf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersOptimumEllipticFilter or IndicatorName.EhlersModifiedOptimumEllipticFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EllipticNumericalOutputs(bars, builtIn.BatchName == IndicatorName.EhlersModifiedOptimumEllipticFilter)["Emoef"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CompoundRatioMovingAverage && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CompoundRatioOutputs(bars, builtIn)["Crma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RepulsionMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RepulsionOutputs(bars, builtIn)["Rma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ElasticVolumeWeightedMovingAverageV1 && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ElasticVolumeAverageOutputs(bars, builtIn)["Evwma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ElasticVolumeWeightedMovingAverageV2)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ElasticVolumeOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Evwma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OptimalWeightedMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OptimalWeightedOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Owma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SelfWeightedMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SelfWeightedOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Swma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName._3HMA && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ThreeHullOutputs(bars, builtIn)["3hma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HullMovingAverage && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HullOutputs(bars, builtIn)["Hma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.IIRLeastSquaresEstimate)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => IirLeastSquaresOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 100))["IIRLse"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HullEstimate)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HullEstimateOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 50))["He"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HoltExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HoltOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 20))["Hema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.HendersonWeightedMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HendersonOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 7))["Hwma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RegularizedExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RegularizedOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Rema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DampedSineWaveWeightedFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DampedSineOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 50))["Dswwf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RecursiveMovingTrendAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RecursiveTrendOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Rmta"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersZeroLagExponentialMovingAverage && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EhlersZeroLagOutputs(bars, builtIn)["Ezlema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ZeroLowLagMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZeroLowLagOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 50))["Zllma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DoubleExponentialSmoothing)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DoubleSmoothingOutputs(bars)["Des"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.McNichollMovingAverage && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => McNichollOutputs(bars, builtIn)["Mnma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ZeroLagTripleExponentialMovingAverage && AverageKind(builtIn.CreateOptions(), 5) is 1 or 2 or 3 or 5 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZeroLagTripleOutputs(bars, builtIn)["Ztema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.QuadrupleExponentialMovingAverage or IndicatorName.PentupleExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BinomialCascadeOutputs(bars, builtIn).Values.Single(), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.Trix && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrixOutputs(bars, builtIn)["Trix"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GeneralizedDoubleExponentialMovingAverage && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => GeneralizedDoubleOutputs(bars, builtIn)["Gdema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersInfiniteImpulseResponseFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EhlersIirOutputs(bars, builtIn)["Eiirf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersFiniteImpulseResponseFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EhlersFirOutputs(bars)["Efirf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.Spencer15PointMovingAverage or IndicatorName.Spencer21PointMovingAverage)
+        {
+            var spencerKey = builtIn.BatchName == IndicatorName.Spencer21PointMovingAverage ? "S21ma" : "S15ma";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SpencerOutputs(bars, builtIn)[spencerKey], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AlphaDecreasingExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, AlphaDecreasingOutput, IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AhrensMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AhrensOutputs(bars, builtIn)["Ahma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OCHistogram && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OpenCloseHistogramOutputs(bars, builtIn)["OcHistogram"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ChandeQuickStick or IndicatorName.DeltaMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var openCloseKeys = builtIn.BatchName == IndicatorName.ChandeQuickStick ? new[] { "Cqs" } : new[] { "Delta", "Signal", "Histogram" };
+            for (var slot = 0; slot < openCloseKeys.Length; slot++)
+            {
+                var key = openCloseKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => OpenCloseAverageOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WellesWilderSummation)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => WilderSummationOutputs(bars, builtIn)["Wws"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendContinuationFactor)
+        {
+            var continuationKeys = builtIn.BatchOutputKey is { } continuationKey ? new[] { continuationKey } : new[] { "TcfPlus", "TcfMinus" };
+            for (var slot = 0; slot < continuationKeys.Length; slot++)
+            {
+                var key = continuationKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrendContinuationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendDetectionIndex)
+        {
+            var detectionKeys = builtIn.BatchOutputKey is { } detectionKey ? new[] { detectionKey } : new[] { "Tdi", "TdiDirection" };
+            for (var slot = 0; slot < detectionKeys.Length; slot++)
+            {
+                var key = detectionKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrendDetectionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendTriggerFactor)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrendTriggerOutputs(bars, builtIn)["Ttf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StochasticCustomOscillator && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var scoKeys = new[] { "Sco", "Signal" };
+            for (var slot = 0; slot < scoKeys.Length; slot++)
+            {
+                var key = scoKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => StochasticCustomOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StochasticMomentumIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var smiKeys = new[] { "Smi", "Signal" };
+            for (var slot = 0; slot < smiKeys.Length; slot++)
+            {
+                var key = smiKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => StochasticMomentumOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MarketMeannessIndex && (AverageKind(builtIn.CreateOptions(), 0) is 1 or 2 or 3 or 6 || ((Builder.Specs.MarketMeannessIndexSpecOptions)builtIn.CreateOptions()).MaType == MovingAvgType.EhlersNoiseEliminationTechnology))
+        {
+            var meannessKeys = new[] { "Mmi", "MmiSmoothed" };
+            for (var slot = 0; slot < meannessKeys.Length; slot++)
+            {
+                var key = meannessKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => MeannessOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PriceZoneOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => PriceZoneOutputs(bars, builtIn)["Pzo"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.NegativeVolumeIndex or IndicatorName.PositiveVolumeIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var primary = builtIn.BatchName == IndicatorName.PositiveVolumeIndex ? "Pvi" : "Nvi";
+            var volumeIndexKeys = builtIn.BatchOutputKey is { } volumeIndexKey ? new[] { volumeIndexKey } : new[] { primary, primary + "Signal" };
+            for (var slot = 0; slot < volumeIndexKeys.Length; slot++)
+            {
+                var key = volumeIndexKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VolumeIndexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TradeVolumeIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var tradeVolumeKeys = new[] { "Tvi", "Signal" };
+            for (var slot = 0; slot < tradeVolumeKeys.Length; slot++)
+            {
+                var key = tradeVolumeKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TradeVolumeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.PriceVolumeTrend or IndicatorName.ModifiedPriceVolumeTrend && AverageKind(builtIn.CreateOptions(), builtIn.BatchName == IndicatorName.ModifiedPriceVolumeTrend ? 1 : 3) is 1 or 2 or 3 or 6)
+        {
+            var pvtKeys = builtIn.BatchOutputKey is { } pvtKey ? new[] { pvtKey } : new[] { builtIn.BatchName == IndicatorName.ModifiedPriceVolumeTrend ? "Mpvt" : "Pvt", "Signal" };
+            for (var slot = 0; slot < pvtKeys.Length; slot++)
+            {
+                var key = pvtKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PriceVolumeTrendOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EaseOfMovement)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EaseOutputs(bars, builtIn)["Eom"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ForceIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ForceOutputs(bars, builtIn)["Fi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VortexIndicator)
+        {
+            var key = builtIn.BatchOutputKey ?? "ViPlus";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VortexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeAccumulationPercent || builtIn.BatchName == IndicatorName.TwiggsMoneyFlow && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.VolumeAccumulationPercent ? "Vapc" : "Tmf";
+            yield return IndicatorValidationRule.Reference(0, bars => MoneyFlowPercentOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.AccumulationDistributionLine or IndicatorName.ChaikinOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var moneyFlowKeys = builtIn.BatchName == IndicatorName.AccumulationDistributionLine ? new[] { "Adl", "AdlSignal" } : new[] { "ChaikinOsc" };
+            for (var slot = 0; slot < moneyFlowKeys.Length; slot++)
+            {
+                var key = moneyFlowKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MoneyFlowAccumulationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WilliamsAccumulationDistribution || builtIn.BatchName == IndicatorName.SmoothedWilliamsAccumulationDistribution && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var accumulationKeys = builtIn.BatchName == IndicatorName.WilliamsAccumulationDistribution ? new[] { "Wad" } : new[] { "Swad", "Signal" };
+            for (var slot = 0; slot < accumulationKeys.Length; slot++)
+            {
+                var key = accumulationKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => WilliamsAccumulationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.UlcerIndex || builtIn.BatchName == IndicatorName.MartinRatio && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.UlcerIndex ? "Ui" : "Mr";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DrawdownOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SortinoRatio && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SortinoOutputs(bars, builtIn)["Sr"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.SharpeRatio or IndicatorName.InformationRatio && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.InformationRatio ? "Ir" : "Sr";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ReturnScoreOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendIntensityIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => TrendIntensityOutputs(bars, builtIn)["Tii"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PriceVolumeOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => PriceVolumeOutputs(bars, builtIn)["Po"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => PriceVolumeOutputs(bars, builtIn)["Vo"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ShinoharaIntensityRatio)
+        {
+            var key = builtIn.CreateOptions() is ShinoharaIntensityRatioBSpecOptions ? "BRatio" : "ARatio";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ShinoharaOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RelativeVolumeIndicator && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RelativeVolumeOutputs(bars, builtIn)["Rvi"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => RelativeVolumeOutputs(bars, builtIn)["Dpl"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.UpsideDownsideVolume or IndicatorName.TFSVolumeOscillator or IndicatorName.VolumeAccumulationOscillator)
+        {
+            var key = builtIn.BatchName == IndicatorName.UpsideDownsideVolume ? "Udv" : builtIn.BatchName == IndicatorName.TFSVolumeOscillator ? "Tfsvo" : "Vao";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolumeBalanceOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.TreynorRatio or IndicatorName.OmegaRatio or IndicatorName.UpsidePotentialRatio)
+        {
+            var key = builtIn.BatchName == IndicatorName.TreynorRatio ? "Tr" : builtIn.BatchName == IndicatorName.OmegaRatio ? "Or" : "Upr";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TargetReturnsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendDirectionForceIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => TrendForceOutputs(bars, builtIn)["Tdfi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ReversalPoints && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => ReversalPointsOutputs(bars, builtIn)["Rp"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.DemarkPressureRatioV1 or IndicatorName.DemarkPressureRatioV2)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => DemarkPressureOutputs(bars, builtIn)["Dpr"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ElderMarketThermometer && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ThermometerOutputs(bars, builtIn)["Emt"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => ThermometerOutputs(bars, builtIn)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RegressionOscillator ||
+            builtIn.BatchName == IndicatorName.LinearRegressionLine && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.RegressionOscillator ? "Rosc" : "LinReg";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DerivedRegressionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.KendallRankCorrelationCoefficient or IndicatorName.LogisticCorrelation)
+        {
+            var logistic = builtIn.BatchName == IndicatorName.LogisticCorrelation;
+            yield return IndicatorValidationRule.Reference(0, bars => RankLogisticOutputs(bars, builtIn)[logistic ? "LogCorr" : "Krcc"],
+                logistic ? LogisticCorrelationBudget : IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersCorrelationTrendIndicator or IndicatorName.EhlersCorrelationCycleIndicator
+            or IndicatorName.EhlersCorrelationAngleIndicator or IndicatorName.EhlersMarketStateIndicator)
+        {
+            var definition = EhlersCorrelations(builtIn)!;
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < definition.Keys.Length; slot++)
+            {
+                var key = definition.Keys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => cache.GetValue(bars, b => definition.Compute(b))[key],
+                    builtIn.BatchName == IndicatorName.EhlersCorrelationAngleIndicator ? new IndicatorErrorBudget(1e-12, 1e-14) : IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EmaWaveIndicator ||
+            (builtIn.BatchName is IndicatorName.ErgodicMeanDeviationIndicator or IndicatorName.TraderPressureIndex
+            && AverageKind(builtIn.CreateOptions(), builtIn.BatchName == IndicatorName.TraderPressureIndex ? 2 : 3) is 1 or 2 or 3 or 6))
+        {
+            var residualKeys = builtIn.BatchName == IndicatorName.EmaWaveIndicator ? new[] { "Wa", "Wb", "Wc" }
+                : builtIn.BatchName == IndicatorName.TraderPressureIndex ? new[] { "Tpx", "Bulls", "Bears" } : new[] { "Emdi", "Signal" };
+            for (var slot = 0; slot < residualKeys.Length; slot++)
+            {
+                var key = residualKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ResidualPressureOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ZScore or IndicatorName.FastZScore or IndicatorName.InverseFisherZScore or IndicatorName.InverseFisherFastZScore
+            && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName switch { IndicatorName.ZScore => "Zscore", IndicatorName.FastZScore => "Fzs", IndicatorName.InverseFisherZScore => "Ifzs", _ => "Iffzs" };
+            var budget = builtIn.BatchName == IndicatorName.InverseFisherZScore ? ZScoreLogisticBudget
+                : builtIn.BatchName == IndicatorName.InverseFisherFastZScore ? RsiInverseFisherBudget : IndicatorErrorBudget.Exact;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZScoreOutputs(bars, builtIn)[key], budget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersFisherTransform)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => FisherValues(Closes(bars), Integer(builtIn.CreateOptions(), "Length", 10)), FisherBudget);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.CommodityChannelIndex or IndicatorName.WoodieCommodityChannelIndex or IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform
+            && AverageKind(builtIn.CreateOptions(), builtIn.BatchName == IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform ? 2 : 1) is 1 or 2 or 3 or 6)
+        {
+            var inverse = builtIn.BatchName == IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform;
+            var commodityKeys = inverse ? new[] { "Eiftcci" } : builtIn.BatchName == IndicatorName.WoodieCommodityChannelIndex
+                ? new[] { "FastCci", "SlowCci", "Histogram" } : new[] { "Cci" };
+            for (var slot = 0; slot < commodityKeys.Length; slot++)
+            {
+                var key = commodityKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => CommodityOutputs(bars, builtIn)[key], inverse ? RsiInverseFisherBudget : IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.EhlersInverseFisherTransform or IndicatorName.EhlersRelativeStrengthIndexInverseFisherTransform
+            && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.EhlersInverseFisherTransform ? "Eift" : "Eiftrsi";
+            yield return IndicatorValidationRule.Reference(0, bars => RsiInverseFisherOutputs(bars, builtIn)[key], RsiInverseFisherBudget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.QuasiWhiteNoise && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var noiseKeys = new[] { "WhiteNoise", "WhiteNoiseMa", "WhiteNoiseStdDev", "WhiteNoiseVariance" };
+            for (var slot = 0; slot < noiseKeys.Length; slot++)
+            {
+                var key = noiseKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => QuasiWhiteNoiseOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ConnorsRelativeStrengthIndex or IndicatorName.StochasticConnorsRelativeStrengthIndex
+            && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var connorsKeys = builtIn.BatchOutputKey is { } only ? new[] { only } : builtIn.BatchName == IndicatorName.ConnorsRelativeStrengthIndex
+                ? new[] { "Rsi", "PctRank", "StreakRsi", "ConnorsRsi" } : new[] { "SaRsi", "Signal" };
+            for (var slot = 0; slot < connorsKeys.Length; slot++)
+            {
+                var key = connorsKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => ConnorsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CCTStochRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var cctRsiKeys = new[] { "Type1", "Type2", "Type3", "Type4", "Type5", "Type6", "TypeCustom", "Signal" };
+            for (var slot = 0; slot < cctRsiKeys.Length; slot++)
+            {
+                var key = cctRsiKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => CctRsiOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StochasticRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => StochasticRsiOutputs(bars, builtIn)["StochRsi"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => StochasticRsiOutputs(bars, builtIn)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ApirineSlowRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => ApirineRsiOutputs(bars, builtIn)["Asrsi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SelfAdjustingRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var selfAdjustingKeys = new[] { "SaRsi", "Signal", "ObLevel", "OsLevel" };
+            for (var slot = 0; slot < selfAdjustingKeys.Length; slot++)
+            {
+                var key = selfAdjustingKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => SelfAdjustingRsiOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptiveRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => AdaptiveRsiOutputs(bars, builtIn)["Arsi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FoldedRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => FoldedRsiOutputs(bars, builtIn)["Frsi"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => FoldedRsiOutputs(bars, builtIn)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var rsiKeys = new[] { "Rsi", "Signal", "Histogram" };
+            for (var slot = 0; slot < rsiKeys.Length; slot++)
+            {
+                var key = rsiKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => PriceRsiOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AsymmetricalRelativeStrengthIndex || builtIn.BatchName == IndicatorName.RapidRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var adaptiveKeys = builtIn.BatchName == IndicatorName.AsymmetricalRelativeStrengthIndex ? new[] { "Arsi" } : new[] { "Rrsi", "Signal" };
+            for (var slot = 0; slot < adaptiveKeys.Length; slot++)
+            {
+                var key = adaptiveKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => AdaptiveGainLossOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DoubleSmoothedRelativeStrengthIndex || builtIn.BatchName == IndicatorName.MomentaRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var rangeKeys = new[] { builtIn.BatchName == IndicatorName.DoubleSmoothedRelativeStrengthIndex ? "Dsrsi" : "Mrsi", "Signal" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++)
+            {
+                var key = rangeKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => RangeGainLossOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersRestoringPullIndicator)
+        {
+            var pullOptions = builtIn.CreateOptions();
+            var pullKeys = new[] { "Rpi", "Signal" };
+            for (var slot = 0; slot < pullKeys.Length; slot++)
+            {
+                var key = pullKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RestoringPullOutputs(bars, pullOptions)[key], new IndicatorErrorBudget(1e-9, 1e-9));
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.WeightedMovingAverage or IndicatorName.LinearWeightedMovingAverage or IndicatorName.SimplifiedWeightedMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length");
+            yield return IndicatorValidationRule.Reference(0, bars => ExactWeightedWindow(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ParabolicWeightedMovingAverage or IndicatorName.CubedWeightedMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            var power = builtIn.BatchName == IndicatorName.ParabolicWeightedMovingAverage ? 2 : 3;
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedPowerMean(bars, period, power), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VariableIndexDynamicAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedVidya(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeMomentumOscillatorAbsolute)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 9);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedAbsoluteChande(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ChandeMomentumOscillatorAverage or IndicatorName.ChandeMomentumOscillatorAbsoluteAverage)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedChandeAverage(bars,
+                absolute: builtIn.BatchName == IndicatorName.ChandeMomentumOscillatorAbsoluteAverage), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedEnvelope(builtIn))
+        {
+            var envelopeOptions = builtIn.CreateOptions();
+            var envelopeKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "MiddleBand" }
+                : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName);
+            for (var slot = 0; slot < envelopeKeys.Count; slot++)
+            {
+                var key = envelopeKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedEnvelope(bars, Integer(envelopeOptions, "Length", 20), BoundedMeanKind(envelopeOptions, 1), Number(envelopeOptions, .025, "Pct", "Mult"))[key],
+                    IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (HasRoundedPriceChannel(builtIn))
+        {
+            var channelOptions = builtIn.CreateOptions();
+            var channelKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "MiddleChannel" }
+                : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName);
+            for (var slot = 0; slot < channelKeys.Count; slot++)
+            {
+                var key = channelKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedPriceChannel(bars, Integer(channelOptions, "Length", 21), BoundedMeanKind(channelOptions, 3), Number(channelOptions, .06, "Pct"))[key],
+                    IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LogReturns)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 1);
+            yield return IndicatorValidationRule.Reference(0, bars => ReferenceLogReturns(bars, period), LogReturnsBudget);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MoveTracker)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedMoveTracker(bars, false), IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1,
+                bars => RoundedMoveTracker(bars, true), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MoneyFlowIndex)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedMoneyFlow(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AverageDayRange)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedAverageDayRange(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.CumulativeSum or IndicatorName.CumulativeVolumeIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedCumulative(bars, builtIn.BatchName == IndicatorName.CumulativeVolumeIndex), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SimpleReturns)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 1);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedSimpleReturns(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeZoneOscillator)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return period > 1 ? IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedVolumeZone(bars, period), IndicatorErrorBudget.Exact)
+                : IndicatorValidationRule.Reference(0, bars => RoundedVolumeZone(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NetVolume)
+        {
+            yield return IndicatorValidationRule.Reference(0, RoundedNetVolume, IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NormalizedVolume)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 20);
+            // One/two finite terms cannot cancel enough to overflow this ratio.
+            yield return period >= 3 ? IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedNormalizedVolume(bars, period), IndicatorErrorBudget.Exact)
+                : IndicatorValidationRule.Reference(0, bars => RoundedNormalizedVolume(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.Range or IndicatorName.TrueRange)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedBarRange(bars, builtIn.BatchName == IndicatorName.TrueRange), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.PriceMomentum or IndicatorName.VolumeMomentum)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 10);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedLaggedDifference(bars, period, builtIn.BatchName == IndicatorName.VolumeMomentum), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MarketFacilitationIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                RoundedMarketFacilitation, IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedObv(builtIn))
+        {
+            var obvOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, RoundedObv, IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1,
+                bars => RoundedObvSignal(bars, Integer(obvOptions, "Length", 20), BoundedMeanKind(obvOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedHighLowIndex(builtIn))
+        {
+            var highLowOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0,
+                bars => RoundedHighLowIndex(bars, Integer(highLowOptions, "Length", 10), BoundedMeanKind(highLowOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedBalanceOfPower(builtIn))
+        {
+            var balanceOptions = builtIn.CreateOptions();
+            var period = Integer(balanceOptions, "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                RoundedBalanceOfPowerLine, IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1,
+                bars => RoundedBalanceOfPowerSignal(bars, period, BoundedMeanKind(balanceOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedMomentum(builtIn))
+        {
+            var momentumOptions = builtIn.CreateOptions();
+            var period = Integer(momentumOptions, "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedMomentum(bars, period), IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1,
+                bars => RoundedMomentumSignal(bars, period, BoundedMeanKind(momentumOptions, 2)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeRateOfChange)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 12);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedRateOfChange(bars, period, volume: true), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RateOfChange)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 12);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedRateOfChange(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WilliamsR)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedWilliams(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DiNapoliPreferredStochasticOscillator)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 8);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedDiNapoli(bars, period)["Dpso"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => RoundedDiNapoli(bars, period)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasBoundedStochastic(builtIn))
+        {
+            foreach (var rule in StochasticNumericalRules(indicator, builtIn)) yield return rule;
+            yield break;
+        }
+        if (HasBoundedFilteredChande(builtIn))
+        {
+            var filterOptions = builtIn.CreateOptions();
+            var period = Integer(filterOptions, "Length", 9);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedFilteredChande(bars, period), IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => RoundedFilteredChandeSignal(bars, period,
+                BoundedMeanKind(filterOptions, 2)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasBoundedChande(builtIn))
+        {
+            var chandeOptions = builtIn.CreateOptions();
+            var period = Integer(chandeOptions, "Length", 14);
+            var signalOnly = builtIn.BatchOutputKey == "Signal";
+            if (!signalOnly)
+                yield return IndicatorValidationRule.Reference(0, bars => RoundedChande(bars, period), IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(signalOnly ? 0 : 1, bars => RoundedChandeSignal(bars, period,
+                Integer(chandeOptions, "SignalLength", 3), BoundedMeanKind(chandeOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersHannMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 20);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedHannMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.DoubleExponentialMovingAverage or IndicatorName.TripleExponentialMovingAverage or IndicatorName.ZeroLagExponentialMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            var triple = builtIn.BatchName == IndicatorName.TripleExponentialMovingAverage;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedExponentialExtrapolation(bars, period, triple), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedDpo(builtIn))
+        {
+            var dpoOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedDpo(bars, Integer(dpoOptions, "Length", 20), BoundedMeanKind(dpoOptions, 1)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedElderRay(builtIn))
+        {
+            var elderOptions = builtIn.CreateOptions();
+            var elderKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "BullPower" }
+                : new[] { "BullPower", "BearPower" };
+            for (var slot = 0; slot < elderKeys.Length; slot++)
+            {
+                var bull = elderKeys[slot] == "BullPower";
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedElderRay(bars, Integer(elderOptions, "Length", 13), BoundedMeanKind(elderOptions, 3), bull),
+                    IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (HasRoundedApo(builtIn))
+        {
+            var apoOptions = builtIn.CreateOptions();
+            var apoFast = apoOptions is PriceOscillatorSpecOptions priceFast ? priceFast.ShortLength : Integer(apoOptions, "FastLength");
+            var apoSlow = apoOptions is PriceOscillatorSpecOptions priceSlow ? priceSlow.LongLength : Integer(apoOptions, "SlowLength");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedApo(bars, apoFast, apoSlow, BoundedMeanKind(apoOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.EhlersHammingMovingAverage)
+        {
+            var hammingOptions = builtIn.CreateOptions();
+            var period = Integer(hammingOptions, "Length", 20);
+            var pedestal = Number(hammingOptions, 3, "Pedestal");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedHammingMean(bars, period, pedestal), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasRoundedBollinger(builtIn))
+        {
+            var bandOptions = builtIn.CreateOptions();
+            var bandKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? (builtIn.BatchName == IndicatorName.BollingerBandsWidth ? "BbWidth" : builtIn.BatchName == IndicatorName.BollingerBandsPercentB ? "PctB" : "MiddleBand") }
+                : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < bandKeys.Length; slot++)
+            {
+                var key = bandKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedBollinger(bars, Integer(bandOptions, "Length", 20), BoundedMeanKind(bandOptions, 1), Number(bandOptions, 2, "StdDevMult", "Multiplier"))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StandardDeviationChannel)
+        {
+            var channelOptions = builtIn.CreateOptions();
+            var channelKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < channelKeys.Length; slot++)
+            {
+                var key = channelKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedRegressionChannel(bars, Integer(channelOptions, "Length", 40), Number(channelOptions, 2, "StdDevMult"))[key],
+                    IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MovingAverageDisplacedEnvelope && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var displacedOptions = builtIn.CreateOptions();
+            var displacedKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < displacedKeys.Length; slot++)
+            {
+                var key = displacedKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedDisplacedEnvelope(bars, displacedOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.MirroredMovingAverageConvergenceDivergence or IndicatorName.MirroredPercentagePriceOscillator)
+        {
+            var mirroredOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.MirroredPercentagePriceOscillator;
+            var stem = percentage ? "Ppo" : "Macd";
+            var mirroredKeys = new[] { stem, "Signal", "Histogram", "Mirror" + stem, "MirrorSignal", "MirrorHistogram" };
+            for (var slot = 0; slot < mirroredKeys.Length; slot++)
+            {
+                var key = mirroredKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedMirrored(bars, mirroredOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LindaRaschke3_10Oscillator)
+        {
+            var lindaOptions = builtIn.CreateOptions();
+            var lindaKeys = new[] { "LindaMacd", "LindaMacdSignal", "LindaMacdHistogram", "LindaPpo", "LindaPpoSignal", "LindaPpoHistogram" };
+            for (var slot = 0; slot < lindaKeys.Length; slot++)
+            {
+                var key = lindaKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedLinda(bars, lindaOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName._4MovingAverageConvergenceDivergence or IndicatorName._4PercentagePriceOscillator)
+        {
+            var fourOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName._4PercentagePriceOscillator;
+            var stem = percentage ? "Ppo" : "Macd";
+            var fourKeys = new[] { stem + "1", "Signal1", "Histogram1", stem + "2", "Signal2", "Histogram2" };
+            for (var slot = 0; slot < fourKeys.Length; slot++)
+            {
+                var key = fourKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedFourOscillator(bars, fourOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendImpulseFilter)
+        {
+            var impulseOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedTrendImpulseReference(bars, impulseOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DetrendedSyntheticPrice)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedSyntheticPriceReference(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendForceHistogram)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedTrendForceReference(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.AwesomeOscillator or IndicatorName.AcceleratorOscillator)
+        {
+            var awesomeOptions = builtIn.CreateOptions();
+            var accelerator = builtIn.BatchName == IndicatorName.AcceleratorOscillator;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedAwesomeReference(bars, awesomeOptions, accelerator), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ImpulseMovingAverageConvergenceDivergence or IndicatorName.ImpulsePercentagePriceOscillator)
+        {
+            var impulseOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.ImpulsePercentagePriceOscillator;
+            var impulseKeys = new[] { percentage ? "Ppo" : "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < impulseKeys.Length; slot++)
+            {
+                var key = impulseKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedImpulseReference(bars, impulseOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.StochasticMovingAverageConvergenceDivergenceOscillator)
+        {
+            var stochasticOptions = builtIn.CreateOptions();
+            var stochasticKeys = new[] { "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < stochasticKeys.Length; slot++)
+            {
+                var key = stochasticKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedStochasticMacdReference(bars, stochasticOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.TFSMboIndicator or IndicatorName.TFSMboPercentagePriceOscillator)
+        {
+            var tfsOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.TFSMboPercentagePriceOscillator;
+            var tfsKeys = new[] { percentage ? "Ppo" : "TfsMob", "Signal", "Histogram" };
+            for (var slot = 0; slot < tfsKeys.Length; slot++)
+            {
+                var key = tfsKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedTfsOscillator(bars, tfsOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.MovingAverageConvergenceDivergenceLeader or IndicatorName.PercentagePriceOscillatorLeader)
+        {
+            var leaderOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.PercentagePriceOscillatorLeader;
+            var leaderKeys = percentage ? new[] { "Ppo", "Signal", "Histogram" } : new[] { "Macd", "I1", "I2" };
+            for (var slot = 0; slot < leaderKeys.Length; slot++)
+            {
+                var key = leaderKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedLeaderOscillator(bars, leaderOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ReverseMovingAverageConvergenceDivergence)
+        {
+            var reverseOptions = builtIn.CreateOptions();
+            var reverseKeys = new[] { "Rmacd", "Signal", "Histogram" };
+            for (var slot = 0; slot < reverseKeys.Length; slot++)
+            {
+                var key = reverseKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedReverseMacdReference(bars, reverseOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.DiNapoliMovingAverageConvergenceDivergence or IndicatorName.DiNapoliPercentagePriceOscillator)
+        {
+            var diNapoliOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.DiNapoliPercentagePriceOscillator;
+            var diNapoliKeys = percentage ? new[] { "Ppo", "Signal", "Histogram" } : new[] { "FastS", "SlowS", "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < diNapoliKeys.Length; slot++)
+            {
+                var key = diNapoliKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedDiNapoliOscillator(bars, diNapoliOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DidiIndex)
+        {
+            var didiOptions = builtIn.CreateOptions();
+            var didiKeys = new[] { "Curta", "Media", "Longa" };
+            for (var slot = 0; slot < didiKeys.Length; slot++)
+            {
+                var key = didiKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedDidi(bars, didiOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.ErgodicMovingAverageConvergenceDivergence or IndicatorName.ErgodicPercentagePriceOscillator)
+        {
+            var ergodicOptions = builtIn.CreateOptions();
+            var ergodicKeys = new[] { builtIn.BatchName == IndicatorName.ErgodicPercentagePriceOscillator ? "Ppo" : "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < ergodicKeys.Length; slot++)
+            {
+                var key = ergodicKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedErgodic(bars, ergodicOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ElliottWaveOscillator)
+        {
+            var elliottOptions = builtIn.CreateOptions();
+            var elliottKeys = new[] { "Ewo", "Signal", "Histogram" };
+            for (var slot = 0; slot < elliottKeys.Length; slot++)
+            {
+                var key = elliottKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedElliott(bars, elliottOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeMomentumOscillator)
+        {
+            var volumeMomentumOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedVolumeMomentumOscillator(bars, volumeMomentumOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeOscillator)
+        {
+            var volumeOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedVolumeOscillator(bars, volumeOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NormalizedMacd)
+        {
+            var normalizedOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedNormalizedMacd(bars, normalizedOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MovingAverageConvergenceDivergence)
+        {
+            var macdOptions = builtIn.CreateOptions();
+            var macdKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Macd" } : new[] { "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < macdKeys.Length; slot++)
+            {
+                var key = macdKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedMacd(bars, macdOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PercentageVolumeOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var pvoOptions = builtIn.CreateOptions();
+            var pvoKeys = new[] { "Pvo", "Signal", "Histogram" };
+            for (var slot = 0; slot < pvoKeys.Length; slot++)
+            {
+                var key = pvoKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedPvo(bars, pvoOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PercentagePriceOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var ppoOptions = builtIn.CreateOptions();
+            var ppoKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Ppo" } : new[] { "Ppo", "Signal", "Histogram" };
+            for (var slot = 0; slot < ppoKeys.Length; slot++)
+            {
+                var key = ppoKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedPpo(bars, ppoOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DisparityIndex && BoundedMeanKind(builtIn.CreateOptions(), 1) is 1 or 2)
+        {
+            var disparityOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedDisparity(bars, disparityOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PerformanceIndex)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedLaggedPercentage(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.PercentageTrailingStops)
+        {
+            var stopOptions = builtIn.CreateOptions();
+            var stopKeys = new[] { "LongStop", "ShortStop" };
+            for (var slot = 0; slot < stopKeys.Length; slot++)
+            {
+                var key = stopKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedPercentageStops(bars, stopOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NickRypockTrailingReverse)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 2);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedTrailingReverse(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.QmaSmaDifference)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedQmaSmaDifference(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeForecastOscillator)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedForecastOscillator(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MeanAbsoluteErrorBands && BoundedMeanKind(builtIn.CreateOptions(), 1) is 1 or 2)
+        {
+            var maeOptions = builtIn.CreateOptions();
+            var maeKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < maeKeys.Length; slot++)
+            {
+                var key = maeKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedMaeBands(bars, maeOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MeanAbsoluteDeviationBands && BoundedMeanKind(builtIn.CreateOptions(), 1) is 1 or 2)
+        {
+            var madOptions = builtIn.CreateOptions();
+            var madKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < madKeys.Length; slot++)
+            {
+                var key = madKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedMadBands(bars, madOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.InterquartileRangeBands)
+        {
+            var quartileOptions = builtIn.CreateOptions();
+            var quartileKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < quartileKeys.Length; slot++)
+            {
+                var key = quartileKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedQuartileBands(bars, Integer(quartileOptions, "Length", 14), Number(quartileOptions, 1.5, "Mult"))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RangeBands && BoundedMeanKind(builtIn.CreateOptions(), 1) is 1 or 2)
+        {
+            var rangeOptions = builtIn.CreateOptions();
+            var rangeKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++)
+            {
+                var key = rangeKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedRangeBands(bars, rangeOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.MidpointOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var midpointOptions = builtIn.CreateOptions();
+            var midpointKeys = new[] { "Mo", "Signal" };
+            for (var slot = 0; slot < midpointKeys.Length; slot++)
+            {
+                var key = midpointKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot,
+                    bars => RoundedMidpoint(bars, Integer(midpointOptions, "Length", 26), BoundedMeanKind(midpointOptions, 3))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GuppyDistanceIndicator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var distanceOptions = builtIn.CreateOptions();
+            var distanceKeys = new[] { "FastDistance", "SlowDistance" };
+            for (var slot = 0; slot < distanceKeys.Length; slot++)
+            {
+                var key = distanceKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedGuppyDistance(bars, distanceOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GuppyMultipleMovingAverage && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var guppyOptions = builtIn.CreateOptions();
+            var guppyKeys = new[] { "SuperGmmaOsc", "SuperGmmaSignal" };
+            for (var slot = 0; slot < guppyKeys.Length; slot++)
+            {
+                var key = guppyKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedGuppy(bars, guppyOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TypicalPriceVolatility)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedTypicalVolatility(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.DownsideDeviation)
+        {
+            var downsideOptions = builtIn.CreateOptions();
+            var period = Integer(downsideOptions, "Length", 20);
+            var target = Number(downsideOptions, 0, "TargetReturn");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedDownside(bars, period, target), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CoefficientOfVariation)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 20);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedCoefficient(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.Skewness)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedSkewness(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RSquared)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedRSquared(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LinearRegression)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            var regressionKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "LinearRegression" }
+                : new[] { "LinearRegression", "PredictedTomorrow", "Slope", "Intercept" };
+            for (var slot = 0; slot < regressionKeys.Length; slot++)
+            {
+                var key = regressionKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedLinearRegression(bars, period)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.StandardError or IndicatorName.StandardErrorOfTheMean)
+        {
+            var regression = builtIn.BatchName == IndicatorName.StandardError;
+            var period = Integer(builtIn.CreateOptions(), "Length", regression ? 14 : 20);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedStandardError(bars, period, regression), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.Variance)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 20);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedPopulationVariance(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SimplifiedLeastSquaresMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedSimplifiedLeastSquares(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LeastSquaresMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 25);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedLeastSquaresMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.LeoMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedLeoMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ArnaudLegouxMovingAverage)
+        {
+            var almaOptions = builtIn.CreateOptions();
+            var period = Integer(almaOptions, "Length", 9);
+            var offset = Number(almaOptions, .85, "Offset");
+            var sigma = Number(almaOptions, 6, "Sigma");
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedAlmaMean(bars, period, offset, sigma), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SineWeightedMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedSineMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.NaturalMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 40);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedNaturalMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.QuickMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedQuickMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.InverseDistanceWeightedMovingAverage or IndicatorName.DistanceWeightedMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedDistanceMassMean(bars, period, builtIn.BatchName == IndicatorName.DistanceWeightedMovingAverage), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FareySequenceWeightedMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 5);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedFareyMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FibonacciWeightedMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedFibonacciMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.SquareRootWeightedMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedSquareRootMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.WellesWilderMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedWilderTrajectory(Closes(bars), period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName is IndicatorName.SymmetricallyWeightedMovingAverage or IndicatorName.EhlersTriangleMovingAverage or IndicatorName.JsaMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0,
+                bars => builtIn.BatchName == IndicatorName.JsaMovingAverage ? RoundedJsaMean(bars, period) : RoundedSymmetricMean(bars, period),
+                IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasBoundedSequentialMean(builtIn))
+        {
+            var sequentialOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedSequentialMean(bars,
+                Integer(sequentialOptions, "Length", 50), BoundedMeanKind(sequentialOptions, 1)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasBoundedMiddleMean(builtIn))
+        {
+            var middleOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedMiddleMean(bars,
+                Integer(middleOptions, "Length1", 14), Integer(middleOptions, "Length2", 10), BoundedMeanKind(middleOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasBoundedSlowMean(builtIn))
+        {
+            var slowOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0,
+                bars => RoundedSlowMean(bars, Integer(slowOptions, "Length", 15), BoundedMeanKind(slowOptions, 2)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasBoundedTriangularMean(builtIn))
+        {
+            var triangularOptions = builtIn.CreateOptions();
+            var triangularKind = BoundedMeanKind(triangularOptions, 1);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedTriangularMean(bars, Integer(triangularOptions, "Length", 20), triangularKind),
+                IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (HasSimpleVolumeMean(builtIn))
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedRollingVolumeMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.OvershootReductionMovingAverage)
+        {
+            var trajectory = OvershootTrajectory(builtIn);
+            if (trajectory is not null) yield return trajectory;
+            yield break;
+        }
+        var foundation = MesaPredictionFormula(builtIn) ?? MobilityFormula(builtIn) ?? GuppyCountBackFormula(builtIn) ?? TechnicalRatingsFormula(builtIn) ?? FourierHarmonicsFormula(builtIn) ?? UltimateMomentumFormula(builtIn) ?? DiscreteFourierFormula(builtIn) ?? DominantCycleFormula(builtIn) ?? TunedBypassFormula(builtIn) ?? SelfAdjustingLaguerreFormula(builtIn) ?? SineWaveFormula(builtIn) ?? OptimizedTrendFormula(builtIn) ?? KaufmanRegressionFormula(builtIn) ?? ZigZagFormula(builtIn) ?? QuadraticFit(builtIn) ?? RemainingTrends(builtIn) ?? ConfluenceFormula(builtIn) ?? CandleTrends(builtIn) ?? VariableAverages(builtIn) ?? CycleNoise(builtIn) ?? AdaptiveV1(builtIn) ?? MamaFormulas(builtIn) ?? PredictiveFilters(builtIn) ?? SwissArmy(builtIn) ?? AdaptiveCyberFormulas(builtIn) ?? RelativeMotion(builtIn) ?? DemarkPatterns(builtIn) ?? AdaptiveEhlersV2(builtIn) ?? Autocorrelation(builtIn) ?? PriceCoordinates(builtIn) ?? EhlersCorrelations(builtIn) ?? EventAndDistance(builtIn) ?? HilbertFormulas(builtIn) ?? SteppedChannels(builtIn) ?? NaturalMarkets(builtIn) ?? RiskRatios(builtIn) ?? RangeMomentum(builtIn) ?? TrendMass(builtIn) ?? WindowFormula(builtIn) ?? PoleFilters(builtIn) ?? EhlersLinear(builtIn) ?? Filters(builtIn) ?? AdaptiveAverages(builtIn) ?? Statistics(builtIn) ?? Oscillators(builtIn)
+            ?? DiscoveredOutputs(builtIn) ?? CompositeMomentum(builtIn) ?? MacdComposites(builtIn) ?? MomentumWindows(builtIn) ?? TrendCounts(builtIn) ?? OscillatorSignals(builtIn) ?? MarketStructure(builtIn) ?? Channels(builtIn) ?? Pivots(builtIn) ?? Volatility(builtIn) ?? VolumeAndReturns(builtIn) ?? Foundation(builtIn);
+        if (foundation is not null)
+        {
+            // All output rules for a fixture share one independent reference evaluation.
+            var fixtures = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            var outputKeys = indicator.Outputs.Count == 1
+                ? new[] { builtIn.BatchOutputKey ?? foundation.Primary }
+                : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName);
+            for (var slot = 0; slot < indicator.Outputs.Count; slot++)
+            {
+                var key = outputKeys[slot];
+                if (foundation.Keys.Contains(key))
+                    yield return builtIn.BatchName is IndicatorName.StandardDeviation or IndicatorName.Trimean or IndicatorName.MedianValue
+                        or IndicatorName.AroonUp or IndicatorName.AroonDown or IndicatorName.AroonOscillator
+                        or IndicatorName.PsychologicalLine or IndicatorName.ChandeTrendScore
+                        or IndicatorName.VolumeWeightedAveragePrice or IndicatorName.WindowedVolumeWeightedMovingAverage or IndicatorName.DonchianChannels or IndicatorName.RangeIdentifier or IndicatorName.WilliamsFractals or IndicatorName.GannSwingOscillator or IndicatorName.GannTrendOscillator or IndicatorName.TFSTetherLineIndicator or IndicatorName.TTMScalperIndicator
+                        or IndicatorName.GeometricMeanMovingAverage or IndicatorName.GeometricMovingAverage or IndicatorName.QuadraticMovingAverage or IndicatorName.KaufmanAdaptiveMovingAverage or IndicatorName.Midpoint or IndicatorName.Midprice or IndicatorName.IchimokuCloud or IndicatorName.IchimokuChikouSpan
+                        or IndicatorName.HighestHigh or IndicatorName.LowestLow or IndicatorName.RollingMax or IndicatorName.RollingMin or IndicatorName.PercentRank
+                        ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key],
+                            builtIn.BatchName is IndicatorName.PsychologicalLine or IndicatorName.ChandeTrendScore
+                                or IndicatorName.VolumeWeightedAveragePrice or IndicatorName.WindowedVolumeWeightedMovingAverage or IndicatorName.DonchianChannels or IndicatorName.RangeIdentifier or IndicatorName.WilliamsFractals or IndicatorName.GannSwingOscillator or IndicatorName.GannTrendOscillator or IndicatorName.TFSTetherLineIndicator or IndicatorName.TTMScalperIndicator
+                        or IndicatorName.GeometricMeanMovingAverage or IndicatorName.GeometricMovingAverage or IndicatorName.QuadraticMovingAverage or IndicatorName.KaufmanAdaptiveMovingAverage or IndicatorName.Midpoint or IndicatorName.Midprice or IndicatorName.IchimokuCloud or IndicatorName.IchimokuChikouSpan or IndicatorName.MedianValue or IndicatorName.HighestHigh or IndicatorName.LowestLow or IndicatorName.RollingMax or IndicatorName.RollingMin or IndicatorName.PercentRank
+                                || builtIn.BatchName == IndicatorName.Trimean && key != "Trimean"
+                                ? IndicatorErrorBudget.Exact : new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
+                        : builtIn.BatchName == IndicatorName.ChandeIntradayMomentumIndex || builtIn.BatchName == IndicatorName.RelativeMomentumIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6
+                            ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName == IndicatorName.WamiOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6
+                            ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName is IndicatorName.PriceMomentumOscillator or IndicatorName.DecisionPointPriceMomentumOscillator or IndicatorName.CoppockCurve or IndicatorName.SmoothedRateOfChange or IndicatorName.KnowSureThing or IndicatorName.PringSpecialK
+                            && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6
+                            ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName is IndicatorName.SmoothedDeltaRatioOscillator or IndicatorName.DoubleSmoothedMomenta or IndicatorName.DirectionalTrendIndex or IndicatorName.OscOscillator or IndicatorName.TrueStrengthIndex or IndicatorName.ErgodicTrueStrengthIndexV1 or IndicatorName.ErgodicTrueStrengthIndexV2
+                            && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6
+                            ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName == IndicatorName.HarmonicMeanMovingAverage
+                            ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName is IndicatorName.EndPointMovingAverage or IndicatorName.SharpModifiedMovingAverage
+                            ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName is IndicatorName.MayerMultiple or IndicatorName.JapaneseCorrelationCoefficient
+                            ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
+                            : builtIn.BatchName is IndicatorName.StatisticalVolatility or IndicatorName.HistoricalVolatility or IndicatorName.KaseSerialDependencyIndex
+                                or IndicatorName.CloseToCloseVolatility or IndicatorName.ParkinsonVolatility
+                                or IndicatorName.GarmanKlassVolatility or IndicatorName.RogersSatchellVolatility or IndicatorName.YangZhangVolatility
+                                ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
+                                : FullReference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key]);
+            }
+            yield break;
+        }
+        var name = builtIn.BatchName;
+        Func<IReadOnlyList<Bar>, IReadOnlyList<double>>? price = name switch
+        {
+            IndicatorName.FullTypicalPrice => bars => bars.Select(b => ExactPriceMean(b.Open, b.High, b.Low, b.Close)).ToArray(),
+            IndicatorName.TypicalPrice => bars => bars.Select(b => ExactPriceMean(b.High, b.Low, b.Close)).ToArray(),
+            IndicatorName.MedianPrice => bars => bars.Select(b => ExactPriceMean(b.High, b.Low)).ToArray(),
+            IndicatorName.AveragePrice => bars => bars.Select(b => ExactPriceMean(b.Open, b.Close)).ToArray(),
+            IndicatorName.WeightedClose => bars => bars.Select(b => ExactPriceMean(b.High, b.Low, b.Close, b.Close)).ToArray(),
+            IndicatorName.Range => bars => bars.Select(b => b.High - b.Low).ToArray(),
+            _ => null
+        };
+        if (price is not null)
+        {
+            yield return name == IndicatorName.Range ? FullReference(0, price)
+                : IndicatorValidationRule.Reference(0, price, new IndicatorErrorBudget(0, 1e-9, requireSameSign: true));
+            yield break;
+        }
+
+        var average = name switch
+        {
+            IndicatorName.SimpleMovingAverage => 1,
+            IndicatorName.WeightedMovingAverage => 2,
+            IndicatorName.ExponentialMovingAverage => 3,
+            IndicatorName.DoubleExponentialMovingAverage => 4,
+            IndicatorName.TripleExponentialMovingAverage => 5,
+            _ => 0
+        };
+        if (average != 0)
+        {
+            var length = Integer(builtIn.CreateOptions(), "Length");
+            // EMA uses its standard coefficient at every positive period.
+            if (average >= 3 && !StandardEmaPeriod(length)) yield break;
+            if (average == 1)
+                yield return IndicatorValidationRule.Reference(0, bars => ExactSma(bars, length),
+                    new IndicatorErrorBudget(0, 1e-9, requireSameSign: true));
+            else if (average == 3)
+                yield return IndicatorValidationRule.Reference(0, bars => RoundedEma(bars, length),
+                    IndicatorErrorBudget.Exact);
+            else
+                yield return FullReference(0,
+                    bars => Average(bars.Select(b => b.Close).ToArray(), length, average));
+            yield break;
+        }
+
+        if (name != IndicatorName.MovingAverageConvergenceDivergence && name != IndicatorName.PercentagePriceOscillator)
+            yield break;
+        var options = builtIn.CreateOptions();
+        var fast = options is PriceOscillatorPercentSpecOptions percent ? percent.ShortLength : Integer(options, "FastLength");
+        var slow = options is PriceOscillatorPercentSpecOptions percentSlow ? percentSlow.LongLength : Integer(options, "SlowLength");
+        var signal = Integer(options, "SignalLength", 9);
+        var kind = AverageKind(options, 3);
+        if (kind == 0) yield break;
+        if (kind >= 3 && (!StandardEmaPeriod(fast) || !StandardEmaPeriod(slow) || !StandardEmaPeriod(signal))) yield break;
+        var keys = indicator.Outputs.Count == 1
+            ? new[] { builtIn.BatchOutputKey ?? (name == IndicatorName.PercentagePriceOscillator ? "Ppo" : "Macd") }
+            : GeneratedIndicatorOutputs.KeysFor(name);
+        for (var slot = 0; slot < indicator.Outputs.Count; slot++)
+        {
+            var key = keys[slot];
+            if (key != "Macd" && key != "Ppo" && key != "Signal" && key != "Histogram") continue;
+            yield return FullReference(slot, bars =>
+            {
+                var closes = bars.Select(b => b.Close).ToArray();
+                var fastAverage = Average(closes, fast, kind);
+                var slowAverage = Average(closes, slow, kind);
+                var line = closes.Select((_, i) => name == IndicatorName.PercentagePriceOscillator
+                    ? slowAverage[i] == 0 ? 0 : 100 * (fastAverage[i] / slowAverage[i] - 1)
+                    : fastAverage[i] - slowAverage[i]).ToArray();
+                if (key == "Macd" || key == "Ppo") return line;
+                var smoothed = Average(line, signal, kind);
+                return key == "Signal" ? smoothed : line.Select((v, i) => v - smoothed[i]).ToArray();
+            });
+        }
+    }
+
+    private static bool StandardEmaPeriod(int length) => length >= 1;
+
+    private static int Integer(object options, string name, int? fallback = null) =>
+        options.GetType().GetProperty(name)?.GetValue(options) is int value ? value
+        : fallback ?? throw new InvalidOperationException("Formula options missing " + name);
+
+    private static double[] ExactWeightedWindow(IReadOnlyList<Bar> bars, int length)
+    {
+        var result = new double[bars.Count];
+        var denominator = new ReferenceFraction((long)length * (length + 1L) / 2);
+        for (var i = 0; i < result.Length; i++)
+        {
+            var sum = new ReferenceFraction(0);
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
+                sum += ReferenceFraction.FromDouble(bars[j].Close) * new ReferenceFraction(length - i + j);
+            result[i] = (sum / denominator).ToDouble();
+        }
+        return result;
+    }
+
+    // Independent trajectory: rational correction form, quantized after each complete update.
+    // Earlier predicted values come from this reference, never observed production outputs.
+    private static double[] RoundedEma(IReadOnlyList<Bar> bars, int length)
+        => RoundedEma(bars.Select(bar => bar.Close).ToArray(), length);
+
+    private static double[] RoundedEma(IReadOnlyList<double> input, int length)
+    {
+        var values = input.Select(ReferenceFraction.FromDouble).ToArray();
+        var result = new double[values.Length];
+        var rate = new ReferenceFraction(2) / new ReferenceFraction((long)length + 1);
+        var previous = new ReferenceFraction(0);
+        var prefix = new ReferenceFraction(0);
+        for (var i = 0; i < values.Length; i++)
+        {
+            ReferenceFraction next;
+            if (i < length)
+            {
+                prefix += values[i];
+                next = prefix / new ReferenceFraction(i + 1);
+            }
+            else next = previous + rate * (values[i] - previous);
+            result[i] = next.ToDouble();
+            previous = ReferenceFraction.FromDouble(result[i]);
+        }
+        return result;
+    }
+
+    private static double[] ExactSma(IReadOnlyList<Bar> bars, int length)
+    {
+        var input = bars.Select(bar => ReferenceFraction.FromDouble(bar.Close)).ToArray();
+        var result = new double[input.Length];
+        for (var i = length - 1; i < input.Length; i++)
+        {
+            var sum = new ReferenceFraction(0);
+            for (var j = i - length + 1; j <= i; j++) sum += input[j];
+            result[i] = (sum / new ReferenceFraction(length)).ToDouble();
+        }
+        return result;
+    }
+
+    internal static double[] Average(IReadOnlyList<double> values, int length, int kind)
+    {
+        // Bounded means of finite inputs have representable results even when their
+        // sums or corrections overflow binary64. Round each independent exact stage.
+        // Preserve the existing IEEE propagation for nonfinite upstream stages.
+        if ((kind is 1 or 2 or 3 or 6) && values.All(value => !double.IsNaN(value) && !double.IsInfinity(value)))
+            return RoundedBoundedStage(values, length, kind);
+
+        if (kind == 4 || kind == 5)
+        {
+            var first = Average(values, length, 3);
+            var second = Average(first, length, 3);
+            if (kind == 4) return first.Select((v, i) => 2 * v - second[i]).ToArray();
+            var third = Average(second, length, 3);
+            return first.Select((v, i) => 3 * (v - second[i]) + third[i]).ToArray();
+        }
+        var result = new double[values.Count];
+        for (var i = 0; i < result.Length; i++)
+        {
+            if (kind == 6)
+            {
+                var previous = i == 0 ? 0 : result[i - 1];
+                result[i] = previous + (values[i] - previous) / length;
+                continue;
+            }
+            if (kind == 3 && i >= length)
+            {
+                result[i] = result[i - 1] + 2d / (length + 1d) * (values[i] - result[i - 1]);
+                continue;
+            }
+            if (kind == 1 && i + 1 < length) continue;
+            double sum = 0;
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
+                sum += values[j] * (kind == 2 ? length - i + j : 1);
+            result[i] = sum / (kind == 2 ? length * (length + 1d) / 2
+                : kind == 3 ? i + 1 : length);
+        }
+        return result;
+    }
+}

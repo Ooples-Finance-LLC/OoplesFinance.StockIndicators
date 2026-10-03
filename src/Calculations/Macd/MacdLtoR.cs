@@ -22,7 +22,9 @@ public static partial class Calculations
         var fastEmaList = GetMovingAverageList(stockData, movingAvgType, fastLength, inputList);
         var slowEmaList = GetMovingAverageList(stockData, movingAvgType, slowLength, inputList);
         var macdList = GetDifferenceList(fastEmaList, slowEmaList);
-        var macdSignalLineList = GetMovingAverageList(stockData, movingAvgType, signalLength, macdList);
+        var finiteInput = FiniteSignalInput.Create(macdList, out var finiteCount);
+        var macdSignalLineList = GetMovingAverageList(stockData, movingAvgType, signalLength, finiteInput);
+        for (var i = finiteCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
         var macdHistogramList = GetDifferenceList(macdList, macdSignalLineList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -68,8 +70,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var emaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var ema26List = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var emaListInput = FiniteSignalInput.Create(inputList, out var emaListCount);
+        var emaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(emaListInput, fastLength)
+            : GetMovingAverageList(stockData, maType, fastLength, emaListInput);
+        for (var i = emaListCount; i < emaList.Count; i++) emaList[i] = double.NaN;
+        var ema26ListInput = FiniteSignalInput.Create(inputList, out var ema26ListCount);
+        var ema26List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(ema26ListInput, slowLength)
+            : GetMovingAverageList(stockData, maType, slowLength, ema26ListInput);
+        for (var i = ema26ListCount; i < ema26List.Count; i++) ema26List[i] = double.NaN;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -84,8 +92,14 @@ public static partial class Calculations
             diff26List.Add(diff26);
         }
 
-        var diff12EmaList = GetMovingAverageList(stockData, maType, fastLength, diff12List);
-        var diff26EmaList = GetMovingAverageList(stockData, maType, slowLength, diff26List);
+        var diff12EmaListInput = FiniteSignalInput.Create(diff12List, out var diff12EmaListCount);
+        var diff12EmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(diff12EmaListInput, fastLength)
+            : GetMovingAverageList(stockData, maType, fastLength, diff12EmaListInput);
+        for (var i = diff12EmaListCount; i < diff12EmaList.Count; i++) diff12EmaList[i] = double.NaN;
+        var diff26EmaListInput = FiniteSignalInput.Create(diff26List, out var diff26EmaListCount);
+        var diff26EmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(diff26EmaListInput, slowLength)
+            : GetMovingAverageList(stockData, maType, slowLength, diff26EmaListInput);
+        for (var i = diff26EmaListCount; i < diff26EmaList.Count; i++) diff26EmaList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ema12 = emaList[i];
@@ -103,7 +117,10 @@ public static partial class Calculations
             macdList.Add(macd);
         }
 
-        var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
+        var macdSignalLineListInput = FiniteSignalInput.Create(macdList, out var macdSignalLineListCount);
+        var macdSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macdSignalLineListInput, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, macdSignalLineListInput);
+        for (var i = macdSignalLineListCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var macd = macdList[i];
@@ -146,80 +163,11 @@ public static partial class Calculations
     public static StockData CalculateMacZVwapIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 12, int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02)
     {
-        List<double> macztList = new(stockData.Count);
-        List<double> l0List = new(stockData.Count);
-        List<double> l1List = new(stockData.Count);
-        List<double> l2List = new(stockData.Count);
-        List<double> l3List = new(stockData.Count);
-        List<double> maczList = new(stockData.Count);
-        List<double> histList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // LazyBear's MAC-Z VWAP. The MACD term is divided by stdev(src, length2), the prices' own standard
-        // deviation. The z-score is his calc_zvwap: the distance of the price from its rolling volume-weighted
-        // mean over length1, in units of sqrt(sma((price - mean)^2, length1)). It used to come from the Z distance
-        // indicator, which measured a cumulative VWAP against a deviation of the VWAP series itself.
-        var stdDevList = GetStandardDeviationList(inputList, length2);
-        var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-        var zScoreList = GetZScoreList(inputList,
-            GetRollingVolumeWeightedMeanList(inputList, stockData.Volumes, length1), Math.Max(1, length1));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stdev = stdDevList[i];
-            var fastMa = fastSmaList[i];
-            var slowMa = slowSmaList[i];
-            var zscore = zScoreList[i];
-
-            var macd = fastMa - slowMa;
-            var maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
-            macztList.Add(maczt);
-
-            var prevL0 = i >= 1 ? l0List[i - 1] : maczt;
-            var l0 = ((1 - gamma) * maczt) + (gamma * prevL0);
-            l0List.Add(l0);
-
-            var prevL1 = i >= 1 ? l1List[i - 1] : maczt;
-            var l1 = (-1 * gamma * l0) + prevL0 + (gamma * prevL1);
-            l1List.Add(l1);
-
-            var prevL2 = i >= 1 ? l2List[i - 1] : maczt;
-            var l2 = (-1 * gamma * l1) + prevL1 + (gamma * prevL2);
-            l2List.Add(l2);
-
-            var prevL3 = i >= 1 ? l3List[i - 1] : maczt;
-            var l3 = (-1 * gamma * l2) + prevL2 + (gamma * prevL3);
-            l3List.Add(l3);
-
-            var macz = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-            maczList.Add(macz);
-        }
-
-        var maczSignalList = GetMovingAverageList(stockData, maType, signalLength, maczList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var macz = maczList[i];
-            var maczSignal = maczSignalList[i];
-
-            var prevHist = i >= 1 ? histList[i - 1] : 0;
-            var hist = macz - maczSignal;
-            histList.Add(hist);
-
-            var signal = GetCompareSignal(hist, prevHist);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Macz", maczList },
-            { "Signal", maczSignalList },
-            { "Histogram", histList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(maczList);
-        stockData.IndicatorName = IndicatorName.MacZVwapIndicator;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = MacZVwapWindow.Calculate(stockData, input, maType, fastLength, slowLength, signalLength, length1, length2, gamma, false);
+        var line = result.Line.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Macz", line }, { "Signal", result.SignalLine.ToList() }, { "Histogram", result.Histogram.ToList() } });
+        stockData.SetSignals(result.Trades.ToList()); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.MacZVwapIndicator;
         return stockData;
     }
 
@@ -240,53 +188,12 @@ public static partial class Calculations
     public static StockData CalculateMacZIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 12, int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1)
     {
-        List<double> maczList = new(stockData.Count);
-        List<double> histList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-        var wilderMovingAvgList = GetMovingAverageList(stockData, MovingAvgType.WildersSmoothingMethod, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var stdev = stdDevList[i];
-            var wima = wilderMovingAvgList[i];
-            var fastMa = fastSmaList[i];
-            var slowMa = slowSmaList[i];
-            var zscore = stdev != 0 ? (currentValue - wima) / stdev : 0;
-
-            var macd = fastMa - slowMa;
-            var macz = stdev != 0 ? (zscore * mult) + (mult * macd / stdev) : zscore;
-            maczList.Add(macz);
-        }
-
-        var maczSignalList = GetMovingAverageList(stockData, maType, signalLength, maczList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var macz = maczList[i];
-            var maczSignal = maczSignalList[i];
-
-            var prevHist = i >= 1 ? histList[i - 1] : 0;
-            var hist = macz - maczSignal;
-            histList.Add(hist);
-
-            var signal = GetCompareSignal(hist, prevHist);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Macz", maczList },
-            { "Signal", maczSignalList },
-            { "Histogram", histList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(maczList);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var result = MacZWindow.Calculate(stockData, input, maType, fastLength, slowLength, signalLength, length, mult, false);
+        var line = result.Line.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Macz", line }, { "Signal", result.SignalLine.ToList() }, { "Histogram", result.Histogram.ToList() } });
+        stockData.SetSignals(result.Trades.ToList()); stockData.SetCustomValues(line);
         stockData.IndicatorName = IndicatorName.MacZIndicator;
-
         return stockData;
     }
 
@@ -306,12 +213,16 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
 
-        var emaOpenList = GetMovingAverageList(stockData, maType, length, openList);
-        var emaCloseList = GetMovingAverageList(stockData, maType, length, inputList);
+        var emaOpenList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(openList, length) : GetMovingAverageList(stockData, maType, length, openList);
+        var emaCloseList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length) : GetMovingAverageList(stockData, maType, length, inputList);
         var macdList = GetDifferenceList(emaCloseList, emaOpenList);
         var macdMirrorList = GetDifferenceList(emaOpenList, emaCloseList);
-        var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
-        var macdMirrorSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdMirrorList);
+        var macdInput = FiniteSignalInput.Create(macdList, out var macdFiniteCount);
+        var macdSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macdInput, signalLength) : GetMovingAverageList(stockData, maType, signalLength, macdInput);
+        for (var i = macdFiniteCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
+        var macdMirrorInput = FiniteSignalInput.Create(macdMirrorList, out var macdMirrorFiniteCount);
+        var macdMirrorSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macdMirrorInput, signalLength) : GetMovingAverageList(stockData, maType, signalLength, macdMirrorInput);
+        for (var i = macdMirrorFiniteCount; i < macdMirrorSignalLineList.Count; i++) macdMirrorSignalLineList[i] = double.NaN;
         var macdHistogramList = GetDifferenceList(macdList, macdSignalLineList);
         var macdMirrorHistogramList = GetDifferenceList(macdMirrorList, macdMirrorSignalLineList);
         for (var i = 0; i < stockData.Count; i++)

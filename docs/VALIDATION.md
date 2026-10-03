@@ -1,5 +1,11 @@
 # V2 Indicator Validation Status
 
+> Historical inventory: the completion statements below do not establish current all-indicator
+> coverage. The older sweeps exclude some constructors and customer assemblies. See
+> [Shared indicator validation](INDICATOR_VALIDATION.md) for the shared discovery API, generated
+> fixtures, explicit mathematical contracts, and its limitations. The new CI suite reports failures
+> uncovered by that broader coverage rather than treating the old counts as a guarantee.
+
 **Last Updated**: 2025-01-26
 **Total Indicators**: 743
 **Golden File Validated**: 49 core indicators (see GoldenFileTests.cs)
@@ -396,3 +402,25 @@ If multiple valid formulas exist:
 | TradingView | High | User-trusted, widely used |
 | TA-Lib | Medium | Easier automated comparison |
 | Investopedia | Low | General reference only |
+
+Automatic shared validation discovery includes an all-minimum-period case for every constructible indicator with period parameters, including customer subclasses. Period arguments are set to one; constructor-enforced minimums still apply. Explicit registrations replace automatically generated cases and must include any needed boundary configurations. Validation runs in tests or development tools through `IndicatorValidation.ValidateAndThrowAsync`, not during production updates.
+
+Strict shared validation requires an independent full trajectory for every output, including startup. Observed-history recurrence checks are supplementary evidence: they cannot satisfy this requirement or fill the startup gap of a post-warmup trajectory. Smoke validation remains explicitly weaker.
+
+
+### Declaring supported input magnitudes
+
+A customer `IIndicatorInputDomainContract` can return a cached immutable domain such as:
+
+```csharp
+private static readonly IndicatorInputDomain Domain = IndicatorInputDomain.Finite
+    .WithRange(IndicatorInputFields.Prices, -1e100, 1e100)
+    .WithRange(IndicatorInputFields.Volume, 0, 1e12);
+public IndicatorInputDomain InputDomain => Domain;
+```
+
+Bounds are inclusive and apply only to the selected fields. Repeated calls intersect constraints and never modify the original domain. Contradictory or nonfinite bounds throw. Choose bounds justified by the formula and numerical analysis; this declaration does not establish an error bound by itself. Runtime domain checks reject out-of-range root or derived observations through the existing typed-domain enforcement.
+
+Shared validation generates adjacent representable values outside each bound with other fields inside the domain. It also exercises alternating accepted boundary values and uses domain-valid replacements during rejection/recovery checks. Single-series and paired-series fixtures respect their independently declared domains. This allows narrow domains without assuming 100 is always an admissible recovery price.
+
+Customer indicators and compositions containing customer states now automatically receive all eleven `xorshift32-v1/seed-244` numerical classes. Additional fixtures must use distinct names; a user-supplied copy cannot replace a mandatory case. Declared domains are checked against generated invalid cases, then accepted in-domain data is compared with the formula reference. This does not infer a customer's intended formula or justify its declared magnitude limits.
