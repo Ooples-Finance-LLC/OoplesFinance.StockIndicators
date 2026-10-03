@@ -5409,3 +5409,12 @@ This is evidence for the isolated batch-747 source. Source was already published
 The SMA-startup fault survived its original route filter because the five enrolled configurations exercise EMA and WMA, not SMA. A new independent SMA(2) hand asserts that prices [1,2,1] yield [0,0,1]: means [0,3/2,3/2] produce ratios [0,0,1], with zero directional averages. The hand checks batch, fast and native routes against a separate rational reference.
 
 The new regression passed on net10.0 using the unchanged production DLL; its mutation filter now targets that check. The original campaign remains unqualified while its remaining outcomes are collected. No production or enrollment changes are included, and a repaired mutation qualification is still required.
+
+
+### Batch 744: Kalman Smoother public mutation qualification
+
+The isolated campaigns `744a` and `744b` passed their baselines and caught **22/22 compiled behavioral faults**, alongside **44/44 distinct focused and integration checks**. Both archives were compared byte-for-byte with the retained batch-744 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `a998448ca5ce816f30195544b53f6f72004078e99142ef30b0183bc8acec7855`. Archive SHA256: `c97b88c38be8998caffdc436dd9ab970da0b17d90e711b292e346416ca98beec` and `c97b88c38be8998caffdc436dd9ab970da0b17d90e711b292e346416ca98beec`.
+
+This is evidence for the isolated batch-744 source. Source was already published in the batch-744 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
