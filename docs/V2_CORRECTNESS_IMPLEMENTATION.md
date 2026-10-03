@@ -5334,3 +5334,10 @@ An isolated copy of the unchanged CorrectnessVerifier consumed the exact package
 - net461: 4/4 configurations passed; runtime `4.0.30319.42000`; assembly SHA256 `be44269a2d459a5f409fafeaa80aa7225acca0fd520f712c34d133b0e2090491`.
 
 The net461 consumer ran on the installed .NET Framework runtime (CLR 4.0.30319.42000), not a certified minimum-version host; dependency-support warnings remain. These 12 configuration executions establish bounded package loading/runtime behavior, not the all-discovered-configurations release gate, minimum-runtime support, competitor performance, or final hosted readiness. PR246 was draft and mergeable but blocked at da9da71f, with required CI queued. Enrollment remains unchanged.
+
+
+### Batch 753: minimum-SDK build
+
+Source `9f43d68f` built successfully in an isolated checkout using installed SDK **10.0.101**, selected with a local, untracked global.json and rollForward disabled. The SDK version was checked before and after the build. `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 -p:GeneratePackageOnBuild=false` restored dependencies, built the netstandard2.0 generator, and compiled the net10.0 library with **zero warnings and zero errors**. No production files changed.
+
+This is Windows evidence for the existing minimum-SDK build requirement. It does not replace the required hosted Linux job, full numerical validation, or the remaining package/release/performance gates.
