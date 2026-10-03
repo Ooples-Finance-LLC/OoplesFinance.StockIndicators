@@ -5425,3 +5425,10 @@ This is evidence for the isolated batch-744 source. Source was already published
 Halving the factor survived the original signed/extreme-input filter because its cases kept the exponent at a clamp. A new independent hand uses [3,5], population variance 1 and factor 1/4: p^4 = 25/16, hence p = sqrt(5)/2 lies inside the range. Factor 1/8 instead clamps to p=1. The resulting two-stage WMA outputs are checked by explicit weights and differ between these factors.
 
 The new hand passed on net10.0 across batch, fast and native routes with preview/reset checks, using the unchanged production DLL. The factor mutation now targets this discriminating regression. Production and enrollment are unchanged; the original campaign remains unqualified while remaining outcomes are collected, and repaired mutation evidence is still required.
+
+
+### Batch 786: Volatility Wave remaining survivor filters
+
+The original first half finished with 13 compiled faults caught and four survivors; it remains excluded from qualification. In addition to the published factor regression, the population-divisor, exponent-scale and squared-price-memory faults now target the existing passing interior-factor hand. For [3,5] at factor 1/4, those faults respectively change p^4 from 25/16 to 25/8, to 1/64 (lower clamp), or make the variance negative (lower clamp). Production and tests are unchanged.
+
+The repaired snapshot differs from the original only in the added hand test and four fault filters. Its retained and new evidence contains 57 distinct passing checks. Replacement mutation verification is running; no repaired kills are claimed yet.

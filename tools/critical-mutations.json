@@ -86105,7 +86105,7 @@
     "scope": "internal sealed class VolatilityWaveWindow",
     "before": "/ ((Fraction)count * count)",
     "after": "/ ((Fraction)count)",
-    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.InteriorFactorChangesPowerWeights"
   },
   {
     "id": "volatility-wave-wide-exponent-scale",
@@ -86114,7 +86114,7 @@
     "scope": "internal sealed class VolatilityWaveWindow",
     "before": "10000 * _factor.Pow(4)",
     "after": "100 * _factor.Pow(4)",
-    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.InteriorFactorChangesPowerWeights"
   },
   {
     "id": "volatility-wave-wide-negative-price",
@@ -86186,7 +86186,7 @@
     "scope": "internal sealed class VolatilityWaveWindow",
     "before": "_sum = sum; _squares = squares;",
     "after": "_sum = sum; _squares = 0;",
-    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.SignedTinyAndExtremeInputsRetainFractionalMeans"
+    "filter": "FullyQualifiedName~VolatilityWaveNumericalTests.InteriorFactorChangesPowerWeights"
   },
   {
     "id": "volatility-wave-wide-native-extrapolation",
