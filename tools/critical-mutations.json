@@ -86590,7 +86590,7 @@
     "file": "src/Models/StockData.cs",
     "scope": "internal ReadOnlyMemory<double> InputMemory",
     "before": "if (_closePrices is not null)",
-    "after": "if (false)",
+    "after": "if (_closePrices is not null && !_closeMemory.HasValue)",
     "filter": "FullyQualifiedName~AdoptedInputTests.FirstDefaultInputReadUsesEditedCloseList"
   },
   {

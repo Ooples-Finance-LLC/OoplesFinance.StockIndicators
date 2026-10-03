@@ -5377,3 +5377,10 @@ Campaign baselines use separate unions of selected fault filters. A supplemental
 Source snapshot SHA256: `9ed16ce404b4bd675f2c65b09d32b545b5efb273527ca5a754e71c0bfebc6254`. Archive SHA256: `4a085ceb7cb6c3884809ae3c0fd0be649920e4352011f1d7bcccf159e64a5204` and `4a085ceb7cb6c3884809ae3c0fd0be649920e4352011f1d7bcccf159e64a5204`.
 
 This is evidence for the isolated batch-682 source. Source was already published in the batch-682 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
+
+
+### Batch 750: adopted default-input mutation qualification
+
+Both isolated campaign baselines passed, and all **3/3 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and all 47 focused checks passed. The original first-half campaign is excluded: one candidate failed compilation. The repaired manifest uses a runtime condition to bypass the current close list for adopted data; production and tests are identical to the original frozen source. This qualifies the batch-750 accessor regressions; broader release gates remain incomplete.
+
+Source snapshot SHA256: `5b0f091549de06a8ac8e17d4544de48c4d6e5d3789a32450eeb6c5f661de28ca`. Archives: `58d3751fb5c61d2ab35fef0e088ae232cba5a86d4231a89e4a3908c3dd557fc3` and `58d3751fb5c61d2ab35fef0e088ae232cba5a86d4231a89e4a3908c3dd557fc3`.
