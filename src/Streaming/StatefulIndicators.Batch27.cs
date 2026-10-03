@@ -694,83 +694,19 @@ public sealed class WilliamsFractalsState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("S1")]
 public sealed class WilsonRelativePriceChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _overbought;
-    private readonly double _oversold;
-    private readonly double _upperNeutralZone;
-    private readonly double _lowerNeutralZone;
-    private readonly RsiState _rsi;
-    private readonly IMovingAverageSmoother _obSmooth;
-    private readonly IMovingAverageSmoother _osSmooth;
-    private readonly IMovingAverageSmoother _nzuSmooth;
-    private readonly IMovingAverageSmoother _nzlSmooth;
-    private readonly StreamingInputResolver _input;
-
+    private readonly WilsonWindow _window;
     public WilsonRelativePriceChannelState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 34,
-        int smoothLength = 1, double overbought = 70, double oversold = 30, double upperNeutralZone = 55,
-        double lowerNeutralZone = 45)
-    {
-        var resolved = Math.Max(1, length);
-        var smooth = Math.Max(1, smoothLength);
-        _overbought = overbought;
-        _oversold = oversold;
-        _upperNeutralZone = upperNeutralZone;
-        _lowerNeutralZone = lowerNeutralZone;
-        _rsi = new RsiState(maType, resolved);
-        _obSmooth = MovingAverageSmootherFactory.Create(maType, smooth);
-        _osSmooth = MovingAverageSmootherFactory.Create(maType, smooth);
-        _nzuSmooth = MovingAverageSmootherFactory.Create(maType, smooth);
-        _nzlSmooth = MovingAverageSmootherFactory.Create(maType, smooth);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        int smoothLength = 1, double overbought = 70, double oversold = 30, double upperNeutralZone = 55, double lowerNeutralZone = 45)
+        => _window = new(maType, length, smoothLength, oversold, lowerNeutralZone, overbought, upperNeutralZone);
     public IndicatorName Name => IndicatorName.WilsonRelativePriceChannel;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _obSmooth.Reset();
-        _osSmooth.Reset();
-        _nzuSmooth.Reset();
-        _nzlSmooth.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var rsi = _rsi.Next(value, isFinal);
-        var ob = _obSmooth.Next(rsi - _overbought, isFinal);
-        var os = _osSmooth.Next(rsi - _oversold, isFinal);
-        var nzu = _nzuSmooth.Next(rsi - _upperNeutralZone, isFinal);
-        var nzl = _nzlSmooth.Next(rsi - _lowerNeutralZone, isFinal);
-
-        var s1 = value - (value * os / 100);
-        var u1 = value - (value * ob / 100);
-        var u2 = value - (value * nzu / 100);
-        var s2 = value - (value * nzl / 100);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "S1", s1 },
-                { "S2", s2 },
-                { "U1", u1 },
-                { "U2", u2 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(s1, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Lines[0], includeOutputs ? new Dictionary<string, double>
+            { ["S1"] = point.Lines[0], ["S2"] = point.Lines[1], ["U1"] = point.Lines[2], ["U2"] = point.Lines[3] } : null);
     }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _obSmooth.Dispose();
-        _osSmooth.Dispose();
-        _nzuSmooth.Dispose();
-        _nzlSmooth.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Wvwma")]

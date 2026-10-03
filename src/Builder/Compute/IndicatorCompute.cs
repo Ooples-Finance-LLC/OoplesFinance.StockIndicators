@@ -21826,39 +21826,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34,
         int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, double threshold = 30)
     {
-        // CalculateWilsonRelativePriceChannel publishes four channels, one per relative strength threshold,
-        // and each is the series pulled back by the smoothed distance of its index from that threshold as a
-        // percentage. The four differ only by the threshold, which is what the spec's overbought, oversold
-        // and neutral zone options set - and which this arm previously ignored.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-        smoothLength = Math.Max(smoothLength, 1);
-
-        using var indexes = context.Rent(count);
-        RelativeStrengthIndex(data, context, input, length, maType, indexes.WritableSpan);
-        var index = indexes.Span;
-
-        using var distances = context.Rent(count);
-        var distance = distances.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            distance[i] = index[i] - threshold;
-        }
-
-        using var smoothedDistances = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, distances.Span, smoothedDistances.WritableSpan);
-        var smoothedDistance = smoothedDistances.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = input[i] - (input[i] * smoothedDistance[i] / 100);
-        }
-
-        return buffer;
+        var values = WilsonWindow.Calculate(data, maType, length, smoothLength, new[] { threshold }, fast: true).Lines[0];
+        var result = context.Rent(values.Length);
+        try { values.AsSpan().CopyTo(result.WritableSpan); return result; } catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6,

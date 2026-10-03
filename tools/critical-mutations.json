@@ -84559,5 +84559,293 @@
     "before": "var lower = quotient.IsZero ? BigInteger.Zero : ExactPopulationDeviation.IntegerRoot(quotient);",
     "after": "var lower = ExactPopulationDeviation.IntegerRoot(quotient);",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies"
+  },
+  {
+    "id": "wilson-wide-zero-loss",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "if (loss.Sign == 0) return Number.Of(100);",
+    "after": "if (loss.Sign == 0) return default;",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "gain.Times(100).Divide(gain + loss)",
+    "after": "gain.Times(50).Divide(gain + loss)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-channel-scale",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "(price * distance).Divide(100)",
+    "after": "(price * distance).Divide(10)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-early-product",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "(price * distance).Divide(100)",
+    "after": "Number.Of((price * distance).Publish()).Divide(100)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-bull-order",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "(bands[2] - bands[3]).Sign < 0",
+    "after": "(bands[2] - bands[3]).Sign > 0",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-bear-order",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "(bands[0] - bands[1]).Sign > 0",
+    "after": "(bands[0] - bands[1]).Sign < 0",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-trade-strong",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "(bull - previousBull).Sign > 0",
+    "after": "(bull - previousBull).Sign < 0",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-native-delta",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "current - _previous",
+    "after": "current + _previous",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "if (final) { _previous",
+    "after": "if (true) { _previous",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-native-distance",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "rsi - threshold",
+    "after": "rsi + threshold",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-original-guard",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "input, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, volumes",
+    "after": "input",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.InvalidInputsAndThresholdsAreRejectedBeforeStateChanges"
+  },
+  {
+    "id": "wilson-wide-loss-sign",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "losses[i] = delta.Times(-1)",
+    "after": "losses[i] = delta",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-batch-hooks",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "var rsiHooks = fast && ComponentAverage.HasOverrides;",
+    "after": "var rsiHooks = ComponentAverage.HasOverrides;",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.CallbackSlotsAreDynamicAndShortValuesAreZeroPadded"
+  },
+  {
+    "id": "wilson-wide-dynamic-hooks",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "var rsiHooks = fast && ComponentAverage.HasOverrides;",
+    "after": "var rsiHooks = fast;",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.CallbackSlotsAreDynamicAndShortValuesAreZeroPadded"
+  },
+  {
+    "id": "wilson-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "i < replacement.Count ? Number.Of(replacement[i]) : default",
+    "after": "i < replacement.Count ? Number.Of(replacement[i]) : Number.Of(1)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.CallbackSlotsAreDynamicAndShortValuesAreZeroPadded"
+  },
+  {
+    "id": "wilson-wide-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "smooth, fast)",
+    "after": "length, fast)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-batch-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "rsi.Select(v => v - Number.Of(threshold))",
+    "after": "rsi.Select(v => v + Number.Of(threshold))",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-reset-means",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "_gains.Reset(); _losses.Reset();",
+    "after": "_gains.Reset();",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal sealed class WilsonWindow",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-mean-floor",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.ExtremePeriodsAllocateObservedHistory"
+  },
+  {
+    "id": "wilson-wide-weight-aging",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted - sum + value.Times",
+    "after": "weighted + sum + value.Times",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-weight-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-sma-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count + 1 < _length",
+    "after": "_count + 1 < _length - 1",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-ema-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_count < _length",
+    "after": "_count < _length - 1",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
+  },
+  {
+    "id": "wilson-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WilsonRelativePriceChannelState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.InvalidInputsAndThresholdsAreRejectedBeforeStateChanges"
+  },
+  {
+    "id": "wilson-wide-native-threshold-order",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WilsonRelativePriceChannelState",
+    "before": "oversold, lowerNeutralZone, overbought, upperNeutralZone",
+    "after": "overbought, lowerNeutralZone, oversold, upperNeutralZone",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-fast-threshold",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(",
+    "before": "new[] { threshold }",
+    "after": "new[] { 30d }",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
+  },
+  {
+    "id": "wilson-wide-enrollment",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": null,
+    "before": "WilsonRelativePriceChannel or ",
+    "after": "",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.NumericalClassesAreEnrolled"
   }
 ]

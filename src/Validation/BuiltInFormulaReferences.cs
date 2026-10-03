@@ -32,6 +32,13 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.WilsonRelativePriceChannel)
+        {
+            var wilsonKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "S1", "S2", "U1", "U2" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < wilsonKeys.Length; slot++) { var selected = wilsonKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => WilsonOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VolatilityMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilityAverageOutputs(bars, builtIn)["Vma"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VolatilityBasedMomentum)

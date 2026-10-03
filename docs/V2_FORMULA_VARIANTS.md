@@ -1027,3 +1027,13 @@ The public formula measures 100*(price-selected mean)/population deviation, smoo
 For prices [0,2,4,2,0,0], SMA means with length/lookback/smoothing 10/2/2 select periods [10,1,1,10,1,1] and publish [0,1,3,146/55,36/55,0]. The third and fifth trading signals are Buy and Sell because their respective margins exactly tie the prior margin. Tests also distinguish the threshold displaced by sqrt(2+epsilon)-sqrt(2), beyond fixed binary64 precision, from its exact tie.
 
 The internal core and VolMaCore registry now use the causal public formula. The existing length argument maps to output length, with default lookback 10 and smoothing 3; an additional internal overload accepts all three periods. Overlapping spans are safe. Typed public options keep their existing length/mean-type fields and defaults. SMA, WMA, EMA and Wilder paths use the exact local kernel; unsupported means preserve legacy dispatch. Fast computation requests its three component means in order; batch bypasses registered callbacks. History grows only with observed samples.
+
+
+
+### Batch 729: Wilson Relative Price Channel
+
+The four channels retain exact selected-price RSI distances through smoothing and price multiplication: price * (1 - MA(RSI - threshold)/100). Their order is S1=oversold, S2=lower neutral, U1=overbought, U2=upper neutral. Signals compare exact price-minus-upper/lower-channel margins, including signed prices. The independent reference derives RSI from net and absolute changes; production averages separate gains and losses.
+
+For prices [10,12,9], EMA length 2 and smoothing 1, the final RSI is 100/7. Final S1/S2/U1/U2 are 729/70, 1647/140, 981/70 and 1773/140; signals are StrongBuy, StrongBuy, StrongSell. Exact intermediate products retain finite channel results at MaxValue. Arbitrary finite thresholds and signed prices remain supported, with observed-history allocation for extreme periods. Batch mean callbacks remain bypassed; the fast path consumes one distance slot when unarmed and gain/loss/distance slots when armed, padding short replacements with zero.
+
+All 83 focused tests passed on net10.0. The 32 mutation candidates remain queued for isolated qualification.

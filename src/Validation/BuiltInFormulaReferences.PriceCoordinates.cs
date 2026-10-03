@@ -69,20 +69,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("vClose", new[] { "vClose", "vOpen", "vHigh", "vLow" },
                     bars => ValueChartValues(bars, length, (MovingAvgType)options.GetType().GetProperty("MaType")!.GetValue(options)!).Outputs);
             case IndicatorName.WilsonRelativePriceChannel:
-                return new("S1", new[] { "S1", "S2", "U1", "U2" }, bars =>
-                {
-                    var changes = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                    var gains = Average(changes.Select(v => Math.Max(0, v)).ToArray(), length, kind);
-                    var losses = Average(changes.Select(v => Math.Max(0, -v)).ToArray(), length, kind);
-                    var rsi = gains.Select((v, i) => losses[i] == 0 ? 100 : 100 * v / (v + losses[i])).ToArray();
-                    double[] Channel(double threshold)
-                    {
-                        var distance = Average(rsi.Select(v => v - threshold).ToArray(), Integer(options, "SmoothLength", 1), kind);
-                        return bars.Select((b, i) => b.Close * (1 - distance[i] / 100)).ToArray();
-                    }
-                    return Outputs(("S1", Channel(Number(options, 30, "Oversold"))), ("S2", Channel(Number(options, 45, "LowerNeutralZone"))),
-                        ("U1", Channel(Number(options, 70, "Overbought"))), ("U2", Channel(Number(options, 55, "UpperNeutralZone"))));
-                });
+                return new("S1", new[] { "S1", "S2", "U1", "U2" }, bars => WilsonOutputs(bars, indicator));
             case IndicatorName.TimeAndMoneyChannel:
                 return new("Median", new[] { "Ch+1", "Ch-1", "Ch+2", "Ch-2", "Ch+3", "Ch-3", "Median" }, bars =>
                 {

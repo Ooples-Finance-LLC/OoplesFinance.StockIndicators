@@ -198,68 +198,10 @@ public static partial class Calculations
         int length = 34, int smoothLength = 1, double overbought = 70, double oversold = 30, double upperNeutralZone = 55,
         double lowerNeutralZone = 45)
     {
-        List<double> rsiOverboughtList = new(stockData.Count);
-        List<double> rsiOversoldList = new(stockData.Count);
-        List<double> rsiUpperNeutralZoneList = new(stockData.Count);
-        List<double> rsiLowerNeutralZoneList = new(stockData.Count);
-        List<double> s1List = new(stockData.Count);
-        List<double> s2List = new(stockData.Count);
-        List<double> u1List = new(stockData.Count);
-        List<double> u2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var rsi = rsiList[i];
-
-            var rsiOverbought = rsi - overbought;
-            rsiOverboughtList.Add(rsiOverbought);
-
-            var rsiOversold = rsi - oversold;
-            rsiOversoldList.Add(rsiOversold);
-
-            var rsiUpperNeutralZone = rsi - upperNeutralZone;
-            rsiUpperNeutralZoneList.Add(rsiUpperNeutralZone);
-
-            var rsiLowerNeutralZone = rsi - lowerNeutralZone;
-            rsiLowerNeutralZoneList.Add(rsiLowerNeutralZone);
-        }
-
-        var obList = GetMovingAverageList(stockData, maType, smoothLength, rsiOverboughtList);
-        var osList = GetMovingAverageList(stockData, maType, smoothLength, rsiOversoldList);
-        var nzuList = GetMovingAverageList(stockData, maType, smoothLength, rsiUpperNeutralZoneList);
-        var nzlList = GetMovingAverageList(stockData, maType, smoothLength, rsiLowerNeutralZoneList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var ob = obList[i];
-            var os = osList[i];
-            var nzu = nzuList[i];
-            var nzl = nzlList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevS1 = GetLastOrDefault(s1List);
-            var s1 = currentValue - (currentValue * os / 100);
-            s1List.Add(s1);
-
-            var prevU1 = GetLastOrDefault(u1List);
-            var u1 = currentValue - (currentValue * ob / 100);
-            u1List.Add(u1);
-
-            var prevU2 = GetLastOrDefault(u2List);
-            var u2 = currentValue - (currentValue * nzu / 100);
-            u2List.Add(u2);
-
-            var prevS2 = GetLastOrDefault(s2List);
-            var s2 = currentValue - (currentValue * nzl / 100);
-            s2List.Add(s2);
-
-            var signal = GetBullishBearishSignal(currentValue - Math.Min(u1, u2), prevValue - Math.Min(prevU1, prevU2),
-                currentValue - Math.Max(s1, s2), prevValue - Math.Max(prevS1, prevS2));
-            signalsList?.Add(signal);
-        }
+        var result = WilsonWindow.Calculate(stockData, maType, length, smoothLength, new[] { oversold, lowerNeutralZone, overbought, upperNeutralZone });
+        var s1List = result.Lines[0].ToList(); var s2List = result.Lines[1].ToList();
+        var u1List = result.Lines[2].ToList(); var u2List = result.Lines[3].ToList();
+        var signalsList = CreateSignalsList(stockData); signalsList?.AddRange(result.Trades);
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "S1", s1List },
