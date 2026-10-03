@@ -5366,3 +5366,14 @@ Corrected exact price/rise/fall means, ratio folding, zero guards, signed signal
 All **50 focused tests passed**, followed by **19 integration checks** after incorporating published changes through 7749c694: **69 distinct passes**. All 11 Karobein source/test edits were preserved byte-for-byte through integration; the rebuilt checks cover existing hand/route/golden contracts plus the adopted-input and compatibility boundaries. The 31 behavioral mutation candidates are frozen and queued, not yet qualified; all 9,975 manifest anchors validate.
 
 Inventory: **6,789/7,131 configurations enrolled**, **342 omissions across 46 types**, all independent references registered, no construction failures, and exact backlog agreement. Enrollment does not establish release readiness. Final numerical, mutation, hosted, package, platform and performance gates remain incomplete; PR246 stays draft.
+
+
+### Batch 682: Premier survivor mutation qualification
+
+The isolated campaigns `682-regressions-a` and `682-regressions-b` passed their baselines and caught **46/46 compiled behavioral faults**, alongside **113 retained focused passes plus three survivor checks (two strengthened tests and one new test)**. Both archives were compared byte-for-byte with the retained batch-682 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Campaign baselines use separate unions of selected fault filters. A supplemental six-test baseline on identical frozen source covers all five first-half baseline tests plus reset/rollover, so all three survivor regressions have passing pristine-source coverage in addition to both original campaign baselines. All original artifacts remain retained.
+
+Source snapshot SHA256: `9ed16ce404b4bd675f2c65b09d32b545b5efb273527ca5a754e71c0bfebc6254`. Archive SHA256: `4a085ceb7cb6c3884809ae3c0fd0be649920e4352011f1d7bcccf159e64a5204` and `4a085ceb7cb6c3884809ae3c0fd0be649920e4352011f1d7bcccf159e64a5204`.
+
+This is evidence for the isolated batch-682 source. Source was already published in the batch-682 checkpoint; this update does not restore older source files. Mutation verification for later batches and the remaining final gates is still incomplete.
