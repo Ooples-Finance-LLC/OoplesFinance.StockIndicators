@@ -5432,3 +5432,10 @@ The new hand passed on net10.0 across batch, fast and native routes with preview
 The original first half finished with 13 compiled faults caught and four survivors; it remains excluded from qualification. In addition to the published factor regression, the population-divisor, exponent-scale and squared-price-memory faults now target the existing passing interior-factor hand. For [3,5] at factor 1/4, those faults respectively change p^4 from 25/16 to 25/8, to 1/64 (lower clamp), or make the variance negative (lower clamp). Production and tests are unchanged.
 
 The repaired snapshot differs from the original only in the added hand test and four fault filters. Its retained and new evidence contains 57 distinct passing checks. Replacement mutation verification is running; no repaired kills are claimed yet.
+
+
+### Batch 746: Karobein repaired mutation qualification
+
+Both isolated campaign baselines passed, and all **31/31 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and the 69 retained focused checks and new SMA startup regression passed. The original 30/31 result remains excluded; the repaired snapshot changes only the SMA regression and its fault filter. This qualifies the batch-746 numerical correction; broader release gates remain incomplete.
+
+Source snapshot SHA256: `bad566bb11ea204b83c8cf71becdb2105ef4457bb122c8a8781bcdbdb20c4bf4`. Archives: `889763a62454b6f8cdc2e14d9d11dbe31ae8931db9ece06bf8be7f0ad36e3672` and `889763a62454b6f8cdc2e14d9d11dbe31ae8931db9ece06bf8be7f0ad36e3672`.
