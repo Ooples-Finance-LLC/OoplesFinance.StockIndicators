@@ -86574,5 +86574,32 @@
     "before": "series[handle] = series[handle].ToArray();",
     "after": "series[handle] = series[handle];",
     "filter": "FullyQualifiedName~SnapshotLifetimeTests.ASnapshotKeepsItsValuesAfterTheRuntimeIsDisposed"
+  },
+  {
+    "id": "adopted-default-input-list",
+    "module": "numerical",
+    "file": "src/Models/StockData.cs",
+    "scope": "public List<double> InputValues",
+    "before": "_inputValues = _closePrices is not null",
+    "after": "_inputValues = false",
+    "filter": "FullyQualifiedName~AdoptedInputTests.FirstDefaultInputReadUsesEditedCloseList"
+  },
+  {
+    "id": "adopted-default-input-memory",
+    "module": "numerical",
+    "file": "src/Models/StockData.cs",
+    "scope": "internal ReadOnlyMemory<double> InputMemory",
+    "before": "if (_closePrices is not null)",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~AdoptedInputTests.FirstDefaultInputReadUsesEditedCloseList"
+  },
+  {
+    "id": "adopted-default-input-span",
+    "module": "numerical",
+    "file": "src/Models/StockData.cs",
+    "scope": "internal ReadOnlySpan<double> InputSpan",
+    "before": "return CloseSpan;",
+    "after": "return _closeMemory.HasValue ? _closeMemory.Value.Span : CloseSpan;",
+    "filter": "FullyQualifiedName~AdoptedInputTests.FirstDefaultInputReadUsesEditedCloseList"
   }
 ]

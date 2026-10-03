@@ -5314,3 +5314,10 @@ The original Premier pair finished with **43/46 compiled faults caught** and thr
 Replaced two unavailable `Enumerable.Append` calls with equivalent singleton concatenations in Adaptive Cyber Cycle and Hampel, and replaced `Math.Clamp` with long-valued min/max in the Turbo Stochastics independent reference. These three substitutions preserve ordering, bounds, and formulas on .NET Framework 4.6.1.
 
 Verification: `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net461 --no-restore -p:GeneratePackageOnBuild=false` passed with zero errors and nine dependency-support warnings. Six focused net10.0 tests passed (`platform749-compatibility.trx`): Adaptive Cyber startup/median periods, Hampel hand/preview-expiry-reset checks, and Turbo Stochastics hand/extreme signed periods. This establishes compilation and focused behavior; net461 runtime assurance remains outstanding. Enrollment is unchanged at 6,784/7,131; mutation campaigns remain separately tracked.
+
+
+### Batch 750: current-close default input
+
+Default InputValues, InputSpan and InputMemory now honor an already-materialized ClosePrices list before an adopted memory view. Explicit input and an independently materialized input copy retain precedence; untouched adopted columns still avoid extra list materialization.
+
+All 47 focused tests passed on net10.0 (adopted750-current-close.trx), including ten new accessor, precedence and batch/fast/builder regressions, existing adopted-column/lazy-view checks and catalog input validation. Three compiled-behavior mutation candidates are frozen and queued, not yet qualified. All 9,944 manifest anchors validate. Numerical enrollment is unchanged at 6,784/7,131 with 347 omissions across 47 types.

@@ -47,11 +47,13 @@ public class StockData : IStockData
         {
             if (_inputValues == null)
             {
-                // Straight from the adopted column when there is one. Going through ClosePrices would build that
-                // column's list as well, so the closes would be copied twice to answer for them once.
-                _inputValues = _closeMemory.HasValue
-                    ? Materialize(_closeMemory.Value)
-                    : new List<double>(ClosePrices);
+                // A materialized close list is authoritative, including edits made by its caller.
+                // Otherwise copy the adopted view directly, without materializing a second list.
+                _inputValues = _closePrices is not null
+                    ? new List<double>(_closePrices)
+                    : _closeMemory.HasValue
+                        ? Materialize(_closeMemory.Value)
+                        : new List<double>(ClosePrices);
             }
 
             return _inputValues;
@@ -254,6 +256,11 @@ public class StockData : IStockData
                 return _inputValues.ToArray();
             }
 
+            if (_closePrices is not null)
+            {
+                return _closePrices.ToArray();
+            }
+
             return _closeMemory ?? (ReadOnlyMemory<double>)ClosePrices.ToArray();
         }
     }
@@ -268,9 +275,7 @@ public class StockData : IStockData
                 return Compatibility.SpanCompat.AsReadOnlySpan(_inputValues);
             }
 
-            return _closeMemory.HasValue
-                ? _closeMemory.Value.Span
-                : Compatibility.SpanCompat.AsReadOnlySpan(ClosePrices);
+            return CloseSpan;
         }
     }
 
