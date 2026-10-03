@@ -74,7 +74,9 @@ internal static partial class BuiltInFormulaReferences
             {
                 var line = first[i].Scale(R(2)).Add(second[i].Scale(R(-1)));
                 var a = line.Low.ToDouble(); var b = line.High.ToDouble();
+#pragma warning disable S1244 // Exact equality certifies that both interval endpoints round to the same binary64 value; an epsilon cannot certify this.
                 if (a == b) { results[i] = a; continue; }
+#pragma warning restore S1244
                 var center = (line.Low + line.High) / R(2);
                 if (line.Low.Sign == line.High.Sign && (line.High - line.Low).CompareTo(center.Abs() / new ReferenceFraction(BigInteger.One << 68)) <= 0)
                 { results[i] = center.ToDouble(); continue; }

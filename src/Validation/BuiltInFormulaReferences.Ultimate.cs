@@ -31,7 +31,9 @@ internal static partial class BuiltInFormulaReferences
 
         bool Publish(ReferenceFraction low, ReferenceFraction high, out double value)
         {
+#pragma warning disable S1244 // Exact equality certifies that both interval endpoints round to the same binary64 value; an epsilon cannot certify this.
             value = low.ToDouble(); if (value == high.ToDouble()) return true;
+#pragma warning restore S1244
             var center = (low + high) / two;
             if (low.Sign != high.Sign || (high - low).CompareTo(center.Abs() * relative) > 0) return false;
             value = center.ToDouble(); return true;

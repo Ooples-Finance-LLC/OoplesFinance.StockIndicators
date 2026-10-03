@@ -228,7 +228,9 @@ internal sealed class VolatilityAverageWindow : IDisposable
             {
                 var (low, high) = Bounds(precision); var denominator = Number.Integer(BigInteger.One << precision);
                 var a = Number.Integer(low).Divide(denominator).Publish(); var b = Number.Integer(high).Divide(denominator).Publish();
+#pragma warning disable S1244 // Exact equality certifies that both interval endpoints round to the same binary64 value; an epsilon cannot certify this.
                 if (a == b) return a;
+#pragma warning restore S1244
             }
         }
     }

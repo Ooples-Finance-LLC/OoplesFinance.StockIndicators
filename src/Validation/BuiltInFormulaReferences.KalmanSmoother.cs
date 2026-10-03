@@ -19,7 +19,9 @@ internal static partial class BuiltInFormulaReferences
                 var root = UltimateReferenceArithmetic.Root(r, bits);
                 var low = (x.A + x.B * (x.B.Sign > 0 ? root.Low : root.High)).ToDouble();
                 var high = (x.A + x.B * (x.B.Sign > 0 ? root.High : root.Low)).ToDouble();
+#pragma warning disable S1244 // Exact equality certifies that both interval endpoints round to the same binary64 value; an epsilon cannot certify this.
                 if (low == high) return low;
+#pragma warning restore S1244
             }
         }
         var output = new double[bars.Count];

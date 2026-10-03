@@ -132,16 +132,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return type == typeof(Obv) ? new Obv(length, average) : new OnBalanceVolume(length, average);
             }
             yield return new IndicatorValidationCase(type, $"obv-composition/{length}/{kind}", Create);
@@ -156,16 +147,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return type == typeof(Apo) ? new Apo(fast, slow, average) : new AbsolutePriceOscillator(fast, slow, average);
             }
             yield return new IndicatorValidationCase(type, $"apo-composition/{fast}/{slow}/{kind}", Create);
@@ -180,16 +162,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new ElderRayIndex(length, average);
             }
             yield return new IndicatorValidationCase(type, $"elder-ray-composition/{length}/{kind}", Create);
@@ -204,16 +177,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new DetrendedPriceOscillator(length, average);
             }
             yield return new IndicatorValidationCase(type, $"dpo-composition/{length}/{kind}", Create);
@@ -228,16 +192,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new BollingerBands(length, 2, average);
             }
             yield return new IndicatorValidationCase(type, $"bollinger-composition/{length}/{kind}", Create);
@@ -252,16 +207,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new MovingAverageEnvelope(length, .025, average);
             }
             yield return new IndicatorValidationCase(type, $"envelope-composition/{length}/{kind}", Create);
@@ -276,16 +222,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new PriceChannel(length, .06, average);
             }
             yield return new IndicatorValidationCase(type, $"price-channel-composition/{length}/{kind}", Create);
@@ -300,16 +237,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new HighLowIndex(length, average);
             }
             yield return new IndicatorValidationCase(type, $"high-low-composition/{length}/{kind}", Create);
@@ -324,16 +252,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new BalanceOfPower(length, average);
             }
             yield return new IndicatorValidationCase(type, $"balance-composition/{length}/{kind}", Create);
@@ -348,16 +267,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new MomentumOscillator(length, 3, average);
             }
             yield return new IndicatorValidationCase(type, $"momentum-composition/{length}/{kind}", Create);
@@ -376,16 +286,7 @@ public static partial class IndicatorValidationDiscovery
             var last = type == typeof(Stochastic) ? 3 : third;
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return type == typeof(Stochastic) ? new Stochastic(length, first, average)
                     : type == typeof(StochasticK) ? new StochasticK(length, first, last, average)
                     : type == typeof(DoubleStochasticOscillator) ? new DoubleStochasticOscillator(length, average)
@@ -414,16 +315,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return type == typeof(Cmo) ? new Cmo(length, average)
                     : type == typeof(ChandeMomentumOscillatorFilter) ? new ChandeMomentumOscillatorFilter(length, average)
                     : type == typeof(ChandeMomentumOscillatorSignal) ? new ChandeMomentumOscillatorSignal(length, signal, average)
@@ -644,15 +536,7 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new MiddleHighLowMovingAverage(periods.Item1, periods.Item2, average);
             }
             yield return new IndicatorValidationCase(type, $"middle-composition/{periods.Item1}/{periods.Item2}/{kind}", Create);
@@ -667,20 +551,25 @@ public static partial class IndicatorValidationDiscovery
         {
             IIndicator Create()
             {
-                IMovingAverage average = kind switch
-                {
-                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
-                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
-                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
-                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
-                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    _ => throw new InvalidOperationException()
-                };
+                IMovingAverage average = CreateCompositionAverage(kind);
                 return new SequentiallyFilteredMovingAverage(length, average);
             }
             yield return new IndicatorValidationCase(type, $"sequential-composition/{length}/{kind}", Create);
         }
     }
+
+    // Every configuration receives a fresh component; callers retain their own supported-kind lists.
+    private static IMovingAverage CreateCompositionAverage(int kind) => kind switch
+    {
+        1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
+        7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
+        9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
+        11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
+        13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
+        16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(),
+        19 => new Vidya(), 20 => new Alma(), 21 => new HammingMa(),
+        _ => throw new InvalidOperationException()
+    };
 
     private static bool IsPeriod(ParameterInfo p) => p.ParameterType == typeof(int)
         && (p.Name!.IndexOf("length", StringComparison.OrdinalIgnoreCase) >= 0

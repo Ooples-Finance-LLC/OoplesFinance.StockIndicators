@@ -45,7 +45,9 @@ internal sealed class QqeWindow : IDisposable
         var loss = _loss!.Next(change.Mantissa < 0 ? change.Absolute : default, final);
         var numerator = new ExactMeanAccumulator(); gain.AddTo(ref numerator, 100);
         var total = new ExactMeanAccumulator(); gain.AddTo(ref total); loss.AddTo(ref total);
+#pragma warning disable S1244 // Only an exactly unchanged finite price preserves the prior RSI; nearby prices must update gains or losses.
         var preserve = _hasPrevious && _length > 1 && (_kind is MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod) && price == _price;
+#pragma warning restore S1244
         var rsi = preserve ? _rsi : GainLossShare.Of(numerator, total, 100);
         var signal = _signal!.Next(Number.Of(rsi), final); var movement = signal - _previousSignal;
         if (movement.Sign < 0) movement = movement.Times(-1);

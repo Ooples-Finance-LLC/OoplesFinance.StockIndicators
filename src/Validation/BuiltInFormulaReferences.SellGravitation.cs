@@ -29,7 +29,9 @@ internal static partial class BuiltInFormulaReferences
             }
             return result;
         }
+#pragma warning disable S1244 // Only an exactly zero candle range takes the zero-denominator convention; every nonzero range retains its ratio.
         var body = bars.Select(b => b.High == b.Low ? zero : (R(b.Close) - R(b.Open)) / (R(b.High) - R(b.Low))).ToArray();
+#pragma warning restore S1244
         var line = Mean(body).Select(v => v.RoundExtendedBinary64()).ToArray();
         var signal = Mean(line); var trades = new Signal[bars.Count]; var previous = zero;
         for (var i = 0; i < bars.Count; i++)

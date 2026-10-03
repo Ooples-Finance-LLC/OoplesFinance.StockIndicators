@@ -36,7 +36,9 @@ internal sealed class UltimateBandWindow
             var lower = mean.Lower + direction * (direction > 0 ? root.Lower : root.Upper);
             var upper = mean.Upper + direction * (direction > 0 ? root.Upper : root.Lower);
             var low = lower.Publish(); var high = upper.Publish();
+#pragma warning disable S1244 // Exact equality certifies that both interval endpoints round to the same binary64 value; an epsilon cannot certify this.
             if (low == high) return low;
+#pragma warning restore S1244
             var middle = (lower + upper) / 2;
             if (lower.Sign == upper.Sign && upper - lower <= middle.Abs() * Fraction.Grid(64)) return middle.Publish();
         }

@@ -308,7 +308,9 @@ internal static class UltimatePowerWeights
         {
             var bounds = evaluate(bits);
             var lower = bounds.Lower.Publish(); var upper = bounds.Upper.Publish();
+#pragma warning disable S1244 // Exact equality certifies that both interval endpoints round to the same binary64 value; an epsilon cannot certify this.
             if (lower == upper) return lower;
+#pragma warning restore S1244
             // A binary64 midpoint need not be separable by interval refinement.
             // Once the uncertainty is below 2^-64 of the nonzero result, the
             // rounded midpoint is at most one representable step from the exact

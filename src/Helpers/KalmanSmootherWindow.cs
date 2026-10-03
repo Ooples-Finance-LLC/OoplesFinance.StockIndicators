@@ -28,7 +28,9 @@ internal sealed class KalmanSmootherWindow
                 var lo = A + B * (B.Sign > 0 ? root.Lower : root.Upper);
                 var hi = A + B * (B.Sign > 0 ? root.Upper : root.Lower);
                 var left = lo.Publish(); var right = hi.Publish();
+#pragma warning disable S1244 // Exact equality certifies that both interval endpoints round to the same binary64 value; an epsilon cannot certify this.
                 if (left == right) return left;
+#pragma warning restore S1244
             }
         }
     }
