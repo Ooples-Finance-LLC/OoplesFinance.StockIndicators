@@ -84198,7 +84198,7 @@
     "scope": "internal sealed class VolatilityAverageWindow",
     "before": "(value - mean).Times(100)",
     "after": "(value - mean).Times(50)",
-    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.HandCancellationSelectsLongWindowAndExactSignalTies"
+    "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ScoreScaleChangesSelectedPeriod"
   },
   {
     "id": "volatility-average-wide-native-preview",

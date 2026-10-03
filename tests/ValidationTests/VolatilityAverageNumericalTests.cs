@@ -61,6 +61,16 @@ public sealed class VolatilityAverageNumericalTests
         Assert.Equal(new[] { Signal.None, Signal.StrongBuy, Signal.Buy, Signal.StrongSell, Signal.Sell, Signal.None }, result.Signals);
     }
     [Fact]
+    public void ScoreScaleChangesSelectedPeriod()
+    {
+        // EMA startup mean([0,2])=1 and population deviation=1, giving score=100.
+        // With lookback=20, level=5 and period=5; zero-filled WMA gives 2*5/15=2/3.
+        // Halving the score gives level=roundEven(2.5)=2, period=8 and output=4/9.
+        var result = Check(new[] { B(0), B(2, 1) }, MovingAvgType.ExponentialMovingAverage, 10, 20, 1);
+        Assert.Equal(new[] { 10, 5 }, result.Periods);
+        Assert.Equal(new[] { 0d, 2d / 3 }, result.Outputs["Vma"]);
+    }
+    [Fact]
     public void SquareClassCancellationAndSubnormalPerturbationsResolveHalfEvenTies()
     {
         // sqrt(2) - 2/sqrt(2) is exactly zero; the smallest binary64 displacement

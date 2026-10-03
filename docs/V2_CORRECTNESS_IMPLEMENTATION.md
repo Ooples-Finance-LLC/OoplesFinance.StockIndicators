@@ -5439,3 +5439,10 @@ The repaired snapshot differs from the original only in the added hand test and 
 Both isolated campaign baselines passed, and all **31/31 compiled behavioral faults** were caught by failing regression tests. Both archived source snapshots match the frozen batch, and the 69 retained focused checks and new SMA startup regression passed. The original 30/31 result remains excluded; the repaired snapshot changes only the SMA regression and its fault filter. This qualifies the batch-746 numerical correction; broader release gates remain incomplete.
 
 Source snapshot SHA256: `bad566bb11ea204b83c8cf71becdb2105ef4457bb122c8a8781bcdbdb20c4bf4`. Archives: `889763a62454b6f8cdc2e14d9d11dbe31ae8931db9ece06bf8be7f0ad36e3672` and `889763a62454b6f8cdc2e14d9d11dbe31ae8931db9ece06bf8be7f0ad36e3672`.
+
+
+### Batch 795: Volatility Moving Average score-scale survivor regression
+
+Halving the native score scale survived the original cancellation hand because its nonzero smoothed scores still selected the minimum period. A new independent hand uses prices [0,2], EMA startup, length 10, lookback 20 and smoothing 1. The mean and population deviation are both 1, so score 100 selects period 5 and output 2/3. Halving the score selects period 8 after ties-to-even rounding, giving 4/9.
+
+The new hand passed on net10.0 across batch, fast and native routes with preview/reset checks, reusing the unchanged production DLL. The fault now targets this hand. Production and enrollment are unchanged; the original campaign remains unqualified and continues to collect its remaining outcomes. Repaired mutation verification is still required.
