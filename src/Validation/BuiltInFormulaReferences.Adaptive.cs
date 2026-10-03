@@ -730,19 +730,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Kama", new[] { "Kama", "Er" }, bars => RoundedKaufmanTrajectory(bars, length,
                     Integer(options, "FastLength", 2), Integer(options, "SlowLength", 30)));
             case IndicatorName.McGinleyDynamicIndicator:
-                var k = Number(options, .6, "K");
-                return new("Mdi", new[] { "Mdi" }, bars =>
-                {
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var previous = i == 0 ? bars[i].Close : result[i - 1];
-                        var denominator = previous == 0 ? 0 : k * length * Math.Pow(bars[i].Close / previous, 4);
-                        var gain = 1 / Math.Max(1, denominator);
-                        result[i] = denominator == 0 ? bars[i].Close : (1 - gain) * previous + gain * bars[i].Close;
-                    }
-                    return Outputs(("Mdi", result));
-                });
+                return new("Mdi", new[] { "Mdi" }, bars => McGinleyOutputs(bars, indicator));
             case IndicatorName.McNichollMovingAverage:
                 var kind = AverageKind(options, 3);
                 if (kind == 0 || length == 1) return null;

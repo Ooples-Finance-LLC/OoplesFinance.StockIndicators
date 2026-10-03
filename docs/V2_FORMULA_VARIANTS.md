@@ -1065,3 +1065,10 @@ ZigZag intentionally redraws prior legs when a later extreme extends them. Its s
 Public Hampel uses the median of observed prices, the median of absolute distances from that same median, and a raw-MAD threshold. Equality accepts the current price; larger distances replace it with the median. The published result is a zero-seeded EMA with alpha=2/(length+1). Exact rational medians, deviations, thresholds, EMA memory and signal margins preserve tiny values and avoid intermediate overflow. History grows only with observations, including Int32.MaxValue periods.
 
 For [0,2,100], length 3 and factor 3, outputs are [0,1,1.5]. For [0,1,2], factor 1 gives final 1.25; the immediately smaller binary64 factor gives 0.625 because it also changes the prior two-point decision. Constant [2,2,2] gives signals StrongBuy, Buy, Buy as the positive margins decline. All finite factors remain supported. The internal core/registry retains its distinct Gaussian-scaled unsmoothed variant pending the separate alignment decision.
+
+
+### Batch 665: McGinley public overflow-safe recurrence
+
+The public recurrence seeds the first output with price, resets to price when the prior output is zero, and floors its adaptive denominator at one. Each step feeds the published binary64 output into the next step, preserving the public feedback convention. For current price x and prior published output p, set q=k*N*x^4 and v=p^4. If p=0 or q<=v, output x; otherwise compute [p*(q-v)+x*v]/q using exact rational intermediates. This is algebraically the original ratio-based update and remains a convex combination for finite inputs, avoiding overflow in price differences and fourth powers.
+
+For prices [-8,8,4], period 2 and k=1, outputs are [-8,0,4]. Zero/negative finite factors reduce to price. Positive factors, including subnormal and MaxValue values, remain supported. Exact signal margins distinguish rising from shrinking positive margins. The internal core/registry retains its separate zero-state convention pending the earlier alignment decision.

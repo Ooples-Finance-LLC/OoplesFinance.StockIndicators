@@ -85881,5 +85881,185 @@
     "before": "new HampelFilterState(hampel.Length, hampel.ScalingFactor)",
     "after": "new HampelFilterState(2, hampel.ScalingFactor)",
     "filter": "FullyQualifiedName~HampelNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "Number.Of(factor).Times(Math.Max(1, length))",
+    "after": "Number.Of(.6).Times(Math.Max(1, length))",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
+  },
+  {
+    "id": "mcginley-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "Times(Math.Max(1, length))",
+    "after": "Times(1)",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-zero-reset",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "_started && _previous != 0 && _coefficient.Sign > 0",
+    "after": "_started && _coefficient.Sign > 0",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
+  },
+  {
+    "id": "mcginley-wide-price-fourth",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "_coefficient * priceSquared * priceSquared",
+    "after": "_coefficient * priceSquared",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-prior-fourth",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "priorSquared * priorSquared",
+    "after": "priorSquared",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-denominator-floor",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "if ((q - v).Sign > 0)",
+    "after": "if (q.Sign > 0)",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-prior-weight",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "prior * (q - v)",
+    "after": "prior * q",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
+  },
+  {
+    "id": "mcginley-wide-price-weight",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "current * v",
+    "after": "current * q",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
+  },
+  {
+    "id": "mcginley-wide-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "Divide(q).Publish()",
+    "after": "Divide(v).Publish()",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.ExtremeDifferencesFourthPowersAndSignalsRemainFinite"
+  },
+  {
+    "id": "mcginley-wide-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "_previous = result;",
+    "after": "_previous = price;",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-startup",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "_started = true;",
+    "after": "_started = false;",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
+  },
+  {
+    "id": "mcginley-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "if (final) { _previous",
+    "after": "if (final || price != 0) { _previous",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.PreviewAndResetPreserveFeedback"
+  },
+  {
+    "id": "mcginley-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "internal void Reset() { _previous = 0; _started = false; }",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.PreviewAndResetPreserveFeedback"
+  },
+  {
+    "id": "mcginley-wide-selected",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.DirectSelectedInputAndFixedRecurrenceBypassCallbacks"
+  },
+  {
+    "id": "mcginley-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "Number.Of(input[i]) - Number.Of(values[i])",
+    "after": "Number.Of(values[i]) - Number.Of(input[i])",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.ExtremeDifferencesFourthPowersAndSignalsRemainFinite"
+  },
+  {
+    "id": "mcginley-wide-native-fields",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class McGinleyDynamicIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar); var value = _window.Next",
+    "after": "var value = _window.Next",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.InvalidParametersAndCandlesAreRejectedWithoutAdvancing"
+  },
+  {
+    "id": "mcginley-wide-batch-factor",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculateMcGinleyDynamicIndicator(",
+    "before": "McGinleyWindow.Calculate(stockData, length, k)",
+    "after": "McGinleyWindow.Calculate(stockData, length, .6)",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
+  },
+  {
+    "id": "mcginley-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMcGinleyDynamicFast(",
+    "before": "McGinleyWindow.Calculate(data, length, .6)",
+    "after": "McGinleyWindow.Calculate(data, 2, .6)",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class McGinleyDynamicIndicatorState",
+    "before": "_window = new(length, k);",
+    "after": "_window = new(2, k);",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.EveryRouteMatchesIndependentRationalReference"
+  },
+  {
+    "id": "mcginley-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/McGinleyWindow.cs",
+    "scope": "internal sealed class McGinleyWindow",
+    "before": "previousMargin = margin;",
+    "after": "previousMargin = default;",
+    "filter": "FullyQualifiedName~McGinleyNumericalTests.IndependentSeedZeroResetAndConvexStepHands"
   }
 ]

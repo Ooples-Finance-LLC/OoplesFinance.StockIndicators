@@ -1103,32 +1103,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMcGinleyDynamicIndicator(this StockData stockData, int length = 14, double k = 0.6)
     {
-        List<double> mdiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevMdi = i >= 1 ? GetLastOrDefault(mdiList) : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ratio = prevMdi != 0 ? currentValue / prevMdi : 0;
-            var bottom = k * length * Pow(ratio, 4);
-
-            var mdi = bottom != 0 ? prevMdi + ((currentValue - prevMdi) / Math.Max(bottom, 1)) : currentValue;
-            mdiList.Add(mdi);
-
-            var signal = GetCompareSignal(currentValue - mdi, prevValue - prevMdi);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mdi", mdiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mdiList);
-        stockData.IndicatorName = IndicatorName.McGinleyDynamicIndicator;
-
+        var result = McGinleyWindow.Calculate(stockData, length, k);
+        var signals = CreateSignalsList(stockData); signals?.AddRange(result.Signals);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mdi", result.Values.ToList() } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(result.Values.ToList()); stockData.IndicatorName = IndicatorName.McGinleyDynamicIndicator;
         return stockData;
     }
 

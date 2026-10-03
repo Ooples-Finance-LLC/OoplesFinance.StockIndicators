@@ -238,51 +238,14 @@ public sealed class McClellanOscillatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Mdi")]
 public sealed class McGinleyDynamicIndicatorState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly double _k;
-    private readonly StreamingInputResolver _input;
-    private double _prevMdi;
-    private bool _hasPrev;
-
-    public McGinleyDynamicIndicatorState(int length = 14, double k = 0.6)
-    {
-        _length = Math.Max(1, length);
-        _k = k;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly McGinleyWindow _window;
+    public McGinleyDynamicIndicatorState(int length = 14, double k = 0.6) => _window = new(length, k);
     public IndicatorName Name => IndicatorName.McGinleyDynamicIndicator;
-
-    public void Reset()
-    {
-        _prevMdi = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevMdi = _hasPrev ? _prevMdi : value;
-        var ratio = prevMdi != 0 ? value / prevMdi : 0;
-        var bottom = _k * _length * MathHelper.Pow(ratio, 4);
-        var mdi = bottom != 0 ? prevMdi + ((value - prevMdi) / Math.Max(bottom, 1)) : value;
-
-        if (isFinal)
-        {
-            _prevMdi = mdi;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mdi", mdi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mdi, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { ["Mdi"] = value } : null);
     }
 }
 
