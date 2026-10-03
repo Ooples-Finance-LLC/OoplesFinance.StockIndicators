@@ -5499,3 +5499,14 @@ All **37/37 compiled behavioral faults** were caught, with passing baselines and
 The original first half and earlier repaired pair with survivors remain excluded. This qualifies the batch-735 numerical correction; broader release gates remain incomplete.
 
 Source snapshot SHA256: `9c96e529ee506b94a64b490764a0acd638f2937c8e2f1bf0847b6eadb5d50900`. Matching archives: `25e50ab40f620097d12b98d5f39b0790e25a3572b7a2cff6b49fafb5d684313a`.
+
+
+### Batch 881: Ultimate Moving Average numerical qualification
+
+UMA and its bands now retain exact money-flow ratios until forming the power exponent, use bounded normalized weights and large-period sums, and preserve original candle fields for selected inputs. Bands combine the unrounded center and population deviation before publication. The separate internal core/registry alignment remains pending.
+
+Verification: **144 distinct focused cases passed**, including the completed 99-case routing repair rerun. After integration with published head `f4a5e0bb`, all **24 focused integration checks** and **2 enrollment-coverage checks** passed. Both mutation baselines passed (26 and 25 tests), and all **39/39 compiled behavioral faults** were caught by complete failing test reports. Compilation failures and timeouts are not counted as kills.
+
+Source snapshot SHA256: `050a08799b85882f2fde5cffddfba104fcdb76df7ea705a4485d198fcb097f2c`. Archives: `3edafcaa4ccef214eadeb2045d9d19d0687cc30286b16df1a75a0b7ab40404ad` and `3edafcaa4ccef214eadeb2045d9d19d0687cc30286b16df1a75a0b7ab40404ad`. Both archives match all 2,433 frozen files. Evidence: `ultimate714-cached-grid-final.trx` plus `ultimate714-integrated729-repair.trx`, `ultimate881-integration.trx`, `ultimate881-enrollment-coverage.trx`, and the two `si-uma881-mutations-*` campaigns.
+
+The compiled inventory is **6,803/7,131 enrolled**, with **328 omissions across 44 indicator types**, no construction failures, and an exact numerical-backlog match. Hosted gates, remaining formulas/core decisions, final package/platform verification and competitor timing evidence remain outstanding.

@@ -1,4 +1,4 @@
-﻿[
+[
   {
     "id": "missing-formula-guard",
     "module": "validation",
@@ -86880,5 +86880,356 @@
     "before": "_window = new(maType, length);",
     "after": "_window = new(maType, 2);",
     "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+  },
+  {
+    "id": "ultimate-wide-typical-selected",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "var typical = (top + bottom + value) / 3;",
+    "after": "var typical = value;",
+    "filter": "FullyQualifiedName~UltimateRouteNumericalTests.SelectedInputPreservesOriginalCandleFlow"
+  },
+  {
+    "id": "ultimate-wide-volume-product",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "var flow = typical * size;",
+    "after": "var flow = typical;",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-positive-direction",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "_started && typical > _previousTypical",
+    "after": "_started && typical < _previousTypical",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-negative-direction",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "_started && typical < _previousTypical",
+    "after": "_started && typical > _previousTypical",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-first-flow",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "_started && typical > _previousTypical",
+    "after": "typical > _previousTypical",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-history-window",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "prices.Count < period",
+    "after": "prices.Count < period - 1",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-positive-history",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "up += point.Positive;",
+    "after": "up += point.Negative;",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-negative-history",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "down += point.Negative;",
+    "after": "down += point.Positive;",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-zero-negative-flow",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "if (down.Sign == 0) mfi = 100;",
+    "after": "if (down.Sign == 0) mfi = 50;",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.PublicRoutesMatchFifthPowerWarmupHand"
+  },
+  {
+    "id": "ultimate-wide-money-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "mfi = 100 * up / (up + down);",
+    "after": "mfi = 50 * up / (up + down);",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "var exponent = _acceleration +",
+    "after": "var exponent = 2 * _acceleration +",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.PublicRoutesMatchFifthPowerWarmupHand"
+  },
+  {
+    "id": "ultimate-wide-money-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "(2 * mfi - 100).Abs() / 25",
+    "after": "(2 * mfi - 100).Abs() / 50",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-current-price",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "new List<Fraction> { value }",
+    "after": "new List<Fraction> { _previousTypical }",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.PublicRoutesMatchFifthPowerWarmupHand"
+  },
+  {
+    "id": "ultimate-wide-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "if (final)",
+    "after": "if (final || _started)",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.PublicRoutesMatchFifthPowerWarmupHand"
+  },
+  {
+    "id": "ultimate-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "_history.RemoveAt(0);",
+    "after": "_history.RemoveAt(_history.Count - 1);",
+    "filter": "FullyQualifiedName~UltimateFractionalFixtureTests.PublicRoutesMatchIndependentFractionalPowers"
+  },
+  {
+    "id": "ultimate-wide-supplied-period",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal Point NextPoint(",
+    "before": "var period = suppliedLength ?? _length.Next(price, final).Length;",
+    "after": "var period = suppliedLength.HasValue ? _maximum : _length.Next(price, final).Length;",
+    "filter": "FullyQualifiedName~UltimateRouteNumericalTests.CallbackOrderShortMeansAndSelectedPricesArePreserved"
+  },
+  {
+    "id": "ultimate-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateAverageWindow.cs",
+    "scope": "internal void Reset()",
+    "before": "_history.Clear();",
+    "after": "if (_history.Count > _maximum) _history.Clear();",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.PublicRoutesMatchFifthPowerWarmupHand"
+  },
+  {
+    "id": "ultimate-wide-band-price",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateBandWindow.cs",
+    "scope": "internal (double Upper, double Middle, double Lower) Next(",
+    "before": "var value = Fraction.Of(price);",
+    "after": "var value = Fraction.Of(center.Value);",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsMatchIndependentRationalWarmupAndWidthHands"
+  },
+  {
+    "id": "ultimate-wide-band-variance",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateBandWindow.cs",
+    "scope": "internal (double Upper, double Middle, double Lower) Next(",
+    "before": "/ _length / _length;",
+    "after": "/ _length;",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsMatchIndependentRationalWarmupAndWidthHands"
+  },
+  {
+    "id": "ultimate-wide-band-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateBandWindow.cs",
+    "scope": "internal (double Upper, double Middle, double Lower) Next(",
+    "before": "_prices.Count < _length - 1",
+    "after": "_prices.Count < 0",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsMatchIndependentRationalWarmupAndWidthHands"
+  },
+  {
+    "id": "ultimate-wide-band-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateBandWindow.cs",
+    "scope": "internal (double Upper, double Middle, double Lower) Next(",
+    "before": "_multiplier * _multiplier * variance",
+    "after": "variance",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsMatchIndependentRationalWarmupAndWidthHands"
+  },
+  {
+    "id": "ultimate-wide-band-upper-direction",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateBandWindow.cs",
+    "scope": "internal (double Upper, double Middle, double Lower) Next(",
+    "before": "Publish(center, widthSquare, _multiplier.Sign)",
+    "after": "Publish(center, widthSquare, -_multiplier.Sign)",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsMatchIndependentRationalWarmupAndWidthHands"
+  },
+  {
+    "id": "ultimate-wide-band-rounded-center",
+    "module": "numerical",
+    "file": "src/Helpers/UltimateBandWindow.cs",
+    "scope": "private static double Publish(",
+    "before": "var mean = center.Bounds(bits);",
+    "after": "var mean = new UltimatePowerWeights.Bounds(Fraction.Of(center.Value), Fraction.Of(center.Value));",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsPreserveCancellationNeighborsAndSubnormalDeviation"
+  },
+  {
+    "id": "ultimate-wide-warmup-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePowerWeights.cs",
+    "scope": "internal static Bounds Mean(",
+    "before": "Sum(length, exponent, bits)",
+    "after": "Sum(Math.Max(1, available), exponent, bits)",
+    "filter": "FullyQualifiedName~UltimatePowerWeightsNumericalTests.WeightedMeanKeepsMissingHistoryInTheDenominator"
+  },
+  {
+    "id": "ultimate-wide-weight-order",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePowerWeights.cs",
+    "scope": "internal static Bounds Mean(",
+    "before": "var index = length - offset;",
+    "after": "var index = offset + 1;",
+    "filter": "FullyQualifiedName~UltimatePowerWeightsNumericalTests.WeightedMeanKeepsMissingHistoryInTheDenominator"
+  },
+  {
+    "id": "ultimate-wide-uniform-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePowerWeights.cs",
+    "scope": "internal static Bounds Sum(",
+    "before": "if (exponent.Sign == 0) return new(length, length);",
+    "after": "if (exponent.Sign == 0) return new(1, 1);",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.StatePreservesSubnormalsAndSupportsHugePeriodsWithoutEagerHistory"
+  },
+  {
+    "id": "ultimate-wide-integer-sum-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePowerWeights.cs",
+    "scope": "internal static Bounds Sum(",
+    "before": "BigInteger.Pow(length, degree)",
+    "after": "BigInteger.Pow(length, degree - 1)",
+    "filter": "FullyQualifiedName~UltimatePowerWeightsNumericalTests.IntegerPowerSumsMatchIndependentClosedForms"
+  },
+  {
+    "id": "ultimate-wide-centered-moment",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePowerWeights.cs",
+    "scope": "private static Bounds Block(",
+    "before": "moment /= degree + 1;",
+    "after": "moment /= degree + 2;",
+    "filter": "FullyQualifiedName~UltimatePowerWeightsNumericalTests.FractionalSumEnclosesIndependentIntegerSquareRootBounds"
+  },
+  {
+    "id": "ultimate-wide-root-relative-grid",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePowerWeights.cs",
+    "scope": "internal static Bounds Root(",
+    "before": "var precision = checked(bits + extra);",
+    "after": "var precision = checked(bits + Math.Min(0, extra));",
+    "filter": "FullyQualifiedName~UltimatePowerWeightsNumericalTests.IrrationalSubnormalRootRetainsARelativeEnclosure"
+  },
+  {
+    "id": "ultimate-wide-root-upper-bound",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePowerWeights.cs",
+    "scope": "internal static Bounds Root(",
+    "before": "new Fraction(root + 1, scale)",
+    "after": "new Fraction(root, scale)",
+    "filter": "FullyQualifiedName~UltimatePowerWeightsNumericalTests.IrrationalSubnormalRootRetainsARelativeEnclosure"
+  },
+  {
+    "id": "ultimate-wide-fast-uma-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeUltimateMovingAverageFast(",
+    "before": "maType, minLength, maxLength, acc",
+    "after": "maType, minLength, minLength, acc",
+    "filter": "FullyQualifiedName~UltimateRouteNumericalTests.CallbackOrderShortMeansAndSelectedPricesArePreserved"
+  },
+  {
+    "id": "ultimate-wide-fast-band-selection",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeUltimateMovingAverageBandsFast(",
+    "before": "band == ChannelBand.Upper ? values.Upper",
+    "after": "band == ChannelBand.Upper ? values.Lower",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsMatchIndependentRationalWarmupAndWidthHands"
+  },
+  {
+    "id": "ultimate-wide-native-uma-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UltimateMovingAverageState",
+    "before": "return new(value, includeOutputs",
+    "after": "return new(value / 2, includeOutputs",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.PublicRoutesMatchFifthPowerWarmupHand"
+  },
+  {
+    "id": "ultimate-wide-native-uma-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UltimateMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.InvalidOpenCannotAdvanceEitherNativeState"
+  },
+  {
+    "id": "ultimate-wide-native-band-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UltimateMovingAverageBandsState",
+    "before": "{ \"UpperBand\", bands.Upper }",
+    "after": "{ \"UpperBand\", bands.Lower }",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.BandsMatchIndependentRationalWarmupAndWidthHands"
+  },
+  {
+    "id": "ultimate-wide-native-band-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UltimateMovingAverageBandsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~UltimateAverageNumericalTests.InvalidOpenCannotAdvanceEitherNativeState"
+  },
+  {
+    "id": "ultimate-wide-factory-uma",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "internal static partial class StatefulIndicatorFactory",
+    "before": "UltimateMovingAverageSpecOptions ultimate => new UltimateMovingAverageState(maType: ultimate.MaType),",
+    "after": "UltimateMovingAverageSpecOptions ultimate => throw new NotSupportedException(),",
+    "filter": "FullyQualifiedName~UltimateRouteNumericalTests.SelectedInputPreservesOriginalCandleFlow"
+  },
+  {
+    "id": "ultimate-wide-streaming-uma",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(",
+    "before": "UltimateMovingAverageSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~UltimateRouteNumericalTests.SelectedInputPreservesOriginalCandleFlow"
+  },
+  {
+    "id": "ultimate-wide-streaming-bands",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(",
+    "before": "UltimateMovingAverageBandsSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~UltimateRouteNumericalTests.SelectedInputPreservesOriginalCandleFlow"
   }
 ]

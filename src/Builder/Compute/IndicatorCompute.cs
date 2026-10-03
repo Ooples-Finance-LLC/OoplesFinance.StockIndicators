@@ -9939,69 +9939,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeUltimateMovingAverageFast(StockData data, ComputeContext context, int minLength = 5,
         int maxLength = 50, double acc = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateUltimateMovingAverage takes a weighted average of the chained series over a window whose
-        // length is the one CalculateVariableLengthMovingAverage walks between the two bounds, and raises the
-        // weights to a power that grows with how far the money flow index of the bar's typical price has
-        // moved away from its midpoint. MovingAverageCore.UltimateMovingAverage is a single fixed length over
-        // the close and expresses none of that. The length decision itself stays in MovingAverageCore.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        maxLength = Math.Max(maxLength, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, maxLength, input, average.WritableSpan);
-        var sma = average.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, maxLength);
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var positiveMoneyFlow = new RollingSum();
-        var negativeMoneyFlow = new RollingSum();
-        double previousLength = maxLength;
-        double previousTypicalPrice = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var typicalPrice = (highs[i] + lows[i] + currentValue) / 3;
-            previousLength = MovingAverageCore.VariableLength(currentValue, sma[i], stdDev[i], previousLength,
-                minLength, maxLength);
-            var windowLength = MathHelper.MinOrMax(previousLength, maxLength, minLength);
-            var rawMoneyFlow = typicalPrice * volumes[i];
-
-            positiveMoneyFlow.Add(i >= 1 && typicalPrice > previousTypicalPrice ? rawMoneyFlow : 0);
-            negativeMoneyFlow.Add(i >= 1 && typicalPrice < previousTypicalPrice ? rawMoneyFlow : 0);
-            previousTypicalPrice = typicalPrice;
-
-            var len = (int)windowLength;
-            var positiveTotal = positiveMoneyFlow.Sum(len);
-            var negativeTotal = negativeMoneyFlow.Sum(len);
-            var moneyFlowRatio = negativeTotal != 0 ? positiveTotal / negativeTotal : 0;
-            var moneyFlowIndex = negativeTotal == 0 ? 100 : positiveTotal == 0 ? 0 :
-                MathHelper.MinOrMax(100 - (100 / (1 + moneyFlowRatio)), 100, 0);
-            var power = acc + (Math.Abs((moneyFlowIndex * 2) - 100) / 25);
-
-            double sum = 0, weightSum = 0;
-            for (var j = 0; j <= len - 1; j++)
-            {
-                var weight = MathHelper.Pow(len - j, power);
-                var previousValue = i >= j ? input[i - j] : 0;
-
-                sum += previousValue * weight;
-                weightSum += weight;
-            }
-
-            output[i] = weightSum != 0 ? sum / weightSum : 0;
-        }
-
-        return buffer;
+        var values = UltimateAverageWindow.Calculate(data, maType, minLength, maxLength, acc).Values;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>
@@ -10011,34 +9950,9 @@ internal static partial class IndicatorCompute
         int minLength = 5, int maxLength = 50, double stdDevMult = 2,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculateUltimateMovingAverageBands centres on the ultimate moving average and offsets the outer
-        // bands by a multiple of the deviation of the caller's own series over the SHORT length, not the
-        // long one the average uses.
-        using var middle = ComputeUltimateMovingAverageFast(data, context, minLength, maxLength, 1, maType);
-
-        var count = data.Count;
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        middle.Span.CopyTo(output);
-
-        if (band == ChannelBand.Middle)
-        {
-            return buffer;
-        }
-
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(SpanCompat.AsReadOnlySpan(inputList), deviation.WritableSpan,
-            Math.Max(minLength, 1));
-        var stdDev = deviation.Span;
-
-        var multiplier = band == ChannelBand.Upper ? stdDevMult : -stdDevMult;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] += multiplier * stdDev[i];
-        }
-
-        return buffer;
+        var values = UltimateBandWindow.Calculate(data, maType, minLength, maxLength, stdDevMult);
+        var selected = band == ChannelBand.Upper ? values.Upper : band == ChannelBand.Lower ? values.Lower : values.Middle;
+        var buffer = context.Rent(selected.Length); selected.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

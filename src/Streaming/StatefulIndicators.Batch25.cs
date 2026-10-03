@@ -803,183 +803,45 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
 }
 
 [PrimaryOutput("Uma")]
-public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisposable
+public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly int _minLength;
-    private readonly int _maxLength;
-    private readonly double _acc;
-    private readonly IMovingAverageSmoother _smaSmoother;
-
-    // This is the second streaming implementation of the variable-length average's length decision: the batch
-    // ultimate moving average reads that indicator's own Length output, while this recomputes it inline below.
-    // Both have to take the same sigma or the two engines choose different lengths for the same bar, which
-    // then compounds, because each bar's length carries forward into the next. See #190.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly RollingCumulativeSum _posFlowSum;
-    private readonly RollingCumulativeSum _negFlowSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevTypical;
-    private double _prevLength;
-    private bool _hasPrev;
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly UltimateAverageWindow _window;
     public UltimateMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int minLength = 5,
-        int maxLength = 50, double acc = 1)
-    {
-        _minLength = Math.Max(1, minLength);
-        _maxLength = Math.Max(_minLength, maxLength);
-        _acc = acc;
-        _smaSmoother = MovingAverageSmootherFactory.Create(maType, _maxLength);
-
-        // No maType, and _maxLength to match the variable-length average whose decision this repeats.
-        _stdDev = new RollingStandardDeviation(_maxLength);
-        _posFlowSum = new RollingCumulativeSum();
-        _negFlowSum = new RollingCumulativeSum();
-        _values = new PooledRingBuffer<double>(_maxLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _prevLength = _maxLength;
-    }
-
+        int maxLength = 50, double acc = 1) => _window = new(maType, minLength, maxLength, acc);
     public IndicatorName Name => IndicatorName.UltimateMovingAverage;
-
-    public void Reset()
-    {
-        _smaSmoother.Reset();
-        _stdDev.Reset();
-        _posFlowSum.Reset();
-        _negFlowSum.Reset();
-        _values.Clear();
-        _prevTypical = 0;
-        _prevLength = _maxLength;
-        _hasPrev = false;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var sma = _smaSmoother.Next(value, isFinal);
-
-        // Fed the resolved input rather than the bar, so this measures the same series the average above does.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var prevLength = _hasPrev ? _prevLength : _maxLength;
-
-        // The variable-length average's decision, taken from the one place that holds it rather than repeated
-        // here: the batch ultimate moving average reads that indicator's own Length output, so a copy here
-        // could disagree with it. See #190.
-        var length = MovingAverageCore.VariableLength(value, sma, stdDev, prevLength, _minLength, _maxLength);
-        var len = Math.Max(1, (int)length);
-        var typical = (bar.High + bar.Low + bar.Close) / 3d;
-        var rawFlow = typical * bar.Volume;
-        var posFlow = _hasPrev && typical > _prevTypical ? rawFlow : 0;
-        var negFlow = _hasPrev && typical < _prevTypical ? rawFlow : 0;
-        var posTotal = isFinal ? _posFlowSum.Add(posFlow, len) : _posFlowSum.Preview(posFlow, len);
-        var negTotal = isFinal ? _negFlowSum.Add(negFlow, len) : _negFlowSum.Preview(negFlow, len);
-        var mfiRatio = negTotal != 0 ? posTotal / negTotal : 0;
-        var mfi = negTotal == 0 ? 100 : posTotal == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + mfiRatio)), 100, 0);
-        var mfScaled = (mfi * 2) - 100;
-        var p = _acc + (Math.Abs(mfScaled) / 25);
-        double sum = 0;
-        double weightedSum = 0;
-        for (var j = 0; j <= len - 1; j++)
-        {
-            var weight = MathHelper.Pow(len - j, p);
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * weight;
-            weightedSum += weight;
-        }
-
-        var uma = weightedSum != 0 ? sum / weightedSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevTypical = typical;
-            _prevLength = length;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Uma", uma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(uma, outputs);
-    }
-
-    public void Dispose()
-    {
-        _smaSmoother.Dispose();
-        _stdDev.Dispose();
-        _values.Dispose();
-    }
-}
-
-[PrimaryOutput("MiddleBand")]
-public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, IDisposable
-{
-    private readonly UltimateMovingAverageState _uma;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190. The band is
-    // the Bollinger construction, so the two engines have to take the same sigma or they draw bands of
-    // different widths over the same prices.
-    private readonly RollingStandardDeviation _stdDev;
-
-    // RollingStandardDeviation takes a value rather than a bar, where the state it replaces resolved its own
-    // input. Close is what the batch calculation's GetInputValuesList resolves, so the two agree.
-    private readonly StreamingInputResolver _input;
-    private readonly double _stdDevMult;
-
-    public UltimateMovingAverageBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int minLength = 5,
-        int maxLength = 50, double stdDevMult = 2)
-    {
-        _uma = new UltimateMovingAverageState(maType, minLength, maxLength, 1);
-
-        // No maType: a windowed deviation is taken about the window's own mean, so there is no moving average
-        // for a type to choose.
-        _stdDev = new RollingStandardDeviation(Math.Max(1, minLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _stdDevMult = stdDevMult;
-    }
-
-    public IndicatorName Name => IndicatorName.UltimateMovingAverageBands;
-
-    public void Reset()
-    {
-        _uma.Reset();
-        _stdDev.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var uma = _uma.Update(bar, isFinal, includeOutputs: false).Value;
-        var stdDev = _stdDev.Next(_input.GetValue(bar), isFinal);
-        var upper = uma + (_stdDevMult * stdDev);
-        var lower = uma - (_stdDevMult * stdDev);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", uma },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(uma, outputs);
+        var value = _window.Next(bar.Close, bar.High, bar.Low, bar.Volume, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Uma", value } } : null);
     }
+    public void Dispose() => _window.Dispose();
+}
 
-    public void Dispose()
+[PrimaryOutput("MiddleBand")]
+public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
+{
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly UltimateAverageWindow _average;
+    private readonly UltimateBandWindow _bands;
+    public UltimateMovingAverageBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int minLength = 5,
+        int maxLength = 50, double stdDevMult = 2)
     {
-        _uma.Dispose();
-        _stdDev.Dispose();
+        _bands = new(minLength, stdDevMult); _average = new(maType, minLength, maxLength, 1);
     }
+    public IndicatorName Name => IndicatorName.UltimateMovingAverageBands;
+    public void Reset() { _average.Reset(); _bands.Reset(); }
+    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
+    {
+        StreamingInputValidation.Validate(bar);
+        var center = _average.NextPoint(bar.Close, bar.High, bar.Low, bar.Volume, isFinal);
+        var bands = _bands.Next(bar.Close, center, isFinal);
+        return new(bands.Middle, includeOutputs ? new Dictionary<string, double> {
+            { "UpperBand", bands.Upper }, { "MiddleBand", bands.Middle }, { "LowerBand", bands.Lower } } : null);
+    }
+    public void Dispose() { _average.Dispose(); _bands.Reset(); }
 }
 
 [PrimaryOutput("Uo")]

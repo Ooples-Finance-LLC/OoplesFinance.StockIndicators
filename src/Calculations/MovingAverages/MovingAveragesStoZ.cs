@@ -295,72 +295,11 @@ public static partial class Calculations
     public static StockData CalculateUltimateMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int minLength = 5, int maxLength = 50, double acc = 1)
     {
-        List<double> umaList = new(stockData.Count);
-        List<double> posMoneyFlowList = new(stockData.Count);
-        List<double> negMoneyFlowList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum posMoneyFlowSum = new();
-        RollingSum negMoneyFlowSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var callerSeries = stockData.CaptureInputSeries();
-        var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).ChainedOutputs["Length"];
-        // The typical price of the bars. The variable-length average publishes itself onto CustomValuesList,
-        // and the typical price used to take it for the close.
-        stockData.RestoreInputSeries(callerSeries);
-        var tpList = CalculateTypicalPrice(stockData).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-            var currentVolume = stockData.Volumes[i];
-            var typicalPrice = tpList[i];
-            var prevTypicalPrice = i >= 1 ? tpList[i - 1] : 0;
-            var length = MinOrMax(lenList[i], maxLength, minLength);
-            var rawMoneyFlow = typicalPrice * currentVolume;
-
-            var posMoneyFlow = i >= 1 && typicalPrice > prevTypicalPrice ? rawMoneyFlow : 0;
-            posMoneyFlowList.Add(posMoneyFlow);
-            posMoneyFlowSum.Add(posMoneyFlow);
-
-            var negMoneyFlow = i >= 1 && typicalPrice < prevTypicalPrice ? rawMoneyFlow : 0;
-            negMoneyFlowList.Add(negMoneyFlow);
-            negMoneyFlowSum.Add(negMoneyFlow);
-
-            var len = (int)length;
-            var posMoneyFlowTotal = posMoneyFlowSum.Sum(len);
-            var negMoneyFlowTotal = negMoneyFlowSum.Sum(len);
-            var mfiRatio = negMoneyFlowTotal != 0 ? posMoneyFlowTotal / negMoneyFlowTotal : 0;
-            var mfi = negMoneyFlowTotal == 0 ? 100 : posMoneyFlowTotal == 0 ? 0 : MinOrMax(100 - (100 / (1 + mfiRatio)), 100, 0);
-            var mfScaled = (mfi * 2) - 100;
-            var p = acc + (Math.Abs(mfScaled) / 25);
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= len - 1; j++)
-            {
-                var weight = Pow(len - j, p);
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var prevUma = GetLastOrDefault(umaList);
-            var uma = weightedSum != 0 ? sum / weightedSum : 0;
-            umaList.Add(uma);
-
-            var signal = GetCompareSignal(currentValue - uma, prevVal - prevUma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Uma", umaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(umaList);
-        stockData.IndicatorName = IndicatorName.UltimateMovingAverage;
-
-        return stockData;
+        var result = UltimateAverageWindow.Calculate(stockData, maType, minLength, maxLength, acc);
+        var line = result.Values.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Uma", line } });
+        stockData.SetSignals(result.Signals.ToList()); stockData.SetCustomValues(line);
+        stockData.IndicatorName = IndicatorName.UltimateMovingAverage; return stockData;
     }
 
 

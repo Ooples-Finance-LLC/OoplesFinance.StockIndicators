@@ -98,40 +98,8 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.UltimateMovingAverageBands:
             case IndicatorName.UltimateMovingAverage:
-                var ultimateKind = AverageKind(options, 1);
-                if (ultimateKind == 0) return null;
                 var ultimateBands = indicator.BatchName == IndicatorName.UltimateMovingAverageBands;
-                return new(ultimateBands ? "MiddleBand" : "Uma", ultimateBands ? new[] { "UpperBand", "MiddleBand", "LowerBand" } : new[] { "Uma" }, bars =>
-                {
-                    var maximum = Integer(options, "MaxLength", 50);
-                    var minimum = Integer(options, "MinLength", 5);
-                    var prices = Closes(bars);
-                    var mean = Average(prices, maximum, ultimateKind);
-                    var variance = PopulationVariance(prices, maximum);
-                    var typical = bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray();
-                    var positive = bars.Select((b, i) => i > 0 && typical[i] > typical[i - 1] ? typical[i] * b.Volume : 0).ToArray();
-                    var negative = bars.Select((b, i) => i > 0 && typical[i] < typical[i - 1] ? typical[i] * b.Volume : 0).ToArray();
-                    var line = new double[bars.Count];
-                    var period = maximum;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        if (variance[i] > 0)
-                        {
-                            var score = Math.Abs(prices[i] - mean[i]) / Math.Sqrt(variance[i]);
-                            period = Clamp(period + (score <= .25 ? 1 : score > 1.75 ? -1 : 0), minimum, maximum);
-                        }
-                        var up = Window(positive, i, period).Sum();
-                        var down = Window(negative, i, period).Sum();
-                        var balance = down == 0 ? 1 : up == 0 ? -1 : (up - down) / (up + down);
-                        var power = 1 + 4 * Math.Abs(balance);
-                        var weights = Enumerable.Range(1, period).Select(age => Math.Exp(power * Math.Log(age))).ToArray();
-                        line[i] = weights.Select((w, j) => i - period + 1 + j < 0 ? 0 : w * prices[i - period + 1 + j]).Sum() / weights.Sum();
-                    }
-                    if (!ultimateBands) return Outputs(("Uma", line));
-                    var widths = PopulationVariance(prices, minimum).Select(v => Number(options, 2, "StdDevMult") * Math.Sqrt(v)).ToArray();
-                    return Outputs(("UpperBand", line.Select((v, i) => v + widths[i]).ToArray()), ("MiddleBand", line),
-                        ("LowerBand", line.Select((v, i) => v - widths[i]).ToArray()));
-                });
+                return new(ultimateBands ? "MiddleBand" : "Uma", ultimateBands ? new[] { "UpperBand", "MiddleBand", "LowerBand" } : new[] { "Uma" }, bars => UltimateOutputs(bars, indicator));
             case IndicatorName.InverseDistanceWeightedMovingAverage:
                 return new("Idwma", new[] { "Idwma" }, bars => Outputs(("Idwma", RoundedDistanceMassMean(bars, length))));
             case IndicatorName.OptimalWeightedMovingAverage:

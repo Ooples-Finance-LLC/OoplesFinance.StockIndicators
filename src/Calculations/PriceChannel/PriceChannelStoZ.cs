@@ -103,54 +103,12 @@ public static partial class Calculations
     public static StockData CalculateUltimateMovingAverageBands(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int minLength = 5, int maxLength = 50, double stdDevMult = 2)
     {
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var callerSeries = stockData.CaptureInputSeries();
-        var umaList = CalculateUltimateMovingAverage(stockData, maType, minLength, maxLength, 1).ChainedValues;
-        // The band width is the deviation of the prices, not of the UMA just published onto CustomValuesList.
-        stockData.RestoreInputSeries(callerSeries);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. A band at k sigma is the Bollinger construction, and sigma there is the windowed deviation;
-        // CalculateStandardDeviationVolatility is a different quantity, about 55% wider on a typical price
-        // series, so these bands were about that much too wide - the same defect #186 fixed in the Bollinger
-        // bands themselves. Taken over inputList, which is the caller's own series captured above. See #190.
-        var stdevList = GetStandardDeviationList(inputList, minLength);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-            var uma = umaList[i];
-            var prevUma = i >= 1 ? umaList[i - 1] : 0;
-            var stdev = stdevList[i];
-
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = uma + (stdDevMult * stdev);
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = uma - (stdDevMult * stdev);
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - uma, prevVal - prevUma, currentValue, prevVal, upperBand, prevUpperBand,
-                lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", umaList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.UltimateMovingAverageBands;
-
-        return stockData;
+        var result = UltimateBandWindow.Calculate(stockData, maType, minLength, maxLength, stdDevMult);
+        var upper = result.Upper.ToList(); var middle = result.Middle.ToList(); var lower = result.Lower.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> {
+            { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(result.Signals.ToList()); stockData.SetCustomValues(new List<double>());
+        stockData.IndicatorName = IndicatorName.UltimateMovingAverageBands; return stockData;
     }
 
 

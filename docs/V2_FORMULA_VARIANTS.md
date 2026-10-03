@@ -927,6 +927,19 @@ The moving-average choice affects batch signals only. This batch and its fast pa
 The independent oracle directly sums rational body sizes for each window. The 49 distinct focused checks passed, including the repaired no-callback threshold hand and the existing streaming parity case. The 24 compiled behavioral mutation checks remain queued; enrollment alone is not qualification. This records the repository formula convention, not independently authenticated external attribution.
 
 
+### Batch 714: Ultimate Moving Average and bands
+
+The public UMA uses the causal Variable Length period, exact typical price `(original high + original low + selected close)/3`, and directional typical-price times volume totals over that period. MFI is `100*positive/(positive+negative)`, clamped to [0,100]; zero negative flow selects 100, while zero positive flow or a signed-flow pole selects 0. The exponent is `acc + abs(2*MFI-100)/25`. The numerator weights available prices by `(period-lag)^exponent`; unavailable warmup prices are zero, and the denominator always contains all period weights. Period bounds normalize to at least one with maximum at least minimum. Finite signed prices and volumes and any finite acceleration remain accepted. The obsolete builder Length option remains inert.
+
+Weights are normalized at the dominant endpoint. Exact integer sums, bounded fractional powers, centered block moments, and bounded omitted tails avoid overflow and loops over billions of missing bars. History grows with received bars. Bands use acceleration 1 and population deviation over the minimum period, with zero width until that window is full; the unrounded center and deviation are combined before publication. A negative multiplier retains signed band orientation. Native selected-input routing preserves original high/low/volume.
+
+Published values refine certified intervals until both endpoints round identically or nonzero relative uncertainty is at most 2^-64. The latter permits at most one representable step at a rounding boundary. Exact rational cases retain exact midpoint handling; signs and subnormal expectations have separate tests. The independent oracle uses a direct logarithm series, a binomial product-limit exponential, Euler-Maclaurin sums with remainder bounds, and integer-search square roots. Its scalar comparison budget is zero absolute error and 5e-16 relative error with equal signs; direct decimal fixtures additionally enforce a one-step budget and exact tiny values.
+
+The focused evidence covers 144 distinct passing cases after the 99-case routing repair rerun; all 24 focused integration checks also passed after incorporating the latest published changes. Both isolated mutation baselines passed, and all 39/39 compiled behavioral faults were caught by complete failing test reports on matching source snapshots.
+
+The internal core and its registry/shared moving-average callers still implement T3-of-T3. Alignment is a separate pending scope decision; this entry does not claim those routes implement public UMA. This bounded qualification does not establish hosted, platform, package, performance, or release readiness.
+
+
 ### Batch 716: Value Chart public numerical contract
 
 Value Chart subtracts the selected input moving average (exact high/low midpoint by default) from each candle coordinate and divides by one twenty-fifth of the five most recent rolling high/low ranges. The range period is ceil(normalized length / 5), clamped to 2..530; missing range history contributes zero. A zero total range publishes zero. The selected-input per-bar range projection and original open are preserved. Batch retains two component-average requests (basis, then coordinate signal mean); each fast output retains one. Short callback replacements are zero-filled. Batch continues to publish four named outputs and an empty custom-values list.

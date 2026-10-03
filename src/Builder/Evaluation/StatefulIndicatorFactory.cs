@@ -535,6 +535,7 @@ internal static partial class StatefulIndicatorFactory
             SupportAndResistanceOscillatorSpecOptions => new SupportAndResistanceOscillatorState(),
             UberTrendIndicatorSpecOptions uber => new UberTrendIndicatorState(uber.Length),
             UltimateVolatilityIndicatorSpecOptions volatility => new UltimateVolatilityIndicatorState(volatility.MaType, volatility.Length),
+            UltimateMovingAverageSpecOptions ultimate => new UltimateMovingAverageState(maType: ultimate.MaType),
             VariableLengthMovingAverageSpecOptions variable => new VariableLengthMovingAverageState(variable.MaType, variable.Length, variable.MaxLength),
             KwanIndicatorSpecOptions kwan => new KwanIndicatorState(kwan.MaType, kwan.Length, kwan.SmoothLength),
             KaseSerialDependencyIndexSpecOptions serial => new KaseSerialDependencyIndexState(serial.Length),

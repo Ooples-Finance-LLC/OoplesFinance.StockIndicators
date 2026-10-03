@@ -17,6 +17,15 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.UltimateMovingAverage or IndicatorName.UltimateMovingAverageBands)
+        {
+            var ultimateKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected }
+                : builtIn.BatchName == IndicatorName.UltimateMovingAverage ? new[] { "Uma" } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < ultimateKeys.Length; slot++)
+            { var key = ultimateKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => UltimateOutputs(b, builtIn))[key], UltimateBudget); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TStepLeastSquaresMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TStepLeastSquaresOutputs(bars, builtIn)["Tslsma"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.TrueRangeAdjustedExponentialMovingAverage)
