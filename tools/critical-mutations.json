@@ -85449,5 +85449,221 @@
     "before": "StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal, _selected);",
     "after": "var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal, _selected);",
     "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.DirectSelectedPricesAndRejectedCandlesPreserveState"
+  },
+  {
+    "id": "zigzag-wide-deviation-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "if (deviation < 0)",
+    "after": "if (deviation < -double.MaxValue)",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.InvalidDeviationAndCandlesAreRejectedEvenForEmptyInput"
+  },
+  {
+    "id": "zigzag-wide-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "Number.Of(lows[0])).Divide(2)",
+    "after": "Number.Of(lows[0])).Divide(3)",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-mean-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "(Number.Of(highs[0]) + Number.Of(lows[0])).Divide(2)",
+    "after": "Number.Of(((Number.Of(highs[0]) + Number.Of(lows[0])).Divide(2)).Publish())",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.UnpublishedHalfSubnormalSeedChangesTheInterpolatedNeighbor"
+  },
+  {
+    "id": "zigzag-wide-percent",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "Number.Of(deviation).Divide(100)",
+    "after": "Number.Of(deviation).Divide(10)",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.ThresholdEqualityAndAdjacentPricesHaveDifferentPivots"
+  },
+  {
+    "id": "zigzag-wide-absolute-pivot",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "pivot.Sign < 0 ? pivot.Times(-1) : pivot",
+    "after": "pivot",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-fall-tie",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "(low - pivot + threshold).Sign < 0",
+    "after": "(low - pivot + threshold).Sign <= 0",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.ThresholdEqualityAndAdjacentPricesHaveDifferentPivots"
+  },
+  {
+    "id": "zigzag-wide-rise-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "(high - pivot - threshold).Sign > 0",
+    "after": "(high - pivot + threshold).Sign > 0",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-initial-direction",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "var highLeg = true;",
+    "after": "var highLeg = false;",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-direction-change",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "highLeg = !highLeg;",
+    "after": "highLeg = true;",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-reversal-field",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "knots.Add((i, highLeg ? low : high))",
+    "after": "knots.Add((i, highLeg ? high : low))",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-extreme-field",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "var extreme = (i, highLeg ? high : low)",
+    "after": "var extreme = (i, highLeg ? low : high)",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-redraw",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "else knots[knots.Count - 1] = extreme;",
+    "after": "else knots.Add(extreme);",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-interpolation",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "Times(j - left.Index).Divide(right.Index - left.Index)",
+    "after": "Times(j - left.Index).Divide(right.Index - left.Index + 1)",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-held-tail",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "zigZag[j] = final.Value.Publish();",
+    "after": "zigZag[j] = 0;",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-signal-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "var slope = point - previous;",
+    "after": "var slope = Number.Of(point.Publish()) - previous;",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.UnpublishedHalfSubnormalSeedChangesTheInterpolatedNeighbor"
+  },
+  {
+    "id": "zigzag-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "previous = point; priorSlope = slope;",
+    "after": "previous = point; priorSlope = default;",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-output-length",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "if (zigZag.Length < highs.Length)",
+    "after": "if (zigZag.Length < 0)",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.HelperSpansAreAliasSafeAndValidationIsAtomic"
+  },
+  {
+    "id": "zigzag-wide-equal-lengths",
+    "module": "numerical",
+    "file": "src/Helpers/ZigZagPath.cs",
+    "scope": "internal static class ZigZagPath",
+    "before": "if (lows.Length != highs.Length)",
+    "after": "if (lows.Length < 0)",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.HelperSpansAreAliasSafeAndValidationIsAtomic"
+  },
+  {
+    "id": "zigzag-wide-batch-signal",
+    "module": "numerical",
+    "file": "src/Calculations/Trend/TrendStoZ.cs",
+    "scope": "public static StockData CalculateZigZag(",
+    "before": "if (signalsList is not null) signalsList.Add(signalValues[i]);",
+    "after": "if (signalsList is not null) signalsList.Add(Signal.None);",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.IndependentExtremaInterpolationAndTailHands"
+  },
+  {
+    "id": "zigzag-wide-batch-validation",
+    "module": "numerical",
+    "file": "src/Calculations/Trend/TrendStoZ.cs",
+    "scope": "public static StockData CalculateZigZag(",
+    "before": "        ZigZagPath.Validate(stockData, deviation);",
+    "after": "        // validation omitted",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.InvalidDeviationAndCandlesAreRejectedEvenForEmptyInput"
+  },
+  {
+    "id": "zigzag-wide-fast-validation",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeZigZagFast(",
+    "before": "        ZigZagPath.Validate(data, deviation);",
+    "after": "        // validation omitted",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.InvalidDeviationAndCandlesAreRejectedEvenForEmptyInput"
+  },
+  {
+    "id": "zigzag-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeZigZagFast(",
+    "before": "// Resolve the candle range, then redraw the complete path through final extrema.\n        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "// Resolve the candle range, then redraw the complete path through final extrema.\n        var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.DirectSelectedRangesAreDiscriminating"
+  },
+  {
+    "id": "zigzag-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Trend/TrendStoZ.cs",
+    "scope": "public static StockData CalculateZigZag(",
+    "before": "        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);",
+    "after": "        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);\n        highList = stockData.HighPrices; lowList = stockData.LowPrices;",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.DirectSelectedRangesAreDiscriminating"
+  },
+  {
+    "id": "zigzag-wide-selected-whole-series",
+    "module": "numerical",
+    "file": "src/Indicators/CustomIndicatorEngine.cs",
+    "scope": "internal double[][] Compute(IIndicator indicator)",
+    "before": "data.SetCustomValues(Compute(indicator.Source)[IndicatorContract.PrimaryOutput(indicator.Source).Slot].ToList());",
+    "after": "data.SetCustomValues(new List<double>());",
+    "filter": "FullyQualifiedName~ZigZagNumericalTests.SelectedSourceUsesResolvedRangesInWholeSeries"
   }
 ]

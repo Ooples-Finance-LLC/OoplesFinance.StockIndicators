@@ -364,7 +364,3 @@ OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/longer-periods
 OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/weighted-average
-OoplesFinance.StockIndicators.Indicators.ZigZag/default
-OoplesFinance.StockIndicators.Indicators.ZigZag/longer-periods
-OoplesFinance.StockIndicators.Indicators.ZigZag/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ZigZag/shorter-periods

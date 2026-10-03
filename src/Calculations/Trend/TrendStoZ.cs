@@ -25,22 +25,20 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateZigZag(this StockData stockData, double deviation = 5)
     {
+        ZigZagPath.Validate(stockData, deviation);
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
         var count = highList.Count;
         List<double> zigZagList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        var zigZag = new double[count];
-        ZigZagPath.Compute(Compatibility.SpanCompat.AsReadOnlySpan(highList), Compatibility.SpanCompat.AsReadOnlySpan(lowList), zigZag, deviation);
+        var zigZag = new double[count]; var signalValues = signalsList is null ? Array.Empty<Signal>() : new Signal[count];
+        ZigZagPath.Compute(Compatibility.SpanCompat.AsReadOnlySpan(highList), Compatibility.SpanCompat.AsReadOnlySpan(lowList), zigZag, deviation, signalValues);
 
         for (var i = 0; i < count; i++)
         {
             zigZagList.Add(zigZag[i]);
 
-            var prevZigZag1 = i >= 1 ? zigZag[i - 1] : 0;
-            var prevZigZag2 = i >= 2 ? zigZag[i - 2] : 0;
-            var signal = GetCompareSignal(zigZag[i] - prevZigZag1, prevZigZag1 - prevZigZag2);
-            signalsList?.Add(signal);
+            if (signalsList is not null) signalsList.Add(signalValues[i]);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

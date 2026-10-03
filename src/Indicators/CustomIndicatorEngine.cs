@@ -151,6 +151,20 @@ internal sealed class CustomIndicatorEngine
             return Remember(indicator, builtIn);
         }
 
+        // ZigZag redraws prior legs and therefore requires the complete selected
+        // series. A streaming state cannot represent its published path.
+        if (indicator is IBuiltInIndicator wholeSeries && wholeSeries.BatchName == IndicatorName.ZigZag
+            && wholeSeries.CreateOptions() is Builder.Specs.ZigZagSpecOptions zigZagOptions)
+        {
+            var data = new StockData(_bars.Select(b => b.Open), _bars.Select(b => b.High),
+                _bars.Select(b => b.Low), _bars.Select(b => b.Close), _bars.Select(b => b.Volume), _bars.Select(b => b.Time));
+            if (indicator.Source is not null)
+                data.SetCustomValues(Compute(indicator.Source)[IndicatorContract.PrimaryOutput(indicator.Source).Slot].ToList());
+            using var context = new Builder.Compute.ComputeContext();
+            using var path = Builder.Compute.IndicatorCompute.ComputeZigZagFast(data, context, zigZagOptions.Deviation);
+            return Remember(indicator, new[] { path.Span.ToArray() });
+        }
+
         // The indicator's own arithmetic first, even for a built-in. A built-in that was handed a
         // component the options type cannot name supplies a composed state that reads that component, and
         // that is the whole answer; only one with nothing of its own falls through to the streaming state

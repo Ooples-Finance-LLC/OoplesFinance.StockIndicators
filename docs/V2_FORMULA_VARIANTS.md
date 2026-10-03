@@ -1051,3 +1051,10 @@ Independent references and hand checks cover normalization, signal smoothing, fo
 The public formula compares HLC3 movement with one tenth of ATR, accumulates positive/negative volume votes, divides by the positive volume average (otherwise one) and the configured period, and smooths the resulting line. Exact rational arithmetic retains threshold ties, subnormal movements and large price/volume products. True range uses the previous original close; the first candle uses its current close. Selected prices retain their custom range policy. Windows allocate only observed history.
 
 The batch and native routes share exact arithmetic with an independent rational reference. Explicit typed-arm dispatch uses the existing batch binding and preserves both published output keys. Component substitutions preserve volume/ATR/signal ordering and short-replacement padding. All 83 indicator cases passed across retained and repaired runs; 31 behavioral mutation candidates remain queued.
+
+
+### Batch 740: ZigZag exact extrema and repainting paths
+
+ZigZag uses exact midpoint seeds, absolute pivot magnitudes for reversal thresholds, strict reversal comparisons and exact interpolation between final extrema. A threshold equality holds the current leg; the adjacent representable price can reverse it. Signals compare exact unpublished path slopes, preserving subnormal movements and avoiding artificial acceleration from rounded outputs. Extreme finite candles and deviations are validated before output writes; helper spans support overlapping input/output.
+
+ZigZag intentionally redraws prior legs when a later extreme extends them. Its selected-input builder path therefore computes the complete series through the same batch calculation and custom candle-range policy; it does not claim streaming parity or prefix invariance. The internal TrendCore variant remains unchanged pending its separate scope decision.

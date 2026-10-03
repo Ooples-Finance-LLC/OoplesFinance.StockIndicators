@@ -4852,6 +4852,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeZigZagFast(StockData data, ComputeContext context, double deviation = 5)
     {
+        ZigZagPath.Validate(data, deviation);
         // Resolve the candle range, then redraw the complete path through final extrema.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
@@ -4870,9 +4871,8 @@ internal static partial class IndicatorCompute
         var highs = highRange.Span;
         var lows = lowRange.Span;
 
-        ZigZagPath.Compute(highs, lows, output, deviation);
-
-        return buffer;
+        try { ZigZagPath.Compute(highs, lows, output, deviation); return buffer; }
+        catch { buffer.Dispose(); throw; }
     }
 
     private static ComputeBuffer ComputeChandelierExitValues(StockData data, ComputeContext context, int length, MovingAvgType kind, double multiplier, bool shortSide)

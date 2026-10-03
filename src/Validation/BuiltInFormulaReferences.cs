@@ -32,6 +32,8 @@ internal static partial class BuiltInFormulaReferences
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UberTrendOutputs(bars, builtIn)["Uti"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.VariableAdaptiveMovingAverage)
         { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VariableAdaptiveOutputs(bars, builtIn)["Vama"], VariableAdaptiveBudget); yield break; }
+        if (builtIn.BatchName == IndicatorName.ZigZag)
+        { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZigZagOutputs(bars, builtIn)["ZigZag"], IndicatorErrorBudget.Exact); yield break; }
         if (builtIn.BatchName == IndicatorName.WaveTrendOscillator)
         {
             var waveKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : new[] { "Wto", "Signal" };
