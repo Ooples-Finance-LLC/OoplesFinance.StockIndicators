@@ -169,6 +169,7 @@ internal static partial class BuiltInFormulaReferences
                 return Single("Esr", bars => bars.Select((b, i) => .5 * b.High + (i < 2 ? 0 : .5 * bars[i - 2].Low)).ToArray());
             case IndicatorName.VolumePositiveNegativeIndicator:
                 if (kind == 0) return null;
+                if (kind is 1 or 2 or 3 or 6) return new("Vpni", new[] { "Vpni", "Signal" }, bars => VolumePositiveNegativeOutputs(bars, indicator));
                 return new("Vpni", new[] { "Vpni", "Signal" }, bars =>
                 {
                     var typical = bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray();

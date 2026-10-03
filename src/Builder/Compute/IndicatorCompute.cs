@@ -169,6 +169,7 @@ internal static partial class IndicatorCompute
         {
             // Multi-output indicators, dispatched on the key the caller named. A spec that names none wants the
             // indicator's own series, which is the first key each of these publishes.
+            VolumePositiveNegativeIndicatorSpecOptions => BuilderArmBinding.TryCompute(data, spec, context),
             RetrospectiveCandlestickChartSpecOptions retrospective => ComputeRetrospectiveCandleFast(data, context, retrospective.Length),
             SimplePriceZoneSpecOptions simpleZone => ComputeSimplePriceZoneFast(data, context, simpleZone.Length),
             EarningSupportResistanceLevelsSpecOptions => ComputeEarningLevelsFast(data, context),

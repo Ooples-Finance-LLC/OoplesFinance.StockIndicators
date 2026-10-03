@@ -1044,3 +1044,10 @@ All 83 focused tests passed on net10.0. The 32 mutation candidates remain queued
 Public batch, fast and streaming WaveTrend use OHLC4. The OHLC-aware internal core now shares that formula; the retained three-price overload explicitly uses HLC3. Exact candle sums, residuals, deviation normalization and smoothing avoid intermediate overflow and preserve cancellation and subnormal movement. Selected inputs preserve original candle fields and feed the selected price through the shared formula. Core span writes are atomic and support overlapping inputs.
 
 Independent references and hand checks cover normalization, signal smoothing, four supported averages, extreme periods and input values, preview/reset behavior, callbacks and invalid candles. All 44 focused tests passed. The 36 behavioral mutation candidates remain queued; enrollment does not establish release readiness.
+
+
+### Batch 738: Volume Positive/Negative exact votes and smoothing
+
+The public formula compares HLC3 movement with one tenth of ATR, accumulates positive/negative volume votes, divides by the positive volume average (otherwise one) and the configured period, and smooths the resulting line. Exact rational arithmetic retains threshold ties, subnormal movements and large price/volume products. True range uses the previous original close; the first candle uses its current close. Selected prices retain their custom range policy. Windows allocate only observed history.
+
+The batch and native routes share exact arithmetic with an independent rational reference. Explicit typed-arm dispatch uses the existing batch binding and preserves both published output keys. Component substitutions preserve volume/ATR/signal ordering and short-replacement padding. All 83 indicator cases passed across retained and repaired runs; 31 behavioral mutation candidates remain queued.

@@ -320,6 +320,13 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 30,
         int smoothLength = 3)
     {
+        length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength);
+        if (StrengthWindow.Supports(maType))
+        {
+            var exact = VolumePositiveNegativeWindow.Calculate(stockData, maType, length, smoothLength); var signals = CreateSignalsList(stockData); signals?.AddRange(exact.Signals);
+            stockData.SetOutputValues(() => exact.Outputs.ToDictionary(p => p.Key, p => p.Value.ToList())); stockData.SetSignals(signals);
+            stockData.SetCustomValues(exact.Outputs["Vpni"].ToList()); stockData.IndicatorName = IndicatorName.VolumePositiveNegativeIndicator; return stockData;
+        }
         List<double> vmpList = new(stockData.Count);
         List<double> vmnList = new(stockData.Count);
         List<double> vpnList = new(stockData.Count);

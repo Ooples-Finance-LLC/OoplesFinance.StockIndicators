@@ -85170,5 +85170,284 @@
     "before": "WaveTrendOscillatorSpecOptions wave => new WaveTrendOscillatorState(length1: wave.Length),",
     "after": "",
     "filter": "FullyQualifiedName~WaveTrendNumericalTests.SelectedPricesFeedBothDirectOutputs"
+  },
+  {
+    "id": "volume-positive-negative-wide-length-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "{ _length = Math.Max(1, length);",
+    "after": "{ _length = Math.Max(2, length);",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExtremePeriodsUseOnlyObservedSamples"
+  },
+  {
+    "id": "volume-positive-negative-wide-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "movement.Times(10)",
+    "after": "movement.Times(5)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExactAtrThresholdTiesAndSmallestMovesRemainDistinct"
+  },
+  {
+    "id": "volume-positive-negative-wide-positive-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "(scaled - atr).Sign > 0",
+    "after": "(scaled - atr).Sign >= 0",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExactAtrThresholdTiesAndSmallestMovesRemainDistinct"
+  },
+  {
+    "id": "volume-positive-negative-wide-negative-vote",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "return positive - negative;",
+    "after": "return positive;",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-typical",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "(top + bottom + price).Divide(3)",
+    "after": "price",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.TypicalMovementUsesOriginalCloseForTrueRange"
+  },
+  {
+    "id": "volume-positive-negative-wide-true-range-close",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_started ? _previousClose : price",
+    "after": "_started ? _previousPrice : price",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.TypicalMovementUsesOriginalCloseForTrueRange"
+  },
+  {
+    "id": "volume-positive-negative-wide-first-range",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_started ? _previousClose : price",
+    "after": "_previousClose",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.DirectSelectedPricesAndRejectedCandlesPreserveState"
+  },
+  {
+    "id": "volume-positive-negative-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "Vote(typical - _previousPrice, atr, size)",
+    "after": "Vote(typical, atr, size)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_sum + vote - (full ? _votes.Peek() : default)",
+    "after": "_sum + vote",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-line-scale",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "sum.Times(100).Divide(average)",
+    "after": "sum.Times(50).Divide(average)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-native-period-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "Divide(average).Divide(_length)",
+    "after": "Divide(average)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "if (final)\n        {\n            if (full)",
+    "after": "if (true)\n        {\n            if (full)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-sum-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_sum = sum; _previousPrice = typical;",
+    "after": "_sum = default; _previousPrice = typical;",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-native-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_votes.Clear(); _sum = _previousPrice",
+    "after": "_sum = _previousPrice",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "selected ? Number.Of(close[i])",
+    "after": "false ? Number.Of(close[i])",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.DirectSelectedPricesAndRejectedCandlesPreserveState"
+  },
+  {
+    "id": "volume-positive-negative-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "Array.Empty<double>(), period)",
+    "after": "Array.Empty<double>(), period + 1)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ComponentCallbacksKeepVolumeAtrSignalOrderAndPadding"
+  },
+  {
+    "id": "volume-positive-negative-wide-callback-padding",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "i < supplied.Count ? Number.Of(supplied[i]) : default",
+    "after": "i < supplied.Count ? Number.Of(supplied[i]) : Number.Integer(1)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ComponentCallbacksKeepVolumeAtrSignalOrderAndPadding"
+  },
+  {
+    "id": "volume-positive-negative-wide-batch-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "if (votes.Count == length) sum -= votes.Dequeue();",
+    "after": "if (votes.Count > length) sum -= votes.Dequeue();",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-batch-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "sum.Times(100).Divide(divisor).Divide(length)",
+    "after": "sum.Times(100).Divide(divisor)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "var signal = Mean(line, smooth, true)",
+    "after": "var signal = Mean(line, length, true)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ComponentCallbacksKeepVolumeAtrSignalOrderAndPadding"
+  },
+  {
+    "id": "volume-positive-negative-wide-weighted-age",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "weighted = weighted - sum + value.Times(_length)",
+    "after": "weighted = weighted + value.Times(_length)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExtremePricesVolumesAndExpiryKeepExactRatios"
+  },
+  {
+    "id": "volume-positive-negative-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "if (_history.Count == _length) sum -= _history.Peek();",
+    "after": "if (_history.Count > _length) sum -= _history.Peek();",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExtremePricesVolumesAndExpiryKeepExactRatios"
+  },
+  {
+    "id": "volume-positive-negative-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
+    "after": "weighted.Divide((long)_length * (_length + 1L))",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExtremePricesVolumesAndExpiryKeepExactRatios"
+  },
+  {
+    "id": "volume-positive-negative-wide-sma-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_count + 1 < _length ? default",
+    "after": "false ? default",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExtremePricesVolumesAndExpiryKeepExactRatios"
+  },
+  {
+    "id": "volume-positive-negative-wide-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_count < _length)",
+    "after": "_count < 1)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-recursive-pole",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "_previous.Times(_length - 1L)",
+    "after": "_previous.Times(_length)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-recursive-drive",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "value.Times(ema ? 2 : 1)",
+    "after": "value.Times(1)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "if (final)\n            {\n                if (finite)",
+    "after": "if (true)\n            {\n                if (finite)",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
+    "scope": "internal sealed class VolumePositiveNegativeWindow",
+    "before": "(value - previous).Sign > 0",
+    "after": "(value - previous).Sign < 0",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.IndependentVotesVolumeNormalizationAndSignalHands"
+  },
+  {
+    "id": "volume-positive-negative-wide-native-selected",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumePositiveNegativeIndicatorState",
+    "before": "bar.Volume, isFinal, _selected",
+    "after": "bar.Volume, isFinal, false",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.SelectedPricesRetainVolumesAndRangePolicy"
+  },
+  {
+    "id": "volume-positive-negative-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumePositiveNegativeIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal, _selected);",
+    "after": "var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal, _selected);",
+    "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.DirectSelectedPricesAndRejectedCandlesPreserveState"
   }
 ]

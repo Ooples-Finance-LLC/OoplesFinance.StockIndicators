@@ -113,95 +113,19 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Vpni")]
 public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _volumeMa;
-    private readonly IMovingAverageSmoother _atrMa;
-    private readonly IMovingAverageSmoother _vpnSmooth;
-    private readonly RollingWindowSum _vmpSum;
-    private readonly RollingWindowSum _vmnSum;
-    private StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevClose;
-    private bool _hasPrev;
-
+    private readonly VolumePositiveNegativeWindow _window;
+    private bool _selected;
     public VolumePositiveNegativeIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 30, int smoothLength = 3)
-    {
-        _length = Math.Max(1, length);
-        _volumeMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _atrMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _vpnSmooth = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _vmpSum = new RollingWindowSum(_length);
-        _vmnSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
-    }
-
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.VolumePositiveNegativeIndicator;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _volumeMa.Reset();
-        _atrMa.Reset();
-        _vpnSmooth.Reset();
-        _vmpSum.Reset();
-        _vmnSum.Reset();
-        _prevValue = 0;
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _selected = true;
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrMa.Next(tr, isFinal);
-        var mav = _volumeMa.Next(bar.Volume, isFinal);
-        mav = mav > 0 ? mav : 1;
-        var mf = value - prevValue;
-        var mc = 0.1 * atr;
-
-        var vmp = mf > mc ? bar.Volume : 0;
-        var vmn = mf < -mc ? bar.Volume : 0;
-        var vp = isFinal ? _vmpSum.Add(vmp, out _) : _vmpSum.Preview(vmp, out _);
-        var vn = isFinal ? _vmnSum.Add(vmn, out _) : _vmnSum.Preview(vmn, out _);
-
-        var vpn = mav != 0 ? (vp - vn) / mav / _length * 100 : 0;
-        var signal = _vpnSmooth.Next(vpn, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Vpni", vpn },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vpn, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal, _selected);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { ["Vpni"] = point.Line, ["Signal"] = point.Signal } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeMa.Dispose();
-        _atrMa.Dispose();
-        _vpnSmooth.Dispose();
-        _vmpSum.Dispose();
-        _vmnSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vpci")]
