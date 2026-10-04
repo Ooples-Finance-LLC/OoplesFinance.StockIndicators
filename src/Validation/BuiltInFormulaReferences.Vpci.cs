@@ -13,18 +13,7 @@ internal static partial class BuiltInFormulaReferences
     {
         fast = Math.Max(1, fast); slow = Math.Max(1, slow); signal = Math.Max(1, signal);
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
-        ReferenceFraction[] Mean(ReferenceFraction[] values, int period)
-        {
-            if (kind is 3 or 6) return SmoothRocBankStage(values, period, kind, v => v);
-            if (kind is not (1 or 2)) return Average(values.Select(v => v.ToDouble()).ToArray(), period, kind).Select(R).ToArray();
-            return values.Select((_, i) =>
-            {
-                if (kind == 1 && i + 1 < period) return R(0);
-                var sum = R(0);
-                for (var j = Math.Max(0, i - period + 1); j <= i; j++) sum += values[j] * R(kind == 2 ? period - (long)i + j : 1);
-                return sum / (kind == 2 ? R(period) * R(period + 1L) / R(2) : R(period));
-            }).ToArray();
-        }
+        ReferenceFraction[] Mean(ReferenceFraction[] values, int period) => WindowedRationalAverage(values, period, kind);
         var prices = bars.Select(b => R(b.Close)).ToArray(); var volumes = bars.Select(b => R(b.Volume)).ToArray();
         ReferenceFraction[] Weighted(int period) => prices.Select((_, i) =>
         {

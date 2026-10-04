@@ -12,21 +12,7 @@ internal static partial class BuiltInFormulaReferences
     {
         length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength);
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
-        ReferenceFraction[] Mean(ReferenceFraction[] values, int period)
-        {
-            if (kind is 3 or 6) return SmoothRocBankStage(values, period, kind, v => v);
-            if (kind is not (1 or 2)) return Average(values.Select(v => v.ToDouble()).ToArray(), period, kind).Select(R).ToArray();
-            // Direct finite windows avoid accumulating irrelevant historical
-            // ratio denominators in a prefix sum; all arithmetic remains exact.
-            return values.Select((_, i) =>
-            {
-                if (kind == 1 && i + 1 < period) return R(0);
-                var sum = R(0);
-                for (var j = Math.Max(0, i - period + 1); j <= i; j++)
-                    sum += values[j] * R(kind == 2 ? period - (long)i + j : 1);
-                return sum / (kind == 2 ? R(period) * R(period + 1L) / R(2) : R(period));
-            }).ToArray();
-        }
+        ReferenceFraction[] Mean(ReferenceFraction[] values, int period) => WindowedRationalAverage(values, period, kind);
         // Independent net/absolute flow identity, without the production gain/loss split.
         var signed = bars.Select((b, i) => i == 0 ? R(0) : (R(b.Close) - R(bars[i - 1].Close)) * R(b.Volume)).ToArray();
         var net = Mean(signed, length); var total = Mean(signed.Select(v => v.Abs()).ToArray(), length);
