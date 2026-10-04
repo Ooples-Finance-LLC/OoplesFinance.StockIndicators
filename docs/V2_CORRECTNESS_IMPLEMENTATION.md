@@ -5859,3 +5859,43 @@ cost still depends on the number of candidate periods. PR #246 remains draft.
 - `si-comb1027-mutations-a` snapshot/archive: `03322f9fc0effe50aa48313c5d89e443ce2a3658be2f36a9e6014bae13a21cb4` / `88266a5e2adaf3e92d701dcc7bc87c7e5acc73b93455d3c8f92113e7223e2fca`.
 
 - `si-comb1027-mutations-b` snapshot/archive: `03322f9fc0effe50aa48313c5d89e443ce2a3658be2f36a9e6014bae13a21cb4` / `88266a5e2adaf3e92d701dcc7bc87c7e5acc73b93455d3c8f92113e7223e2fca`.
+
+
+### Ehlers Anticipate qualification (2026-10-04)
+
+Canonical Hann/SMA/WMA/EMA/Wilder routes now order phase correlations exactly
+against the binary64 sine basis. Packed integer convolution replaces the
+quadratic phase matrix; impulse capture retains extended filter values without
+changing the public impulse-response output. Selected input, preview/reset,
+signals, tiny differences, overflow, phase-boundary cases and shared impulse
+callers are covered. Unsupported averages retain their previous numerical path.
+
+**100 distinct focused checks passed. 20/20 compiled arithmetic faults were
+caught**, including five repaired test gaps. The original campaigns caught 15;
+centering, variance, packing-offset, extended-exponent and direct-fallback faults
+required stronger fixtures. Only their successful compiled repair failures are
+credited. Baselines, source archives, test-only additions and changed test
+filters were authenticated in `si-anticipate1046-qualified.json`.
+
+The separately approved public maximum is **4,096**. Larger periods reject in
+options, batch, fast and native routes before allocation or state/output changes.
+Values below one retain their previous normalization to one. **Five additional
+compiled limit faults were caught**, and **64 integrated checks passed**,
+including Comb and Confluence composition checks (`anticipate1054-integration-limit.trx`).
+The earlier internal 8,192-period kernel check is not a public period guarantee.
+
+Compiled enrollment is **6,886/7,131**, leaving **245 configurations across 28
+indicator types**, with no construction failures and exact backlog agreement.
+All **10,297 mutation anchors** validate. Compilation errors, the rejected first
+campaign launcher, failed initial routing tests and original surviving faults
+receive no qualification credit. PR #246 remains draft; final assurance remains.
+
+- `si-anticipate1045-mutations-0` snapshot/archive: `ece0671056a8832e8017aebc3fb2b8688b3e8d8617c597611715d29707542630` / `6d4a6e99cad21d606dce23bc68b8f816be951323dd7478eaf2f147c7bc04981c`.
+
+- `si-anticipate1045-mutations-1` snapshot/archive: `ece0671056a8832e8017aebc3fb2b8688b3e8d8617c597611715d29707542630` / `6d4a6e99cad21d606dce23bc68b8f816be951323dd7478eaf2f147c7bc04981c`.
+
+- `si-anticipate1052-repairs` snapshot/archive: `c0fb8115b17b88e7cd5ba6d499666a4b2afae9f4f53a8d2486febd7b4cb94a19` / `4ad84711da6928789a47861730ae513500fa98a47243927f9f28c79811d0d027`.
+
+- `si-anticipate1056-limit-0` snapshot/archive: `b3e964597df6c2d410c04d2f373f2f14ba9f84ecdabe05760c049db05768d33e` / `d29b329c8e5ccb206a9aa4e5e5dd9f7c9d3d3226b84322ae014241ff29e84f20`.
+
+- `si-anticipate1056-limit-1` snapshot/archive: `b3e964597df6c2d410c04d2f373f2f14ba9f84ecdabe05760c049db05768d33e` / `d29b329c8e5ccb206a9aa4e5e5dd9f7c9d3d3226b84322ae014241ff29e84f20`.

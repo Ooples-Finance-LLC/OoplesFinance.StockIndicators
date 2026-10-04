@@ -1319,3 +1319,28 @@ inputs replace closes; validate all candle fields before advancing state.
 Storage is proportional to the number of periods and observed roofing history,
 not the sum of all period widths. Large narrow ranges are supported without
 period-sized eager allocation; a wide range still evaluates every candidate.
+
+
+### Ehlers Anticipate: exact phase ordering and public period bound
+
+The supported public period is 1 through 4,096; values below one still normalize
+to one, while larger values throw before calculation/allocation. All averaging
+kinds share this bound. Canonical Hann/SMA/WMA/EMA/Wilder calculations retain the
+existing extended binary64 impulse stages, including subnormal rounding, three
+startup zeros and smoothing period clamp(ceil(length/1.4),2,530). Capturing the
+extended stage does not change standalone Impulse Response publication.
+
+For each phase p, use the binary64 basis -sin(2*pi*(p+lag)/length), with missing
+history zero. Cancel common history variance and compare signed squared
+covariances divided by each wave variance exactly. Exact ties retain the first
+phase. Periods at most two and exactly flat histories return zero. No relative
+flatness or phase-tie tolerance remains on these canonical routes. Publish the
+winning binary64 sine sample. Signals retain GetCompareSignal(current,previous).
+
+The 2*length-1 distinct wave samples allow packed integer polynomial convolution
+to compute all dot products with linear storage instead of a quadratic matrix.
+Wave prefix sums and squares supply exact phase means/variances. Observed filter
+history grows lazily. Native previews calculate before committing history; reset
+clears the filter and previous prediction. Selected inputs drive the filter;
+invalid prices/candle fields reject before advancing state. Unsupported averaging
+kinds retain the legacy numerical phase path within the same public period bound.

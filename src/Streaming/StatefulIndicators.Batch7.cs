@@ -306,6 +306,7 @@ public sealed class EhlersImpulseResponseState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Predict")]
 public sealed class EhlersAnticipateIndicatorState : IStreamingIndicatorState, IDisposable
 {
+    private readonly AnticipateWindow? _exact;
     private readonly int _length;
     private readonly EhlersAnticipatePhase _phaseMatcher;
     private readonly double[] _history;
@@ -316,7 +317,13 @@ public sealed class EhlersAnticipateIndicatorState : IStreamingIndicatorState, I
     public EhlersAnticipateIndicatorState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length = 14, double bw = 1)
     {
-        _length = Math.Max(1, length);
+        _length = AnticipateWindow.ValidateLength(length);
+        if (ImpulseResponseWindow.Supports(maType))
+        {
+            _exact = new(maType, _length, bw);
+            _phaseMatcher = null!; _history = Array.Empty<double>(); _input = default; _engine = null!; _filters = null!;
+            return;
+        }
         _phaseMatcher = new EhlersAnticipatePhase(_length);
         _history = new double[_length];
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -328,12 +335,19 @@ public sealed class EhlersAnticipateIndicatorState : IStreamingIndicatorState, I
 
     public void Reset()
     {
+        if (_exact is not null) { _exact.Reset(); return; }
         _engine.Reset();
         _filters.Clear();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_exact is not null)
+        {
+            var prediction = _exact.Next(bar.Close, isFinal).Value;
+            return new(prediction, includeOutputs ? new Dictionary<string, double> { { "Predict", prediction } } : null);
+        }
         var value = _input.GetValue(bar);
         var hFilt = _engine.Next(value, isFinal);
 
@@ -360,6 +374,7 @@ public sealed class EhlersAnticipateIndicatorState : IStreamingIndicatorState, I
 
     public void Dispose()
     {
+        if (_exact is not null) { _exact.Dispose(); return; }
         _engine.Dispose();
         _filters.Dispose();
     }

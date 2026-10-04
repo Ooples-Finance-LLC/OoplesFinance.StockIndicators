@@ -89247,5 +89247,210 @@
     "before": "- damping * At(band, i - 2)",
     "after": "+ damping * At(band, i - 2)",
     "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "anticipate-exact-covariance",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "_length * dot - sum * waveSum",
+    "after": "_length * dot + sum * waveSum",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.TinyDifferencesAndExtremeCommonScalingKeepTheirPhase",
+    "scope": "internal double Predict(IReadOnlyList<BigInteger> history)"
+  },
+  {
+    "id": "anticipate-exact-variance",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "_length * (_squares![phase + _length] - _squares[phase]) - waveSum * waveSum",
+    "after": "_length * (_squares![phase + _length] - _squares[phase]) + waveSum * waveSum",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.AdjacentWaveBisectorsResolveVarianceDifferencesExactly"
+  },
+  {
+    "id": "anticipate-exact-packing-order",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "Pack(source, sourceOffset, width, true)",
+    "after": "Pack(source, sourceOffset, width, false)",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.PackedCovariancesMatchIndependentPairwiseCorrelations"
+  },
+  {
+    "id": "anticipate-exact-offset-removal",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "- count * sourceOffset * waveOffset",
+    "after": "+ count * sourceOffset * waveOffset",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.TinyDifferencesAndExtremeCommonScalingKeepTheirPhase"
+  },
+  {
+    "id": "anticipate-exact-sign-order",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "covariance.Sign > previousCovariance.Sign",
+    "after": "covariance.Sign < previousCovariance.Sign",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.PackedCovariancesMatchIndependentPairwiseCorrelations"
+  },
+  {
+    "id": "anticipate-exact-score-order",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "return covariance.Sign * order > 0",
+    "after": "return covariance.Sign * order < 0",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.PackedCovariancesMatchIndependentPairwiseCorrelations"
+  },
+  {
+    "id": "anticipate-exact-phase-output",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "return Wave(bestPhase);",
+    "after": "return Wave((bestPhase + 1) % _length);",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.PackedCovariancesMatchIndependentPairwiseCorrelations",
+    "scope": "internal double Predict(IReadOnlyList<BigInteger> history)"
+  },
+  {
+    "id": "anticipate-exact-flat",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "if (_length * squares == sum * sum) return 0;",
+    "after": "if (_length * squares == sum * sum) return 1;",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.FullFlatAndUnresolvableWindowsNeedNoBasisAllocation"
+  },
+  {
+    "id": "anticipate-exact-tolerance",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "before": "var source = history.Take(count).ToArray();",
+    "after": "if (history.Max() - history.Min() < BigInteger.Abs(history.Max()) / 1000000000000L) return 0;\n        var source = history.Take(count).ToArray();",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.TinyDifferencesAndExtremeCommonScalingKeepTheirPhase"
+  },
+  {
+    "id": "anticipate-exact-preview",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateWindow.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.BandAndSmoothedStagesCoverExtremesAndPeriods"
+  },
+  {
+    "id": "anticipate-exact-history",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateWindow.cs",
+    "before": "_history.Reverse()",
+    "after": "_history",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.BandAndSmoothedStagesCoverExtremesAndPeriods"
+  },
+  {
+    "id": "anticipate-exact-reset",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateWindow.cs",
+    "before": "_impulse.Reset(); _history.Clear();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.BandAndSmoothedStagesCoverExtremesAndPeriods"
+  },
+  {
+    "id": "anticipate-exact-signal",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateWindow.cs",
+    "before": "value > _previous ? Signal.StrongBuy",
+    "after": "value < _previous ? Signal.StrongBuy",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.SelectedInputsAndSignalsPreserveThePredictionContract"
+  },
+  {
+    "id": "anticipate-exact-extended-scale",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateWindow.cs",
+    "before": "<< filtered.UpperShift",
+    "after": "<< 0",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.OverflowingFilteredValuesRetainTheirPhase"
+  },
+  {
+    "id": "anticipate-exact-capture-hann",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "before": "ExtendedOutput = new(rounded, shift)",
+    "after": "ExtendedOutput = new(-rounded, shift)",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.ExtendedImpulseCapturePreservesPublicValuesAndExactStage"
+  },
+  {
+    "id": "anticipate-exact-capture-average",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "before": "if (captureExtended) ExtendedOutput = average;",
+    "after": "if (captureExtended) ExtendedOutput = new(0);",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.ExtendedImpulseCapturePreservesPublicValuesAndExactStage"
+  },
+  {
+    "id": "anticipate-exact-selected",
+    "module": "anticipate-numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var input = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.SelectedInputsAndSignalsPreserveThePredictionContract",
+    "scope": "public static StockData CalculateEhlersAnticipateIndicator"
+  },
+  {
+    "id": "anticipate-exact-native-validation",
+    "module": "anticipate-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) _exact?.Reset();\n        StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.RejectedFieldsAndBandwidthDoNotAdvanceState",
+    "scope": "public sealed class EhlersAnticipateIndicatorState"
+  },
+  {
+    "id": "anticipate-exact-oracle-phase",
+    "module": "anticipate-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Anticipate.cs",
+    "before": "result[i]=-Math.Sin(2*Math.PI*winner/length);",
+    "after": "result[i]=Math.Sin(2*Math.PI*winner/length);",
+    "filter": "FullyQualifiedName~AnticipateNumericalTests.BandAndSmoothedStagesCoverExtremesAndPeriods"
+  },
+  {
+    "id": "anticipate-exact-direct-covariance",
+    "module": "anticipate-numerical",
+    "file": "src/Helpers/AnticipateExactPhase.cs",
+    "scope": "private double Direct(IReadOnlyList<BigInteger> history, int count, BigInteger sum)",
+    "before": "_length * dot - sum * waveSum",
+    "after": "_length * dot + sum * waveSum",
+    "filter": "FullyQualifiedName~AnticipateExactPhaseTests.TinyDifferencesAndExtremeCommonScalingKeepTheirPhase"
+  },
+  {
+    "id": "anticipate-limit-boundary",
+    "module": "anticipate-period-limit",
+    "file": "src/Helpers/AnticipateWindow.cs",
+    "before": "length > MaximumLength",
+    "after": "length > MaximumLength + 1",
+    "filter": "FullyQualifiedName~AnticipatePeriodLimitTests.OversizedPeriodsRejectAcrossAllRoutesBeforePublishing"
+  },
+  {
+    "id": "anticipate-limit-options",
+    "module": "anticipate-period-limit",
+    "file": "src/Builder/Specs/IndicatorSpec.cs",
+    "before": "Length = Helpers.AnticipateWindow.ValidateLength(length);",
+    "after": "Length = Math.Max(1, Math.Min(length, 4096));",
+    "filter": "FullyQualifiedName~AnticipatePeriodLimitTests.OversizedPeriodsRejectAcrossAllRoutesBeforePublishing"
+  },
+  {
+    "id": "anticipate-limit-native",
+    "module": "anticipate-period-limit",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "before": "_length = AnticipateWindow.ValidateLength(length);",
+    "after": "_length = Math.Max(1, Math.Min(length, 4096));",
+    "filter": "FullyQualifiedName~AnticipatePeriodLimitTests.OversizedPeriodsRejectAcrossAllRoutesBeforePublishing"
+  },
+  {
+    "id": "anticipate-limit-batch",
+    "module": "anticipate-period-limit",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "before": "length = AnticipateWindow.ValidateLength(length);",
+    "after": "length = Math.Max(1, Math.Min(length, 4096));",
+    "filter": "FullyQualifiedName~AnticipatePeriodLimitTests.OversizedPeriodsRejectAcrossAllRoutesBeforePublishing"
+  },
+  {
+    "id": "anticipate-limit-fast",
+    "module": "anticipate-period-limit",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length = AnticipateWindow.ValidateLength(length);",
+    "after": "length = Math.Max(1, Math.Min(length, 4096));",
+    "filter": "FullyQualifiedName~AnticipatePeriodLimitTests.OversizedPeriodsRejectAcrossAllRoutesBeforePublishing"
   }
 ]

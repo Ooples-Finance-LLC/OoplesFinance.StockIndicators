@@ -392,6 +392,19 @@ public static partial class Calculations
     public static StockData CalculateEhlersAnticipateIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length = 14, double bw = 1)
     {
+        length = AnticipateWindow.ValidateLength(length);
+        if (ImpulseResponseWindow.Supports(maType))
+        {
+            using var window = new AnticipateWindow(maType, length, bw);
+            var (input, _, _, _, _) = GetInputValuesList(stockData);
+            foreach (var series in new[] { input, stockData.OpenPrices, stockData.HighPrices, stockData.LowPrices, stockData.ClosePrices, stockData.Volumes })
+                foreach (var price in series) Streaming.StreamingInputValidation.Finite(price, nameof(stockData));
+            var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+            foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Predict", values } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAnticipateIndicator;
+            return stockData;
+        }
         length = Math.Max(length, 1);
         List<double> predictList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

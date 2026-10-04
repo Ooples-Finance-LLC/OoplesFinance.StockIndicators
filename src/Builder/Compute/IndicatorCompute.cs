@@ -19023,6 +19023,17 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, double bw = 1)
     {
+        length = AnticipateWindow.ValidateLength(length);
+        if (ImpulseResponseWindow.Supports(maType))
+        {
+            using var window = new AnticipateWindow(maType, length, bw);
+            var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+            foreach (var series in new[] { input, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes })
+                foreach (var price in series) StreamingInputValidation.Finite(price, nameof(data));
+            var prediction = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) prediction.WritableSpan[i] = window.Next(input[i], true).Value;
+            return prediction;
+        }
         var count = data.Count; length = Math.Max(1, length);
         using var hFiltBuffer = ComputeEhlersImpulseResponseFast(data, context, length, bw, maType);
         var hFiltSpan = hFiltBuffer.Span;

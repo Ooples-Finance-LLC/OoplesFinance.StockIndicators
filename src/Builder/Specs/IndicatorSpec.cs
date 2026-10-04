@@ -10521,7 +10521,7 @@ public sealed class EhlersAnticipateIndicatorSpecOptions : IIndicatorSpecOptions
 
     public EhlersAnticipateIndicatorSpecOptions(int length, double bw, MovingAvgType maType)
     {
-        Length = Math.Max(1, length);
+        Length = Helpers.AnticipateWindow.ValidateLength(length);
         Bw = bw;
         MaType = maType;
     }

@@ -11,6 +11,7 @@ internal sealed class ImpulseResponseWindow : IDisposable
     private RocBankValue _first, _second;
     private double _previous, _older;
     private int _startup;
+    internal RocBankValue ExtendedOutput { get; private set; }
     internal static bool Supports(MovingAvgType kind) => HannIndicatorWindow.Supports(kind);
     internal ImpulseResponseWindow(MovingAvgType kind, int length, double bandwidth)
     {
@@ -28,7 +29,7 @@ internal sealed class ImpulseResponseWindow : IDisposable
         else if (StrengthWindow.Supports(kind)) _average = new(kind, period, period);
         else _fallback = MovingAverageSmootherFactory.Create(kind, period);
     }
-    internal double Next(double value, bool commit)
+    internal double Next(double value, bool commit, bool captureExtended = false)
     {
         RocBankValue band = default;
         if (_startup >= 3)
@@ -48,12 +49,30 @@ internal sealed class ImpulseResponseWindow : IDisposable
                 var term = new ExactMeanAccumulator(); term.AddProduct(v.Mantissa, _weights[lag], -1); term.ScaleByPowerOfTwo(v.UpperShift); sum.Subtract(term);
             }
             output = sum.Ratio(_mass);
+            if (captureExtended)
+            {
+                for (var shift = 0; ; shift += 1024)
+                {
+                    var denominator = _mass; denominator.ScaleByPowerOfTwo(shift);
+                    var rounded = sum.Ratio(denominator);
+                    if (!double.IsInfinity(rounded)) { ExtendedOutput = new(rounded, shift); break; }
+                }
+            }
             if (commit) { if (_history.Count == _weights.Length) _history.RemoveAt(0); _history.Add(band); }
         }
-        else output = _average is not null ? _average.Next(band, commit).Publish() : _fallback!.Next(band.Publish(), commit);
+        else if (_average is not null)
+        {
+            var average = _average.Next(band, commit); output = average.Publish();
+            if (captureExtended) ExtendedOutput = average;
+        }
+        else
+        {
+            output = _fallback!.Next(band.Publish(), commit);
+            if (captureExtended) ExtendedOutput = new(output);
+        }
         if (commit) { _second = _first; _first = band; _older = _previous; _previous = value; _startup = Math.Min(3, _startup + 1); }
         return output;
     }
-    internal void Reset() { _first = _second = default; _previous = _older = 0; _startup = 0; _history.Clear(); _average?.Reset(); _fallback?.Reset(); }
+    internal void Reset() { ExtendedOutput = default; _first = _second = default; _previous = _older = 0; _startup = 0; _history.Clear(); _average?.Reset(); _fallback?.Reset(); }
     public void Dispose() { _average?.Dispose(); _fallback?.Dispose(); _history.Clear(); }
 }

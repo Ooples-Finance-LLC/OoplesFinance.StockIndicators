@@ -1116,6 +1116,16 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CyberCycleValues(bars, cyberAlpha), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersAnticipateIndicator)
+        {
+            var anticipateOptions = (EhlersAnticipateIndicatorSpecOptions)builtIn.CreateOptions();
+            var anticipateKind = anticipateOptions.MaType == MovingAvgType.EhlersHannMovingAverage ? 7 : AverageKind(anticipateOptions, 0);
+            if (anticipateKind is 1 or 2 or 3 or 6 or 7)
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AnticipateValues(bars, anticipateOptions.Length, anticipateOptions.Bw, anticipateKind), IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.EhlersImpulseResponse)
         {
             var impulseOptions = (EhlersImpulseResponseSpecOptions)builtIn.CreateOptions();
