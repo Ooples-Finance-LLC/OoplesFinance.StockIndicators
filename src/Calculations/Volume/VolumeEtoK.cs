@@ -44,77 +44,12 @@ public static partial class Calculations
     public static StockData CalculateKlingerVolumeOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int fastLength = 34, int slowLength = 55, int signalLength = 13)
     {
-        var count = stockData.Count;
-        List<double> kvoList = new(count);
-        List<double> trendList = new(count);
-        List<double> dmList = new(count);
-        List<double> cmList = new(count);
-        List<double> vfList = new(count);
-        List<double> kvoHistoList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var mom = i == 0 ? 0 : currentHigh + currentLow + currentValue - (highList[i - 1] + lowList[i - 1] + prevValue);
-
-            var prevTrend = i >= 1 ? trendList[i - 1] : 0;
-            var trend = mom > 0 ? 1 : mom < 0 ? -1 : prevTrend;
-            trendList.Add(trend);
-
-            var prevDm = i >= 1 ? dmList[i - 1] : 0;
-            var dm = currentHigh - currentLow;
-            dmList.Add(dm);
-
-            var prevCm = i >= 1 ? cmList[i - 1] : 0;
-            var cm = trend == prevTrend ? prevCm + dm : prevDm + dm;
-            cmList.Add(cm);
-
-            var temp = cm != 0 ? Math.Abs((2 * (dm / cm)) - 1) : 0;
-            var vf = currentVolume * temp * trend * 100;
-            vfList.Add(vf);
-        }
-
-        if (maType == MovingAvgType.ExponentialMovingAverage)
-        {
-            var difference = new OoplesFinance.StockIndicators.Streaming.KlingerEmaDifference(fastLength, slowLength);
-            foreach (var force in vfList) kvoList.Add(difference.Next(force, true));
-        }
-        else
-        {
-            var fast = GetMovingAverageList(stockData, maType, fastLength, vfList);
-            var slow = GetMovingAverageList(stockData, maType, slowLength, vfList);
-            for (var i = 0; i < count; i++) kvoList.Add(fast[i] - slow[i]);
-        }
-
-        var kvoSignalList = GetMovingAverageList(stockData, maType, signalLength, kvoList);
-        for (var i = 0; i < count; i++)
-        {
-            var klingerOscillator = kvoList[i];
-            var koSignalLine = kvoSignalList[i];
-
-            var prevKlingerOscillatorHistogram = i >= 1 ? kvoHistoList[i - 1] : 0;  
-            var klingerOscillatorHistogram = klingerOscillator - koSignalLine;  
-            kvoHistoList.Add(klingerOscillatorHistogram);
-
-            var signal = GetCompareSignal(klingerOscillatorHistogram, prevKlingerOscillatorHistogram);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Kvo", kvoList },
-            { "KvoSignal", kvoSignalList },
-            { "KvoHistogram", kvoHistoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kvoList);
-        stockData.IndicatorName = IndicatorName.KlingerVolumeOscillator;
-
+        var result = KlingerWindow.Calculate(stockData, maType, fastLength, slowLength, signalLength, true);
+        var line = result.Line.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Kvo", line },
+            { "KvoSignal", result.SignalLine.ToList() }, { "KvoHistogram", result.Histogram.ToList() } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades.ToList());
+        stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.KlingerVolumeOscillator;
         return stockData;
     }
 

@@ -87494,5 +87494,231 @@
     "before": "        if (builtIn.BatchName == IndicatorName.UltimateTraderOscillator &&\n            (AverageKind(builtIn.CreateOptions(), 0) is 1 or 2 or 3 or 6))",
     "after": "        if (builtIn.BatchName == IndicatorName.UltimateTraderOscillator)",
     "filter": "FullyQualifiedName~UltimateTraderNumericalTests.UnsupportedAverageDoesNotAcquireAnInventedReference"
+  },
+  {
+    "id": "klinger-exact-price-sum",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "var sum = h + l + c;",
+    "after": "var sum = h + l;",
+    "filter": "FullyQualifiedName~SubnormalTrendHasAnIndependentRationalHand"
+  },
+  {
+    "id": "klinger-exact-trend-tie",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "direction == 0 ? _trend : direction",
+    "after": "direction == 0 ? 0 : direction",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-reversal-range",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": ": _range + range;",
+    "after": ": range;",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-continued-range",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "? _cumulative + range",
+    "after": "? range",
+    "filter": "FullyQualifiedName~SubnormalTrendHasAnIndependentRationalHand"
+  },
+  {
+    "id": "klinger-exact-force-scale",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "* trend * 100;",
+    "after": "* trend * 99;",
+    "filter": "FullyQualifiedName~SubnormalTrendHasAnIndependentRationalHand"
+  },
+  {
+    "id": "klinger-exact-force-ratio",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "2 * range / cumulative - 1",
+    "after": "range / cumulative - 1",
+    "filter": "FullyQualifiedName~SubnormalTrendHasAnIndependentRationalHand"
+  },
+  {
+    "id": "klinger-exact-force-preview",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "if (final) { _sum = sum; _range = range;",
+    "after": "if (true) { _sum = sum; _range = range;",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-histogram",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "var histogram = line - signal;",
+    "after": "var histogram = line + signal;",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-wma-weight",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "value * _length;",
+    "after": "value * (_length - 1L);",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-window-expiry",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "sum -= _history.Peek();",
+    "after": "sum -= 0 * _history.Peek();",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-sma-warmup",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "_count < _length - 1 ? 0",
+    "after": "_count < _length ? 0",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-ema-seed",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "result = sum / (_count + 1);",
+    "after": "result = sum / (_count + 2);",
+    "filter": "FullyQualifiedName~SubnormalTrendHasAnIndependentRationalHand"
+  },
+  {
+    "id": "klinger-exact-recursive-decay",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "_previous * (_length - 1L)",
+    "after": "_previous * _length",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-recursive-divisor",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "ema ? _length + 1L : _length",
+    "after": "ema ? _length + 2L : _length",
+    "filter": "FullyQualifiedName~SubnormalTrendHasAnIndependentRationalHand"
+  },
+  {
+    "id": "klinger-exact-signal-average",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "var smooth = Mean(line, signal, true);",
+    "after": "var smooth = line;",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-selected-input",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~DirectChainedPricesPreserveOriginalCandles"
+  },
+  {
+    "id": "klinger-exact-callback-padding",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "i < custom.Count ? custom[i] : 0",
+    "after": "i < custom.Count ? custom[i] : 1",
+    "filter": "FullyQualifiedName~CallbacksKeepOrderPeriodsShortOutputsAndInputRestoration"
+  },
+  {
+    "id": "klinger-exact-callback-period",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "ComponentAverage.Take(published!, length)",
+    "after": "ComponentAverage.Take(published!, length + 1)",
+    "filter": "FullyQualifiedName~CallbacksKeepOrderPeriodsShortOutputsAndInputRestoration"
+  },
+  {
+    "id": "klinger-exact-callback-ema-legs",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "kind != MovingAvgType.ExponentialMovingAverage;",
+    "after": "true;",
+    "filter": "FullyQualifiedName~CallbacksKeepOrderPeriodsShortOutputsAndInputRestoration"
+  },
+  {
+    "id": "klinger-exact-core-volume",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "window.Next(high[i], low[i], close[i], volume[i], true)",
+    "after": "window.Next(high[i], low[i], close[i], 1, true)",
+    "filter": "FullyQualifiedName~CoreSpansAllowOverlapAndKeepSuffixes"
+  },
+  {
+    "id": "klinger-exact-core-signal",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "signalOutput ? point.SignalLine : point.Line",
+    "after": "signalOutput ? point.Line : point.Line",
+    "filter": "FullyQualifiedName~CoreSpansAllowOverlapAndKeepSuffixes"
+  },
+  {
+    "id": "klinger-exact-average-preview",
+    "module": "klinger-numerical",
+    "file": "src/Helpers/KlingerWindow.cs",
+    "before": "if (final)\n            {\n                if (window)",
+    "after": "if (true)\n            {\n                if (window)",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange"
+  },
+  {
+    "id": "klinger-exact-native-price",
+    "module": "klinger-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "before": "_input.GetValue(bar), bar.Volume, isFinal",
+    "after": "_input.GetValue(bar) * -1, bar.Volume, isFinal",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange",
+    "scope": "public sealed class KlingerVolumeOscillatorState"
+  },
+  {
+    "id": "klinger-exact-reference-force",
+    "module": "klinger-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Klinger.cs",
+    "before": "I(100L * directions[i])",
+    "after": "I(99L * directions[i])",
+    "filter": "FullyQualifiedName~SubnormalTrendHasAnIndependentRationalHand"
+  },
+  {
+    "id": "klinger-exact-fast-series",
+    "module": "klinger-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "series == KlingerSeries.Signal ? result.SignalLine",
+    "after": "series == KlingerSeries.Signal ? result.Line",
+    "filter": "FullyQualifiedName~ExactForcesSurviveOverflowTiesReversalsAndZeroRange",
+    "scope": "internal static ComputeBuffer ComputeKlingerVolumeOscillatorFast("
+  },
+  {
+    "id": "klinger-exact-factory-fast",
+    "module": "klinger-numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "klinger.MaType, klinger.FastLength, klinger.SlowLength, klinger.SignalLength",
+    "after": "klinger.MaType, 1, klinger.SlowLength, klinger.SignalLength",
+    "filter": "FullyQualifiedName~KlingerNumericalTests.SelectedSourcesPreserveOriginalCandles"
+  },
+  {
+    "id": "klinger-exact-factory-signal",
+    "module": "klinger-numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "signalLength: ksig.SignalLength",
+    "after": "signalLength: 1",
+    "filter": "FullyQualifiedName~KlingerNumericalTests.SelectedSourcesPreserveOriginalCandles"
+  },
+  {
+    "id": "klinger-exact-factory-alias",
+    "module": "klinger-numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new KlingerVolumeOscillatorState(fastLength: kvo.Length)",
+    "after": "new KlingerVolumeOscillatorState(fastLength: 1)",
+    "filter": "FullyQualifiedName~KlingerNumericalTests.SelectedSourcesPreserveOriginalCandles"
   }
 ]

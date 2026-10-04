@@ -15056,75 +15056,9 @@ internal static partial class IndicatorCompute
         int slowLength = 55, int signalLength = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         KlingerSeries series = KlingerSeries.Oscillator)
     {
-        // CalculateKlingerVolumeOscillator builds a volume force from the bar's trend, its range and the
-        // cumulative range carried while the trend holds, then takes the difference of two averages of it.
-        // This is the one implementation of all three of its published series; the VolumeCore and
-        // OscillatorCore entry points the three arms used before each expressed only part of it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-
-        using var volumeForce = context.Rent(count);
-        var vf = volumeForce.WritableSpan;
-        double trend = 0, previousDailyMeasurement = 0, previousCumulativeMeasurement = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var momentum = i == 0 ? 0 : highs[i] + lows[i] + input[i] - (highs[i - 1] + lows[i - 1] + input[i - 1]);
-            var previousTrend = trend;
-            trend = momentum > 0 ? 1 : momentum < 0 ? -1 : previousTrend;
-
-            var dailyMeasurement = highs[i] - lows[i];
-            var cumulativeMeasurement = trend == previousTrend
-                ? previousCumulativeMeasurement + dailyMeasurement
-                : previousDailyMeasurement + dailyMeasurement;
-
-            var ratio = cumulativeMeasurement != 0
-                ? Math.Abs((2 * (dailyMeasurement / cumulativeMeasurement)) - 1)
-                : 0;
-            vf[i] = volumes[i] * ratio * trend * 100;
-
-            previousDailyMeasurement = dailyMeasurement;
-            previousCumulativeMeasurement = cumulativeMeasurement;
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        if (maType == MovingAvgType.ExponentialMovingAverage)
-        {
-            var difference = new OoplesFinance.StockIndicators.Streaming.KlingerEmaDifference(fastLength, slowLength);
-            for (var i = 0; i < count; i++) output[i] = difference.Next(vf[i], true);
-        }
-        else
-        {
-            using var fast = context.Rent(count);
-            using var slow = context.Rent(count);
-            MovingAverage(data, maType, fastLength, volumeForce.Span, fast.WritableSpan);
-            MovingAverage(data, maType, slowLength, volumeForce.Span, slow.WritableSpan);
-            for (var i = 0; i < count; i++) output[i] = fast.Span[i] - slow.Span[i];
-        }
-
-        if (series == KlingerSeries.Oscillator)
-        {
-            return buffer;
-        }
-
-        using var oscillator = context.Rent(count);
-        output.CopyTo(oscillator.WritableSpan);
-        MovingAverage(data, maType, signalLength, oscillator.Span, output);
-
-        if (series == KlingerSeries.Histogram)
-        {
-            for (var i = 0; i < count; i++)
-            {
-                output[i] = oscillator.Span[i] - output[i];
-            }
-        }
-
-        return buffer;
+        var result = KlingerWindow.Calculate(data, maType, fastLength, slowLength, signalLength, true);
+        var values = series == KlingerSeries.Signal ? result.SignalLine : series == KlingerSeries.Histogram ? result.Histogram : result.Line;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

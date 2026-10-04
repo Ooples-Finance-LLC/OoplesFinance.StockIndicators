@@ -17,6 +17,19 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.KlingerVolumeOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var klingerOptions = builtIn.CreateOptions(); var klingerKind = AverageKind(klingerOptions, 3);
+            var klingerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "Kvo", "KvoSignal", "KvoHistogram" };
+            var klingerCache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < klingerKeys.Length; slot++)
+            {
+                var key = klingerKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => klingerCache.GetValue(bars,
+                    b => KlingerValues(b, Integer(klingerOptions, "FastLength", Integer(klingerOptions, "Length", 34)), Integer(klingerOptions, "SlowLength", 55), Integer(klingerOptions, "SignalLength", 13), klingerKind))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.UltimateMovingAverage or IndicatorName.UltimateMovingAverageBands)
         {
             var ultimateKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected }

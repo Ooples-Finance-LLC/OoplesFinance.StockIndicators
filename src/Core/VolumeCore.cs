@@ -155,39 +155,7 @@ internal static class VolumeCore
     /// </summary>
     internal static void KlingerVolumeOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int fastLength = 34, int slowLength = 55)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var vfArray = pool.Rent(close.Length);
-
-        try
-        {
-            var vf = vfArray.AsSpan(0, close.Length);
-
-            double previousSum = 0, previousRange = 0, cumulativeRange = 0;
-            var trend = 0;
-            for (var i = 0; i < close.Length; i++)
-            {
-                var sum = high[i] + low[i] + close[i];
-                var range = high[i] - low[i];
-                var nextTrend = i == 0 ? 0 : sum > previousSum ? 1 : sum < previousSum ? -1 : trend;
-                cumulativeRange = nextTrend == trend ? cumulativeRange + range : previousRange + range;
-                vf[i] = cumulativeRange == 0 ? 0 : volume[i] * Math.Abs(2 * range / cumulativeRange - 1) * nextTrend * 100;
-                trend = nextTrend;
-                previousSum = sum;
-                previousRange = range;
-            }
-
-            var difference = new OoplesFinance.StockIndicators.Streaming.KlingerEmaDifference(fastLength, slowLength);
-            for (var i = 0; i < close.Length; i++) output[i] = difference.Next(vf[i], true);
-        }
-        finally
-        {
-            pool.Return(vfArray);
-        }
+        KlingerWindow.Core(high, low, close, volume, output, fastLength, slowLength, 1, false);
     }
 
     /// <summary>

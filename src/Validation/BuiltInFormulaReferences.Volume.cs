@@ -17,6 +17,9 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.DemandIndex:
                 return Single("Di", bars => DemandIndexValues(bars).Outputs["Di"]);
             case IndicatorName.KlingerVolumeOscillator:
+                if (kind is 1 or 2 or 3 or 6)
+                    return new("Kvo", new[] { "Kvo", "KvoSignal", "KvoHistogram" }, bars => KlingerValues(bars,
+                        Integer(options, "FastLength", Integer(options, "Length", 34)), Integer(options, "SlowLength", 55), Integer(options, "SignalLength", 13), kind));
                 if (kind == 0) return null;
                 return new("Kvo", new[] { "Kvo", "KvoSignal", "KvoHistogram" }, bars =>
                 {

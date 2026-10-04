@@ -5519,3 +5519,14 @@ The six-score formula now preserves exact differences and normalization, lazy ex
 The first pair exposed a missing direct chained-input regression and one analyzer-rejected candidate; it is excluded from final qualification. Both corrected isolated mutation baselines passed (6 and 8 tests); all **32/32 compiled behavioral faults** were caught by complete failing test reports. Both source archives match the 2,436-file frozen source. Snapshot SHA256: `ff7995d9568e2e8acb5b1d4828622c0a32d7113d233c62a9bf7d2f6f6b79d70c`. Archives: `3842e957a9780e621da2b1db25ca7941e9ec6dfea90fa66b8162f037c207f64d` and `3842e957a9780e621da2b1db25ca7941e9ec6dfea90fa66b8162f037c207f64d`. Evidence: `ultimate-trader890-final.trx`, and `si-uto890-mutations-a/b`.
 
 Compiled enrollment is **6,808/7,131**, with **323 omissions across 43 indicator types**, no construction failures, and an exact backlog match. This batch does not establish completion of remaining numerical, hosted, package/platform or competitor-performance requirements. PR246 remains draft.
+
+
+### Batch 901: Klinger volume oscillator family qualification
+
+KlingerVolumeOscillator, KlingerSignal and Kvo now retain exact trend decisions, force and supported moving-average intermediates across batch, fast, native, live and internal core routes. Independent segment-sum references cover the formula, selected inputs, callbacks, preview/reset, extreme periods and span overlap.
+
+Verification: **213 distinct focused cases passed**, with six strengthened cases superseding their original passing versions. The first mutation pair exposed three coverage gaps and is excluded from qualification. On the corrected test snapshot, both baselines passed (34 and 32 tests) and **28/28 compiled behavioral faults** were caught by complete failing test reports. Production files were unchanged between the full focused run and the strengthened tests.
+
+Snapshot SHA256: `810e19deec336fdd5d9c2b135a63518bb3a8ea004526ec66f58013e077d67b47`. Both source archives: `bf373af11fa79f62161ef855a17204ff46413b6ac323de9789e59dc2a5d6b3ac`; all 2,440 archived files were hash-verified. Evidence: `klinger898-focused.trx`, `klinger899-strengthened.trx`, `klinger900-chain.trx`, and `si-klinger901-mutations-a/b`.
+
+Compiled enrollment is **6,833/7,131**, with **298 omissions across 40 indicator types**, no construction failures and an exact backlog match. PR246 remains draft; hosted gates and final package/platform and competitor timing assurance remain outstanding.

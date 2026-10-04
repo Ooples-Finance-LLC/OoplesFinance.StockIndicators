@@ -373,88 +373,25 @@ public sealed class KirshenbaumBandsState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Kvo")]
 public sealed class KlingerVolumeOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
+    private readonly KlingerWindow _window;
     private readonly StreamingInputResolver _input;
-    private readonly KlingerEmaDifference? _difference;
-    private double _prevValue;
-    private double _prevTrend;
-    private double _prevDm;
-    private double _prevCm;
-    private bool _hasPrev;
-
     public KlingerVolumeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int fastLength = 34, int slowLength = 55, int signalLength = 13)
     {
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _window = new KlingerWindow(maType, fastLength, slowLength, signalLength);
         _input = new StreamingInputResolver(InputName.Close, null);
-        _difference = maType == MovingAvgType.ExponentialMovingAverage ? new KlingerEmaDifference(fastLength, slowLength) : null;
     }
-
     public IndicatorName Name => IndicatorName.KlingerVolumeOscillator;
-
-    public void Reset()
-    {
-        _difference?.Reset();
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _prevTrend = 0;
-        _prevDm = 0;
-        _prevCm = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var value = bar.High + bar.Low + _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var mom = _hasPrev ? value - prevValue : 0;
-        var trend = mom > 0 ? 1 : mom < 0 ? -1 : _prevTrend;
-        var dm = bar.High - bar.Low;
-        var cm = trend == _prevTrend ? _prevCm + dm : _prevDm + dm;
-        var temp = cm != 0 ? Math.Abs((2 * (dm / cm)) - 1) : 0;
-        var vf = bar.Volume * temp * trend * 100;
-
-        var kvo = _difference is not null ? _difference.Next(vf, isFinal)
-            : _fastSmoother.Next(vf, isFinal) - _slowSmoother.Next(vf, isFinal);
-        var signal = _signalSmoother.Next(kvo, isFinal);
-        var histogram = kvo - signal;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevTrend = trend;
-            _prevDm = dm;
-            _prevCm = cm;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Kvo", kvo },
-                { "KvoSignal", signal },
-                { "KvoHistogram", histogram }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kvo, outputs);
+        var point = _window.Next(bar.High, bar.Low, _input.GetValue(bar), bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double>(3)
+            { { "Kvo", point.Line }, { "KvoSignal", point.SignalLine }, { "KvoHistogram", point.Histogram } } : null;
+        return new StreamingIndicatorStateResult(point.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Kst")]

@@ -1279,24 +1279,7 @@ internal static class OscillatorCore
     /// </summary>
     internal static void KlingerSignal(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int fastLength = 34, int slowLength = 55, int signalLength = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var kvoArray = pool.Rent(close.Length);
-
-        try
-        {
-            var kvo = kvoArray.AsSpan(0, close.Length);
-            VolumeCore.KlingerVolumeOscillator(high, low, close, volume, kvo, fastLength, slowLength);
-            MovingAverageCore.ExponentialMovingAverage(kvo, output, signalLength);
-        }
-        finally
-        {
-            pool.Return(kvoArray);
-        }
+        KlingerWindow.Core(high, low, close, volume, output, fastLength, slowLength, signalLength, true);
     }
 
     /// <summary>

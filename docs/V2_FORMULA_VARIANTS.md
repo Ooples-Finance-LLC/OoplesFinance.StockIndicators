@@ -1117,3 +1117,26 @@ The public formula combines body/range, close position, rolling close position, 
 The raw result is smoothed by lookback, smoothing, then smoothing again; Uto is the second stage and Signal is the third. Each stage publishes binary64, and recursive feedback retains that publication boundary. SMA/WMA/EMA/Wilder use local lazy history; other average kinds retain their existing fallback. The public length parameter remains inert. Fast callbacks retain their order and zero-pad short replacements. Trading signals compare exact differences of published lines.
 
 The unused three-RSI internal core is replaced by an OHLCV-aware implementation with explicit lookback, smoothing and range periods. It validates span lengths and reads all input before writing overlapping output. Independent references use direct rational candle windows and separate smoothing. The one-bar extreme signed-candle example produces exactly 100; the mixed-score hand -25,-50,100/3,-100/9,-100,0 produces -5500/79 before smoothing.
+
+
+### Batch 898: Klinger volume oscillator family
+
+KlingerVolumeOscillator, KlingerSignal and Kvo retain the public volume-force formula:
+trend follows the exact change in high + low + effective close, with ties retaining the
+previous direction; cumulative range spans the current trend and the bar preceding its
+reversal. An exactly zero cumulative range retains the existing zero-force convention.
+Signed finite prices, volumes and ranges keep their existing domain.
+
+Volume force and SMA/WMA/EMA/Wilder smoothing now retain exact rational intermediates
+through the oscillator, signal and histogram. Only public series are rounded to binary64;
+an independently proven overflow of a final output uses the validation framework's
+existing overflow-rejection contract. A three-bar hand with high=1, low=0, volume=1 and
+closes [0, epsilon, 2*epsilon] yields 100/9 for EMA(1)-EMA(2), even for the smallest positive
+subnormal epsilon. History allocation grows with observed bars, not an extreme requested
+period. Exact recursive state can grow in integer precision as history grows.
+
+Batch/fast/native/live routes and the oscillator/signal cores share this calculation.
+Selected prices preserve original high/low/volume fields. The established EMA route
+continues to request only its signal component callback; other averages request fast,
+slow, then signal. Core output can overlap any input span, and suffix elements are untouched.
+Unsupported average kinds retain their prior fallback and reference eligibility.
