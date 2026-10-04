@@ -5057,47 +5057,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void LinearQuadraticConvergenceDivergenceOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var linRegArray = pool.Rent(close.Length);
-        var quadRegArray = pool.Rent(close.Length);
-
-        try
-        {
-            var linReg = linRegArray.AsSpan(0, close.Length);
-            var quadReg = quadRegArray.AsSpan(0, close.Length);
-
-            // Linear regression
-            MovingAverageCore.LinearRegression(close, linReg, length);
-
-            // Quadratic approximation (use DEMA as proxy for quadratic behavior)
-            MovingAverageCore.ExponentialMovingAverage(close, quadReg, length);
-            var emaOfEma = pool.Rent(close.Length);
-            try
-            {
-                var eofe = emaOfEma.AsSpan(0, close.Length);
-                MovingAverageCore.ExponentialMovingAverage(quadReg, eofe, length);
-
-                // Output = Linear - Quadratic convergence
-                for (var i = 0; i < close.Length; i++)
-                {
-                    output[i] = linReg[i] - (2 * quadReg[i] - eofe[i]);
-                }
-            }
-            finally
-            {
-                pool.Return(emaOfEma);
-            }
-        }
-        finally
-        {
-            pool.Return(linRegArray);
-            pool.Return(quadRegArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var input = close.ToArray();
+        foreach (var price in input) Streaming.StreamingInputValidation.Finite(price, nameof(close));
+        using var state = new LinearQuadraticWindow(MovingAvgType.SimpleMovingAverage, length, 25);
+        for (var i = 0; i < input.Length; i++) output[i] = state.Next(input[i], true);
     }
 
     /// <summary>

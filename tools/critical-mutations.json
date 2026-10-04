@@ -17980,8 +17980,8 @@
     "id": "qreg-retains-expired-price",
     "module": "numerical",
     "file": "src/Helpers/QuadraticProjectionWindow.cs",
-    "before": "_prices.Count == _length ?",
-    "after": "_prices.Count > _length ?",
+    "before": "(_observed?.Count ?? _prices!.Count) == _length ?",
+    "after": "(_observed?.Count ?? _prices!.Count) > _length ?",
     "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
   },
   {
@@ -18044,8 +18044,8 @@
     "id": "qreg-commits-preview",
     "module": "numerical",
     "file": "src/Helpers/QuadraticProjectionWindow.cs",
-    "before": "if (commit) { _prices.TryAdd",
-    "after": "{ _prices.TryAdd",
+    "before": "if (commit) { _prices?.TryAdd",
+    "after": "{ _prices?.TryAdd",
     "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
   },
   {
@@ -90271,5 +90271,136 @@
     "before": "_previousSlope = slope",
     "after": "_previousSlope = BigInteger.Zero",
     "filter": "FullyQualifiedName~ProjectionNumericalTests.SignalsUseExactSlopeAndPreserveVolatilityGates"
+  },
+  {
+    "id": "lqcd-exact-difference",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/LinearQuadraticWindow.cs",
+    "before": "_quadratic.LastExtended - linear",
+    "after": "_quadratic.LastExtended + linear",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-signal-scale",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/LinearQuadraticWindow.cs",
+    "before": "<< average.UpperShift",
+    "after": "<< 0",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-second-subtraction",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/LinearQuadraticWindow.cs",
+    "before": "oscillator - mean",
+    "after": "oscillator",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.LinearAndQuadraticHandsPreserveDoubleSignalSubtraction"
+  },
+  {
+    "id": "lqcd-exact-preview",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/LinearQuadraticWindow.cs",
+    "before": "var linear = _linear.Next(price, final)",
+    "after": "var linear = _linear.Next(price, true)",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-reset",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/LinearQuadraticWindow.cs",
+    "before": "_quadratic.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-signal-period",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/LinearQuadraticWindow.cs",
+    "before": "new(kind, signalLength, 1, observedHistory: true)",
+    "after": "new(kind, signalLength + 1, 1, observedHistory: true)",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-extended-endpoint",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "if (_observed is not null) LastExtended = RocBankValue.RoundUnits(numerator, determinant << 1074);",
+    "after": "if (_observed is not null) LastExtended = ExactVarianceWindow.Units(result);",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-lazy-price",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_observed.Enqueue(price)",
+    "after": "_observed.Enqueue(0)",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-lazy-eviction",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_observed.Count == _length",
+    "after": "_observed.Count > _length",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-linear-lazy-price",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "_observed.Enqueue(value)",
+    "after": "_observed.Enqueue(0)",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-linear-lazy-expiry",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "_observed.Peek()",
+    "after": "0",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-linear-reset",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "_observed?.Clear(); _sum = default",
+    "after": "_sum = default",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "lqcd-exact-fast-period",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "LinearQuadraticWindow.Calculate(data, maType, length, signalLength)",
+    "after": "LinearQuadraticWindow.Calculate(data, maType, length + 1, signalLength)",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview",
+    "scope": "internal static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast("
+  },
+  {
+    "id": "lqcd-exact-callbacks",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.FastCallbacksRetainThreeCentersAndSignalRequest",
+    "scope": "internal static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast("
+  },
+  {
+    "id": "lqcd-exact-core-period",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "MovingAvgType.SimpleMovingAverage, length, 25",
+    "after": "MovingAvgType.SimpleMovingAverage, length + 1, 25",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.CoreMatchesPublicHistogramWithOverlappingSpans",
+    "scope": "internal static void LinearQuadraticConvergenceDivergenceOscillator("
+  },
+  {
+    "id": "lqcd-exact-reference-fit",
+    "module": "linear-quadratic-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.LinearQuadratic.cs",
+    "before": "covariance / variance * center",
+    "after": "covariance / (variance + new ReferenceFraction(1)) * center",
+    "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
   }
 ]

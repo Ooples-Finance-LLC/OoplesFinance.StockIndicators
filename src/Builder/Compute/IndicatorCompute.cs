@@ -9111,6 +9111,13 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast(StockData data, ComputeContext context,
         int length = 50, int signalLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var result = LinearQuadraticWindow.Calculate(data, maType, length, signalLength);
+            var exactBuffer = context.Rent(result.Values.Count);
+            for (var i = 0; i < result.Values.Count; i++) exactBuffer.WritableSpan[i] = result.Values[i];
+            return exactBuffer;
+        }
         // CalculateLinearQuadraticConvergenceDivergenceOscillator publishes its HISTOGRAM as "Lqcdo": the
         // quadratic regression less the linear one is the convergence line, and the histogram takes its
         // signal average off that line twice over, once to make the oscillator and once again to make the

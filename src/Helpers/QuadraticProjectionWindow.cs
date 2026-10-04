@@ -6,14 +6,16 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class QuadraticProjectionWindow : IDisposable
 {
     private readonly int _length;
-    private readonly PooledRingBuffer<double> _prices;
+    private readonly PooledRingBuffer<double>? _prices;
+    private readonly Queue<double>? _observed;
+    internal BigInteger LastExtended { get; private set; }
     private readonly RocBankAverage? _xMean, _qMean, _yMean;
     private BigInteger _sum, _linear, _square;
     private long _index;
-    internal QuadraticProjectionWindow(MovingAvgType kind, int length, int capacityHint = int.MaxValue)
+    internal QuadraticProjectionWindow(MovingAvgType kind, int length, int capacityHint = int.MaxValue, bool observedHistory = false)
     {
-        _length = Math.Max(1, length); _prices = new(Math.Min(_length, Math.Max(1, capacityHint)));
-        if (StrengthWindow.Supports(kind)) { _xMean = new(kind, _length, capacityHint); _qMean = new(kind, _length, capacityHint); _yMean = new(kind, _length, capacityHint); }
+        _length = Math.Max(1, length); if (observedHistory) _observed = new(); else _prices = new(Math.Min(_length, Math.Max(1, capacityHint)));
+        if (StrengthWindow.Supports(kind)) { _xMean = new(kind, _length, capacityHint, observedHistory); _qMean = new(kind, _length, capacityHint, observedHistory); _yMean = new(kind, _length, capacityHint, observedHistory); }
     }
     private static BigInteger Units(RocBankValue value) => ExactVarianceWindow.Units(value.Mantissa) << value.UpperShift;
     // Sums over [0,n]; missing prehistory has both index and price zero.
@@ -24,14 +26,14 @@ internal sealed class QuadraticProjectionWindow : IDisposable
     internal double Next(double price, bool commit, double? indexMean = null, double? squareMean = null, double? priceMean = null)
     {
         var x = new BigInteger(_index); var q = x * x; var incoming = ExactVarianceWindow.Units(price);
-        var expiredX = x - _length; var expired = _prices.Count == _length ? ExactVarianceWindow.Units(_prices[0]) : BigInteger.Zero;
+        var expiredX = x - _length; var expired = (_observed?.Count ?? _prices!.Count) == _length ? ExactVarianceWindow.Units(_observed is null ? _prices![0] : _observed.Peek()) : BigInteger.Zero;
         var sum = _sum + incoming - expired;
         var linear = _linear + x * incoming - expiredX * expired;
         var square = _square + q * incoming - expiredX * expiredX * expired;
         var xm = indexMean.HasValue ? new RocBankValue(indexMean.Value) : _xMean!.Next(new RocBankValue((double)x), commit);
         var qm = squareMean.HasValue ? new RocBankValue(squareMean.Value) : _qMean!.Next(new RocBankValue((double)q), commit);
         var ym = priceMean.HasValue ? new RocBankValue(priceMean.Value) : _yMean!.Next(new RocBankValue(price), commit);
-        var result = ym.Publish();
+        var result = ym.Publish(); LastExtended = Units(ym);
         if (_length >= 3 && _index >= 2)
         {
             var n = new BigInteger(_length);
@@ -45,11 +47,12 @@ internal sealed class QuadraticProjectionWindow : IDisposable
                 var slope = xy * qq - qy * xq; var curvature = qy * xx - xy * xq;
                 var numerator = (Units(ym) * determinant << 1074) + slope * ((x << 1074) - Units(xm)) + curvature * ((q << 1074) - Units(qm));
                 result = ExactMeanAccumulator.UnitRatio(numerator, determinant << 1074);
+                if (_observed is not null) LastExtended = RocBankValue.RoundUnits(numerator, determinant << 1074);
             }
         }
-        if (commit) { _prices.TryAdd(price, out _); _sum = sum; _linear = linear; _square = square; _index++; }
+        if (commit) { _prices?.TryAdd(price, out _); if (_observed is not null) { if (_observed.Count == _length) _observed.Dequeue(); _observed.Enqueue(price); } _sum = sum; _linear = linear; _square = square; _index++; }
         return result;
     }
-    internal void Reset() { _prices.Clear(); _xMean?.Reset(); _qMean?.Reset(); _yMean?.Reset(); _sum = _linear = _square = default; _index = 0; }
-    public void Dispose() { _prices.Dispose(); _xMean?.Dispose(); _qMean?.Dispose(); _yMean?.Dispose(); }
+    internal void Reset() { _prices?.Clear(); _observed?.Clear(); LastExtended = default; _xMean?.Reset(); _qMean?.Reset(); _yMean?.Reset(); _sum = _linear = _square = default; _index = 0; }
+    public void Dispose() { _prices?.Dispose(); _observed?.Clear(); _xMean?.Dispose(); _qMean?.Dispose(); _yMean?.Dispose(); }
 }

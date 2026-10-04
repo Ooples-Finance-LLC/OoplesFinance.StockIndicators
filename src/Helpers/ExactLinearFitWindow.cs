@@ -5,17 +5,24 @@ namespace OoplesFinance.StockIndicators.Helpers;
 // Exact partial-window OLS. Each published reading is rounded independently.
 internal sealed class ExactLinearFitWindow : IDisposable
 {
-    private readonly PooledRingBuffer<double> _window;
+    private readonly PooledRingBuffer<double>? _window;
+    private readonly Queue<double>? _observed;
+    private readonly int _length;
     private BigInteger _sum, _weighted, _index;
 
-    internal ExactLinearFitWindow(int length) => _window = new PooledRingBuffer<double>(Math.Max(1, length));
+    internal ExactLinearFitWindow(int length, bool observedHistory = false)
+    {
+        _length = Math.Max(1, length);
+        if (observedHistory) _observed = new(); else _window = new PooledRingBuffer<double>(_length);
+    }
 
     internal Fit Next(double value, bool isFinal)
     {
         var current = ExactVarianceWindow.Units(value);
-        var full = _window.Count == _window.Capacity;
-        var expired = full ? ExactVarianceWindow.Units(_window[0]) : BigInteger.Zero;
-        var count = full ? _window.Count : _window.Count + 1;
+        var observed = _observed?.Count ?? _window!.Count;
+        var full = observed == _length;
+        var expired = full ? ExactVarianceWindow.Units(_observed is null ? _window![0] : _observed.Peek()) : BigInteger.Zero;
+        var count = full ? observed : observed + 1;
         var sum = _sum + current - expired;
         var weighted = full ? _weighted - _sum + expired + (count - 1) * current : _weighted + (count - 1) * current;
         var n = new BigInteger(count);
@@ -24,7 +31,8 @@ internal sealed class ExactLinearFitWindow : IDisposable
         var fit = new Fit(sum, covariance, n, spread, _index);
         if (isFinal)
         {
-            _window.TryAdd(value, out _);
+            _window?.TryAdd(value, out _);
+            if (_observed is not null) { if (full) _observed.Dequeue(); _observed.Enqueue(value); }
             _sum = sum; _weighted = weighted; _index++;
         }
         return fit;
@@ -115,6 +123,6 @@ internal sealed class ExactLinearFitWindow : IDisposable
 
     }
 
-    internal void Reset() { _window.Clear(); _sum = default; _weighted = default; _index = default; }
-    public void Dispose() => _window.Dispose();
+    internal void Reset() { _window?.Clear(); _observed?.Clear(); _sum = default; _weighted = default; _index = default; }
+    public void Dispose() { _window?.Dispose(); _observed?.Clear(); }
 }

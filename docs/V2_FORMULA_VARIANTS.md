@@ -1401,3 +1401,15 @@ lower 0 and bandwidth 200. Signal comparisons retain exact stage ordering.
 The core oscillator uses the same projection formula and preserves overlapping
 input spans. Callback averages retain their periods and fast callbacks use an
 isolated StockData view. Huge periods allocate only observed history.
+
+
+### Linear Quadratic Convergence Divergence histogram
+
+Fit the partial-window linear endpoint and the existing moving-average-centered
+quadratic endpoint independently to the selected series. Retain binary64 stage
+precision with an extended upper exponent for their difference and its signal
+average. The published histogram is two sequential rounded subtractions of the
+signal from that difference; it is not collapsed into a single difference-minus-
+twice-signal rounding. Core and registry use this histogram with the existing
+25-period signal default. Large periods store only observed history in this
+composition. Shared fit callers keep their existing publication and ring paths.

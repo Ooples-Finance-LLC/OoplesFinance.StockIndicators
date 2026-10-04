@@ -8,11 +8,13 @@ internal static partial class BuiltInFormulaReferences
         var options = indicator.CreateOptions(); return QuadraticProjectionOutputs(bars, Math.Max(1, Integer(options, "Length", 500)), AverageKind(options, 1));
     }
     internal static IReadOnlyDictionary<string, double[]> QuadraticProjectionOutputs(IReadOnlyList<Bar> bars, int length, int kind)
+        => Outputs(("QuadReg", QuadraticProjectionStages(bars, length, kind).Select(v => v.ToDouble()).ToArray()));
+    private static ReferenceFraction[] QuadraticProjectionStages(IReadOnlyList<Bar> bars, int length, int kind)
     {
         var zero = new ReferenceFraction(0); var prices = bars.Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray();
         var indices = Enumerable.Range(0, bars.Count).Select(i => new ReferenceFraction(i)).ToArray();
         var xMean = SmoothRocBankStage(indices, length, kind); var qMean = SmoothRocBankStage(indices.Select(x => x * x).ToArray(), length, kind);
-        var yMean = SmoothRocBankStage(prices, length, kind); var result = new double[bars.Count];
+        var yMean = SmoothRocBankStage(prices, length, kind); var result = new ReferenceFraction[bars.Count];
         // Prefix sums are independent of the production sliding-state update. Geometry
         // uses Gram-Schmidt in local coordinates, with zero-index prehistory multiplicity.
         var prefix0 = new ReferenceFraction[bars.Count + 1]; var prefix1 = new ReferenceFraction[bars.Count + 1]; var prefix2 = new ReferenceFraction[bars.Count + 1];
@@ -27,7 +29,7 @@ internal static partial class BuiltInFormulaReferences
         for (var i = 0; i < bars.Count; i++)
         {
             if (i < length) { var x = new BigInteger(i); sx += x; sq += x * x; sc += x * x * x; sf += x * x * x * x; }
-            if (length < 3 || i < 2) { result[i] = yMean[i].ToDouble(); continue; }
+            if (length < 3 || i < 2) { result[i] = yMean[i]; continue; }
             var start = Math.Max(0, i - length + 1); var origin = new ReferenceFraction(start);
             var sy = prefix0[i + 1] - prefix0[start];
             var xy = prefix1[i + 1] - prefix1[start] - origin * sy;
@@ -40,8 +42,8 @@ internal static partial class BuiltInFormulaReferences
             var curvature = new ReferenceFraction(n * norm) * vy / new ReferenceFraction(vnorm);
             var slope = new ReferenceFraction(n) * uy / new ReferenceFraction(norm) - new ReferenceFraction(projection) * curvature / new ReferenceFraction(norm);
             var distance = indices[i] - xMean[i];
-            result[i] = (yMean[i] + slope * distance + curvature * (indices[i] * indices[i] - qMean[i] - new ReferenceFraction(2) * origin * distance)).ToDouble();
+            result[i] = (yMean[i] + slope * distance + curvature * (indices[i] * indices[i] - qMean[i] - new ReferenceFraction(2) * origin * distance)).RoundExtendedBinary64();
         }
-        return Outputs(("QuadReg", result));
+        return result;
     }
 }

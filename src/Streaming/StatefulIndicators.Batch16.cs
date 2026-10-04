@@ -691,13 +691,15 @@ public sealed class LinearExtrapolationState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Lqcdo")]
 public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly LinearRegressionState _linReg;
-    private readonly QuadraticRegressionEngine _quadReg;
-    private readonly IMovingAverageSmoother _signalSmoother;
+    private readonly LinearQuadraticWindow? _wide;
+    private readonly LinearRegressionState _linReg = null!;
+    private readonly QuadraticRegressionEngine _quadReg = null!;
+    private readonly IMovingAverageSmoother _signalSmoother = null!;
 
     public LinearQuadraticConvergenceDivergenceOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 50, int signalLength = 25)
     {
+        if (StrengthWindow.Supports(maType)) { _wide = new(maType, length, signalLength); return; }
         var resolved = Math.Max(1, length);
         _linReg = new LinearRegressionState(resolved);
         _quadReg = new QuadraticRegressionEngine(maType, resolved, InputName.Close);
@@ -708,6 +710,7 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _linReg.Reset();
         _quadReg.Reset();
         _signalSmoother.Reset();
@@ -715,6 +718,12 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var value = _wide.Next(bar.Close, isFinal);
+            return new(value, includeOutputs ? new Dictionary<string,double> { ["Lqcdo"] = value } : null);
+        }
         StreamingInputValidation.Validate(bar);
         var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
         var quadReg = _quadReg.Next(bar, isFinal);
@@ -737,6 +746,7 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
 
     public void Dispose()
     {
+        if (_wide is not null) { _wide.Dispose(); return; }
         _linReg.Dispose();
         _quadReg.Dispose();
         _signalSmoother.Dispose();

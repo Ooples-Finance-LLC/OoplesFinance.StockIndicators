@@ -107,14 +107,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.QuadraticRegression:
                 return new("QuadReg", new[] { "QuadReg" }, bars => Outputs(("QuadReg", QuadraticProjectionReference(Closes(bars), length, kind))));
             case IndicatorName.LinearQuadraticConvergenceDivergenceOscillator:
-                return new("Lqcdo", new[] { "Lqcdo" }, bars =>
-                {
-                    var prices = Closes(bars); var linear = RegressionEndpoints(prices, length);
-                    var quadratic = QuadraticProjectionReference(prices, length, 1);
-                    var difference = quadratic.Select((v, i) => v - linear[i]).ToArray();
-                    var signal = Average(difference, 25, 1);
-                    return Outputs(("Lqcdo", difference.Select((v, i) => v - 2 * signal[i]).ToArray()));
-                });
+                return new("Lqcdo", new[] { "Lqcdo" }, bars => LinearQuadraticOutputs(bars, indicator));
             case IndicatorName.HerrickPayoffIndex:
                 return new("Hpi", new[] { "Hpi" }, bars => Outputs(("Hpi",
                     HerrickPayoffValues(bars, Number(options, 100, "PointValue"), (indicator as IIndicator)?.Source is not null))));

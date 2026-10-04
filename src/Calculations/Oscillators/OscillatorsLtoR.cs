@@ -474,6 +474,14 @@ public static partial class Calculations
     public static StockData CalculateLinearQuadraticConvergenceDivergenceOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50, int signalLength = 25)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result = LinearQuadraticWindow.Calculate(stockData, maType, length, signalLength);
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Lqcdo", result.Values } });
+            stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+            stockData.SetCustomValues(result.Values); stockData.IndicatorName = IndicatorName.LinearQuadraticConvergenceDivergenceOscillator;
+            return stockData;
+        }
         List<double> lqcdList = new(stockData.Count);
         List<double> histList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

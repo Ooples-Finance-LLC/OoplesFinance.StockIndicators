@@ -5973,3 +5973,19 @@ mutation anchors validate. Enrollment is 6,934/7,131, leaving 197 configurations
 across 22 types (`si-projection1133-inventory.json`). No new period cap is imposed;
 projection work per observation still grows with observed window history.
 PR #246 remains draft and final assurance is incomplete.
+
+
+### Linear Quadratic Convergence Divergence qualification (batch 1139)
+
+All four configurations retain extended regression endpoints through the
+difference and both rounded signal subtractions. Optional observed-history
+storage in the shared fit helpers preserves existing ring callers. The core
+now computes the public histogram instead of a DEMA approximation. Independent
+centered fits and orthogonal quadratic references, large periods, selected
+inputs, callbacks, preview/reset and overlapping core spans passed 41 distinct
+checks. All 18 compiled faults were caught, including two migrated existing
+quadratic expiry/preview faults (`si-lqcd1130-qualified.json`). A preliminary
+compilation failure received no credit. Main integration passed 14 checks
+(`lqcd1136-integration.trx`), and all 10,413 mutation anchors validate. Enrollment
+is 6,938/7,131, leaving 193 configurations across 21 types
+(`si-lqcd1137-inventory.json`). PR #246 remains draft; final assurance is incomplete.
