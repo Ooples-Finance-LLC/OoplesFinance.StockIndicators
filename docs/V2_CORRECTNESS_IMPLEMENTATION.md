@@ -5952,3 +5952,24 @@ All 46 compiled faults were caught, including 30 reverified output faults and
 All 10,373 mutation anchors validate. Enrollment is 6,920/7,131, leaving 211
 configurations across 25 types (`si-zdistance1123-inventory.json`). PR #246 remains
 draft; final platform/package/timing assurance is incomplete.
+
+
+### Projection family numerical qualification (batch 1134)
+
+All 14 Projection Bands/Oscillator/Bandwidth configurations now retain extended
+regression slopes and bands through ratio evaluation. Observed-history storage
+avoids eager period allocation; the existing lag pairing and missing zero terms
+remain intact. The core oscillator now follows the public projection formula.
+Typed streaming routes, output metadata, selected inputs, callback consumption
+and fast-path caller isolation are covered.
+
+154 distinct focused checks passed (including existing quadratic-projection
+checks), and 24 compiled behavioral faults were caught
+(`si-projection1119-qualified.json`). One initial unreachable mutation failed
+compilation and received no credit; its compilable replacement was caught. Main
+integration passed 16 distinct checks (`projection1132-integration.trx` and
+`projection1135-callback.trx`). All 10,397
+mutation anchors validate. Enrollment is 6,934/7,131, leaving 197 configurations
+across 22 types (`si-projection1133-inventory.json`). No new period cap is imposed;
+projection work per observation still grows with observed window history.
+PR #246 remains draft and final assurance is incomplete.

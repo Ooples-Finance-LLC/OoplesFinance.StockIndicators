@@ -355,15 +355,7 @@ internal static partial class BuiltInFormulaReferences
                 return new(projectionKey, name == IndicatorName.ProjectionBands ? new[] { "UpperBand", "MiddleBand", "LowerBand" }
                     : new[] { projectionKey, "Signal" }, bars =>
                 {
-                    var (upper, lower) = ReferenceProjectionEnvelope(bars, length);
-                    if (name == IndicatorName.ProjectionBands)
-                        return Outputs(("UpperBand", upper), ("LowerBand", lower),
-                            ("MiddleBand", upper.Zip(lower, (u, l) => (u + l) / 2).ToArray()));
-                    var line = bars.Select((b, i) => name == IndicatorName.ProjectionOscillator
-                        ? upper[i] == lower[i] ? 0 : 100 * (b.Close - lower[i]) / (upper[i] - lower[i]) // NOSONAR: S1244 - Equal bounds define an exactly zero range; nearby distinct bounds must still be evaluated.
-                        : upper[i] + lower[i] == 0 ? 0 : 200 * (upper[i] - lower[i]) / (upper[i] + lower[i])).ToArray();
-                    return Outputs((projectionKey, line), ("Signal", Average(line,
-                        name == IndicatorName.ProjectionOscillator ? Integer(options, "SmoothLength", 4) : length, kind)));
+                    return ProjectionOutputs(bars, indicator);
                 });
             case IndicatorName.MovingAverageBands:
             case IndicatorName.MovingAverageBandWidth:
@@ -799,30 +791,6 @@ internal static partial class BuiltInFormulaReferences
                 });
             default: return null;
         }
-    }
-    private static (double[] Upper, double[] Lower) ReferenceProjectionEnvelope(IReadOnlyList<Bar> bars, int period)
-    {
-        var highs = bars.Select(b => b.High).ToArray();
-        var lows = bars.Select(b => b.Low).ToArray();
-        double[] Slopes(double[] values) => values.Select((_, i) =>
-        {
-            var window = Window(values, i, period).ToArray();
-            var center = (window.Length - 1d) / 2;
-            var mean = window.Average();
-            var spread = window.Length * (window.Length * (double)window.Length - 1) / 12;
-            return spread == 0 ? 0 : window.Select((v, j) => (v - mean) * (j - center)).Sum() / spread;
-        }).ToArray();
-        var highSlopes = Slopes(highs);
-        var lowSlopes = Slopes(lows);
-        // Published convention extrapolates each lagged bar using the preceding fitted slope;
-        // unavailable bars and slopes are zero. The current candle remains inside the envelope.
-        double[] Envelope(double[] values, double[] slopes, bool upper) => values.Select((v, i) =>
-        {
-            var projected = Enumerable.Range(1, period).Select(lag => (i < lag - 1 ? 0 : values[i - lag + 1])
-                + lag * (i < lag ? 0 : slopes[i - lag])).Append(v);
-            return upper ? projected.Max() : projected.Min();
-        }).ToArray();
-        return (Envelope(highs, highSlopes, true), Envelope(lows, lowSlopes, false));
     }
 
 }

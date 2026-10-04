@@ -603,147 +603,34 @@ public sealed class ProjectedSupportAndResistanceState : IStreamingIndicatorStat
 [PrimaryOutput("MiddleBand")]
 public sealed class ProjectionBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly ProjectionBandsCalculator _calculator;
-    private readonly StreamingInputResolver _input;
-
-    public ProjectionBandsState(int length = 14)
-    {
-        _calculator = new ProjectionBandsCalculator(length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ProjectionFamilyKernel _kernel;
+    public ProjectionBandsState(int length = 14) => _kernel = new(IndicatorName.ProjectionBands,length,MovingAvgType.WeightedMovingAverage,4);
     public IndicatorName Name => IndicatorName.ProjectionBands;
-
-    public void Reset()
-    {
-        _calculator.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        _ = _input.GetValue(bar);
-        var bands = _calculator.Update(bar.High, bar.Low, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", bands.Upper },
-                { "MiddleBand", bands.Middle },
-                { "LowerBand", bands.Lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bands.Middle, outputs);
-    }
-
-    public void Dispose()
-    {
-        _calculator.Dispose();
-    }
+    public void Reset() => _kernel.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs) => _kernel.Update(bar,isFinal,includeOutputs);
+    public void Dispose() => _kernel.Dispose();
 }
 
 [PrimaryOutput("Pbo")]
 public sealed class ProjectionOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly ProjectionBandsCalculator _bands;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public ProjectionOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14,
-        int smoothLength = 4)
-    {
-        _bands = new ProjectionBandsCalculator(length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ProjectionFamilyKernel _kernel;
+    public ProjectionOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14, int smoothLength = 4) => _kernel = new(IndicatorName.ProjectionOscillator,length,maType,smoothLength);
     public IndicatorName Name => IndicatorName.ProjectionOscillator;
-
-    public void Reset()
-    {
-        _bands.Reset();
-        _signalSmoother.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var bands = _bands.Update(bar.High, bar.Low, isFinal);
-        var range = bands.Upper - bands.Lower;
-        var pbo = range != 0 ? 100 * (value - bands.Lower) / range : 0;
-        var signal = _signalSmoother.Next(pbo, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Pbo", pbo },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pbo, outputs);
-    }
-
-    public void Dispose()
-    {
-        _bands.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Reset() => _kernel.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs) => _kernel.Update(bar,isFinal,includeOutputs);
+    public void Dispose() => _kernel.Dispose();
 }
 
 [PrimaryOutput("Pbw")]
 public sealed class ProjectionBandwidthState : IStreamingIndicatorState, IDisposable
 {
-    private readonly ProjectionBandsCalculator _bands;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public ProjectionBandwidthState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14)
-    {
-        var resolvedLength = Math.Max(1, length);
-        _bands = new ProjectionBandsCalculator(resolvedLength);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ProjectionFamilyKernel _kernel;
+    public ProjectionBandwidthState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14) => _kernel = new(IndicatorName.ProjectionBandwidth,length,maType,length);
     public IndicatorName Name => IndicatorName.ProjectionBandwidth;
-
-    public void Reset()
-    {
-        _bands.Reset();
-        _signalSmoother.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        _ = _input.GetValue(bar);
-        var bands = _bands.Update(bar.High, bar.Low, isFinal);
-        var sum = bands.Upper + bands.Lower;
-        var pbw = sum != 0 ? 200 * (bands.Upper - bands.Lower) / sum : 0;
-        var signal = _signalSmoother.Next(pbw, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Pbw", pbw },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pbw, outputs);
-    }
-
-    public void Dispose()
-    {
-        _bands.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Reset() => _kernel.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs) => _kernel.Update(bar,isFinal,includeOutputs);
+    public void Dispose() => _kernel.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]
@@ -6696,148 +6583,6 @@ internal readonly struct RollingWindowSnapshot
     public double Sum { get; }
     public double SumSquares { get; }
     public int Count { get; }
-}
-
-internal readonly struct ProjectionBandsSnapshot
-{
-    public ProjectionBandsSnapshot(double upper, double middle, double lower)
-    {
-        Upper = upper;
-        Middle = middle;
-        Lower = lower;
-    }
-
-    public double Upper { get; }
-    public double Middle { get; }
-    public double Lower { get; }
-}
-
-internal sealed class ProjectionBandsCalculator : IDisposable
-{
-    private readonly int _length;
-    // The slopes batch CalculateProjectionBands takes from CalculateLinearRegression: the same class, fed the
-    // same highs and lows.
-    private readonly ExactLinearFitWindow _highFit;
-    private readonly ExactLinearFitWindow _lowFit;
-    private readonly PooledRingBuffer<double> _highs;
-    private readonly PooledRingBuffer<double> _lows;
-    private readonly PooledRingBuffer<double> _highSlopes;
-    private readonly PooledRingBuffer<double> _lowSlopes;
-    private int _index;
-
-    public ProjectionBandsCalculator(int length)
-    {
-        _length = Math.Max(1, length);
-        _highFit = new ExactLinearFitWindow(_length);
-        _lowFit = new ExactLinearFitWindow(_length);
-        _highs = new PooledRingBuffer<double>(_length);
-        _lows = new PooledRingBuffer<double>(_length);
-        _highSlopes = new PooledRingBuffer<double>(_length);
-        _lowSlopes = new PooledRingBuffer<double>(_length);
-    }
-
-    public ProjectionBandsSnapshot Update(double high, double low, bool isFinal)
-    {
-        var currentIndex = _index;
-        var pu = high;
-        var pl = low;
-
-        var highCount = _highs.Count;
-        var lowCount = _lows.Count;
-        var slopeCount = _highSlopes.Count;
-        var highStartIndex = currentIndex - highCount;
-        var lowStartIndex = currentIndex - lowCount;
-        var slopeStartIndex = currentIndex - slopeCount;
-
-        for (var j = 1; j <= _length; j++)
-        {
-            var slopeIndex = currentIndex - j;
-            var highIndex = currentIndex - (j - 1);
-
-            double highSlope = 0;
-            double lowSlope = 0;
-            if (slopeIndex >= slopeStartIndex && slopeIndex >= 0)
-            {
-                var slopeOffset = slopeIndex - slopeStartIndex;
-                if (slopeOffset >= 0 && slopeOffset < slopeCount)
-                {
-                    highSlope = _highSlopes[slopeOffset];
-                    lowSlope = _lowSlopes[slopeOffset];
-                }
-            }
-
-            double pHigh;
-            if (highIndex == currentIndex)
-            {
-                pHigh = high;
-            }
-            else
-            {
-                var highOffset = highIndex - highStartIndex;
-                pHigh = highOffset >= 0 && highOffset < highCount ? _highs[highOffset] : 0;
-            }
-
-            double pLow;
-            if (highIndex == currentIndex)
-            {
-                pLow = low;
-            }
-            else
-            {
-                var lowOffset = highIndex - lowStartIndex;
-                pLow = lowOffset >= 0 && lowOffset < lowCount ? _lows[lowOffset] : 0;
-            }
-
-            var vHigh = pHigh + (highSlope * j);
-            var vLow = pLow + (lowSlope * j);
-            if (vHigh > pu)
-            {
-                pu = vHigh;
-            }
-
-            if (vLow < pl)
-            {
-                pl = vLow;
-            }
-        }
-
-        var middle = (pu + pl) / 2;
-
-        if (isFinal)
-        {
-            var highSlope = _highFit.Next(high, isFinal: true).Slope;
-            var lowSlope = _lowFit.Next(low, isFinal: true).Slope;
-
-            _highSlopes.TryAdd(highSlope, out _);
-            _lowSlopes.TryAdd(lowSlope, out _);
-            _highs.TryAdd(high, out _);
-            _lows.TryAdd(low, out _);
-            _index++;
-        }
-
-        return new ProjectionBandsSnapshot(pu, middle, pl);
-    }
-
-    public void Reset()
-    {
-        _highFit.Reset();
-        _lowFit.Reset();
-        _highs.Clear();
-        _lows.Clear();
-        _highSlopes.Clear();
-        _lowSlopes.Clear();
-        _index = 0;
-    }
-
-    public void Dispose()
-    {
-        _highFit.Dispose();
-        _lowFit.Dispose();
-        _highs.Dispose();
-        _lows.Dispose();
-        _highSlopes.Dispose();
-        _lowSlopes.Dispose();
-    }
 }
 
 internal sealed class RollingWindowSum : IDisposable

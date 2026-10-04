@@ -3992,30 +3992,17 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ProjectionOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must cover every close.");
+        // Capture inputs before output writes so overlapping spans retain their input contract.
+        var highs=high.Slice(0,close.Length).ToArray(); var lows=low.Slice(0,close.Length).ToArray(); var prices=close.ToArray();
+        for (var i=0;i<prices.Length;i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+            Streaming.StreamingInputValidation.Finite(highs[i],nameof(high)); Streaming.StreamingInputValidation.Finite(lows[i],nameof(low));
+            Streaming.StreamingInputValidation.Finite(prices[i],nameof(close));
         }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 50;
-                continue;
-            }
-
-            var hh = high[i];
-            var ll = low[i];
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                if (high[j] > hh) hh = high[j];
-                if (low[j] < ll) ll = low[j];
-            }
-
-            var range = hh - ll;
-            output[i] = range != 0 ? ((close[i] - ll) / range) * 100 : 50;
-        }
+        using var bands=new Streaming.ProjectionBandsCalculator(length);
+        for (var i=0;i<prices.Length;i++) output[i]=Streaming.ProjectionBandsSnapshot.Publish(bands.Update(highs[i],lows[i],true).Oscillator(prices[i]));
     }
 
     /// <summary>

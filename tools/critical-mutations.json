@@ -90075,5 +90075,201 @@
     "before": "return -sign*comparison;",
     "after": "return sign*comparison;",
     "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "projection-exact-middle",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "MiddleUnits = Round(upper + lower, 2)",
+    "after": "MiddleUnits = Round(upper + lower, 1)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.HiddenBandOverflowRetainsFiniteRatiosAndMiddle"
+  },
+  {
+    "id": "projection-exact-bandwidth",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "Round((200 * (UpperUnits - LowerUnits)) << 1074, UpperUnits + LowerUnits)",
+    "after": "Round((100 * (UpperUnits - LowerUnits)) << 1074, UpperUnits + LowerUnits)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.HiddenBandOverflowRetainsFiniteRatiosAndMiddle"
+  },
+  {
+    "id": "projection-exact-oscillator",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "ExactVarianceWindow.Units(value) - LowerUnits",
+    "after": "ExactVarianceWindow.Units(value) + LowerUnits",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.RoutesMatchIndependentCenteredFits"
+  },
+  {
+    "id": "projection-exact-fit-expiry",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "sum + value - expired",
+    "after": "sum + value + expired",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-weighted-aging",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "weighted - sum + expired",
+    "after": "weighted + sum + expired",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-fit-normalization",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "6 * (2 * nextWeighted",
+    "after": "3 * (2 * nextWeighted",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-price-lag",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "history.Length - (int)lag + 1",
+    "after": "history.Length - (int)lag",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-slope-lag",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "history[slopeIndex].HighSlope",
+    "after": "history[Math.Min(history.Length - 1, slopeIndex + 1)].HighSlope",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-lag-multiplier",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "highSlope * lag",
+    "after": "highSlope * (lag + 1)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-missing-zero",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "if (_length > history.Length + 1L)",
+    "after": "if (_length < 0)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-preview",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "        if (final)",
+    "after": "        if (true)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-reset-moments",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionBandsCalculator.cs",
+    "before": "_highSum = _lowSum = _highWeighted = _lowWeighted = default",
+    "after": "_highSum = _lowSum = default",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-lazy-expiry",
+    "module": "projection-numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "_observedHistory.Peek()).AddTo(ref sum, -1)",
+    "after": "_observedHistory.Peek()).AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.LazyAverageMatchesExistingRingAndIndependentProjectionSignal"
+  },
+  {
+    "id": "projection-exact-lazy-commit",
+    "module": "projection-numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "_observedHistory.Enqueue(value)",
+    "after": "_observedHistory.Enqueue(default)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.LazyAverageMatchesExistingRingAndIndependentProjectionSignal"
+  },
+  {
+    "id": "projection-exact-average-weight",
+    "module": "projection-numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, _length + 1L)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.LazyAverageMatchesExistingRingAndIndependentProjectionSignal"
+  },
+  {
+    "id": "projection-exact-callback-isolation",
+    "module": "projection-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var isolated = data.WithValues(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);",
+    "after": "var isolated = data;",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.FastCallbackUsesIsolatedSelectedInput",
+    "scope": "internal static ComputeBuffer ComputeProjectionFamilyFast("
+  },
+  {
+    "id": "projection-exact-fast-period",
+    "module": "projection-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ProjectionFamilyKernel.Calculate(data,family,length,kind,smooth)",
+    "after": "ProjectionFamilyKernel.Calculate(data,family,length + 1,kind,smooth)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.RoutesMatchIndependentCenteredFits",
+    "scope": "internal static ComputeBuffer ComputeProjectionFamilyFast("
+  },
+  {
+    "id": "projection-exact-core-period",
+    "module": "projection-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new Streaming.ProjectionBandsCalculator(length)",
+    "after": "new Streaming.ProjectionBandsCalculator(length + 1)",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.CorePreservesAliasedInputsAndRejectsInvalidBeforeWrites",
+    "scope": "internal static void ProjectionOscillator("
+  },
+  {
+    "id": "projection-exact-core-guard",
+    "module": "projection-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "Streaming.StreamingInputValidation.Finite(highs[i],nameof(high));",
+    "after": "if(double.IsNaN(highs[i])) output[0] = 0; Streaming.StreamingInputValidation.Finite(highs[i],nameof(high));",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.CorePreservesAliasedInputsAndRejectsInvalidBeforeWrites",
+    "scope": "internal static void ProjectionOscillator("
+  },
+  {
+    "id": "projection-exact-reference-fit",
+    "module": "projection-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Projection.cs",
+    "before": "covariance / variance",
+    "after": "covariance / (variance + new ReferenceFraction(1))",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.ObservedHistoryPreservesLagPairingPreviewResetAndHugePeriods"
+  },
+  {
+    "id": "projection-exact-signal-slope",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionFamilyKernel.cs",
+    "before": "slope = value - line",
+    "after": "slope = line - value",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.SignalsUseExactSlopeAndPreserveVolatilityGates"
+  },
+  {
+    "id": "projection-exact-signal-gate",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionFamilyKernel.cs",
+    "before": "mean >= _previousMean",
+    "after": "mean <= _previousMean",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.SignalsUseExactSlopeAndPreserveVolatilityGates"
+  },
+  {
+    "id": "projection-exact-signal-bandwidth-gate",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionFamilyKernel.cs",
+    "before": "line >= mean",
+    "after": "line <= mean",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.SignalsUseExactSlopeAndPreserveVolatilityGates"
+  },
+  {
+    "id": "projection-exact-signal-history",
+    "module": "projection-numerical",
+    "file": "src/Streaming/ProjectionFamilyKernel.cs",
+    "before": "_previousSlope = slope",
+    "after": "_previousSlope = BigInteger.Zero",
+    "filter": "FullyQualifiedName~ProjectionNumericalTests.SignalsUseExactSlopeAndPreserveVolatilityGates"
   }
 ]

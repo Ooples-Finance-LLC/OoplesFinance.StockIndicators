@@ -1388,3 +1388,16 @@ the corresponding Buy/Sell applies, and zero slope is neutral. The old threshold
 crossing clauses are redundant under exact score ordering. Published scores,
 full-width warmup, signed-volume semantics and zero-volume-mean behavior remain
 unchanged. Preview evaluates a signal without advancing committed score history.
+
+
+### Projection Bands, Oscillator and Bandwidth
+
+For lag j at bar i, project the price at i-j+1 with the partial-window OLS slope
+at i-j. Missing prices/slopes contribute zero; the current candle remains in the
+envelope. Retain binary64 stage precision with an extended upper exponent. Form
+the middle, oscillator and bandwidth before publishing overflowing bands; e.g.
+[-MaxValue, MaxValue, 0] at length 2 ends with upper 2*MaxValue, middle MaxValue,
+lower 0 and bandwidth 200. Signal comparisons retain exact stage ordering.
+The core oscillator uses the same projection formula and preserves overlapping
+input spans. Callback averages retain their periods and fast callbacks use an
+isolated StockData view. Huge periods allocate only observed history.

@@ -153,6 +153,8 @@ internal static partial class StatefulIndicatorFactory
             MomentaRelativeStrengthIndexSpecOptions mrsi => new MomentaRelativeStrengthIndexState(mrsi.MaType, mrsi.Length1, mrsi.Length2),
             EhlersSpectrumDerivedFilterBankSpecOptions bank => new EhlersSpectrumDerivedFilterBankState(bank.MinLength, bank.MaxLength, bank.Length1, bank.Length2),
             ProjectionBandsSpecOptions projection => new ProjectionBandsState(projection.Length),
+            ProjectionOscillatorSpecOptions projection => new ProjectionOscillatorState(projection.MaType, projection.Length),
+            ProjectionBandwidthSpecOptions projection => new ProjectionBandwidthState(projection.MaType, projection.Length),
             HampelFilterSpecOptions hampel => new HampelFilterState(hampel.Length, hampel.ScalingFactor),
             VolumePositiveNegativeIndicatorSpecOptions vpn => new VolumePositiveNegativeIndicatorState(vpn.MaType, vpn.Length, vpn.SmoothLength),
             MeanAbsoluteDeviationBandsSpecOptions error0 => new MeanAbsoluteDeviationBandsState(error0.StdDevFactor, error0.MaType, error0.Length),

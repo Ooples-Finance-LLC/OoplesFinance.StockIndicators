@@ -482,58 +482,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateProjectionBands(this StockData stockData, int length = 14)
     {
-        List<double> puList = new(stockData.Count);
-        List<double> plList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        stockData.SetCustomValues(lowList);
-        var lowSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
-        stockData.SetCustomValues(highList);
-        var highSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevPu = i >= 1 ? puList[i - 1] : 0;
-            var prevPl = i >= 1 ? plList[i - 1] : 0;
-
-            double pu = currentHigh, pl = currentLow;
-            for (var j = 1; j <= length; j++)
-            {
-                var highSlope = i >= j ? highSlopeList[i - j] : 0;
-                var lowSlope = i >= j ? lowSlopeList[i - j] : 0;
-                var pHigh = i >= j - 1 ? highList[i - (j - 1)] : 0;
-                var pLow = i >= j - 1 ? lowList[i - (j - 1)] : 0;
-                var vHigh = pHigh + (highSlope * j);
-                var vLow = pLow + (lowSlope * j);
-                pu = Math.Max(pu, vHigh);
-                pl = Math.Min(pl, vLow);
-            }
-            puList.Add(pu);
-            plList.Add(pl);
-
-            var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (pu + pl) / 2;
-            middleBandList.Add(middleBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, pu, prevPu, pl, prevPl);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", puList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", plList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.ProjectionBands;
-
+        var result = Streaming.ProjectionFamilyKernel.Calculate(stockData,IndicatorName.ProjectionBands,length,MovingAvgType.WeightedMovingAverage,4);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", result.Outputs["UpperBand"] }, { "MiddleBand", result.Outputs["MiddleBand"] }, { "LowerBand", result.Outputs["LowerBand"] } }); stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+        stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.ProjectionBands;
         return stockData;
     }
 

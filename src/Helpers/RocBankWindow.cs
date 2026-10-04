@@ -62,24 +62,28 @@ internal sealed class RocBankAverage : IDisposable
     private readonly MovingAvgType _kind;
     private readonly int _length;
     private readonly PooledRingBuffer<RocBankValue>? _window;
+    private readonly Queue<RocBankValue>? _observedHistory;
     private ExactMeanAccumulator _sum, _weighted;
     private RocBankValue _previous;
     private long _count;
-    internal RocBankAverage(MovingAvgType kind, int length, int capacityHint)
+    internal RocBankAverage(MovingAvgType kind, int length, int capacityHint, bool observedHistory = false)
     {
         if (!StrengthWindow.Supports(kind)) throw new ArgumentOutOfRangeException(nameof(kind));
         _kind = kind; _length = Math.Max(1, length);
         if (kind is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
-            _window = new(Math.Min(_length, Math.Max(1, capacityHint)));
+        {
+            if (observedHistory) _observedHistory = new();
+            else _window = new(Math.Min(_length, Math.Max(1, capacityHint)));
+        }
     }
     internal RocBankValue Next(RocBankValue value, bool final)
     {
         var sum = _sum; var weighted = _weighted;
         RocBankValue result;
-        if (_window is not null)
+        if (_window is not null || _observedHistory is not null)
         {
             weighted.Subtract(sum); value.AddTo(ref weighted, _length);
-            if (_count >= _length) _window[0].AddTo(ref sum, -1);
+            if (_count >= _length) (_observedHistory is null ? _window![0] : _observedHistory.Peek()).AddTo(ref sum, -1);
             value.AddTo(ref sum);
             result = _kind == MovingAvgType.WeightedMovingAverage
                 ? RocBankValue.Round(weighted, count: (long)_length * (_length + 1L) / 2)
@@ -96,11 +100,20 @@ internal sealed class RocBankAverage : IDisposable
             _previous.AddTo(ref next, _length - 1L); value.AddTo(ref next, ema ? 2 : 1);
             result = RocBankValue.Round(next, count: ema ? _length + 1L : _length);
         }
-        if (final) { _sum = sum; _weighted = weighted; _previous = result; _window?.TryAdd(value, out _); _count++; }
+        if (final)
+        {
+            _sum = sum; _weighted = weighted; _previous = result; _window?.TryAdd(value, out _);
+            if (_observedHistory is not null)
+            {
+                if (_observedHistory.Count == _length) _observedHistory.Dequeue();
+                _observedHistory.Enqueue(value);
+            }
+            _count++;
+        }
         return result;
     }
-    internal void Reset() { _sum = _weighted = default; _previous = default; _count = 0; _window?.Clear(); }
-    public void Dispose() => _window?.Dispose();
+    internal void Reset() { _sum = _weighted = default; _previous = default; _count = 0; _window?.Clear(); _observedHistory?.Clear(); }
+    public void Dispose() { _window?.Dispose(); _observedHistory?.Clear(); }
 }
 
 internal sealed class RocBankWindow : IDisposable

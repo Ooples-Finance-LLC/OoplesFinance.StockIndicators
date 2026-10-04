@@ -2031,6 +2031,16 @@ internal static partial class BuiltInFormulaReferences
             for (var slot = 0; slot < directionalKeys.Length; slot++) { var key = directionalKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DirectionalIndexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.ProjectionBands or IndicatorName.ProjectionOscillator or IndicatorName.ProjectionBandwidth)
+        {
+            var projectionKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < projectionKeys.Length; slot++)
+            {
+                var key = projectionKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ProjectionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

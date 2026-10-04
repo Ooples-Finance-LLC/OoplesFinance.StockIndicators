@@ -511,6 +511,12 @@ public static partial class Calculations
     public static StockData CalculateProjectionOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 14, int smoothLength = 4)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result = Streaming.ProjectionFamilyKernel.Calculate(stockData,IndicatorName.ProjectionOscillator,length,maType,smoothLength);
+            stockData.SetOutputValues(() => result.Outputs); stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+            stockData.SetCustomValues(result.Outputs["Pbo"]); stockData.IndicatorName = IndicatorName.ProjectionOscillator; return stockData;
+        }
         List<double> pboList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -518,7 +524,7 @@ public static partial class Calculations
         var projectionBandsList = CalculateProjectionBands(stockData, length);
         var puList = projectionBandsList.ChainedOutputs["UpperBand"];
         var plList = projectionBandsList.ChainedOutputs["LowerBand"];
-        var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var wmaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -530,7 +536,7 @@ public static partial class Calculations
             pboList.Add(pbo);
         }
 
-        var pboSignalList = GetMovingAverageList(stockData, maType, smoothLength, pboList);
+        var pboSignalList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(pboList), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, pboList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var pbo = pboSignalList[i];
@@ -567,6 +573,12 @@ public static partial class Calculations
     public static StockData CalculateProjectionBandwidth(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 14)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result = Streaming.ProjectionFamilyKernel.Calculate(stockData,IndicatorName.ProjectionBandwidth,length,maType,length);
+            stockData.SetOutputValues(() => result.Outputs); stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+            stockData.SetCustomValues(result.Outputs["Pbw"]); stockData.IndicatorName = IndicatorName.ProjectionBandwidth; return stockData;
+        }
         List<double> pbwList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -574,7 +586,7 @@ public static partial class Calculations
         var projectionBandsList = CalculateProjectionBands(stockData, length);
         var puList = projectionBandsList.ChainedOutputs["UpperBand"];
         var plList = projectionBandsList.ChainedOutputs["LowerBand"];
-        var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var wmaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -585,7 +597,7 @@ public static partial class Calculations
             pbwList.Add(pbw);
         }
 
-        var pbwSignalList = GetMovingAverageList(stockData, maType, length, pbwList);
+        var pbwSignalList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(pbwList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, pbwList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var pbw = pbwList[i];

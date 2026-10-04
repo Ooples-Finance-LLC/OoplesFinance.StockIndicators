@@ -901,9 +901,8 @@ internal static partial class IndicatorCompute
             },
 
             // Batch 6 - Projection/Regression oscillators
-            ProjectionOscillatorSpecOptions projo => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeProjectionOscillatorFast(data, context, projo.Length), 4, projo.MaType)
-                : ComputeProjectionOscillatorFast(data, context, projo.Length),
+            ProjectionBandsSpecOptions projectionBands => ComputeProjectionFamilyFast(data,context,IndicatorName.ProjectionBands,projectionBands.Length,MovingAvgType.WeightedMovingAverage,4,spec.OutputKey),
+            ProjectionOscillatorSpecOptions projo => ComputeProjectionFamilyFast(data,context,IndicatorName.ProjectionOscillator,projo.Length,projo.MaType,4,spec.OutputKey),
             RainbowOscillatorSpecOptions rbo => ComputeRainbowOscillatorFast(data, context, rbo.Length, maType: rbo.MaType, outputKey: spec.OutputKey),
             RegressionOscillatorSpecOptions regro => ComputeRegressionOscillatorFast(data, context, regro.Length),
             NormalizedRelativeVigorIndexSpecOptions nv => ComputeNormalizedVigorFast(data, context, nv.Length, nv.MaType, spec.OutputKey),
@@ -2164,9 +2163,7 @@ internal static partial class IndicatorCompute
                     MacdSeries.Signal),
                 _ => null
             },
-            ProjectionBandwidthSpecOptions pb => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeProjectionBandwidthFast(data, context, pb.Length), pb.Length, pb.MaType)
-                : ComputeProjectionBandwidthFast(data, context, pb.Length),
+            ProjectionBandwidthSpecOptions pb => ComputeProjectionFamilyFast(data,context,IndicatorName.ProjectionBandwidth,pb.Length,pb.MaType,pb.Length,spec.OutputKey),
             QuasiWhiteNoiseSpecOptions qwn => ComputeQuasiWhiteNoiseFast(data, context, qwn.Length, qwn.NoiseLength, qwn.Divisor,
                 qwn.MaType, spec.OutputKey switch
                 {
@@ -8129,29 +8126,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Projection Oscillator using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeProjectionFamilyFast(StockData data, ComputeContext context, IndicatorName family,
+        int length, MovingAvgType kind, int smooth, string? key)
+    {
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind))
+        {
+            var isolated = data.WithValues(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
+            if (family == IndicatorName.ProjectionOscillator) isolated.CalculateProjectionOscillator(kind,length,smooth);
+            else if (family == IndicatorName.ProjectionBandwidth) isolated.CalculateProjectionBandwidth(kind,length);
+            else isolated.CalculateProjectionBands(length);
+            var legacyKey = key ?? (family == IndicatorName.ProjectionBands ? "MiddleBand" : family == IndicatorName.ProjectionOscillator ? "Pbo" : "Pbw");
+            var legacy = isolated.ChainedOutputs[legacyKey]; var buffer = context.Rent(legacy.Count);
+            for (var i=0;i<legacy.Count;i++) buffer.WritableSpan[i] = legacy[i];
+            return buffer;
+        }
+        var result = ProjectionFamilyKernel.Calculate(data,family,length,kind,smooth);
+        var outputKey = key ?? (family == IndicatorName.ProjectionBands ? "MiddleBand" : family == IndicatorName.ProjectionOscillator ? "Pbo" : "Pbw");
+        var values = result.Outputs[outputKey]; var output = context.Rent(values.Count);
+        for (var i=0;i<values.Count;i++) output.WritableSpan[i] = values[i];
+        return output;
+    }
+
     internal static ComputeBuffer ComputeProjectionOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateProjectionOscillator places the chained series within the projection bands as a percentage
-        // of their width. Its moving average only feeds the separate Signal series, so this arm takes none.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var upperBand = context.Rent(count);
-        using var lowerBand = context.Rent(count);
-        ProjectionBands(data, context, length, upperBand.WritableSpan, lowerBand.WritableSpan);
-        var pu = upperBand.Span;
-        var pl = lowerBand.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var width = pu[i] - pl[i];
-            output[i] = width != 0 ? 100 * (input[i] - pl[i]) / width : 0;
-        }
-
-        return buffer;
+        return ComputeProjectionFamilyFast(data,context,IndicatorName.ProjectionOscillator,length,MovingAvgType.WeightedMovingAverage,4,null);
     }
 
     /// <summary>
@@ -18739,24 +18737,7 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateProjectionBandwidth measures the projection bands as a percentage of their midpoint. Its
-        // moving average only feeds the separate Signal series.
-        var count = data.Count;
-
-        using var upperBand = context.Rent(count);
-        using var lowerBand = context.Rent(count);
-        ProjectionBands(data, context, length, upperBand.WritableSpan, lowerBand.WritableSpan);
-        var pu = upperBand.Span;
-        var pl = lowerBand.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = pu[i] + pl[i] != 0 ? 200 * (pu[i] - pl[i]) / (pu[i] + pl[i]) : 0;
-        }
-
-        return buffer;
+        return ComputeProjectionFamilyFast(data,context,IndicatorName.ProjectionBandwidth,length,MovingAvgType.WeightedMovingAverage,4,null);
     }
 
     /// <summary>
@@ -18765,50 +18746,7 @@ internal static partial class IndicatorCompute
     /// The batch keeps the terms whose lookback has not filled at zero rather than skipping them, which is
     /// what makes the opening bars of anything built on these bands read as a full-width range.
     /// </summary>
-    private static void ProjectionBands(StockData data, ComputeContext context, int length, Span<double> upper, Span<double> lower)
-    {
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-        length = Math.Max(length, 1);
 
-        using var highSlopes = context.Rent(count);
-        var highSlope = highSlopes.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(length))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                highSlope[i] = regression.Next(highs[i], isFinal: true).Slope;
-            }
-        }
-
-        using var lowSlopes = context.Rent(count);
-        var lowSlope = lowSlopes.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(length))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                lowSlope[i] = regression.Next(lows[i], isFinal: true).Slope;
-            }
-        }
-
-        for (var i = 0; i < count; i++)
-        {
-            double pu = highs[i], pl = lows[i];
-            for (var j = 1; j <= length; j++)
-            {
-                var hSlope = i >= j ? highSlope[i - j] : 0;
-                var lSlope = i >= j ? lowSlope[i - j] : 0;
-                var pHigh = i >= j - 1 ? highs[i - (j - 1)] : 0;
-                var pLow = i >= j - 1 ? lows[i - (j - 1)] : 0;
-                pu = Math.Max(pu, pHigh + (hSlope * j));
-                pl = Math.Min(pl, pLow + (lSlope * j));
-            }
-
-            upper[i] = pu;
-            lower[i] = pl;
-        }
-    }
 
     /// <summary>
     /// Selects which of the four series the quasi white noise routine publishes.
