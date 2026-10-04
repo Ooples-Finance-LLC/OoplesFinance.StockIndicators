@@ -13,9 +13,15 @@ public sealed class PercentageTrailingStopsSpecOptions : IIndicatorSpecOptions
 public sealed class KaufmanAdaptiveBandsSpecOptions : IIndicatorSpecOptions
 {
     public KaufmanAdaptiveBandsSpecOptions(int length = 100, double stdDevFactor = 3)
-    { Length = Math.Max(1, length); StdDevFactor = stdDevFactor; }
+    { Length = Math.Max(1, length); StdDevFactor = ValidateExponent(stdDevFactor); }
     public int Length { get; }
     public double StdDevFactor { get; }
+    internal static double ValidateExponent(double stdDevFactor)
+    {
+        if (double.IsNaN(stdDevFactor) || double.IsInfinity(stdDevFactor) || stdDevFactor < 0)
+            throw new ArgumentOutOfRangeException(nameof(stdDevFactor), "Exponent must be finite and nonnegative.");
+        return stdDevFactor;
+    }
 }
 
 /// <summary>Efficiency lookback and fast/slow dispersion windows for step channels.</summary>

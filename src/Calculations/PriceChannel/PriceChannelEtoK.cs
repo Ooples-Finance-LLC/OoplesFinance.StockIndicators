@@ -467,6 +467,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKaufmanAdaptiveBands(this StockData stockData, int length = 100, double stdDevFactor = 3)
     {
+        Builder.Specs.KaufmanAdaptiveBandsSpecOptions.ValidateExponent(stdDevFactor);
         List<double> upperBandList = new(stockData.Count);
         List<double> lowerBandList = new(stockData.Count);
         List<double> powMaList = new(stockData.Count);

@@ -757,8 +757,8 @@ public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDispo
 
     public KaufmanAdaptiveBandsState(int length = 100, double stdDevFactor = 3)
     {
+        _stdDevFactor = Builder.Specs.KaufmanAdaptiveBandsSpecOptions.ValidateExponent(stdDevFactor);
         _er = new EfficiencyRatioState(Math.Max(1, length));
-        _stdDevFactor = stdDevFactor;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
