@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
@@ -10,21 +9,7 @@ internal static partial class BuiltInFormulaReferences
     {
         length = Math.Max(1, length);
         ReferenceFraction R(double v) => ReferenceFraction.FromDouble(v);
-        ReferenceFraction Compact(ReferenceFraction value)
-        {
-            if (value.Sign == 0) return R(0);
-            // Bound only recursive memory, using four independent binary64
-            // residuals (about 212 bits), beyond production's 106-bit state.
-            // Normalize first to preserve both exponent extremes. Finite-window
-            // ratios, products, means and the current result remain rational.
-            var factor = new ReferenceFraction(BigInteger.One << 512); var scale = R(1);
-            var magnitude = Math.Abs(value.ToDouble());
-            while (double.IsInfinity(magnitude) || magnitude >= Math.Pow(2, 512)) { value /= factor; scale *= factor; magnitude = Math.Abs(value.ToDouble()); }
-            while (magnitude < Math.Pow(2, -256)) { value *= factor; scale /= factor; magnitude = Math.Abs(value.ToDouble()); }
-            var total = R(0);
-            for (var part = 0; part < 4; part++) { var component = R(value.ToDouble()); total += component; value -= component; }
-            return total * scale;
-        }
+        ReferenceFraction Compact(ReferenceFraction value) => CompactReferenceFraction(value);
         var prices = bars.Select(b => R(b.Close)).ToArray(); var gains = new ReferenceFraction[bars.Count]; var losses = new ReferenceFraction[bars.Count];
         var up = new ReferenceFraction[bars.Count]; var down = new ReferenceFraction[bars.Count]; var line = new ReferenceFraction[bars.Count];
         ReferenceFraction Sum(ReferenceFraction[] values, int i)

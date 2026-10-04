@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
@@ -13,16 +12,7 @@ internal static partial class BuiltInFormulaReferences
     {
         length = Math.Max(1, length); ReferenceFraction R(double v) => ReferenceFraction.FromDouble(v);
         var zero = R(0); var previousAnchor = zero; var previousResidual = zero; var changes = new ReferenceFraction[prices.Length];
-        ReferenceFraction Compact(ReferenceFraction value)
-        {
-            if (value.Sign == 0) return zero;
-            var factor = new ReferenceFraction(BigInteger.One << 512); var scale = R(1); var magnitude = Math.Abs(value.ToDouble());
-            while (double.IsInfinity(magnitude) || magnitude >= Math.Pow(2, 512)) { value /= factor; scale *= factor; magnitude = Math.Abs(value.ToDouble()); }
-            while (magnitude < Math.Pow(2, -256)) { value *= factor; scale /= factor; magnitude = Math.Abs(value.ToDouble()); }
-            var result = zero;
-            for (var part = 0; part < 4; part++) { var component = R(value.ToDouble()); result += component; value -= component; }
-            return result * scale;
-        }
+        ReferenceFraction Compact(ReferenceFraction value) => CompactReferenceFraction(value);
         ReferenceFraction Abs(ReferenceFraction v) => v.Sign < 0 ? zero - v : v;
         for (var i = 0; i < prices.Length; i++)
         {

@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
@@ -6,28 +5,14 @@ internal static partial class BuiltInFormulaReferences
     internal static double[] DeviationScaledValues(IReadOnlyList<Bar> bars, int fast, int slow, bool fisher = false)
     {
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
-        var chunk = new ReferenceFraction(BigInteger.One << 512); var upper = new ReferenceFraction(BigInteger.One << 256); var lower = new ReferenceFraction(1) / upper;
-        ReferenceFraction Round(ReferenceFraction value)
-        {
-            if (value.Sign == 0) return value; var scale = new ReferenceFraction(1);
-            while (value.Abs().CompareTo(lower) < 0) { value *= chunk; scale /= chunk; }
-            while (value.Abs().CompareTo(upper) >= 0) { value /= chunk; scale *= chunk; }
-            return R(value.ToDouble()) * scale;
-        }
+        ReferenceFraction Round(ReferenceFraction value) => DeviationReferenceRound(value);
         fast = Math.Max(2, fast); slow = Math.Max(1, slow);
         var angle = Math.Sqrt(2) * Math.PI / fast; var radius = R(Math.Exp(-angle)); var cosine = R(Math.Cos(angle));
         var one = new ReferenceFraction(1); var two = new ReferenceFraction(2); var zero = new ReferenceFraction(0);
         var c2 = two * radius * cosine; var c3 = zero - radius * radius; var c1 = one - c2 - c3;
         var changes = new ReferenceFraction[bars.Count]; var drive = new ReferenceFraction[bars.Count]; var filtered = new ReferenceFraction[bars.Count]; var average = new ReferenceFraction[bars.Count]; var result = new double[bars.Count]; var ratio = zero; var held = 0d;
         ReferenceFraction Prior(ReferenceFraction[] values, int index) => index < 0 ? zero : values[index];
-        ReferenceFraction Root(ReferenceFraction variance)
-        {
-            if (variance.Sign == 0) return zero; var scale = one;
-            var squareChunk = chunk * chunk; var highSquare = upper * upper; var lowSquare = lower * lower;
-            while (variance.CompareTo(lowSquare) < 0) { variance *= squareChunk; scale /= chunk; }
-            while (variance.CompareTo(highSquare) >= 0) { variance /= squareChunk; scale *= chunk; }
-            return R(variance.SqrtToDouble()) * scale;
-        }
+        ReferenceFraction Root(ReferenceFraction variance) => DeviationReferenceRoot(variance);
         for (var i = 0; i < bars.Count; i++)
         {
             changes[i] = i < 2 ? zero : Round(R(bars[i].Close) - R(bars[i - 2].Close));

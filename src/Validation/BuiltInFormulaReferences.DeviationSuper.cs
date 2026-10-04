@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
@@ -6,24 +5,10 @@ internal static partial class BuiltInFormulaReferences
     internal static double[] DeviationSuperValues(IReadOnlyList<Bar> bars, int length, int rmsLength, MovingAvgType kind)
     {
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
-        var chunk = new ReferenceFraction(BigInteger.One << 512); var upper = new ReferenceFraction(BigInteger.One << 256); var lower = new ReferenceFraction(1) / upper;
-        ReferenceFraction Round(ReferenceFraction value)
-        {
-            if (value.Sign == 0) return value; var scale = new ReferenceFraction(1);
-            while (value.Abs().CompareTo(lower) < 0) { value *= chunk; scale /= chunk; }
-            while (value.Abs().CompareTo(upper) >= 0) { value /= chunk; scale *= chunk; }
-            return R(value.ToDouble()) * scale;
-        }
+        ReferenceFraction Round(ReferenceFraction value) => DeviationReferenceRound(value);
         length = Math.Max(1, length); rmsLength = Math.Max(1, rmsLength);
         var one = new ReferenceFraction(1); var two = new ReferenceFraction(2); var zero = new ReferenceFraction(0);
-        ReferenceFraction Root(ReferenceFraction variance)
-        {
-            if (variance.Sign == 0) return zero; var scale = one;
-            var squareChunk = chunk * chunk; var highSquare = upper * upper; var lowSquare = lower * lower;
-            while (variance.CompareTo(lowSquare) < 0) { variance *= squareChunk; scale /= chunk; }
-            while (variance.CompareTo(highSquare) >= 0) { variance /= squareChunk; scale *= chunk; }
-            return R(variance.SqrtToDouble()) * scale;
-        }
+        ReferenceFraction Root(ReferenceFraction variance) => DeviationReferenceRoot(variance);
         var smoothing = (int)Math.Ceiling(length / 1.4m);
         var weights = Enumerable.Range(0, smoothing).Select(lag => R(kind == MovingAvgType.EhlersHannMovingAverage ? 1 - Math.Cos(2 * Math.PI * ((lag + 1d) / (smoothing + 1d))) : smoothing - lag)).ToArray();
         var mass = weights.Aggregate(zero, (sum, weight) => sum + weight);

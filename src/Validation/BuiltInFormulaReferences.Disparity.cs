@@ -7,16 +7,7 @@ internal static partial class BuiltInFormulaReferences
     {
         private static ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
         private static readonly ReferenceFraction zero = R(0), one = R(1), factor = new(BigInteger.One << 512);
-        internal static ReferenceFraction Compact(ReferenceFraction value)
-        {
-            if (value.Sign == 0) return zero;
-            var scale = one; var magnitude = Math.Abs(value.ToDouble());
-            while (double.IsInfinity(magnitude) || magnitude >= Math.Pow(2, 512)) { value /= factor; scale *= factor; magnitude = Math.Abs(value.ToDouble()); }
-            while (magnitude < Math.Pow(2, -256)) { value *= factor; scale /= factor; magnitude = Math.Abs(value.ToDouble()); }
-            var result = zero;
-            for (var part = 0; part < 4; part++) { var component = R(value.ToDouble()); result += component; value -= component; }
-            return result * scale;
-        }
+        internal static ReferenceFraction Compact(ReferenceFraction value) => CompactReferenceFraction(value);
         internal static ReferenceFraction Root(ReferenceFraction square)
         {
             var scale = one; var rootFactor = new ReferenceFraction(BigInteger.One << 256); var magnitude = square.ToDouble();

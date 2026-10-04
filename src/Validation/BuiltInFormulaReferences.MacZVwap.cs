@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
@@ -9,20 +8,7 @@ internal static partial class BuiltInFormulaReferences
     {
         fast = Math.Max(1, fast); slow = Math.Max(1, slow); signal = Math.Max(1, signal); volumeLength = Math.Max(1, volumeLength); deviationLength = Math.Max(1, deviationLength);
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
-        ReferenceFraction Compact(ReferenceFraction value)
-        {
-            if (value.Sign == 0) return R(0);
-            // Four independently rounded binary64 residual components retain at least
-            // 212 significant bits, above production's 106/160-bit states. Normalize
-            // first so neither exponent boundary truncates the reference trajectory.
-            var factor = new ReferenceFraction(BigInteger.One << 512); var scale = R(1);
-            var magnitude = Math.Abs(value.ToDouble());
-            while (double.IsInfinity(magnitude) || magnitude >= Math.Pow(2, 512)) { value /= factor; scale *= factor; magnitude = Math.Abs(value.ToDouble()); }
-            while (magnitude < Math.Pow(2, -256)) { value *= factor; scale /= factor; magnitude = Math.Abs(value.ToDouble()); }
-            var total = R(0);
-            for (var part = 0; part < 4; part++) { var component = R(value.ToDouble()); total += component; value -= component; }
-            return total * scale;
-        }
+        ReferenceFraction Compact(ReferenceFraction value) => CompactReferenceFraction(value);
         ReferenceFraction[] Mean(ReferenceFraction[] values, int period, int meanKind)
         {
             if (meanKind is 4 or 5) return Average(values.Select(v => v.ToDouble()).ToArray(), period, meanKind).Select(R).ToArray();
@@ -42,22 +28,7 @@ internal static partial class BuiltInFormulaReferences
             }
             return result;
         }
-        ReferenceFraction Root(ReferenceFraction square)
-        {
-            if (square.Sign == 0) return R(0);
-            // Normalize the validation fraction, then correct a binary64 root
-            // with its exact rational residual. Independent of the production
-            // integer-root and 106-bit rounding algorithm.
-            var factor = new ReferenceFraction(BigInteger.One << 512); var scale = R(1); var estimate = square.ToDouble();
-            while (double.IsInfinity(estimate) || estimate >= Math.Pow(2, 512)) { square /= factor * factor; scale *= factor; estimate = square.ToDouble(); }
-            while (estimate < Math.Pow(2, -512)) { square *= factor * factor; scale /= factor; estimate = square.ToDouble(); }
-            var high = Math.Sqrt(estimate);
-            var seed = R(high); var correction = (square - seed * seed) / (R(2) * seed);
-            var improved = seed + correction;
-            var refined = (improved + square / improved) / R(2);
-            var low = (refined - seed).ToDouble();
-            return (seed + R(low)) * scale;
-        }
+        ReferenceFraction Root(ReferenceFraction square) => RefinedReferenceRoot(square);
         var prices = bars.Select(b => R(b.Close)).ToArray(); var fastValues = Mean(prices, fast, kind); var slowValues = Mean(prices, slow, kind);
         var residuals = new ReferenceFraction[bars.Count]; var raw = new ReferenceFraction[bars.Count];
         for (var i = 0; i < bars.Count; i++)

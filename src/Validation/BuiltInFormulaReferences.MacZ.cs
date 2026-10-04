@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
@@ -34,22 +33,7 @@ internal static partial class BuiltInFormulaReferences
             }
             return result;
         }
-        ReferenceFraction Root(ReferenceFraction square)
-        {
-            if (square.Sign == 0) return R(0);
-            // Normalize the validation fraction, then correct a binary64 root
-            // with its exact rational residual. Independent of the production
-            // integer-root and 106-bit rounding algorithm.
-            var factor = new ReferenceFraction(BigInteger.One << 512); var scale = R(1); var estimate = square.ToDouble();
-            while (double.IsInfinity(estimate) || estimate >= Math.Pow(2, 512)) { square /= factor * factor; scale *= factor; estimate = square.ToDouble(); }
-            while (estimate < Math.Pow(2, -512)) { square *= factor * factor; scale /= factor; estimate = square.ToDouble(); }
-            var high = Math.Sqrt(estimate);
-            var seed = R(high); var correction = (square - seed * seed) / (R(2) * seed);
-            var improved = seed + correction;
-            var refined = (improved + square / improved) / R(2);
-            var low = (refined - seed).ToDouble();
-            return (seed + R(low)) * scale;
-        }
+        ReferenceFraction Root(ReferenceFraction square) => RefinedReferenceRoot(square);
         var prices = bars.Select(b => R(b.Close)).ToArray(); var fastValues = Mean(prices, fast, kind); var slowValues = Mean(prices, slow, kind); var wilder = Mean(prices, length, 6);
         var line = new ReferenceFraction[bars.Count];
         for (var i = 0; i < bars.Count; i++)
