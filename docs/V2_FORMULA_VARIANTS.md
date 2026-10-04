@@ -1424,3 +1424,16 @@ thresholds. Current and previous peak signs gate the published level. Extended
 intermediates preserve finite levels and exact level-change signals. Histories
 allocate only observed samples. The core now publishes Kpo with smoothing 3,
 aligned with the public formula; callback requests retain their existing route.
+
+
+### Time and Money Channel extended stages
+
+The existing delay is ceil(length1/2), clamped to 2 through 530. Returns retain
+separately rounded subtraction, multiplication by 100 and division. SMA variance
+uses centered population deviation, then its rounded square; other canonical
+averages retain rounded E[y-squared] minus rounded E[y]-squared. Negative delayed
+variance contributes zero deviation. Extended intermediates preserve finite
+bands even when the published Median width overflows. Band arithmetic retains
+its coefficient, addition and product stages. Native history is lazy, and the
+four callback periods remain length1, length2, length2, length1. The fast callback
+route isolates caller state.

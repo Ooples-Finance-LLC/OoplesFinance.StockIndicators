@@ -71,24 +71,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.WilsonRelativePriceChannel:
                 return new("S1", new[] { "S1", "S2", "U1", "U2" }, bars => WilsonOutputs(bars, indicator));
             case IndicatorName.TimeAndMoneyChannel:
-                return new("Median", new[] { "Ch+1", "Ch-1", "Ch+2", "Ch-2", "Ch+3", "Ch-3", "Median" }, bars =>
-                {
-                    var basisPeriod = Integer(options, "Length1", 41);
-                    var variancePeriod = Integer(options, "Length2", 82);
-                    var lag = Math.Max(2, Math.Min(530, (int)Math.Ceiling(basisPeriod / 2d)));
-                    var basis = Average(Closes(bars), basisPeriod, kind);
-                    var returns = bars.Select((b, i) => i < lag || basis[i - lag] == 0 ? 0 : 100 * (b.Close - basis[i - lag]) / basis[i - lag]).ToArray();
-                    var mean = Average(returns, variancePeriod, kind);
-                    var square = Average(returns.Select(v => v * v).ToArray(), variancePeriod, kind);
-                    var variance = kind == 1 ? PopulationVariance(returns, variancePeriod)
-                        : square.Select((v, i) => Math.Max(0, v - mean[i] * mean[i])).ToArray();
-                    var laggedDeviation = bars.Select((_, i) => i < lag ? 0 : Math.Sqrt(variance[i - lag])).ToArray();
-                    var width = Average(laggedDeviation, basisPeriod, kind);
-                    var result = new Dictionary<string, double[]> { ["Median"] = width };
-                    foreach (var multiplier in new[] { 1, -1, 2, -2, 3, -3 })
-                        result["Ch" + (multiplier > 0 ? "+" : "-") + Math.Abs(multiplier)] = basis.Select((v, i) => v * (1 + multiplier * .01 * width[i])).ToArray();
-                    return result;
-                });
+                return new("Median", new[] { "Ch+1", "Ch-1", "Ch+2", "Ch-2", "Ch+3", "Ch-3", "Median" }, bars => TimeMoneyOutputs(bars, indicator));
             default: return null;
         }
     }

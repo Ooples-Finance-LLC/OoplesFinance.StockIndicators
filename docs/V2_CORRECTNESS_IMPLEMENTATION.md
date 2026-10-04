@@ -6005,3 +6005,18 @@ Kase Convergence and Linear Quadratic preservation checks. All 10,433 mutation
 anchors validate. Enrollment is 6,946/7,131, leaving 185 configurations across
 20 types (`si-kase1162-inventory.json`). PR #246 remains draft; final assurance
 is incomplete.
+
+
+### Time and Money Channel qualification (batch 1174)
+
+All nine configurations retain extended return, variance and channel stages.
+Independent references for all seven outputs, selected inputs, four average
+kinds, signals, preview/reset, invalid inputs, large periods and four callback
+requests passed 71 focused checks. All 19 compiled behavioral faults were
+caught (`si-timemoney1158-qualified.json`). An initial resolver-initializer
+compilation error was corrected before the successful focused run and received
+no credit. Main integration passed 11 checks (`timemoney1170-integration.trx`),
+including Kase and Linear Quadratic preservation checks. All 10,452 mutation
+anchors validate. Enrollment is 6,955/7,131, leaving 176 configurations across
+19 types (`si-timemoney1173-inventory.json`). PR #246 remains draft; final
+platform/package/timing assurance is incomplete.

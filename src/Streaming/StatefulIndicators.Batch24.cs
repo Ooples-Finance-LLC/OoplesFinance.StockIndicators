@@ -948,22 +948,24 @@ public sealed class TillsonT3MovingAverageState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Median")]
 public sealed class TimeAndMoneyChannelState : IStreamingIndicatorState, IDisposable
 {
+    private readonly TimeMoneyWindow? _wide;
     private readonly int _length1;
     private readonly int _length2;
     private readonly int _halfLength;
-    private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly IMovingAverageSmoother _avyomSmoother;
-    private readonly IMovingAverageSmoother _yomSquaredSmoother;
-    private readonly IMovingAverageSmoother _sigomSmoother;
-    private readonly PooledRingBuffer<double> _basisValues;
-    private readonly PooledRingBuffer<double> _varyomValues;
-    private readonly StreamingInputResolver _input;
+    private readonly IMovingAverageSmoother _basisSmoother = null!;
+    private readonly IMovingAverageSmoother _avyomSmoother = null!;
+    private readonly IMovingAverageSmoother _yomSquaredSmoother = null!;
+    private readonly IMovingAverageSmoother _sigomSmoother = null!;
+    private readonly PooledRingBuffer<double> _basisValues = null!;
+    private readonly PooledRingBuffer<double> _varyomValues = null!;
+    private readonly StreamingInputResolver _input = default;
     private int _index;
     private readonly RollingStandardDeviation? _centeredDeviation;
 
     public TimeAndMoneyChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 41,
         int length2 = 82)
     {
+        if (StrengthWindow.Supports(maType)) { _wide = new(maType, length1, length2); return; }
         _centeredDeviation = maType == MovingAvgType.SimpleMovingAverage ? new RollingStandardDeviation(length2) : null;
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
@@ -981,6 +983,7 @@ public sealed class TimeAndMoneyChannelState : IStreamingIndicatorState, IDispos
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _centeredDeviation?.Reset();
         _basisSmoother.Reset();
         _avyomSmoother.Reset();
@@ -993,6 +996,12 @@ public sealed class TimeAndMoneyChannelState : IStreamingIndicatorState, IDispos
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var point = _wide.Next(bar.Close, isFinal);
+            return new(point.Outputs[6], includeOutputs ? TimeMoneyWindow.Keys.Select((key, i) => (key, i)).ToDictionary(p => p.key, p => point.Outputs[p.i]) : null);
+        }
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
         var prevBasis = _index >= _halfLength ? EhlersStreamingWindow.GetOffsetValue(_basisValues, basis, _halfLength) : 0;
@@ -1040,6 +1049,7 @@ public sealed class TimeAndMoneyChannelState : IStreamingIndicatorState, IDispos
 
     public void Dispose()
     {
+        if (_wide is not null) { _wide.Dispose(); return; }
         _centeredDeviation?.Dispose();
         _basisSmoother.Dispose();
         _avyomSmoother.Dispose();

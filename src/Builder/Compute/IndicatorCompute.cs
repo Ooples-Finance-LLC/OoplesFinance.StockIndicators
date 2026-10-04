@@ -21099,68 +21099,17 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTimeAndMoneyChannelFast(StockData data, ComputeContext context, int length1 = 41, int length2 = 82, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // V1 Algorithm: Yield over median (yom), variance, std of yom, channel bands
-        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
-        int count = data.Count;
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-
-        int halfLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length1 / 2));
-
-        // Compute SMA (basis)
-        var smaBuffer = context.Rent(count);
-        maCore.Compute(close, smaBuffer.WritableSpan, length1);
-
-        // Compute yom = 100 * (close - prevBasis) / prevBasis
-        var yomBuffer = context.Rent(count);
-        var yomSquaredBuffer = context.Rent(count);
-        for (int i = 0; i < count; i++)
+        var key = outputKey ?? "Median"; List<double> values;
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+            values = TimeMoneyWindow.Calculate(data, maType, length1, length2).Outputs[key];
+        else
         {
-            double prevBasis = i >= halfLength ? smaBuffer.Span[i - halfLength] : 0;
-            double yom = prevBasis != 0 ? 100 * (close[i] - prevBasis) / prevBasis : 0;
-            yomBuffer.WritableSpan[i] = yom;
-            yomSquaredBuffer.WritableSpan[i] = yom * yom;
+            var isolated = data.WithValues(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
+            isolated.CalculateTimeAndMoneyChannel(maType, length1, length2); values = isolated.ChainedOutputs[key];
         }
-
-        // Compute avyom and yomSquaredSma
-        var avyomBuffer = context.Rent(count);
-        var yomSquaredSmaBuffer = context.Rent(count);
-        maCore.Compute(yomBuffer.Span, avyomBuffer.WritableSpan, length2);
-        maCore.Compute(yomSquaredBuffer.Span, yomSquaredSmaBuffer.WritableSpan, length2);
-
-        using var centeredDeviation = context.Rent(count);
-        if (maType == MovingAvgType.SimpleMovingAverage)
-            VolatilityCore.StandardDeviation(yomBuffer.Span, centeredDeviation.WritableSpan, length2);
-
-        // Compute variance and std
-        var somBuffer = context.Rent(count);
-        for (int i = 0; i < count; i++)
-        {
-            double prevVaryom = i >= halfLength ? yomSquaredSmaBuffer.Span[i - halfLength] - (avyomBuffer.Span[i - halfLength] * avyomBuffer.Span[i - halfLength]) : 0;
-            double som = maType == MovingAvgType.SimpleMovingAverage
-                ? (i >= halfLength ? centeredDeviation.Span[i - halfLength] : 0)
-                : prevVaryom >= 0 ? Math.Sqrt(prevVaryom) : 0;
-            somBuffer.WritableSpan[i] = som;
-        }
-
-        // Compute sigom (smoothed som) - this is used for channel width
-        var result = context.Rent(count);
-        maCore.Compute(somBuffer.Span, result.WritableSpan, length1);
-
-        if (outputKey is "Ch+1" or "Ch-1" or "Ch+2" or "Ch-2" or "Ch+3" or "Ch-3")
-        {
-            var multiplier = (outputKey[2] == '+' ? 1 : -1) * (outputKey[3] - '0') * .01;
-            for (var i = 0; i < count; i++)
-                result.WritableSpan[i] = smaBuffer.Span[i] * (1 + multiplier * result.Span[i]);
-        }
-
-        yomBuffer.Dispose();
-        yomSquaredBuffer.Dispose();
-        avyomBuffer.Dispose();
-        yomSquaredSmaBuffer.Dispose();
-        somBuffer.Dispose();
-        smaBuffer.Dispose();
-
-        return result;
+        var buffer = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++) buffer.WritableSpan[i] = values[i];
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeTopsAndBottomsFinderFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)

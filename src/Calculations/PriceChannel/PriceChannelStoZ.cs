@@ -378,6 +378,14 @@ public static partial class Calculations
     public static StockData CalculateTimeAndMoneyChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length1 = 41, int length2 = 82)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result = TimeMoneyWindow.Calculate(stockData, maType, length1, length2);
+            stockData.SetOutputValues(() => result.Outputs);
+            stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+            stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.TimeAndMoneyChannel;
+            return stockData;
+        }
         List<double> yomList = new(stockData.Count);
         List<double> yomSquaredList = new(stockData.Count);
         List<double> varyomList = new(stockData.Count);
@@ -393,7 +401,7 @@ public static partial class Calculations
 
         var halfLength = MinOrMax((int)Math.Ceiling((double)length1 / 2));
 
-        var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
+        var smaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -408,8 +416,8 @@ public static partial class Calculations
         }
 
         var deviations = maType == MovingAvgType.SimpleMovingAverage ? GetStandardDeviationList(yomList, length2) : null;
-        var avyomList = GetMovingAverageList(stockData, maType, length2, yomList);
-        var yomSquaredSmaList = GetMovingAverageList(stockData, maType, length2, yomSquaredList);
+        var avyomList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(yomList), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, yomList);
+        var yomSquaredSmaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(yomSquaredList), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, yomSquaredList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevVaryom = i >= halfLength ? varyomList[i - halfLength] : 0;
@@ -423,7 +431,7 @@ public static partial class Calculations
             somList.Add(som);
         }
 
-        var sigomList = GetMovingAverageList(stockData, maType, length1, somList);
+        var sigomList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(somList), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, somList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var som = somList[i];
