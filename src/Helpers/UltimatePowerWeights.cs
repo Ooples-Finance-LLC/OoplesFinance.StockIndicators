@@ -12,11 +12,12 @@ internal static class UltimatePowerWeights
         private readonly BigInteger _denominator;
         internal BigInteger Denominator => _denominator.IsZero ? BigInteger.One : _denominator;
         internal int Sign => Numerator.Sign;
-        internal Fraction(BigInteger numerator, BigInteger denominator)
+        internal Fraction(BigInteger numerator, BigInteger denominator) : this(numerator, denominator, false) { }
+        private Fraction(BigInteger numerator, BigInteger denominator, bool reduced)
         {
             if (denominator.IsZero) throw new DivideByZeroException();
             if (denominator.Sign < 0) { numerator = -numerator; denominator = -denominator; }
-            var gcd = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
+            var gcd = reduced ? BigInteger.One : BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
             Numerator = numerator / gcd; _denominator = denominator / gcd;
         }
         internal static Fraction Of(double value)
@@ -25,29 +26,35 @@ internal static class UltimatePowerWeights
             return new(ExactVarianceWindow.Units(value), BigInteger.One << 1074);
         }
         internal static Fraction Grid(int bits) => new(BigInteger.One, BigInteger.One << bits);
-        internal Fraction Abs() => new(BigInteger.Abs(Numerator), Denominator);
-        internal Fraction Pow(int power) => new(BigInteger.Pow(Numerator, power), BigInteger.Pow(Denominator, power));
+        internal Fraction Abs() => new(BigInteger.Abs(Numerator), Denominator, true);
+        internal Fraction Pow(int power) => new(BigInteger.Pow(Numerator, power), BigInteger.Pow(Denominator, power), true);
         internal BigInteger Floor() { var q = BigInteger.DivRem(Numerator, Denominator, out var r); return r.Sign < 0 ? q - 1 : q; }
         internal BigInteger Ceiling() => -(-this).Floor();
         internal double Publish() => MacZWindow.Number.Integer(Numerator).Divide(MacZWindow.Number.Integer(Denominator)).Publish();
         public int CompareTo(Fraction other) => (Numerator * other.Denominator).CompareTo(other.Numerator * Denominator);
         public static implicit operator Fraction(int value) => new(value, BigInteger.One);
         public static implicit operator Fraction(long value) => new(value, BigInteger.One);
-        public static Fraction operator -(Fraction a) => new(-a.Numerator, a.Denominator);
+        public static Fraction operator -(Fraction a) => new(-a.Numerator, a.Denominator, true);
         public static Fraction operator +(Fraction a, Fraction b)
         {
             var gcd = BigInteger.GreatestCommonDivisor(a.Denominator, b.Denominator);
             var left = b.Denominator / gcd; var right = a.Denominator / gcd;
-            return new(a.Numerator * left + b.Numerator * right, a.Denominator * left);
+            var numerator = a.Numerator * left + b.Numerator * right;
+            // Reduced inputs leave common factors only in the original denominator GCD.
+            var remaining = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), gcd);
+            return new(numerator / remaining, right * (b.Denominator / remaining), true);
         }
         public static Fraction operator -(Fraction a, Fraction b) => a + -b;
         public static Fraction operator *(Fraction a, Fraction b)
         {
+            // Each numerator is already coprime to this common denominator.
+            if (a.Denominator == b.Denominator)
+                return new(a.Numerator * b.Numerator, a.Denominator * b.Denominator, true);
             var left = BigInteger.GreatestCommonDivisor(BigInteger.Abs(a.Numerator), b.Denominator);
             var right = BigInteger.GreatestCommonDivisor(BigInteger.Abs(b.Numerator), a.Denominator);
-            return new((a.Numerator / left) * (b.Numerator / right), (a.Denominator / right) * (b.Denominator / left));
+            return new((a.Numerator / left) * (b.Numerator / right), (a.Denominator / right) * (b.Denominator / left), true);
         }
-        public static Fraction operator /(Fraction a, Fraction b) => a * new Fraction(b.Denominator, b.Numerator);
+        public static Fraction operator /(Fraction a, Fraction b) => a * new Fraction(b.Denominator, b.Numerator, true);
         public static bool operator <(Fraction a, Fraction b) => a.CompareTo(b) < 0;
         public static bool operator >(Fraction a, Fraction b) => a.CompareTo(b) > 0;
         public static bool operator <=(Fraction a, Fraction b) => a.CompareTo(b) <= 0;
