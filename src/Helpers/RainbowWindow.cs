@@ -1,4 +1,5 @@
-﻿using OoplesFinance.StockIndicators.Builder.Compute;
+﻿using Average = OoplesFinance.StockIndicators.Helpers.UnroundedMovingAverage;
+using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Streaming;
 using Number = OoplesFinance.StockIndicators.Helpers.MacZWindow.Number;
 namespace OoplesFinance.StockIndicators.Helpers;
@@ -77,37 +78,6 @@ internal sealed class RainbowWindow : IDisposable
             finally { data.RestoreInputSeries(caller); }
         }
         return (line, upper, lower, trades);
-    }
-    private sealed class Average : IDisposable
-    {
-        private readonly MovingAvgType _kind; private readonly int _length;
-        private readonly Queue<Number> _history = new();
-        private readonly IMovingAverageSmoother? _fallback;
-        private Number _sum, _weighted, _previous; private long _count;
-        internal Average(MovingAvgType kind, int length)
-        { _kind = kind; _length = Math.Max(1, length); if (!StrengthWindow.Supports(kind)) _fallback = MovingAverageSmootherFactory.Create(kind, _length); }
-        internal Number Next(Number value, bool final)
-        {
-            if (_fallback is not null) return Number.Of(_fallback.Next(value.Publish(), final));
-            if (_length == 1) return value;
-            var sum = _sum; var weighted = _weighted; Number result;
-            var window = _kind is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage;
-            if (window)
-            {
-                weighted = weighted - sum + value.Times(_length);
-                if (_history.Count == _length) sum -= _history.Peek(); sum += value;
-                result = _kind == MovingAvgType.WeightedMovingAverage ? weighted.Divide((long)_length * (_length + 1L) / 2)
-                    : _count + 1 < _length ? default : sum.Divide(_length);
-            }
-            else if (_kind == MovingAvgType.ExponentialMovingAverage && _count < _length)
-            { sum += value; result = sum.Divide(_count + 1); }
-            else
-            { var ema = _kind == MovingAvgType.ExponentialMovingAverage; result = (_previous.Times(_length - 1L) + value.Times(ema ? 2 : 1)).Divide(ema ? _length + 1L : _length); }
-            if (final) { if (window) { if (_history.Count == _length) _history.Dequeue(); _history.Enqueue(value); } _sum = sum; _weighted = weighted; _previous = result; _count++; }
-            return result;
-        }
-        internal void Reset() { _history.Clear(); _sum = _weighted = _previous = default; _count = 0; _fallback?.Reset(); }
-        public void Dispose() => _fallback?.Dispose();
     }
     internal void Reset() { foreach (var stage in _stages) stage.Reset(); _highs.Clear(); _lows.Clear(); _count = 0; _previous = default; }
     public void Dispose() { Reset(); foreach (var stage in _stages) stage.Dispose(); }

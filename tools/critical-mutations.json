@@ -73952,8 +73952,7 @@
   {
     "id": "rainbow-wide-period-minimum",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_length = Math.Max(1, length)",
     "after": "_length = Math.Max(2, length)",
     "filter": "FullyQualifiedName~RainbowNumericalTests.UnitCascadePeriodCancelsBeforePublication"
@@ -73961,8 +73960,7 @@
   {
     "id": "rainbow-wide-weighted-aging",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted - sum + value.Times(_length)",
     "after": "weighted + value.Times(_length)",
     "filter": "FullyQualifiedName~RainbowNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
@@ -73970,8 +73968,7 @@
   {
     "id": "rainbow-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide((long)_length * (_length + 1L))",
     "filter": "FullyQualifiedName~RainbowNumericalTests.ExtremeAndSubnormalRangesRetainCompleteRatios"
@@ -73979,8 +73976,7 @@
   {
     "id": "rainbow-wide-sma-startup",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default : sum.Divide(_length)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~RainbowNumericalTests.OpeningCascadeHasIndependentThreeOutputHand"
@@ -73988,8 +73984,7 @@
   {
     "id": "rainbow-wide-mean-expiry",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum -= _history.Peek();",
     "after": "sum += _history.Peek();",
     "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
@@ -73997,8 +73992,7 @@
   {
     "id": "rainbow-wide-ema-seed",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum.Divide(_count + 1)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
@@ -74006,8 +74000,7 @@
   {
     "id": "rainbow-wide-recursive-retention",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_previous.Times(_length - 1L)",
     "after": "_previous.Times(_length)",
     "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
@@ -74015,8 +74008,7 @@
   {
     "id": "rainbow-wide-recursive-gain",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
@@ -74024,8 +74016,7 @@
   {
     "id": "rainbow-wide-mean-reset",
     "module": "numerical",
-    "file": "src/Helpers/RainbowWindow.cs",
-    "scope": "internal sealed class RainbowWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_sum = _weighted = _previous = default;",
     "after": "_sum = _weighted = default;",
     "filter": "FullyQualifiedName~RainbowNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
@@ -74636,8 +74627,7 @@
   {
     "id": "recursive-rsi-wide-weighted-aging",
     "module": "numerical",
-    "file": "src/Helpers/RecursiveRsiWindow.cs",
-    "scope": "internal sealed class RecursiveRsiWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted - sum + value.Times(_length)",
     "after": "weighted + value.Times(_length)",
     "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.ExtremeAndSubnormalChangesRetainExactDirection"
@@ -74645,8 +74635,7 @@
   {
     "id": "recursive-rsi-wide-weighted-current",
     "module": "numerical",
-    "file": "src/Helpers/RecursiveRsiWindow.cs",
-    "scope": "internal sealed class RecursiveRsiWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(_length);",
     "after": "value.Times(_length - 1L);",
     "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.ExtremeAndSubnormalChangesRetainExactDirection"
@@ -74654,8 +74643,7 @@
   {
     "id": "recursive-rsi-wide-mean-expiry",
     "module": "numerical",
-    "file": "src/Helpers/RecursiveRsiWindow.cs",
-    "scope": "internal sealed class RecursiveRsiWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum -= _history.Peek();",
     "after": "sum += _history.Peek();",
     "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
@@ -74663,8 +74651,7 @@
   {
     "id": "recursive-rsi-wide-source-retention",
     "module": "numerical",
-    "file": "src/Helpers/RecursiveRsiWindow.cs",
-    "scope": "internal sealed class RecursiveRsiWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_previous.Times(_length - 1L)",
     "after": "_previous.Times(_length)",
     "filter": "FullyQualifiedName~RecursiveRsiNumericalTests.TiesExpiryAndRecursiveTransitionsPreservePreviewsAndReset"
@@ -75500,8 +75487,7 @@
   {
     "id": "sell-gravitation-wide-period",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_length = Math.Max(1, length)",
     "after": "_length = 1",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.HandBodyRatioAndTwoAverages"
@@ -75509,8 +75495,7 @@
   {
     "id": "sell-gravitation-wide-weighted-shift",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted = weighted - sum",
     "after": "weighted = weighted + sum",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -75518,8 +75503,7 @@
   {
     "id": "sell-gravitation-wide-weighted-current",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(_length)",
     "after": "value.Times(_length - 1L)",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -75527,8 +75511,7 @@
   {
     "id": "sell-gravitation-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide((long)_length * (_length + 1L))",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -75536,8 +75519,7 @@
   {
     "id": "sell-gravitation-wide-simple-ready",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default",
     "after": "_count + 1 <= _length ? default",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.HandBodyRatioAndTwoAverages"
@@ -75545,8 +75527,7 @@
   {
     "id": "sell-gravitation-wide-expiry",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum -= _history.Peek();",
     "after": "sum -= default(Number);",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -75554,8 +75535,7 @@
   {
     "id": "sell-gravitation-wide-ema-start",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum.Divide(_count + 1)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -75563,8 +75543,7 @@
   {
     "id": "sell-gravitation-wide-recursive-weight",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -75572,8 +75551,7 @@
   {
     "id": "sell-gravitation-wide-average-preview",
     "module": "numerical",
-    "file": "src/Helpers/SellGravitationWindow.cs",
-    "scope": "internal sealed class SellGravitationWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "if (final) { if (window)",
     "after": "if (true) { if (window)",
     "filter": "FullyQualifiedName~SellGravitationNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -75851,8 +75829,7 @@
   {
     "id": "squeeze-wide-weighted-shift",
     "module": "numerical",
-    "file": "src/Helpers/SqueezeMomentumWindow.cs",
-    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted = weighted - sum + value.Times(_length);",
     "after": "weighted = weighted + value.Times(_length);",
     "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
@@ -75860,8 +75837,7 @@
   {
     "id": "squeeze-wide-weighted-current",
     "module": "numerical",
-    "file": "src/Helpers/SqueezeMomentumWindow.cs",
-    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted - sum + value.Times(_length)",
     "after": "weighted - sum + value.Times(_length - 1L)",
     "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
@@ -75869,8 +75845,7 @@
   {
     "id": "squeeze-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/SqueezeMomentumWindow.cs",
-    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "(_length + 1L) / 2",
     "after": "(_length + 2L) / 2",
     "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
@@ -75878,8 +75853,7 @@
   {
     "id": "squeeze-wide-simple-ready",
     "module": "numerical",
-    "file": "src/Helpers/SqueezeMomentumWindow.cs",
-    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default",
     "after": "_count + 1 <= _length ? default",
     "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.HandResidualAndCenteredRegression"
@@ -75887,8 +75861,7 @@
   {
     "id": "squeeze-wide-recursive-weight",
     "module": "numerical",
-    "file": "src/Helpers/SqueezeMomentumWindow.cs",
-    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
@@ -75896,8 +75869,7 @@
   {
     "id": "squeeze-wide-recursive-denominator",
     "module": "numerical",
-    "file": "src/Helpers/SqueezeMomentumWindow.cs",
-    "scope": "internal sealed class SqueezeMomentumWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "Divide(ema ? _length + 1L : _length)",
     "after": "Divide(ema ? _length + 2L : _length + 1L)",
     "filter": "FullyQualifiedName~SqueezeMomentumNumericalTests.PreviewResetAndWindowExpiryMatchDirectFormula"
@@ -76490,8 +76462,7 @@
   {
     "id": "residual-volatility-wide-weighted-shift",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted = weighted - sum + value.Times(_length);",
     "after": "weighted = weighted + value.Times(_length);",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
@@ -76499,8 +76470,7 @@
   {
     "id": "residual-volatility-wide-weighted-current",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted - sum + value.Times(_length)",
     "after": "weighted - sum + value.Times(_length - 1L)",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
@@ -76508,8 +76478,7 @@
   {
     "id": "residual-volatility-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "(_length + 1L) / 2",
     "after": "(_length + 2L) / 2",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
@@ -76517,8 +76486,7 @@
   {
     "id": "residual-volatility-wide-simple-ready",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default",
     "after": "_count + 1 <= _length ? default",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.HandResidualSquaresAndThreeAverages"
@@ -76526,8 +76494,7 @@
   {
     "id": "residual-volatility-wide-simple-expiry",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "if (_history.Count == _length) sum -= _history.Peek();",
     "after": "if (_history.Count > _length) sum -= _history.Peek();",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
@@ -76535,8 +76502,7 @@
   {
     "id": "residual-volatility-wide-recursive-retention",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_previous.Times(_length - 1L)",
     "after": "_previous.Times(_length - 2L)",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
@@ -76544,8 +76510,7 @@
   {
     "id": "residual-volatility-wide-recursive-current",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
@@ -76553,8 +76518,7 @@
   {
     "id": "residual-volatility-wide-ema-startup",
     "module": "numerical",
-    "file": "src/Helpers/ResidualVolatilityWindow.cs",
-    "scope": "internal sealed class ResidualVolatilityWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum.Divide(_count + 1)",
     "after": "sum.Divide(_count + 2)",
     "filter": "FullyQualifiedName~ResidualVolatilityNumericalTests.ExpiryAndRecursiveStartupPreservePreviewReset"
@@ -76850,8 +76814,7 @@
   {
     "id": "stationary-levels-wide-weighted-shift",
     "module": "numerical",
-    "file": "src/Helpers/StationaryLevelsWindow.cs",
-    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted = weighted - sum + value.Times(_length);",
     "after": "weighted = weighted + value.Times(_length);",
     "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -76859,8 +76822,7 @@
   {
     "id": "stationary-levels-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/StationaryLevelsWindow.cs",
-    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "(_length + 1L) / 2",
     "after": "(_length + 2L) / 2",
     "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -76868,8 +76830,7 @@
   {
     "id": "stationary-levels-wide-simple-ready",
     "module": "numerical",
-    "file": "src/Helpers/StationaryLevelsWindow.cs",
-    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default",
     "after": "_count + 1 <= _length ? default",
     "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.IndependentLagProjectionAndTwoWindowHands"
@@ -76877,8 +76838,7 @@
   {
     "id": "stationary-levels-wide-simple-expiry",
     "module": "numerical",
-    "file": "src/Helpers/StationaryLevelsWindow.cs",
-    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "if (_history.Count == _length) sum -= _history.Peek();",
     "after": "if (_history.Count > _length) sum -= _history.Peek();",
     "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -76886,8 +76846,7 @@
   {
     "id": "stationary-levels-wide-recursive-current",
     "module": "numerical",
-    "file": "src/Helpers/StationaryLevelsWindow.cs",
-    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -76895,8 +76854,7 @@
   {
     "id": "stationary-levels-wide-ema-startup",
     "module": "numerical",
-    "file": "src/Helpers/StationaryLevelsWindow.cs",
-    "scope": "internal sealed class StationaryLevelsWindow : IDisposable",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum.Divide(_count + 1)",
     "after": "sum.Divide(_count + 2)",
     "filter": "FullyQualifiedName~StationaryLevelsNumericalTests.ExpiryAndRecursiveTransitionsPreservePreviewReset"
@@ -78083,8 +78041,7 @@
   {
     "id": "tops-bottoms-wide-weighted-recurrence",
     "module": "numerical",
-    "file": "src/Helpers/TopsBottomsWindow.cs",
-    "scope": "internal sealed class TopsBottomsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted = weighted - sum + value.Times(_length);",
     "after": "weighted = weighted - sum + value;",
     "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
@@ -78092,8 +78049,7 @@
   {
     "id": "tops-bottoms-wide-sma-warmup",
     "module": "numerical",
-    "file": "src/Helpers/TopsBottomsWindow.cs",
-    "scope": "internal sealed class TopsBottomsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default : sum.Divide(_length)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ZeroMeansConstantWindowsAndLazyExtremePeriods"
@@ -78101,17 +78057,15 @@
   {
     "id": "tops-bottoms-wide-ema-seed",
     "module": "numerical",
-    "file": "src/Helpers/TopsBottomsWindow.cs",
-    "scope": "internal sealed class TopsBottomsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count < _length",
     "after": "_count < 1",
-    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry"
+    "filter": "FullyQualifiedName~TopsBottomsNumericalTests.ExactEndpointHandsAndExpiry|FullyQualifiedName~UnroundedMovingAverageTests.IndependentWindowAndRecurrenceSurvivePreviewResetAndCancellation"
   },
   {
     "id": "tops-bottoms-wide-mean-state-rounding",
     "module": "numerical",
-    "file": "src/Helpers/TopsBottomsWindow.cs",
-    "scope": "internal sealed class TopsBottomsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_previous = result;",
     "after": "_previous = Number.Of(result.Publish());",
     "filter": "FullyQualifiedName~TopsBottomsNumericalTests.RoundedMovingAverageTiesCannotCreateFalseEndpoints"
@@ -78416,8 +78370,7 @@
   {
     "id": "trend-analysis-index-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
-    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide(_length)",
     "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
@@ -78425,8 +78378,7 @@
   {
     "id": "trend-analysis-index-wide-sma-warmup",
     "module": "numerical",
-    "file": "src/Helpers/TrendAnalysisIndexWindow.cs",
-    "scope": "internal sealed class TrendAnalysisIndexWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default : sum.Divide(_length)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~TrendAnalysisIndexNumericalTests.IndependentRangeSmoothingAndSignalHands"
@@ -78722,8 +78674,7 @@
   {
     "id": "trend-analysis-indicator-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/TrendAnalysisIndicatorWindow.cs",
-    "scope": "internal sealed class TrendAnalysisIndicatorWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide(_length)",
     "filter": "FullyQualifiedName~TrendAnalysisIndicatorNumericalTests.IndependentPopulationDeviationAndSignalHands"
@@ -78731,8 +78682,7 @@
   {
     "id": "trend-analysis-indicator-wide-sma-warmup",
     "module": "numerical",
-    "file": "src/Helpers/TrendAnalysisIndicatorWindow.cs",
-    "scope": "internal sealed class TrendAnalysisIndicatorWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default : sum.Divide(_length)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~TrendAnalysisIndicatorNumericalTests.IndependentPopulationDeviationAndSignalHands"
@@ -79406,8 +79356,7 @@
   {
     "id": "tstep-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
-    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide(_length)",
     "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
@@ -79415,8 +79364,7 @@
   {
     "id": "tstep-wide-sma-warmup",
     "module": "numerical",
-    "file": "src/Helpers/TStepLeastSquaresWindow.cs",
-    "scope": "internal sealed class TStepLeastSquaresWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default : sum.Divide(_length)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~TStepLeastSquaresNumericalTests.IndependentStepsCovarianceAndSignalHands"
@@ -79685,8 +79633,7 @@
   {
     "id": "turbo-scaler-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/TurboScalerWindow.cs",
-    "scope": "internal sealed class TurboScalerWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide(_length)",
     "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
@@ -79694,8 +79641,7 @@
   {
     "id": "turbo-scaler-wide-weighted-expiry",
     "module": "numerical",
-    "file": "src/Helpers/TurboScalerWindow.cs",
-    "scope": "internal sealed class TurboScalerWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted = weighted - sum",
     "after": "weighted = weighted + sum",
     "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
@@ -79703,8 +79649,7 @@
   {
     "id": "turbo-scaler-wide-sma-warmup",
     "module": "numerical",
-    "file": "src/Helpers/TurboScalerWindow.cs",
-    "scope": "internal sealed class TurboScalerWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default : sum.Divide(_length)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
@@ -79712,17 +79657,15 @@
   {
     "id": "turbo-scaler-wide-mean-expiry",
     "module": "numerical",
-    "file": "src/Helpers/TurboScalerWindow.cs",
-    "scope": "internal sealed class TurboScalerWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum -= _history.Peek();",
-    "after": "sum -= default;",
-    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
+    "after": "sum -= default(Number);",
+    "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands|FullyQualifiedName~UnroundedMovingAverageTests.IndependentWindowAndRecurrenceSurvivePreviewResetAndCancellation"
   },
   {
     "id": "turbo-scaler-wide-ema-seed",
     "module": "numerical",
-    "file": "src/Helpers/TurboScalerWindow.cs",
-    "scope": "internal sealed class TurboScalerWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "result = sum.Divide(_count + 1)",
     "after": "result = sum.Divide(_length)",
     "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
@@ -79730,8 +79673,7 @@
   {
     "id": "turbo-scaler-wide-recursive-gain",
     "module": "numerical",
-    "file": "src/Helpers/TurboScalerWindow.cs",
-    "scope": "internal sealed class TurboScalerWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
@@ -79739,8 +79681,7 @@
   {
     "id": "turbo-scaler-wide-reset-mean",
     "module": "numerical",
-    "file": "src/Helpers/TurboScalerWindow.cs",
-    "scope": "internal sealed class TurboScalerWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_history.Clear();",
     "after": "",
     "filter": "FullyQualifiedName~TurboScalerNumericalTests.IndependentRawRangesAndSmoothedSignalHands"
@@ -80063,8 +80004,7 @@
   {
     "id": "turbo-stoch-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/TurboStochasticsWindow.cs",
-    "scope": "internal sealed class TurboStochasticsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide(_length)",
     "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
@@ -80072,8 +80012,7 @@
   {
     "id": "turbo-stoch-wide-sma-warmup",
     "module": "numerical",
-    "file": "src/Helpers/TurboStochasticsWindow.cs",
-    "scope": "internal sealed class TurboStochasticsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_count + 1 < _length ? default : sum.Divide(_length)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
@@ -80081,8 +80020,7 @@
   {
     "id": "turbo-stoch-wide-ema-seed",
     "module": "numerical",
-    "file": "src/Helpers/TurboStochasticsWindow.cs",
-    "scope": "internal sealed class TurboStochasticsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "sum.Divide(_count + 1)",
     "after": "sum.Divide(_length)",
     "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
@@ -80090,8 +80028,7 @@
   {
     "id": "turbo-stoch-wide-recursive-gain",
     "module": "numerical",
-    "file": "src/Helpers/TurboStochasticsWindow.cs",
-    "scope": "internal sealed class TurboStochasticsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
@@ -80099,8 +80036,7 @@
   {
     "id": "turbo-stoch-wide-mean-reset",
     "module": "numerical",
-    "file": "src/Helpers/TurboStochasticsWindow.cs",
-    "scope": "internal sealed class TurboStochasticsWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_history.Clear();",
     "after": "",
     "filter": "FullyQualifiedName~TurboStochasticsNumericalTests.IndependentRawSmoothedAndRegressionHands"
@@ -80738,8 +80674,7 @@
   {
     "id": "variable-length-wide-weighted-divisor",
     "module": "numerical",
-    "file": "src/Helpers/VariableLengthWindow.cs",
-    "scope": "internal sealed class VariableLengthWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "weighted.Divide((long)_length * (_length + 1L) / 2)",
     "after": "weighted.Divide(_length)",
     "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
@@ -80747,8 +80682,7 @@
   {
     "id": "variable-length-wide-recursive-gain",
     "module": "numerical",
-    "file": "src/Helpers/VariableLengthWindow.cs",
-    "scope": "internal sealed class VariableLengthWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "value.Times(ema ? 2 : 1)",
     "after": "value.Times(ema ? 1 : 2)",
     "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
@@ -80756,8 +80690,7 @@
   {
     "id": "variable-length-wide-reset-mean",
     "module": "numerical",
-    "file": "src/Helpers/VariableLengthWindow.cs",
-    "scope": "internal sealed class VariableLengthWindow",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
     "before": "_history.Clear();",
     "after": "",
     "filter": "FullyQualifiedName~VariableLengthNumericalTests.IndependentFeedbackHandsAndEveryAverageKind"
@@ -87720,5 +87653,29 @@
     "before": "new KlingerVolumeOscillatorState(fastLength: kvo.Length)",
     "after": "new KlingerVolumeOscillatorState(fastLength: 1)",
     "filter": "FullyQualifiedName~KlingerNumericalTests.SelectedSourcesPreserveOriginalCandles"
+  },
+  {
+    "id": "shared-unrounded-fallback-preview",
+    "module": "numerical",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
+    "before": "_fallback.Next(value.Publish(), final)",
+    "after": "_fallback.Next(value.Publish(), true)",
+    "filter": "FullyQualifiedName~UnroundedMovingAverageTests.FallbackPreservesItsOwnPreviewAndResetContract"
+  },
+  {
+    "id": "shared-unrounded-fallback-reset",
+    "module": "numerical",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
+    "before": "_fallback?.Reset();",
+    "after": "_fallback?.Next(17, true);",
+    "filter": "FullyQualifiedName~UnroundedMovingAverageTests.FallbackPreservesItsOwnPreviewAndResetContract"
+  },
+  {
+    "id": "shared-unrounded-premature-publication",
+    "module": "numerical",
+    "file": "src/Helpers/UnroundedMovingAverage.cs",
+    "before": "return result;",
+    "after": "return Number.Of(result.Publish());",
+    "filter": "FullyQualifiedName~UnroundedMovingAverageTests.UnpublishedStagesPreserveSmallResidualAfterOverflowCancellation"
   }
 ]

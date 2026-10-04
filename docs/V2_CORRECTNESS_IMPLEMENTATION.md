@@ -5530,3 +5530,12 @@ Verification: **213 distinct focused cases passed**, with six strengthened cases
 Snapshot SHA256: `810e19deec336fdd5d9c2b135a63518bb3a8ea004526ec66f58013e077d67b47`. Both source archives: `bf373af11fa79f62161ef855a17204ff46413b6ac323de9789e59dc2a5d6b3ac`; all 2,440 archived files were hash-verified. Evidence: `klinger898-focused.trx`, `klinger899-strengthened.trx`, `klinger900-chain.trx`, and `si-klinger901-mutations-a/b`.
 
 Compiled enrollment is **6,833/7,131**, with **298 omissions across 40 indicator types**, no construction failures and an exact backlog match. PR246 remains draft; hosted gates and final package/platform and competitor timing assurance remain outstanding.
+
+
+### Shared unrounded averaging consolidation (2026-10-04)
+
+Thirteen identical averaging-state classes now share `UnroundedMovingAverage`, preserving exact unpublished intermediates, startup conventions, preview and reset. MacZ's separately rounded recurrence retains its existing implementation.
+
+All **41 distinct focused checks passed**, including the separately rerun 18 shared-helper checks with the strengthened exact-residual assertion. Across the original and targeted repair campaigns, **70/70 unique compiled behavioral faults were caught**. Two survivors and one compiler-rejected seed from the original campaigns are excluded; the repair covers the EMA startup selection, typed-zero expiry seed and premature-publication assertion. Both pairs have passing baselines and matching source archives. Production sources are identical between pairs; only test and mutation metadata differ.
+
+Snapshots: `2b34ade4d77dd75fee4b7b6ee7aae570d392cd770fb23d92e561cf745aa7be49` and `f0acbda79cfa043a25e50f0a39e49a8c5d5b2885ec4adf4d279c69e69458d7c4`. Evidence: `si-shared-average926-qualified.json` and the `si-shared-average915/919-mutations-a/b` campaigns. This is bounded shared-helper evidence, not final release assurance. Numerical enrollment remains 6,833/7,131 in the published source; Kaufman qualification and the other remaining gates continue separately.
