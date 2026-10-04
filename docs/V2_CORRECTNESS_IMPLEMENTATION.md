@@ -5587,3 +5587,47 @@ Compiled enrollment is **6,842/7,131**, leaving **289 configurations across 38
 types**. There are no construction failures and the backlog matches exactly.
 All **10,132 mutation anchors** validate. PR246 remains draft; the remaining
 numerical, hosted, package/platform and competitor gates remain outstanding.
+
+
+### Kaufman Adaptive Bands qualification (2026-10-04)
+
+Batch and native routes now evaluate the exact efficiency-powered mean and second
+moment with outward intervals. Exact common-exponent power classes resolve
+algebraic cancellation at rounding ties, including subnormal halfway bands.
+Constant folding is bounded; interval evaluations are cached. Signals retain the
+published-band boundary. Expression storage and exact fallback costs depend on
+history; this is not a constant-memory or competitor-speed qualification.
+
+The independent integer-exponent reference uses centered variance with integer
+coordinates, unreduced final ratio rounding, and exact integer-square comparisons.
+A certified leading-integer root bound avoids most full binary searches without
+relaxing the exact error budget. Integer exponents 0–32 have exact overflow-aware
+registration. Fractional exponents retain the approximate legacy reference and
+targeted algebraic hands, not exhaustive arbitrary-exponent qualification.
+
+Verification: **48/48 focused checks passed** (`adaptive952-integrated.trx`,
+1 minute 38 seconds). The unchanged-source mutation baselines passed, and
+**19/19 unique compiled behavioral faults were caught**. Three original survivors
+and all intentionally stopped focused runs receive no credit. Calculation helpers
+are identical across campaigns; reference registration/publication, strengthened
+tests and the final certified root optimization have separately authenticated
+snapshots. The root optimization has two additional compiled fault checks.
+
+Main-worktree verification: **46/46 combined Adaptive Bands/Kaufman/Mobility
+route and enrollment checks passed**, followed by **5/5 final reference and
+enrollment checks** after the reference optimization. These overlap the focused
+checks and are not added to the distinct count. All **10,151 mutation anchors**
+validate. Compiled enrollment is **6,846/7,131**, leaving **285 configurations
+across 37 types**, with no construction failures and exact backlog agreement.
+
+Authenticated campaign snapshot and archive SHA256 pairs:
+
+- `si-adaptive943-mutations-a`: `59646a15c95ddef837c54099090dad6aa2be70904d1fefaa686d1c0ac05f877f` / `836b69560ad55b1ae388220a5daa2710c575d502d7d40a5b95fd511bb4b2bc58`.
+
+- `si-adaptive943-mutations-b`: `59646a15c95ddef837c54099090dad6aa2be70904d1fefaa686d1c0ac05f877f` / `836b69560ad55b1ae388220a5daa2710c575d502d7d40a5b95fd511bb4b2bc58`.
+
+- `si-adaptive946-mutations`: `8ece70834010afd27d207c458f80eb28f6d86106ea02a652a1acd2a20d299bbd` / `5f38c34eb6b36fd7c2be05594653ffe66cad08905784332f41db9c65b913e9c6`.
+
+- `si-adaptive952-root-mutations`: `1771853781b087ea83aced82a3f0a478490a5f9a65ec669113fa219c9281f242` / `ca2aa5625adbebc5e2336c8f3c37a2aca11ee4d3b89f3efc4d549c7a7e01e3d0`.
+
+Hosted current-head checks, final platform/package assurance and fair competitor timing remain outstanding. PR #246 stays draft.

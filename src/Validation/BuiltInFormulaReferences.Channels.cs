@@ -194,6 +194,8 @@ internal static partial class BuiltInFormulaReferences
                 var exponent = Number(options, 3, "StdDevFactor");
                 return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
                 {
+                    if (exponent >= 0 && exponent <= 32 && Math.Truncate(exponent).Equals(exponent))
+                        return KaufmanAdaptiveIntegerValues(bars, length, (int)exponent);
                     var gains = EfficiencyRatios(bars, length).Select(e => Math.Pow(e, exponent)).ToArray();
                     var middle = new double[bars.Count];
                     var deviation = new double[bars.Count];

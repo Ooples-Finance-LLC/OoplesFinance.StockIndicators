@@ -88119,5 +88119,160 @@
     "before": "if (mass.CompareTo(masses[mode]) > 0)",
     "after": "if (mass.CompareTo(masses[mode]) < 0)",
     "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.EveryRouteMatchesIndependentCandleCdf"
+  },
+  {
+    "id": "kaufman-bands-exact-travel-expiry",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanAdaptiveBandWindow.cs",
+    "before": "_travel + movement - (full ? _moves.Peek() : (F)0)",
+    "after": "_travel + movement + (full ? _moves.Peek() : (F)0)",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.IntegerPowersMatchCenteredVarianceAcrossScales"
+  },
+  {
+    "id": "kaufman-bands-exact-efficiency-price",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanAdaptiveBandWindow.cs",
+    "before": "(value - _prices.Peek()).Abs() / travel",
+    "after": "(value - _lastPrice).Abs() / travel",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.IntegerPowersMatchCenteredVarianceAcrossScales"
+  },
+  {
+    "id": "kaufman-bands-exact-retained",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanAdaptiveBandWindow.cs",
+    "before": "_algebra.Constant(1) - gain",
+    "after": "_algebra.Constant(1) + gain",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.IntegerPowersMatchCenteredVarianceAcrossScales"
+  },
+  {
+    "id": "kaufman-bands-exact-second-moment",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanAdaptiveBandWindow.cs",
+    "before": "_algebra.Constant(value * value)",
+    "after": "_algebra.Constant(value)",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.IntegerPowersMatchCenteredVarianceAcrossScales"
+  },
+  {
+    "id": "kaufman-bands-exact-variance",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanAdaptiveBandWindow.cs",
+    "before": "second - mean * mean",
+    "after": "second + mean * mean",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.IntegerPowersMatchCenteredVarianceAcrossScales"
+  },
+  {
+    "id": "kaufman-bands-exact-preview",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanAdaptiveBandWindow.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.AlgebraicCancellationResolvesTheSubnormalMeanMidpoint"
+  },
+  {
+    "id": "kaufman-bands-exact-reset",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanAdaptiveBandWindow.cs",
+    "before": "_mean = _second = _algebra.Constant(0);",
+    "after": "_mean = _algebra.Constant(0);",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.AlgebraicCancellationResolvesTheSubnormalMeanMidpoint",
+    "scope": "internal void Reset()"
+  },
+  {
+    "id": "kaufman-bands-exact-rejection-atomicity",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "before": "var point = _window.Next(_input.GetValue(bar), isFinal);",
+    "after": "if (isFinal && (double.IsNaN(bar.Close) || double.IsInfinity(bar.Close))) _window.Next(0, true);\n        var point = _window.Next(_input.GetValue(bar), isFinal);",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.RejectedPricesDoNotAdvanceHistory",
+    "scope": "public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDisposable"
+  },
+  {
+    "id": "kaufman-bands-exact-native-upper",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "before": "[\"UpperBand\"] = point.Upper",
+    "after": "[\"UpperBand\"] = point.Lower",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.RoutesMatchIndependentCenteredVariance",
+    "scope": "public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDisposable"
+  },
+  {
+    "id": "kaufman-bands-exact-round-even",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanBandAlgebra.cs",
+    "before": "(BitConverter.DoubleToInt64Bits(lower) & 1) == 0",
+    "after": "(BitConverter.DoubleToInt64Bits(lower) & 1) != 0",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.AlgebraicCancellationResolvesTheSubnormalMeanMidpoint"
+  },
+  {
+    "id": "kaufman-bands-exact-power-coefficient",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanBandAlgebra.cs",
+    "before": "coefficient * ratio",
+    "after": "coefficient / ratio",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.PowerClassesCancelWithoutFactoringTheRationalBases"
+  },
+  {
+    "id": "kaufman-bands-exact-power-class",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanBandAlgebra.cs",
+    "before": "RationalRatio(basis / term.Key, out var ratio)",
+    "after": "RationalRatio(basis * term.Key, out var ratio)",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.PowerClassesCancelWithoutFactoringTheRationalBases"
+  },
+  {
+    "id": "kaufman-bands-exact-interval-upper",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanBandAlgebra.cs",
+    "before": "a.Upper * b.Upper",
+    "after": "a.Lower * b.Lower",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.IntervalProductsContainTheirIndependentRationalSquares"
+  },
+  {
+    "id": "kaufman-bands-exact-band-comparison",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Helpers/KaufmanBandAlgebra.cs",
+    "before": "if (distance.Sign() < 0) return direction;",
+    "after": "if (distance.Sign() > 0) return direction;",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.BandRoundingResolvesAlgebraicHalfwayTies"
+  },
+  {
+    "id": "kaufman-bands-exact-reference-variance",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.KaufmanBands.cs",
+    "before": "variance = (gd - gn) * (gd * variance + gn * delta * delta);",
+    "after": "variance = (gd + gn) * (gd * variance + gn * delta * delta);",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.IntegerPowersMatchCenteredVarianceAcrossScales"
+  },
+  {
+    "id": "kaufman-bands-reference-unreduced-denominator",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Validation/ReferenceFraction.cs",
+    "before": "=> new ReferenceFraction(numerator, denominator, true).ToDouble();",
+    "after": "=> new ReferenceFraction(numerator, 1, true).ToDouble();",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveReferenceEquivalenceTests.UnreducedFinalRoundingMatchesNormalizedRatios"
+  },
+  {
+    "id": "kaufman-bands-exact-reference-budget",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "before": "b => KaufmanAdaptiveIntegerValues(b, adaptiveBands.Length, (int)adaptiveBands.StdDevFactor))[key], IndicatorErrorBudget.Exact);",
+    "after": "b => KaufmanAdaptiveIntegerValues(b, adaptiveBands.Length, (int)adaptiveBands.StdDevFactor))[key], new IndicatorErrorBudget(1e-9, 1e-9));",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveBandNumericalTests.EnrolledReferenceRejectsEvenASubnormalOutputFault"
+  },
+  {
+    "id": "kaufman-bands-reference-leading-square-scale",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.KaufmanBands.cs",
+    "before": "var leading = variance >> (2 * shift);",
+    "after": "var leading = variance >> shift;",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveReferenceEquivalenceTests.IntegerCoordinatesMatchOriginalCenteredFractions"
+  },
+  {
+    "id": "kaufman-bands-reference-uncertified-root",
+    "module": "kaufman-bands-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.KaufmanBands.cs",
+    "before": "if (lower.Equals(upper)) return lower;",
+    "after": "if (!double.IsNaN(lower)) return lower;",
+    "filter": "FullyQualifiedName~KaufmanAdaptiveReferenceEquivalenceTests.IntegerCoordinatesMatchOriginalCenteredFractions"
   }
 ]

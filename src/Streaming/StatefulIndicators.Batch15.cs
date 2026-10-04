@@ -749,64 +749,18 @@ public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, I
 [PrimaryOutput("MiddleBand")]
 public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-    private readonly StreamingInputResolver _input;
-    private readonly double _stdDevFactor;
-    private double _prevMiddle;
-    private double _prevPowMa;
-
-    public KaufmanAdaptiveBandsState(int length = 100, double stdDevFactor = 3)
-    {
-        _stdDevFactor = Builder.Specs.KaufmanAdaptiveBandsSpecOptions.ValidateExponent(stdDevFactor);
-        _er = new EfficiencyRatioState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KaufmanAdaptiveBandWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public KaufmanAdaptiveBandsState(int length = 100, double stdDevFactor = 3) => _window = new(length, stdDevFactor);
     public IndicatorName Name => IndicatorName.KaufmanAdaptiveBands;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _prevMiddle = 0;
-        _prevPowMa = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var er = _er.Next(value, isFinal);
-        var erPow = MathHelper.Pow(er, _stdDevFactor);
-        var middle = (value * erPow) + ((1 - erPow) * _prevMiddle);
-        var powMa = (MathHelper.Pow(value, 2) * erPow) + ((1 - erPow) * _prevPowMa);
-        var middleSq = middle * middle;
-        var dev = powMa - middleSq >= 0 ? MathHelper.Sqrt(powMa - middleSq) : 0;
-        var upper = middle + dev;
-        var lower = middle - dev;
-
-        if (isFinal)
-        {
-            _prevMiddle = middle;
-            _prevPowMa = powMa;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        var point = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Middle, includeOutputs ? new Dictionary<string, double>
+        { ["UpperBand"] = point.Upper, ["MiddleBand"] = point.Middle, ["LowerBand"] = point.Lower } : null);
     }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-    }
+    public void Dispose() => Reset();
 }
 
 [PrimaryOutput("Kaco")]

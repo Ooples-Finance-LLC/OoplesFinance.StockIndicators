@@ -467,54 +467,20 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKaufmanAdaptiveBands(this StockData stockData, int length = 100, double stdDevFactor = 3)
     {
-        Builder.Specs.KaufmanAdaptiveBandsSpecOptions.ValidateExponent(stdDevFactor);
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<double> powMaList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var window = new KaufmanAdaptiveBandWindow(length, stdDevFactor);
+        var prices = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues;
+        foreach (var price in prices) Streaming.StreamingInputValidation.Finite(price, nameof(stockData));
+        List<double> upper = new(prices.Count), middle = new(prices.Count), lower = new(prices.Count);
+        var signals = CreateSignalsList(stockData);
+        foreach (var price in prices)
         {
-            var er = Pow(erList[i], stdDevFactor);
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (currentValue * er) + ((1 - er) * prevMiddleBand);
-            middleBandList.Add(middleBand);
-
-            var prevPowMa = GetLastOrDefault(powMaList);
-            var powMa = (Pow(currentValue, 2) * er) + ((1 - er) * prevPowMa);
-            powMaList.Add(powMa);
-
-            var kaufmanDev = powMa - Pow(middleBand, 2) >= 0 ? Sqrt(powMa - Pow(middleBand, 2)) : 0;
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + kaufmanDev;
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - kaufmanDev;
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, upperBand,
-                prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
+            var point = window.Next(price, true);
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); signals?.Add(point.Trade);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.KaufmanAdaptiveBands;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>
+        { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
+        stockData.IndicatorName = IndicatorName.KaufmanAdaptiveBands; return stockData;
     }
 
 

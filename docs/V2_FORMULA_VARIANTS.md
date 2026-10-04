@@ -1171,3 +1171,23 @@ seven-bar weighted stages; its length argument controls the candle lookback.
 Point candles [1,0,2] with lookback two yield Mo [0,0,-25] and Signal
 [0,0,-6.25]. Its previous normalized-true-range calculation was a different
 formula. Core output may alias an input span.
+
+### Kaufman Adaptive Bands
+
+The gain is the exact length-window efficiency ratio raised to the nonnegative
+finite `StdDevFactor` exponent. Mean and raw second moment start at zero; the
+bands are mean plus/minus the square root of the population variance. A zero
+exponent gives unit gain, including during startup. Published outputs round once
+to binary64, with ties to even. Signals compare published middle-band values.
+
+Production evaluates outward intervals and resolves ambiguous rounding ties
+with exact common-exponent power classes. This permits exact cancellation for
+fractional exponents. Expression storage grows with retained history, and exact
+fallback can be expensive; no constant-memory or competitor-speed claim applies.
+
+The independent reference for integer exponents 0 through 32 uses centered
+variance in integer coordinates and integer-square comparisons for band rounding.
+It has an exact output budget and recognizes mathematical output overflow.
+Fractional-exponent verification includes explicit algebraic cancellation and
+subnormal halfway hands; the older approximate fractional reference remains.
+These checks do not establish exhaustive arbitrary-exponent qualification.

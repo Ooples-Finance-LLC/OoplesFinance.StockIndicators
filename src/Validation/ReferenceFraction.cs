@@ -115,6 +115,11 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
         return new ReferenceFraction(logarithm, scale).ToDouble();
     }
 
+    // Final rounding uses integer division and does not require a reduced ratio.
+    // Keep the unreduced value private so arithmetic still receives normalized fractions.
+    internal static double RatioToDouble(BigInteger numerator, BigInteger denominator)
+        => new ReferenceFraction(numerator, denominator, true).ToDouble();
+
     internal double ToDouble()
     {
         if (_numerator.IsZero) return 0;

@@ -17,6 +17,20 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.KaufmanAdaptiveBands
+            && builtIn.CreateOptions() is KaufmanAdaptiveBandsSpecOptions adaptiveBands
+            && adaptiveBands.StdDevFactor <= 32 && Math.Truncate(adaptiveBands.StdDevFactor).Equals(adaptiveBands.StdDevFactor))
+        {
+            var bandKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            var bandCache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < bandKeys.Length; slot++)
+            {
+                var key = bandKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => bandCache.GetValue(bars,
+                    b => KaufmanAdaptiveIntegerValues(b, adaptiveBands.Length, (int)adaptiveBands.StdDevFactor))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KlingerVolumeOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var klingerOptions = builtIn.CreateOptions(); var klingerKind = AverageKind(klingerOptions, 3);
