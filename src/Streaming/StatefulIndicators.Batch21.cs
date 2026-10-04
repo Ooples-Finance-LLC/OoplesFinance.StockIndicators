@@ -752,85 +752,20 @@ public sealed class RepulsionMovingAverageState : IStreamingIndicatorState, IDis
 }
 
 [PrimaryOutput("Raf")]
-public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState, IDisposable
+public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly int _length;
-    private readonly RollingWindowMax _highWindow1;
-    private readonly RollingWindowMin _lowWindow1;
-    private readonly RollingWindowMax _highWindow2;
-    private readonly RollingWindowMin _lowWindow2;
-    private readonly StreamingInputResolver _input;
-    private double _prevAltma;
-    private bool _hasPrev;
-
-    public RetentionAccelerationFilterState(int length = 50)
-    {
-        _length = Math.Max(1, length);
-        _highWindow1 = new RollingWindowMax(_length);
-        _lowWindow1 = new RollingWindowMin(_length);
-        _highWindow2 = new RollingWindowMax(_length * 2);
-        _lowWindow2 = new RollingWindowMin(_length * 2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly RetentionAccelerationWindow _window;
+    public RetentionAccelerationFilterState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.RetentionAccelerationFilter;
-
-    public void Reset()
-    {
-        _highWindow1.Reset();
-        _lowWindow1.Reset();
-        _highWindow2.Reset();
-        _lowWindow2.Reset();
-        _prevAltma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest1 = isFinal ? _highWindow1.Add(bar.High, out _) : _highWindow1.Preview(bar.High, out _);
-        var lowest1 = isFinal ? _lowWindow1.Add(bar.Low, out _) : _lowWindow1.Preview(bar.Low, out _);
-        var highest2 = isFinal ? _highWindow2.Add(bar.High, out _) : _highWindow2.Preview(bar.High, out _);
-        var lowest2 = isFinal ? _lowWindow2.Add(bar.Low, out _) : _lowWindow2.Preview(bar.Low, out _);
-        var ar = 2 * (highest1 - lowest1);
-        var br = 2 * (highest2 - lowest2);
-        var k1 = ar != 0 ? (1 - ar) / ar : 0;
-        var k2 = br != 0 ? (1 - br) / br : 0;
-        var alpha = k1 != 0 ? k2 / k1 : 0;
-        var r1 = alpha != 0 && highest1 >= 0
-            ? MathHelper.Sqrt(highest1) / 4 * ((alpha - 1) / alpha) * (k2 / (k2 + 1))
-            : 0;
-        var r2 = highest2 >= 0 ? MathHelper.Sqrt(highest2) / 4 * (alpha - 1) * (k1 / (k1 + 1)) : 0;
-        var factor = r1 != 0 ? r2 / r1 : 0;
-        var altk = MathHelper.Pow(factor >= 1 ? 1 : factor, MathHelper.Sqrt(_length)) * ((double)1 / _length);
-        var prevAltma = _hasPrev ? _prevAltma : value;
-        var altma = (altk * value) + ((1 - altk) * prevAltma);
-
-        if (isFinal)
-        {
-            _prevAltma = altma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Raf", altma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(altma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var next = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(next.Value, includeOutputs ? new Dictionary<string, double> { { "Raf", next.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow1.Dispose();
-        _lowWindow1.Dispose();
-        _highWindow2.Dispose();
-        _lowWindow2.Dispose();
-    }
+    public void Dispose() => Reset();
 }
 
 [PrimaryOutput("Rcc")]

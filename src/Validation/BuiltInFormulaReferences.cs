@@ -147,6 +147,11 @@ internal static partial class BuiltInFormulaReferences
             for (var slot = 0; slot < qualityKeys.Length; slot++) { var selected = qualityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VolatilityQualityOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RetentionAccelerationFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RetentionValues(bars, Integer(builtIn.CreateOptions(), "Length", 50)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ZDistanceFromVwap)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZDistanceOutputs(bars, builtIn)["Zscore"], IndicatorErrorBudget.Exact);

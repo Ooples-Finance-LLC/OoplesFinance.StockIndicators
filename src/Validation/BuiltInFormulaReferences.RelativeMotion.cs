@@ -787,23 +787,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Rochla", ExpandedGainTrajectory(Closes(bars), gains)));
                 });
             case IndicatorName.RetentionAccelerationFilter:
-                return new("Raf", new[] { "Raf" }, bars =>
-                {
-                    var gains = bars.Select((_, i) =>
-                    {
-                        var first = Window(bars, i, length).ToArray();
-                        var second = Window(bars, i, length * 2).ToArray();
-                        var high1 = first.Max(b => b.High);
-                        var high2 = second.Max(b => b.High);
-                        var a = 2 * (high1 - first.Min(b => b.Low));
-                        var b = 2 * (high2 - second.Min(b => b.Low));
-                        // Cancel the k1/k2 and alpha factors in r2/r1. Keep the original zero-r1 cases.
-                        var ratio = high1 <= 0 || a == 0 || b == 0 || a == 1 || b == 1 || a == b // NOSONAR: S1244 - Preserve the original exact singular cases before algebraic cancellation.
-                            ? 0 : Math.Sqrt(high2 / high1) * a / b;
-                        return Math.Pow(Math.Min(1, ratio), Math.Sqrt(length)) / length;
-                    }).ToArray();
-                    return Outputs(("Raf", ExpandedGainTrajectory(Closes(bars), gains)));
-                });
+                return new("Raf", new[] { "Raf" }, bars => Outputs(("Raf", RetentionValues(bars, length))));
             case IndicatorName.TrigonometricOscillator:
                 return new("To", new[] { "To" }, bars =>
                 {

@@ -12140,49 +12140,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeRetentionAccelerationFilterFast(StockData data, ComputeContext context, int length = 50)
     {
-        // CalculateRetentionAccelerationFilter derives its smoothing constant from two nested high/low ranges -
-        // one over the length and one over twice the length - and then runs an exponential-style blend of the
-        // chained series with that constant. The seed is the current value, not zero.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow1 = new RollingMinMax(length);
-        var lowWindow1 = new RollingMinMax(length);
-        var highWindow2 = new RollingMinMax(length * 2);
-        var lowWindow2 = new RollingMinMax(length * 2);
-        var lengthRoot = MathHelper.Sqrt(length);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow1.Add(highs[i]);
-            lowWindow1.Add(lows[i]);
-            highWindow2.Add(highs[i]);
-            lowWindow2.Add(lows[i]);
-
-            var highest1 = highWindow1.Max;
-            var lowest1 = lowWindow1.Min;
-            var highest2 = highWindow2.Max;
-            var lowest2 = lowWindow2.Min;
-            var ar = 2 * (highest1 - lowest1);
-            var br = 2 * (highest2 - lowest2);
-            var k1 = ar != 0 ? (1 - ar) / ar : 0;
-            var k2 = br != 0 ? (1 - br) / br : 0;
-            var alpha = k1 != 0 ? k2 / k1 : 0;
-            var r1 = alpha != 0 && highest1 >= 0 ? MathHelper.Sqrt(highest1) / 4 * ((alpha - 1) / alpha) * (k2 / (k2 + 1)) : 0;
-            var r2 = highest2 >= 0 ? MathHelper.Sqrt(highest2) / 4 * (alpha - 1) * (k1 / (k1 + 1)) : 0;
-            var factor = r1 != 0 ? r2 / r1 : 0;
-            var altk = MathHelper.Pow(factor >= 1 ? 1 : factor, lengthRoot) * ((double)1 / length);
-
-            var prevAltma = i >= 1 ? output[i - 1] : input[i];
-            output[i] = (altk * input[i]) + ((1 - altk) * prevAltma);
-        }
-
+        var values = RetentionAccelerationWindow.Calculate(data, length).Values;
+        var buffer = context.Rent(values.Length);
+        values.AsSpan().CopyTo(buffer.WritableSpan);
         return buffer;
     }
 

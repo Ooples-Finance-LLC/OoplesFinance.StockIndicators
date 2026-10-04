@@ -88559,5 +88559,133 @@
     "before": "if(double.IsNaN(certified[\"UpperBand\"][i]))",
     "after": "if(double.IsPositiveInfinity(certified[\"UpperBand\"][i]))",
     "filter": "FullyQualifiedName~VariableAverageNumericalTests.AffineRangeHalfwayBandHasAnIndependentConstantHand"
+  },
+  {
+    "id": "retention-exact-gain",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "Math.Pow(ratio, Math.Sqrt(_length)) / _length",
+    "after": "Math.Pow(ratio, Math.Sqrt(_length)) / (_length + 1)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-exponent",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "Math.Sqrt(_length)",
+    "after": "Math.Sqrt(_length + 1)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-outer-high",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "Extreme(_high2, high, 2L * _length, true)",
+    "after": "Extreme(_high2, high, _length, true)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-inner-low",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "Extreme(_low1, low, _length, false)",
+    "after": "Extreme(_low1, low, 2L * _length, false)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-expiry",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "first.Value.Index <= _index - width) first = first.Next",
+    "after": "first.Value.Index < _index - width) first = first.Next",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-seed",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "_index == 0 ? price : _previous",
+    "after": "_index == 0 ? 0 : _previous",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.ExactSingularRangesFreezeThePreviousOutput"
+  },
+  {
+    "id": "retention-exact-blend",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "previous + gain * (current - previous)",
+    "after": "previous + gain * (current + previous)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-preview",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-reset",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "_index = 0; _previous = 0;",
+    "after": "_index = 1; _previous = 0;",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.ExactSingularRangesFreezeThePreviousOutput"
+  },
+  {
+    "id": "retention-exact-half-inner",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "a.CompareTo((F)1) != 0",
+    "after": "true",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.ExactSingularRangesFreezeThePreviousOutput"
+  },
+  {
+    "id": "retention-exact-half-outer",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "b.CompareTo((F)1) != 0",
+    "after": "true",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.ExactSingularRangesFreezeThePreviousOutput"
+  },
+  {
+    "id": "retention-exact-high-ratio",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "h2 * a * a / (h1 * b * b)",
+    "after": "h1 * a * a / (h2 * b * b)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-rejection",
+    "module": "retention-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);\n        var next = _window.Next(bar.Close, bar.High, bar.Low, isFinal);",
+    "after": "if (double.IsNaN(bar.Low)) _window.Reset();\n        StreamingInputValidation.Validate(bar);\n        var next = _window.Next(bar.Close, bar.High, bar.Low, isFinal);",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.RejectionPreservesCommittedWindows"
+  },
+  {
+    "id": "retention-exact-reference-ratio",
+    "module": "retention-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Retention.cs",
+    "before": "proportion * proportion * H / h",
+    "after": "proportion * proportion * h / H",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-reference-blend",
+    "module": "retention-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Retention.cs",
+    "before": "price + (R(1) - weight) * (previous - price)",
+    "after": "price + weight * (previous - price)",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.NestedRangesHaveIndependentQuarterFactorHand"
+  },
+  {
+    "id": "retention-exact-signal-direction",
+    "module": "retention-numerical",
+    "file": "src/Helpers/RetentionAccelerationWindow.cs",
+    "before": "var change = margin - _previousMargin;",
+    "after": "var change = _previousMargin - margin;",
+    "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.PublishedResidualSignalsRetainOverflowingDifferences"
   }
 ]

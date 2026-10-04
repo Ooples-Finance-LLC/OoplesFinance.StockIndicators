@@ -5700,3 +5700,35 @@ backlog agreement. Qualification: `si-vma966-qualified.json`; source integration
 - `si-vma965-subtraction-mutations` snapshot/archive: `5985b587ffcd293d3c2c8dd5b49d896ef74f72c002729f8b044f47803edbd409` / `045a6724765ff8fd8972bc00c40e607f5c8be2f538c83b6a385f7c1c46bc8ce3`.
 
 Hosted gates, final package/platform assurance and competitor timing remain outstanding. PR #246 remains draft.
+
+
+### Retention Acceleration Filter public qualification (2026-10-04)
+
+The public batch, fast and native routes now evaluate the existing cancelled
+range ratio without overflowing the intermediate ranges or losing exact singular
+comparisons. Lazy extrema support doubled periods beyond Int32 without eager
+allocation. The ratio root is rounded once, followed by the existing binary64
+power/gain boundary; each blend is evaluated exactly and rounded once into the
+published recurrence. Signals compare exact differences of published values.
+Invalid fields are rejected before history changes.
+
+**37 distinct focused checks passed**, including all four public configurations,
+selected inputs, singular hands, extreme ranges, large periods, signals,
+preview/reset and rejection. **Seven enrollment/Vma/Herrick integration checks
+passed** using unchanged binaries. **16 unique compiled behavioral faults were
+caught**. The original reset fault survived a zero-start hand and receives no
+credit; its repaired filter uses the existing nonzero-start hand, passes baseline
+and catches the fault. Earlier compilation and incorrect-hand attempts receive
+no verification credit. Qualification: `si-retention981-qualified.json`.
+
+Compiled inventory (`si-retention975-inventory.json`) is **6,860/7,131**, leaving
+**271 configurations across 33 types**, with no construction failures and exact
+backlog agreement. All **10,202 mutation anchors** validate. The separate core/
+registry alignment and continuous singular extension decisions remain pending;
+this batch preserves the existing public zero-gain singular convention.
+
+- `si-retention974-mutations-a` snapshot/archive: `0c9094e2ff622a64f7a3f3cc06eb3a1bb2a86bc99274d6d11da8343294d6c7c2` / `d5e0cd7bc6568b954dfeed9752f8148cca74a977653f750c36457c829ba64a30`.
+
+- `si-retention974-mutations-b` snapshot/archive: `0c9094e2ff622a64f7a3f3cc06eb3a1bb2a86bc99274d6d11da8343294d6c7c2` / `d5e0cd7bc6568b954dfeed9752f8148cca74a977653f750c36457c829ba64a30`.
+
+- `si-retention979-reset-mutations` snapshot/archive: `0699254ff763ba9b4ec979918ac78b525ae4d6570b4b67bfc2754269b23e8c06` / `94c8d2435adabe1d1e1203eaca755783d62aab01bd234746efe73dc29ff04aaf`.

@@ -862,45 +862,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRetentionAccelerationFilter(this StockData stockData, int length = 50)
     {
-        List<double> altmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList1, lowestList1) = GetMaxAndMinValuesList(highList, lowList, length);
-        var (highestList2, lowestList2) = GetMaxAndMinValuesList(highList, lowList, length * 2);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var highest1 = highestList1[i];
-            var lowest1 = lowestList1[i];
-            var highest2 = highestList2[i];
-            var lowest2 = lowestList2[i];
-            var ar = 2 * (highest1 - lowest1);
-            var br = 2 * (highest2 - lowest2);
-            var k1 = ar != 0 ? (1 - ar) / ar : 0;
-            var k2 = br != 0 ? (1 - br) / br : 0;
-            var alpha = k1 != 0 ? k2 / k1 : 0;
-            var r1 = alpha != 0 && highest1 >= 0 ? Sqrt(highest1) / 4 * ((alpha - 1) / alpha) * (k2 / (k2 + 1)) : 0;
-            var r2 = highest2 >= 0 ? Sqrt(highest2) / 4 * (alpha - 1) * (k1 / (k1 + 1)) : 0;
-            var factor = r1 != 0 ? r2 / r1 : 0;
-            var altk = Pow(factor >= 1 ? 1 : factor, Sqrt(length)) * ((double)1 / length);
-
-            var prevAltma = i >= 1 ? altmaList[i - 1] : currentValue;
-            var altma = (altk * currentValue) + ((1 - altk) * prevAltma);
-            altmaList.Add(altma);
-
-            var signal = GetCompareSignal(currentValue - altma, prevValue - prevAltma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Raf", altmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(altmaList);
+        var result = RetentionAccelerationWindow.Calculate(stockData, length);
+        var values = result.Values.ToList();
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Raf", values } });
+        var signals = CreateSignalsList(stockData);
+        signals?.AddRange(result.Signals);
+        stockData.SetSignals(signals);
+        stockData.SetCustomValues(values);
         stockData.IndicatorName = IndicatorName.RetentionAccelerationFilter;
-
         return stockData;
     }
 

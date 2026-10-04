@@ -1227,3 +1227,23 @@ Other averaging kinds and custom callbacks retain existing binary64 boundaries.
 An affine true-range hand places the upper band exactly at -1 - 2^-53 and
 independently verifies ties-to-even publication of -1. Expression storage and
 exact fallback costs remain history dependent.
+
+
+### Retention Acceleration Filter public routes
+
+Let `a=2*(shortHigh-shortLow)` and `b=2*(longHigh-longLow)`, with windows
+`length` and `2*length`. Preserve zero gain when shortHigh<=0, either range is
+zero or one, or a=b. Otherwise the cancelled ratio is
+`sqrt(longHigh/shortHigh)*a/b`. Compute its squared magnitude rationally, retain
+its sign, and clip positive ratios at one before taking the correctly rounded
+root. The gain uses binary64 `Pow(ratio,Sqrt(length))/length`. Each recurrence
+blends current price with the previous published output using exact intermediate
+arithmetic and one final round. Startup is current price. Non-real/nonfinite
+gains reject before state changes. This is a rounded-power contract, not an
+arbitrary-precision transcendental claim.
+
+For length four, start with close=0, high=16, low=0, followed by four bars with
+close=4, high=4, low=2. The last ratio is 1/4, gain 1/64, and output 1/16.
+Selected prices retain original highs/lows. Existing exact singular cases stay
+zero; no continuous extension or separate core/registry formula alignment is
+included in this public batch.
