@@ -208,6 +208,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersAdaptiveStochasticIndicatorV1SpecOptions), typeof(EhlersAdaptiveCommodityChannelIndexV1SpecOptions), typeof(EhlersAdaptiveRelativeStrengthIndexV1SpecOptions), typeof(EhlersAdaptiveRsiFisherTransformV1SpecOptions), typeof(EhlersSineWaveIndicatorV1SpecOptions), typeof(EhlersInstantaneousTrendlineV1SpecOptions), typeof(EhlersHilbertOscillatorSpecOptions),
         typeof(EhlersIirFilterSpecOptions),
         typeof(EhlersImpulseReactionSpecOptions),
+        typeof(EhlersMesaPredictIndicatorV1SpecOptions),
         typeof(EhlersImpulseResponseSpecOptions),
         typeof(EhlersInfiniteImpulseResponseFilterSpecOptions),
         typeof(HistoricalVolatilityPercentileSpecOptions),

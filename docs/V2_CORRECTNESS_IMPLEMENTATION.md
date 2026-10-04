@@ -5899,3 +5899,27 @@ receive no qualification credit. PR #246 remains draft; final assurance remains.
 - `si-anticipate1056-limit-0` snapshot/archive: `b3e964597df6c2d410c04d2f373f2f14ba9f84ecdabe05760c049db05768d33e` / `d29b329c8e5ccb206a9aa4e5e5dd9f7c9d3d3226b84322ae014241ff29e84f20`.
 
 - `si-anticipate1056-limit-1` snapshot/archive: `b3e964597df6c2d410c04d2f373f2f14ba9f84ecdabe05760c049db05768d33e` / `d29b329c8e5ccb206a9aa4e5e5dd9f7c9d3d3226b84322ae014241ff29e84f20`.
+
+
+### Mesa Predict V1 numerical qualification (2026-10-04)
+
+Mesa Predict V1 now retains filter, Burg-fit and forecast stages beyond binary64's
+upper exponent, with binary64 stage precision and subnormal rounding. Observed
+history replaces eager period/horizon allocations. Independent sparse residual
+and prediction-polynomial references cover all three outputs and all five routes.
+The amplitude cutoff and unused Length3 parameter remain unchanged.
+
+**108 distinct focused checks passed; 24 compiled behavioral faults were caught**
+(`si-mesa1070-qualified.json`). One original residual-support survivor required a
+higher-order, partially filled window regression; only the successful compiled
+repair is credited. Failed restore/build attempts and an interrupted profiling
+run receive no credit. **26 main-checkout integration checks passed**, including
+Anticipate period limits and Comb selected-input/state preservation
+(`mesa1083-integration.trx`). All **10,321 mutation anchors** validate.
+
+Compiled enrollment is **6,898/7,131**, leaving **233 configurations across 27
+types**, with no constructor failures and exact backlog agreement
+(`si-mesa1086-inventory.json`). No new public period cap is introduced. Very large
+nonzero orders, horizons and Hann windows remain computationally expensive;
+maximum-int verification covers zero startup, not general throughput. PR #246
+remains draft; final platform/package and timing assurance remains incomplete.

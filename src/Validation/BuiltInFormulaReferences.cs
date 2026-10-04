@@ -1126,6 +1126,13 @@ internal static partial class BuiltInFormulaReferences
                 yield break;
             }
         }
+        if (builtIn.BatchName == IndicatorName.EhlersMesaPredictIndicatorV1)
+        {
+            var mesaOptions = (EhlersMesaPredictIndicatorV1SpecOptions)builtIn.CreateOptions();
+            var mesaKeys = builtIn.BatchOutputKey is { } selectedMesa ? new[] { selectedMesa } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<mesaKeys.Length;slot++) { var key=mesaKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>MesaPredictionValues(bars,mesaOptions)[key],IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersImpulseResponse)
         {
             var impulseOptions = (EhlersImpulseResponseSpecOptions)builtIn.CreateOptions();

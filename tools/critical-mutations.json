@@ -89452,5 +89452,200 @@
     "before": "length = AnticipateWindow.ValidateLength(length);",
     "after": "length = Math.Max(1, Math.Min(length, 4096));",
     "filter": "FullyQualifiedName~AnticipatePeriodLimitTests.OversizedPeriodsRejectAcrossAllRoutesBeforePublishing"
+  },
+  {
+    "id": "mesa-v1-exact-startup",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "_startup < 4",
+    "after": "_startup < 3",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-lag",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "R(_price1 - _price2)",
+    "after": "R(_price1 + _price2)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-feedback",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "Product(_h2, _hp1)",
+    "after": "Product(_h2, -_hp1)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-low-half",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "R(Product(_l1, R(hp + _hp1)), 2)",
+    "after": "R(Product(_l1, R(hp + _hp1)), 1)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-cutoff",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "(scale << 46)",
+    "after": "(scale << 45)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.RelativeAmplitudeCutoffRemainsAFormulaDecision"
+  },
+  {
+    "id": "mesa-v1-exact-cutoff-bypass",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "(scale << 46) > BigInteger.Max(BigInteger.Abs(price), BigInteger.Abs(_price1))",
+    "after": "scale.Sign > 0",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.RelativeAmplitudeCutoffRemainsAFormulaDecision"
+  },
+  {
+    "id": "mesa-v1-exact-forward-lag",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "start + j + 1 - prefix",
+    "after": "start + j - prefix",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-reflection",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "R(2 * cross * Unit, energy)",
+    "after": "R(cross * Unit, energy)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-polynomial",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "prior[k] - Product(reflection, prior[order-k])",
+    "after": "prior[k] + Product(reflection, prior[order-k])",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-residual-support",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "var nextStart = Math.Max(0, start - 1)",
+    "after": "var nextStart = start",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.PartialHistoryCanReachHigherBurgOrders"
+  },
+  {
+    "id": "mesa-v1-exact-backward-residual",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "At(backward, index) - Product(reflection, At(forward, index))",
+    "after": "At(backward, index + 1) - Product(reflection, At(forward, index + 1))",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-sample-expiry",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "_samples.Skip(_samples.Count == _window ? 1 : 0)",
+    "after": "_samples.Skip(0)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-temporal-history",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "_coefficients.Reverse().Take(_smooth - 1)",
+    "after": "_coefficients.Take(_smooth - 1)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-hann-mass",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "lag < _smooth; lag++) mass",
+    "after": "lag < Math.Min(_smooth, _coefficients.Count + 1); lag++) mass",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-lag-histories",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "ExactProduct(At(history[lag], k), Weight(lag + 1))",
+    "after": "ExactProduct(At(history[lag], 0), Weight(lag + 1))",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-horizon",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "step < _horizon; step++",
+    "after": "step < _horizon - 1; step++",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-forecast-lags",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "At(path, path.Count - 1 - k)",
+    "after": "At(path, path.Count - 1)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-prediction-average",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "R(prePredict + _previousPrediction, 2)",
+    "after": "R(prePredict + _previousPrediction, 1)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-preview",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-reset",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "_samples.Clear(); _coefficients.Clear();",
+    "after": "_coefficients.Clear();",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset",
+    "scope": "internal void Reset()"
+  },
+  {
+    "id": "mesa-v1-exact-signal",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/MesaPredictionKernel.cs",
+    "before": "difference > _previousDifference ? Signal.StrongBuy",
+    "after": "difference < _previousDifference ? Signal.StrongBuy",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.SelectedPricesAndSignalsUseTheFilteredForecast"
+  },
+  {
+    "id": "mesa-v1-exact-selected-fast",
+    "module": "mesa-v1-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.SelectedPricesAndSignalsUseTheFilteredForecast",
+    "scope": "internal static ComputeBuffer ComputeMesaPredictV1Fast("
+  },
+  {
+    "id": "mesa-v1-exact-reference-polynomial",
+    "module": "mesa-v1-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.MesaPrediction.cs",
+    "before": "R(v-R(reflection*expanded[order-k]))",
+    "after": "R(v+R(reflection*expanded[order-k]))",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.ExtendedFilterFitAndForecastPreservePreviewAndReset"
+  },
+  {
+    "id": "mesa-v1-exact-native-rejection",
+    "module": "mesa-v1-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open)) _kernel.Reset();\n        StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~MesaV1NumericalTests.InvalidInputDoesNotAdvanceAnyStage",
+    "scope": "public sealed class EhlersMesaPredictIndicatorV1State"
   }
 ]

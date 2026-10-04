@@ -1344,3 +1344,24 @@ history grows lazily. Native previews calculate before committing history; reset
 clears the filter and previous prediction. Selected inputs drive the filter;
 invalid prices/candle fields reject before advancing state. Unsupported averaging
 kinds retain the legacy numerical phase path within the same public period bound.
+
+
+### Mesa Predict V1: extended stages and sparse Burg history
+
+Retain the existing binary64 filter coefficients, four high-pass startup zeros,
+and scalar rounding boundaries, extending only the upper exponent. Fit Burg
+coefficients to normalized filtered samples with zero-filled unavailable history.
+Covariance/energy sums are exact before rounding each reflection; residual and
+autoregressive stages retain binary64 precision. Stop when either residual is
+identically zero; subsequent reflections then remain zero. Residual support moves
+left at each order even while the sample window is partially filled.
+
+Each lag retains its own temporal Hann history. Use the full smoothing-window
+mass of the existing binary64 cosine weights, including unavailable zero
+coefficients. Forecast recursively for Length1 steps, then average the current
+and preceding unsmoothed forecast. The fit cutoff is exactly 64*epsilon (2^-46)
+relative to the maximum magnitude of current/preceding input. Length3 remains
+unused. Exact filtered-minus-predicted ordering determines signals before output
+projection. Invalid OHLCV/selected inputs reject before state changes. Preview and
+reset preserve all committed histories. This introduces no new public period cap;
+large nonzero orders/horizons and full Hann-mass evaluation can still be costly.

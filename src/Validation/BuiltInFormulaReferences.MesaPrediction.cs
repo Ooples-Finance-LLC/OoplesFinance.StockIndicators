@@ -1,64 +1,78 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Builder.Specs;
-
 namespace OoplesFinance.StockIndicators.Validation;
-
 internal static partial class BuiltInFormulaReferences
 {
     private static FormulaDefinition? MesaPredictionFormula(IBuiltInIndicator indicator)
     {
         if (indicator.CreateOptions() is not EhlersMesaPredictIndicatorV1SpecOptions options) return null;
-        return new("Predict", new[] { "Ssf", "Predict", "PrePredict" }, bars =>
+        return new("Predict", new[] { "Ssf", "Predict", "PrePredict" }, bars => MesaPredictionValues(bars,options));
+    }
+    internal static Dictionary<string,double[]> MesaPredictionValues(IReadOnlyList<Bar> bars, EhlersMesaPredictIndicatorV1SpecOptions options)
+    {
+        var window=Math.Max(2,options.UpperLength); var orderLimit=Math.Min(Math.Max(1,options.Length2),window-1);
+        var smooth=Math.Max(1,options.LowerLength); var horizon=Math.Max(1,options.Length1);
+        var zero=new ReferenceFraction(0); var one=new ReferenceFraction(1); var two=new ReferenceFraction(2);
+        ReferenceFraction R(ReferenceFraction v)=>RoundRocBankStage(v);
+        ReferenceFraction D(double v)=>ReferenceFraction.FromDouble(v);
+        ReferenceFraction At(IReadOnlyList<ReferenceFraction> a,int j)=>j<0||j>=a.Count?zero:a[j];
+        ReferenceFraction Sparse(Dictionary<int,ReferenceFraction> a,int j)=>a.TryGetValue(j,out var v)?v:zero;
+        var highAngle=Math.Sqrt(2)*Math.PI/window;var highPole=Math.Exp(-highAngle);
+        var h2=2*highPole*Math.Cos(highAngle);var h3=-highPole*highPole;var h1=(1+h2-h3)/4;
+        var lowAngle=Math.Sqrt(2)*Math.PI/smooth;var lowPole=Math.Exp(-lowAngle);
+        var l2=2*lowPole*Math.Cos(lowAngle);var l3=-lowPole*lowPole;var l1=1-l2-l3;
+        var prices=bars.Select(b=>D(b.Close)).ToArray();var high=new ReferenceFraction[bars.Count];var ssf=new ReferenceFraction[bars.Count];
+        var pre=new ReferenceFraction[bars.Count];var predicted=new ReferenceFraction[bars.Count];var coefficients=new List<ReferenceFraction[]>();
+        ReferenceFraction? mass=null;
+        ReferenceFraction Weight(int lag)=>D(1-Math.Cos(2*Math.PI*(lag+1d)/(smooth+1d)));
+        for(var i=0;i<bars.Count;i++)
         {
-            var prices = Closes(bars); var exact = prices.Select(BinaryDecimal).ToArray();
-            var angle = Math.Sqrt(2)*Math.PI/options.UpperLength;
-            var pole = Complex.FromPolarCoordinates(Math.Exp(-angle), angle);
-            var gain = (1+2*pole.Real+pole.Magnitude*pole.Magnitude)/4;
-            // Expand the high-pass denominator into its conjugate-pole impulse response.
-            var impulse = Enumerable.Range(0, bars.Count).Select(age =>
-                Math.Pow(pole.Magnitude, age)*Math.Sin((age+1)*angle)/Math.Sin(angle)).ToArray();
-            var drive = exact.Select((v, i) => i < 4 ? 0m : v-2*exact[i-1]+exact[i-2]).ToArray();
-            var high = exact.Select((_, i) => (double)Enumerable.Range(0, i+1)
-                .Sum(j => drive[j]*BinaryDecimal(gain*impulse[i-j]))).ToArray();
-            var lowAngle = Math.Sqrt(2)*Math.PI/options.LowerLength;
-            var ssf = HilbertLowPass(high, Math.Exp(-lowAngle), lowAngle);
-            var coefficients = new List<decimal[]>(); var prediction = new double[bars.Count];
-            var weights = Enumerable.Range(1, options.LowerLength).Select(j =>
-                BinaryDecimal(1-Math.Cos(2*Math.PI*j/(options.LowerLength+1)))).ToArray();
-            for (var i = 0; i < bars.Count; i++)
+            high[i]=i<4?zero:R(R(R(D(h1)*R(R(prices[i]-At(prices,i-1))-R(At(prices,i-1)-At(prices,i-2))))+R(D(h2)*At(high,i-1)))+R(D(h3)*At(high,i-2)));
+            ssf[i]=R(R(R(R(D(l1)*R(high[i]+At(high,i-1)))/two)+R(D(l2)*At(ssf,i-1)))+R(D(l3)*At(ssf,i-2)));
+            var sample=ssf.Skip(Math.Max(0,i-window+1)).Take(Math.Min(window,i+1)).ToArray();
+            var scale=sample.Select(v=>v.Abs()).Aggregate(zero,(a,b)=>a.CompareTo(b)>0?a:b);
+            var priceScale=prices[i].Abs().CompareTo(At(prices,i-1).Abs())>0?prices[i].Abs():At(prices,i-1).Abs();
+            var polynomial=new[]{one};
+            if(scale.CompareTo(D(64*2.2204460492503131e-16)*priceScale)>0)
             {
-                var sample = Enumerable.Range(0, options.UpperLength).Select(j =>
-                    i-options.UpperLength+1+j < 0 ? 0 : ssf[i-options.UpperLength+1+j]).ToArray();
-                var scale = sample.Max(Math.Abs); var polynomial = new[] { 1m };
-                if (scale > 64*Math.Pow(2, -52)*Math.Max(Math.Abs(prices[i]), i == 0 ? 0 : Math.Abs(prices[i-1])))
+                var forward=new Dictionary<int,ReferenceFraction>();var backward=new Dictionary<int,ReferenceFraction>();
+                for(var j=0;j<sample.Length;j++)
                 {
-                    var forward = sample.Skip(1).Select(v => BinaryDecimal(v/scale)).ToArray();
-                    var backward = sample.Take(sample.Length-1).Select(v => BinaryDecimal(v/scale)).ToArray();
-                    for (var order = 1; order <= options.Length2; order++)
-                    {
-                        var cross = forward.Zip(backward, (f, b) => f*b).Sum();
-                        var energy = forward.Sum(v => v*v)+backward.Sum(v => v*v);
-                        var reflection = energy == 0 ? 0 : Math.Max(-1m, Math.Min(1m, 2*cross/energy));
-                        // Prediction-error polynomial A(z) - reflection*z^order*A(1/z).
-                        var extended = polynomial.Concat(new[] { 0m }).ToArray();
-                        polynomial = extended.Select((v, k) => v-reflection*extended[order-k]).ToArray();
-                        var nextForward = forward.Skip(1).Zip(backward.Skip(1), (f, b) => f-reflection*b).ToArray();
-                        backward = backward.Take(backward.Length-1).Zip(forward, (b, f) => b-reflection*f).ToArray();
-                        forward = nextForward;
-                    }
+                    var position=window-sample.Length+j;var value=R(sample[j]/scale);if(value.Sign==0)continue;
+                    if(position>0)forward[position-1]=value;if(position<window-1)backward[position]=value;
                 }
-                var fitted = Enumerable.Range(1, options.Length2).Select(k => k < polynomial.Length ? -polynomial[k] : 0m).ToArray();
-                coefficients.Add(fitted);
-                var smoothed = fitted.Select((_, k) => Enumerable.Range(0, Math.Min(i+1, weights.Length))
-                    .Sum(lag => weights[lag]*coefficients[i-lag][k])/weights.Sum()).ToArray();
-                var path = sample.Select(BinaryDecimal).ToList();
-                for (var step = 0; step < options.Length1; step++)
-                    path.Add(smoothed.Select((value, lag) => value*path[path.Count-1-lag]).Sum());
-                prediction[i] = (double)path[path.Count-1];
+                for(var order=1;order<=orderLimit;order++)
+                {
+                    if(forward.Count==0||backward.Count==0)break;
+                    var cross=forward.Aggregate(zero,(sum,p)=>sum+p.Value*Sparse(backward,p.Key));
+                    var energy=forward.Values.Concat(backward.Values).Aggregate(zero,(sum,v)=>sum+v*v);
+                    var reflection=energy.Sign==0?zero:R(two*cross/energy);
+                    if(reflection.CompareTo(one)>0)reflection=one;if(reflection.CompareTo(zero-one)<0)reflection=zero-one;
+                    var expanded=polynomial.Concat(new[]{zero}).ToArray();
+                    polynomial=expanded.Select((v,k)=>R(v-R(reflection*expanded[order-k]))).ToArray();
+                    var keys=forward.Keys.Concat(backward.Keys).Distinct().ToArray();var nextForward=new Dictionary<int,ReferenceFraction>();var nextBackward=new Dictionary<int,ReferenceFraction>();
+                    foreach(var k in keys)
+                    {
+                        if(k>0&&k<window-order){var v=R(Sparse(forward,k)-R(reflection*Sparse(backward,k)));if(v.Sign!=0)nextForward[k-1]=v;}
+                        if(k<window-order-1){var v=R(Sparse(backward,k)-R(reflection*Sparse(forward,k)));if(v.Sign!=0)nextBackward[k]=v;}
+                    }
+                    forward=nextForward;backward=nextBackward;
+                }
             }
-            return Outputs(("Ssf", ssf), ("PrePredict", prediction),
-                ("Predict", prediction.Select((v, i) => (v+(i == 0 ? 0 : prediction[i-1]))/2).ToArray()));
-        });
+            var fitted=polynomial.Skip(1).Select(v=>zero-v).ToArray();coefficients.Add(fitted);
+            var recent=coefficients.Skip(Math.Max(0,coefficients.Count-smooth)).Reverse().ToArray();
+            var count=recent.Max(v=>v.Length);var averaged=new ReferenceFraction[count];
+            if(count>0&&mass is null){var sum=zero;for(var lag=0;lag<smooth;lag++)sum+=Weight(lag);mass=sum;}
+            for(var k=0;k<count;k++){var sum=zero;for(var lag=0;lag<recent.Length;lag++)sum+=At(recent[lag],k)*Weight(lag);averaged[k]=R(sum/mass!.Value);}
+            var forecast=zero;
+            if(averaged.Any(v=>v.Sign!=0))
+            {
+                var path=sample.ToList();
+                for(var step=0;step<horizon;step++)
+                {var sum=zero;for(var k=0;k<count;k++)sum+=averaged[k]*At(path,path.Count-1-k);forecast=R(sum);path.Add(forecast);}
+            }
+            pre[i]=forecast;predicted[i]=R((forecast+At(pre,i-1))/two);
+        }
+        return new(){["Ssf"]=ssf.Select(v=>v.ToDouble()).ToArray(),["Predict"]=predicted.Select(v=>v.ToDouble()).ToArray(),["PrePredict"]=pre.Select(v=>v.ToDouble()).ToArray()};
     }
 }

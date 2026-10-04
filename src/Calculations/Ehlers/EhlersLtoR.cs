@@ -357,13 +357,14 @@ public static partial class Calculations
         List<double> ssfList = new(stockData.Count), predictList = new(stockData.Count), prePredictList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        foreach (var series in new[] { inputList, stockData.OpenPrices, stockData.HighPrices, stockData.LowPrices, stockData.ClosePrices, stockData.Volumes })
+            foreach (var price in series) Streaming.StreamingInputValidation.Finite(price, nameof(stockData));
         using var kernel = new Streaming.MesaPredictionKernel(length1, length2, lowerLength, upperLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var result = kernel.Next(inputList[i], true);
-            var previous = i == 0 ? 0 : ssfList[i-1]-predictList[i-1];
             ssfList.Add(result.Ssf); predictList.Add(result.Predict); prePredictList.Add(result.PrePredict);
-            signalsList?.Add(GetCompareSignal(result.Ssf-result.Predict, previous));
+            signalsList?.Add(result.Signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

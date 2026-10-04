@@ -1821,6 +1821,7 @@ internal static partial class IndicatorCompute
                 inverseRsi.Length, inverseRsi.SignalLength, inverseRsi.MaType, false, .015),
             EhlersCommodityChannelIndexInverseFisherTransformSpecOptions inverseCci => ComputeOscillatorInverseFisherFast(data, context,
                 inverseCci.Length, inverseCci.SignalLength, inverseCci.MaType, true, inverseCci.Constant),
+            EhlersMesaPredictIndicatorV1SpecOptions mesaV1 => ComputeMesaPredictV1Fast(data, context, mesaV1, spec.OutputKey),
             EhlersImpulseResponseSpecOptions eir => ComputeEhlersImpulseResponseFast(data, context, eir.Length, eir.Bw, eir.MaType),
             EhlersModifiedRelativeStrengthIndexSpecOptions modifiedRsi => ComputeModifiedRsiFast(data, context, modifiedRsi, spec.OutputKey),
             EhlersModifiedStochasticIndicatorSpecOptions emsi => ComputeEhlersModifiedStochasticFast(data, context,
@@ -19020,6 +19021,17 @@ internal static partial class IndicatorCompute
         return output;
     }
 
+
+    internal static ComputeBuffer ComputeMesaPredictV1Fast(StockData data, ComputeContext context, EhlersMesaPredictIndicatorV1SpecOptions options, string? outputKey)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        foreach(var series in new[] { input, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes })
+            foreach(var price in series) StreamingInputValidation.Finite(price, nameof(data));
+        using var kernel = new MesaPredictionKernel(options.Length1, options.Length2, options.LowerLength, options.UpperLength);
+        var result = context.Rent(input.Count);
+        for(var i=0;i<input.Count;i++) { var point=kernel.Next(input[i],true);result.WritableSpan[i]=outputKey=="Ssf"?point.Ssf:outputKey=="PrePredict"?point.PrePredict:point.Predict; }
+        return result;
+    }
 
     internal static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, double bw = 1)
     {
