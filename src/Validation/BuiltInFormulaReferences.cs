@@ -152,6 +152,17 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RetentionValues(bars, Integer(builtIn.CreateOptions(), "Length", 50)), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.PrimeNumberOscillator or IndicatorName.PrimeNumberBands)
+        {
+            var bands = builtIn.BatchName == IndicatorName.PrimeNumberBands;
+            var primeKeys = builtIn.BatchOutputKey is { } primeKey ? new[] { primeKey } : bands ? new[] { "UpperBand", "LowerBand" } : new[] { "Pno" };
+            for (var slot = 0; slot < primeKeys.Length; slot++)
+            {
+                var key = primeKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => PrimeOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 5), bands)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ZDistanceFromVwap)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZDistanceOutputs(bars, builtIn)["Zscore"], IndicatorErrorBudget.Exact);

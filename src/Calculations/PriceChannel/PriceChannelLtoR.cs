@@ -357,12 +357,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        stockData.SetCustomValues(highList);
-        var pnoUpBandList = CalculatePrimeNumberOscillator(stockData, length).ChainedValues;
-        stockData.SetCustomValues(lowList);
-        var pnoDnBandList = CalculatePrimeNumberOscillator(stockData, length).ChainedValues;
-        var (upperBandList, _) = GetMaxAndMinValuesList(pnoUpBandList, length);
-        var (_, lowerBandList) = GetMaxAndMinValuesList(pnoDnBandList, length);
+        PrimeOffsetWindow.Validate(stockData);
+        var window = new PrimeBandWindow(length);
+        var upperBandList = new List<double>(inputList.Count); var lowerBandList = new List<double>(inputList.Count);
+        for (var index = 0; index < inputList.Count; index++)
+        {
+            var pair = window.Next(highList[index], lowList[index], true);
+            upperBandList.Add(pair.Upper); lowerBandList.Add(pair.Lower);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {

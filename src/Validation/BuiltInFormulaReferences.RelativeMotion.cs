@@ -4,35 +4,7 @@ namespace OoplesFinance.StockIndicators.Validation;
 
 internal static partial class BuiltInFormulaReferences
 {
-    private static double[] PrimeOffsetsReference(double[] prices, int tolerance)
-    {
-        // Direct divisor definition, independent of the production six-step primality test.
-        bool Prime(long n)
-        {
-            if (n < 2) return false;
-            for (long divisor = 2; divisor <= Math.Floor(Math.Sqrt(n)); divisor++)
-                if (n % divisor == 0) return false;
-            return true;
-        }
-        double previousUpper = 0, previousLower = 0, previousOffset = 0;
-        return prices.Select(value =>
-        {
-            var center = (long)Math.Round(value);
-            var radius = value * tolerance / 100;
-            var high = (long)Math.Round(value + radius);
-            var low = (long)Math.Round(value - radius);
-            for (var candidate = center; candidate <= high; candidate++)
-            {
-                if (Prime(candidate)) { previousUpper = candidate; break; }
-                if (candidate == long.MaxValue) break;
-            }
-            for (var candidate = center; candidate >= Math.Max(2, low); candidate--)
-                if (Prime(candidate)) { previousLower = candidate; break; }
-            var offset = previousUpper - value < value - previousLower ? previousUpper - value : previousLower - value;
-            if (offset != 0) previousOffset = offset;
-            return previousOffset;
-        }).ToArray();
-    }
+
 
     private static double[] SecondOrderImpulse(int count, double first, double second)
     {

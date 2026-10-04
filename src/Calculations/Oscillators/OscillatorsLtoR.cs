@@ -1290,37 +1290,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePrimeNumberOscillator(this StockData stockData, int length = 5)
     {
-        List<double> pnoList = new(stockData.Count);
-        List<double> pno1List = new(stockData.Count);
-        List<double> pno2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var primes = PrimeNumberSearch.Find(currentValue, length);
-            var pno1 = primes.Upper == 0 ? GetLastOrDefault(pno1List) : primes.Upper;
-            var pno2 = primes.Lower == 0 ? GetLastOrDefault(pno2List) : primes.Lower;
-            pno1List.Add(pno1);
-            pno2List.Add(pno2);
-
-            var prevPno = GetLastOrDefault(pnoList);
-            var pno = pno1 - currentValue < currentValue - pno2 ? pno1 - currentValue : pno2 - currentValue;
-            pno = pno == 0 ? prevPno : pno;
-            pnoList.Add(pno);
-
-            var signal = GetCompareSignal(pno, prevPno);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pno", pnoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pnoList);
-        stockData.IndicatorName = IndicatorName.PrimeNumberOscillator;
-
+        PrimeOffsetWindow.Validate(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new PrimeOffsetWindow(length); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        double previous = 0;
+        foreach (var price in input) { var value = window.Next(price, true); values.Add(value); signals?.Add(GetCompareSignal(value, previous)); previous = value; }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pno", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.PrimeNumberOscillator;
         return stockData;
     }
 

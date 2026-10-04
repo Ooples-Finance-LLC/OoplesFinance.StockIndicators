@@ -88687,5 +88687,173 @@
     "before": "var change = margin - _previousMargin;",
     "after": "var change = _previousMargin - margin;",
     "filter": "FullyQualifiedName~RetentionAccelerationNumericalTests.PublishedResidualSignalsRetainOverflowingDifferences"
+  },
+  {
+    "id": "prime-bounded-witnesses",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "new long[] { 2, 325, 9375, 28178, 450775, 9780504, 1795265022 }",
+    "after": "new long[] { 2 }",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.PrimalityMatchesDivisorDefinitionAndKnownLargeCertificates"
+  },
+  {
+    "id": "prime-bounded-small-prime",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "return candidate == prime;",
+    "after": "return false;",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.PrimalityMatchesDivisorDefinitionAndKnownLargeCertificates"
+  },
+  {
+    "id": "prime-bounded-composite",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "if (composite) return false;",
+    "after": "if (composite) return true;",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.PrimalityMatchesDivisorDefinitionAndKnownLargeCertificates"
+  },
+  {
+    "id": "prime-bounded-negative",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "if (candidate < 2) return false;",
+    "after": "if (candidate < 2) return true;",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.PrimalityMatchesDivisorDefinitionAndKnownLargeCertificates"
+  },
+  {
+    "id": "prime-bounded-upper-clip",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "? long.MaxValue",
+    "after": "? long.MinValue",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.LargePrimeDistancesDoNotRoundAway"
+  },
+  {
+    "id": "prime-bounded-upper-domain",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "value > Maximum",
+    "after": "value >= Maximum",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.LargePrimeDistancesDoNotRoundAway"
+  },
+  {
+    "id": "prime-bounded-lower-domain",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "value < Minimum",
+    "after": "value <= Minimum",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.RoutesMatchIndependentBoundedSearch"
+  },
+  {
+    "id": "prime-bounded-radius",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "/ 100;",
+    "after": "/ 1000;",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.MissingSearchAndExactTiesRetainSpecifiedHistory"
+  },
+  {
+    "id": "prime-bounded-center-round",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeNumberSearch.cs",
+    "before": "var center = (long)Math.Round(value);",
+    "after": "var center = (long)Math.Floor(value);",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.MissingSearchAndExactTiesRetainSpecifiedHistory"
+  },
+  {
+    "id": "prime-bounded-upper-carry",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "found.Upper == 0 ? _upper : found.Upper",
+    "after": "found.Upper",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.MissingSearchAndExactTiesRetainSpecifiedHistory"
+  },
+  {
+    "id": "prime-bounded-lower-carry",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "found.Lower == 0 ? _lower : found.Lower",
+    "after": "found.Lower",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.MissingSearchAndExactTiesRetainSpecifiedHistory"
+  },
+  {
+    "id": "prime-bounded-tie",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "up < down ? up : -down",
+    "after": "up <= down ? up : -down",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.MissingSearchAndExactTiesRetainSpecifiedHistory"
+  },
+  {
+    "id": "prime-bounded-wide-offset",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "(F)upper - price",
+    "after": "F.Of((double)upper) - price",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.LargePrimeDistancesDoNotRoundAway"
+  },
+  {
+    "id": "prime-bounded-zero-carry",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "offset.Sign == 0 ? _previous : offset.Publish()",
+    "after": "offset.Publish()",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.MissingSearchAndExactTiesRetainSpecifiedHistory"
+  },
+  {
+    "id": "prime-bounded-preview",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "if (final) { _upper = upper;",
+    "after": "if (true) { _upper = upper;",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.RoutesMatchIndependentBoundedSearch"
+  },
+  {
+    "id": "prime-bounded-reset",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "_upper = _lower = 0; _previous = 0;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.MissingSearchAndExactTiesRetainSpecifiedHistory"
+  },
+  {
+    "id": "prime-bounded-band-minimum",
+    "module": "prime-numerical",
+    "file": "src/Helpers/PrimeOffsetWindow.cs",
+    "before": "_width = Math.Max(2, length);",
+    "after": "_width = Math.Max(1, length);",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.HugePeriodsUseObservedHistoryAndBandMinimumRemainsTwo"
+  },
+  {
+    "id": "prime-bounded-reference-witnesses",
+    "module": "prime-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Prime.cs",
+    "before": "new[] { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 }",
+    "after": "new[] { 2 }",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.PrimalityMatchesDivisorDefinitionAndKnownLargeCertificates"
+  },
+  {
+    "id": "prime-bounded-reference-distance",
+    "module": "prime-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Prime.cs",
+    "before": "(above + below).Sign < 0 ? above : below",
+    "after": "(above + below).Sign > 0 ? above : below",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.LargePrimeDistancesDoNotRoundAway"
+  },
+  {
+    "id": "prime-bounded-native-rejection",
+    "module": "prime-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "PrimeOffsetWindow.Validate(bar);\n        var pair = _window.Next",
+    "after": "if (double.IsNaN(bar.Low)) _window.Reset();\n        PrimeOffsetWindow.Validate(bar);\n        var pair = _window.Next",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.BoundedDomainRejectsBeforeAdvancingEitherBand"
+  },
+  {
+    "id": "prime-bounded-fast-selected",
+    "module": "prime-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);\n        var window = new PrimeOffsetWindow(length);",
+    "after": "var input = data.ClosePrices;\n        var window = new PrimeOffsetWindow(length);",
+    "filter": "FullyQualifiedName~PrimeNumberNumericalTests.DirectSelectedInputsKeepOriginalCandlesAndSignedSignals"
   }
 ]

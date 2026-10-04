@@ -1247,3 +1247,26 @@ close=4, high=4, low=2. The last ratio is 1/4, gain 1/64, and output 1/16.
 Selected prices retain original highs/lows. Existing exact singular cases stay
 zero; no continuous extension or separate core/registry formula alignment is
 included in this public batch.
+
+
+### Prime Number Oscillator and Prime Number Bands
+
+The public percentage search uses a ties-to-even rounded center and endpoints,
+with tolerance at least one percent. OHLC and selected prices must be finite
+and in [-9223372036854775808, 9223372036854774784]; finite volumes remain allowed
+without magnitude/sign restrictions. Search endpoints may extend beyond price
+bounds and are clipped to signed 64-bit integer limits. Candidate primality is
+deterministic over that domain.
+
+Each missing upper/lower search retains its own previous prime (initially zero).
+Compare `upper-price` against `price-lower` exactly, selecting the lower signed
+offset on ties. An exactly zero offset retains the previous published output.
+Round the chosen rational offset once. This retains the existing signed-distance
+rule even when remembered primes no longer bracket the input. Inputs [8,11,12,0]
+with five-percent tolerance produce [-8,-8,-1,11]. At the largest supported
+price the result is 13, from upper prime 9223372036854774797.
+
+Bands search original highs/lows and apply max/min to their published offsets
+with width max(2,length). The existing lagged-band signal convention is retained.
+Window storage grows with observed history. The separate core oscillator's
+different historical formula has not been aligned by this public batch.

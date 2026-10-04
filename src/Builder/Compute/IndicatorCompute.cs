@@ -8432,35 +8432,10 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputePrimeNumberOscillatorFast(StockData data, ComputeContext context, int length = 5)
     {
-        // CalculatePrimeNumberOscillator searches outward from the rounded chained value for the nearest
-        // prime above and the nearest below, within a band of length percent, and publishes whichever
-        // distance is the smaller signed offset. OscillatorCore.PrimeNumberOscillator read the close and
-        // measured something else. Each search falls back to the previous bar's prime when it finds none.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double previousUpperPrime = 0, previousLowerPrime = 0, previousOutput = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var primes = PrimeNumberSearch.Find(currentValue, length);
-            var upperPrime = primes.Upper == 0 ? previousUpperPrime : primes.Upper;
-            var lowerPrime = primes.Lower == 0 ? previousLowerPrime : primes.Lower;
-            previousUpperPrime = upperPrime;
-            previousLowerPrime = lowerPrime;
-
-            var offset = upperPrime - currentValue < currentValue - lowerPrime
-                ? upperPrime - currentValue
-                : lowerPrime - currentValue;
-            offset = offset == 0 ? previousOutput : offset;
-            output[i] = offset;
-            previousOutput = offset;
-        }
-
+        PrimeOffsetWindow.Validate(data);
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var window = new PrimeOffsetWindow(length); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

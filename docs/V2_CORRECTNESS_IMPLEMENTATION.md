@@ -5760,3 +5760,36 @@ configurations remains a separate pending scope decision. PR #246 stays draft.
 - `si-zdistance981-mutations-b` snapshot/archive: `0c9094e2ff622a64f7a3f3cc06eb3a1bb2a86bc99274d6d11da8343294d6c7c2` / `d5e0cd7bc6568b954dfeed9752f8148cca74a977653f750c36457c829ba64a30`.
 
 - `si-zdistance992-midpoint-mutations` snapshot/archive: `cc9d615e15a27234671dcbe4d893b7093bae2ba51c9f99e5f06b6e1105503309` / `9148d47815aa7be57d645747a64f17d8771347cd684e331b7cb00c7a9a0893e4`.
+
+
+### Prime Number Oscillator and Bands bounded-search qualification (2026-10-04)
+
+The approved public search domain is now explicit: every OHLC price and selected
+input must lie in [-2^63, 9223372036854774784], the representable binary64 portion
+of signed 64-bit integers. Volumes must be finite. Reject invalid inputs before
+advancing either band. Rounded percentage search endpoints are clipped to the
+signed 64-bit integer domain. Deterministic seven-witness primality testing
+replaces impractical trial division, and exact signed distances preserve prime
+offsets lost by first converting large primes to binary64. Band extrema retain
+only observed history, including for Int32.MaxValue periods.
+
+**54 focused checks and six shared domain/enrollment checks passed** in the
+candidate. **21/21 compiled behavioral faults were caught** with unchanged-source
+passing baselines and authenticated archives (`si-prime996-qualified.json`).
+**64/64 main integration checks passed** (`prime997-integration.trx`), including
+published retention, Z Distance, Vma and Herrick hands. Groups overlap; these
+are not a distinct sum. The initial restore-target failure receives no credit.
+
+The independent oracle uses direct divisors for small numbers and twelve prime
+witnesses for large numbers, plus fixed large prime/pseudoprime cases. At the
+largest supported price, neighboring primes are 45 below and 13 above: output
+13 must not disappear through floating conversion. Selected inputs, exact ties,
+missing-prime carry, preview/reset, rejection atomicity, large periods and signed
+signals are covered. All **10,223 mutation anchors** validate. Compiled enrollment
+is **6,868/7,131**, with **263 omissions across 31 types**, no construction failures
+and exact backlog agreement (`si-prime998-inventory.json`). Separate legacy core
+alignment is not included. PR #246 remains draft.
+
+- `si-prime991-mutations-a` snapshot/archive: `0e5d67c518fd02b497277de0ed6ddc7398976b7863729c69dc6c9d10e39f2379` / `d838037950aa2ed3de49f0beeee6bf65e9ff58bdb7951d6c62e84ac29212c6ef`.
+
+- `si-prime991-mutations-b` snapshot/archive: `0e5d67c518fd02b497277de0ed6ddc7398976b7863729c69dc6c9d10e39f2379` / `d838037950aa2ed3de49f0beeee6bf65e9ff58bdb7951d6c62e84ac29212c6ef`.

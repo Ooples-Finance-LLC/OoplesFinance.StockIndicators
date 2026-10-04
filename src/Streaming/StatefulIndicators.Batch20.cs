@@ -261,138 +261,39 @@ public sealed class PriceZoneOscillatorState : IStreamingIndicatorState, IDispos
 }
 
 [PrimaryOutput("UpperBand")]
-public sealed class PrimeNumberBandsState : IStreamingIndicatorState, IDisposable
+public sealed class PrimeNumberBandsState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly int _length;
-    private readonly PrimeNumberOscillatorState _upperPno;
-    private readonly PrimeNumberOscillatorState _lowerPno;
-    private readonly RollingWindowMax _upperWindow;
-    private readonly RollingWindowMin _lowerWindow;
-    private readonly StreamingInputResolver _input;
-
-    public PrimeNumberBandsState(int length = 5)
-    {
-        _length = Math.Max(1, length);
-        _upperPno = new PrimeNumberOscillatorState(_length, bar => bar.High);
-        _lowerPno = new PrimeNumberOscillatorState(_length, bar => bar.Low);
-        _upperWindow = new RollingWindowMax(Math.Max(2, _length));
-        _lowerWindow = new RollingWindowMin(Math.Max(2, _length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly PrimeBandWindow _window;
+    public PrimeNumberBandsState(int length = 5) => _window = new(length);
     public IndicatorName Name => IndicatorName.PrimeNumberBands;
-
-    public void Reset()
-    {
-        _upperPno.Reset();
-        _lowerPno.Reset();
-        _upperWindow.Reset();
-        _lowerWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var upperPno = _upperPno.Update(bar, isFinal, includeOutputs: false).Value;
-        var lowerPno = _lowerPno.Update(bar, isFinal, includeOutputs: false).Value;
-        var upper = isFinal ? _upperWindow.Add(upperPno, out _) : _upperWindow.Preview(upperPno, out _);
-        var lower = isFinal ? _lowerWindow.Add(lowerPno, out _) : _lowerWindow.Preview(lowerPno, out _);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "UpperBand", upper },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(upper, outputs);
+        PrimeOffsetWindow.Validate(bar);
+        var pair = _window.Next(bar.High, bar.Low, isFinal);
+        return new(pair.Upper, includeOutputs ? new Dictionary<string, double> { { "UpperBand", pair.Upper }, { "LowerBand", pair.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _upperPno.Dispose();
-        _lowerPno.Dispose();
-        _upperWindow.Dispose();
-        _lowerWindow.Dispose();
-    }
+    public void Dispose() => Reset();
 }
 
 [PrimaryOutput("Pno")]
 public sealed class PrimeNumberOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private double _prevPno1;
-    private double _prevPno2;
-    private double _prevPno;
-    private bool _hasPrev;
-
-    public PrimeNumberOscillatorState(int length = 5)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
-    internal PrimeNumberOscillatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
+    private readonly PrimeOffsetWindow _window;
+    private readonly Func<OhlcvBar, double>? _selector;
+    public PrimeNumberOscillatorState(int length = 5) => _window = new(length);
+    internal PrimeNumberOscillatorState(int length, Func<OhlcvBar, double> selector) : this(length)
+        => _selector = selector ?? throw new ArgumentNullException(nameof(selector));
     public IndicatorName Name => IndicatorName.PrimeNumberOscillator;
-
-    public void Reset()
-    {
-        _prevPno1 = 0;
-        _prevPno2 = 0;
-        _prevPno = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var primes = PrimeNumberSearch.Find(value, _length);
-        var pno1 = primes.Upper == 0 ? (_hasPrev ? _prevPno1 : 0) : primes.Upper;
-        var pno2 = primes.Lower == 0 ? (_hasPrev ? _prevPno2 : 0) : primes.Lower;
-
-        var pno = pno1 - value < value - pno2 ? pno1 - value : pno2 - value;
-        if (pno == 0)
-        {
-            pno = _hasPrev ? _prevPno : 0;
-        }
-
-        if (isFinal)
-        {
-            _prevPno1 = pno1;
-            _prevPno2 = pno2;
-            _prevPno = pno;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pno", pno }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pno, outputs);
+        PrimeOffsetWindow.Validate(bar);
+        var value = _window.Next(_selector is null ? bar.Close : _selector(bar), isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Pno", value } } : null);
     }
-
-    public void Dispose()
-    {
-    }
+    public void Dispose() => Reset();
 }
 
 [PrimaryOutput("PringSpecialK")]
