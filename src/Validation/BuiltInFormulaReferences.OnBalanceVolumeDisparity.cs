@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
@@ -16,48 +15,7 @@ internal static partial class BuiltInFormulaReferences
     {
         length = Math.Max(1, length); signalLength = Math.Max(1, signalLength);
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
-        var zero = R(0); var one = R(1); var factor = new ReferenceFraction(BigInteger.One << 512);
-        ReferenceFraction Compact(ReferenceFraction value)
-        {
-            if (value.Sign == 0) return zero;
-            var scale = one; var magnitude = Math.Abs(value.ToDouble());
-            while (double.IsInfinity(magnitude) || magnitude >= Math.Pow(2, 512)) { value /= factor; scale *= factor; magnitude = Math.Abs(value.ToDouble()); }
-            while (magnitude < Math.Pow(2, -256)) { value *= factor; scale /= factor; magnitude = Math.Abs(value.ToDouble()); }
-            var result = zero;
-            for (var part = 0; part < 4; part++) { var component = R(value.ToDouble()); result += component; value -= component; }
-            return result * scale;
-        }
-        ReferenceFraction Root(ReferenceFraction square)
-        {
-            var scale = one; var rootFactor = new ReferenceFraction(BigInteger.One << 256); var magnitude = square.ToDouble();
-            while (double.IsInfinity(magnitude) || magnitude >= Math.Pow(2, 512)) { square /= factor; scale *= rootFactor; magnitude = square.ToDouble(); }
-            while (magnitude < Math.Pow(2, -256)) { square *= factor; scale /= rootFactor; magnitude = square.ToDouble(); }
-            var root = R(square.SqrtToDouble());
-            // Two exact Newton corrections from the binary64 seed provide
-            // over 200 bits, independently of production's 106-bit root ratio.
-            for (var step = 0; step < 2; step++) root = (root + square / root) / R(2);
-            return Compact(root * scale);
-        }
-        ReferenceFraction[] Mean(ReferenceFraction[] values, int period)
-        {
-            if (kind is not (1 or 2 or 3 or 6)) return Average(values.Select(v => v.ToDouble()).ToArray(), period, kind).Select(R).ToArray();
-            var result = new ReferenceFraction[values.Length]; var previous = zero;
-            for (var i = 0; i < values.Length; i++)
-            {
-                if (period == 1) result[i] = values[i];
-                else if (kind == 6) result[i] = Compact((previous * R(period - 1) + values[i]) / R(period));
-                else if (kind == 3 && i >= period) result[i] = Compact((previous * R(period - 1) + R(2) * values[i]) / new ReferenceFraction(period + 1L));
-                else if (kind == 1 && i + 1 < period) result[i] = zero;
-                else
-                {
-                    var total = zero;
-                    for (var j = Math.Max(0, i - period + 1); j <= i; j++) total += values[j] * R(kind == 2 ? period - i + j : 1);
-                    result[i] = total / new ReferenceFraction(kind == 2 ? (long)period * (period + 1L) / 2 : Math.Min(i + 1, period));
-                }
-                previous = result[i];
-            }
-            return result;
-        }
+        var zero = R(0);
         var prices = (selected ?? Closes(bars)).Select(R).ToArray(); var indices = new ReferenceFraction[bars.Count]; var index = zero;
         for (var i = 0; i < bars.Count; i++)
         {
@@ -67,28 +25,11 @@ internal static partial class BuiltInFormulaReferences
             else if (direction < 0) index -= R(bars[i].Volume);
             indices[i] = index;
         }
-        ReferenceFraction[] Coordinate(ReferenceFraction[] values, ReferenceFraction[] means)
-        {
-            var result = new ReferenceFraction[values.Length];
-            for (var i = 0; i < values.Length; i++)
-            {
-                if (i + 1 < length) { result[i] = one; continue; }
-                var sample = values.Skip(i - length + 1).Take(length).ToArray(); var mean = sample.Aggregate(zero, (sum, value) => sum + value) / R(length);
-                var variance = sample.Aggregate(zero, (sum, value) => sum + (value - mean) * (value - mean)) / R(length);
-                if (variance.Sign == 0) { result[i] = one; continue; }
-                var delta = values[i] - means[i];
-                if (delta.Sign == 0) { result[i] = R(1.5); continue; }
-                var squaredZ = delta * delta / variance; var absoluteZ = Root(squaredZ);
-                result[i] = delta.Sign > 0 ? R(1.5) + absoluteZ / R(4)
-                    : (R(36) - squaredZ) / (R(4) * (R(6) + absoluteZ));
-            }
-            return result;
-        }
-        var priceMeans = Mean(prices, length);
-        var indexMeans = Mean(indices, length);
-        var pricePositions = Coordinate(prices, priceMeans); var indexPositions = Coordinate(indices, indexMeans);
+        var priceMeans = DisparityReference.Mean(prices, length, kind);
+        var indexMeans = DisparityReference.Mean(indices, length, kind);
+        var pricePositions = DisparityReference.Coordinate(prices, priceMeans, length); var indexPositions = DisparityReference.Coordinate(indices, indexMeans, length);
         var line = pricePositions.Select((value, i) => indexPositions[i].Sign == 0 ? zero : value / indexPositions[i]).ToArray();
-        var signal = Mean(line, signalLength);
+        var signal = DisparityReference.Mean(line, signalLength, kind);
         var trades = new Signal[bars.Count]; var previousLine = zero; var previousState = 0;
         for (var i = 0; i < line.Length; i++)
         {
