@@ -5830,3 +5830,32 @@ PR #246 remains draft; no merge or release.
 - `si-confluence1026-source-mutation` snapshot/archive: `34548048cec03f9e1349972ccd73e24c0c6da3855a136cd8779cbfa448210d12` / `8f5e62523131ab1d5f2e743ebdc148633871783f37bc0cb23a0f079e0e664cd4`.
 
 - `si-confluence1028-quadrant` snapshot/archive: `493df764324de413a594e6ccad361aeca93f290659892799c1eb93eb130ca61b` / `6a0e723e854f1e19e67895e1fc841064bf425720d9e383bebcd9394de605d4f0`.
+
+
+### Ehlers Comb Filter Spectral Estimate qualification (2026-10-04)
+
+The approved redesign replaces quadratic bandpass history with a current and
+delayed recurrence per period plus shared observed roofing history. Exact
+squared powers and half-maximum comparisons survive both exponent extremes;
+maximum normalization cancels before the final weighted-period division.
+The existing roofing stage exposes its extended result without shared edits.
+The independent reference stores each trajectory and sums its historical
+squares directly, rather than reproducing the delayed-state optimization.
+
+**37 distinct focused checks passed**, including all eight discovered numerical
+configurations, selected sources, exact cutoff hands, maximum-period narrow
+ranges, signals, preview/reset and invalid-input state preservation.
+**19/19 compiled behavioral faults were caught** with passing baselines and
+authenticated archives (`si-comb1032-qualified.json`). The first test-build
+namespace error receives no credit; the earlier 12 checks overlap the final 37.
+**35 main integration checks passed**, including Confluence source-composition
+and unit-period checks (`comb1034-integration.trx`).
+
+Compiled enrollment is **6,881/7,131**, leaving **250 configurations across 29
+types**, with no construction failures and exact backlog agreement. All
+**10,272 mutation sites** validate. No new public period limit was introduced;
+cost still depends on the number of candidate periods. PR #246 remains draft.
+
+- `si-comb1027-mutations-a` snapshot/archive: `03322f9fc0effe50aa48313c5d89e443ce2a3658be2f36a9e6014bae13a21cb4` / `88266a5e2adaf3e92d701dcc7bc87c7e5acc73b93455d3c8f92113e7223e2fca`.
+
+- `si-comb1027-mutations-b` snapshot/archive: `03322f9fc0effe50aa48313c5d89e443ce2a3658be2f36a9e6014bae13a21cb4` / `88266a5e2adaf3e92d701dcc7bc87c7e5acc73b93455d3c8f92113e7223e2fca`.

@@ -89095,5 +89095,157 @@
     "before": "selectedInput ? close : bars.Select",
     "after": "!selectedInput ? close : bars.Select",
     "filter": "FullyQualifiedName~ConfluenceNumericalTests.SelectedSourcesPassBuilderAndLiveRoutes"
+  },
+  {
+    "id": "comb-exact-expiry",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "_squares + added * added - removed * removed",
+    "after": "_squares + added * added",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-normalization",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "(BigInteger)Period * Period",
+    "after": "(BigInteger)Period",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-delayed-input",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "At(_index - band.Period - 2)",
+    "after": "At(_index - band.Period - 1)",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-delayed-state",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "_delayedSecond = _delayedFirst; _delayedFirst = lagged;",
+    "after": "_delayedSecond = _first; _delayedFirst = lagged;",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-feedback",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "Product(ref sum, first, _feedback);",
+    "after": "Product(ref sum, first, -_feedback);",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-lag",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "Product(ref sum, older, -_drive);",
+    "after": "Product(ref sum, older, _drive);",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-cutoff",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "2 * item.Power >= maximum",
+    "after": "2 * item.Power > maximum",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.ExactHalfPowerIsIncludedAndNormalizationDoesNotUnderflow"
+  },
+  {
+    "id": "comb-exact-premature-power",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "foreach (var item in powers) if (item.Power > maximum)",
+    "after": "powers = powers.Select(p => (p.Period, F.Of(p.Power.Publish()))).ToArray();\n        foreach (var item in powers) if (item.Power > maximum)",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.ExactHalfPowerIsIncludedAndNormalizationDoesNotUnderflow"
+  },
+  {
+    "id": "comb-exact-weights",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "weighted += item.Period * item.Power",
+    "after": "weighted += item.Power",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.ExactHalfPowerIsIncludedAndNormalizationDoesNotUnderflow"
+  },
+  {
+    "id": "comb-exact-preview",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "if (final)\n        {\n            foreach (var band",
+    "after": "if (true)\n        {\n            foreach (var band",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-reset",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "_roof.Reset(); _roofHistory.Clear();",
+    "after": "_roofHistory.Clear();",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-empty",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "total.Sign == 0 ? 0",
+    "after": "total.Sign == 0 ? 1",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.SinglePeriodAndEmptySpectrumHaveIndependentHands"
+  },
+  {
+    "id": "comb-exact-parameter",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "if (bandwidth < 0)",
+    "after": "if (bandwidth < -1)",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.SelectedInputsAndRejectedBarsPreserveState"
+  },
+  {
+    "id": "comb-exact-angle",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "turns - new F(turns.Floor(), BigInteger.One)",
+    "after": "(F)0",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-signal",
+    "module": "comb-numerical",
+    "file": "src/Helpers/CombSpectrumWindow.cs",
+    "before": "slope.Sign > 0 ? change.Sign > 0",
+    "after": "slope.Sign > 0 ? change.Sign < 0",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.SelectedInputsAndRejectedBarsPreserveState"
+  },
+  {
+    "id": "comb-exact-selected",
+    "module": "comb-numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);\n        foreach (var series in new[] { input, stockData.OpenPrices",
+    "after": "var input = stockData.ClosePrices;\n        foreach (var series in new[] { input, stockData.OpenPrices",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.SelectedInputsAndRejectedBarsPreserveState"
+  },
+  {
+    "id": "comb-exact-native-rejection",
+    "module": "comb-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "before": "StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value;",
+    "after": "if (double.IsNaN(bar.Open)) _window.Reset();\n        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value;",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.SelectedInputsAndRejectedBarsPreserveState"
+  },
+  {
+    "id": "comb-exact-reference-history",
+    "module": "comb-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.CombSpectrum.cs",
+    "before": "j < i; j++) sum += band[j] * band[j];",
+    "after": "j <= i; j++) sum += band[j] * band[j];",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
+  },
+  {
+    "id": "comb-exact-reference-decay",
+    "module": "comb-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.CombSpectrum.cs",
+    "before": "- damping * At(band, i - 2)",
+    "after": "+ damping * At(band, i - 2)",
+    "filter": "FullyQualifiedName~CombSpectrumNumericalTests.DelayedPowerMatchesDirectHistoryAcrossRoutes"
   }
 ]

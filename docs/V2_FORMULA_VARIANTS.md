@@ -1292,3 +1292,30 @@ introduced. Storage grows with observed history; recursive rational precision
 can grow with history. Unsupported averages and callback paths retain their
 existing boundaries: batch averaging bypasses callbacks and the fast callback
 route retains nine slots, including the two unused shortened averages.
+
+
+### Ehlers Comb Filter Spectral Estimate: exact powers and delayed state
+
+For each period j in [max(1,length2),max(1,length1)], retain its own two-sample
+bandpass recurrence driven by the existing extended roofing output. Round the
+combined bandpass stage at binary64 precision with an extended upper exponent;
+ordinary/subnormal publication behavior remains. Decay retains the [0.01,0.99]
+clamp using cosine/(1+sqrt((1-cosine)*(1+cosine))) for positive cosine, otherwise
+0.01. Finite nonnegative bandwidth is required. When the ordinary angle product
+overflows, reduce the exact bandwidth/period ratio modulo one before evaluating
+the trigonometric coefficient.
+
+Power at bar i is the exact sum of the preceding j bandpass squares divided by
+j squared; it excludes the current bar. An identical j-bar-delayed filter gives
+the expired squared value, avoiding a separate history matrix for every period.
+Retain powers at least half the exact maximum. Cancel maximum normalization and
+publish sum(j*power)/sum(power) once; empty/zero spectra yield zero. At powers
+[2,1] for periods [2,3], the result is 7/3; any strictly smaller second power is
+excluded, even for a subnormal-sized difference. A single active period 3
+produces [0,3,3,...] once historical power is nonzero.
+
+Signals compare exact differences of the extended roofing stages. Selected
+inputs replace closes; validate all candle fields before advancing state.
+Storage is proportional to the number of periods and observed roofing history,
+not the sum of all period widths. Large narrow ranges are supported without
+period-sized eager allocation; a wide range still evaluates every candidate.

@@ -724,85 +724,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersCombFilterSpectralEstimate(this StockData stockData, int length1 = 48, int length2 = 10, double bw = 0.3)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> domCycList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        // One bandpass per period in the comb, each with its own two-sample recursion and its own
-        // history. Both were read from a single list holding one value per bar - whichever period the
-        // loop happened to finish on, always the longest - so every period was driven by another
-        // period's output, and the power that picks the dominant cycle was summed over a mixture of
-        // periods instead of over the one being measured. The same defect, and the same fix, as the
-        // spectrum derived filter bank.
-        var ring = length1;
-        var powers = new double[length1 + 1];
-        var bpPrev1 = new double[length1 + 1];
-        var bpPrev2 = new double[length1 + 1];
-        var bpHistory = new double[length1 + 1, ring];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var roofingFilter = roofingFilterList[i];
-            var prevRoofingFilter1 = i >= 1 ? roofingFilterList[i - 1] : 0;
-            var prevRoofingFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
-            double maxPwr = 0, spx = 0, sp = 0;
-            var slot = i % ring;
-            for (var j = length2; j <= length1; j++)
-            {
-                var beta = Math.Cos(2 * Math.PI / j);
-                var gamma = 1 / Math.Cos(2 * Math.PI * bw / j);
-                var alpha = MinOrMax(gamma - Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-                var bp = (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) + (beta * (1 + alpha) * bpPrev1[j]) - (alpha * bpPrev2[j]);
-
-                double pwr = 0;
-                for (var k = 1; k <= j; k++)
-                {
-                    // This period's own output k bars ago, and every one of them. A power is a sum of
-                    // squares and cannot depend on the sign of what is squared, so gating this on
-                    // prevBp / j >= 0 discarded every bar where the bandpass ran negative - half of
-                    // them, for a filter centred on zero.
-                    var prevBp = i >= k ? bpHistory[j, ((slot - k) % ring + ring) % ring] : 0;
-                    pwr += Pow(prevBp / j, 2);
-                }
-
-                bpHistory[j, slot] = bp;
-                bpPrev2[j] = bpPrev1[j];
-                bpPrev1[j] = bp;
-
-                powers[j] = pwr;
-                maxPwr = Math.Max(pwr, maxPwr);
-            }
-
-            for (var j = length2; j <= length1; j++)
-            {
-                var pwr = maxPwr != 0 ? powers[j] / maxPwr : 0;
-
-                if (pwr >= 0.5)
-                {
-                    spx += j * pwr;
-                    sp += pwr;
-                }
-            }
-
-            var domCyc = sp != 0 ? spx / sp : 0;
-            domCycList.Add(domCyc);
-
-            var signal = GetCompareSignal(roofingFilter - prevRoofingFilter1, prevRoofingFilter1 - prevRoofingFilter2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ecfse", domCycList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(domCycList);
-        stockData.IndicatorName = IndicatorName.EhlersCombFilterSpectralEstimate;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        foreach (var series in new[] { input, stockData.OpenPrices, stockData.HighPrices, stockData.LowPrices, stockData.ClosePrices, stockData.Volumes })
+            foreach (var value in series) Streaming.StreamingInputValidation.Finite(value, nameof(stockData));
+        var window = new CombSpectrumWindow(length1, length2, bw); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ecfse", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersCombFilterSpectralEstimate; return stockData;
     }
 
 

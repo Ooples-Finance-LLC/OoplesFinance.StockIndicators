@@ -165,126 +165,16 @@ public sealed class EhlersCorrelationAngleIndicatorState : IStreamingIndicatorSt
 [PrimaryOutput("Ecfse")]
 public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly double _bw;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-
-    // One bandpass per period in the comb, each with its own two-sample recursion and its own history.
-    // See the batch calculation. A single shared buffer drove every period from another period's output
-    // and summed the deciding power over a mixture of periods.
-    private readonly double[] _bpPrev1;
-    private readonly double[] _bpPrev2;
-    private readonly double[,] _bpHistory;
-    private readonly double[] _bpCurrent;
-    private readonly double[] _powers;
-    private readonly int _ring;
-    private double _prevRoofingFilter1;
-    private double _prevRoofingFilter2;
-    private int _index;
-
-    public EhlersCombFilterSpectralEstimateState(int length1 = 48, int length2 = 10, double bw = 0.3)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _bw = bw;
-        _roofingFilter = new EhlersRoofingFilterV2State(_length1, _length2);
-        _ring = _length1;
-        _bpPrev1 = new double[_length1 + 1];
-        _bpPrev2 = new double[_length1 + 1];
-        _bpHistory = new double[_length1 + 1, _ring];
-        _bpCurrent = new double[_length1 + 1];
-        _powers = new double[_length1 + 1];
-    }
-
+    private readonly CombSpectrumWindow _window;
+    public EhlersCombFilterSpectralEstimateState(int length1 = 48, int length2 = 10, double bw = 0.3) => _window = new(length1, length2, bw);
     public IndicatorName Name => IndicatorName.EhlersCombFilterSpectralEstimate;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        Array.Clear(_bpPrev1, 0, _bpPrev1.Length);
-        Array.Clear(_bpPrev2, 0, _bpPrev2.Length);
-        Array.Clear(_bpHistory, 0, _bpHistory.Length);
-        Array.Clear(_bpCurrent, 0, _bpCurrent.Length);
-        _prevRoofingFilter1 = 0;
-        _prevRoofingFilter2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevRoofingFilter2 = _prevRoofingFilter2;
-
-        double maxPwr = 0;
-        double spx = 0;
-        double sp = 0;
-        var slot = _index % _ring;
-        for (var j = _length2; j <= _length1; j++)
-        {
-            var beta = Math.Cos(2 * Math.PI / j);
-            var gamma = 1 / Math.Cos(2 * Math.PI * _bw / j);
-            var alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-            var bp = (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) +
-                 (beta * (1 + alpha) * _bpPrev1[j]) - (alpha * _bpPrev2[j]);
-            _bpCurrent[j] = bp;
-
-            double pwr = 0;
-            for (var k = 1; k <= j; k++)
-            {
-                // This period's own output k bars ago, and every one of them: a power is a sum of
-                // squares and cannot depend on the sign of what is squared.
-                var prevBp = _index >= k ? _bpHistory[j, ((slot - k) % _ring + _ring) % _ring] : 0;
-                pwr += MathHelper.Pow(prevBp / j, 2);
-            }
-
-            _powers[j] = pwr;
-            maxPwr = Math.Max(pwr, maxPwr);
-        }
-
-        for (var j = _length2; j <= _length1; j++)
-        {
-            var pwr = maxPwr != 0 ? _powers[j] / maxPwr : 0;
-            if (pwr >= 0.5)
-            {
-                spx += j * pwr;
-                sp += pwr;
-            }
-        }
-
-        var domCyc = sp != 0 ? spx / sp : 0;
-
-        if (isFinal)
-        {
-            _prevRoofingFilter2 = _prevRoofingFilter1;
-            _prevRoofingFilter1 = roofingFilter;
-            for (var j = _length2; j <= _length1; j++)
-            {
-                _bpHistory[j, slot] = _bpCurrent[j];
-                _bpPrev2[j] = _bpPrev1[j];
-                _bpPrev1[j] = _bpCurrent[j];
-            }
-
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ecfse", domCyc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(domCyc, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ecfse", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Eacr")]

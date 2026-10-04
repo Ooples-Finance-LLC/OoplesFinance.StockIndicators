@@ -153,6 +153,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.Reference(0, bars => ConfluenceExact(bars, Integer(confluenceOptions, "Length"), AverageKind(confluenceOptions, 1), indicator.Source is not null), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersCombFilterSpectralEstimate)
+        {
+            var combOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => CombSpectrumValues(bars, Integer(combOptions, "Length1", 48), Integer(combOptions, "Length2", 10), Number(combOptions, .3, "Bw")).Values, IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RetentionAccelerationFilter)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RetentionValues(bars, Integer(builtIn.CreateOptions(), "Length", 50)), IndicatorErrorBudget.Exact);

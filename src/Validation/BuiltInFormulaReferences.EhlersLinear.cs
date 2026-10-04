@@ -25,35 +25,8 @@ internal static partial class BuiltInFormulaReferences
                 return new("Eci", new[] { "Eci", "Slope" }, bars => ConvolutionOutputs(bars, indicator));
 
             case IndicatorName.EhlersCombFilterSpectralEstimate:
-                return new("Ecfse", new[] { "Ecfse" }, bars =>
-                {
-                    var high = Integer(options, "Length1", 48); var low = Integer(options, "Length2", 10);
-                    var bandwidth = Number(options, .3, "Bw");
-                    var roof = HilbertRoofingTrajectory(Closes(bars), high, low);
-                    var drive = roof.Select((v, i) => v - (i < 2 ? 0 : roof[i - 2])).ToArray();
-                    var periods = Enumerable.Range(low, Math.Max(0, high - low + 1)).ToArray();
-                    var powers = periods.Select(period =>
-                    {
-                        var angle = 2 * Math.PI * bandwidth / period; var cosine = Math.Cos(angle);
-                        var decay = Clamp(cosine <= 0 ? .01 : cosine / (1 + Math.Abs(Math.Sin(angle))), .01, .99);
-                        var first = Math.Cos(2 * Math.PI / period) * (1 + decay);
-                        var discriminant = Complex.Sqrt(new Complex(first * first - 4 * decay, 0));
-                        var pole1 = (first + discriminant) / 2; var pole2 = (first - discriminant) / 2;
-                        var impulse = Enumerable.Range(0, roof.Length).Select(lag => discriminant.Magnitude < 1e-12
-                            ? (lag + 1) * Complex.Pow(pole1, lag).Real
-                            : ((Complex.Pow(pole1, lag + 1) - Complex.Pow(pole2, lag + 1)) / discriminant).Real).ToArray();
-                        var band = roof.Select((_, i) => .5 * (1 - decay) * Enumerable.Range(0, i + 1).Sum(j => impulse[i - j] * drive[j])).ToArray();
-                        return band.Select((_, i) => Enumerable.Range(Math.Max(0, i - period), Math.Min(i, period))
-                            .Sum(j => Math.Pow(band[j] / period, 2))).ToArray();
-                    }).ToArray();
-                    return Outputs(("Ecfse", roof.Select((_, i) =>
-                    {
-                        var maximum = powers.Length == 0 ? 0 : powers.Max(p => p[i]);
-                        var retained = Enumerable.Range(0, periods.Length).Where(j => maximum > 0 && powers[j][i] >= maximum / 2).ToArray();
-                        var total = retained.Sum(j => powers[j][i]);
-                        return total == 0 ? 0 : retained.Sum(j => periods[j] * powers[j][i]) / total;
-                    }).ToArray()));
-                });
+                return new("Ecfse", new[] { "Ecfse" }, bars => Outputs(("Ecfse", CombSpectrumValues(bars,
+                    Integer(options, "Length1", 48), Integer(options, "Length2", 10), Number(options, .3, "Bw")).Values)));
             case IndicatorName.EhlersDiscreteFourierTransformSpectralEstimate:
                 return new("Edftse", new[] { "Edftse" }, bars =>
                 {
