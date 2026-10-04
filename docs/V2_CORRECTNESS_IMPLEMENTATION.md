@@ -5732,3 +5732,31 @@ this batch preserves the existing public zero-gain singular convention.
 - `si-retention974-mutations-b` snapshot/archive: `0c9094e2ff622a64f7a3f3cc06eb3a1bb2a86bc99274d6d11da8343294d6c7c2` / `d5e0cd7bc6568b954dfeed9752f8148cca74a977653f750c36457c829ba64a30`.
 
 - `si-retention979-reset-mutations` snapshot/archive: `0699254ff763ba9b4ec979918ac78b525ae4d6570b4b67bfc2754269b23e8c06` / `94c8d2435adabe1d1e1203eaca755783d62aab01bd234746efe73dc29ff04aaf`.
+
+
+### Z Distance from VWAP output mutation qualification (2026-10-04)
+
+Completed the previously queued output-only verification without production
+changes. **42 current-source focused checks passed**, followed by an additional
+independent midpoint hand: prices [1, 1+2^-52, 1], equal volumes and period two
+produce [0, sqrt(2), -1]. The two nonzero residuals are exactly +/-2^-53;
+rounding their means early incorrectly erases the last residual.
+
+**30 unique compiled behavioral faults were caught**, with **43 distinct focused
+passes**. The original mean-publication seed survived and receives no credit;
+the new hand passes unchanged-source baseline and catches that same fault in
+the repaired campaign. All archives, source hashes and compiled failing TRXs
+were authenticated (`si-zdistance994-qualified.json`). C# and build inputs
+match after newline normalization except for the documented added test; the
+previously published reference-average consolidation is retained.
+
+All **10,202 mutation anchors** validate. Numerical enrollment remains
+**6,860/7,131**, with **271 omissions across 33 types**. This completes output
+mutation qualification only; exact signal redesign for the five Z Distance
+configurations remains a separate pending scope decision. PR #246 stays draft.
+
+- `si-zdistance981-mutations-a` snapshot/archive: `0c9094e2ff622a64f7a3f3cc06eb3a1bb2a86bc99274d6d11da8343294d6c7c2` / `d5e0cd7bc6568b954dfeed9752f8148cca74a977653f750c36457c829ba64a30`.
+
+- `si-zdistance981-mutations-b` snapshot/archive: `0c9094e2ff622a64f7a3f3cc06eb3a1bb2a86bc99274d6d11da8343294d6c7c2` / `d5e0cd7bc6568b954dfeed9752f8148cca74a977653f750c36457c829ba64a30`.
+
+- `si-zdistance992-midpoint-mutations` snapshot/archive: `cc9d615e15a27234671dcbe4d893b7093bae2ba51c9f99e5f06b6e1105503309` / `9148d47815aa7be57d645747a64f17d8771347cd684e331b7cb00c7a9a0893e4`.

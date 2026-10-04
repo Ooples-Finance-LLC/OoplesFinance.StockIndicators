@@ -57,6 +57,12 @@ public sealed class ZDistanceNumericalTests
         Assert.Equal(new[] { 0d, Math.Sqrt(2) }, Check(new[] { B(double.Epsilon, double.Epsilon), B(3 * double.Epsilon, double.Epsilon) }));
         Assert.Equal(new[] { 0d, Math.Sqrt(2) }, Check(new[] { B(1), B(Math.BitIncrement(1d)) }));
     }
+    [Fact]
+    public void MidpointMeansMustRemainUnpublishedAcrossResidualHistory()
+    {
+        // Both nonzero residuals are exactly +/- half an ULP; their squares are equal.
+        Assert.Equal(new[] { 0d, Math.Sqrt(2), -1d }, Check(new[] { B(1), B(Math.BitIncrement(1d)), B(1) }));
+    }
     [Theory]
     [InlineData(MovingAvgType.VolumeWeightedAveragePrice)]
     [InlineData(MovingAvgType.SimpleMovingAverage)]

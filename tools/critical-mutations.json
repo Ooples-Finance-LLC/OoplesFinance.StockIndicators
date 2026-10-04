@@ -83231,7 +83231,7 @@
     "scope": "internal sealed class ZDistanceWindow",
     "before": "var residual = current - mean;",
     "after": "var residual = current - Number.Of(mean.Publish());",
-    "filter": "FullyQualifiedName~ZDistanceNumericalTests.SubnormalProductsAndResidualsRetainNormalizedMovement"
+    "filter": "FullyQualifiedName~ZDistanceNumericalTests.MidpointMeansMustRemainUnpublishedAcrossResidualHistory"
   },
   {
     "id": "z-distance-wide-residual-sign",
