@@ -194,7 +194,7 @@ internal static partial class BuiltInFormulaReferences
                 var exponent = Number(options, 3, "StdDevFactor");
                 return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
                 {
-                    if (exponent >= 0 && exponent <= 32 && Math.Truncate(exponent).Equals(exponent))
+                    if (exponent >= 0 && exponent <= 32 && Math.Truncate(exponent).Equals(exponent)) // NOSONAR: S1244 - Only exact integer exponents satisfy the algebraic cancellation contract.
                         return KaufmanAdaptiveIntegerValues(bars, length, (int)exponent);
                     var gains = EfficiencyRatios(bars, length).Select(e => Math.Pow(e, exponent)).ToArray();
                     var middle = new double[bars.Count];

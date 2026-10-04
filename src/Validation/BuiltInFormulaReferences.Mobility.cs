@@ -51,7 +51,7 @@ internal static partial class BuiltInFormulaReferences
             }
             if (masses[mode].Sign == 0) continue;
             var center = lower + (R(mode) + one / R(2)) * width;
-            raw[i] = R(price.CompareTo(center) < 0 ? 100 : -100) * (one - priceMass / masses[mode]);
+            raw[i] = R(price.CompareTo(center) < 0 ? 100 : -100) * (one - priceMass / masses[mode]); // NOSONAR: S4143 - Replace the initialized zero only for a nondegenerate, fully observed window.
         }
         var line = RationalAverage(raw, 7, kind); var signal = RationalAverage(line, 7, kind);
         return new() { ["Mo"] = line.Select(v => v.ToDouble()).ToArray(), ["Signal"] = signal.Select(v => v.ToDouble()).ToArray() };

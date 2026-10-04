@@ -143,7 +143,7 @@ internal sealed class VariableAverageExpression
         {
             var bounds=Evaluate(bits); if (!bounds.HasValue) continue;
             var lower=bounds.Value.Lower.Publish(); var upper=bounds.Value.Upper.Publish();
-            if (lower.Equals(upper)) return lower;
+            if (lower.Equals(upper)) return lower; // NOSONAR: S1244 - Certification requires both interval endpoints to round to exactly the same binary64 value.
         }
         return Exact().Publish();
     }

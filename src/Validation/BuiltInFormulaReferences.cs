@@ -43,7 +43,7 @@ internal static partial class BuiltInFormulaReferences
         }
         if (builtIn.BatchName == IndicatorName.KaufmanAdaptiveBands
             && builtIn.CreateOptions() is KaufmanAdaptiveBandsSpecOptions adaptiveBands
-            && adaptiveBands.StdDevFactor <= 32 && Math.Truncate(adaptiveBands.StdDevFactor).Equals(adaptiveBands.StdDevFactor))
+            && adaptiveBands.StdDevFactor <= 32 && Math.Truncate(adaptiveBands.StdDevFactor).Equals(adaptiveBands.StdDevFactor)) // NOSONAR: S1244 - This reference applies only to exact integer exponents.
         {
             var bandKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
             var bandCache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();

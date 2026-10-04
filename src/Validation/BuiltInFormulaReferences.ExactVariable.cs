@@ -147,7 +147,7 @@ internal static partial class BuiltInFormulaReferences
         for(var i=0;i<values.Length;i++)
         {
             var low=values[i].Low.ToDouble();var high=values[i].High.ToDouble();
-            if(!low.Equals(high)) { output[i]=double.NaN;complete=false; }
+            if(!low.Equals(high)) { output[i]=double.NaN;complete=false; } // NOSONAR: S1244 - Distinct rounded endpoints cannot certify a uniquely rounded output.
             else output[i]=low;
         }
         return complete;

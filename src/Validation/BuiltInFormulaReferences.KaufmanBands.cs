@@ -64,7 +64,7 @@ internal static partial class BuiltInFormulaReferences
         var scaledDenominator = denominator << 1074;
         var lower = ReferenceFraction.RatioToDouble(center + (direction > 0 ? lowerRoot : -upperRoot), scaledDenominator);
         var upper = ReferenceFraction.RatioToDouble(center + (direction > 0 ? upperRoot : -lowerRoot), scaledDenominator);
-        if (lower.Equals(upper)) return lower;
+        if (lower.Equals(upper)) return lower; // NOSONAR: S1244 - Equal rounded enclosure endpoints certify one binary64 result; a tolerance would not.
         var fourVariance = 4 * variance;
         int Compare(BigInteger twiceUnits)
         {
