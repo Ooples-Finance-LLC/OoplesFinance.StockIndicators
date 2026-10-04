@@ -9145,35 +9145,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast(StockData data, ComputeContext context, int length = 200,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateStationaryExtrapolatedLevelsOscillator detrends the series by its moving average, then
-        // extrapolates that residual forward from the values one and two windows back, and publishes the raw
-        // stochastic of the extrapolation over twice the length. The extrapolation, not the close, is the
-        // series the stochastic is taken of.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, length, input, smoothed.WritableSpan);
-        var sma = smoothed.Span;
-
-        using var residual = context.Rent(count);
-        using var extrapolated = context.Rent(count);
-        var y = residual.WritableSpan;
-        var ext = extrapolated.WritableSpan;
-        for (var i = 0; i < count; i++)
+        List<double> values;
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+            values = StationaryLevelsOscillatorWindow.Calculate(data, maType, length).Values;
+        else
         {
-            y[i] = input[i] - sma[i];
-
-            var prevY = i >= length ? y[i - length] : 0;
-            var prevY2 = i >= length * 2 ? y[i - (length * 2)] : 0;
-            ext[i] = ((2 * prevY) - prevY2) / 2;
+            var isolated = data.WithValues(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
+            isolated.CalculateStationaryExtrapolatedLevelsOscillator(maType, length); values = isolated.ChainedValues;
         }
-
-        var buffer = context.Rent(count);
-        StochasticFastK(data, context, extrapolated.Span, length * 2, buffer.WritableSpan);
-        return buffer;
+        var output = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++) output.WritableSpan[i] = values[i];
+        return output;
     }
 
     /// <summary>

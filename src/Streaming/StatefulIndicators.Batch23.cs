@@ -435,84 +435,17 @@ public sealed class StandardPivotPointsState : IStreamingIndicatorState, ICustom
 [PrimaryOutput("Selo")]
 public sealed class StationaryExtrapolatedLevelsOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _stochLength;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly PooledRingBuffer<double> _yValues;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-    private double _previousExtrapolation;
-
-    public StationaryExtrapolatedLevelsOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 200)
-    {
-        _length = Math.Max(1, length);
-        _stochLength = Math.Max(1, _length * 2);
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _maxWindow = new RollingWindowMax(_stochLength);
-        _minWindow = new RollingWindowMin(_stochLength);
-        _yValues = new PooledRingBuffer<double>(_stochLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly StationaryLevelsOscillatorWindow _window;
+    public StationaryExtrapolatedLevelsOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200)
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.StationaryExtrapolatedLevelsOscillator;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _yValues.Clear();
-        _index = 0;
-        _previousExtrapolation = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        var y = value - sma;
-        var prevY = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_yValues, _length) : 0;
-        var prevY2 = _index >= _stochLength ? EhlersStreamingWindow.GetOffsetValue(_yValues, _stochLength) : 0;
-        var ext = ((2 * prevY) - prevY2) / 2;
-        // Apply the same per-bar range contract as a chained stochastic input.
-        var withinBar = CalculationsHelper.IsWithinBarRange(ext, bar.Low, bar.High);
-        var previous = _index == 0 ? ext : _previousExtrapolation;
-        var high = withinBar ? bar.High : Math.Max(previous, ext);
-        var low = withinBar ? bar.Low : Math.Min(previous, ext);
-        var highest = isFinal ? _maxWindow.Add(high, out _) : _maxWindow.Preview(high, out _);
-        var lowest = isFinal ? _minWindow.Add(low, out _) : _minWindow.Preview(low, out _);
-        var range = highest - lowest;
-        var osc = range != 0 ? MathHelper.MinOrMax((ext - lowest) / range * 100, 100, 0) : 0;
-
-        if (isFinal)
-        {
-            _yValues.TryAdd(y, out _);
-            _previousExtrapolation = ext;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Selo", osc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(osc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string,double> { ["Selo"] = point.Value } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _yValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Si")]

@@ -1450,3 +1450,19 @@ window, the selected averaging conventions and three callback requests. The
 fitted line and residual retain binary64 precision with an extended upper
 exponent. Signals compare exact differences of these rounded stages. The core
 uses the same formula with SMA and preserves overlapping spans.
+
+
+### Stationary Extrapolated Levels Oscillator corrected range
+
+Following the explicit formula decision, the oscillator is the raw stochastic
+of the extrapolated series alone over twice the requested period. Original
+candle ranges no longer enter that transformed stochastic. The residual remains
+price minus its selected moving average; extrapolation remains
+(2 * residual[t-length] - residual[t-2*length]) / 2 with zero missing history.
+Each subtraction, multiplication and division retains its rounded stage with
+an extended upper exponent. The normalized range remains finite across extended
+values. Doubled periods use 64-bit arithmetic, and lazy lag queues and monotonic
+range deques avoid eager period-sized allocation. The core follows this formula
+with SMA. The single average callback and fast caller isolation are preserved.
+The separate Stationary Extrapolated Levels indicator retains its existing
+formula and implementation.

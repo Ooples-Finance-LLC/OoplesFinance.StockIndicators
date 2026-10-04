@@ -2265,46 +2265,13 @@ public static partial class Calculations
     public static StockData CalculateStationaryExtrapolatedLevelsOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 200)
     {
-        List<double> extList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var prevY = i >= length ? yList[i - length] : 0;
-            var prevY2 = i >= length * 2 ? yList[i - (length * 2)] : 0;
-
-            var y = currentValue - sma;
-            yList.Add(y);
-
-            var ext = ((2 * prevY) - prevY2) / 2;
-            extList.Add(ext);
-        }
-
-        stockData.SetCustomValues(extList);
-        var oscList = CalculateStochasticOscillator(stockData, maType, length: length * 2).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var osc = oscList[i];
-            var prevOsc1 = i >= 1 ? oscList[i - 1] : 0;
-            var prevOsc2 = i >= 2 ? oscList[i - 2] : 0;
-
-            var signal = GetRsiSignal(osc - prevOsc1, prevOsc1 - prevOsc2, osc, prevOsc1, 80, 20);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Selo", oscList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(oscList);
-        stockData.IndicatorName = IndicatorName.StationaryExtrapolatedLevelsOscillator;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var means = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList();
+        if (means is null && !StrengthWindow.Supports(maType)) means = GetMovingAverageList(stockData, maType, length, input);
+        var result = StationaryLevelsOscillatorWindow.Calculate(stockData, maType, length, means);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Selo", result.Values } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+        stockData.SetCustomValues(result.Values); stockData.IndicatorName = IndicatorName.StationaryExtrapolatedLevelsOscillator;
         return stockData;
     }
 

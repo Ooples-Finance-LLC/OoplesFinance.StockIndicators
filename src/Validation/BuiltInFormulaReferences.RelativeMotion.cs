@@ -54,27 +54,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.PeakValleyEstimation:
                 return new("Sign1", new[] { "Sign1", "Sign2", "Sign3" }, bars => PeakValleyOutputs(bars, indicator));
             case IndicatorName.StationaryExtrapolatedLevelsOscillator:
-                return new("Selo", new[] { "Selo" }, bars =>
-                {
-                    var prices = Closes(bars); var average = Average(prices, length, kind);
-                    var residual = prices.Select((v, i) => v - average[i]).ToArray();
-                    var extrapolated = prices.Select((_, i) => (i < length ? 0 : residual[i - length])
-                        - (i < 2 * length ? 0 : residual[i - 2 * length] / 2)).ToArray();
-                    // A transformed input inside its candle retains that candle's range;
-                    // otherwise its range spans its current and previous observations.
-                    var bounds = extrapolated.Select((v, i) =>
-                    {
-                        var tolerance = 1e-12 * Math.Max(Math.Abs(bars[i].Low), Math.Abs(bars[i].High));
-                        var inside = v >= bars[i].Low - tolerance && v <= bars[i].High + tolerance;
-                        var previous = i == 0 ? v : extrapolated[i - 1];
-                        return (Low: inside ? bars[i].Low : Math.Min(previous, v), High: inside ? bars[i].High : Math.Max(previous, v));
-                    }).ToArray();
-                    return Outputs(("Selo", extrapolated.Select((v, i) =>
-                    {
-                        var sample = Window(bounds, i, 2 * length).ToArray(); var low = sample.Min(b => b.Low); var high = sample.Max(b => b.High);
-                        return high == low ? 0 : Clamp(100 * (v - low) / (high - low), 0, 100); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    }).ToArray()));
-                });
+                return new("Selo", new[] { "Selo" }, bars => StationaryLevelsOscillatorOutputs(bars, indicator));
             case IndicatorName.FreedomOfMovement:
                 return new("Fom", new[] { "Fom", "Dpl" }, bars =>
                 {

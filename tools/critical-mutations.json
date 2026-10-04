@@ -90870,5 +90870,177 @@
     "after": "AsReadOnlySpan(lList), length + 1)",
     "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ThreeCallbacksKeepPeriodsAndFastCallerState",
     "scope": "public static StockData CalculateRobustWeightingOscillator("
+  },
+  {
+    "id": "stationary-oscillator-range-period",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "_rangeLength = 2L * _length",
+    "after": "_rangeLength = _length",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-first-lag",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "_first.Count == _length ? _first.Peek() : BigInteger.Zero",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-second-lag",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "_second.Count == _length ? _second.Peek() : BigInteger.Zero",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-residual",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "U(price) - mean",
+    "after": "U(price) + mean",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-extrapolation-sign",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "Round(2 * first) - second",
+    "after": "Round(2 * first) + second",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-first-memory",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "_first.Enqueue(residual)",
+    "after": "_first.Enqueue(mean)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-second-memory",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "_second.Enqueue(first)",
+    "after": "_second.Enqueue(residual)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-range-expiry",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "while (first is not null && first.Value.Index <= _index - _rangeLength)",
+    "after": "while (first is not null && first.Value.Index <= _index - _rangeLength + 1)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-high-extreme",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "BigInteger.Max(value, first.Value.Value)",
+    "after": "BigInteger.Min(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-low-extreme",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "BigInteger.Min(value, first.Value.Value)",
+    "after": "BigInteger.Max(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-high-prune",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "maximum ? last.Value.Value <= value",
+    "after": "maximum ? last.Value.Value >= value",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-low-prune",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": ": last.Value.Value >= value",
+    "after": ": last.Value.Value <= value",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-percent",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "100 * (extrapolated - low)",
+    "after": "50 * (extrapolated - low)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-preview",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "if (final)\n        {\n            if (_first.Count",
+    "after": "if (true)\n        {\n            if (_first.Count",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-reset",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "_first.Clear(); _second.Clear(); _max.Clear(); _min.Clear();\n        _index = 0;",
+    "after": "_first.Clear(); _second.Clear(); _min.Clear();\n        _index = 0;",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.ExtremeExtrapolationsPreserveLagsExpirySignalsAndPreview"
+  },
+  {
+    "id": "stationary-oscillator-signal",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Helpers/StationaryLevelsOscillatorWindow.cs",
+    "before": "var slope = units - _previous",
+    "after": "var slope = units + _previous",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-reference",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.StationaryLevelsOscillator.cs",
+    "before": "(R(100) * (extrapolated[i] - low)",
+    "after": "(R(99) * (extrapolated[i] - low)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.HandUsesOnlyExtrapolationAndExpiresTheOldRange"
+  },
+  {
+    "id": "stationary-oscillator-core",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "state.Next(prices[i], true).Value",
+    "after": "-state.Next(prices[i], true).Value",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.CoreMatchesPublicFormulaAndProtectsOverlappingSpans",
+    "scope": "internal static void StationaryExtrapolatedLevelsOscillator("
+  },
+  {
+    "id": "stationary-oscillator-fast",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "output.WritableSpan[i] = values[i]",
+    "after": "output.WritableSpan[i] = -values[i]",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.RoutesMatchIndependentExtrapolatedStochastic",
+    "scope": "internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast("
+  },
+  {
+    "id": "stationary-oscillator-callback-isolation",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var isolated = data.WithValues(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);",
+    "after": "var isolated = data;",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.CallbackKeepsItsPeriodAndFastCallerState",
+    "scope": "internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast("
+  },
+  {
+    "id": "stationary-oscillator-callback-period",
+    "module": "stationary-oscillator-numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "AsReadOnlySpan(input), length)",
+    "after": "AsReadOnlySpan(input), length + 1)",
+    "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.CallbackKeepsItsPeriodAndFastCallerState",
+    "scope": "public static StockData CalculateStationaryExtrapolatedLevelsOscillator("
   }
 ]

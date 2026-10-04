@@ -4989,36 +4989,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void StationaryExtrapolatedLevelsOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var linRegArray = pool.Rent(close.Length);
-        var slopeArray = pool.Rent(close.Length);
-
-        try
-        {
-            var linReg = linRegArray.AsSpan(0, close.Length);
-            var slope = slopeArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.LinearRegression(close, linReg, length);
-            TrendCore.LinearRegressionSlope(close, slope, length);
-
-            // Extrapolated level = linReg + slope (projected one bar ahead)
-            // Oscillator = close - extrapolated level
-            for (var i = 0; i < close.Length; i++)
-            {
-                var extrapolated = linReg[i] + slope[i];
-                output[i] = close[i] - extrapolated;
-            }
-        }
-        finally
-        {
-            pool.Return(linRegArray);
-            pool.Return(slopeArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var prices = close.ToArray();
+        foreach (var value in prices) StreamingInputValidation.Finite(value, nameof(close));
+        using var state = new StationaryLevelsOscillatorWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < prices.Length; i++) output[i] = state.Next(prices[i], true).Value;
     }
 
     /// <summary>

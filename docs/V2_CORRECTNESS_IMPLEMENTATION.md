@@ -6037,3 +6037,20 @@ or assertion change was needed. Main integration passed 11 checks
 All 10,470 anchors validate. Enrollment is 6,960/7,131, leaving 171 configurations
 across 18 types (`si-robust1189-inventory.json`). PR #246 remains draft; final
 assurance is incomplete.
+
+
+### Stationary Extrapolated Levels Oscillator qualification (batch 1193)
+
+The approved formula computes the raw stochastic from the extrapolated series
+alone and aligns the core. All five configurations preserve extended residual
+and extrapolation stages, use 64-bit doubled periods, and allocate lag/range
+history lazily. Independent formula, route, selected-input, signal, preview/reset,
+callback, invalid-input and overlapping-core checks passed 43 focused tests.
+All 21 compiled faults were caught (`si-stationary1184-qualified.json`). An
+initial route run exposed missing generated output metadata; recognized dictionary
+syntax fixed it before the successful focused run. Main integration passed 14
+checks (`stationary1191-integration.trx`), preserving the separate Stationary
+Levels indicator, Robust Weighting and Time and Money behavior. All 10,491 anchors
+validate. Enrollment is 6,965/7,131, leaving 166 configurations across 17 types
+(`si-stationary1192-inventory.json`). PR #246 remains draft; final assurance is
+incomplete.
