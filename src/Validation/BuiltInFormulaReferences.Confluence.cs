@@ -10,6 +10,7 @@ internal static partial class BuiltInFormulaReferences
         var options = indicator.CreateOptions(); var kind = AverageKind(options, 1);
         if (kind == 0) return null;
         var length = Integer(options, "Length");
+        if (kind is 1 or 2 or 3 or 6) return new("Ci", new[] { "Ci" }, bars => Outputs(("Ci", ConfluenceExact(bars, length, kind))));
         return new("Ci", new[] { "Ci" }, bars =>
         {
             var periods = new[] { length, 2 * length - 1, 4 * length - 3, 8 * length - 7 };

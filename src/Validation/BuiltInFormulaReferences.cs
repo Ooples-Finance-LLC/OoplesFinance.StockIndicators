@@ -147,6 +147,12 @@ internal static partial class BuiltInFormulaReferences
             for (var slot = 0; slot < qualityKeys.Length; slot++) { var selected = qualityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => cache.GetValue(bars, b => VolatilityQualityOutputs(b, builtIn))[selected], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ConfluenceIndicator && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var confluenceOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => ConfluenceExact(bars, Integer(confluenceOptions, "Length"), AverageKind(confluenceOptions, 1), indicator.Source is not null), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RetentionAccelerationFilter)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RetentionValues(bars, Integer(builtIn.CreateOptions(), "Length", 50)), IndicatorErrorBudget.Exact);

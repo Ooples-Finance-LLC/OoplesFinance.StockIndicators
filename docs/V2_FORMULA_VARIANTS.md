@@ -1270,3 +1270,25 @@ Bands search original highs/lows and apply max/min to their published offsets
 with width max(2,length). The existing lagged-band signal convention is retained.
 Window storage grows with observed history. The separate core oscillator's
 different historical formula has not been aligned by this public batch.
+
+
+### Confluence canonical averaging and exact votes
+
+For base period n, use n, 2n-1, 4n-3 and 8n-7, widening before arithmetic.
+SMA startup is zero until full; WMA retains full-width zero padding; EMA uses
+observed-count startup then its ordinary recurrence; Wilder starts from zero.
+These canonical intermediate stages and projections remain rational. The
+short correction retains clamp(n-1,2,530). Zero-delay comparisons use the current
+sample, and a zero-width error signal is zero. Nonzero signal windows average
+available observations. Constant prices [2,2,2] at n=1 yield [0,0,0]: the second
+bar's error vote -3 cancels its momentum vote +3.
+
+Angles are exact rational degrees. Root-of-unity algebra proves exact ties;
+certified Taylor bounds determine every nonzero sign. Error, momentum and spread
+votes retain their existing scoring and spread-direction dilution. Published
+output differences determine signals exactly. Raw candles use exact OHLC4;
+selected inputs replace both close and full-price means. No new period cap is
+introduced. Storage grows with observed history; recursive rational precision
+can grow with history. Unsupported averages and callback paths retain their
+existing boundaries: batch averaging bypasses callbacks and the fast callback
+route retains nine slots, including the two unused shortened averages.

@@ -578,6 +578,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateConfluenceIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
     {
+        if (ConfluenceWindow.Supports(maType) && (maType == MovingAvgType.WeightedMovingAverage || !Builder.Compute.ComponentAverage.HasOverrides))
+        {
+            var result = ConfluenceWindow.Calculate(stockData, maType, length); var values = result.Values.ToList();
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ci", values } });
+            stockData.SetSignals(result.Signals.ToList()); stockData.SetCustomValues(values);
+            stockData.IndicatorName = IndicatorName.ConfluenceIndicator; return stockData;
+        }
         List<double> value5List = new(stockData.Count);
         List<double> value6List = new(stockData.Count);
         List<double> value7List = new(stockData.Count);

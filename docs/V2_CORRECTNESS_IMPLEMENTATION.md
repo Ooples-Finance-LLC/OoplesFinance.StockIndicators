@@ -5793,3 +5793,40 @@ alignment is not included. PR #246 remains draft.
 - `si-prime991-mutations-a` snapshot/archive: `0e5d67c518fd02b497277de0ed6ddc7398976b7863729c69dc6c9d10e39f2379` / `d838037950aa2ed3de49f0beeee6bf65e9ff58bdb7951d6c62e84ac29212c6ef`.
 
 - `si-prime991-mutations-b` snapshot/archive: `0e5d67c518fd02b497277de0ed6ddc7398976b7863729c69dc6c9d10e39f2379` / `d838037950aa2ed3de49f0beeee6bf65e9ff58bdb7951d6c62e84ac29212c6ef`.
+
+
+### Confluence exact-vote qualification (2026-10-04)
+
+Canonical SMA, WMA, EMA and Wilder routes retain rational averaging/projection
+stages and compare trigonometric votes without tolerance ties. Widened derived
+periods and observed-history buffers support large periods without eager period
+allocation. The independent reference uses separate rational arithmetic,
+prime-by-prime root reduction and expansions about 30-degree centers, versus
+production's prime-power tower and integer-degree centers.
+
+**43 distinct focused checks passed**, including all five discovered numerical
+configurations, extreme/subnormal inputs, large periods, rejection atomicity,
+preview/reset, selected sources, signals and callback routing. **30 compiled
+behavioral faults were caught** with authenticated source archives and passing
+baselines (`si-confluence1019-qualified.json`). Three compiler-only mutation
+attempts and the initial failed callback-test baseline receive no credit.
+The corrected callback expectation preserves batch bypass and nine fast-path
+slots. The late selected-source reference extension has ten focused checks and
+its own compiled mutation; five checks overlap the earlier group.
+
+**38 main integration checks passed** (`confluence1030-integration.trx`). Compiled
+enrollment is **6,873/7,131**, leaving **258 configurations across 30 types**,
+with no construction failures and exact backlog agreement. All 10,253 mutation
+sites validate. The independent comment-only Sonar batch preserved executable
+text; SonarCloud passed on 99813b8f. Current-head hosted checks remain separate.
+PR #246 remains draft; no merge or release.
+
+- `si-confluence1011-mutations-a` snapshot/archive: `67198bd3a918efdb8ec3e379c6265c47e11c42dc84de71dac3eccf2054da3f7d` / `57e4d89cb883fb4095f540d3df0c4fb8af202baa49e46b413ffff0f3aa94a956`.
+
+- `si-confluence1014-mutations-b` snapshot/archive: `11e2088fd5f6c62ccc3e3befe1e0474f4559f83d0b2c7e88cd6237b868cb3a70` / `c18d4a3f9c1bb5000655d2a4164c79eb80ae9efd9ac642c2ed2849e2b951213b`.
+
+- `si-confluence1022-repairs` snapshot/archive: `69cb49fb25f856f02bc166cc467174d09eac6373e4994c26a9493b08c0656883` / `3bbf8a1fa2ac0e627f671831ad8eefba2ca924a527c7ce6583d6f4e14c21723b`.
+
+- `si-confluence1026-source-mutation` snapshot/archive: `34548048cec03f9e1349972ccd73e24c0c6da3855a136cd8779cbfa448210d12` / `8f5e62523131ab1d5f2e743ebdc148633871783f37bc0cb23a0f079e0e664cd4`.
+
+- `si-confluence1028-quadrant` snapshot/archive: `493df764324de413a594e6ccad361aeca93f290659892799c1eb93eb130ca61b` / `6a0e723e854f1e19e67895e1fc841064bf425720d9e383bebcd9394de605d4f0`.

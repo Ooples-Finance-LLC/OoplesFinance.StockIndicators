@@ -80,8 +80,7 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
     }
 }
 
-[PrimaryOutput("Ci")]
-public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
+internal sealed class LegacyConfluenceIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length;
     private readonly int _stl;
@@ -118,7 +117,7 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
     private double _prevMom;
     private double _prevValue70;
 
-    public ConfluenceIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
+    public LegacyConfluenceIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
     {
         _length = Math.Max(1, length);
         _stl = (int)Math.Ceiling((_length * 2) - 1 - 0.5m);

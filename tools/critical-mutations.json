@@ -88855,5 +88855,245 @@
     "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);\n        var window = new PrimeOffsetWindow(length);",
     "after": "var input = data.ClosePrices;\n        var window = new PrimeOffsetWindow(length);",
     "filter": "FullyQualifiedName~PrimeNumberNumericalTests.DirectSelectedInputsKeepOriginalCandlesAndSignedSignals"
+  },
+  {
+    "id": "confluence-exact-wide-period",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "8L * n - 7",
+    "after": "8 * n - 7",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-startup",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "_count + 1 < period ? (F)0 : sum / period",
+    "after": "sum / period",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-weighted-denominator",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "weighted / ((F)period * (period + 1) / 2)",
+    "after": "weighted / ((F)period * period / 2)",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-ema-startup",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "result = sum / (_count + 1);",
+    "after": "result = sum / period;",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-wilder-gain",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "value * (ema ? 2 : 1)",
+    "after": "value * 2",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-zero-delay",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "width == 0 ? current",
+    "after": "width == 0 ? zero",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-projection",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "2 * means[i] - _previousMeans[i]",
+    "after": "2 * means[i]",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-short-correction",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "_periods[0] - 1 - _short",
+    "after": "_periods[0] - 1 + _short",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-full-correction",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "(means[6] - means[5])",
+    "after": "(means[5] - means[6])",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.ExtremeAndSubnormalCandleMeansKeepExactVotes"
+  },
+  {
+    "id": "confluence-exact-phase",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "(means[0] - _phaseMean.Delayed(means[0])).Sign < 0",
+    "after": "(means[0] - _phaseMean.Delayed(means[0])).Sign > 0",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-error-signal",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "Math.Min(_count + 1, _delays[1])",
+    "after": "_delays[1]",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-spread-signal",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "Math.Min(_count + 1, _periods[0])",
+    "after": "_periods[0]",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-vote-tie",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "sign == 0 || motion == 0 || position == 0",
+    "after": "sign == 0 || motion == 0",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-dilution",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "total / 10d",
+    "after": "total / 100d",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-preview",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "if (final)\n        {\n            for (var i = 0;",
+    "after": "if (true)\n        {\n            for (var i = 0;",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-reset",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "_previousError = _errorSum = T.Zero;\n        _count = 0;",
+    "after": "_previousError = T.Zero;\n        _count = 0;",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-selected",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "var selected = data.ChainedValues.Count > 0;",
+    "after": "var selected = false;",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.SelectedInputsReplaceBothMeansAndSignalsUsePublishedDifferences"
+  },
+  {
+    "id": "confluence-exact-signal",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "acceleration.Sign > 0 ? Signal.StrongBuy",
+    "after": "acceleration.Sign < 0 ? Signal.StrongBuy",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.SelectedInputsReplaceBothMeansAndSignalsUsePublishedDifferences"
+  },
+  {
+    "id": "confluence-exact-full-range",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceWindow.cs",
+    "before": "(F.Of(data.OpenPrices[i]) + F.Of(data.HighPrices[i]) + F.Of(data.LowPrices[i]) + close) / 4",
+    "after": "F.Of((data.OpenPrices[i] + data.HighPrices[i] + data.LowPrices[i] + data.ClosePrices[i]) / 4)",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.ExtremeAndSubnormalCandleMeansKeepExactVotes"
+  },
+  {
+    "id": "confluence-exact-native-rejection",
+    "module": "confluence-numerical",
+    "file": "src/Streaming/ConfluenceIndicatorState.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) _window!.Reset();\n        StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RejectedBarDoesNotAdvanceAnyStage"
+  },
+  {
+    "id": "confluence-exact-native-selected",
+    "module": "confluence-numerical",
+    "file": "src/Streaming/ConfluenceIndicatorState.cs",
+    "before": "var full = _selected ? close",
+    "after": "var full = !_selected ? close",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.SelectedInputsReplaceBothMeansAndSignalsUsePublishedDifferences"
+  },
+  {
+    "id": "confluence-exact-callback",
+    "module": "confluence-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ConfluenceWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "ConfluenceWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.CallbackSlotsAndWeightedBatchBypassRemainCompatible"
+  },
+  {
+    "id": "confluence-exact-reference-projection",
+    "module": "confluence-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ConfluenceNumerics.cs",
+    "before": "2 * v - At(m, i - 1)",
+    "after": "2 * v + At(m, i - 1)",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.RoutesPreviewResetAndLargePeriodsMatchIndependentReference"
+  },
+  {
+    "id": "confluence-exact-reference-wave",
+    "module": "confluence-numerical",
+    "file": "src/Validation/ConfluenceReferenceWave.cs",
+    "before": "SinBasis(t.Center + 3 * k + 3)",
+    "after": "SinBasis(t.Center + 3 * k)",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.IndependentWaveHandlesAlgebraicTiesAndTinyResiduals"
+  },
+  {
+    "id": "confluence-exact-quadrant",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceTrigonometry.cs",
+    "before": "angle = 180 - angle; cosine = -cosine;",
+    "after": "angle = 180 - angle; cosine = cosine.Abs();",
+    "filter": "FullyQualifiedName~ConfluenceTrigonometryTests"
+  },
+  {
+    "id": "confluence-exact-tiny-sign",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceTrigonometry.cs",
+    "before": "if (_terms.Count == 0) return _constant.Sign;",
+    "after": "if (_terms.Count == 0) return _constant.Sign;\n        if (_terms.Keys.All(a => Math.Abs(a.Publish()) < 1e-12)) return 0;",
+    "filter": "FullyQualifiedName~ConfluenceTrigonometryTests.SubnormalLinearQuadraticAndCubicSignsSurviveCancellation"
+  },
+  {
+    "id": "confluence-exact-root-sine",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceRootRelations.cs",
+    "before": "-term.Sine / 2",
+    "after": "term.Sine / 2",
+    "filter": "FullyQualifiedName~ConfluenceRootRelationTests"
+  },
+  {
+    "id": "confluence-exact-root-columns",
+    "module": "confluence-numerical",
+    "file": "src/Helpers/ConfluenceRootRelations.cs",
+    "before": "if (group.Count < prime)",
+    "after": "if (group.Count <= prime)",
+    "filter": "FullyQualifiedName~ConfluenceRootRelationTests"
+  },
+  {
+    "id": "confluence-exact-reference-zero",
+    "module": "confluence-numerical",
+    "file": "src/Validation/ConfluenceReferenceWave.cs",
+    "before": "if (order.IsOne) return false;",
+    "after": "if (order.IsOne) return true;",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.IndependentWaveHandlesAlgebraicTiesAndTinyResiduals"
+  },
+  {
+    "id": "confluence-exact-source-reference",
+    "module": "confluence-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ConfluenceNumerics.cs",
+    "before": "selectedInput ? close : bars.Select",
+    "after": "!selectedInput ? close : bars.Select",
+    "filter": "FullyQualifiedName~ConfluenceNumericalTests.SelectedSourcesPassBuilderAndLiveRoutes"
   }
 ]

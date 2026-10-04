@@ -18943,6 +18943,11 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeConfluenceIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        if (ConfluenceWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var values = ConfluenceWindow.Calculate(data, maType, length).Values; var result = context.Rent(values.Length);
+            values.AsSpan().CopyTo(result.WritableSpan); return result;
+        }
         var (fullPrice, _, _, _, close, _) = CalculationsHelper.GetInputValuesList(InputName.FullTypicalPrice, data);
         var buffer = context.Rent(data.Count);
         OscillatorCore.ConfluenceIndicator(SpanCompat.AsReadOnlySpan(close), SpanCompat.AsReadOnlySpan(fullPrice),
