@@ -4183,43 +4183,12 @@ internal static class OscillatorCore
     /// </summary>
     internal static void KasePeakOscillatorV1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 30)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var trueRangeArray = pool.Rent(close.Length);
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var trueRange = trueRangeArray.AsSpan(0, close.Length);
-            var atr = atrArray.AsSpan(0, close.Length);
-
-            // Calculate True Range
-            VolatilityCore.TrueRange(high, low, close, trueRange);
-            MovingAverageCore.SimpleMovingAverage(trueRange, atr, length);
-
-            // Calculate oscillator based on trend strength
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length || atr[i] == 0)
-                {
-                    output[i] = 0;
-                }
-                else
-                {
-                    var momentum = close[i] - close[i - length];
-                    output[i] = momentum / (atr[i] * Math.Sqrt(length));
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(trueRangeArray);
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Candle spans must cover every close.");
+        var highs = high.Slice(0, close.Length).ToArray(); var lows = low.Slice(0, close.Length).ToArray(); var prices = close.ToArray();
+        foreach (var values in new[] { highs, lows, prices }) foreach (var value in values) StreamingInputValidation.Finite(value, nameof(close));
+        using var state = new KasePeakV1Window(length, 3);
+        for (var i = 0; i < prices.Length; i++) output[i] = state.Next(highs[i], lows[i], prices[i], true).Level;
     }
 
     /// <summary>

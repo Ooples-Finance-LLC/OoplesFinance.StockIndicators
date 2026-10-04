@@ -90402,5 +90402,169 @@
     "before": "covariance / variance * center",
     "after": "covariance / (variance + new ReferenceFraction(1)) * center",
     "filter": "FullyQualifiedName~LinearQuadraticNumericalTests.ExtendedEndpointsPreserveIndependentHistogramAndPreview"
+  },
+  {
+    "id": "kase-v1-exact-peak-period",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "_length, smoothLength, 1",
+    "after": "_length, smoothLength + 1, 1",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.ExtremeRangesPreserveBandsPreviewAndReset"
+  },
+  {
+    "id": "kase-v1-exact-peak-preview",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "_peak.NextPeak(high, low, price, final)",
+    "after": "_peak.NextPeak(high, low, price, true)",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.ExtremeRangesPreserveBandsPreviewAndReset"
+  },
+  {
+    "id": "kase-v1-exact-expiry",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "_sum + peak - expired",
+    "after": "_sum + peak + expired",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.NarrowCandlesKeepLargeStartupPeaksAndWindowExpiry"
+  },
+  {
+    "id": "kase-v1-exact-square-expiry",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "peak * peak - expired * expired",
+    "after": "peak * peak + expired * expired",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.NarrowCandlesKeepLargeStartupPeaksAndWindowExpiry"
+  },
+  {
+    "id": "kase-v1-exact-mean-warmup",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "count < _length ? BigInteger.Zero : Round(sum, _length)",
+    "after": "Round(sum, count)",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.NarrowCandlesKeepLargeStartupPeaksAndWindowExpiry"
+  },
+  {
+    "id": "kase-v1-exact-variance-center",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "count * squares - sum * sum",
+    "after": "count * squares + sum * sum",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.NarrowCandlesKeepLargeStartupPeaksAndWindowExpiry"
+  },
+  {
+    "id": "kase-v1-exact-variance-divisor",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "new BigInteger(count) * count",
+    "after": "new BigInteger(count)",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.NarrowCandlesKeepLargeStartupPeaksAndWindowExpiry"
+  },
+  {
+    "id": "kase-v1-exact-radius",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "U(1.33) * deviation",
+    "after": "U(1.3) * deviation",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.NarrowCandlesKeepLargeStartupPeaksAndWindowExpiry"
+  },
+  {
+    "id": "kase-v1-exact-upper-floor",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "U(2.08)",
+    "after": "U(2.0)",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.SignTransitionsAndThresholdsHaveIndependentHands"
+  },
+  {
+    "id": "kase-v1-exact-lower-floor",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "U(-1.92)",
+    "after": "U(-2.0)",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.SignTransitionsAndThresholdsHaveIndependentHands"
+  },
+  {
+    "id": "kase-v1-exact-peak-sign-gate",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "_previousPeak.Sign >= 0 && peak.Sign > 0",
+    "after": "peak.Sign > 0",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.SignTransitionsAndThresholdsHaveIndependentHands"
+  },
+  {
+    "id": "kase-v1-exact-preview-history",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "        if (final)",
+    "after": "        if (true)",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.ExtremeRangesPreserveBandsPreviewAndReset"
+  },
+  {
+    "id": "kase-v1-exact-reset-peaks",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "_peak.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.ExtremeRangesPreserveBandsPreviewAndReset"
+  },
+  {
+    "id": "kase-v1-exact-signal-history",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "_previousLevel = level",
+    "after": "_previousLevel = BigInteger.Zero",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.SignTransitionsAndThresholdsHaveIndependentHands"
+  },
+  {
+    "id": "kase-v1-exact-fast-series",
+    "module": "kase-v1-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "series == KasePeakSeries.Pk ? result.Peaks : result.Levels",
+    "after": "series == KasePeakSeries.Pk ? result.Levels : result.Peaks",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.RoutesMatchIndependentPeakAndCenteredVariance",
+    "scope": "internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast("
+  },
+  {
+    "id": "kase-v1-exact-callback-bypass",
+    "module": "kase-v1-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (!ComponentAverage.HasOverrides)",
+    "after": "if (data.Count >= 0)",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.FastCallbacksKeepPeakAndMeanRequests",
+    "scope": "internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast("
+  },
+  {
+    "id": "kase-v1-exact-core-series",
+    "module": "kase-v1-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "state.Next(highs[i], lows[i], prices[i], true).Level",
+    "after": "state.Next(highs[i], lows[i], prices[i], true).Peak",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.CorePreservesPublicLevelsAndOverlappingCandleSpans",
+    "scope": "internal static void KasePeakOscillatorV1("
+  },
+  {
+    "id": "kase-v1-exact-core-guard",
+    "module": "kase-v1-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "StreamingInputValidation.Finite(value, nameof(close));",
+    "after": "{ if (double.IsNaN(value)) output[0] = 0; StreamingInputValidation.Finite(value, nameof(close)); }",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.CorePreservesPublicLevelsAndOverlappingCandleSpans",
+    "scope": "internal static void KasePeakOscillatorV1("
+  },
+  {
+    "id": "kase-v1-exact-reference-center",
+    "module": "kase-v1-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.KasePeakV1.cs",
+    "before": "var delta = peak[j] - center",
+    "after": "var delta = peak[j] + center",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.NarrowCandlesKeepLargeStartupPeaksAndWindowExpiry"
+  },
+  {
+    "id": "kase-v1-exact-negative-sign-gate",
+    "module": "kase-v1-numerical",
+    "file": "src/Helpers/KasePeakV1Window.cs",
+    "before": "_previousPeak.Sign <= 0 && peak.Sign < 0",
+    "after": "peak.Sign < 0",
+    "filter": "FullyQualifiedName~KasePeakV1NumericalTests.SignTransitionsAndThresholdsHaveIndependentHands"
   }
 ]

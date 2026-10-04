@@ -604,53 +604,17 @@ public sealed class KaseIndicatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Kpo")]
 public sealed class KasePeakOscillatorV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly KasePeakOscillatorV1Engine _engine;
-    private double _prevPk;
-
-    public KasePeakOscillatorV1State(int length = 30, int smoothLength = 3)
-    {
-        _engine = new KasePeakOscillatorV1Engine(Math.Max(1, length), Math.Max(1, smoothLength));
-    }
-
+    private readonly KasePeakV1Window _window;
+    public KasePeakOscillatorV1State(int length = 30, int smoothLength = 3) => _window = new(length, smoothLength);
     public IndicatorName Name => IndicatorName.KasePeakOscillatorV1;
-
-    public void Reset()
-    {
-        _engine.Reset();
-        _prevPk = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var pk = _engine.Next(bar, isFinal, out var mn, out var sd);
-        var v1 = mn + (1.33 * sd) > 2.08 ? mn + (1.33 * sd) : 2.08;
-        var v2 = mn - (1.33 * sd) < -1.92 ? mn - (1.33 * sd) : -1.92;
-        var prevPk = _prevPk;
-        var ln = prevPk >= 0 && pk > 0 ? v1 : prevPk <= 0 && pk < 0 ? v2 : 0;
-
-        if (isFinal)
-        {
-            _prevPk = pk;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Kpo", ln },
-                { "Pk", pk }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ln, outputs);
+        var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Level, includeOutputs ? new Dictionary<string,double> { ["Kpo"] = point.Level, ["Pk"] = point.Peak } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Kpo")]

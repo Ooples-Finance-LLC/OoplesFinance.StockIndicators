@@ -8327,6 +8327,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast(StockData data, ComputeContext context, int length = 30,
         int smoothLength = 3, KasePeakSeries series = KasePeakSeries.Kpo)
     {
+        if (!ComponentAverage.HasOverrides)
+        {
+            var result = KasePeakV1Window.Calculate(data, length, smoothLength);
+            var values = series == KasePeakSeries.Pk ? result.Peaks : result.Levels;
+            var exactBuffer = context.Rent(values.Count);
+            for (var i = 0; i < values.Count; i++) exactBuffer.WritableSpan[i] = values[i];
+            return exactBuffer;
+        }
         var count = data.Count;
         var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);

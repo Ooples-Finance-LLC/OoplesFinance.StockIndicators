@@ -1336,6 +1336,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKasePeakOscillatorV1(this StockData stockData, int length = 30, int smoothLength = 3)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result = KasePeakV1Window.Calculate(stockData, length, smoothLength);
+            stockData.SetOutputValues(() => new Dictionary<string,List<double>> { ["Kpo"] = result.Levels, ["Pk"] = result.Peaks });
+            stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+            stockData.SetCustomValues(result.Levels); stockData.IndicatorName = IndicatorName.KasePeakOscillatorV1;
+            return stockData;
+        }
         List<double> diffList = new(stockData.Count);
         List<double> lnList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

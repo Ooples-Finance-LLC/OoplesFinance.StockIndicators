@@ -5989,3 +5989,19 @@ compilation failure received no credit. Main integration passed 14 checks
 (`lqcd1136-integration.trx`), and all 10,413 mutation anchors validate. Enrollment
 is 6,938/7,131, leaving 193 configurations across 21 types
 (`si-lqcd1137-inventory.json`). PR #246 remains draft; final assurance is incomplete.
+
+
+### Kase Peak Oscillator V1 qualification (batch 1163)
+
+All eight configurations now preserve extended peak stages and centered variance,
+with lazy observed history and the existing sign gates and 2.08/-1.92 thresholds.
+The core follows the public Kpo level. Independent formula, routing, callback,
+preview/reset, invalid-input and overlapping-core checks passed 72 focused tests.
+All 20 compiled behavioral faults were caught (`si-kase1145-qualified.json`).
+Five initial survivors were exposed by the existing narrow-candle regression;
+only their test filters changed, and their compiled reruns failed as required.
+Main integration passed 13 checks (`kase1160-integration.trx`), including shared
+Kase Convergence and Linear Quadratic preservation checks. All 10,433 mutation
+anchors validate. Enrollment is 6,946/7,131, leaving 185 configurations across
+20 types (`si-kase1162-inventory.json`). PR #246 remains draft; final assurance
+is incomplete.

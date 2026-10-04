@@ -699,17 +699,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.PhaseChangeIndex:
                 return new("Pci", new[] { "Pci", "Signal" }, bars => PhaseChangeOutputs(bars, indicator));
             case IndicatorName.KasePeakOscillatorV1:
-                return new("Kpo", new[] { "Kpo", "Pk" }, bars =>
-                {
-                    var peak = KaseReferencePeak(bars, length, Integer(options, "SmoothLength", 3));
-                    var mean = Average(peak, length, 1);
-                    var variance = PopulationVariance(peak, length);
-                    var levels = peak.Select((v, i) => v > 0 && (i == 0 || peak[i - 1] >= 0)
-                        ? Math.Max(2.08, mean[i] + 1.33 * Math.Sqrt(variance[i]))
-                        : v < 0 && (i == 0 || peak[i - 1] <= 0)
-                            ? Math.Min(-1.92, mean[i] - 1.33 * Math.Sqrt(variance[i])) : 0).ToArray();
-                    return Outputs(("Kpo", levels), ("Pk", peak));
-                });
+                return new("Kpo", new[] { "Kpo", "Pk" }, bars => KasePeakV1Outputs(bars, indicator));
             case IndicatorName.KaseConvergenceDivergence:
                 return new("Kcd", new[] { "Kcd" }, bars => KaseConvergenceOutputs(bars, indicator));
             case IndicatorName.KasePeakOscillatorV2:

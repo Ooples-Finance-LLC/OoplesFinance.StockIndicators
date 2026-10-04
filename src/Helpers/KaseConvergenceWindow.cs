@@ -28,7 +28,7 @@ internal sealed class KaseConvergenceWindow : IDisposable
         : Round((U(high) + U(low) - U(previousHigh) - U(previousLow)) * _sqrt, atr);
     private static Signal Trade(BigInteger value, BigInteger previous) => value.Sign > 0 && value > previous ? Signal.StrongBuy
         : value.Sign < 0 && value < previous ? Signal.StrongSell : value.Sign > 0 ? Signal.Buy : value.Sign < 0 ? Signal.Sell : Signal.None;
-    private BigInteger NextPeak(double high, double low, double price, bool final)
+    internal BigInteger NextPeak(double high, double low, double price, bool final)
     {
         var atr = _atr.Next(Range(high, low, _hasPrevious ? _previousPrice : price), final);
         var previous = _history.Count == _length ? _history.Peek() : default;

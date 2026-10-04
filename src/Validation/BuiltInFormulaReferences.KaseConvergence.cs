@@ -11,6 +11,19 @@ internal static partial class BuiltInFormulaReferences
     {
         length = Math.Max(1, length); peakLength = Math.Max(1, peakLength); signalLength = Math.Max(1, signalLength);
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value); var zero = R(0);
+        var peak = KasePeakStages(bars, length, peakLength, selected);
+        var signal = kind is 1 or 2 or 3 or 6 ? SmoothRocBankStage(peak, signalLength, kind) : Average(peak.Select(v => v.ToDouble()).ToArray(), signalLength, kind).Select(R).ToArray();
+        var residual = peak.Select((v, i) => RoundRocBankStage(v - signal[i])).ToArray(); var trades = new Signal[bars.Count];
+        for (var i = 0; i < bars.Count; i++)
+        {
+            var value = residual[i]; var previous = i == 0 ? zero : residual[i - 1];
+            trades[i] = value.Sign > 0 && value.CompareTo(previous) > 0 ? Signal.StrongBuy : value.Sign < 0 && value.CompareTo(previous) < 0 ? Signal.StrongSell : value.Sign > 0 ? Signal.Buy : value.Sign < 0 ? Signal.Sell : Signal.None;
+        }
+        return (residual.Select(v => v.ToDouble()).ToArray(), trades);
+    }
+    private static ReferenceFraction[] KasePeakStages(IReadOnlyList<Bar> bars, int length, int peakLength, bool selected)
+    {
+        ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value); var zero = R(0);
         var highs = bars.Select((b, i) => !selected || b.Close >= b.Low && b.Close <= b.High ? b.High : Math.Max(b.Close, bars[Math.Max(0, i - 1)].Close)).ToArray();
         var lows = bars.Select((b, i) => !selected || b.Close >= b.Low && b.Close <= b.High ? b.Low : Math.Min(b.Close, bars[Math.Max(0, i - 1)].Close)).ToArray();
         var ranges = bars.Select((b, i) =>
@@ -23,14 +36,7 @@ internal static partial class BuiltInFormulaReferences
         var atr = SmoothRocBankStage(ranges, length, 6); var root = R(Math.Sqrt(length));
         var drive = bars.Select((_, i) => atr[i].Sign == 0 ? zero : RoundRocBankStage((R(highs[i]) + R(lows[i])
             - (i < length ? zero : R(highs[i - length]) + R(lows[i - length]))) * root / atr[i])).ToArray();
-        var peak = SmoothRocBankStage(drive, peakLength, 2);
-        var signal = kind is 1 or 2 or 3 or 6 ? SmoothRocBankStage(peak, signalLength, kind) : Average(peak.Select(v => v.ToDouble()).ToArray(), signalLength, kind).Select(R).ToArray();
-        var residual = peak.Select((v, i) => RoundRocBankStage(v - signal[i])).ToArray(); var trades = new Signal[bars.Count];
-        for (var i = 0; i < bars.Count; i++)
-        {
-            var value = residual[i]; var previous = i == 0 ? zero : residual[i - 1];
-            trades[i] = value.Sign > 0 && value.CompareTo(previous) > 0 ? Signal.StrongBuy : value.Sign < 0 && value.CompareTo(previous) < 0 ? Signal.StrongSell : value.Sign > 0 ? Signal.Buy : value.Sign < 0 ? Signal.Sell : Signal.None;
-        }
-        return (residual.Select(v => v.ToDouble()).ToArray(), trades);
+        return SmoothRocBankStage(drive, peakLength, 2);
     }
+
 }

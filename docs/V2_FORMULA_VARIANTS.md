@@ -1413,3 +1413,14 @@ signal from that difference; it is not collapsed into a single difference-minus-
 twice-signal rounding. Core and registry use this histogram with the existing
 25-period signal default. Large periods store only observed history in this
 composition. Shared fit callers keep their existing publication and ring paths.
+
+
+### Kase Peak Oscillator V1 extended bands
+
+V1 retains the qualified Kase peak stages, a full-window SMA mean and a
+partial-window centered population deviation. The rounded deviation is multiplied
+by 1.33 before adding/subtracting the mean; 2.08 and -1.92 remain the fixed band
+thresholds. Current and previous peak signs gate the published level. Extended
+intermediates preserve finite levels and exact level-change signals. Histories
+allocate only observed samples. The core now publishes Kpo with smoothing 3,
+aligned with the public formula; callback requests retain their existing route.
