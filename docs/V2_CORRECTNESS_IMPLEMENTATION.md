@@ -5937,3 +5937,18 @@ passed 34 checks (`ratings1104-integration.trx`), preserving Mesa, Anticipate an
 Comb. All 10,357 mutation anchors validate. Enrollment is 6,915/7,131, leaving
 216 configurations across 26 types (`si-ratings1106-inventory.json`). PR #246
 remains draft; remaining families and final assurance are incomplete.
+
+
+### Z Distance exact signal qualification (batch 1126)
+
+All five Z Distance from VWAP configurations are enrolled. Scores retain their
+existing output normalization; slope and acceleration compare exact signed
+radicals before publication. Adjacent rounded scores can therefore remain equal
+while the signal correctly changes. Independent radical elimination, extreme
+scales, signed volume, selected inputs, preview and reset passed 61 focused checks.
+All 46 compiled faults were caught, including 30 reverified output faults and
+16 new signal faults (`si-zdistance1110-qualified.json`). Main integration passed
+11 checks (`zdistance1120-integration.trx`); Ratings and Mesa were preserved.
+All 10,373 mutation anchors validate. Enrollment is 6,920/7,131, leaving 211
+configurations across 25 types (`si-zdistance1123-inventory.json`). PR #246 remains
+draft; final platform/package/timing assurance is incomplete.

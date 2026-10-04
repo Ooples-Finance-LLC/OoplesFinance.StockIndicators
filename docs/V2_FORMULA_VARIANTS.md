@@ -1376,3 +1376,15 @@ uses exact signed price-volume products and full-window startup; stochastic and
 SMA vote means retain rounded binary64 stages. The nine moving-average and eleven
 oscillator rules, callback requests, selected-input range semantics, and unused
 stochastic Length3 are preserved. The published rating remains their group mean.
+
+
+### Z Distance from VWAP exact signal ordering
+
+Retain each normalized score as a signed radical with an exact rational square.
+Compare current-minus-previous and current-minus-twice-previous-plus-older before
+rounding. Positive slope produces StrongBuy only with positive acceleration;
+negative slope produces StrongSell only with negative acceleration. Otherwise
+the corresponding Buy/Sell applies, and zero slope is neutral. The old threshold
+crossing clauses are redundant under exact score ordering. Published scores,
+full-width warmup, signed-volume semantics and zero-volume-mean behavior remain
+unchanged. Preview evaluates a signal without advancing committed score history.

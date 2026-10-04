@@ -211,8 +211,3 @@ OoplesFinance.StockIndicators.Indicators.VolumeFlowIndicator/minimum-signalLengt
 OoplesFinance.StockIndicators.Indicators.VolumeFlowIndicator/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.VolumeFlowIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.VolumeFlowIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/default
-OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/longer-periods
-OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/shorter-periods
-OoplesFinance.StockIndicators.Indicators.ZDistanceFromVwap/weighted-average

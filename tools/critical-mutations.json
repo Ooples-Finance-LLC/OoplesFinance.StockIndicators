@@ -89947,5 +89947,133 @@
     "after": "50, maLength5, maLength6, hullMaLength",
     "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.AdditionalPublicPeriodsReachEveryRoute",
     "scope": "internal static ComputeBuffer ComputeTechnicalRatingsFast("
+  },
+  {
+    "id": "z-distance-signal-pair-sign",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "(a.Square - b.Square).Sign * a.Sign",
+    "after": "(a.Square - b.Square).Sign * b.Sign",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "z-distance-signal-pair-zero",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "if (a.Sign == 0) return b.Sign;",
+    "after": "if (a.Sign == 0) return 0;",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "z-distance-signal-root-comparison",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "rational * rational - square",
+    "after": "rational * rational + square",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "z-distance-signal-exact-tie",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "comparison == 0 ? 0",
+    "after": "comparison == 0 ? rootSign",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "z-distance-signal-isolated-square",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "a.Square + b.Square - c.Square",
+    "after": "a.Square + b.Square + c.Square",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "z-distance-signal-cross-square",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "(a.Square * b.Square).Times(4)",
+    "after": "(a.Square * b.Square).Times(1)",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "z-distance-signal-cross-sign",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "a.Sign * b.Sign",
+    "after": "-a.Sign * b.Sign",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
+  },
+  {
+    "id": "z-distance-signal-coefficient-square",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "(long)coefficient * coefficient",
+    "after": "Math.Abs((long)coefficient)",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.ExactSignalsPreservePreviewResetAndSelectedInputs"
+  },
+  {
+    "id": "z-distance-signal-premature-square",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "Square = square;",
+    "after": "Square = Number.Of(square.Publish());",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.SubnormalSizedPerturbationsResolveExactRadicalTies"
+  },
+  {
+    "id": "z-distance-signal-slope",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "previous.Times(-1), default",
+    "after": "previous.Times(1), default",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.ExactSignalsPreservePreviewResetAndSelectedInputs"
+  },
+  {
+    "id": "z-distance-signal-acceleration",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "previous.Times(-2), older",
+    "after": "previous.Times(-1), older",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.ExactSignalsPreservePreviewResetAndSelectedInputs"
+  },
+  {
+    "id": "z-distance-signal-older-score",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceRoot.cs",
+    "before": "previous.Times(-2), older",
+    "after": "previous.Times(-2), default",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.ExactSignalsPreservePreviewResetAndSelectedInputs"
+  },
+  {
+    "id": "z-distance-signal-history-lag",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "before": "_older = _previous; _previous = root;",
+    "after": "_previous = root; _older = root;",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.ExactSignalsPreservePreviewResetAndSelectedInputs"
+  },
+  {
+    "id": "z-distance-signal-history-reset",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "before": "_previous = _older = default;",
+    "after": "_older = default;",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.ExactSignalsPreservePreviewResetAndSelectedInputs"
+  },
+  {
+    "id": "z-distance-signal-batch-signal",
+    "module": "z-distance-exact-signals",
+    "file": "src/Helpers/ZDistanceWindow.cs",
+    "before": "signals?.Add(state.LastSignal);",
+    "after": "signals?.Add(Signal.None);",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.PublishedScoreTiesStillCastTheirExactSignal"
+  },
+  {
+    "id": "z-distance-signal-reference-isolation",
+    "module": "z-distance-exact-signals",
+    "file": "src/Validation/BuiltInFormulaReferences.ZDistance.cs",
+    "before": "return -sign*comparison;",
+    "after": "return sign*comparison;",
+    "filter": "FullyQualifiedName~ZDistanceSignalTests.AllRadicalSignsAndPermutationsMatchIndependentElimination"
   }
 ]

@@ -299,19 +299,8 @@ public static partial class Calculations
     {
         List<double> zscoreList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var zscoreValues = ZDistanceWindow.Calculate(stockData, maType, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevZScore1 = i >= 1 ? zscoreList[i - 1] : 0;
-            var prevZScore2 = i >= 2 ? zscoreList[i - 2] : 0;
-
-            var zscore = zscoreValues[i];
-            zscoreList.Add(zscore);
-
-            var signal = GetRsiSignal(zscore - prevZScore1, prevZScore1 - prevZScore2, zscore, prevZScore1, 2, -2);
-            signalsList?.Add(signal);
-        }
+        var zscoreValues = ZDistanceWindow.Calculate(stockData, maType, length, signalsList);
+        zscoreList.AddRange(zscoreValues);
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Zscore", zscoreList }

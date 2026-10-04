@@ -10,6 +10,8 @@ internal sealed class ZDistanceWindow : IDisposable
     private readonly Queue<(Number Product, Number Volume)> _flow = new();
     private readonly Queue<Number> _squares = new();
     private Number _product, _volume, _squareSum;
+    private ZDistanceRoot _previous, _older;
+    internal Signal LastSignal { get; private set; }
     internal ZDistanceWindow(MovingAvgType kind, int length)
     {
         _length = Math.Max(1, length);
@@ -26,16 +28,19 @@ internal sealed class ZDistanceWindow : IDisposable
         if (_squares.Count == _length) squares -= _squares.Peek();
         var ratio = _squares.Count + 1 < _length || squares.Sign == 0 ? default : square.Times(_length).Divide(squares);
         var value = residual.Sign * ExactPopulationDeviation.RootRatio(ratio.Numerator << 2148, ratio.Denominator);
+        var root = new ZDistanceRoot(ratio, residual.Sign);
+        LastSignal = ZDistanceRoot.Vote(root, _previous, _older);
         if (final)
         {
             if (_flow.Count == _length) _flow.Dequeue();
             if (_squares.Count == _length) _squares.Dequeue();
             _flow.Enqueue((product, weight)); _squares.Enqueue(square);
             _product = products; _volume = volumes; _squareSum = squares;
+            _older = _previous; _previous = root;
         }
         return value;
     }
-    internal static double[] Calculate(StockData data, MovingAvgType kind, int length)
+    internal static double[] Calculate(StockData data, MovingAvgType kind, int length, ICollection<Signal>? signals = null)
     {
         var (input, _, _, _, volumes) = CalculationsHelper.GetInputValuesList(data);
         foreach (var values in new[] { input, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, volumes })
@@ -43,9 +48,9 @@ internal sealed class ZDistanceWindow : IDisposable
         using var state = new ZDistanceWindow(kind, length);
         var fallback = kind != MovingAvgType.VolumeWeightedAveragePrice && !StrengthWindow.Supports(kind)
             ? CalculationsHelper.GetMovingAverageList(data, kind, Math.Max(1, length), input) : null;
-        return input.Select((value, i) => state.Next(value, volumes[i], true, fallback is null ? null : Number.Of(fallback[i]))).ToArray();
+        return input.Select((value, i) => { var result = state.Next(value, volumes[i], true, fallback is null ? null : Number.Of(fallback[i])); signals?.Add(state.LastSignal); return result; }).ToArray();
     }
-    internal void Reset() { _flow.Clear(); _squares.Clear(); _product = _volume = _squareSum = default; _mean?.Reset(); }
+    internal void Reset() { _flow.Clear(); _squares.Clear(); _product = _volume = _squareSum = default; _mean?.Reset(); _previous = _older = default; LastSignal = Signal.None; }
     public void Dispose() => _mean?.Dispose();
     private sealed class Average : IDisposable
     {
