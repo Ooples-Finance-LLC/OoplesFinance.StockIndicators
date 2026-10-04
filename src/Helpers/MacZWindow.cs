@@ -131,6 +131,9 @@ internal sealed class MacZWindow : IDisposable
             if (comparison > 0 || comparison == 0 && !root.IsEven) root++;
             return new(Sign * root, checked(_exponent + 1074 + shift));
         }
+        internal UltimatePowerWeights.Fraction ToFraction() => _exponent >= 0
+            ? new(_coefficient << _exponent, Denominator)
+            : new(_coefficient, Denominator << -_exponent);
         internal double Publish()
         { var sum = new ExactMeanAccumulator(); sum.Add(1, _coefficient); sum.ScaleByPowerOfTwo(_exponent); var denominator = new ExactMeanAccumulator(); denominator.Add(1, Denominator); return sum.Ratio(denominator); }
     }

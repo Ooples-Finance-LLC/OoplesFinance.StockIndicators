@@ -17,6 +17,30 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.VariableMovingAverage)
+        {
+            var variableLength=Integer(builtIn.CreateOptions(),"Length",6);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars=>CertifiedVariableReference(Closes(bars),variableLength),IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VariableMovingAverageBands)
+        {
+            var variableOptions=builtIn.CreateOptions();
+            var variableKind=(MovingAvgType)variableOptions.GetType().GetProperty("MaType")!.GetValue(variableOptions)!;
+            if (variableKind==MovingAvgType.VariableMovingAverage || Helpers.StrengthWindow.Supports(variableKind))
+            {
+                var variableBandKeys=builtIn.BatchOutputKey is { } outputKey ? new[] { outputKey } : new[] { "UpperBand","MiddleBand","LowerBand" };
+                var cache=new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>,Dictionary<string,double[]>>();
+                for(var slot=0;slot<variableBandKeys.Length;slot++)
+                {
+                    var key=variableBandKeys[slot];
+                    yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>cache.GetValue(bars,
+                        b=>CertifiedVariableBandsReference(b,Integer(variableOptions,"Length",6),variableKind,Number(variableOptions,1.5,"Mult"),indicator.Source is not null))[key],IndicatorErrorBudget.Exact);
+                }
+                yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.KaufmanAdaptiveBands
             && builtIn.CreateOptions() is KaufmanAdaptiveBandsSpecOptions adaptiveBands
             && adaptiveBands.StdDevFactor <= 32 && Math.Truncate(adaptiveBands.StdDevFactor).Equals(adaptiveBands.StdDevFactor))

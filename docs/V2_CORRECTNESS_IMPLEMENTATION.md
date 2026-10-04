@@ -5662,3 +5662,41 @@ construction failures and exact backlog agreement.
 - `si-herrick954-repair-mutations` snapshot/archive: `59d14f8b6af7768240a223488cab066a4cf1ff6f61eee0c11ce2806ad75ecdb5` / `c2f28f6e20eb616b0309195d098772c279f94b8013d6200ab0b319c6f9195554`.
 
 Hosted quality gates, final package/platform checks and competitor timing remain outstanding. PR #246 remains draft.
+
+
+### Variable Moving Average and Bands qualification (2026-10-04)
+
+The shared Vma recurrence now preserves exact ties and small directional changes
+using outward significant-bit intervals with exact rational fallback. Iterative
+expression evaluation avoids recursive stack growth; lazy extrema storage avoids
+allocating a declared window up front. Bands preserve true ranges wider than
+binary64 until final rounding. Batch, fast and native routes share the same band
+engine and callback routing. Other averaging kinds retain their existing
+binary64 arithmetic boundaries and are not claimed to have arbitrary numerical
+qualification. Expression storage and exact fallback costs depend on history.
+
+**82 distinct focused checks passed**, including a 1,200-point monotone rational
+hand, overflowing true ranges, independent midpoint rounding, shared averaging
+callers, callbacks, preview/reset and rejection atomicity. The final 80-check
+fixture run completed in 2m47s; two additional independent hands passed in their
+mutation baselines. **22 unique compiled behavioral faults were caught**. The
+original subtraction seed survived and receives no credit; its strengthened
+independent identity and repaired campaign passed baseline and caught the fault.
+Compilation failures and interrupted attempts receive no credit.
+
+**45/45 main integration checks passed** (`vma966-integration.trx`), including
+Herrick preservation and enrollment. These overlap focused checks. All **10,186
+mutation anchors** validate. Compiled enrollment is **6,856/7,131**, leaving
+**275 configurations across 34 types**, with no construction failures and exact
+backlog agreement. Qualification: `si-vma966-qualified.json`; source integration:
+`si-vma966-integration-proof.json`; inventory: `si-vma967-inventory.json`.
+
+- `si-vma962-mutations-a` snapshot/archive: `affa046170a28e69f16ab780b318abbe3905f0f0ae3dc919473e84ac290e3389` / `6a4c129c92c8de5e191646951bc06f30ea4f6611806948c38534fa1f29fe8c94`.
+
+- `si-vma962-mutations-b` snapshot/archive: `affa046170a28e69f16ab780b318abbe3905f0f0ae3dc919473e84ac290e3389` / `6a4c129c92c8de5e191646951bc06f30ea4f6611806948c38534fa1f29fe8c94`.
+
+- `si-vma964-reference-mutations` snapshot/archive: `6b58e1bec0b58aeb2994f2eeb5bbf416e86d41a51ea135f416d15cc7835d4ece` / `39d7513e8e1b96ad8c95177be4cb2bcaab45cb649bff0c1f335d8a2f1fdec2d0`.
+
+- `si-vma965-subtraction-mutations` snapshot/archive: `5985b587ffcd293d3c2c8dd5b49d896ef74f72c002729f8b044f47803edbd409` / `045a6724765ff8fd8972bc00c40e607f5c8be2f538c83b6a385f7c1c46bc8ce3`.
+
+Hosted gates, final package/platform assurance and competitor timing remain outstanding. PR #246 remains draft.

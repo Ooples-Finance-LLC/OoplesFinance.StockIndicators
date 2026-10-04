@@ -88380,5 +88380,184 @@
     "after": "if (double.IsNaN(bar.Close)) _window.Next(17, 2, 4, 3, true); var point = _window.Next(_input.GetValue(bar), bar.Open, bar.Close, bar.Volume, isFinal);",
     "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.RejectedFieldsDoNotAdvanceHistory",
     "scope": "public sealed class HerrickPayoffIndexState"
+  },
+  {
+    "id": "vma-exact-gain",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "(F)1/length",
+    "after": "(F)2/length",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-retained",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "_retained=E.One-_gain",
+    "after": "_retained=E.One",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-down-change",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "change.Sign<0 ? -change : 0",
+    "after": "change.Sign<0 ? change : 0",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-index-memory",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "Smooth(_index,strength)",
+    "after": "Smooth(_up,strength)",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-old-tolerance",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "var position=ReferenceEquals(index,low.Value)",
+    "after": "var position=spread.Publish()<=1e-12 ? E.Zero : ReferenceEquals(index,low.Value)",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.NarrowMonotoneIndexRetainsItsExactEndpointPosition"
+  },
+  {
+    "id": "vma-exact-preview",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "if (final)",
+    "after": "if (final || _count>=0)",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-reset",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "_count=0;",
+    "after": "_count=1;",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-expiry",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "first.Value.Index<=index-_length",
+    "after": "first.Value.Index<index-_length",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-initial-average",
+    "module": "vma-numerical",
+    "file": "src/Streaming/ExactVariableMovingAverageEngine.cs",
+    "before": "_count==0 ? price :",
+    "after": "_count==0 ? E.Zero :",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-shared-commit",
+    "module": "vma-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "before": "_engine.Next(value,isFinal)",
+    "after": "_engine.Next(value,false)",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.CoreAndAveragingDispatchRetainExactNarrowIndexBehavior",
+    "scope": "internal sealed class VariableMovingAverageEngine"
+  },
+  {
+    "id": "vma-exact-interval-upper",
+    "module": "vma-numerical",
+    "file": "src/Helpers/VariableAverageExpression.cs",
+    "before": "upper ? scaled.Ceiling() : scaled.Floor()",
+    "after": "scaled.Floor()",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExpressionsCertifyRationalCancellationAndScale"
+  },
+  {
+    "id": "vma-exact-negative-subtraction",
+    "module": "vma-numerical",
+    "file": "src/Helpers/VariableAverageExpression.cs",
+    "before": "a.Lower-b.Upper,a.Upper-b.Lower",
+    "after": "a.Lower-b.Lower,a.Upper-b.Upper",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.IndependentFractionalPathsRetainZeroDifference"
+  },
+  {
+    "id": "vma-exact-band-width",
+    "module": "vma-numerical",
+    "file": "src/Helpers/VariableBandWindow.cs",
+    "before": "var width=_mult*range;",
+    "after": "var width=_mult*line;",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.BandsKeepWideTrueRangesUntilFinalRounding"
+  },
+  {
+    "id": "vma-exact-range-gap",
+    "module": "vma-numerical",
+    "file": "src/Helpers/VariableBandWindow.cs",
+    "before": "_started ? _previousRangePrice : p",
+    "after": "_started ? p : _previousRangePrice",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.RoutesMatchIndependentVectorReference"
+  },
+  {
+    "id": "vma-exact-callback-range",
+    "module": "vma-numerical",
+    "file": "src/Helpers/VariableBandWindow.cs",
+    "before": "ComponentAverage.Take(ranges,Math.Max(1,length))",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(prices),Math.Max(1,length))",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.CustomerBandsReceivePriceThenTrueRangeAndRestoreInputs"
+  },
+  {
+    "id": "vma-exact-callback-finally",
+    "module": "vma-numerical",
+    "file": "src/Helpers/VariableBandWindow.cs",
+    "before": "finally { data.RestoreInputSeries(caller); }",
+    "after": "finally { }",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.CustomerBandsReceivePriceThenTrueRangeAndRestoreInputs"
+  },
+  {
+    "id": "vma-exact-fraction-exponent",
+    "module": "vma-numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "before": "Denominator << -_exponent);",
+    "after": "Denominator << (-_exponent+1));",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.NumberConversionPreservesValuesBeyondBinary64"
+  },
+  {
+    "id": "vma-exact-native-rejection",
+    "module": "vma-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "before": "var value=_input.GetValue(bar); var point=_window.Next(value,bar.High,bar.Low,isFinal);",
+    "after": "if(double.IsNaN(bar.High)) _window.Next(17,17,17,true); var value=_input.GetValue(bar); var point=_window.Next(value,bar.High,bar.Low,isFinal);",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.InvalidBandInputsDoNotAdvanceEitherAverage",
+    "scope": "public sealed class VariableMovingAverageBandsState"
+  },
+  {
+    "id": "vma-exact-fast-band",
+    "module": "vma-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var values=band==ChannelBand.Upper ? points.Upper",
+    "after": "var values=band==ChannelBand.Upper ? points.Lower",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.FastBandsHonorBothCustomerAveragesAndPreserveTheCaller",
+    "scope": "internal static ComputeBuffer ComputeVariableMovingAverageBandsFast"
+  },
+  {
+    "id": "vma-exact-reference-period",
+    "module": "vma-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ExactVariable.cs",
+    "before": "var period=VariableReferenceBound.Point(new R(length));",
+    "after": "var period=VariableReferenceBound.Point(new R(length+1));",
+    "filter": "FullyQualifiedName~VariableAverageExactEngineTests.ExactDefinitionMatchesAcrossSignsAndScales"
+  },
+  {
+    "id": "vma-exact-reference-uncertified-endpoint",
+    "module": "vma-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ExactVariable.cs",
+    "before": "if(!low.Equals(high)) { output[i]=double.NaN;complete=false; }",
+    "after": "if(!low.Equals(high)) { output[i]=low; }",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.AffineRangeHalfwayBandHasAnIndependentConstantHand"
+  },
+  {
+    "id": "vma-exact-reference-unresolved-upper",
+    "module": "vma-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ExactVariable.cs",
+    "before": "if(double.IsNaN(certified[\"UpperBand\"][i]))",
+    "after": "if(double.IsPositiveInfinity(certified[\"UpperBand\"][i]))",
+    "filter": "FullyQualifiedName~VariableAverageNumericalTests.AffineRangeHalfwayBandHasAnIndependentConstantHand"
   }
 ]

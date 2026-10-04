@@ -1207,3 +1207,23 @@ mathematical output overflow is recognized by the reference contract.
 With point value one, volume three, comparison prices [1,3,2,4], opens [2,4,1,0]
 and closes [4,6,8,9], outputs are [0,9,0,6]. Point value minus one reverses them.
 Preview/reset and invalid-input rejection retain committed history.
+
+
+### Variable Moving Average and Variable Moving Average Bands
+
+Vma starts at the first price and retains its unpublished rational recurrence.
+Directional differences and window extrema use exact comparisons, including
+changes smaller than a floating-point tolerance. Certified outward intervals
+resolve ordinary comparisons and output rounding; ambiguous decisions fall back
+to exact arithmetic. Shared zero/one expressions are immutable. A monotone
+length-six input 0 through 1199 matches the independent rational Wilder
+recurrence with gain 1/6, even as index differences become very small.
+
+Bands average exact true ranges before combining the center with the signed
+multiplier. With initial price zero, high MaxValue, low -MaxValue, length two
+and multiplier .25, Variable bands publish +/-MaxValue/2; Weighted bands publish
++/-MaxValue/3. A zero multiplier publishes zero without an infinity product.
+Other averaging kinds and custom callbacks retain existing binary64 boundaries.
+An affine true-range hand places the upper band exactly at -1 - 2^-53 and
+independently verifies ties-to-even publication of -1. Expression storage and
+exact fallback costs remain history dependent.

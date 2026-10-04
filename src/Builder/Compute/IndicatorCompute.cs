@@ -16771,33 +16771,15 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Variable Moving Average Bands using zero-allocation fast path.
+    /// Computes Variable Moving Average Bands through the shared exact band calculation.
     /// Returns the middle band (VMA).
     /// </summary>
     internal static ComputeBuffer ComputeVariableMovingAverageBandsFast(StockData data, ComputeContext context, int length = 6,
         double mult = 1.5, MovingAvgType maType = MovingAvgType.VariableMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculateVariableMovingAverageBands centres on the moving average of the chained series and steps
-        // the outer bands by a multiple of the average true range. The switch this replaced fell back to a
-        // simple average of the close for every type but two, including the variable average it is named for.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        if (band == ChannelBand.Middle) return buffer;
-        var atr = averageTrueRange.Span;
-        var multiplier = band == ChannelBand.Upper ? mult : -mult;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] += multiplier * atr[i];
-        }
-
-        return buffer;
+        var points=VariableBandWindow.Calculate(data,maType,length,mult);
+        var values=band==ChannelBand.Upper ? points.Upper : band==ChannelBand.Lower ? points.Lower : points.Middle;
+        var buffer=context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

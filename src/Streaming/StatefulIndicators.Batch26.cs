@@ -272,94 +272,19 @@ public sealed class VariableMovingAverageState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("MiddleBand")]
 public sealed class VariableMovingAverageBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly bool _useVariable;
-    private readonly double _mult;
-    private readonly VariableMovingAverageEngine? _vmaEngine;
-    private readonly VariableMovingAverageEngine? _atrEngine;
-    private readonly IMovingAverageSmoother? _ma;
-    private readonly IMovingAverageSmoother? _atrMa;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public VariableMovingAverageBandsState(MovingAvgType maType = MovingAvgType.VariableMovingAverage, int length = 6,
-        double mult = 1.5)
-    {
-        _mult = mult;
-        _useVariable = maType == MovingAvgType.VariableMovingAverage;
-        if (_useVariable)
-        {
-            _vmaEngine = new VariableMovingAverageEngine(length);
-            _atrEngine = new VariableMovingAverageEngine(length);
-        }
-        else
-        {
-            var resolved = Math.Max(1, length);
-            _ma = MovingAverageSmootherFactory.Create(maType, resolved);
-            _atrMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        }
-
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VariableBandWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public VariableMovingAverageBandsState(MovingAvgType maType=MovingAvgType.VariableMovingAverage,int length=6,double mult=1.5)
+        => _window=new(maType,length,mult);
     public IndicatorName Name => IndicatorName.VariableMovingAverageBands;
-
-    public void Reset()
+    public void Reset() => _window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _vmaEngine?.Reset();
-        _atrEngine?.Reset();
-        _ma?.Reset();
-        _atrMa?.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
+        var value=_input.GetValue(bar); var point=_window.Next(value,bar.High,bar.Low,isFinal);
+        return new StreamingIndicatorStateResult(point.Middle,includeOutputs ? new Dictionary<string,double>
+            { ["UpperBand"]=point.Upper,["MiddleBand"]=point.Middle,["LowerBand"]=point.Lower } : null);
     }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var vma = _useVariable
-            ? _vmaEngine!.Next(value, isFinal)
-            : _ma!.Next(value, isFinal);
-
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevClose = _hasPrev ? _prevClose : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _useVariable
-            ? _atrEngine!.Next(tr, isFinal)
-            : _atrMa!.Next(tr, isFinal);
-
-        var offset = _mult * atr;
-        var upper = vma + offset;
-        var lower = vma - offset;
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", vma },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vma, outputs);
-    }
-
-    public void Dispose()
-    {
-        _vmaEngine?.Dispose();
-        _atrEngine?.Dispose();
-        _ma?.Dispose();
-        _atrMa?.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vhma")]
@@ -1391,51 +1316,9 @@ public sealed class VolumeAdjustedMovingAverageState : IStreamingIndicatorState,
 
 internal sealed class VariableMovingAverageEngine : IDisposable
 {
-    private readonly VariableAverageNumber _gain;
-    private readonly VariableAverageExtrema _high, _low;
-    private VariableAverageNumber _up, _down, _positive, _negative, _index;
-    private double _previousValue, _average;
-    private long _count;
-
-    public VariableMovingAverageEngine(int length)
-    {
-        length = Math.Max(1, length);
-        _gain = (VariableAverageNumber)1 / length;
-        _high = new VariableAverageExtrema(length, true);
-        _low = new VariableAverageExtrema(length, false);
-    }
-    public double Next(double value, bool isFinal)
-    {
-        var change = _count == 0 ? 0 : value - _previousValue;
-        var up = _up + _gain * ((VariableAverageNumber)Math.Max(0, change) - _up);
-        var down = _down + _gain * ((VariableAverageNumber)Math.Max(0, -change) - _down);
-        var total = up + down;
-        var positive = _positive + _gain * ((total.CompareTo(0) == 0 ? (VariableAverageNumber)0 : up / total) - _positive);
-        var negative = _negative + _gain * ((total.CompareTo(0) == 0 ? (VariableAverageNumber)0 : down / total) - _negative);
-        var strengthSum = positive + negative;
-        var strength = strengthSum.CompareTo(0) == 0 ? (VariableAverageNumber)0 : VariableAverageNumber.Abs(positive - negative) / strengthSum;
-        var index = _index + _gain * (strength - _index);
-        var high = _high.Next(index, _count, isFinal);
-        var low = _low.Next(index, _count, isFinal);
-        var spread = high - low;
-        // Binary64-scale ties are not new directional information. The extra arithmetic precision
-        // above makes resolvable narrow ranges accurate before this boundary is reached.
-        var uncertainty = 32 * 2.2204460492503131e-16 * Math.Max(Math.Abs(high.Value), Math.Abs(low.Value));
-        var position = spread.Value <= uncertainty || (index - low).Value <= uncertainty ? 0
-            : (high - index).Value <= uncertainty ? 1 : ((index - low) / spread).Value;
-        var previous = _count == 0 ? value : _average;
-        var average = previous + _gain.Value * position * (value - previous);
-        if (isFinal)
-        {
-            _up = up; _down = down; _positive = positive; _negative = negative; _index = index;
-            _previousValue = value; _average = average; _count++;
-        }
-        return average;
-    }
-    public void Reset()
-    {
-        _up = _down = _positive = _negative = _index = 0;
-        _previousValue = _average = 0; _count = 0; _high.Reset(); _low.Reset();
-    }
-    public void Dispose() { }
+    private readonly ExactVariableMovingAverageEngine _engine;
+    public VariableMovingAverageEngine(int length) => _engine=new(length);
+    public double Next(double value,bool isFinal) => _engine.Next(value,isFinal);
+    public void Reset() => _engine.Reset();
+    public void Dispose() => _engine.Dispose();
 }

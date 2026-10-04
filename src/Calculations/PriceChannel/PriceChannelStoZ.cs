@@ -241,44 +241,11 @@ public static partial class Calculations
     public static StockData CalculateVariableMovingAverageBands(this StockData stockData, MovingAvgType maType = MovingAvgType.VariableMovingAverage,
         int length = 6, double mult = 1.5)
     {
-        List<double> ubandList = new(stockData.Count);
-        List<double> lbandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var maList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentAtr = atrList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var vma = maList[i];
-            var prevVma = i >= 1 ? maList[i - 1] : 0;
-            var o = mult * currentAtr;
-
-            var prevUband = GetLastOrDefault(ubandList);
-            var uband = vma + o;
-            ubandList.Add(uband);
-
-            var prevLband = GetLastOrDefault(lbandList);
-            var lband = vma - o;
-            lbandList.Add(lband);
-
-            var signal = GetBollingerBandsSignal(currentValue - vma, prevValue - prevVma, currentValue, prevValue, uband, prevUband, lband, prevLband);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", ubandList },
-            { "MiddleBand", maList },
-            { "LowerBand", lbandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.VariableMovingAverageBands;
-
+        var points=VariableBandWindow.Calculate(stockData,maType,length,mult);
+        stockData.SetOutputValues(() => new Dictionary<string,List<double>>
+            { { "UpperBand",points.Upper.ToList() }, { "MiddleBand",points.Middle.ToList() }, { "LowerBand",points.Lower.ToList() } });
+        var signals=CreateSignalsList(stockData); signals?.AddRange(points.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(new List<double>()); stockData.IndicatorName=IndicatorName.VariableMovingAverageBands;
         return stockData;
     }
 

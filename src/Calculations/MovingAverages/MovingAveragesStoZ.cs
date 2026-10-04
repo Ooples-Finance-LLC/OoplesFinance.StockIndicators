@@ -786,11 +786,15 @@ public static partial class Calculations
         var values = new List<double>(stockData.Count);
         var signals = CreateSignalsList(stockData);
         using var engine = new OoplesFinance.StockIndicators.Streaming.VariableMovingAverageEngine(length);
+        UltimatePowerWeights.Fraction previousDifference=0;
         for (var i = 0; i < stockData.Count; i++)
         {
             var value = engine.Next(inputList[i], true);
-            var previous = i == 0 ? inputList[i] : values[i - 1];
-            signals?.Add(GetCompareSignal(inputList[i] - value, (i == 0 ? 0 : inputList[i - 1]) - previous));
+            var difference=UltimatePowerWeights.Fraction.Of(inputList[i])-UltimatePowerWeights.Fraction.Of(value);
+            var sign=difference.Sign; var change=(difference-previousDifference).Sign;
+            signals?.Add(sign>0 && change>0 ? Signal.StrongBuy : sign<0 && change<0 ? Signal.StrongSell
+                : sign>0 ? Signal.Buy : sign<0 ? Signal.Sell : Signal.None);
+            previousDifference=difference;
             values.Add(value);
         }
         stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vma", values } });
