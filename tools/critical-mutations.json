@@ -87655,6 +87655,144 @@
     "filter": "FullyQualifiedName~KlingerNumericalTests.SelectedSourcesPreserveOriginalCandles"
   },
   {
+    "id": "kaufman-binary-exact-travel",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "_travel + move - (full ? _moves.Peek() : (F)0)",
+    "after": "_travel + move",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-efficiency",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "(value - _prices.Peek()).Abs() / travel",
+    "after": "(F)0",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-gain",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "coefficient * coefficient",
+    "after": "coefficient",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-seed",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "_started ? _average : value",
+    "after": "_started ? _average : (F)0",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-filter-scale",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "F.Of(filter) / 100",
+    "after": "F.Of(filter) / 10",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-positive-tie",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "distance.Sign > 0 && comparison > 0",
+    "after": "distance.Sign > 0 && comparison >= 0",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-negative-direction",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "distance.Sign >= 0 || comparison < 0",
+    "after": "distance.Sign >= 0 || comparison > 0",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.ExactFallbackHonorsNegativeSquareRootThreshold"
+  },
+  {
+    "id": "kaufman-binary-exact-zero-threshold",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "return distance.Sign > 0;",
+    "after": "return distance.Sign >= 0;",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-variance",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "(squares * _length - sum * sum) / _length / _length",
+    "after": "squares / _length",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-fall",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "change.Sign < 0 ? average : _low",
+    "after": "change.Sign > 0 ? average : _low",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-rise",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "change.Sign > 0 ? average : _high",
+    "after": "change.Sign < 0 ? average : _high",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-preview",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-expiry",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "_changes.Dequeue();",
+    "after": "_changes.Peek();",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-reset",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/KaufmanBinaryWindow.cs",
+    "before": "_started = false;",
+    "after": "_started = true;",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.SignedExtremePricesAndPeriodsRetainBoundedDecisions|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
+    "id": "kaufman-binary-exact-selected",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.DirectChainedInputIsUsedAndCandlesArePreserved|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests",
+    "scope": "public static StockData CalculateKaufmanBinaryWave("
+  },
+  {
+    "id": "kaufman-binary-exact-native-preview",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "before": "_window.Next(_input.GetValue(bar), isFinal)",
+    "after": "_window.Next(_input.GetValue(bar), true)",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests",
+    "scope": "public sealed class KaufmanBinaryWaveState"
+  },
+  {
+    "id": "kaufman-binary-exact-reference-gain",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.KaufmanBinary.cs",
+    "before": "coefficient * coefficient",
+    "after": "coefficient",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies|FullyQualifiedName~CertifiedKaufmanBinaryTests|FullyQualifiedName~KaufmanIntegerReferenceTests"
+  },
+  {
     "id": "shared-unrounded-fallback-preview",
     "module": "numerical",
     "file": "src/Helpers/UnroundedMovingAverage.cs",
@@ -87677,5 +87815,165 @@
     "before": "return result;",
     "after": "return Number.Of(result.Publish());",
     "filter": "FullyQualifiedName~UnroundedMovingAverageTests.UnpublishedStagesPreserveSmallResidualAfterOverflowCancellation"
+  },
+  {
+    "id": "kaufman-certified-lower-round",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "upper ? scaled.Ceiling() : scaled.Floor()",
+    "after": "scaled.Ceiling()",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.OutwardArithmeticContainsExactCancellationAndProducts"
+  },
+  {
+    "id": "kaufman-certified-upper-round",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "upper ? scaled.Ceiling() : scaled.Floor()",
+    "after": "scaled.Floor()",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.OutwardArithmeticContainsExactCancellationAndProducts"
+  },
+  {
+    "id": "kaufman-certified-square-zero",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "Lower.Sign <= 0 && Upper.Sign >= 0",
+    "after": "Lower.Sign < 0 && Upper.Sign < 0",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.OutwardArithmeticContainsExactCancellationAndProducts"
+  },
+  {
+    "id": "kaufman-certified-travel-expiry",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "_travel + move - (full ? _moves.Peek() : (F)0)",
+    "after": "_travel + move",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-efficiency",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "(value - _prices.Peek()).Abs() / travel",
+    "after": "(value - _prices.Peek()).Abs()",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-gain",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "Interval.Exact(coefficient * coefficient)",
+    "after": "Interval.Exact(coefficient)",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-seed",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "_started ? _average : Interval.Exact(value)",
+    "after": "_started ? _average : Interval.Exact(0)",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-zero-tie",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "distance.Lower.Sign > 0 ? true :",
+    "after": "distance.Lower.Sign >= 0 ? true :",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-negative-zero-variance",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "distance.Lower.Sign == 0 && variance.Lower.Sign > 0",
+    "after": "distance.Lower.Sign == 0",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.ZeroDistanceAndPossiblyZeroVarianceRequireExactDecision"
+  },
+  {
+    "id": "kaufman-certified-variance",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "squares * Interval.Exact(_length) - sum.Square()",
+    "after": "squares * Interval.Exact(_length)",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-preview",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "if (final)\n        {",
+    "after": "if (final || _started)\n        {",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-change-expiry",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "_changes.Dequeue();",
+    "after": "_changes.Peek();",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-fallback-result",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "var result = _exact.Next(price, final);",
+    "after": "var result = 0d; _exact.Next(price, final);",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.AmbiguousExtremeCancellationUsesLosslessExactFallback"
+  },
+  {
+    "id": "kaufman-certified-fallback-preview",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "_exact.Next(price, final)",
+    "after": "_exact.Next(price, true)",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.AmbiguousExtremeCancellationUsesLosslessExactFallback"
+  },
+  {
+    "id": "kaufman-certified-replay-price",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "_observations.Add(price);",
+    "after": "_observations.Add(-price);",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.FallbackAfterResetPreservesRationalThresholdTie"
+  },
+  {
+    "id": "kaufman-certified-replay-reset",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "_exact.Reset();",
+    "after": "_exact.Next(1, true);",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.FallbackAfterResetPreservesRationalThresholdTie"
+  },
+  {
+    "id": "kaufman-certified-sum-reset",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "_average = _low = _high = _sum = _squares = default;",
+    "after": "_average = _low = _high = default;",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-certified-filter-scale",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
+    "before": "F.Of(filter) / 100",
+    "after": "F.Of(filter) / 10",
+    "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
+  },
+  {
+    "id": "kaufman-reference-centered-coordinates",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.KaufmanBinary.cs",
+    "before": "value * length - sum",
+    "after": "value * (length + 1) - sum",
+    "filter": "FullyQualifiedName~KaufmanBinaryNumericalTests.IndependentEfficiencyHandAndExactThresholdTies"
+  },
+  {
+    "id": "kaufman-reference-centered-divisor",
+    "module": "kaufman-binary-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.KaufmanBinary.cs",
+    "before": "threshold.Denominator * threshold.Denominator * length * length * length",
+    "after": "threshold.Denominator * threshold.Denominator * length * length",
+    "filter": "FullyQualifiedName~KaufmanIntegerReferenceTests.DenominatorChainMatchesOriginalFractionDefinition"
   }
 ]

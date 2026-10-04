@@ -1140,3 +1140,12 @@ Selected prices preserve original high/low/volume fields. The established EMA ro
 continues to request only its signal component callback; other averages request fast,
 slow, then signal. Core output can overlap any input span, and suffix elements are untouched.
 Unsupported average kinds retain their prior fallback and reference eligibility.
+
+
+### Kaufman Binary Wave
+
+The formula uses an exact efficiency ratio, adaptive average and population variance of average changes. The average starts at the first price; the last rise/fall levels start at zero. Strict signed threshold comparisons preserve exact ties, including negative filters.
+
+The production evaluator uses outward-rounded rational intervals to certify decisions. Ambiguous comparisons replay the retained observations through the exact rational evaluator; no tolerance changes a signal. This bounds ordinary-path mantissa precision, but retained observations and exact fallback still carry history-dependent storage and computation costs. The independent reference uses integer coordinates over an exact denominator chain and the centered-square variance definition.
+
+The length-2 hand [0,1,3,2] with fast=1, slow=0, filter=10 yields [0,0,1,0]. Signed extreme prices and periods, selected/chained inputs, preview/reset, exact fallback and rejected nonfinite values are included in verification. All four configurations are numerically enrolled. The focused checks and mutation qualification are recorded in V2_CORRECTNESS_IMPLEMENTATION.md; no competitor-performance claim is made.

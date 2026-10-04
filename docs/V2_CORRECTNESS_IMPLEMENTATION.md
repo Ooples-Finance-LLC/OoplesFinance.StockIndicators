@@ -5539,3 +5539,25 @@ Thirteen identical averaging-state classes now share `UnroundedMovingAverage`, p
 All **41 distinct focused checks passed**, including the separately rerun 18 shared-helper checks with the strengthened exact-residual assertion. Across the original and targeted repair campaigns, **70/70 unique compiled behavioral faults were caught**. Two survivors and one compiler-rejected seed from the original campaigns are excluded; the repair covers the EMA startup selection, typed-zero expiry seed and premature-publication assertion. Both pairs have passing baselines and matching source archives. Production sources are identical between pairs; only test and mutation metadata differ.
 
 Snapshots: `2b34ade4d77dd75fee4b7b6ee7aae570d392cd770fb23d92e561cf745aa7be49` and `f0acbda79cfa043a25e50f0a39e49a8c5d5b2885ec4adf4d279c69e69458d7c4`. Evidence: `si-shared-average926-qualified.json` and the `si-shared-average915/919-mutations-a/b` campaigns. This is bounded shared-helper evidence, not final release assurance. Numerical enrollment remains 6,833/7,131 in the published source; Kaufman qualification and the other remaining gates continue separately.
+
+
+### Kaufman Binary Wave qualification (2026-10-04)
+
+Certified outward intervals preserve the exact wave decisions and replay an exact
+rational evaluator when a comparison is ambiguous. The independent reference
+uses an integer denominator chain and centered-square variance. Retained
+observations and exact fallback still have history-dependent costs.
+
+Verification: **53 distinct focused checks passed**, and **37/37 compiled
+behavioral faults were caught**. The original campaigns caught 34 faults; three
+survivors were excluded and then caught by the targeted repair campaign with a
+passing baseline. Production sources are identical between these campaigns.
+Evidence: `si-kaufman934-qualified.json`, `si-kaufman925-mutations-a/b`,
+`si-kaufman934-mutations`, and the 920/922/924/928/930 test reports.
+
+Compiled enrollment is **6,837/7,131**, leaving **294 configurations across 39
+types**, with no construction failures and an exact backlog match. A local
+64-observation comparison matched all outputs across three repeats, taking
+14–18 ms with certification versus 76–85 ms with the prior exact evaluator;
+this is not competitor timing evidence. PR246 remains draft, and the remaining
+numerical, hosted, package/platform and competitor gates remain outstanding.

@@ -1490,69 +1490,16 @@ public static partial class Calculations
     public static StockData CalculateKaufmanBinaryWave(this StockData stockData, int length = 20, double fastSc = 0.6022, double slowSc = 0.0645,
         double filterPct = 10)
     {
-        List<double> amaList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<double> amaLowList = new(stockData.Count);
-        List<double> amaHighList = new(stockData.Count);
-        List<double> bwList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var window = new CertifiedKaufmanBinaryWindow(length, fastSc, slowSc, filterPct);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var efRatio = efRatioList[i];
-            var prevAma = i >= 1 ? amaList[i - 1] : currentValue;
-            var smooth = Pow((efRatio * fastSc) + slowSc, 2);
-
-            var ama = prevAma + (smooth * (currentValue - prevAma));
-            amaList.Add(ama);
-
-            var diff = ama - prevAma;
-            diffList.Add(diff);
+            var value = window.Next(price, true); var previous = values.Count == 0 ? 0 : values[values.Count - 1];
+            signals?.Add(GetCompareSignal(value, previous)); values.Add(value);
         }
-
-        stockData.SetCustomValues(diffList);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The filter is a percentage of a deviation of the adaptive average's own changes, and a move
-        // has to clear it before the wave turns; the quantity this replaces is about 55% wider on a typical
-        // price series, so the filter sat too high and the wave turned less often than it should. Taken over
-        // diffList by name, which is the series this measures. See #190.
-        var diffStdDevList = GetStandardDeviationList(diffList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var ama = amaList[i];
-            var diffStdDev = diffStdDevList[i];
-            var prevAma = i >= 1 ? amaList[i - 1] : currentValue;
-            var filter = filterPct / 100 * diffStdDev;
-
-            var prevAmaLow = GetLastOrDefault(amaLowList);
-            var amaLow = ama < prevAma ? ama : prevAmaLow;
-            amaLowList.Add(amaLow);
-
-            var prevAmaHigh = GetLastOrDefault(amaHighList);
-            var amaHigh = ama > prevAma ? ama : prevAmaHigh;
-            amaHighList.Add(amaHigh);
-
-            var prevBw = GetLastOrDefault(bwList);
-            double bw = ama - amaLow > filter ? 1 : amaHigh - ama > filter ? -1 : 0;
-            bwList.Add(bw);
-
-            var signal = GetCompareSignal(bw, prevBw);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Kbw", bwList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bwList);
-        stockData.IndicatorName = IndicatorName.KaufmanBinaryWave;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Kbw", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.KaufmanBinaryWave;
         return stockData;
     }
 

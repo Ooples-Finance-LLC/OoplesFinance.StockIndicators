@@ -116,85 +116,20 @@ public sealed class KaufmanAdaptiveMovingAverageState : IStreamingIndicatorState
 [PrimaryOutput("Kbw")]
 public sealed class KaufmanBinaryWaveState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly CertifiedKaufmanBinaryWindow _window;
     private readonly StreamingInputResolver _input;
-    private readonly double _fastSc;
-    private readonly double _slowSc;
-    private readonly double _filterPct;
-    private double _prevAma;
-    private double _prevAmaLow;
-    private double _prevAmaHigh;
-    private bool _hasPrev;
-
-    public KaufmanBinaryWaveState(int length = 20, double fastSc = 0.6022, double slowSc = 0.0645,
-        double filterPct = 10)
-    {
-        var resolved = Math.Max(1, length);
-        _er = new EfficiencyRatioState(resolved);
-        // No moving-average type, and no selector: the change is passed to Next directly.
-        _stdDev = new RollingStandardDeviation(resolved);
-        _fastSc = fastSc;
-        _slowSc = slowSc;
-        _filterPct = filterPct;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public KaufmanBinaryWaveState(int length = 20, double fastSc = 0.6022, double slowSc = 0.0645, double filterPct = 10)
+    { _window = new CertifiedKaufmanBinaryWindow(length, fastSc, slowSc, filterPct); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.KaufmanBinaryWave;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _stdDev.Reset();
-        _prevAma = 0;
-        _prevAmaLow = 0;
-        _prevAmaHigh = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevAma = _hasPrev ? _prevAma : value;
-        var er = _er.Next(value, isFinal);
-        var smooth = MathHelper.Pow((er * _fastSc) + _slowSc, 2);
-        var ama = prevAma + (smooth * (value - prevAma));
-        var diff = ama - prevAma;
-
-        // Fed the adaptive average's own change, which is the series this measures.
-        var diffStdDev = _stdDev.Next(diff, isFinal);
-        var filter = _filterPct / 100d * diffStdDev;
-        var amaLow = ama < prevAma ? ama : _prevAmaLow;
-        var amaHigh = ama > prevAma ? ama : _prevAmaHigh;
-        double bw = ama - amaLow > filter ? 1 : amaHigh - ama > filter ? -1 : 0;
-
-        if (isFinal)
-        {
-            _prevAma = ama;
-            _prevAmaLow = amaLow;
-            _prevAmaHigh = amaHigh;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Kbw", bw }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bw, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Kbw", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-        _stdDev.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, IDisposable

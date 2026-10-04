@@ -569,25 +569,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Hvp", rank), ("Signal", Average(rank, length, kind)));
                 });
             case IndicatorName.KaufmanBinaryWave:
-                return new("Kbw", new[] { "Kbw" }, bars =>
-                {
-                    var gains = EfficiencyRatios(bars, length).Select(er => Math.Pow(er * Number(options, .6022, "FastSc") + Number(options, .0645, "SlowSc"), 2)).ToArray();
-                    var average = ExpandedGainTrajectory(Closes(bars), gains);
-                    var changes = average.Select((v, i) => i == 0 ? 0 : v - average[i - 1]).ToArray();
-                    var result = new double[bars.Count];
-                    double lastFall = 0, lastRise = 0;
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var sample = Window(changes, i, length).ToArray();
-                        var mean = sample.Average();
-                        var deviation = i + 1 < length ? 0 : Math.Sqrt(sample.Sum(v => (v - mean) * (v - mean)) / length);
-                        var threshold = Number(options, 10, "FilterPct") * deviation / 100;
-                        if (changes[i] < 0) lastFall = average[i];
-                        if (changes[i] > 0) lastRise = average[i];
-                        result[i] = average[i] - lastFall > threshold ? 1 : lastRise - average[i] > threshold ? -1 : 0;
-                    }
-                    return Outputs(("Kbw", result));
-                });
+                return new("Kbw", new[] { "Kbw" }, bars => KaufmanBinaryValues(bars, length,
+                    Number(options, .6022, "FastSc"), Number(options, .0645, "SlowSc"), Number(options, 10, "FilterPct")));
             case IndicatorName.QuantitativeQualitativeEstimation:
                 return new("FastAtrRsi", new[] { "FastAtrRsi", "SlowAtrRsi" }, bars => QqeOutputs(bars, indicator));
             case IndicatorName.PrimeNumberOscillator:
