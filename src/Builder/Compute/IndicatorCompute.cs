@@ -8069,79 +8069,15 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Mobility Oscillator using zero-allocation fast path.
+    /// Computes Mobility Oscillator with exact density and unpublished smoothing.
     /// </summary>
     internal static ComputeBuffer ComputeMobilityOscillatorFast(StockData data, ComputeContext context, int length1 = 10,
         int length2 = 14, int signalLength = 7, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         MacdSeries series = MacdSeries.Line)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-
-        using var highRange = context.Rent(count);
-        using var lowRange = context.Rent(count);
-        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
-        var highs = highRange.Span;
-        var lows = lowRange.Span;
-
-        using var raw = context.Rent(count);
-        var mo = raw.WritableSpan;
-
-        using var density = context.Rent(length1);
-        var masses = density.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var countAvailable = Math.Min(length2, i+1);
-            var maximum = highs[i - 0]; var minimum = lows[i - 0];
-            for (var k = 1; k < countAvailable; k++)
-            {
-                maximum = Math.Max(maximum, highs[i - k]);
-                minimum = Math.Min(minimum, lows[i - k]);
-            }
-            var width = (maximum-minimum)/length1;
-            var rawValue = 0d;
-            if (i >= length2 && width > 0)
-            {
-                var comparison = input[i-length2];
-                var mode = 0; var largestMass = -1d; var priceMass = 0d;
-                for (var bin = 0; bin < length1; bin++)
-                {
-                    var lower = minimum+bin*width;
-                    var upper = bin+1 == length1 ? maximum : minimum+(bin+1)*width;
-                    double mass = 0;
-                    for (var k = 0; k < countAvailable; k++)
-                    {
-                        var h = highs[i - k]; var l = lows[i - k];
-                        mass += h == l ? (l >= lower && (l < upper || bin+1 == length1) ? 1 : 0) // NOSONAR: S1244 - Equal candle bounds are a point mass, not a narrow interval.
-                            : Math.Max(0, Math.Min(h, upper)-Math.Max(l, lower))/(h-l);
-                    }
-                    masses[bin] = mass; largestMass = Math.Max(largestMass, mass);
-                    if (comparison >= lower && (comparison < upper || bin+1 == length1 && comparison <= upper)) priceMass = mass;
-                }
-                // Choose the first bin tied with the global maximum.
-                while (mode+1 < length1 && largestMass-masses[mode] > 1e-12*countAvailable) mode++;
-                largestMass = masses[mode];
-                var modePrice = minimum+(mode+0.5)*width;
-                if (largestMass > 0)
-                    rawValue = (comparison < modePrice ? 1 : -1)*100*Math.Max(0, 1-priceMass/largestMass);
-            }
-            mo[i] = rawValue;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, signalLength, raw.Span, buffer.WritableSpan);
-        if (series == MacdSeries.Line)
-        {
-            return buffer;
-        }
-
-        using var line = buffer;
-        var signalBuffer = context.Rent(count);
-        MovingAverage(data, maType, signalLength, line.Span, signalBuffer.WritableSpan);
-        return signalBuffer;
+        var result = MobilityWindow.Calculate(data, maType, length1, length2, signalLength);
+        var values = series == MacdSeries.Line ? result.Line : result.SignalLine;
+        var buffer = context.Rent(values.Length); values.AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>

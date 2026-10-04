@@ -2679,71 +2679,11 @@ public static partial class Calculations
     public static StockData CalculateMobilityOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length1 = 10, int length2 = 14, int signalLength = 7)
     {
-        List<double> moList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
-        var masses = new double[length1];
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var countAvailable = Math.Min(length2, i+1);
-            var maximum = highList[i - 0]; var minimum = lowList[i - 0];
-            for (var k = 1; k < countAvailable; k++)
-            {
-                maximum = Math.Max(maximum, highList[i - k]);
-                minimum = Math.Min(minimum, lowList[i - k]);
-            }
-            var width = (maximum-minimum)/length1;
-            var rawValue = 0d;
-            if (i >= length2 && width > 0)
-            {
-                var comparison = inputList[i-length2];
-                var mode = 0; var largestMass = -1d; var priceMass = 0d;
-                for (var bin = 0; bin < length1; bin++)
-                {
-                    var lower = minimum+bin*width;
-                    var upper = bin+1 == length1 ? maximum : minimum+(bin+1)*width;
-                    double mass = 0;
-                    for (var k = 0; k < countAvailable; k++)
-                    {
-                        var h = highList[i - k]; var l = lowList[i - k];
-                        mass += h == l ? (l >= lower && (l < upper || bin+1 == length1) ? 1 : 0) // NOSONAR: S1244 - Equal candle bounds are a point mass, not a narrow interval.
-                            : Math.Max(0, Math.Min(h, upper)-Math.Max(l, lower))/(h-l);
-                    }
-                    masses[bin] = mass; largestMass = Math.Max(largestMass, mass);
-                    if (comparison >= lower && (comparison < upper || bin+1 == length1 && comparison <= upper)) priceMass = mass;
-                }
-                // Choose the first bin tied with the global maximum.
-                while (mode+1 < length1 && largestMass-masses[mode] > 1e-12*countAvailable) mode++;
-                largestMass = masses[mode];
-                var modePrice = minimum+(mode+0.5)*width;
-                if (largestMass > 0)
-                    rawValue = (comparison < modePrice ? 1 : -1)*100*Math.Max(0, 1-priceMass/largestMass);
-            }
-            moList.Add(rawValue);
-        }
-
-        var moWmaList = GetMovingAverageList(stockData, maType, signalLength, moList);
-        var moSigList = GetMovingAverageList(stockData, maType, signalLength, moWmaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var mo = moWmaList[i];
-            var moSig = moSigList[i];
-            var prevMo = i >= 1 ? moWmaList[i - 1] : 0;
-            var prevMoSig = i >= 1 ? moSigList[i - 1] : 0;
-
-            var signal = GetCompareSignal(mo - moSig, prevMo - prevMoSig);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mo", moWmaList },
-            { "Signal", moSigList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(moWmaList);
-        stockData.IndicatorName = IndicatorName.MobilityOscillator;
-
+        var result = MobilityWindow.Calculate(stockData, maType, length1, length2, signalLength);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>
+        { { "Mo", result.Line.ToList() }, { "Signal", result.SignalLine.ToList() } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades.ToList());
+        stockData.SetCustomValues(result.Line.ToList()); stockData.IndicatorName = IndicatorName.MobilityOscillator;
         return stockData;
     }
 

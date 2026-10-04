@@ -5561,3 +5561,29 @@ types**, with no construction failures and an exact backlog match. A local
 14–18 ms with certification versus 76–85 ms with the prior exact evaluator;
 this is not competitor timing evidence. PR246 remains draft, and the remaining
 numerical, hosted, package/platform and competitor gates remain outstanding.
+
+
+### Mobility numerical qualification (2026-10-04)
+
+Mobility now uses exact candle density, the first exact modal bin, the original
+candle ranges for selected/chained sources, and unpublished rational smoothing.
+Sparse candidate bins and lazy history avoid allocations proportional to declared
+bin counts or unobserved periods. The core helper is aligned with the public
+formula and supports aliased output.
+
+**48 distinct focused checks passed**, and **18/18 compiled behavioral faults
+were caught** with a passing unchanged-source baseline. The initial 15 missing
+native-factory dispatch failures were repaired and all 25 affected route and
+selected-source checks passed. The combined Kaufman/Mobility routes and enrollment
+then passed **34/34 integration checks**.
+
+Evidence: `si-mobility935-qualified.json`, `si-mobility935-mutations`,
+`mobility932-integrated.trx`, `mobility933-dispatch.trx`,
+`mobility940-integration.trx`, and `si-mobility940-inventory.json`.
+
+Mutation snapshot: `3c20bafe99de52fa8ef39e9527e68d2d76691c393fa9dc42faf7232597da819c`. Source archive: `71017f522bdcd8721981fba8b25d4fca1d95c68d65a1a4cf6e44fac8b4f1020c`.
+
+Compiled enrollment is **6,842/7,131**, leaving **289 configurations across 38
+types**. There are no construction failures and the backlog matches exactly.
+All **10,132 mutation anchors** validate. PR246 remains draft; the remaining
+numerical, hosted, package/platform and competitor gates remain outstanding.

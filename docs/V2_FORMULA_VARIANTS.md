@@ -1149,3 +1149,25 @@ The formula uses an exact efficiency ratio, adaptive average and population vari
 The production evaluator uses outward-rounded rational intervals to certify decisions. Ambiguous comparisons replay the retained observations through the exact rational evaluator; no tolerance changes a signal. This bounds ordinary-path mantissa precision, but retained observations and exact fallback still carry history-dependent storage and computation costs. The independent reference uses integer coordinates over an exact denominator chain and the centered-square variance definition.
 
 The length-2 hand [0,1,3,2] with fast=1, slow=0, filter=10 yields [0,0,1,0]. Signed extreme prices and periods, selected/chained inputs, preview/reset, exact fallback and rejected nonfinite values are included in verification. All four configurations are numerically enrolled. The focused checks and mutation qualification are recorded in V2_CORRECTNESS_IMPLEMENTATION.md; no competitor-performance claim is made.
+
+
+### Mobility Oscillator
+
+Each candle contributes a uniform distribution over its original low/high range,
+or a point mass when its bounds coincide. Equal-width bins cover the current
+lookback window; the first exact maximum is the mode. The comparison price is
+one bar older than that window and can use the caller's selected or chained
+source without replacing the candle ranges. Density ratios and both smoothing
+stages retain exact rational intermediate values for supported average kinds.
+
+The density kernel evaluates sparse candidate bins around candle endpoints, so
+even `int.MaxValue` bins do not allocate or iterate over the declared bin count.
+Storage follows received observations up to the lookback. Custom averages keep
+their established callback path. Nonfinite used inputs and inverted candle
+ranges are rejected before history changes.
+
+The core helper now uses the public density formula with ten bins and two
+seven-bar weighted stages; its length argument controls the candle lookback.
+Point candles [1,0,2] with lookback two yield Mo [0,0,-25] and Signal
+[0,0,-6.25]. Its previous normalized-true-range calculation was a different
+formula. Core output may alias an input span.

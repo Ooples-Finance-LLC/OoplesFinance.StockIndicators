@@ -87975,5 +87975,149 @@
     "before": "threshold.Denominator * threshold.Denominator * length * length * length",
     "after": "threshold.Denominator * threshold.Denominator * length * length",
     "filter": "FullyQualifiedName~KaufmanIntegerReferenceTests.DenominatorChainMatchesOriginalFractionDefinition"
+  },
+  {
+    "id": "mobility-exact-mode-tie",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityDensity.cs",
+    "before": "if ((mass - maximumMass).Sign > 0)",
+    "after": "if ((mass - maximumMass).Sign >= 0)",
+    "filter": "FullyQualifiedName~MobilityDensityNumericalTests.SparseCandidatesMatchIndependentExhaustiveCdf"
+  },
+  {
+    "id": "mobility-exact-mode-gap",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityDensity.cs",
+    "before": "if ((mass - maximumMass).Sign > 0)",
+    "after": "if ((mass - maximumMass).Publish() > 1e-12)",
+    "filter": "FullyQualifiedName~MobilityDensityNumericalTests.DistinctNearTiedMassesSelectTheTrueMode"
+  },
+  {
+    "id": "mobility-exact-point-bin",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityDensity.cs",
+    "before": "if (Bin(candle.Low) == bin)",
+    "after": "if (Bin(candle.Low) != bin)",
+    "filter": "FullyQualifiedName~MobilityDensityNumericalTests.SparseCandidatesMatchIndependentExhaustiveCdf"
+  },
+  {
+    "id": "mobility-exact-uniform-mass",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityDensity.cs",
+    "before": "(candle.High - candle.Low) * binCount",
+    "after": "(candle.High - candle.Low)",
+    "filter": "FullyQualifiedName~MobilityDensityNumericalTests.SparseCandidatesMatchIndependentExhaustiveCdf"
+  },
+  {
+    "id": "mobility-exact-outside-price",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityDensity.cs",
+    "before": "comparison < minimum || comparison > maximum",
+    "after": "comparison <= minimum || comparison >= maximum",
+    "filter": "FullyQualifiedName~MobilityDensityNumericalTests.ExtremeBinCountsRetainPointMassAndUniformDensity"
+  },
+  {
+    "id": "mobility-exact-magnitude",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityDensity.cs",
+    "before": "Number.Of(1) - priceMass.Divide(maximumMass)",
+    "after": "Number.Of(1) + priceMass.Divide(maximumMass)",
+    "filter": "FullyQualifiedName~MobilityDensityNumericalTests.SparseCandidatesMatchIndependentExhaustiveCdf"
+  },
+  {
+    "id": "mobility-exact-direction",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityDensity.cs",
+    "before": "? magnitude : default(Number) - magnitude",
+    "after": "? default(Number) - magnitude : magnitude",
+    "filter": "FullyQualifiedName~MobilityDensityNumericalTests.SparseCandidatesMatchIndependentExhaustiveCdf"
+  },
+  {
+    "id": "mobility-exact-window-age",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "_candles.Skip(1).ToList()",
+    "after": "_candles.ToList()",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.FirstExactModeAndTwoWeightedStagesHaveIndependentHand"
+  },
+  {
+    "id": "mobility-exact-comparison-age",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "MobilityDensity.Evaluate(sample, _prices.Peek(), _bins)",
+    "after": "MobilityDensity.Evaluate(sample, comparison, _bins)",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.FirstExactModeAndTwoWeightedStagesHaveIndependentHand"
+  },
+  {
+    "id": "mobility-exact-preview",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "if (final)\n        {\n            if (full)",
+    "after": "if (true)\n        {\n            if (full)",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.FirstExactModeAndTwoWeightedStagesHaveIndependentHand"
+  },
+  {
+    "id": "mobility-exact-reset",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "_candles.Clear(); _prices.Clear();",
+    "after": "_candles.Clear();",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.FirstExactModeAndTwoWeightedStagesHaveIndependentHand"
+  },
+  {
+    "id": "mobility-exact-second-stage",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "_signal.Next(line, final)",
+    "after": "_signal.Next(raw, final)",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.FirstExactModeAndTwoWeightedStagesHaveIndependentHand"
+  },
+  {
+    "id": "mobility-exact-selected",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.ChainedComparisonPriceDoesNotReplaceCandleRanges"
+  },
+  {
+    "id": "mobility-exact-callback-line",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "ComponentAverage.Take(line, smooth)",
+    "after": "ComponentAverage.Take(raw, smooth)",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.CustomerAveragesReceiveRawThenLineAndPreserveCallerInputs"
+  },
+  {
+    "id": "mobility-exact-callback-finally",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "finally { data.RestoreInputSeries(caller); }",
+    "after": "finally { }",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.ThrowingCustomerAverageRestoresCallerInputs"
+  },
+  {
+    "id": "mobility-exact-range-guard",
+    "module": "mobility-numerical",
+    "file": "src/Helpers/MobilityWindow.cs",
+    "before": "if (low > high) throw",
+    "after": "if (false) throw",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.RejectedCandlesDoNotAdvanceNativeHistory"
+  },
+  {
+    "id": "mobility-exact-core-formula",
+    "module": "mobility-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "MovingAvgType.WeightedMovingAverage, 10, length, 7",
+    "after": "MovingAvgType.WeightedMovingAverage, 10, length, 1",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.CoreUsesPublicDensityFormulaAndSupportsAliasedOutput"
+  },
+  {
+    "id": "mobility-exact-reference-mode",
+    "module": "mobility-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Mobility.cs",
+    "before": "if (mass.CompareTo(masses[mode]) > 0)",
+    "after": "if (mass.CompareTo(masses[mode]) < 0)",
+    "filter": "FullyQualifiedName~MobilityOscillatorNumericalTests.EveryRouteMatchesIndependentCandleCdf"
   }
 ]

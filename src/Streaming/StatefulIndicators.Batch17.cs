@@ -525,113 +525,20 @@ public sealed class MirroredPercentagePriceOscillatorState : IStreamingIndicator
 [PrimaryOutput("Mo")]
 public sealed class MobilityOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly double[] _masses;
-    private readonly int _length2;
-    private readonly IMovingAverageSmoother _moSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _highValues;
-    private readonly PooledRingBuffer<double> _lowValues;
-    private readonly PooledRingBuffer<double> _values;
+    private readonly MobilityWindow _window;
     private readonly StreamingInputResolver _input;
-
     public MobilityOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length1 = 10, int length2 = 14, int signalLength = 7)
-    {
-        _length1 = Math.Max(1, length1);
-        _masses = new double[_length1];
-        _length2 = Math.Max(1, length2);
-        _moSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _highValues = new PooledRingBuffer<double>(_length2);
-        _lowValues = new PooledRingBuffer<double>(_length2);
-        _values = new PooledRingBuffer<double>(_length2 + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(maType, length1, length2, signalLength); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.MobilityOscillator;
-
-    public void Reset()
-    {
-        _moSmoother.Reset();
-        _signalSmoother.Reset();
-        _highValues.Clear();
-        _lowValues.Clear();
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var countAvailable = Math.Min(_length2, _values.Count+1);
-        var maximum = EhlersStreamingWindow.GetOffsetValue(_highValues, high, 0); var minimum = EhlersStreamingWindow.GetOffsetValue(_lowValues, low, 0);
-        for (var k = 1; k < countAvailable; k++)
-        {
-            maximum = Math.Max(maximum, EhlersStreamingWindow.GetOffsetValue(_highValues, high, k));
-            minimum = Math.Min(minimum, EhlersStreamingWindow.GetOffsetValue(_lowValues, low, k));
-        }
-        var width = (maximum-minimum)/_length1;
-        var rawValue = 0d;
-        if (_values.Count >= _length2 && width > 0)
-        {
-            var comparison = EhlersStreamingWindow.GetOffsetValue(_values, value, _length2);
-            var mode = 0; var largestMass = -1d; var priceMass = 0d;
-            for (var bin = 0; bin < _length1; bin++)
-            {
-                var lower = minimum+bin*width;
-                var upper = bin+1 == _length1 ? maximum : minimum+(bin+1)*width;
-                double mass = 0;
-                for (var k = 0; k < countAvailable; k++)
-                {
-                    var h = EhlersStreamingWindow.GetOffsetValue(_highValues, high, k); var l = EhlersStreamingWindow.GetOffsetValue(_lowValues, low, k);
-                    mass += h == l ? (l >= lower && (l < upper || bin+1 == _length1) ? 1 : 0) // NOSONAR: S1244 - Equal candle bounds are a point mass, not a narrow interval.
-                        : Math.Max(0, Math.Min(h, upper)-Math.Max(l, lower))/(h-l);
-                }
-                _masses[bin] = mass; largestMass = Math.Max(largestMass, mass);
-                if (comparison >= lower && (comparison < upper || bin+1 == _length1 && comparison <= upper)) priceMass = mass;
-            }
-            // Choose the first bin tied with the global maximum.
-            while (mode+1 < _length1 && largestMass-_masses[mode] > 1e-12*countAvailable) mode++;
-            largestMass = _masses[mode];
-            var modePrice = minimum+(mode+0.5)*width;
-            if (largestMass > 0)
-                rawValue = (comparison < modePrice ? 1 : -1)*100*Math.Max(0, 1-priceMass/largestMass);
-        }
-        var moValue = rawValue;
-
-        var moSmoothed = _moSmoother.Next(moValue, isFinal);
-        var signal = _signalSmoother.Next(moSmoothed, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _highValues.TryAdd(high, out _);
-            _lowValues.TryAdd(low, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Mo", moSmoothed },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(moSmoothed, outputs);
+        var point = _window.Next(bar.High, bar.Low, _input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double>
+        { ["Mo"] = point.Line, ["Signal"] = point.SignalLine } : null);
     }
-
-    public void Dispose()
-    {
-        _moSmoother.Dispose();
-        _signalSmoother.Dispose();
-        _highValues.Dispose();
-        _lowValues.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ghla")]

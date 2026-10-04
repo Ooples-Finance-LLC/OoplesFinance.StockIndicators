@@ -3923,51 +3923,14 @@ internal static class OscillatorCore
     /// </summary>
     internal static void MobilityOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(close.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, close.Length);
-
-            // Calculate normalized range
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i == 0)
-                {
-                    range[i] = high[i] - low[i];
-                }
-                else
-                {
-                    var tr = Math.Max(high[i] - low[i], Math.Max(Math.Abs(high[i] - close[i - 1]), Math.Abs(low[i] - close[i - 1])));
-                    range[i] = tr;
-                }
-            }
-
-            // Calculate mobility as rolling sum normalized
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                var sum = 0.0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    sum += range[j];
-                }
-
-                output[i] = close[i] != 0 ? (sum / length) / close[i] * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length)
+            throw new ArgumentException("High, low and close must have equal lengths.");
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) MobilityWindow.Validate(high[i], low[i], close[i]);
+        using var window = new MobilityWindow(MovingAvgType.WeightedMovingAverage, 10, length, 7);
+        var values = new double[close.Length];
+        for (var i = 0; i < values.Length; i++) values[i] = window.Next(high[i], low[i], close[i], true).Line;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>
