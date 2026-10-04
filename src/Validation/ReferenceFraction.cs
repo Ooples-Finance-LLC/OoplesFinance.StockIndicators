@@ -9,11 +9,12 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
     private readonly BigInteger _numerator, _denominator;
     internal ReferenceFraction(long value) : this(new BigInteger(value), BigInteger.One) { }
     internal ReferenceFraction(BigInteger value) : this(value, BigInteger.One) { }
-    private ReferenceFraction(BigInteger numerator, BigInteger denominator)
+    private ReferenceFraction(BigInteger numerator, BigInteger denominator) : this(numerator, denominator, false) { }
+    private ReferenceFraction(BigInteger numerator, BigInteger denominator, bool reduced)
     {
         if (denominator.IsZero) throw new DivideByZeroException();
         if (denominator.Sign < 0) { numerator = -numerator; denominator = -denominator; }
-        var divisor = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
+        var divisor = reduced ? BigInteger.One : BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
         _numerator = numerator / divisor; _denominator = denominator / divisor;
     }
     // Validation-only binary64 precision with an unbounded upper exponent.
@@ -37,7 +38,7 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
 
     internal int Sign => _numerator.Sign;
     internal (BigInteger Numerator, BigInteger Denominator) Components => (_numerator, _denominator);
-    internal ReferenceFraction Abs() => new(BigInteger.Abs(_numerator), _denominator);
+    internal ReferenceFraction Abs() => new(BigInteger.Abs(_numerator), _denominator, true);
     internal static ReferenceFraction FromDouble(double value)
     {
         if (double.IsNaN(value) || double.IsInfinity(value)) throw new ArgumentOutOfRangeException(nameof(value));
@@ -201,8 +202,32 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
         return bits;
     }
     public int CompareTo(ReferenceFraction other) => (_numerator * other._denominator).CompareTo(other._numerator * _denominator);
-    public static ReferenceFraction operator +(ReferenceFraction a, ReferenceFraction b) => new(a._numerator * b._denominator + b._numerator * a._denominator, a._denominator * b._denominator);
-    public static ReferenceFraction operator -(ReferenceFraction a, ReferenceFraction b) => new(a._numerator * b._denominator - b._numerator * a._denominator, a._denominator * b._denominator);
-    public static ReferenceFraction operator *(ReferenceFraction a, ReferenceFraction b) => new(a._numerator * b._numerator, a._denominator * b._denominator);
-    public static ReferenceFraction operator /(ReferenceFraction a, ReferenceFraction b) => new(a._numerator * b._denominator, a._denominator * b._numerator);
+    private static ReferenceFraction Combine(ReferenceFraction a, ReferenceFraction b, bool subtract)
+    {
+        // With reduced operands, only factors in the denominator GCD can
+        // remain common after forming the numerator over the LCM.
+        var common = BigInteger.GreatestCommonDivisor(a._denominator, b._denominator);
+        var leftScale = b._denominator / common; var rightScale = a._denominator / common;
+        var right = b._numerator * rightScale;
+        var numerator = a._numerator * leftScale + (subtract ? -right : right);
+        var remaining = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), common);
+        return new(numerator / remaining, rightScale * (b._denominator / remaining), true);
+    }
+    public static ReferenceFraction operator +(ReferenceFraction a, ReferenceFraction b) => Combine(a, b, false);
+    public static ReferenceFraction operator -(ReferenceFraction a, ReferenceFraction b) => Combine(a, b, true);
+    public static ReferenceFraction operator *(ReferenceFraction a, ReferenceFraction b)
+    {
+        var left = BigInteger.GreatestCommonDivisor(BigInteger.Abs(a._numerator), b._denominator);
+        var right = BigInteger.GreatestCommonDivisor(BigInteger.Abs(b._numerator), a._denominator);
+        return new((a._numerator / left) * (b._numerator / right),
+            (a._denominator / right) * (b._denominator / left), true);
+    }
+    public static ReferenceFraction operator /(ReferenceFraction a, ReferenceFraction b)
+    {
+        if (b._numerator.IsZero) throw new DivideByZeroException();
+        var numerators = BigInteger.GreatestCommonDivisor(BigInteger.Abs(a._numerator), BigInteger.Abs(b._numerator));
+        var denominators = BigInteger.GreatestCommonDivisor(a._denominator, b._denominator);
+        return new((a._numerator / numerators) * (b._denominator / denominators),
+            (a._denominator / denominators) * (b._numerator / numerators), true);
+    }
 }
