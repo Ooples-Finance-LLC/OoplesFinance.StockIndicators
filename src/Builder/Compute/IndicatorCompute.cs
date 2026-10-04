@@ -20925,6 +20925,23 @@ internal static partial class IndicatorCompute
         int maLength5 = 100, int maLength6 = 200, int hullMaLength = 9,
         TechnicalRatingSeries series = TechnicalRatingSeries.Total)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var state = new Streaming.TechnicalRatingsState(maType, aoLength1, aoLength2, rsiLength, stochLength1, stochLength2, 3, ultOscLength1, ultOscLength2, ultOscLength3, ichiLength1, ichiLength2, ichiLength3, vwmaLength, cciLength, adxLength, momLength, macdLength1, macdLength2, macdLength3, bullBearLength, williamRLength, maLength1, maLength2, maLength3, maLength4, maLength5, maLength6, hullMaLength);
+            var selected = data.ChainedValues.Count > 0; var ratingInput = selected ? data.ChainedValues : data.InputValues;
+            foreach (var values in new[] { ratingInput, data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes })
+                foreach (var value in values) Streaming.StreamingInputValidation.Finite(value, nameof(ratingInput));
+            if (selected) ((Streaming.ICustomInputConsumer)state).ReadCloseAsInput();
+            var result = context.Rent(ratingInput.Count);
+            var key = series == TechnicalRatingSeries.MovingAverages ? "Mr" : series == TechnicalRatingSeries.Oscillator ? "Or" : "Tr";
+            for (var i = 0; i < ratingInput.Count; i++)
+            {
+                var bar = new Streaming.OhlcvBar("RATING", Streaming.BarTimeframe.Minutes(1), DateTime.MinValue, DateTime.MinValue,
+                    data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], ratingInput[i], data.Volumes[i], true);
+                result.WritableSpan[i] = state.Update(bar, true, true).Outputs![key];
+            }
+            return result;
+        }
         // CalculateTechnicalRatings scores nine moving average conditions and eleven oscillator conditions at
         // every bar, each contributing 1, -1 or 0, and divides each group by its own count. The total is the
         // average of the two. Every component below is an indicator this file already computes, so the arm is

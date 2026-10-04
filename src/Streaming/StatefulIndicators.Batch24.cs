@@ -12,24 +12,15 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
     private bool _customInput;
     private CustomInputRange _componentRange;
 
-    private readonly int _uoLength1;
-    private readonly int _uoLength2;
-    private readonly int _uoLength3;
-    private readonly int _vwmaLength;
-    private readonly RollingWindowSum _bpSum1;
-    private readonly RollingWindowSum _bpSum2;
-    private readonly RollingWindowSum _bpSum3;
-    private readonly RollingWindowSum _trSum1;
-    private readonly RollingWindowSum _trSum2;
-    private readonly RollingWindowSum _trSum3;
+    private readonly UltimatePressureWindow _ultimate;
+    private readonly TechnicalRatingVolume _volume;
+    private readonly TechnicalRatingAverage _aoFast, _aoSlow;
     private readonly IMovingAverageSmoother _ma10;
     private readonly IMovingAverageSmoother _ma20;
     private readonly IMovingAverageSmoother _ma30;
     private readonly IMovingAverageSmoother _ma50;
     private readonly IMovingAverageSmoother _ma100;
     private readonly IMovingAverageSmoother _ma200;
-    private readonly IMovingAverageSmoother _vwmaVolumeSmoother;
-    private readonly RollingWindowSum _vwmaVolumePriceSum;
     private readonly RollingWindowMax _stochHighWindow;
     private readonly RollingWindowMin _stochLowWindow;
     private readonly IMovingAverageSmoother _stochFastSmoother;
@@ -37,17 +28,16 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
     private readonly RollingWindowMin _stochRsiLowWindow;
     private readonly IMovingAverageSmoother _stochRsiFastSmoother;
     private readonly RelativeStrengthIndexState _rsi;
-    private readonly AwesomeOscillatorState _ao;
-    private readonly IMovingAverageSmoother _macdFast;
-    private readonly IMovingAverageSmoother _macdSlow;
-    private readonly IMovingAverageSmoother _macdSignal;
+    private readonly TechnicalRatingAverage _macdFast;
+    private readonly TechnicalRatingAverage _macdSlow;
+    private readonly TechnicalRatingAverage _macdSignal;
     private readonly IchimokuCloudState _ichimoku;
     private readonly AverageDirectionalIndexState _adx;
     private readonly CommodityChannelIndexState _cci;
-    private readonly ElderRayIndexState _elderRay;
-    private readonly HullMovingAverageState _hma;
-    private readonly WilliamsRState _williamsR;
-    private readonly MomentumOscillatorState _momentum;
+    private readonly TechnicalRatingAverage _elderRay;
+    private readonly TechnicalRatingHull _hma;
+    private readonly TechnicalRatingWilliams _williamsR;
+    private readonly TechnicalRatingMomentum _momentum;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
     private double _prevRsi;
@@ -56,15 +46,18 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
     private double _prevCci;
     private double _prevAdxPlus;
     private double _prevAdxMinus;
-    private double _prevAo1;
-    private double _prevAo2;
-    private double _prevMom;
+    private TechnicalRatingValue _prevAo1;
+    private TechnicalRatingValue _prevAo2;
+    private TechnicalRatingValue _prevMom;
     private double _prevKStoRsi;
     private double _prevDStoRsi;
-    private double _prevWr;
-    private double _prevBullPower;
-    private double _prevBearPower;
+    private TechnicalRatingValue _prevWr;
+    private TechnicalRatingValue _prevBullPower;
+    private TechnicalRatingValue _prevBearPower;
     private bool _hasPrev;
+
+    private static IMovingAverageSmoother RatingMean(MovingAvgType kind, int period) => kind == MovingAvgType.SimpleMovingAverage
+        ? new RoundedSimpleMovingAverageSmoother(period) : MovingAverageSmootherFactory.Create(kind, period);
 
     public TechnicalRatingsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3,
@@ -75,45 +68,36 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         int maLength4 = 50, int maLength5 = 100, int maLength6 = 200, int hullMaLength = 9)
     {
         _ = stochLength3;
-        _uoLength1 = Math.Max(1, ultOscLength1);
-        _uoLength2 = Math.Max(1, ultOscLength2);
-        _uoLength3 = Math.Max(1, ultOscLength3);
-        _vwmaLength = Math.Max(1, vwmaLength);
+        _ultimate = new(ultOscLength1, ultOscLength2, ultOscLength3);
+        _volume = new(vwmaLength);
+        _aoFast = new(MovingAvgType.SimpleMovingAverage, aoLength1);
+        _aoSlow = new(MovingAvgType.SimpleMovingAverage, aoLength2);
         var resolvedStoch = Math.Max(1, stochLength1);
         var resolvedStochSmooth = Math.Max(1, stochLength2);
 
-        _bpSum1 = new RollingWindowSum(_uoLength1);
-        _bpSum2 = new RollingWindowSum(_uoLength2);
-        _bpSum3 = new RollingWindowSum(_uoLength3);
-        _trSum1 = new RollingWindowSum(_uoLength1);
-        _trSum2 = new RollingWindowSum(_uoLength2);
-        _trSum3 = new RollingWindowSum(_uoLength3);
-        _ma10 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength1));
-        _ma20 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength2));
-        _ma30 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength3));
-        _ma50 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength4));
-        _ma100 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength5));
-        _ma200 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength6));
-        _vwmaVolumeSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, _vwmaLength);
-        _vwmaVolumePriceSum = new RollingWindowSum(_vwmaLength);
+        _ma10 = RatingMean(maType, Math.Max(1, maLength1));
+        _ma20 = RatingMean(maType, Math.Max(1, maLength2));
+        _ma30 = RatingMean(maType, Math.Max(1, maLength3));
+        _ma50 = RatingMean(maType, Math.Max(1, maLength4));
+        _ma100 = RatingMean(maType, Math.Max(1, maLength5));
+        _ma200 = RatingMean(maType, Math.Max(1, maLength6));
         _stochHighWindow = new RollingWindowMax(resolvedStoch);
         _stochLowWindow = new RollingWindowMin(resolvedStoch);
-        _stochFastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
+        _stochFastSmoother = RatingMean(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
         _stochRsiHighWindow = new RollingWindowMax(resolvedStoch);
         _stochRsiLowWindow = new RollingWindowMin(resolvedStoch);
-        _stochRsiFastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
+        _stochRsiFastSmoother = RatingMean(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
         _rsi = new RelativeStrengthIndexState(Math.Max(1, rsiLength), 3);
-        _ao = new AwesomeOscillatorState(Math.Max(1, aoLength1), Math.Max(1, aoLength2));
-        _macdFast = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength1));
-        _macdSlow = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength2));
-        _macdSignal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength3));
+        _macdFast = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength1));
+        _macdSlow = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength2));
+        _macdSignal = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength3));
         _ichimoku = new IchimokuCloudState(ichiLength1, ichiLength2, ichiLength3);
         _adx = new AverageDirectionalIndexState(Math.Max(1, adxLength));
         _cci = new CommodityChannelIndexState(MovingAvgType.SimpleMovingAverage, Math.Max(1, cciLength), 0.015);
-        _elderRay = new ElderRayIndexState(MovingAvgType.ExponentialMovingAverage, Math.Max(1, bullBearLength));
-        _hma = new HullMovingAverageState(MovingAvgType.WeightedMovingAverage, Math.Max(1, hullMaLength));
-        _williamsR = new WilliamsRState(Math.Max(1, williamRLength));
-        _momentum = new MomentumOscillatorState(MovingAvgType.WeightedMovingAverage, Math.Max(1, momLength));
+        _elderRay = new TechnicalRatingAverage(MovingAvgType.ExponentialMovingAverage, Math.Max(1, bullBearLength));
+        _hma = new TechnicalRatingHull(hullMaLength);
+        _williamsR = new TechnicalRatingWilliams(williamRLength);
+        _momentum = new TechnicalRatingMomentum(momLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -124,27 +108,19 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
     void ICustomInputConsumer.ReadCloseAsInput()
     {
         _customInput = true;
-        ((ICustomInputConsumer)_ao).ReadCloseAsInput();
         ((ICustomInputConsumer)_cci).ReadCloseAsInput();
     }
 
     public void Reset()
     {
         _componentRange.Reset();
-        _bpSum1.Reset();
-        _bpSum2.Reset();
-        _bpSum3.Reset();
-        _trSum1.Reset();
-        _trSum2.Reset();
-        _trSum3.Reset();
+        _ultimate.Reset(); _volume.Reset(); _aoFast.Reset(); _aoSlow.Reset();
         _ma10.Reset();
         _ma20.Reset();
         _ma30.Reset();
         _ma50.Reset();
         _ma100.Reset();
         _ma200.Reset();
-        _vwmaVolumeSmoother.Reset();
-        _vwmaVolumePriceSum.Reset();
         _stochHighWindow.Reset();
         _stochLowWindow.Reset();
         _stochFastSmoother.Reset();
@@ -152,7 +128,6 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         _stochRsiLowWindow.Reset();
         _stochRsiFastSmoother.Reset();
         _rsi.Reset();
-        _ao.Reset();
         _macdFast.Reset();
         _macdSlow.Reset();
         _macdSignal.Reset();
@@ -196,35 +171,26 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         var ma50 = _ma50.Next(value, isFinal);
         var ma100 = _ma100.Next(value, isFinal);
         var ma200 = _ma200.Next(value, isFinal);
-        var hma = _hma.Update(bar, isFinal, includeOutputs: false).Value;
+        var hma = _hma.Next(value, isFinal);
 
-        var volume = bar.Volume;
-        var volumeSma = _vwmaVolumeSmoother.Next(volume, isFinal);
-        var volumePrice = value * volume;
-        int vwmaCount;
-        var volumePriceSum = isFinal
-            ? _vwmaVolumePriceSum.Add(volumePrice, out vwmaCount)
-            : _vwmaVolumePriceSum.Preview(volumePrice, out vwmaCount);
-        var volumePriceAvg = vwmaCount > 0 ? volumePriceSum / vwmaCount : 0;
-        var vwma = volumeSma != 0 ? volumePriceAvg / volumeSma : 0;
+        var vwma = _volume.Next(value, bar.Volume, isFinal);
 
         var stochHigh = isFinal ? _stochHighWindow.Add(ranged.High, out _) : _stochHighWindow.Preview(ranged.High, out _);
         var stochLow = isFinal ? _stochLowWindow.Add(ranged.Low, out _) : _stochLowWindow.Preview(ranged.Low, out _);
-        var stochRange = stochHigh - stochLow;
-        var kSto = stochRange != 0 ? MathHelper.MinOrMax((value - stochLow) / stochRange * 100, 100, 0) : 0;
+        var kSto = ClampedRangePosition.Percent(value, stochLow, stochHigh);
         var dSto = _stochFastSmoother.Next(kSto, isFinal);
         var prevKSto = _hasPrev ? _prevKSto : 0;
         var prevDSto = _hasPrev ? _prevDSto : 0;
 
         var stochRsiHigh = isFinal ? _stochRsiHighWindow.Add(rsi, out _) : _stochRsiHighWindow.Preview(rsi, out _);
         var stochRsiLow = isFinal ? _stochRsiLowWindow.Add(rsi, out _) : _stochRsiLowWindow.Preview(rsi, out _);
-        var stochRsiRange = stochRsiHigh - stochRsiLow;
-        var kStoRsi = stochRsiRange != 0 ? MathHelper.MinOrMax((rsi - stochRsiLow) / stochRsiRange * 100, 100, 0) : 0;
+        var kStoRsi = ClampedRangePosition.Percent(rsi, stochRsiLow, stochRsiHigh);
         var dStoRsi = _stochRsiFastSmoother.Next(kStoRsi, isFinal);
         var prevKStoRsi = _hasPrev ? _prevKStoRsi : 0;
         var prevDStoRsi = _hasPrev ? _prevDStoRsi : 0;
 
-        var ao = _ao.Update(bar, isFinal, includeOutputs: false).Value;
+        var median = _customInput ? value : TechnicalRatingValue.Ratio(ExactVarianceWindow.Units(bar.High) + ExactVarianceWindow.Units(bar.Low), 2).Publish();
+        var ao = _aoFast.Next(median, isFinal) - _aoSlow.Next(median, isFinal);
         var prevAo1 = _hasPrev ? _prevAo1 : 0;
         var prevAo2 = _hasPrev ? _prevAo2 : 0;
 
@@ -233,21 +199,7 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         var macd = macdFast - macdSlow;
         var macdSig = _macdSignal.Next(macd, isFinal);
 
-        var previousForPressure = _hasPrev ? prevValue : value;
-        var minValue = Math.Min(bar.Low, previousForPressure);
-        var maxValue = Math.Max(bar.High, previousForPressure);
-        var bp = value - minValue;
-        var tr = maxValue - minValue;
-        var bpSum1 = isFinal ? _bpSum1.Add(bp, out _) : _bpSum1.Preview(bp, out _);
-        var bpSum2 = isFinal ? _bpSum2.Add(bp, out _) : _bpSum2.Preview(bp, out _);
-        var bpSum3 = isFinal ? _bpSum3.Add(bp, out _) : _bpSum3.Preview(bp, out _);
-        var trSum1 = isFinal ? _trSum1.Add(tr, out _) : _trSum1.Preview(tr, out _);
-        var trSum2 = isFinal ? _trSum2.Add(tr, out _) : _trSum2.Preview(tr, out _);
-        var trSum3 = isFinal ? _trSum3.Add(tr, out _) : _trSum3.Preview(tr, out _);
-        var avg1 = trSum1 != 0 ? bpSum1 / trSum1 : 0;
-        var avg2 = trSum2 != 0 ? bpSum2 / trSum2 : 0;
-        var avg3 = trSum3 != 0 ? bpSum3 / trSum3 : 0;
-        var uo = MathHelper.MinOrMax(100 * (((4 * avg1) + (2 * avg2) + avg3) / 7), 100, 0);
+        var uo = _ultimate.Next(bar.High, bar.Low, value, isFinal);
 
         var ichimokuResult = _ichimoku.Update(ranged, isFinal, includeOutputs: true);
         var ichimokuOutputs = ichimokuResult.Outputs!;
@@ -267,17 +219,16 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         var cci = _cci.Update(bar, isFinal, includeOutputs: false).Value;
         var prevCci = _hasPrev ? _prevCci : 0;
 
-        var elderResult = _elderRay.Update(ranged, isFinal, includeOutputs: true);
-        var elderOutputs = elderResult.Outputs!;
-        var bullPower = elderOutputs["BullPower"];
-        var bearPower = elderOutputs["BearPower"];
+        var elderMean = _elderRay.Next(value, isFinal);
+        var bullPower = (TechnicalRatingValue)ranged.High - elderMean;
+        var bearPower = (TechnicalRatingValue)ranged.Low - elderMean;
         var prevBullPower = _hasPrev ? _prevBullPower : 0;
         var prevBearPower = _hasPrev ? _prevBearPower : 0;
 
-        var wr = _williamsR.Update(ranged, isFinal, includeOutputs: false).Value;
+        var wr = _williamsR.Next(ranged.High, ranged.Low, value, isFinal);
         var prevWr = _hasPrev ? _prevWr : 0;
 
-        var mom = _momentum.Update(bar, isFinal, includeOutputs: false).Value;
+        var mom = _momentum.Next(value, isFinal);
         var prevMom = _hasPrev ? _prevMom : 0;
 
         var upTrend = TechnicalRatingComparison.Compare(value, ma50) > 0;
@@ -354,27 +305,19 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
 
 public void Dispose()
 {
-    _bpSum1.Dispose();
-        _bpSum2.Dispose();
-        _bpSum3.Dispose();
-        _trSum1.Dispose();
-        _trSum2.Dispose();
-        _trSum3.Dispose();
+    _volume.Dispose(); _aoFast.Dispose(); _aoSlow.Dispose();
         _ma10.Dispose();
         _ma20.Dispose();
         _ma30.Dispose();
         _ma50.Dispose();
         _ma100.Dispose();
         _ma200.Dispose();
-        _vwmaVolumeSmoother.Dispose();
-        _vwmaVolumePriceSum.Dispose();
         _stochHighWindow.Dispose();
         _stochLowWindow.Dispose();
         _stochFastSmoother.Dispose();
         _stochRsiHighWindow.Dispose();
         _stochRsiLowWindow.Dispose();
         _stochRsiFastSmoother.Dispose();
-        _ao.Dispose();
         _macdFast.Dispose();
         _macdSlow.Dispose();
         _macdSignal.Dispose();

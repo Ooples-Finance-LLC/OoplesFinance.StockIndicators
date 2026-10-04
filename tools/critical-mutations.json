@@ -89647,5 +89647,305 @@
     "after": "if(double.IsNaN(bar.Open)) _kernel.Reset();\n        StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~MesaV1NumericalTests.InvalidInputDoesNotAdvanceAnyStage",
     "scope": "public sealed class EhlersMesaPredictIndicatorV1State"
+  },
+  {
+    "id": "ratings-exact-double-ties",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingComparison.cs",
+    "before": "left.CompareTo(right)",
+    "after": "Math.Abs(left-right)<1e-12?0:left.CompareTo(right)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.TinyAndOverflowingValuesCastOrderedVotes"
+  },
+  {
+    "id": "ratings-exact-wide-order",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingComparison.cs",
+    "before": "left.Units.CompareTo(right.Units)",
+    "after": "left.Publish().CompareTo(right.Publish())",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.TinyAndOverflowingValuesCastOrderedVotes"
+  },
+  {
+    "id": "ratings-exact-negative-divisor",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "denominator.Sign < 0 ? -numerator : numerator",
+    "after": "numerator",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset"
+  },
+  {
+    "id": "ratings-exact-upper-exponent",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "ExactVarianceWindow.Units(result.Mantissa) << result.UpperShift",
+    "after": "ExactVarianceWindow.Units(result.Mantissa)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtendedAveragesRetainTheirUpperExponent"
+  },
+  {
+    "id": "ratings-exact-average-preview",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "_average.Next(RocBankValue.Round(exact), final)",
+    "after": "_average.Next(RocBankValue.Round(exact), true)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset"
+  },
+  {
+    "id": "ratings-exact-average-reset",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "internal void Reset() => _average.Reset();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset"
+  },
+  {
+    "id": "ratings-exact-volume-startup",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "_history.Count < _length - 1 || mass.IsZero",
+    "after": "mass.IsZero",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExactVolumeProductsSurviveOverflowUnderflowAndEviction"
+  },
+  {
+    "id": "ratings-exact-volume-products",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "ExactVarianceWindow.Units(price) * v",
+    "after": "ExactVarianceWindow.Units(price * volume) * TechnicalRatingValue.Unit",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExactVolumeProductsSurviveOverflowUnderflowAndEviction"
+  },
+  {
+    "id": "ratings-exact-volume-expiry",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "sum -= old.PriceVolume",
+    "after": "sum += old.PriceVolume",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExactVolumeProductsSurviveOverflowUnderflowAndEviction"
+  },
+  {
+    "id": "ratings-exact-volume-mass",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "mass -= old.Volume",
+    "after": "mass += old.Volume",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExactVolumeProductsSurviveOverflowUnderflowAndEviction"
+  },
+  {
+    "id": "ratings-exact-volume-preview",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExactVolumeProductsSurviveOverflowUnderflowAndEviction",
+    "scope": "internal sealed class TechnicalRatingVolume"
+  },
+  {
+    "id": "ratings-exact-volume-reset",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "_priceVolume = _volume = default;",
+    "after": "_volume = default;",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExactVolumeProductsSurviveOverflowUnderflowAndEviction"
+  },
+  {
+    "id": "ratings-exact-hull-factor",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "2 * half.Units - full.Units",
+    "after": "half.Units - full.Units",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset"
+  },
+  {
+    "id": "ratings-exact-hull-root",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "HullWindow.Root(length)",
+    "after": "1",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset"
+  },
+  {
+    "id": "ratings-exact-momentum-scale",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "ExactVarianceWindow.Units(value) * 100 * TechnicalRatingValue.Unit",
+    "after": "ExactVarianceWindow.Units(value) * 99 * TechnicalRatingValue.Unit",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.MomentumRetainsOrderBeyondPublishedExponent"
+  },
+  {
+    "id": "ratings-exact-momentum-history",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "_history.Count == _length ? _history.Peek() : 0",
+    "after": "_history.Count > 0 ? _history.Peek() : 0",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.MomentumRetainsOrderBeyondPublishedExponent"
+  },
+  {
+    "id": "ratings-exact-momentum-preview",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.MomentumRetainsOrderBeyondPublishedExponent",
+    "scope": "internal sealed class TechnicalRatingMomentum"
+  },
+  {
+    "id": "ratings-exact-momentum-reset",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "internal void Reset() => _history.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.MomentumRetainsOrderBeyondPublishedExponent",
+    "scope": "internal sealed class TechnicalRatingMomentum"
+  },
+  {
+    "id": "ratings-exact-williams-scale",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "100 * (ExactVarianceWindow.Units(value)",
+    "after": "99 * (ExactVarianceWindow.Units(value)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.UnclampedWilliamsRetainsItsThresholdScale"
+  },
+  {
+    "id": "ratings-exact-williams-preview",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "var upper = final ?",
+    "after": "var upper = true ?",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.UnclampedWilliamsRetainsItsThresholdScale"
+  },
+  {
+    "id": "ratings-exact-williams-zero",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "(TechnicalRatingValue)(-100d)",
+    "after": "(TechnicalRatingValue)(0d)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.UnclampedWilliamsRetainsItsThresholdScale"
+  },
+  {
+    "id": "ratings-exact-williams-reset",
+    "module": "technical-ratings-numerical",
+    "file": "src/Helpers/TechnicalRatingArithmetic.cs",
+    "before": "internal void Reset() { _high.Reset(); _low.Reset(); }",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.UnclampedWilliamsRetainsItsThresholdScale"
+  },
+  {
+    "id": "ratings-exact-rounded-means",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "new RoundedSimpleMovingAverageSmoother(period)",
+    "after": "new SimpleMovingAverageSmoother(period)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.RoundedComponentMeansDoNotInventCrossovers"
+  },
+  {
+    "id": "ratings-exact-ma-votes",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "maRating /= 9;",
+    "after": "maRating /= 8;",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset",
+    "scope": "public sealed class TechnicalRatingsState"
+  },
+  {
+    "id": "ratings-exact-osc-votes",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "oscRating /= 11;",
+    "after": "oscRating /= 10;",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset",
+    "scope": "public sealed class TechnicalRatingsState"
+  },
+  {
+    "id": "ratings-exact-total-votes",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "(maRating + oscRating) / 2",
+    "after": "(maRating + oscRating) / 3",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset",
+    "scope": "public sealed class TechnicalRatingsState"
+  },
+  {
+    "id": "ratings-exact-ao-history",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "_prevAo2 = _prevAo1;",
+    "after": "_prevAo2 = 0;",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset",
+    "scope": "public sealed class TechnicalRatingsState"
+  },
+  {
+    "id": "ratings-exact-macd-signal",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "_macdSignal.Next(macd, isFinal)",
+    "after": "_macdSignal.Next(macdSlow, isFinal)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset"
+  },
+  {
+    "id": "ratings-exact-bull-input",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "(TechnicalRatingValue)ranged.High - elderMean",
+    "after": "(TechnicalRatingValue)ranged.Low - elderMean",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.AsymmetricCandlesKeepBullAndBearVotesSeparate"
+  },
+  {
+    "id": "ratings-exact-selected-mean",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "var median = _customInput ? value :",
+    "after": "var median = false ? value :",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.SelectedSourcePreservesComponentRanges"
+  },
+  {
+    "id": "ratings-exact-native-rejection",
+    "module": "technical-ratings-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open)) Reset();\n        StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.InvalidFieldsDoNotCommitComponents",
+    "scope": "public sealed class TechnicalRatingsState"
+  },
+  {
+    "id": "ratings-exact-fast-selected",
+    "module": "technical-ratings-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var ratingInput = selected ? data.ChainedValues : data.InputValues;",
+    "after": "var ratingInput = data.ClosePrices;",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.DirectFastSelectionMatchesIndependentComponentVotes",
+    "scope": "internal static ComputeBuffer ComputeTechnicalRatingsFast("
+  },
+  {
+    "id": "ratings-exact-callback-batch",
+    "module": "technical-ratings-numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.CallbackRoutesStillRequestTheirComponents",
+    "scope": "public static StockData CalculateTechnicalRatings("
+  },
+  {
+    "id": "ratings-exact-callback-fast",
+    "module": "technical-ratings-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.CallbackRoutesStillRequestTheirComponents",
+    "scope": "internal static ComputeBuffer ComputeTechnicalRatingsFast("
+  },
+  {
+    "id": "ratings-exact-reference-votes",
+    "module": "technical-ratings-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.TechnicalRatings.cs",
+    "before": "int CompareVote(ReferenceFraction x, ReferenceFraction y) => x.CompareTo(y);",
+    "after": "int CompareVote(ReferenceFraction x, ReferenceFraction y) => 0;",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.ExtremeComponentsPreservePreviewAndReset"
+  },
+  {
+    "id": "ratings-exact-period-fast",
+    "module": "technical-ratings-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "maLength4, maLength5, maLength6, hullMaLength",
+    "after": "50, maLength5, maLength6, hullMaLength",
+    "filter": "FullyQualifiedName~TechnicalRatingsNumericalTests.AdditionalPublicPeriodsReachEveryRoute",
+    "scope": "internal static ComputeBuffer ComputeTechnicalRatingsFast("
   }
 ]

@@ -5923,3 +5923,17 @@ types**, with no constructor failures and exact backlog agreement
 nonzero orders, horizons and Hann windows remain computationally expensive;
 maximum-int verification covers zero startup, not general throughput. PR #246
 remains draft; final platform/package and timing assurance remains incomplete.
+
+
+### Technical Ratings numerical qualification (batch 1109)
+
+All 17 configurations now use exact component comparisons and extended binary64
+intermediates for overflowing votes. Independent component references, selected
+inputs, callback routes, public period forwarding, preview and reset are covered.
+159 distinct focused checks and 36 compiled behavioral faults qualified
+(`si-ratings1096-qualified.json`); four original survivors were caught by added
+regressions, and no failed build or survivor receives credit. Main integration
+passed 34 checks (`ratings1104-integration.trx`), preserving Mesa, Anticipate and
+Comb. All 10,357 mutation anchors validate. Enrollment is 6,915/7,131, leaving
+216 configurations across 26 types (`si-ratings1106-inventory.json`). PR #246
+remains draft; remaining families and final assurance are incomplete.

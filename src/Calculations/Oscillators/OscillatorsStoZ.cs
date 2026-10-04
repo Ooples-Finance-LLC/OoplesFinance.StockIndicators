@@ -1800,6 +1800,27 @@ public static partial class Calculations
         int macdLength3 = 9, int bullBearLength = 13, int williamRLength = 14, int maLength1 = 10, int maLength2 = 20, int maLength3 = 30, 
         int maLength4 = 50, int maLength5 = 100, int maLength6 = 200, int hullMaLength = 9)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var state = new Streaming.TechnicalRatingsState(maType, aoLength1, aoLength2, rsiLength, stochLength1, stochLength2, stochLength3, ultOscLength1, ultOscLength2, ultOscLength3, ichiLength1, ichiLength2, ichiLength3, vwmaLength, cciLength, adxLength, momLength, macdLength1, macdLength2, macdLength3, bullBearLength, williamRLength, maLength1, maLength2, maLength3, maLength4, maLength5, maLength6, hullMaLength);
+            var selected = stockData.ChainedValues.Count > 0;
+            var input = selected ? stockData.ChainedValues : stockData.InputValues;
+            foreach (var values in new[] { input, stockData.OpenPrices, stockData.HighPrices, stockData.LowPrices, stockData.ClosePrices, stockData.Volumes })
+                foreach (var value in values) Streaming.StreamingInputValidation.Finite(value, nameof(input));
+            if (selected) ((Streaming.ICustomInputConsumer)state).ReadCloseAsInput();
+            var result = new Dictionary<string, List<double>> { ["Tr"] = new(), ["Or"] = new(), ["Mr"] = new() };
+            var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var bar = new Streaming.OhlcvBar("RATING", Streaming.BarTimeframe.Minutes(1), DateTime.MinValue, DateTime.MinValue,
+                    stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+                var point = state.Update(bar, true, true);
+                foreach (var key in result.Keys) result[key].Add(point.Outputs![key]);
+                signals?.Add(GetConditionSignal(point.Value > 0.1, point.Value < -0.1));
+            }
+            stockData.SetOutputValues(() => result); stockData.SetSignals(signals); stockData.SetCustomValues(result["Tr"]);
+            stockData.IndicatorName = IndicatorName.TechnicalRatings; return stockData;
+        }
         // The components that read their own default input - a typical or median price - read the
         // CALLER's series instead whenever one is chained, and by the time this calculation calls them
         // an earlier component has already published its output onto CustomValuesList, which they would

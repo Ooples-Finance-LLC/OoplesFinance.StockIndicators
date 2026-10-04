@@ -17,6 +17,17 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TechnicalRatings && TechnicalRatingsFormula(builtIn) is { } ratings)
+        {
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string,double[]>>();
+            var ratingKeys = builtIn.BatchOutputKey is { } key ? new[] { key } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < ratingKeys.Length; slot++)
+            {
+                var output = ratingKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => cache.GetValue(bars, b => ratings.Compute(b))[output], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VariableMovingAverage)
         {
             var variableLength=Integer(builtIn.CreateOptions(),"Length",6);

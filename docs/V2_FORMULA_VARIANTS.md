@@ -1365,3 +1365,14 @@ unused. Exact filtered-minus-predicted ordering determines signals before output
 projection. Invalid OHLCV/selected inputs reject before state changes. Preview and
 reset preserve all committed histories. This introduces no new public period cap;
 large nonzero orders/horizons and full Hann-mass evaluation can still be costly.
+
+
+### Technical Ratings exact component votes
+
+Distinct representable component values are ordered without a relative tolerance.
+MACD, awesome oscillator, Hull, momentum, bull/bear and Williams stages retain
+binary64 precision with an extended upper exponent before votes are cast. VWMA
+uses exact signed price-volume products and full-window startup; stochastic and
+SMA vote means retain rounded binary64 stages. The nine moving-average and eleven
+oscillator rules, callback requests, selected-input range semantics, and unused
+stochastic Length3 are preserved. The published rating remains their group mean.

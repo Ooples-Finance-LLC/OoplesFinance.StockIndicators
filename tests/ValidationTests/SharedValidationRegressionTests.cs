@@ -3452,10 +3452,10 @@ public sealed class SharedValidationRegressionTests
     }
 
     [Theory]
-    [InlineData(100, 100.000000000001, 0)]
+    [InlineData(100, 100.000000000001, -1)]
     [InlineData(100, 100.00000001, -1)]
     [InlineData(-100, -100.00000001, 1)]
-    [InlineData(0, 0.0000000000001, 0)]
+    [InlineData(0, 0.0000000000001, -1)]
     [InlineData(0, 0.00000000001, -1)]
     public void TechnicalRatingVotesSeparateNumericalTiesFromRealCrossings(double left, double right, int expected)
     {
