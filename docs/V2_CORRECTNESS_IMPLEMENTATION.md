@@ -6020,3 +6020,20 @@ including Kase and Linear Quadratic preservation checks. All 10,452 mutation
 anchors validate. Enrollment is 6,955/7,131, leaving 176 configurations across
 19 types (`si-timemoney1173-inventory.json`). PR #246 remains draft; final
 platform/package/timing assurance is incomplete.
+
+
+### Robust Weighting Oscillator qualification (batch 1190)
+
+The approved regression residual replaces the erroneous price-minus-slope-minus-
+intercept-times-price transform and the unrelated median-based core. All five
+configurations preserve full-window slope warmup and three averaging stages,
+using exact centered slopes, extended fitted lines/residuals and lazy history.
+Independent formula, route, selected-input, signal, preview/reset, callback and
+core-alias tests passed 43 focused checks. All 18 compiled faults were caught
+(`si-robust1171-qualified.json`); the original warmup fault survived a length-two
+fixture, then failed against the existing length-three regression. No production
+or assertion change was needed. Main integration passed 11 checks
+(`robust1188-integration.trx`), preserving Time and Money and Kase behavior.
+All 10,470 anchors validate. Enrollment is 6,960/7,131, leaving 171 configurations
+across 18 types (`si-robust1189-inventory.json`). PR #246 remains draft; final
+assurance is incomplete.

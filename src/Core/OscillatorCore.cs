@@ -4374,64 +4374,15 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes Robust Weighting Oscillator using outlier-resistant statistics.
+    /// Computes Robust Weighting Oscillator as a smoothed regression residual.
     /// </summary>
     internal static void RobustWeightingOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var windowArray = pool.Rent(length);
-
-        try
-        {
-            var window = windowArray.AsSpan(0, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                }
-                else
-                {
-                    // Copy window
-                    for (var j = 0; j < length; j++)
-                    {
-                        window[j] = close[i - length + 1 + j];
-                    }
-
-                    // Sort for median
-                    var sortedWindow = window.ToArray();
-                    Array.Sort(sortedWindow);
-                    var median = sortedWindow[length / 2];
-
-                    // Calculate MAD (Median Absolute Deviation)
-                    var mad = 0.0;
-                    for (var j = 0; j < length; j++)
-                    {
-                        mad += Math.Abs(window[j] - median);
-                    }
-                    mad /= length;
-
-                    if (mad != 0)
-                    {
-                        output[i] = (close[i] - median) / (mad * 1.4826); // 1.4826 is the consistency constant
-                    }
-                    else
-                    {
-                        output[i] = 0;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(windowArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var prices = close.ToArray();
+        foreach (var value in prices) StreamingInputValidation.Finite(value, nameof(close));
+        using var state = new RobustWeightingWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < prices.Length; i++) output[i] = state.Next(prices[i], true).Value;
     }
 
     #endregion

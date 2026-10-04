@@ -90721,5 +90721,154 @@
     "before": "Root(variance[i - lag])",
     "after": "Root(variance[i])",
     "filter": "FullyQualifiedName~TimeMoneyNumericalTests.MeansVarianceSignalsPreviewAndResetRetainTheirStages"
+  },
+  {
+    "id": "robust-residual-expiry",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "_sum + value - expired",
+    "after": "_sum + value + expired",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-weighted-expiry",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "_weighted - _sum + expired + (count - 1) * value",
+    "after": "_weighted + _sum + expired + (count - 1) * value",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-covariance",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "2 * weighted + (n - 1) * sum",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-denominator",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "n * (n * n - 1)",
+    "after": "n * (n * n + 1)",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-warmup",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "count < _length || count == 1",
+    "after": "count == 1",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-time-center",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "((_index << 1074) - time)",
+    "after": "((_index << 1074) + time)",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-price-center",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "(mean * denominator << 1074)",
+    "after": "(2 * mean * denominator << 1074)",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-formula",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "value - line",
+    "after": "value + line",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.LinearHandHasOnlyThePreservedStartupResidual"
+  },
+  {
+    "id": "robust-residual-smoothing",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "Average(_residualMean, residual, final)",
+    "after": "residual",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.LinearHandHasOnlyThePreservedStartupResidual"
+  },
+  {
+    "id": "robust-residual-preview",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-reset",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "_sum = _weighted = _index = _previous = _previousSlope = default;",
+    "after": "_sum = _weighted = _previous = _previousSlope = default;",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-signals",
+    "module": "robust-residual-numerical",
+    "file": "src/Helpers/RobustWeightingWindow.cs",
+    "before": "var slope = output - _previous",
+    "after": "var slope = output + _previous",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-reference",
+    "module": "robust-residual-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.RobustWeighting.cs",
+    "before": "covariance += offset * prices[j]",
+    "after": "covariance -= offset * prices[j]",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ExtremeResidualsPreserveCentersExpirySignalsAndPreview"
+  },
+  {
+    "id": "robust-residual-core",
+    "module": "robust-residual-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "state.Next(prices[i], true).Value",
+    "after": "-state.Next(prices[i], true).Value",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.CoreMatchesPublicFormulaAndProtectsOverlappingSpans",
+    "scope": "internal static void RobustWeightingOscillator("
+  },
+  {
+    "id": "robust-residual-fast",
+    "module": "robust-residual-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan[i] = values[i]",
+    "after": "buffer.WritableSpan[i] = -values[i]",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.RoutesMatchIndependentCenteredResidual",
+    "scope": "internal static ComputeBuffer ComputeRobustWeightingOscillatorFast("
+  },
+  {
+    "id": "robust-residual-callback-isolation",
+    "module": "robust-residual-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var isolated = data.WithValues(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);",
+    "after": "var isolated = data;",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ThreeCallbacksKeepPeriodsAndFastCallerState",
+    "scope": "internal static ComputeBuffer ComputeRobustWeightingOscillatorFast("
+  },
+  {
+    "id": "robust-residual-callback-formula",
+    "module": "robust-residual-numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "currentValue - ((a * i) + b)",
+    "after": "currentValue - a - (b * currentValue)",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ThreeCallbacksKeepPeriodsAndFastCallerState",
+    "scope": "public static StockData CalculateRobustWeightingOscillator("
+  },
+  {
+    "id": "robust-residual-callback-period",
+    "module": "robust-residual-numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "AsReadOnlySpan(lList), length)",
+    "after": "AsReadOnlySpan(lList), length + 1)",
+    "filter": "FullyQualifiedName~RobustWeightingNumericalTests.ThreeCallbacksKeepPeriodsAndFastCallerState",
+    "scope": "public static StockData CalculateRobustWeightingOscillator("
   }
 ]

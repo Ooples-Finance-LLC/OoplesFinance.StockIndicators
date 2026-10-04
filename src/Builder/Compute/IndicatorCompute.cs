@@ -8556,48 +8556,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRobustWeightingOscillatorFast(StockData data, ComputeContext context, int length = 200,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateRobustWeightingOscillator fits the chained series against the bar index - the correlation
-        // scaled by the ratio of the two standard deviations gives the slope, and the two moving averages give
-        // the intercept - then smooths the residual the fit leaves behind. OscillatorCore.RobustWeightingOscillator
-        // took the close and measured something else.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var window = Math.Max(length, 1);
-
-        using var index = context.Rent(count);
-        var indexValues = index.WritableSpan;
-        for (var i = 0; i < count; i++)
+        List<double> values;
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+            values = RobustWeightingWindow.Calculate(data, maType, length).Values;
+        else
         {
-            indexValues[i] = i;
+            var isolated = data.WithValues(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
+            isolated.CalculateRobustWeightingOscillator(maType, length); values = isolated.ChainedValues;
         }
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        using var indexAverage = context.Rent(count);
-        MovingAverage(data, maType, length, index.Span, indexAverage.WritableSpan);
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, window);
-        using var indexDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(index.Span, indexDeviation.WritableSpan, window);
-
-        using var residual = context.Rent(count);
-        var l = residual.WritableSpan;
-        var correlation = new RollingCorrelation();
-        for (var i = 0; i < count; i++)
-        {
-            correlation.Add(i, input[i]);
-            var corr = correlation.R(length);
-            corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-
-            var slope = indexDeviation.Span[i] != 0 ? corr * (deviation.Span[i] / indexDeviation.Span[i]) : 0;
-            var intercept = average.Span[i] - (slope * indexAverage.Span[i]);
-            l[i] = input[i] - slope - (intercept * input[i]);
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, residual.Span, buffer.WritableSpan);
+        var buffer = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++) buffer.WritableSpan[i] = values[i];
         return buffer;
     }
 

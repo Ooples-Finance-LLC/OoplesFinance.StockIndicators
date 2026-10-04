@@ -71,31 +71,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("R2ar", result));
                 });
             case IndicatorName.RobustWeightingOscillator:
-                return new("Rwo", new[] { "Rwo" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var mean = Average(prices, length, kind);
-                    var timeMean = Average(Enumerable.Range(0, bars.Count).Select(i => (double)i).ToArray(), length, kind);
-                    var residual = prices.Select((value, i) =>
-                    {
-                        // Pairwise differences give the least-squares slope without
-                        // correlation, standard-deviation engines, or raw moments.
-                        var first = Math.Max(0, i-length+1);
-                        double numerator = 0, denominator = 0;
-                        for (var a = first; a <= i; a++)
-                            for (var b = a+1; b <= i; b++)
-                            {
-                                numerator += (b-a)*(prices[b]-prices[a]);
-                                denominator += (b-a)*(double)(b-a);
-                            }
-                        var slope = i+1 < length || denominator == 0 ? 0 : numerator/denominator;
-                        var intercept = mean[i]-slope*timeMean[i];
-                        // The named oscillator's legacy transform is x-a-b*x;
-                        // it is not the residual x-(a*time+b).
-                        return value*(1-intercept)-slope;
-                    }).ToArray();
-                    return Outputs(("Rwo", Average(residual, length, kind)));
-                });
+                return new("Rwo", new[] { "Rwo" }, bars => RobustWeightingOutputs(bars, indicator));
             default: return null;
         }
     }

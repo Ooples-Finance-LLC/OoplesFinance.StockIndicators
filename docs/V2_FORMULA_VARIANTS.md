@@ -1437,3 +1437,16 @@ bands even when the published Median width overflows. Band arithmetic retains
 its coefficient, addition and product stages. Native history is lazy, and the
 four callback periods remain length1, length2, length2, length1. The fast callback
 route isolates caller state.
+
+
+### Robust Weighting Oscillator regression residual
+
+Following the explicit formula decision, the oscillator smooths
+price - (slope * barIndex + intercept), where intercept is the selected price
+average minus slope times the selected index average. The implementation centers
+this line algebraically and evaluates the OLS slope exactly, avoiding overflow
+in the correlation/deviation ratio. It retains zero slope before a full deviation
+window, the selected averaging conventions and three callback requests. The
+fitted line and residual retain binary64 precision with an extended upper
+exponent. Signals compare exact differences of these rounded stages. The core
+uses the same formula with SMA and preserves overlapping spans.

@@ -2229,6 +2229,14 @@ public static partial class Calculations
     public static StockData CalculateRobustWeightingOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 200)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result = RobustWeightingWindow.Calculate(stockData, maType, length);
+            stockData.SetOutputValues(() => new Dictionary<string,List<double>> { ["Rwo"] = result.Values });
+            stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+            stockData.SetCustomValues(result.Values); stockData.IndicatorName = IndicatorName.RobustWeightingOscillator;
+            return stockData;
+        }
         List<double> indexList = new(stockData.Count);
         List<double> corrList = new(stockData.Count);
         List<double> lList = new(stockData.Count);
@@ -2248,8 +2256,8 @@ public static partial class Calculations
             corrList.Add((double)corr);
         }
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
+        var smaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
+        var indexSmaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(indexList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, indexList);
         var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(indexList);
         var indexStdDevList = GetStandardDeviationList(indexList, length);
@@ -2264,11 +2272,11 @@ public static partial class Calculations
             var a = indexStdDev != 0 ? corr * (stdDev / indexStdDev) : 0;
             var b = sma - (a * indexSma);
 
-            var l = currentValue - a - (b * currentValue);
+            var l = currentValue - ((a * i) + b);
             lList.Add(l);
         }
 
-        var lSmaList = GetMovingAverageList(stockData, maType, length, lList);
+        var lSmaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(lList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, lList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var l = lSmaList[i];

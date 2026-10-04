@@ -41,19 +41,21 @@ public sealed class RightSidedRickerMovingAverageState : IStreamingIndicatorStat
 [PrimaryOutput("Rwo")]
 public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RobustWeightingWindow? _wide;
     private readonly int _length;
-    private readonly RollingWindowCorrelation _corrWindow;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly IMovingAverageSmoother _indexSma;
-    private readonly IMovingAverageSmoother _lSma;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly RollingStandardDeviation _indexStdDev;
-    private readonly StreamingInputResolver _input;
+    private readonly RollingWindowCorrelation _corrWindow = null!;
+    private readonly IMovingAverageSmoother _sma = null!;
+    private readonly IMovingAverageSmoother _indexSma = null!;
+    private readonly IMovingAverageSmoother _lSma = null!;
+    private readonly RollingStandardDeviation _stdDev = null!;
+    private readonly RollingStandardDeviation _indexStdDev = null!;
+    private readonly StreamingInputResolver _input = default;
     private double _indexValue;
     private int _index;
 
     public RobustWeightingOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200)
     {
+        if (StrengthWindow.Supports(maType)) { _wide = new(maType, length); return; }
         _length = Math.Max(1, length);
         _corrWindow = new RollingWindowCorrelation(_length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
@@ -68,6 +70,7 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _corrWindow.Reset();
         _sma.Reset();
         _indexSma.Reset();
@@ -80,6 +83,12 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var point = _wide.Next(bar.Close, isFinal);
+            return new(point.Value, includeOutputs ? new Dictionary<string,double> { ["Rwo"] = point.Value } : null);
+        }
         var value = _input.GetValue(bar);
         var index = (double)_index;
         _indexValue = index;
@@ -94,7 +103,7 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
 
         var a = indexStdDev != 0 ? corr * (stdDev / indexStdDev) : 0;
         var b = sma - (a * indexSma);
-        var l = value - a - (b * value);
+        var l = value - ((a * index) + b);
         var lSma = _lSma.Next(l, isFinal);
 
         if (isFinal)
@@ -116,6 +125,7 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
 
     public void Dispose()
     {
+        if (_wide is not null) { _wide.Dispose(); return; }
         _corrWindow.Dispose();
         _sma.Dispose();
         _indexSma.Dispose();
