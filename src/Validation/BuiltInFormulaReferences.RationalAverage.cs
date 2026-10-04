@@ -32,11 +32,14 @@ internal static partial class BuiltInFormulaReferences
     }
 
     private static ReferenceFraction[] RationalAverage(ReferenceFraction[] values, int length, MovingAvgType kind)
+        => RationalAverage(values, length, kind, kind == MovingAvgType.DoubleExponentialMovingAverage ? 4 : kind == MovingAvgType.TripleExponentialMovingAverage ? 5 : (int)kind);
+
+    private static ReferenceFraction[] RationalAverage(ReferenceFraction[] values, int length, MovingAvgType kind, int fallbackKind)
     {
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
         var zero = R(0);
         if (kind is not (MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod))
-            return Average(values.Select(v => v.ToDouble()).ToArray(), length, kind == MovingAvgType.DoubleExponentialMovingAverage ? 4 : kind == MovingAvgType.TripleExponentialMovingAverage ? 5 : (int)kind).Select(R).ToArray();
+            return Average(values.Select(v => v.ToDouble()).ToArray(), length, fallbackKind).Select(R).ToArray();
         var result = new ReferenceFraction[values.Length];
         for (var i = 0; i < values.Length; i++)
         {
