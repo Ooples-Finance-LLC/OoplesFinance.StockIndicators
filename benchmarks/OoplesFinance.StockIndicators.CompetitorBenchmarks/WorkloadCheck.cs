@@ -101,7 +101,9 @@ internal static class WorkloadCheck
 
     private static void Equal(double expected, double actual, ref int assertions)
     {
+#pragma warning disable S1244 // Replaying the identical library, inputs and state must reproduce its binary64 outputs exactly.
         if (!double.IsFinite(expected) || !expected.Equals(actual))
+#pragma warning restore S1244
             throw new InvalidOperationException($"Workload mismatch: expected {expected:R}, actual {actual:R}.");
         assertions++;
     }
