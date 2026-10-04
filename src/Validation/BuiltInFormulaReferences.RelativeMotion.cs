@@ -144,14 +144,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Lqcdo", difference.Select((v, i) => v - 2 * signal[i]).ToArray()));
                 });
             case IndicatorName.HerrickPayoffIndex:
-                return new("Hpi", new[] { "Hpi" }, bars => Outputs(("Hpi", bars.Select((b, i) =>
-                {
-                    if (i == 0) return 0d;
-                    var change = ((b.High + b.Low) - (bars[i - 1].High + bars[i - 1].Low)) / 2;
-                    var opening = Math.Min(b.Open, bars[i - 1].Open);
-                    var adjustment = opening == 0 ? 0 : Math.Abs(b.Close - bars[i - 1].Close) / (2 * opening);
-                    return change * b.Volume * Number(options, 100, "PointValue") * (1 + (change < 0 ? -adjustment : adjustment));
-                }).ToArray())));
+                return new("Hpi", new[] { "Hpi" }, bars => Outputs(("Hpi",
+                    HerrickPayoffValues(bars, Number(options, 100, "PointValue"), (indicator as IIndicator)?.Source is not null))));
             case IndicatorName.PivotDetectorOscillator:
                 // The obsolete Length option remains inert; public defaults are 200 and 14.
                 return new("Pdo", new[] { "Pdo" }, bars => PivotDetectorValues(bars, kind: kind).Outputs);

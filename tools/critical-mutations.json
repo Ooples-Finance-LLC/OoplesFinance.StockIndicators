@@ -88274,5 +88274,111 @@
     "before": "if (lower.Equals(upper)) return lower;",
     "after": "if (!double.IsNaN(lower)) return lower;",
     "filter": "FullyQualifiedName~KaufmanAdaptiveReferenceEquivalenceTests.IntegerCoordinatesMatchOriginalCenteredFractions"
+  },
+  {
+    "id": "herrick-exact-startup",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "if (_started)",
+    "after": "if (_started || price != double.PositiveInfinity)",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-change",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "p - _previousPrice",
+    "after": "p + _previousPrice",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-opening-minimum",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "o < _previousOpen",
+    "after": "o > _previousOpen",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-adjustment-sign",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "change.Sign < 0",
+    "after": "change.Sign > 0",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-adjustment-divisor",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "/ (2 * opening)",
+    "after": "/ opening",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-point-value",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "change * _pointValue * F.Of(volume)",
+    "after": "change * F.Of(volume)",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-early-publication",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "change * _pointValue * F.Of(volume)",
+    "after": "F.Of((change * _pointValue).Publish()) * F.Of(volume)",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.IntermediateOverflowAndUnderflowDoNotCorruptFinitePayoff"
+  },
+  {
+    "id": "herrick-exact-preview",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-reset",
+    "module": "herrick-numerical",
+    "file": "src/Helpers/HerrickPayoffWindow.cs",
+    "before": "_started = false;",
+    "after": "_started = true;",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-native-output",
+    "module": "herrick-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "[\"Hpi\"] = point.Value",
+    "after": "[\"Hpi\"] = 0",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands",
+    "scope": "public sealed class HerrickPayoffIndexState"
+  },
+  {
+    "id": "herrick-exact-reference-divisor",
+    "module": "herrick-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Herrick.cs",
+    "before": "new ReferenceFraction(2) * opening;",
+    "after": "new ReferenceFraction(3) * opening;",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.DirectPayoffHasIndependentSignedOpeningHands"
+  },
+  {
+    "id": "herrick-exact-selected-reference",
+    "module": "herrick-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Herrick.cs",
+    "before": "selected ? b.Close",
+    "after": "false ? b.Close",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.SelectedSourcesPreserveOriginalCandles"
+  },
+  {
+    "id": "herrick-exact-rejection-atomicity",
+    "module": "herrick-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "var point = _window.Next(_input.GetValue(bar), bar.Open, bar.Close, bar.Volume, isFinal);",
+    "after": "if (double.IsNaN(bar.Close)) _window.Next(17, 2, 4, 3, true); var point = _window.Next(_input.GetValue(bar), bar.Open, bar.Close, bar.Volume, isFinal);",
+    "filter": "FullyQualifiedName~HerrickPayoffNumericalTests.RejectedFieldsDoNotAdvanceHistory",
+    "scope": "public sealed class HerrickPayoffIndexState"
   }
 ]

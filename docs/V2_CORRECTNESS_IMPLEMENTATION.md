@@ -5631,3 +5631,34 @@ Authenticated campaign snapshot and archive SHA256 pairs:
 - `si-adaptive952-root-mutations`: `1771853781b087ea83aced82a3f0a478490a5f9a65ec669113fa219c9281f242` / `ca2aa5625adbebc5e2336c8f3c37a2aca11ee4d3b89f3efc4d549c7a7e01e3d0`.
 
 Hosted current-head checks, final platform/package assurance and fair competitor timing remain outstanding. PR #246 stays draft.
+
+
+### Herrick Payoff Index qualification (2026-10-04)
+
+The existing volume-weighted median-price payoff now uses exact rational
+differences, products and opening-price adjustment, rounding the final payoff
+once. This avoids intermediate overflow/underflow and cancellation through the
+redundant previous-payoff addition. Startup remains zero; signed opening prices,
+zero opening and signed/zero point values retain the existing formula. Signals
+compare published payoffs. Chained/selected prices replace the comparison price
+and close as on the existing routes; original open and volume remain inputs.
+
+**11/11 focused checks passed**, covering batch/native/streaming, selected input,
+independent signed hands, extremes, preview/reset and rejection atomicity.
+**13/13 compiled behavioral faults were caught**. The original startup fault
+failed compilation and the original rejection fault survived; neither receives
+credit. Repaired seeds have a passing unchanged-source baseline and compiled
+failing behavioral reports. Production and test sources are identical across the
+authenticated campaign archives; only mutation metadata differs.
+
+**55/55 combined Herrick/Adaptive Bands/Kaufman/Mobility integration checks
+passed** (`herrick957-integration.trx`; overlapping checks, not a distinct sum).
+All **10,164 mutation anchors** validate. Compiled enrollment is
+**6,847/7,131**, leaving **284 configurations across 36 types**, with no
+construction failures and exact backlog agreement.
+
+- `si-herrick951-mutations` snapshot/archive: `3f9d5ccdfd38b713d32ec711cc7d04dcc7c8246f30eeca33b480872c2e857e4f` / `bd224a4e6eb0506dbc3d13000c8511fa66ff1a988dbd92b3898388f389bc0300`.
+
+- `si-herrick954-repair-mutations` snapshot/archive: `59d14f8b6af7768240a223488cab066a4cf1ff6f61eee0c11ce2806ad75ecdb5` / `c2f28f6e20eb616b0309195d098772c279f94b8013d6200ab0b319c6f9195554`.
+
+Hosted quality gates, final package/platform checks and competitor timing remain outstanding. PR #246 remains draft.

@@ -729,67 +729,17 @@ public sealed class HendersonWeightedMovingAverageState : IStreamingIndicatorSta
 [PrimaryOutput("Hpi")]
 public sealed class HerrickPayoffIndexState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly double _pointValue;
-    private StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevOpen;
-    private double _prevClose;
-    private double _prevK;
-    private bool _hasPrev;
-
-    public HerrickPayoffIndexState(double pointValue = 100)
-    {
-        _pointValue = pointValue;
-        _input = new StreamingInputResolver(InputName.MedianPrice, null);
-    }
-
+    private readonly HerrickPayoffWindow _window;
+    private StreamingInputResolver _input = new(InputName.MedianPrice, null);
+    public HerrickPayoffIndexState(double pointValue = 100) => _window = new(pointValue);
     public IndicatorName Name => IndicatorName.HerrickPayoffIndex;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevOpen = 0;
-        _prevClose = 0;
-        _prevK = 0;
-        _hasPrev = false;
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _input = new(InputName.Close, null);
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = _hasPrev ? value - prevValue : 0;
-        var k = diff * _pointValue * bar.Volume;
-        var prevOpen = _hasPrev ? _prevOpen : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var absDiff = Math.Abs(bar.Close - prevClose);
-        var g = Math.Min(bar.Open, prevOpen);
-        var temp = g != 0 ? value < prevValue ? 1 - (absDiff / 2 / g) : 1 + (absDiff / 2 / g) : 1;
-        k *= temp;
-        var hpi = _prevK + (k - _prevK);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevOpen = bar.Open;
-            _prevClose = bar.Close;
-            _prevK = k;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Hpi", hpi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hpi, outputs);
+        var point = _window.Next(_input.GetValue(bar), bar.Open, bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs
+            ? new Dictionary<string, double> { ["Hpi"] = point.Value } : null);
     }
 }
 

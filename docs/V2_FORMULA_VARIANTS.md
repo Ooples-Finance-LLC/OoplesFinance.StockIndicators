@@ -1191,3 +1191,19 @@ It has an exact output budget and recognizes mathematical output overflow.
 Fractional-exponent verification includes explicit algebraic cancellation and
 subnormal halfway hands; the older approximate fractional reference remains.
 These checks do not establish exhaustive arbitrary-exponent qualification.
+
+
+### Herrick Payoff Index
+
+This repository's variant uses rounded median price (or the selected/chained
+price), volume, and the minimum of current/previous opening prices. It does not
+consume open interest. After a zero first output, payoff is price change times
+point value times volume times `1 ± abs(close change)/(2*minimum open)`, with
+minus for a falling comparison price. A zero minimum open uses adjustment one.
+The redundant previous-payoff cancellation is evaluated algebraically. Finite
+inputs use exact intermediate rational arithmetic and one final binary64 round;
+mathematical output overflow is recognized by the reference contract.
+
+With point value one, volume three, comparison prices [1,3,2,4], opens [2,4,1,0]
+and closes [4,6,8,9], outputs are [0,9,0,6]. Point value minus one reverses them.
+Preview/reset and invalid-input rejection retain committed history.

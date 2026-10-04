@@ -31,6 +31,13 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.HerrickPayoffIndex)
+        {
+            var payoff = (HerrickPayoffIndexSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => HerrickPayoffValues(bars, payoff.PointValue, indicator.Source is not null), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KlingerVolumeOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var klingerOptions = builtIn.CreateOptions(); var klingerKind = AverageKind(klingerOptions, 3);

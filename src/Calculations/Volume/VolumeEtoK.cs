@@ -126,45 +126,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateHerrickPayoffIndex(this StockData stockData, double pointValue = 100)
     {
-        List<double> kList = new(stockData.Count);
-        List<double> hpicList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, closeList, volumeList) = GetInputValuesList(InputName.MedianPrice, stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var window = new HerrickPayoffWindow(pointValue);
+        var (prices, _, _, opens, closes, volumes) = GetInputValuesList(InputName.MedianPrice, stockData);
+        List<double> output = new(prices.Count);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < prices.Count; i++)
         {
-            var currentClose = closeList[i];
-            var currentOpen = openList[i];
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevClose = i >= 1 ? closeList[i - 1] : 0;
-            var prevOpen = i >= 1 ? openList[i - 1] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevK = i >= 1 ? kList[i - 1] : 0;
-            var absDiff = Math.Abs(currentClose - prevClose);
-            var g = Math.Min(currentOpen, prevOpen);
-            var k = MinPastValues(i, 1, currentValue - prevValue) * pointValue * currentVolume;
-            var temp = g != 0 ? currentValue < prevValue ? 1 - (absDiff / 2 / g) : 1 + (absDiff / 2 / g) : 1;
-
-            k *= temp;
-            kList.Add(k);
-
-            var prevHpic = i >= 1 ? hpicList[i - 1] : 0;
-            var hpic = prevK + (k - prevK);
-            hpicList.Add(hpic);
-
-            var signal = GetCompareSignal(hpic, prevHpic);
-            signalsList?.Add(signal);
+            var point = window.Next(prices[i], opens[i], closes[i], volumes[i], true);
+            output.Add(point.Value); signals?.Add(point.Trade);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Hpi", hpicList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(hpicList);
-        stockData.IndicatorName = IndicatorName.HerrickPayoffIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Hpi", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
+        stockData.IndicatorName = IndicatorName.HerrickPayoffIndex; return stockData;
     }
 
 
