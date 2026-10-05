@@ -6211,3 +6211,20 @@ regression (`si-r2adaptive1317-qualified.json`). Six main integration checks pas
 (`r2adaptive1329-integration.trx`). Enrollment is 7,069/7,131, leaving62
 configurations across six types (`si-r2adaptive1332-inventory.json`). Final
 assurance remains incomplete.
+
+
+### Ehlers Fourier Series qualification (batch 1335)
+
+Four configurations now use extended harmonic recurrences, exact window powers,
+and certified normalized algebraic sums. Startup gates, unresolved Nyquist
+harmonics and zero-bandwidth behavior are preserved. Observed histories replace
+eager period storage; public, fast and native routes validate before mutation.
+The independent algebraic oracle adds extended publication and retains its
+square-class cancellation and halfway-rounding checks.
+
+All33 distinct focused checks passed. All15 compiled faults were caught; the
+original drive survivor is excluded and the corrected hand-fixture filter catches
+it (`si-fourierseries1317-qualified.json`). Seven main integration checks passed
+(`fourierseries1333-integration.trx`), including shared oracle and earlier route
+regressions. Enrollment is 7,073/7,131, leaving58 configurations across five types
+(`si-fourierseries1335-inventory.json`). Final assurance remains incomplete.

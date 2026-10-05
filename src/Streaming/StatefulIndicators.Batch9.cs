@@ -702,145 +702,15 @@ public sealed class EhlersFMDemodulatorIndicatorState : IStreamingIndicatorState
 [PrimaryOutput("Wave")]
 public sealed class EhlersFourierSeriesAnalysisState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _l1;
-    private readonly double _s1;
-    private readonly double _l2;
-    private readonly double _s2;
-    private readonly double _l3;
-    private readonly double _s3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _bp1Values;
-    private readonly PooledRingBuffer<double> _bp2Values;
-    private readonly PooledRingBuffer<double> _bp3Values;
-    private readonly PooledRingBuffer<double> _q1Values;
-    private readonly PooledRingBuffer<double> _q2Values;
-    private readonly PooledRingBuffer<double> _q3Values;
-    private readonly PooledRingBuffer<double> _waveValues;
-    private int _index;
-
-    public EhlersFourierSeriesAnalysisState(int length = 20, double bw = 0.1)
+    private readonly FourierSeriesWindow _window;
+    public EhlersFourierSeriesAnalysisState(int length=20,double bw=.1)=>_window=new(length,bw);
+    public IndicatorName Name=>IndicatorName.EhlersFourierSeriesAnalysis;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-        _bp1Values = new PooledRingBuffer<double>(_length);
-        _bp2Values = new PooledRingBuffer<double>(_length);
-        _bp3Values = new PooledRingBuffer<double>(_length);
-        _q1Values = new PooledRingBuffer<double>(_length);
-        _q2Values = new PooledRingBuffer<double>(_length);
-        _q3Values = new PooledRingBuffer<double>(_length);
-        _waveValues = new PooledRingBuffer<double>(2);
-
-        _l1 = Math.Cos(2 * Math.PI / _length);
-        _s1 = FourierHarmonicPole.For((double)_length/1, bw);
-
-        _l2 = Math.Cos(2 * Math.PI / ((double)_length / 2));
-        _s2 = FourierHarmonicPole.For((double)_length/2, bw);
-
-        _l3 = Math.Cos(2 * Math.PI / ((double)_length / 3));
-        _s3 = FourierHarmonicPole.For((double)_length/3, bw);
+        StreamingInputValidation.Validate(bar);var point=_window.Next(bar.Close,isFinal);return new(point.Wave,includeOutputs?new Dictionary<string,double>{{"Wave",point.Wave},{"Roc",point.Roc}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.EhlersFourierSeriesAnalysis;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _bp1Values.Clear();
-        _bp2Values.Clear();
-        _bp3Values.Clear();
-        _q1Values.Clear();
-        _q2Values.Clear();
-        _q3Values.Clear();
-        _waveValues.Clear();
-        _index = 0;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prevBp1_1 = EhlersStreamingWindow.GetOffsetValue(_bp1Values, 1);
-        var prevBp2_1 = EhlersStreamingWindow.GetOffsetValue(_bp2Values, 1);
-        var prevBp3_1 = EhlersStreamingWindow.GetOffsetValue(_bp3Values, 1);
-        var prevBp1_2 = EhlersStreamingWindow.GetOffsetValue(_bp1Values, 2);
-        var prevBp2_2 = EhlersStreamingWindow.GetOffsetValue(_bp2Values, 2);
-        var prevBp3_2 = EhlersStreamingWindow.GetOffsetValue(_bp3Values, 2);
-        var prevWave2 = EhlersStreamingWindow.GetOffsetValue(_waveValues, 2);
-
-        var bp1 = _index <= 3
-            ? 0
-            : (0.5 * (1 - _s1) * (value - prevValue)) + (_l1 * (1 + _s1) * prevBp1_1) - (_s1 * prevBp1_2);
-        var q1 = _index <= 4 ? 0 : _length / (2 * Math.PI) * (bp1 - prevBp1_1);
-
-        var bp2 = _index <= 3
-            ? 0
-            : (0.5 * (1 - _s2) * (value - prevValue)) + (_l2 * (1 + _s2) * prevBp2_1) - (_s2 * prevBp2_2);
-        var q2 = _index <= 4 ? 0 : _length / (4 * Math.PI) * (bp2 - prevBp2_1);
-
-        var bp3 = _index <= 3
-            ? 0
-            : (0.5 * (1 - _s3) * (value - prevValue)) + (_l3 * (1 + _s3) * prevBp3_1) - (_s3 * prevBp3_2);
-        var q3 = _index <= 4 ? 0 : _length / (6 * Math.PI) * (bp3 - prevBp3_1);
-
-        double p1 = 0;
-        double p2 = 0;
-        double p3 = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            var prevBp1 = EhlersStreamingWindow.GetOffsetValue(_bp1Values, bp1, j);
-            var prevBp2 = EhlersStreamingWindow.GetOffsetValue(_bp2Values, bp2, j);
-            var prevBp3 = EhlersStreamingWindow.GetOffsetValue(_bp3Values, bp3, j);
-            var prevQ1 = EhlersStreamingWindow.GetOffsetValue(_q1Values, q1, j);
-            var prevQ2 = EhlersStreamingWindow.GetOffsetValue(_q2Values, q2, j);
-            var prevQ3 = EhlersStreamingWindow.GetOffsetValue(_q3Values, q3, j);
-            p1 += (prevBp1 * prevBp1) + (prevQ1 * prevQ1);
-            p2 += (prevBp2 * prevBp2) + (prevQ2 * prevQ2);
-            p3 += (prevBp3 * prevBp3) + (prevQ3 * prevQ3);
-        }
-
-        var wave = p1 != 0 ? bp1 + (MathHelper.Sqrt(p2 / p1) * bp2) + (MathHelper.Sqrt(p3 / p1) * bp3) : 0;
-        var roc = _length / (4 * Math.PI) * (wave - prevWave2);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _bp1Values.TryAdd(bp1, out _);
-            _bp2Values.TryAdd(bp2, out _);
-            _bp3Values.TryAdd(bp3, out _);
-            _q1Values.TryAdd(q1, out _);
-            _q2Values.TryAdd(q2, out _);
-            _q3Values.TryAdd(q3, out _);
-            _waveValues.TryAdd(wave, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Wave", wave },
-                { "Roc", roc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(wave, outputs);
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _bp1Values.Dispose();
-        _bp2Values.Dispose();
-        _bp3Values.Dispose();
-        _q1Values.Dispose();
-        _q2Values.Dispose();
-        _q3Values.Dispose();
-        _waveValues.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Fama")]

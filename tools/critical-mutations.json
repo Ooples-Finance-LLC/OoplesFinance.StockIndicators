@@ -92369,5 +92369,126 @@
     "after": "rentedR2.WritableSpan[i]=-result.Values[i]",
     "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.RoutesMatchIndependentThreeEstimateBlend",
     "scope": "internal static ComputeBuffer ComputeR2AdaptiveRegressionFast("
+  },
+  {
+    "id": "fourier-series-harmonic-period",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "(double)_period/(k+1)",
+    "after": "(double)_period/(k+2)",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-drive",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": ".5*(1-pole)",
+    "after": ".5*(1+pole)",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.HandSingleResolvedHarmonicPreservesStartupAndRoc"
+  },
+  {
+    "id": "fourier-series-feedback",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "U(_feedback[k])*_last[k]",
+    "after": "U(_feedback[k])*_prior[k]",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-second-pole",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "-U(_pole[k])*_prior[k]",
+    "after": "+U(_pole[k])*_prior[k]",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-startup",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "_count<4?",
+    "after": "_count<3?",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-quadrature-startup",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "_count<5?",
+    "after": "_count<4?",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-energy",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "bp[k]*bp[k]+q*q",
+    "after": "bp[k]*bp[k]",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-energy-expiry",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "_energy.Count==_period?_energy.Peek()[k]:BigInteger.Zero",
+    "after": "_energy.Count>_period?_energy.Peek()[k]:BigInteger.Zero",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-power-ratio",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "Number.Integer(power[0]).Divide(Number.Integer(power[k]))",
+    "after": "Number.Integer(power[k]).Divide(Number.Integer(power[0]))",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-roc-lag",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "var roc=Product(wave-priorWave,_rocFactor)",
+    "after": "var roc=Product(wave-previousWave,_rocFactor)",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-preview",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "if(final){for(var k=0;k<3;k++)",
+    "after": "if(true){for(var k=0;k<3;k++)",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-reset",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "_count=0;",
+    "after": "_count=7;",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-signals",
+    "module": "fourier-series-numerical",
+    "file": "src/Helpers/FourierSeriesWindow.cs",
+    "before": "Signal.StrongBuy:wave",
+    "after": "Signal.StrongSell:wave",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "fourier-series-reference",
+    "module": "fourier-series-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.FourierSeries.cs",
+    "before": "energy[i]=band[i]*band[i]+q*q",
+    "after": "energy[i]=band[i]*band[i]",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.RoutesMatchIndependentHarmonicSum"
+  },
+  {
+    "id": "fourier-series-fast",
+    "module": "fourier-series-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan[i]=values[i]",
+    "after": "buffer.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~FourierSeriesNumericalTests.RoutesMatchIndependentHarmonicSum",
+    "scope": "internal static ComputeBuffer ComputeFourierSeriesFast("
   }
 ]

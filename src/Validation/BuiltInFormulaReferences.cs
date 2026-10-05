@@ -2125,6 +2125,11 @@ internal static partial class BuiltInFormulaReferences
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>R2AdaptiveOutputs(bars,builtIn)["R2ar"],IndicatorErrorBudget.Exact);yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersFourierSeriesAnalysis)
+        {
+            var fourierKeys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<fourierKeys.Length;slot++){var key=fourierKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>FourierSeriesOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

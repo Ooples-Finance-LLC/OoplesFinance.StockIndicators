@@ -1548,3 +1548,9 @@ full-window activation of the secondary estimate. Core/registry intentionally
 retain their separate regression-residual blend. Both routes use exact moments,
 extended intermediate arithmetic and prevalidation; this change does not claim
 formula equivalence between those variants.
+
+
+Ehlers Fourier Series preserves its three rounded harmonic recurrences and
+normalized algebraic sum, including startup and unresolved Nyquist behavior.
+Window powers and trade comparisons are exact; unpublished harmonic stages use
+extended upper exponents. Histories grow with observed samples.

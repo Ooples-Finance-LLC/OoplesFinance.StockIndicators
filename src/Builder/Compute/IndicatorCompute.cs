@@ -1924,6 +1924,8 @@ internal static partial class IndicatorCompute
             VervoortModifiedBollingerBandIndicatorSpecOptions vm when !ComponentAverage.HasOverrides && VervoortModifiedWindow.Supports(vm.MaType)
                 && spec.OutputKey is null or "UpperBand" or "MiddleBand" or "LowerBand" or "PercentB"
                 => ComputeVervoortModifiedBandsFast(data,context,vm.MaType,vm.Length1,vm.Length2,vm.SmoothLength,vm.StdDevMult,spec.OutputKey ?? "PercentB"),
+            EhlersFourierSeriesAnalysisSpecOptions fourier when spec.OutputKey is null or "Wave" or "Roc"
+                => ComputeFourierSeriesFast(data,context,fourier.Length,fourier.Bw,spec.OutputKey ?? "Wave"),
             VervoortVolatilityBandsSpecOptions vvb => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2,
@@ -16904,6 +16906,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVervoortModifiedBandsFast(StockData data,ComputeContext context,MovingAvgType kind,int band,int outer,int smooth,double multiplier,string key)
     {
         var result=VervoortModifiedWindow.Calculate(data,kind,band,outer,smooth,multiplier);var values=result.Outputs[key];var buffer=context.Rent(values.Count);
+        for(var i=0;i<values.Count;i++)buffer.WritableSpan[i]=values[i];return buffer;
+    }
+
+    internal static ComputeBuffer ComputeFourierSeriesFast(StockData data,ComputeContext context,int length,double bandwidth,string key)
+    {
+        var result=FourierSeriesWindow.Calculate(data,length,bandwidth);var values=result.Outputs[key];var buffer=context.Rent(values.Count);
         for(var i=0;i<values.Count;i++)buffer.WritableSpan[i]=values[i];return buffer;
     }
 

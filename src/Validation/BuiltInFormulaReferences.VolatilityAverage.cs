@@ -129,6 +129,22 @@ internal sealed class VolatilityScoreOracle
         var estimate = BigInteger.One << ((value.ToByteArray().Length * 8 + 1) / 2);
         while (true) { var next = (estimate + value / estimate) / 2; if (next >= estimate) return estimate; estimate = next; }
     }
+    internal ReferenceFraction RoundExtended()
+    {
+        if(_terms.Count==0)return new(0);
+        if(_terms.Count==1 && _terms[0].Root.CompareTo(new(1))==0)return _terms[0].Coefficient.RoundExtendedBinary64();
+        for(var precision=80;;precision=checked(precision*3))
+        {
+            BigInteger lower=0,upper=0;
+            foreach(var term in _terms)
+            {
+                var (a,b)=term.Coefficient.Components;var (c,d)=term.Root.Components;var numerator=(a*a*c)<<(2*precision);var denominator=b*b*d;
+                var floor=Root(numerator/denominator);var ceiling=floor*floor*denominator==numerator?floor:floor+1;
+                if(a.Sign>0){lower+=floor;upper+=ceiling;}else{lower-=ceiling;upper-=floor;}
+            }
+            var grid=new ReferenceFraction(BigInteger.One<<precision);var low=(new ReferenceFraction(lower)/grid).RoundExtendedBinary64();var high=(new ReferenceFraction(upper)/grid).RoundExtendedBinary64();if(low.CompareTo(high)==0)return low;
+        }
+    }
     internal int Compare(ReferenceFraction threshold)
     {
         var difference = Plus(Of(new ReferenceFraction(-1) * threshold));
