@@ -1,5 +1,6 @@
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Compute;
+using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Streaming;
@@ -39,6 +40,30 @@ public sealed class BayesianNumericalTests
         }
         return expected;
     }
+    [Fact]
+    public void BuilderDefaultAndNativePrimarySelectTheirDeclaredOutputs()
+    {
+        var bars = Bars(new[] { 2d, 4, 1, 7 });
+        var expected = BuiltInFormulaReferences.BayesianValues(bars, 20, 1).Outputs;
+        Assert.Equal(1, expected["SigmaProbsDown"][0]);
+        Assert.Equal(0, expected["ProbPrime"][0]);
+        var indicator = new BayesianOscillator();
+        var builtIn = (IBuiltInIndicator)indicator;
+        Assert.Equal("SigmaProbsDown", GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName)[0]);
+        using var context = new ComputeContext();
+        using var fast = IndicatorCompute.TryComputeFast(Data(bars),
+            new IndicatorSpec(builtIn.BatchName, builtIn.CreateOptions()), context);
+        Assert.NotNull(fast);
+        Assert.Equal(expected["SigmaProbsDown"], fast.Value.ToArray());
+        using var native = new BayesianOscillatorState();
+        for (var i = 0; i < bars.Length; i++)
+        {
+            var point = native.Update(Native(bars[i]), true, true);
+            Assert.Equal(expected["ProbPrime"][i], point.Value);
+            Assert.Equal(expected["SigmaProbsDown"][i], point.Outputs!["SigmaProbsDown"]);
+        }
+    }
+
     [Fact]
     public void WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows()
     {

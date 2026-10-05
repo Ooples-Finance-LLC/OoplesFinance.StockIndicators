@@ -6352,3 +6352,19 @@ candidate after CRLF/LF normalization; dispatch, method and mutation-entry
 ordering was reconciled without changing their bodies
 (`si-final1374-source-agreement.json`). Full-suite and package consumers remain
 in progress, and hosted platform and final timing evidence remains outstanding.
+
+
+### Selected-output parity fixture repair (batch 1377)
+
+The full route sweep compared Bayesian's builder default `SigmaProbsDown` with
+the native state's explicitly declared primary `ProbPrime`. It now resolves
+the indicator object's selected/default output key and requests that same key
+from both routes. Production formulas and output contracts are unchanged.
+An independent-reference regression checks the distinct builder/native defaults
+and their named outputs. Both that regression and the full route sweep pass
+(`final1377-route-parity.trx`). The first attempt had a missing test namespace
+import and supplies no verification credit.
+
+The still-running original full suite has reported three fixture failures; all
+three have passing corrected reruns. Package consumers continue against the
+unchanged immutable production package.
