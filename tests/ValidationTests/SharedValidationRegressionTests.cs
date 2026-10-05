@@ -879,7 +879,10 @@ public sealed class SharedValidationRegressionTests
     {
         var bars = new[] { 2d, 4, 8 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddDays(i), v, v + 1, v - 1, v, 1)).ToArray();
         Assert.Equal(new[] { 3d, 5, 9 }, Stock(bars).CalculateModifiedGannHiloActivator(length: 1).CustomValuesList);
-        Assert.Equal(new[] { 0d, -2, -1 }, Stock(bars).CalculateRobustWeightingOscillator(length: 2).CustomValuesList);
+        // The initial residual is 2 during SMA warmup; each later two-point fit
+        // has zero residual. Smoothing [2, 0, 0] at length two gives [0, 1, 0].
+        Assert.Equal(new[] { 0d, 1, 0 }, Stock(bars).CalculateRobustWeightingOscillator(length: 2).CustomValuesList);
+        Assert.Equal(new[] { 0d, 1, 0 }, BuiltInFormulaReferences.RobustWeightingOutputs(bars, 2, 1)["Rwo"]);
     }
 
     [Theory]
@@ -1410,12 +1413,13 @@ public sealed class SharedValidationRegressionTests
         {
             await CompareRoutes(new RahulMohindarOscillator(period), Stock(bars).CalculateRahulMohindarOscillator(length2: period),
                 new RahulMohindarOscillatorState(length2: period), bars);
-            foreach (var target in new[] { 20d, 50, 80 })
-                await CompareRoutes(new ReverseEngineeringRsi(period, target), Stock(bars).CalculateReverseEngineeringRelativeStrengthIndex(period, target),
-                    new ReverseEngineeringRelativeStrengthIndexState(period, target), bars);
             await CompareRoutes(new TradersDynamicIndex(period, 3, 2, 4), Stock(bars).CalculateTradersDynamicIndex(length1: period, length2: 3, length3: 2, length4: 4),
                 new TradersDynamicIndexState(length1: period, length2: 3, length3: 2, length4: 4), bars);
         }
+        foreach (var period in new[] { 2, 3, 14 })
+            foreach (var target in new[] { 20d, 50, 80 })
+                await CompareRoutes(new ReverseEngineeringRsi(period, target), Stock(bars).CalculateReverseEngineeringRelativeStrengthIndex(period, target),
+                    new ReverseEngineeringRelativeStrengthIndexState(period, target), bars);
     }
 
     [Fact]

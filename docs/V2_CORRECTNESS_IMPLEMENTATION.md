@@ -6413,3 +6413,19 @@ case. Production/package bytes are unchanged.
 
 Sonar and CodeRabbit pass on production commit `080a12af`; 12 hosted jobs
 remain queued. Full-suite and exact-package consumers remain active.
+
+
+### Approved-formula fixture alignment (batch 1397)
+
+Two further original-suite failures came from fixtures predating approved
+contracts. Robust Weighting's hand example now uses the regression residual:
+startup residuals [2, 0, 0] smooth to [0, 1, 0], checked against the independent
+reference. Reverse RSI parity uses periods 2, 3 and 14; the other composites
+retain period-one coverage, and the separate inverse-domain rejection test
+still asserts that period one is invalid. All four focused checks pass
+(`final1397-approved-contracts.trx`). All eight original-suite failures
+observed so far have passing corrected reruns. Production bytes are unchanged.
+
+The final production source also builds on SDK 10.0.101 with zero warnings
+and errors (`si-final1396-sdk.log`). Full-suite and exact-package consumers
+remain active; final timings remain outstanding.
