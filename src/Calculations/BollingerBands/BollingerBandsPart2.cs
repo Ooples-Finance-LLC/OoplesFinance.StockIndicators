@@ -135,6 +135,11 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length1 = 18,
         int length2 = 200, int smoothLength = 8, double stdDevMult = 1.6)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides && VervoortModifiedWindow.Supports(maType))
+        {
+            var result=VervoortModifiedWindow.Calculate(stockData,maType,length1,length2,smoothLength,stdDevMult);
+            stockData.SetOutputValues(()=>result.Outputs);stockData.SetSignals(result.Signals);stockData.SetCustomValues(new List<double>());stockData.IndicatorName=IndicatorName.VervoortModifiedBollingerBandIndicator;return stockData;
+        }
         List<double> haOpenList = new(stockData.Count);
         List<double> hacList = new(stockData.Count);
         List<double> zlhaList = new(stockData.Count);

@@ -1921,6 +1921,9 @@ internal static partial class IndicatorCompute
                 spec.OutputKey == "UpperBand" ? ChannelBand.Upper : spec.OutputKey == "LowerBand" ? ChannelBand.Lower : ChannelBand.Middle),
             StollerAverageRangeChannelsSpecOptions starc => ComputeStollerAverageRangeChannelsFast(data, context, starc.Length, starc.AtrMult, starc.MaType,
                 spec.OutputKey == "UpperBand" ? ChannelBand.Upper : spec.OutputKey == "LowerBand" ? ChannelBand.Lower : ChannelBand.Middle),
+            VervoortModifiedBollingerBandIndicatorSpecOptions vm when !ComponentAverage.HasOverrides && VervoortModifiedWindow.Supports(vm.MaType)
+                && spec.OutputKey is null or "UpperBand" or "MiddleBand" or "LowerBand" or "PercentB"
+                => ComputeVervoortModifiedBandsFast(data,context,vm.MaType,vm.Length1,vm.Length2,vm.SmoothLength,vm.StdDevMult,spec.OutputKey ?? "PercentB"),
             VervoortVolatilityBandsSpecOptions vvb => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2,
@@ -16893,6 +16896,12 @@ internal static partial class IndicatorCompute
     /// Computes Vervoort Volatility Bands using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
+    internal static ComputeBuffer ComputeVervoortModifiedBandsFast(StockData data,ComputeContext context,MovingAvgType kind,int band,int outer,int smooth,double multiplier,string key)
+    {
+        var result=VervoortModifiedWindow.Calculate(data,kind,band,outer,smooth,multiplier);var values=result.Outputs[key];var buffer=context.Rent(values.Count);
+        for(var i=0;i<values.Count;i++)buffer.WritableSpan[i]=values[i];return buffer;
+    }
+
     internal static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8,
         int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)

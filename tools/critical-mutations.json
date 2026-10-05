@@ -92111,5 +92111,142 @@
     "after": "rentedFlow.WritableSpan[i]=-values[i]",
     "filter": "FullyQualifiedName~VolumeFlowNumericalTests.RoutesMatchIndependentCappedFlow",
     "scope": "internal static ComputeBuffer ComputeVolumeFlowIndicatorFast("
+  },
+  {
+    "id": "vervoort-modified-open",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "(_previousInput+_previousOpen).Divide(2)",
+    "after": "(_previousInput+_previousOpen).Divide(3)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-candle-shape",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "source+open+upperCandle+lowerCandle",
+    "after": "source+open+upperCandle-lowerCandle",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-zero-lag",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "_third.Next(first.Times(2)-second,final)",
+    "after": "_third.Next(first-second,final)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-tema",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "first.Times(3)-second.Times(3)",
+    "after": "first.Times(2)-second.Times(3)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-variance",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "squares.Times(count)-sum*sum",
+    "after": "squares.Times(count)+sum*sum",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-expiry",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "var expired=full?_values.Peek():default",
+    "after": "var expired=default(Number)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-cutoff",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "(inner.Variance-threshold*threshold).Sign>0",
+    "after": "inner.Variance.Sign>0",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.SettledCandleRetainsSmallSpreadCutoff"
+  },
+  {
+    "id": "vervoort-modified-position",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "(filtered-center).Times(25)",
+    "after": "(filtered-center).Times(50)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.HandBandUsesPopulationSpreadAndFiftyCenter"
+  },
+  {
+    "id": "vervoort-modified-outer-period",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "_outer=new(outer)",
+    "after": "_outer=new(band)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-outer-warmup",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "outer.Full?outer.Variance:default",
+    "after": "outer.Variance",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-band-width",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "variance*Number.Of(_multiplier)",
+    "after": "variance*Number.Of(1)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-signals",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "Signal.StrongBuy:slope",
+    "after": "Signal.StrongSell:slope",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-preview",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "if(final){_previousInput=source",
+    "after": "if(true){_previousInput=source",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-reset",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "_previousInput=_previousOpen=_previousPercent=_previousSlope=default",
+    "after": "_previousInput=_previousOpen=_previousPercent=_previousSlope=Number.Integer(123)",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.ExtremeCandlesPreserveAllOutputsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-modified-reference",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.VervoortModified.cs",
+    "before": "R(25)*(filtered[i]-center[i])",
+    "after": "R(50)*(filtered[i]-center[i])",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.RoutesMatchIndependentTwoDeviationFormula"
+  },
+  {
+    "id": "vervoort-modified-fast",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVervoortModifiedBandsFast(",
+    "before": "buffer.WritableSpan[i]=values[i]",
+    "after": "buffer.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.FastSelectionsPreserveCallerState"
+  },
+  {
+    "id": "vervoort-modified-root-certification",
+    "module": "vervoort-modified-numerical",
+    "file": "src/Helpers/VervoortModifiedWindow.cs",
+    "before": "if(low==high)return low;",
+    "after": "if(precision>=64)return low;",
+    "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.AlgebraicBoundsResolveBothSidesOfHalfUlp"
   }
 ]

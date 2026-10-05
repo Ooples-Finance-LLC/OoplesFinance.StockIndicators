@@ -6176,3 +6176,21 @@ reset survivors were excluded and caught by targeted regressions. Eleven main
 integration checks passed (`volumeflow1303-integration.trx`). Enrollment is
 7,053/7,131, leaving 78 configurations across eight types
 (`si-volumeflow1306-inventory.json`). Final assurance remains incomplete.
+
+
+### Vervoort Modified Bollinger qualification (batch 1328)
+
+Eleven configurations now preserve the Heikin-Ashi cascade, configurable
+averages, full inner population variance, existing relative small-spread cutoff,
+and outer variance over rounded percent readings. Certified single-root bounds
+avoid symbolic factorization while resolving halfway rounding cases exactly.
+Public, fast and native routes use lazy history and exact signal comparisons;
+custom averaging callbacks retain their existing route.
+
+All 89 distinct focused checks passed and all 17 compiled behavioral faults were
+caught (`si-vmodified1310-qualified.json`). Seven main integration checks passed
+(`vmodified1326-integration.trx`); the accidentally broad duplicate integration
+run1312 receives no credit. Published Smoothed and Volume Flow changes
+were preserved (`si-vmodified1311-integration-proof.json`). Enrollment is
+7,064/7,131, leaving 67 configurations across seven types
+(`si-vmodified1316-inventory.json`). Final assurance remains incomplete.

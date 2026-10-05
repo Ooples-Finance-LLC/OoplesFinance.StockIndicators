@@ -1533,3 +1533,11 @@ endpoints. The full-window population variance feeds an exact algebraic cutoff
 comparison. The signed flow is capped by the previous volume average and
 normalized by the current one. Signal and histogram stages retain their
 rounded-average contract; default typical-price means are rounded once.
+
+
+Vervoort Modified Bollinger retains its Heikin-Ashi average cascade, the existing
+relative small-spread cutoff, and `50 + 25*(filtered-center)/sqrt(variance)`.
+The outer population deviation uses rounded percent readings and its separate
+period, centered on50. Exact comparisons and certified algebraic rounding apply
+to the six supported basic average types; custom callbacks remain on the legacy
+path. Histories allocate only for observations received.

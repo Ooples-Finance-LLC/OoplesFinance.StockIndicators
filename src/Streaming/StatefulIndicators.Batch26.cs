@@ -597,18 +597,20 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
 [PrimaryOutput("PercentB")]
 public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly IMovingAverageSmoother _hacMa1;
-    private readonly IMovingAverageSmoother _hacMa2;
-    private readonly IMovingAverageSmoother _zlhaMa;
-    private readonly IMovingAverageSmoother _wma;
+    private readonly VervoortModifiedWindow? _safe;
+    private bool _selected;
+    private readonly IMovingAverageSmoother _hacMa1 = null!;
+    private readonly IMovingAverageSmoother _hacMa2 = null!;
+    private readonly IMovingAverageSmoother _zlhaMa = null!;
+    private readonly IMovingAverageSmoother _wma = null!;
     // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
     // the smoothed Heikin-Ashi series over length1 and the other the percent-b series over length2 - two
     // different series over two different windows, which must not be crossed in either respect.
-    private readonly RollingStandardDeviation _zlhaStdDev;
-    private readonly RollingStandardDeviation _percbStdDev;
+    private readonly RollingStandardDeviation _zlhaStdDev = null!;
+    private readonly RollingStandardDeviation _percbStdDev = null!;
     private StreamingInputResolver _input;
     private readonly double _stdDevMult;
-    private readonly VervoortModifiedBandPosition _precise;
+    private readonly VervoortModifiedBandPosition _precise = null!;
     private double _prevInput;
     private double _prevHao;
     private bool _hasPrev;
@@ -616,6 +618,8 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     public VervoortModifiedBollingerBandIndicatorState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length1 = 18, int length2 = 200,
         int smoothLength = 8, double stdDevMult = 1.6)
     {
+        _safe=VervoortModifiedWindow.Supports(maType)?new(maType,length1,length2,smoothLength,stdDevMult):null;
+        if(_safe is not null)return;
         _stdDevMult = stdDevMult;
         _precise = new VervoortModifiedBandPosition(maType, length1, smoothLength);
         _hacMa1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
@@ -630,11 +634,12 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
 
     public IndicatorName Name => IndicatorName.VervoortModifiedBollingerBandIndicator;
 
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
+    void ICustomInputConsumer.ReadCloseAsInput()
+    { _selected=true;_input = new StreamingInputResolver(InputName.Close, null); }
 
     public void Reset()
     {
+        if(_safe is not null){_safe.Reset();return;}
         _precise.Reset();
         _hacMa1.Reset();
         _hacMa2.Reset();
@@ -649,6 +654,12 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        if(_safe is not null)
+        {
+            StreamingInputValidation.Validate(bar);var mean=new ExactMeanAccumulator();mean.Add(bar.Open);mean.Add(bar.High);mean.Add(bar.Low);mean.Add(bar.Close);
+            var point=_safe.Next(_selected?bar.Close:mean.Mean(4),bar.High,bar.Low,isFinal);
+            return new(point.Percent,includeOutputs?new Dictionary<string,double>{{"UpperBand",point.Upper},{"MiddleBand",50},{"LowerBand",point.Lower},{"PercentB",point.Percent}}:null);
+        }
         var inputValue = _input.GetValue(bar);
         var prevInput = _hasPrev ? _prevInput : 0;
         var prevHao = _hasPrev ? _prevHao : 0;
@@ -698,6 +709,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
 
     public void Dispose()
     {
+        if(_safe is not null){_safe.Dispose();return;}
         _precise.Dispose();
         _hacMa1.Dispose();
         _hacMa2.Dispose();
