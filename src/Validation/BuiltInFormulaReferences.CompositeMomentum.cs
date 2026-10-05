@@ -12,28 +12,7 @@ internal static partial class BuiltInFormulaReferences
         switch (indicator.BatchName)
         {
             case IndicatorName.TechnicalRank:
-                return new("Tr", new[] { "Tr" }, bars =>
-                {
-                    int Period(int n) => Integer(options, "Length"+n);
-                    var prices = Closes(bars);
-                    var longMean = Average(prices, Period(1), 1);
-                    var mediumMean = Average(prices, Period(3), 1);
-                    var fast = Average(prices, Period(5), 3); var slow = Average(prices, Period(6), 3);
-                    var ppo = fast.Select((v, i) => slow[i] == 0 ? 0 : 100*(v/slow[i]-1)).ToArray();
-                    var ppoSignal = Average(ppo, Period(7), 3);
-                    var histogram = ppo.Select((v, i) => v-ppoSignal[i]).ToArray();
-                    var strength = MotionRsi(prices, Period(9));
-                    double Return(int i, int period) => i < period || prices[i-period] == 0 ? 0 : prices[i]/prices[i-period]-1;
-                    return Outputs(("Tr", prices.Select((v, i) =>
-                    {
-                        // Returns are dimensionless here: convert each weighted return
-                        // to percentage points exactly once.
-                        var longTerm = 30*(Return(i, Period(2))+(longMean[i] == 0 ? 0 : v/longMean[i]-1));
-                        var mediumTerm = 15*(Return(i, Period(4))+(mediumMean[i] == 0 ? 0 : v/mediumMean[i]-1));
-                        var impulse = i < Period(8) ? 0 : (histogram[i]-histogram[i-Period(8)])/Period(8);
-                        return Clamp(longTerm+mediumTerm+5*impulse+.05*strength[i], 0, 100);
-                    }).ToArray()));
-                });
+                return new("Tr", new[] { "Tr" }, bars => TechnicalRankOutputs(bars, indicator));
             case IndicatorName.InsyncIndex:
                 return new("Iidx", new[] { "Iidx" }, bars => InsyncOutputs(bars, indicator));
             case IndicatorName.EmaWaveIndicator:

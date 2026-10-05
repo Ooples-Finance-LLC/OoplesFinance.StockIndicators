@@ -565,6 +565,7 @@ internal static class BuilderVerifiedArms
         typeof(StandardDevationSpecOptions),
         typeof(StandardDeviationChannelSpecOptions),
         typeof(StationaryExtrapolatedLevelsOscillatorSpecOptions),
+        typeof(TechnicalRankSpecOptions),
         typeof(StationaryExtrapolatedLevelsSpecOptions),
         typeof(StatisticalVolatilitySpecOptions),
         typeof(StcSpecOptions),

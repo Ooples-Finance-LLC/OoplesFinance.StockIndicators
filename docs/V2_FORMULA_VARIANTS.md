@@ -1476,3 +1476,13 @@ for the next price at the target; exact slope decisions remain distinguishable
 even if published prices round to ties. Certified intervals retain binary64
 outputs, with exact replay for ambiguity. Observations are retained for that
 replay; bounded interval arithmetic does not imply bounded total stream memory.
+
+
+### Technical Rank extended component stages
+
+Technical Rank retains weights 0.3/0.3/0.15/0.15/5/0.05 for long MA distance,
+long ROC, medium MA distance, medium ROC, PPO histogram slope, and Wilder RSI.
+The six terms and their left-associative sum retain binary64 stage precision
+with an extended upper exponent. Clamp [0,100] only after the completed sum.
+Periods and startup behavior remain unchanged; signal comparisons distinguish
+exact changes between rounded ranks.

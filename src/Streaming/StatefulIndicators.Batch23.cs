@@ -838,105 +838,15 @@ public sealed class SymmetricallyWeightedMovingAverageState : IStreamingIndicato
 [PrimaryOutput("Tr")]
 public sealed class TechnicalRankState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length8;
-    private readonly IMovingAverageSmoother _ma1;
-    private readonly IMovingAverageSmoother _ma2;
-    private readonly RateOfChangeState _rocLong;
-    private readonly RateOfChangeState _rocShort;
-    private readonly RelativeStrengthIndexState _rsi;
-    private readonly IMovingAverageSmoother _ppoFast;
-    private readonly IMovingAverageSmoother _ppoSlow;
-    private readonly IMovingAverageSmoother _ppoSignal;
-    private readonly PooledRingBuffer<double> _histValues;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public TechnicalRankState(int length1 = 200, int length2 = 125, int length3 = 50, int length4 = 20,
-        int length5 = 12, int length6 = 26, int length7 = 9, int length8 = 3, int length9 = 14)
+    private readonly TechnicalRankWindow _window;
+    public TechnicalRankState(int length1=200,int length2=125,int length3=50,int length4=20,int length5=12,int length6=26,int length7=9,int length8=3,int length9=14)
+        => _window=new(length1,length2,length3,length4,length5,length6,length7,length8,length9);
+    public IndicatorName Name=>IndicatorName.TechnicalRank;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length8 = Math.Max(1, length8);
-        _ma1 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length1));
-        _ma2 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length3));
-        _rocLong = new RateOfChangeState(Math.Max(1, length2));
-        _rocShort = new RateOfChangeState(Math.Max(1, length4));
-        _rsi = new RelativeStrengthIndexState(Math.Max(1, length9), 3);
-        _ppoFast = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length5));
-        _ppoSlow = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length6));
-        _ppoSignal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length7));
-        _histValues = new PooledRingBuffer<double>(_length8);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var point=_window.Next(bar.Close,isFinal);
+        return new(point.Value,includeOutputs?new Dictionary<string,double>{{"Tr",point.Value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.TechnicalRank;
-
-    public void Reset()
-    {
-        _ma1.Reset();
-        _ma2.Reset();
-        _rocLong.Reset();
-        _rocShort.Reset();
-        _rsi.Reset();
-        _ppoFast.Reset();
-        _ppoSlow.Reset();
-        _ppoSignal.Reset();
-        _histValues.Clear();
-        _index = 0;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var ma1 = _ma1.Next(value, isFinal);
-        var ma2 = _ma2.Next(value, isFinal);
-        var rocLong = _rocLong.Update(bar, isFinal, includeOutputs: false).Value;
-        var rocShort = _rocShort.Update(bar, isFinal, includeOutputs: false).Value;
-        var rsi = _rsi.Update(bar, isFinal, includeOutputs: false).Value;
-
-        var fast = _ppoFast.Next(value, isFinal);
-        var slow = _ppoSlow.Next(value, isFinal);
-        var ppo = slow != 0 ? 100 * (fast - slow) / slow : 0;
-        var signal = _ppoSignal.Next(ppo, isFinal);
-        var histogram = ppo - signal;
-
-        var prevHistogram = _index >= _length8 ? EhlersStreamingWindow.GetOffsetValue(_histValues, histogram, _length8) : 0;
-        var slope = _index >= _length8 ? (histogram - prevHistogram) / _length8 : 0;
-
-        var ltMa = ma1 != 0 ? 0.3 * 100 * (value - ma1) / ma1 : 0;
-        var ltRoc = 0.3 * rocLong;
-        var mtMa = ma2 != 0 ? 0.15 * 100 * (value - ma2) / ma2 : 0;
-        var mtRoc = 0.15 * rocShort;
-        var stPpo = 0.05 * 100 * slope;
-        var stRsi = 0.05 * rsi;
-
-        var tr = Math.Min(100, Math.Max(0, ltMa + ltRoc + mtMa + mtRoc + stPpo + stRsi));
-
-        if (isFinal)
-        {
-            _histValues.TryAdd(histogram, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tr", tr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tr, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ma1.Dispose();
-        _ma2.Dispose();
-        _rocLong.Dispose();
-        _rocShort.Dispose();
-        _ppoFast.Dispose();
-        _ppoSlow.Dispose();
-        _ppoSignal.Dispose();
-        _histValues.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }

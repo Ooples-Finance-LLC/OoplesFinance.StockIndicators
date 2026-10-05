@@ -6069,3 +6069,19 @@ All 19 compiled faults were caught (`si-reversersi1206-qualified.json`);
 11 main integration checks passed (`reversersi1212-integration.trx`). Enrollment
 is 6,969/7,131, leaving 162 configurations across 16 types
 (`si-reversersi1213-inventory.json`). Final assurance remains incomplete.
+
+
+### Technical Rank qualification (batch 1232)
+
+All 22 configurations preserve the six weighted MA-distance, ROC, PPO-slope and
+RSI terms, rounding each stage and clamping only the completed sum to [0,100].
+Extended intermediates allow finite ranks despite overflowing component returns.
+The typed fast arm preserves caller state; lazy histories avoid period-sized
+allocation. Independent component references and route/selected-input/numerical
+checks passed 160 distinct tests. All 17 compiled faults were caught
+(`si-technicalrank1218-qualified.json`), including a targeted reset-signal repair;
+the original reset survivor receives no credit. Nine integration checks passed
+(`technicalrank1227-integration.trx`), preserving Reverse RSI cancellation and
+converging-trend behavior. Enrollment is 6,991/7,131, leaving 140 configurations
+across 15 types (`si-technicalrank1231-inventory.json`). Final assurance remains
+incomplete.

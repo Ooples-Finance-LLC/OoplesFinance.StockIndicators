@@ -172,6 +172,7 @@ internal static partial class IndicatorCompute
             VolumePositiveNegativeIndicatorSpecOptions => BuilderArmBinding.TryCompute(data, spec, context),
             RetrospectiveCandlestickChartSpecOptions retrospective => ComputeRetrospectiveCandleFast(data, context, retrospective.Length),
             SimplePriceZoneSpecOptions simpleZone => ComputeSimplePriceZoneFast(data, context, simpleZone.Length),
+            TechnicalRankSpecOptions rank => ComputeTechnicalRankFast(data,context,rank.Length1,rank.Length2,rank.Length3,rank.Length4,rank.Length5,rank.Length6,rank.Length7,rank.Length8,rank.Length9),
             EarningSupportResistanceLevelsSpecOptions => ComputeEarningLevelsFast(data, context),
             MacdSpecOptions macd => spec.OutputKey switch
             {
@@ -9140,8 +9141,16 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Stationary Extrapolated Levels Oscillator using zero-allocation fast path.
+    /// Computes Technical Rank without publishing into the caller.
     /// </summary>
+    internal static ComputeBuffer ComputeTechnicalRankFast(StockData data,ComputeContext context,int length1=200,int length2=125,int length3=50,int length4=20,int length5=12,int length6=26,int length7=9,int length8=3,int length9=14)
+    {
+        var values=TechnicalRankWindow.Calculate(data,length1,length2,length3,length4,length5,length6,length7,length8,length9).Values;
+        var output=context.Rent(values.Count);
+        for(var i=0;i<values.Count;i++)output.WritableSpan[i]=values[i];
+        return output;
+    }
+
     internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast(StockData data, ComputeContext context, int length = 200,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {

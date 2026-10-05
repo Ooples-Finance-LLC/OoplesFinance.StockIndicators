@@ -1420,58 +1420,10 @@ public static partial class Calculations
     public static StockData CalculateTechnicalRank(this StockData stockData, int length1 = 200, int length2 = 125, int length3 = 50, int length4 = 20,
         int length5 = 12, int length6 = 26, int length7 = 9, int length8 = 3, int length9 = 14)
     {
-        List<double> trList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var ma1List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, inputList);
-        var ma2List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length3, inputList);
-        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = stockData.CaptureInputSeries();
-        var ltRocList = CalculateRateOfChange(stockData, length2).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var mtRocList = CalculateRateOfChange(stockData, length4).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var rsiList = CalculateRelativeStrengthIndex(stockData, length: length9).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var ppoHistList = CalculatePercentagePriceOscillator(stockData, MovingAvgType.ExponentialMovingAverage, length5, length6, length7).
-            ChainedOutputs["Histogram"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentEma200 = ma1List[i];
-            var currentEma50 = ma2List[i];
-            var currentRoc125 = ltRocList[i];
-            var currentRoc20 = mtRocList[i];
-            var currentPpoHistogram = ppoHistList[i];
-            var currentRsi = rsiList[i];
-            var currentPrice = inputList[i];
-            var prevTr1 = i >= 1 ? trList[i - 1] : 0;
-            var prevTr2 = i >= 2 ? trList[i - 2] : 0;
-            var ltMa = currentEma200 != 0 ? 0.3 * 100 * (currentPrice - currentEma200) / currentEma200 : 0;
-            var ltRoc = 0.3 * currentRoc125;
-            var mtMa = currentEma50 != 0 ? 0.15 * 100 * (currentPrice - currentEma50) / currentEma50 : 0;
-            var mtRoc = 0.15 * currentRoc20;
-            var currentValue = currentPpoHistogram;
-            var prevValue = i >= length8 ? ppoHistList[i - length8] : 0;
-            var slope = length8 != 0 ? MinPastValues(i, length8, currentValue - prevValue) / length8 : 0;
-            var stPpo = 0.05 * 100 * slope;
-            var stRsi = 0.05 * currentRsi;
-
-            var tr = Math.Min(100, Math.Max(0, ltMa + ltRoc + mtMa + mtRoc + stPpo + stRsi));
-            trList.Add(tr);
-
-            var signal = GetCompareSignal(tr - prevTr1, prevTr1 - prevTr2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tr", trList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trList);
-        stockData.IndicatorName = IndicatorName.TechnicalRank;
-
+        var result = TechnicalRankWindow.Calculate(stockData,length1,length2,length3,length4,length5,length6,length7,length8,length9);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tr", result.Values } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+        stockData.SetCustomValues(result.Values);stockData.IndicatorName=IndicatorName.TechnicalRank;
         return stockData;
     }
 

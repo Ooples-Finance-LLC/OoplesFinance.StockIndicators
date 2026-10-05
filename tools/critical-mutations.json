@@ -91196,5 +91196,142 @@
     "after": "buffer.WritableSpan[i] = -values[i]",
     "filter": "FullyQualifiedName~ReverseRsiNumericalTests.RoutesMatchIndependentSeededGainLossInverse",
     "scope": "internal static ComputeBuffer ComputeReverseEngineeringRsiFast("
+  },
+  {
+    "id": "technical-rank-long-lag",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "_longPeriod=Math.Max(1,length2)",
+    "after": "_longPeriod=Math.Max(1,length2+1)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-medium-lag",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "_mediumPeriod=Math.Max(1,length4)",
+    "after": "_mediumPeriod=Math.Max(1,length4+1)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-ppo-period",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "MovingAvgType.ExponentialMovingAverage,length5,1,true",
+    "after": "MovingAvgType.ExponentialMovingAverage,length5+1,1,true",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-ppo-signal",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "MovingAvgType.ExponentialMovingAverage,length7,1,true",
+    "after": "MovingAvgType.ExponentialMovingAverage,length7+1,1,true",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-percent",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "100*(value-basis)<<1074",
+    "after": "100*(value+basis)<<1074",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-mean-distance",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "Round(price-mean)",
+    "after": "Round(price+mean)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-long-weight",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "MeanLeg(value,longMean,30)",
+    "after": "MeanLeg(value,longMean,15)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-medium-weight",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "MeanLeg(value,mediumMean,15)",
+    "after": "MeanLeg(value,mediumMean,30)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-histogram",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "Round(ppo-signal)",
+    "after": "Round(ppo+signal)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-slope",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "Round(histogram-_histograms.Peek())",
+    "after": "Round(histogram+_histograms.Peek())",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-rsi-weight",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "U(.05)*U(strength)",
+    "after": "U(.5)*U(strength)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-clamp",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "BigInteger.Min(100*Unit,",
+    "after": "BigInteger.Min(50*Unit,",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.OverflowingReturnStillHasAFiniteSaturatedRank"
+  },
+  {
+    "id": "technical-rank-signals",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "change>_previousSlope",
+    "after": "change<_previousSlope",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-preview",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "if(final)",
+    "after": "if(final || price != 0)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.ExtendedComponentsPreservePreviewResetAndExactSignals"
+  },
+  {
+    "id": "technical-rank-reset",
+    "module": "technical-rank-numerical",
+    "file": "src/Helpers/TechnicalRankWindow.cs",
+    "before": "_previous=_previousSlope=default;",
+    "after": "_previousSlope=default;",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.WindowResetRestoresSignalHistory"
+  },
+  {
+    "id": "technical-rank-reference",
+    "module": "technical-rank-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.TechnicalRank.cs",
+    "before": "MeanTerm(longMean[i],30)",
+    "after": "MeanTerm(longMean[i],15)",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.RoutesMatchIndependentWeightedComponents"
+  },
+  {
+    "id": "technical-rank-fast",
+    "module": "technical-rank-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "output.WritableSpan[i]=values[i]",
+    "after": "output.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~TechnicalRankNumericalTests.RoutesMatchIndependentWeightedComponents",
+    "scope": "internal static ComputeBuffer ComputeTechnicalRankFast("
   }
 ]
