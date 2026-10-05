@@ -6264,3 +6264,20 @@ normalization. All 16 compiled behavioral faults were caught
 caller-state regressions. Enrollment is 7,101/7,131, leaving 30 configurations
 across three types (`si-ultimatemomentum1362-inventory.json`). Final assurance
 remains incomplete.
+
+
+### Tuned Bypass qualification (batch 1367)
+
+Ehlers Dominant Cycle Tuned Bypass now uses a local cycle engine with exact
+relative powers, extended filter arithmetic, observed histories and exact
+trade comparisons. Its shared Spectrum Derived Filter Bank engine and
+previously enrolled callers remain unchanged. Public, fast, native and
+streaming routes preserve the seven-bar startup and three-decibel selection.
+
+Verification: 89 distinct focused checks (88 in `tuned1357-focused.trx`, plus
+the neighboring-bin regression in the 1363 mutation baseline), 16 compiled
+behavioral faults caught (`si-tuned1355-qualified.json`), and five main
+integration regressions (`tuned1367-integration.trx`). The original selection
+survivor is excluded; its stronger-fixture repair supplies the kill.
+Enrollment is 7,113/7,131, leaving 18 configurations across two types
+(`si-tuned1367-inventory.json`). Final assurance remains incomplete.

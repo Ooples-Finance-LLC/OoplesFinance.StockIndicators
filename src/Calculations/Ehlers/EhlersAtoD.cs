@@ -235,57 +235,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersDominantCycleTunedBypassFilter(this StockData stockData, int minLength = 8, int maxLength = 50, 
         int length1 = 40, int length2 = 10)
     {
-        minLength = Math.Max(minLength, 1);
-        maxLength = Math.Max(maxLength, minLength);
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> v1List = new(stockData.Count);
-        List<double> v2List = new(stockData.Count);
-        List<double> hpList = new(stockData.Count);
-        List<double> smoothHpList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var twoPiPer = MinOrMax(2 * Math.PI / length1, 0.99, 0.01);
-        var alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
-
-        var domCycList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersSpectrumDerivedFilterBank(data, minLength, maxLength, length1, length2));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var domCyc = domCycList[i];
-            var beta = Math.Cos(MinOrMax(2 * Math.PI / domCyc, 0.99, 0.01));
-            var delta = Math.Max((-0.015 * i) + 0.5, 0.15);
-            var gamma = 1 / Math.Cos(MinOrMax(4 * Math.PI * (delta / domCyc), 0.99, 0.01));
-            var alpha = gamma - Sqrt((gamma * gamma) - 1);
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevHp1 = i >= 1 ? hpList[i - 1] : 0;
-            var prevHp2 = i >= 2 ? hpList[i - 2] : 0;
-            var prevHp3 = i >= 3 ? hpList[i - 3] : 0;
-            var prevHp4 = i >= 4 ? hpList[i - 4] : 0;
-            var prevHp5 = i >= 5 ? hpList[i - 5] : 0;
-
-            var hp = i < 7 ? currentValue : (0.5 * (1 + alpha1) * (currentValue - prevValue)) + (alpha1 * prevHp1);
-            hpList.Add(hp);
-
-            var prevSmoothHp = GetLastOrDefault(smoothHpList);
-            var smoothHp = i < 7 ? currentValue - prevValue : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
-            smoothHpList.Add(smoothHp);
-
-            var prevV1 = i >= 1 ? v1List[i - 1] : 0;
-            var prevV1_2 = i >= 2 ? v1List[i - 2] : 0;
-            var v1 = (0.5 * (1 - alpha) * (smoothHp - prevSmoothHp)) + (beta * (1 + alpha) * prevV1) - (alpha * prevV1_2);
-            v1List.Add(v1);
-
-            var v2 = domCyc / Math.PI * 2 * (v1 - prevV1);
-            v2List.Add(v2);
-
-            var signal = GetConditionSignal(v2 > v1 && v2 >= 0, v2 < v1 || v2 < 0);
-            signalsList?.Add(signal);
-        }
-
+        var result=TunedBypassWindow.Calculate(stockData,minLength,maxLength,length1,length2);
+        var v1List=result.Outputs["V1"];var v2List=result.Outputs["V2"];var signalsList=result.Signals;
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "V1", v1List },
             { "V2", v2List }

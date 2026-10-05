@@ -1567,3 +1567,18 @@ Ultimate Momentum retains its existing relative settling tolerance and flat
 EMA/Wilder RSI hold. Its band position uses full population variance; money flow
 uses exact signed products and bounded ratio rules. Rounded unpublished blend
 and gain/loss stages have extended upper exponents. Length6 remains unused.
+
+
+### Ehlers Dominant Cycle Tuned Bypass: scaled cycle powers
+
+The cycle selector retains the seven-bar high-pass/FIR startup, exact relative
+energy ratios, the three-decibel inclusion rule, and the observed median
+window. Transcendental coefficients remain binary64; filter stages round to
+binary64 precision with an extended upper exponent. The adaptive bypass
+retains its existing angle clamps and V1/V2 formulas, and compares unrounded
+extended outputs for Buy/Sell decisions.
+
+This indicator has its own cycle engine; the shared Spectrum Derived Filter
+Bank and its other callers retain their existing formulas. State grows with
+observed history rather than eager period-sized buffers. No new public period
+limit is introduced; work still scales with the requested bin range.

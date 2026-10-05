@@ -315,96 +315,16 @@ public sealed class EhlersDistanceCoefficientFilterState : IStreamingIndicatorSt
 [PrimaryOutput("V2")]
 public sealed class EhlersDominantCycleTunedBypassFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha1;
-    private readonly StreamingInputResolver _input;
-    private readonly EhlersSpectrumDerivedFilterBankEngine _sdfb;
-    private readonly PooledRingBuffer<double> _hpValues;
-    private readonly PooledRingBuffer<double> _v1Values;
-    private double _prevSmoothHp;
-    private double _prevValue;
-    private int _index;
-
-    public EhlersDominantCycleTunedBypassFilterState(int minLength = 8, int maxLength = 50, int length1 = 40,
-        int length2 = 10)
+    private readonly TunedBypassWindow _window;
+    public EhlersDominantCycleTunedBypassFilterState(int minLength=8,int maxLength=50,int length1=40,int length2=10)=>_window=new(minLength,maxLength,length1,length2);
+    public IndicatorName Name=>IndicatorName.EhlersDominantCycleTunedBypassFilter;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolvedMin = Math.Max(1, minLength);
-        var resolvedMax = Math.Max(maxLength, resolvedMin);
-        var resolvedLength1 = Math.Max(1, length1);
-        var twoPiPer = MathHelper.MinOrMax(2 * Math.PI / resolvedLength1, 0.99, 0.01);
-        _alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _sdfb = new EhlersSpectrumDerivedFilterBankEngine(resolvedMin, resolvedMax, resolvedLength1, Math.Max(1, length2));
-        _hpValues = new PooledRingBuffer<double>(5);
-        _v1Values = new PooledRingBuffer<double>(2);
+        StreamingInputValidation.Validate(bar);var p=_window.Next(bar.Close,isFinal);
+        return new(p.Second,includeOutputs?new Dictionary<string,double>{{"V1",p.First},{"V2",p.Second}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.EhlersDominantCycleTunedBypassFilter;
-
-    public void Reset()
-    {
-        _sdfb.Reset();
-        _hpValues.Clear();
-        _v1Values.Clear();
-        _prevSmoothHp = 0;
-        _prevValue = 0;
-        _index = 0;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var domCyc = _sdfb.Next(value, isFinal);
-        var beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / domCyc, 0.99, 0.01));
-        var delta = Math.Max((-0.015 * _index) + 0.5, 0.15);
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * (delta / domCyc), 0.99, 0.01));
-        var alpha = gamma - MathHelper.Sqrt((gamma * gamma) - 1);
-
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevHp1 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 1);
-        var prevHp2 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 2);
-        var prevHp3 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 3);
-        var prevHp4 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 4);
-        var prevHp5 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 5);
-
-        var hp = _index < 7 ? value : (0.5 * (1 + _alpha1) * (value - prevValue)) + (_alpha1 * prevHp1);
-        var smoothHp = _index < 7
-            ? value - prevValue
-            : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
-
-        var prevSmoothHp = _index >= 1 ? _prevSmoothHp : 0;
-        var prevV1 = EhlersStreamingWindow.GetOffsetValue(_v1Values, 1);
-        var prevV1_2 = EhlersStreamingWindow.GetOffsetValue(_v1Values, 2);
-        var v1 = (0.5 * (1 - alpha) * (smoothHp - prevSmoothHp)) + (beta * (1 + alpha) * prevV1) - (alpha * prevV1_2);
-        var v2 = domCyc / Math.PI * 2 * (v1 - prevV1);
-
-        if (isFinal)
-        {
-            _hpValues.TryAdd(hp, out _);
-            _v1Values.TryAdd(v1, out _);
-            _prevSmoothHp = smoothHp;
-            _prevValue = value;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "V1", v1 },
-                { "V2", v2 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(v2, outputs);
-    }
-
-    public void Dispose()
-    {
-        _sdfb.Dispose();
-        _hpValues.Dispose();
-        _v1Values.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Edddc")]
