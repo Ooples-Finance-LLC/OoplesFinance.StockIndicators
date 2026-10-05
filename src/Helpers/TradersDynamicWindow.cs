@@ -21,7 +21,7 @@ internal sealed class TradersDynamicWindow : IDisposable
     private double Deviation(double current)
     {
         if(_history.Count<_period-1)return 0;
-        var values=_history.Count==_period?_history.Skip(1).Append(current):_history.Append(current);
+        var values=_history.Count==_period?_history.Skip(1).Concat(new[] { current }):_history.Concat(new[] { current });
         var sample=values.ToArray();var anchor=sample[0];double sum=0;
         foreach(var value in sample)sum+=value-anchor;
         var mean=sum/_period;double variance=0;var lost=false;

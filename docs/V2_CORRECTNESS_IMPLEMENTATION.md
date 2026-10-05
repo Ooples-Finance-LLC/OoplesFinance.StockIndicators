@@ -6281,3 +6281,19 @@ integration regressions (`tuned1367-integration.trx`). The original selection
 survivor is excluded; its stronger-fixture repair supplies the kill.
 Enrollment is 7,113/7,131, leaving 18 configurations across two types
 (`si-tuned1367-inventory.json`). Final assurance remains incomplete.
+
+
+### Final compatibility repair (batch 1369)
+
+The combined candidate exposed three `Enumerable.Append` calls in Traders
+Dynamic and Tuned Bypass that are unavailable on net461. Equivalent singleton
+`Concat` calls preserve their observed-window ordering. The discovered-native
+input fixture now uses the approved minimum period of two for Reverse RSI;
+its prior period-one construction failed before exercising input rejection.
+
+All three target frameworks build with zero errors, and 11 affected regressions
+pass, including both Reverse RSI construction cases (`final1369-compatibility.trx`).
+The immutable local package `2.0.0-correctness.local1369` was created from the
+combined candidate; package consumers and the full suite are still running.
+The full-suite snapshot predates this fixture repair; its failure is retained
+and must be reconciled with the passing targeted rerun, not counted as a pass.

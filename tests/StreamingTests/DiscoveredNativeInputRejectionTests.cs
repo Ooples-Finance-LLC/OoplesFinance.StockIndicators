@@ -19,7 +19,7 @@ public sealed class DiscoveredNativeInputRejectionTests
         Assert.All(parameters, p => Assert.True(p.HasDefaultValue, $"Register a construction case for required parameter {p.Name} on {typeName}."));
         var arguments = parameters.Select(p => minimumPeriods && p.ParameterType == typeof(int)
             && (p.Name!.IndexOf("length", StringComparison.OrdinalIgnoreCase) >= 0 || p.Name.IndexOf("period", StringComparison.OrdinalIgnoreCase) >= 0)
-                ? (object)1 : p.DefaultValue).ToArray();
+                ? (object)(type == typeof(ReverseEngineeringRelativeStrengthIndexState) ? 2 : 1) : p.DefaultValue).ToArray();
         IStreamingIndicatorState Create() => type == typeof(CustomInputState)
             ? minimumPeriods ? new CustomInputState(new SimpleMovingAverageState(1), InputSeries.Of(new SimpleMovingAverageState(2)))
                 : new CustomInputState(new SimpleMovingAverageState(3), bar => bar.Close)

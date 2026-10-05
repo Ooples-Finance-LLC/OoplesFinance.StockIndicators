@@ -19,7 +19,7 @@ internal sealed class TunedCycleWindow
             powers.Add(((int)period,power));peak=BigInteger.Max(peak,power);bands.Add((int)period,(real,old.Real,imaginary,old.Imag));
         }
         var numerator=new ExactMeanAccumulator();var denominator=new ExactMeanAccumulator();if(!peak.IsZero)foreach(var bin in powers){var ratio=ExactMeanAccumulator.UnitRatio((100*peak-99*bin.Power)<<1074,peak);var db=10*Math.Log10(ratio);if(db<=3){var weight=_maximum-db;numerator.Add(weight,bin.Period);denominator.Add(weight);}}
-        var cycle=denominator.IsExactlyZero?_minimum:Math.Max(_minimum,Math.Min(_maximum,numerator.Ratio(denominator)));var kept=_cycles.Count==_medianLength?_cycles.Skip(1):_cycles;var sorted=kept.Append(cycle).OrderBy(v=>v).ToArray();var mean=new ExactMeanAccumulator();mean.Add(sorted[(sorted.Length-1)/2]);mean.Add(sorted[sorted.Length/2]);var result=mean.Mean(2);
+        var cycle=denominator.IsExactlyZero?_minimum:Math.Max(_minimum,Math.Min(_maximum,numerator.Ratio(denominator)));var kept=_cycles.Count==_medianLength?_cycles.Skip(1):_cycles;var sorted=kept.Concat(new[] { cycle }).OrderBy(v=>v).ToArray();var mean=new ExactMeanAccumulator();mean.Add(sorted[(sorted.Length-1)/2]);mean.Add(sorted[sorted.Length/2]);var result=mean.Mean(2);
         if(final){if(_hp.Count==5)_hp.Dequeue();_hp.Enqueue(hp);if(_smooth.Count==3)_smooth.Dequeue();_smooth.Enqueue(smooth);if(_cycles.Count==_medianLength)_cycles.Dequeue();_cycles.Enqueue(cycle);_bands=bands;_previous=value;_index++;}return result;
     }
     internal void Reset(){_hp.Clear();_smooth.Clear();_cycles.Clear();_bands.Clear();_previous=default;_index=0;}
