@@ -387,8 +387,9 @@ public sealed class FormulaContractCoverageTests
         // The final projection is 22 - 3 * binary64(14/3), not the unrounded polynomial value 8.
         Assert.Single(BuiltInFormulaReferences.For(new QuadraticRegression(3))).Check(
             new IndicatorValidationContext("quadratic-hand", bars, [[0, 0, 2, 7.999999999999999]], 0));
+        // Subtract the separately rounded OLS endpoints (8/3 and 20/3); the signal is still zero.
         Assert.Single(BuiltInFormulaReferences.For(new LinearQuadraticConvergenceDivergenceOscillator(3))).Check(
-            new IndicatorValidationContext("linear-quadratic-hand", bars, [[-2, -4, -2d / 3, 4d / 3]], 0));
+            new IndicatorValidationContext("linear-quadratic-hand", bars, [[-2, -4, 2 - 8d / 3, 7.999999999999999 - 20d / 3]], 0));
     }
 
     [Fact]
@@ -855,7 +856,8 @@ public sealed class FormulaContractCoverageTests
     public void AdaptiveCyberStartsWithASecondDifferenceAndASeededPeriod()
     {
         var bars = new[] { new Bar(DateTime.UnixEpoch, 2, 2, 2, 2, 1) };
-        var initialPeriod = .15 * .33 * (6.28318 / .1 + .5);
+        // Instantaneous period and smoothed period are separately rounded stages.
+        var initialPeriod = .15 * (.33 * (6.28318 / .1 + .5));
         var rules = BuiltInFormulaReferences.For(new EhlersAdaptiveCyberCycle()).ToArray();
         Assert.Equal(2, rules.Length);
         foreach (var rule in rules) rule.Check(new IndicatorValidationContext("adaptive-cyber-opening", bars,
@@ -3241,7 +3243,9 @@ public sealed class FormulaContractCoverageTests
     {
         var prices = new[] { 1d, 2, 1, 2 };
         var bars = prices.Select((v, i) => new Bar(new DateTime(2021, 1, 4).AddDays(i), v, v, v, v, 1)).ToArray();
-        var expected = new[] { new[] { 1d, 1, .8, .5 }, new[] { 0d, 0, .2, .5 }, new[] { 0d, 0, .5, .5 } };
+        // Evidence rounds first: .8 = 3602879701896397/2^52 and .2 = 3602879701896397/2^54.
+        // Their exact combined odds round to the next double above one half.
+        var expected = new[] { new[] { 1d, 1, .8, .5 }, new[] { 0d, 0, .2, .5 }, new[] { 0d, 0, .5000000000000001, .5 } };
         var rules = BuiltInFormulaReferences.For(new BayesianOscillator(3)).ToArray();
         Assert.Equal(3, rules.Length);
         foreach (var rule in rules)
@@ -3262,7 +3266,7 @@ public sealed class FormulaContractCoverageTests
                 for (var slot = 0; slot < keys.Length; slot++)
                 {
                     Assert.InRange(final.Outputs![keys[slot]], 0, 1);
-                    Assert.InRange(Math.Abs(final.Outputs[keys[slot]] - expected[slot][i]), 0, 1e-12);
+                    Assert.Equal(expected[slot][i], final.Outputs[keys[slot]]);
                     Assert.Equal(final.Outputs[keys[slot]], preview.Outputs![keys[slot]]);
                 }
             }

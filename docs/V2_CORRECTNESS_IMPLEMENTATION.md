@@ -6467,3 +6467,21 @@ The superseded 1383 consumers were stopped after their process identities were
 verified; their incomplete runs receive no completed package-validation credit.
 The original full suite continues, with all nine failures reported so far covered
 by corrected passing reruns. Final package/platform checks and timings remain pending.
+
+
+### Staged-rounding hand fixtures (batch 1418)
+
+Three further original-suite failures came from hand vectors that reassociated
+rounded formula stages. Adaptive Cyber now rounds its instantaneous period before
+smoothing; Linear Quadratic subtracts separately rounded regression endpoints;
+Bayesian combines the already rounded evidence probabilities. The binary64 values
+0.8 and 0.2 are not exact complements, so their combined probability rounds to
+0.5000000000000001. Formula-reference comparisons remain exact, and the Bayesian
+native-output assertion is strengthened from tolerance to exact equality.
+
+The two Cyber checks pass (`final1417-cyber-startup.trx`), followed by all five
+checks in the combined repair batch (`final1418-hand-rounding.trx`), with zero
+failures/skips. All 12 original-suite failures observed so far have corrected
+passing reruns. These are test-only repairs: the three candidate-1413 package
+consumers remain valid and active. The original suite, package runs, hosted
+platform checks and actual benchmark timings are still incomplete.
