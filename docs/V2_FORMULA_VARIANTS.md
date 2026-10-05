@@ -1582,3 +1582,19 @@ This indicator has its own cycle engine; the shared Spectrum Derived Filter
 Bank and its other callers retain their existing formulas. State grows with
 observed history rather than eager period-sized buffers. No new public period
 limit is introduced; work still scales with the requested bin range.
+
+
+### Ehlers Discrete Fourier Transform: exact relative spectrum
+
+The original cutoff pole, six-bar high-pass startup, six-tap cleanup and
+relative-mass cutoff are retained. Filter stages round to binary64 precision
+with an extended upper exponent; direct Fourier sums and spectral powers are
+exact over those observations and binary64 trigonometric coefficients.
+Logarithmic weights retain their existing formula, with an exact normalized
+weighted period before final rounding. Trade comparisons use the extended
+high-pass values.
+
+History contains observed samples; eager quadratic trigonometric matrices are
+removed. A narrow bin range near Int32.MaxValue does not wrap. No new public
+maximum is introduced: runtime still scales with bin count and observed window
+length. All candle fields are validated before output/state changes.

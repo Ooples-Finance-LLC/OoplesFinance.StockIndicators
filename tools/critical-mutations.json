@@ -91394,8 +91394,8 @@
     "id": "traders-dynamic-expiry",
     "module": "traders-dynamic-numerical",
     "file": "src/Helpers/TradersDynamicWindow.cs",
-    "before": "_history.Skip(1).Append(current)",
-    "after": "_history.Take(_period-1).Append(current)",
+    "before": "_history.Skip(1).Concat(new[] { current })",
+    "after": "_history.Take(_period-1).Concat(new[] { current })",
     "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
   },
   {
@@ -92874,5 +92874,134 @@
     "before": "first[i]=Round(D(.5*(1-alpha))",
     "after": "first[i]=Round(D(.5*(1+alpha))",
     "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-pole",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "_pole=Math.Cos(angle)/(1+Math.Sin(angle))",
+    "after": "_pole=Math.Cos(angle)/(1+Math.Cos(angle))",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.HighPassRetainsPoleDriveAndSixTapCleanup"
+  },
+  {
+    "id": "dft-exact-drive",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "_drive=(1+_pole)/2",
+    "after": "_drive=(1-_pole)/2",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.HighPassRetainsPoleDriveAndSixTapCleanup"
+  },
+  {
+    "id": "dft-exact-startup",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "_count<6?price:",
+    "after": "_count<5?price:",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-fir",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "lag is 2 or 3?3:",
+    "after": "lag is 2 or 3?2:",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-fir-divisor",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "RoundUnits(cleaned,12)",
+    "after": "RoundUnits(cleaned,10)",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-expiry",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "_cleaned.Skip(1).ToArray()",
+    "after": "_cleaned.Skip(0).ToArray()",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-phase",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "2*Math.PI*lag/period",
+    "after": "Math.PI*lag/period",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-power",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "real*real+imaginary*imaginary",
+    "after": "real*real",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-weights",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "100*peak-99*bin.Power",
+    "after": "100*peak-98*bin.Power",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-mean",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "numerator.Add(weight,bin.Period)",
+    "after": "numerator.Add(weight,bin.Period+1)",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.SingleSampleWeightsAllBinsEquallyAndZeroHasNoCycle"
+  },
+  {
+    "id": "dft-exact-preview",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "if(final){if(_hp.Count",
+    "after": "if(true){if(_hp.Count",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-reset",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "_count=0;LastSignal=Signal.None",
+    "after": "_count=6;LastSignal=Signal.None",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-signals",
+    "module": "dft-numerical",
+    "file": "src/Streaming/DiscreteFourierCycle.cs",
+    "before": "hp.Sign>0&&hp>previous",
+    "after": "hp.Sign>0&&hp<previous",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.SingleSampleWeightsAllBinsEquallyAndZeroHasNoCycle"
+  },
+  {
+    "id": "dft-exact-reference",
+    "module": "dft-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.DiscreteFourier.cs",
+    "before": "var taps=new[]{1,2,3,3,2,1}",
+    "after": "var taps=new[]{1,2,2,3,2,1}",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-exact-fast",
+    "module": "dft-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan[i]=result.Values[i]",
+    "after": "buffer.WritableSpan[i]=0",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.NarrowHugeBinRangeUsesObservedHistoryAndPreservesCaller",
+    "scope": "internal static ComputeBuffer ComputeDiscreteFourierFast("
+  },
+  {
+    "id": "dft-exact-reference-dyadic",
+    "module": "spectral-optimization",
+    "file": "src/Validation/BuiltInFormulaReferences.DiscreteFourier.cs",
+    "before": "samples[lag]*Units(R(Math.Cos(phase)))",
+    "after": "samples[0]*Units(R(Math.Cos(phase)))",
+    "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.DyadicSpectrumMatchesOriginalRationalQuadrature"
   }
 ]

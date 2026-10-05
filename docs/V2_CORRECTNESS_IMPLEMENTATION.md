@@ -6297,3 +6297,36 @@ The immutable local package `2.0.0-correctness.local1369` was created from the
 combined candidate; package consumers and the full suite are still running.
 The full-suite snapshot predates this fixture repair; its failure is retained
 and must be reconciled with the passing targeted rerun, not counted as a pass.
+
+
+### Discrete Fourier Transform qualification (batch 1371)
+
+DFT preserves its cutoff pole, six-bar startup, six-tap cleanup and relative
+mass cutoff while using extended filter arithmetic and exact spectral sums,
+powers and normalized weights. Public, fast and native routes share the
+observed-history engine. Exact high-pass comparisons retain trade signals.
+The independent dyadic oracle is cross-checked against its original rational
+quadrature over tiny, ordinary and extreme scales.
+
+All 75 focused checks pass (`dft1349-focused.trx`); all 16 compiled behavioral
+faults are caught (`si-dft1355-qualified.json`). Five main integration checks
+pass (`dft1371-integration.trx`). Enrollment is 7,123/7,131, leaving eight
+Spectral Estimate configurations (`si-dft1371-inventory.json`). Final
+full-suite, package/platform and timing assurance remains in progress.
+
+
+### Final fixture and mutation-target repair (batch 1373)
+
+The nondefault native/batch parity fixture now uses the existing builder
+fixture's valid 0.8 adaptive gain instead of multiplying 0.667 beyond one.
+Its full discovered-state sweep passes (`final1373-alternate-parity.trx`).
+This repairs the second observed failure in the still-running full-suite
+snapshot; the production domain guard and assertions remain intact.
+
+All 10,749 mutation targets resolve uniquely in the combined candidate. Two
+Fourier fast-output targets now specify their method scope, and the Traders
+Dynamic expiry target follows the net461-compatible Concat spelling. All
+three faults compile and are caught after a six-check passing baseline
+(`si-final1373-qualified.json`). These are rechecks of existing faults, not
+additional unique kills. The combined library also builds with SDK 10.0.101
+with zero warnings/errors (`si-final1370-sdk.log`).

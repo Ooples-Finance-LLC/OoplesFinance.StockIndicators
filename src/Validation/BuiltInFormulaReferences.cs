@@ -2144,6 +2144,10 @@ internal static partial class BuiltInFormulaReferences
             var tunedKeys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for(var slot=0;slot<tunedKeys.Length;slot++){var key=tunedKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>TunedBypassOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersDiscreteFourierTransform)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>DiscreteFourierOutputs(bars,builtIn)["Edft"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

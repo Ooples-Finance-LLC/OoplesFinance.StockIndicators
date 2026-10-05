@@ -778,17 +778,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersDiscreteFourierTransform(this StockData stockData, int minLength = 8, int maxLength = 50, int length = 40)
     {
-        List<double> dominantCycleList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        using var spectrum = new Streaming.DiscreteFourierCycle(minLength, maxLength, length);
-        double previousHighPass = 0;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            dominantCycleList.Add(spectrum.Next(inputList[i], true, out var hp));
-            signalsList?.Add(GetCompareSignal(hp, previousHighPass));
-            previousHighPass = hp;
-        }
+        var result = Streaming.DiscreteFourierCycle.Calculate(stockData,minLength,maxLength,length);
+        var dominantCycleList = result.Values;
+        var signalsList = result.Signals;
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Edft", dominantCycleList }

@@ -1930,6 +1930,8 @@ internal static partial class IndicatorCompute
                 => ComputeUltimateMomentumFast(data,context,ultimate.MaType,ultimate.Length1,ultimate.Length2,ultimate.Length3,ultimate.Length4,ultimate.Length5,ultimate.StdDevMult),
             EhlersDominantCycleTunedBypassFilterSpecOptions tuned when spec.OutputKey is null or "V1" or "V2"
                 => ComputeTunedBypassFast(data,context,tuned.MinLength,tuned.MaxLength,tuned.Length1,tuned.Length2,spec.OutputKey ?? "V2"),
+            EhlersDiscreteFourierTransformSpecOptions dft when spec.OutputKey is null or "Edft"
+                => ComputeDiscreteFourierFast(data,context,dft.MinLength,dft.MaxLength,dft.Length),
             VervoortVolatilityBandsSpecOptions vvb => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2,
@@ -16929,6 +16931,12 @@ internal static partial class IndicatorCompute
     {
         var result=TunedBypassWindow.Calculate(data,minimum,maximum,cutoff,median);var values=result.Outputs[key];var buffer=context.Rent(values.Count);
         for(var i=0;i<values.Count;i++)buffer.WritableSpan[i]=values[i];return buffer;
+    }
+
+    internal static ComputeBuffer ComputeDiscreteFourierFast(StockData data,ComputeContext context,int minimum,int maximum,int cutoff)
+    {
+        var result=DiscreteFourierCycle.Calculate(data,minimum,maximum,cutoff);var buffer=context.Rent(result.Values.Count);
+        for(var i=0;i<result.Values.Count;i++)buffer.WritableSpan[i]=result.Values[i];return buffer;
     }
 
     internal static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8,
