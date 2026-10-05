@@ -6330,3 +6330,25 @@ three faults compile and are caught after a six-check passing baseline
 (`si-final1373-qualified.json`). These are rechecks of existing faults, not
 additional unique kills. The combined library also builds with SDK 10.0.101
 with zero warnings/errors (`si-final1370-sdk.log`).
+
+
+### Spectral Estimate qualification and completed enrollment (batch 1374)
+
+DFT Spectral Estimate preserves Roofing V2, direct Fourier sums, the fourth-power
+recurrence, exact half-peak selection and the final weighted period. Extended
+scaled power stages avoid intermediate overflow. Observed histories replace
+eager trigonometric tables, and the missing fast route is registered.
+
+All 62 focused checks pass (`spectral1360-focused.trx`); all 15 distinct
+compiled faults are caught (`si-spectral1355-qualified.json`). Six main
+integration regressions pass (`spectral1374-integration.trx`). The repaired
+fast-output mutation is additionally authenticated in batch 1373.
+
+Enrollment is **7,131/7,131**, with **zero omissions**, zero construction
+failures, complete independent-reference registrations and an empty matching
+numerical backlog (`si-spectral1374-inventory.json`). This completes enrollment,
+not all final assurance. Production source matches the immutable 1369 package
+candidate after CRLF/LF normalization; dispatch, method and mutation-entry
+ordering was reconciled without changing their bodies
+(`si-final1374-source-agreement.json`). Full-suite and package consumers remain
+in progress, and hosted platform and final timing evidence remains outstanding.

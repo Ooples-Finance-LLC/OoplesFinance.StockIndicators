@@ -202,98 +202,16 @@ public sealed class EhlersDiscreteFourierTransformState : IStreamingIndicatorSta
 [PrimaryOutput("Edftse")]
 public sealed class EhlersDiscreteFourierTransformSpectralEstimateState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly PooledRingBuffer<double> _roofingValues;
-    private readonly double[] _rArray;
-    private readonly double[] _pendingPower;
-
-    public EhlersDiscreteFourierTransformSpectralEstimateState(int length1 = 48, int length2 = 10)
+    private readonly DftSpectrumWindow _window;
+    public EhlersDiscreteFourierTransformSpectralEstimateState(int length1=48,int length2=10)=>_window=new(length1,length2);
+    public IndicatorName Name=>IndicatorName.EhlersDiscreteFourierTransformSpectralEstimate;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _roofingFilter = new EhlersRoofingFilterV2State(_length1, _length2);
-        _roofingValues = new PooledRingBuffer<double>(_length1 + 1);
-        _rArray = new double[_length1 + 1];
-        _pendingPower = new double[_length1 + 1];
+        StreamingInputValidation.Validate(bar);var point=_window.Next(bar.Close,isFinal);
+        return new(point.Value,includeOutputs?new Dictionary<string,double>{{"Edftse",point.Value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.EhlersDiscreteFourierTransformSpectralEstimate;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _roofingValues.Clear();
-        Array.Clear(_rArray, 0, _rArray.Length);
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, false).Value;
-
-        double maxPwr = 0;
-        double spx = 0;
-        double sp = 0;
-        for (var j = _length2; j <= _length1; j++)
-        {
-            double cosPart = 0;
-            double sinPart = 0;
-            for (var k = 0; k <= _length1; k++)
-            {
-                var prevFilt = EhlersStreamingWindow.GetOffsetValue(_roofingValues, roofingFilter, k);
-                cosPart += prevFilt * Math.Cos(2 * Math.PI * ((double)k / j));
-                sinPart += prevFilt * Math.Sin(2 * Math.PI * ((double)k / j));
-            }
-
-            var sqSum = MathHelper.Pow(cosPart, 2) + MathHelper.Pow(sinPart, 2);
-            var prevR = _rArray[j];
-            var r = (0.2 * MathHelper.Pow(sqSum, 2)) + (0.8 * prevR);
-            if (isFinal)
-            {
-                _rArray[j] = r;
-            }
-
-            _pendingPower[j] = r;
-            maxPwr = Math.Max(r, maxPwr);
-        }
-
-        for (var j = _length2; j <= _length1; j++)
-        {
-            var pwr = maxPwr != 0 ? _pendingPower[j] / maxPwr : 0;
-
-            if (pwr >= 0.5)
-            {
-                spx += j * pwr;
-                sp += pwr;
-            }
-        }
-
-        var domCyc = sp != 0 ? spx / sp : 0;
-
-        if (isFinal)
-        {
-            _roofingValues.TryAdd(roofingFilter, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Edftse", domCyc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(domCyc, outputs);
-    }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-        _roofingValues.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Edcf")]

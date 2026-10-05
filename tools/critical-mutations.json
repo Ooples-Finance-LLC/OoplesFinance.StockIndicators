@@ -92748,134 +92748,6 @@
     "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
   },
   {
-    "id": "tuned-bypass-cycle-startup",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "_index<7?value:",
-    "after": "_index<6?value:",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-cycle-fir",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "3*H(2)+3*H(3)",
-    "after": "2*H(2)+3*H(3)",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-cycle-quadrature",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "scale*(smooth-S(1))",
-    "after": "scale*(smooth-S(2))",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-cycle-real-feedback",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "feedback*old.Real",
-    "after": "feedback*old.Imag",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-cycle-power",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "real*real+imaginary*imaginary",
-    "after": "real*real",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-cycle-selection",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "if(db<=3)",
-    "after": "if(db<=1)",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.CycleSelectionIncludesNeighboringThreeDecibelBins"
-  },
-  {
-    "id": "tuned-bypass-cycle-median",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "mean.Mean(2)",
-    "after": "mean.Mean(1)",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ZeroPricesKeepZeroOutputsAndMinimumCycle"
-  },
-  {
-    "id": "tuned-bypass-cycle-preview",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "if(final){if(_hp.Count",
-    "after": "if(true){if(_hp.Count",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-cycle-reset",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedCycleWindow.cs",
-    "before": "_bands.Clear();",
-    "after": "_bands.Count.ToString();",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-startup",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedBypassWindow.cs",
-    "before": "_index<7?value:",
-    "after": "_index<6?value:",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-drive",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedBypassWindow.cs",
-    "before": "U(.5*(1-alpha))",
-    "after": "U(.5*(1+alpha))",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.SingleBinStartupMatchesBandpassImpulse"
-  },
-  {
-    "id": "tuned-bypass-feedback",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedBypassWindow.cs",
-    "before": "U(beta*(1+alpha))*_v1",
-    "after": "U(beta*(1+alpha))*_v12",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-quadrature",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedBypassWindow.cs",
-    "before": "U(cycle/Math.PI*2)",
-    "after": "U(cycle/Math.PI)",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.SingleBinStartupMatchesBandpassImpulse"
-  },
-  {
-    "id": "tuned-bypass-preview",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedBypassWindow.cs",
-    "before": "if(final){if(_hp.Count",
-    "after": "if(true){if(_hp.Count",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
-    "id": "tuned-bypass-signal",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Helpers/TunedBypassWindow.cs",
-    "before": "second>first&&second.Sign>=0",
-    "after": "second<first&&second.Sign>=0",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.SingleBinStartupMatchesBandpassImpulse"
-  },
-  {
-    "id": "tuned-bypass-reference",
-    "module": "tuned-bypass-numerical",
-    "file": "src/Validation/BuiltInFormulaReferences.TunedBypassExact.cs",
-    "before": "first[i]=Round(D(.5*(1-alpha))",
-    "after": "first[i]=Round(D(.5*(1+alpha))",
-    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
-  },
-  {
     "id": "dft-exact-pole",
     "module": "dft-numerical",
     "file": "src/Streaming/DiscreteFourierCycle.cs",
@@ -93003,5 +92875,254 @@
     "before": "samples[lag]*Units(R(Math.Cos(phase)))",
     "after": "samples[0]*Units(R(Math.Cos(phase)))",
     "filter": "FullyQualifiedName~DiscreteFourierNumericalTests.DyadicSpectrumMatchesOriginalRationalQuadrature"
+  },
+  {
+    "id": "dft-spectrum-phase",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "2*Math.PI*((double)lag/period)",
+    "after": "Math.PI*((double)lag/period)",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-power",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "real*real+imaginary*imaginary",
+    "after": "real*real",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-fourth-power",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "new F(energy*energy,BigInteger.One)",
+    "after": "new F(energy,BigInteger.One)",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-recurrence",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": ".8)*previous",
+    "after": ".6)*previous",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-expiry",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "_history.Skip(1).ToArray()",
+    "after": "_history.Skip(0).ToArray()",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-threshold",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "2*bin.Value>=peak",
+    "after": "3*bin.Value>=peak",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-normalization",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "weighted/total",
+    "after": "weighted/(total*2)",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.SingleBinPublishesItsPeriodAfterRoofingStartup"
+  },
+  {
+    "id": "dft-spectrum-preview",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "if(final){_roof.Next",
+    "after": "if(true){_roof.Next",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-reset",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "_roof.Reset();_history.Clear();_powers.Clear();",
+    "after": "_roof.Reset();_history.Clear();",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-signals",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "slope.Sign>0&&slope>_previousSlope",
+    "after": "slope.Sign>0&&slope<_previousSlope",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-roof-advance",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "_roof.Next(price,true);",
+    "after": "_roof.Next(price,false);",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-reference",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.DftSpectrum.cs",
+    "before": "R.FromDouble(.8)*(i==0",
+    "after": "R.FromDouble(.7)*(i==0",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.ExtremePricesPreserveSpectrumSignalsPreviewAndReset"
+  },
+  {
+    "id": "dft-spectrum-fast",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan[i]=result.Values[i]",
+    "after": "buffer.WritableSpan[i]=0",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.NarrowHugeBinRangeUsesObservedHistoryAndPreservesCaller",
+    "scope": "internal static ComputeBuffer ComputeDftSpectrumFast("
+  },
+  {
+    "id": "dft-spectrum-rounding-exponent",
+    "module": "spectral-optimization",
+    "file": "src/Helpers/DftSpectrumWindow.cs",
+    "before": "return U(value)<<shift",
+    "after": "return U(value)",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.PowerExponentShortcutMatchesOriginalRounding"
+  },
+  {
+    "id": "dft-spectrum-reference-dyadic",
+    "module": "dft-spectrum-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.DftSpectrum.cs",
+    "before": "units[i-lag]*Units(R.FromDouble(Math.Cos(angle)))",
+    "after": "units[i]*Units(R.FromDouble(Math.Cos(angle)))",
+    "filter": "FullyQualifiedName~DftSpectrumNumericalTests.DyadicSpectrumMatchesOriginalRationalQuadrature"
+  },
+  {
+    "id": "tuned-bypass-cycle-startup",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "_index<7?value:",
+    "after": "_index<6?value:",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-cycle-fir",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "3*H(2)+3*H(3)",
+    "after": "2*H(2)+3*H(3)",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-cycle-quadrature",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "scale*(smooth-S(1))",
+    "after": "scale*(smooth-S(2))",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-cycle-real-feedback",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "feedback*old.Real",
+    "after": "feedback*old.Imag",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-cycle-power",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "real*real+imaginary*imaginary",
+    "after": "real*real",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-cycle-selection",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "if(db<=3)",
+    "after": "if(db<=1)",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.CycleSelectionIncludesNeighboringThreeDecibelBins"
+  },
+  {
+    "id": "tuned-bypass-cycle-median",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "mean.Mean(2)",
+    "after": "mean.Mean(1)",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ZeroPricesKeepZeroOutputsAndMinimumCycle"
+  },
+  {
+    "id": "tuned-bypass-cycle-preview",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "if(final){if(_hp.Count",
+    "after": "if(true){if(_hp.Count",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-cycle-reset",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedCycleWindow.cs",
+    "before": "_bands.Clear();",
+    "after": "_bands.Count.ToString();",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-startup",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedBypassWindow.cs",
+    "before": "_index<7?value:",
+    "after": "_index<6?value:",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-drive",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedBypassWindow.cs",
+    "before": "U(.5*(1-alpha))",
+    "after": "U(.5*(1+alpha))",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.SingleBinStartupMatchesBandpassImpulse"
+  },
+  {
+    "id": "tuned-bypass-feedback",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedBypassWindow.cs",
+    "before": "U(beta*(1+alpha))*_v1",
+    "after": "U(beta*(1+alpha))*_v12",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-quadrature",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedBypassWindow.cs",
+    "before": "U(cycle/Math.PI*2)",
+    "after": "U(cycle/Math.PI)",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.SingleBinStartupMatchesBandpassImpulse"
+  },
+  {
+    "id": "tuned-bypass-preview",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedBypassWindow.cs",
+    "before": "if(final){if(_hp.Count",
+    "after": "if(true){if(_hp.Count",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "tuned-bypass-signal",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Helpers/TunedBypassWindow.cs",
+    "before": "second>first&&second.Sign>=0",
+    "after": "second<first&&second.Sign>=0",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.SingleBinStartupMatchesBandpassImpulse"
+  },
+  {
+    "id": "tuned-bypass-reference",
+    "module": "tuned-bypass-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.TunedBypassExact.cs",
+    "before": "first[i]=Round(D(.5*(1-alpha))",
+    "after": "first[i]=Round(D(.5*(1+alpha))",
+    "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
   }
 ]

@@ -28,29 +28,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Ecfse", new[] { "Ecfse" }, bars => Outputs(("Ecfse", CombSpectrumValues(bars,
                     Integer(options, "Length1", 48), Integer(options, "Length2", 10), Number(options, .3, "Bw")).Values)));
             case IndicatorName.EhlersDiscreteFourierTransformSpectralEstimate:
-                return new("Edftse", new[] { "Edftse" }, bars =>
-                {
-                    var high = Integer(options, "Length1", 48); var low = Integer(options, "Length2", 10);
-                    var roof = HilbertRoofingTrajectory(Closes(bars), high, low);
-                    var periods = Enumerable.Range(low, Math.Max(0, high - low + 1)).ToArray();
-                    var powers = periods.Select(period =>
-                    {
-                        var energy = roof.Select((_, i) =>
-                        {
-                            var vector = Enumerable.Range(0, Math.Min(high + 1, i + 1))
-                                .Aggregate(Complex.Zero, (sum, lag) => sum + roof[i - lag] * Complex.FromPolarCoordinates(1, 2 * Math.PI * lag / period));
-                            return Math.Pow(vector.Magnitude, 4);
-                        }).ToArray();
-                        return energy.Select((_, i) => Enumerable.Range(0, i + 1).Sum(j => .2 * Math.Pow(.8, i - j) * energy[j])).ToArray();
-                    }).ToArray();
-                    return Outputs(("Edftse", roof.Select((_, i) =>
-                    {
-                        var maximum = powers.Length == 0 ? 0 : powers.Max(p => p[i]);
-                        var retained = Enumerable.Range(0, periods.Length).Where(j => maximum > 0 && powers[j][i] >= maximum / 2).ToArray();
-                        var total = retained.Sum(j => powers[j][i]);
-                        return total == 0 ? 0 : retained.Sum(j => periods[j] * powers[j][i]) / total;
-                    }).ToArray()));
-                });
+                return new("Edftse",new[]{"Edftse"},bars=>DftSpectrumOutputs(bars,indicator));
             case IndicatorName.EhlersMesaPredictIndicatorV2:
                 if (options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
                     return new("Predict",new[]{"Ssf","Predict","Extrap"},bars=>MesaPredictV2Outputs(bars,indicator));

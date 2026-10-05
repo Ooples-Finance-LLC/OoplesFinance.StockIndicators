@@ -1598,3 +1598,19 @@ History contains observed samples; eager quadratic trigonometric matrices are
 removed. A narrow bin range near Int32.MaxValue does not wrap. No new public
 maximum is introduced: runtime still scales with bin count and observed window
 length. All candle fields are validated before output/state changes.
+
+
+### Ehlers DFT Spectral Estimate: extended fourth-power recurrence
+
+Roofing V2 retains its existing formula. Direct Fourier sums produce exact
+energy over the observed rounded roof values and binary64 trigonometric
+coefficients. Power follows `0.2 * energy^2 + 0.8 * previousPower`, rounded to
+binary64 precision in a common extended scale that cancels from the result.
+Bins satisfy the exact half-peak comparison `2 * power >= peak`; their weighted
+period is rounded only after forming the complete ratio. Trade comparisons
+use exact differences of the extended roof observations.
+
+Histories grow with observations and no quadratic trigonometric tables are
+allocated. Empty requested spectra produce zero. Narrow Int32.MaxValue bin
+ranges avoid integer wrap; the existing period domain remains, with work
+proportional to the requested range and observed window.

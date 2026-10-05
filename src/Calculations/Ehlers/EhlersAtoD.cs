@@ -601,71 +601,8 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersDiscreteFourierTransformSpectralEstimate(this StockData stockData, int length1 = 48, int length2 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> domCycList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var rArray = new double[length1 + 1];
-
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        // DFT basis cos/sin(2π·k/j) depends only on (period j, lag k), not the bar i — precompute once.
-        var cosTable = new double[length1 + 1, length1 + 1];
-        var sinTable = new double[length1 + 1, length1 + 1];
-        for (var jj = length2; jj <= length1; jj++)
-        {
-            for (var kk = 0; kk <= length1; kk++)
-            {
-                var angle = 2 * Math.PI * ((double)kk / jj);
-                cosTable[jj, kk] = Math.Cos(angle);
-                sinTable[jj, kk] = Math.Sin(angle);
-            }
-        }
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var roofingFilter = roofingFilterList[i];
-            var prevRoofingFilter1 = i >= 1 ? roofingFilterList[i - 1] : 0;
-            var prevRoofingFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
-
-            double maxPwr = 0, spx = 0, sp = 0;
-            for (var j = length2; j <= length1; j++)
-            {
-                double cosPart = 0, sinPart = 0;
-                for (var k = 0; k <= length1; k++)
-                {
-                    var prevFilt = i >= k ? roofingFilterList[i - k] : 0;
-                    cosPart += prevFilt * cosTable[j, k];
-                    sinPart += prevFilt * sinTable[j, k];
-                }
-
-                var sqSum = (cosPart * cosPart) + (sinPart * sinPart);
-                var prevR = rArray[j];
-                var r = (0.2 * (sqSum * sqSum)) + (0.8 * prevR);
-                rArray[j] = r;
-                maxPwr = Math.Max(r, maxPwr);
-            }
-
-            // Normalize every bin against the same complete spectrum, not a prefix maximum.
-            for (var j = length2; j <= length1; j++)
-            {
-                var pwr = maxPwr != 0 ? rArray[j] / maxPwr : 0;
-
-                if (pwr >= 0.5)
-                {
-                    spx += j * pwr;
-                    sp += pwr;
-                }
-            }
-
-            var domCyc = sp != 0 ? spx / sp : 0;
-            domCycList.Add(domCyc);
-
-            var signal = GetCompareSignal(roofingFilter - prevRoofingFilter1, prevRoofingFilter1 - prevRoofingFilter2);
-            signalsList?.Add(signal);
-        }
-
+        var result=DftSpectrumWindow.Calculate(stockData,length1,length2);
+        var domCycList=result.Values;var signalsList=result.Signals;
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Edftse", domCycList }
         });
