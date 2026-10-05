@@ -11118,6 +11118,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersVariableIndexDynamicAverageFast(StockData data, ComputeContext context,
         int fastLength = 9, int slowLength = 30, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var values=EhlersVidyaWindow.Calculate(data,maType,fastLength,slowLength).Values;var rentedVidya=context.Rent(values.Count);
+            for(var i=0;i<values.Count;i++)rentedVidya.WritableSpan[i]=values[i];return rentedVidya;
+        }
         // CalculateEhlersVariableIndexDynamicAverage sets its smoothing factor from how far the chained series
         // sits from its fast average against how far it sits from its slow one, both measured as a root mean
         // square, so the average speeds up when the short term spread widens. The spec's own length is marked

@@ -2097,6 +2097,10 @@ internal static partial class BuiltInFormulaReferences
             var key=builtIn.BatchName==IndicatorName.VervoortHeikenAshiCandlestickOscillator?"Vhaco":"Vhaltco";
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>VervoortCandleOutputs(bars,builtIn,indicator.Source is not null)[key],IndicatorErrorBudget.Exact);yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersVariableIndexDynamicAverage && AverageKind(builtIn.CreateOptions(),2) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>EhlersVidyaOutputs(bars,builtIn)["Evidya"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

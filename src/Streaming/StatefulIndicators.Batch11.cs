@@ -1383,10 +1383,11 @@ public sealed class EhlersTripleDelayLineDetrenderState : IStreamingIndicatorSta
 [PrimaryOutput("Evidya")]
 public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _shortSmoother;
-    private readonly IMovingAverageSmoother _longSmoother;
-    private readonly RollingWindowSum _shortPowSum;
-    private readonly RollingWindowSum _longPowSum;
+    private readonly EhlersVidyaWindow? _wide;
+    private readonly IMovingAverageSmoother _shortSmoother = null!;
+    private readonly IMovingAverageSmoother _longSmoother = null!;
+    private readonly RollingWindowSum _shortPowSum = null!;
+    private readonly RollingWindowSum _longPowSum = null!;
     private readonly StreamingInputResolver _input;
     private double _prevVidya;
     private bool _hasPrev;
@@ -1394,6 +1395,7 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
     public EhlersVariableIndexDynamicAverageState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int fastLength = 9, int slowLength = 30)
     {
+        if (StrengthWindow.Supports(maType)) { _wide=new(maType,fastLength,slowLength); return; }
         var resolvedFast = Math.Max(1, fastLength);
         var resolvedSlow = Math.Max(1, slowLength);
         _shortSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
@@ -1407,6 +1409,7 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _shortSmoother.Reset();
         _longSmoother.Reset();
         _shortPowSum.Reset();
@@ -1417,6 +1420,8 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if(_wide is not null){var point=_wide.Next(bar.Close,isFinal);return new(point.Value,includeOutputs?new Dictionary<string,double>{{"Evidya",point.Value}}:null);}
         var value = _input.GetValue(bar);
         var shortAvg = _shortSmoother.Next(value, isFinal);
         var longAvg = _longSmoother.Next(value, isFinal);
@@ -1455,6 +1460,7 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
 
     public void Dispose()
     {
+        if (_wide is not null) { _wide.Dispose(); return; }
         _shortSmoother.Dispose();
         _longSmoother.Dispose();
         _shortPowSum.Dispose();

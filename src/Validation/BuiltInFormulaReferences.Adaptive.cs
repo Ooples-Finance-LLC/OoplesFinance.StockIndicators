@@ -271,6 +271,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersVariableIndexDynamicAverage:
                 var vidyaKind = AverageKind(options, 2);
                 if (vidyaKind == 0) return null;
+                if (vidyaKind is 1 or 2 or 3 or 6) return new("Evidya",new[]{"Evidya"},bars=>EhlersVidyaOutputs(bars,indicator));
                 return new("Evidya", new[] { "Evidya" }, bars =>
                 {
                     var prices = Closes(bars);

@@ -962,6 +962,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersDualDifferentiatorDominantCycleSpecOptions cycle => new EhlersDualDifferentiatorDominantCycleState(cycle.Length1, cycle.Length2, cycle.Length3),
             EhlersHomodyneDominantCycleSpecOptions cycle => new EhlersHomodyneDominantCycleState(cycle.Length1, cycle.Length2, cycle.Length3),
             EhlersPhaseAccumulationDominantCycleSpecOptions cycle => new EhlersPhaseAccumulationDominantCycleState(cycle.Length1, cycle.Length2, cycle.Length3, cycle.Length4),
+            EhlersVariableIndexDynamicAverageSpecOptions evidya => new EhlersVariableIndexDynamicAverageState(evidya.MaType, 9, 30),
             EhlersDiscreteFourierTransformSpecOptions dft => new EhlersDiscreteFourierTransformState(dft.MinLength, dft.MaxLength, dft.Length),
             UltimateMomentumIndicatorSpecOptions ultimate => new UltimateMomentumIndicatorState(ultimate.MaType, ultimate.Length1, ultimate.Length2, ultimate.Length3, ultimate.Length4, ultimate.Length5, stdDevMult: ultimate.StdDevMult),
             EhlersMesaPredictIndicatorV1SpecOptions mesa => new EhlersMesaPredictIndicatorV1State(mesa.Length1, mesa.Length2, lowerLength: mesa.LowerLength, upperLength: mesa.UpperLength),

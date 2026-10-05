@@ -825,6 +825,12 @@ public static partial class Calculations
     public static StockData CalculateEhlersVariableIndexDynamicAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int fastLength = 9, int slowLength = 30)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result=EhlersVidyaWindow.Calculate(stockData,maType,fastLength,slowLength);
+            stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Evidya",result.Values}});stockData.SetCustomValues(result.Values);
+            stockData.SetSignals(result.Signals);stockData.IndicatorName=IndicatorName.EhlersVariableIndexDynamicAverage;return stockData;
+        }
         List<double> vidyaList = new(stockData.Count);
         List<double> longPowList = new(stockData.Count);
         List<double> shortPowList = new(stockData.Count);

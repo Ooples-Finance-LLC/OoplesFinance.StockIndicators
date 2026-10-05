@@ -91602,5 +91602,142 @@
     "after": "rentedCandle.WritableSpan[i]=-values[i]",
     "filter": "FullyQualifiedName~VervoortCandleNumericalTests.RoutesMatchIndependentCandleLatches",
     "scope": "internal static ComputeBuffer ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast("
+  },
+  {
+    "id": "ehlers-vidya-fast-mean",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "value-U(fastMean)",
+    "after": "value+U(fastMean)",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-slow-mean",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "value-U(slowMean)",
+    "after": "value+U(slowMean)",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-fast-expiry",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "_fastSum+fastSquare-",
+    "after": "_fastSum+fastSquare+",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-slow-expiry",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "_slowSum+slowSquare-",
+    "after": "_slowSum+slowSquare+",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-count",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "var denominator=slowSum*fastCount",
+    "after": "var denominator=slowSum*slowCount",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-gain",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "var multiplier=U(.2)",
+    "after": "var multiplier=U(.3)",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-lower-clamp",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "lower*lower?.01",
+    "after": "lower*lower?.02",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.GainClampsAndZeroEnergyRemainDistinct"
+  },
+  {
+    "id": "ehlers-vidya-upper-clamp",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "upper*upper?.99",
+    "after": "upper*upper?.9",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.GainClampsAndZeroEnergyRemainDistinct"
+  },
+  {
+    "id": "ehlers-vidya-zero-energy",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "var gain=0d;",
+    "after": "var gain=.01;",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.GainClampsAndZeroEnergyRemainDistinct"
+  },
+  {
+    "id": "ehlers-vidya-seed",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "_started?_previous:price",
+    "after": "_started?_previous:0",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-blend",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "blend.AddProduct(previous,-gain)",
+    "after": "blend.AddProduct(previous,gain)",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-signal",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "slope>_previousSlope",
+    "after": "slope<_previousSlope",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-preview",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "if(final)",
+    "after": "if(final || price != 0)",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-reset",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Helpers/EhlersVidyaWindow.cs",
+    "before": "_started=false;",
+    "after": "_started=true;",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.ExtremePricesPreserveExactEnergySignalsPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-reference",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.EhlersVidya.cs",
+    "before": "R(.2)*R(.2)*Energy",
+    "after": "R(.3)*R(.3)*Energy",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.RoutesMatchIndependentResidualRmsRatio"
+  },
+  {
+    "id": "ehlers-vidya-fast",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rentedVidya.WritableSpan[i]=values[i]",
+    "after": "rentedVidya.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.HugePeriodsAndFastCalculationPreserveCallerState",
+    "scope": "internal static ComputeBuffer ComputeEhlersVariableIndexDynamicAverageFast("
+  },
+  {
+    "id": "ehlers-vidya-native-defaults",
+    "module": "ehlers-vidya-numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new EhlersVariableIndexDynamicAverageState(evidya.MaType, 9, 30)",
+    "after": "new EhlersVariableIndexDynamicAverageState(evidya.MaType, 10, 30)",
+    "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.RoutesMatchIndependentResidualRmsRatio"
   }
 ]

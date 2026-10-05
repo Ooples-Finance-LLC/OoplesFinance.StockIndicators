@@ -1496,3 +1496,13 @@ variant retains its 0.35 body/range predicate. The long variant retains its
 configurable factor (default 1.1) and requires its down-trend short-candle gate
 for both current and retained keeping states. Selected sources replace the
 full-typical input; original open/high/low candle fields retain their roles.
+
+
+### Ehlers VIDYA public residual-RMS contract
+
+Public and builder routes use the configured fast/slow moving averages (builder
+defaults 9/30), exact squared residual windows, and gain 0.2 times their RMS
+ratio, clamped to [0.01,0.99]. Zero slow energy gives zero gain. The gain is
+rounded once and the convex update is rounded once. The obsolete single Length
+builder option remains unused. Core/registry currently retain their separate
+ordinary VIDYA formula; changing that behavior awaits an explicit decision.

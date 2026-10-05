@@ -6116,3 +6116,20 @@ survivor was excluded and caught by a custom-factor regression. Eleven main
 integration checks passed (`vervoort1254-integration.trx`). Enrollment is
 7,012/7,131, leaving 119 configurations across 12 types
 (`si-vervoort1257-inventory.json`). Final assurance remains incomplete.
+
+
+### Ehlers VIDYA public-route qualification (batch 1268)
+
+All five public configurations preserve the fast/slow residual RMS formula and
+0.01/0.99 gain clamps. Exact residual powers avoid underflow and overflow before
+the finite RMS ratio; a single final rounding preserves the convex price blend.
+Histories grow with observed input. The missing typed native factory now uses
+the public 9/30 defaults, preserving the obsolete single Length option's lack
+of effect. Independent references, routes, selected inputs, gain boundaries,
+zero energy, extreme prices and preview/reset passed 42 distinct checks;
+all 17 compiled faults were caught (`si-evidya1261-qualified.json`). Eleven
+integration checks passed (`evidya1265-integration.trx`). Enrollment is
+7,017/7,131, leaving 114 configurations across 11 types
+(`si-evidya1267-inventory.json`). The separate core/registry formula alignment
+remains pending approval; those existing VIDYA routes were not changed.
+Final assurance remains incomplete.
