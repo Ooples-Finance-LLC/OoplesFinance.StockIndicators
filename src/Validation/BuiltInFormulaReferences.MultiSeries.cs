@@ -72,16 +72,17 @@ internal static partial class BuiltInFormulaReferences
                     break;
                 case IndicatorName.RelativeStrength3DIndicator:
                     var ratio = new double[p.Length];
-                    for (var i = 0; i < ratio.Length; i++) ratio[i] = b[i] == 0 ? i == 0 ? 0 : ratio[i-1] : 100*p[i]/b[i];
+                    for (var i = 0; i < ratio.Length; i++) ratio[i] = b[i] == 0 ? i == 0 ? 0 : ratio[i-1] : p[i]/b[i]*100;
                     var fast = Average(ratio, Period("length3", 10), kind); var medium = Average(fast, Period("length2", 7), kind);
                     var slowLength = Period("length4", 15); var slow = Average(fast, slowLength, kind);
                     var verySlow = Average(slow, Period("length5", 30), kind);
-                    bool Below(double x, double y) => y-x > 1e-12*Math.Max(1, Math.Max(Math.Abs(x), Math.Abs(y)));
+                    // Distinct rounded averages cast distinct votes, including a decaying tail.
+                    bool Below(double x, double y) => x < y;
                     var score = p.Select((_, i) => Below(medium[i], slow[i]) ? 0d : Below(fast[i], medium[i])
                         ? Below(slow[i], verySlow[i]) ? 5 : 9 : Below(slow[i], verySlow[i]) ? 9 : 10).ToArray();
                     var scoreMean = Average(score, Period("length1", 4), kind);
                     result["Rs3d"] = score.Select((v, i) => v >= 5 || Below(scoreMean[i], v)
-                        ? 100d*Window(score, i, slowLength).Count(x => x >= 5)/slowLength : 0).ToArray();
+                        ? (double)Window(score, i, slowLength).Count(x => x >= 5)/slowLength*100 : 0).ToArray();
                     break;
             }
             return result;

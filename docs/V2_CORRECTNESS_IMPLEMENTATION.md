@@ -6506,3 +6506,27 @@ Candidate 1413 is superseded. Its ongoing runs are retained to collect further
 failures; they cannot establish correctness of the corrected package. The
 original full suite still has only the 12 previously repaired failures.
 Corrected exact-package execution and final benchmark timings remain pending.
+
+
+### Paired Relative Strength 3D reference alignment (batch 1427)
+
+The retained candidate-1413 run exposed one more failure: paired Relative
+Strength 3D, shorter periods, spike/constant fixture, bar 236. The reference
+used the old tolerance-based voting comparison after production had adopted
+exact comparisons. Its medium average 200.00000000000006 is strictly below
+its slow average 200.00000000016914, so the correct score is zero; treating
+these values as tied incorrectly published 12.5.
+
+The independent reference now preserves exact votes and the existing ratio
+and normalization rounding stages. Calculation code is unchanged. All 15
+paired configurations and the explicit post-spike regression pass
+(`final1427-rs3d-reference.trx`: 16 passed). Restoring the old tolerance causes
+a compiled assertion failure from a passing baseline
+(`si-final1427-qualified.json`). All 10,767 mutation anchors resolve and 19
+tooling checks pass.
+
+Candidate 1425 passed 15 ordinary/Ehlers VIDYA configurations on each of net10,
+net8 and net461 with authenticated loaded DLLs, and its source builds on SDK
+10.0.101 with zero warnings/errors. It is now superseded by this reference
+repair. Final complete package evidence and actual competitor timings remain
+pending; partial results from older candidates are not final-package evidence.
