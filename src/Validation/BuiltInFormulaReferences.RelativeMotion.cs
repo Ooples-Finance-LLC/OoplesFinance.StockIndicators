@@ -451,6 +451,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Sltsf", result));
                 });
             case IndicatorName.TradersDynamicIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Tdi", new[] { "UpperBand", "MiddleBand", "LowerBand", "Tdi", "Signal" }, bars => TradersDynamicOutputs(bars,indicator));
                 return new("Tdi", new[] { "UpperBand", "MiddleBand", "LowerBand", "Tdi", "Signal" }, bars =>
                 {
                     var strength = MotionRsi(Closes(bars), Integer(options, "Length1", 13), kind);

@@ -1532,6 +1532,12 @@ public static partial class Calculations
     public static StockData CalculateTradersDynamicIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result = TradersDynamicWindow.Calculate(stockData, maType, length1, length2, length3, length4);
+            stockData.SetOutputValues(() => result.Outputs); stockData.SetCustomValues(result.Outputs["Tdi"]);
+            stockData.SetSignals(result.Signals); stockData.IndicatorName = IndicatorName.TradersDynamicIndex; return stockData;
+        }
         List<double> upList = new(stockData.Count);
         List<double> dnList = new(stockData.Count);
         List<double> midList = new(stockData.Count);

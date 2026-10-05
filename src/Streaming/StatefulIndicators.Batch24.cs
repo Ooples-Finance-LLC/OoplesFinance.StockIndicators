@@ -609,18 +609,20 @@ public sealed class TraderPressureIndexState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Tdi")]
 public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RsiState _rsi;
-    private readonly IMovingAverageSmoother _rsiSignal;
+    private readonly TradersDynamicWindow? _wide;
+    private readonly RsiState _rsi = null!;
+    private readonly IMovingAverageSmoother _rsiSignal = null!;
 
     // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _mabSmoother;
-    private readonly IMovingAverageSmoother _mbbSmoother;
+    private readonly RollingStandardDeviation _stdDev = null!;
+    private readonly IMovingAverageSmoother _mabSmoother = null!;
+    private readonly IMovingAverageSmoother _mbbSmoother = null!;
     private readonly StreamingInputResolver _input;
 
     public TradersDynamicIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7)
     {
+        if (StrengthWindow.Supports(maType)) { _wide = new(maType,length1,length2,length3,length4); return; }
         _rsi = new RsiState(maType, Math.Max(1, length1));
         _rsiSignal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         // No moving-average type, and no selector: the index is passed to Next directly.
@@ -634,6 +636,7 @@ public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDispos
 
     public void Reset()
     {
+        if (_wide is not null) { _wide.Reset(); return; }
         _rsi.Reset();
         _rsiSignal.Reset();
         _stdDev.Reset();
@@ -643,6 +646,12 @@ public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDispos
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var point=_wide.Next(bar.Close,isFinal);
+            return new(point.Line,includeOutputs?new Dictionary<string,double>{{"UpperBand",point.Upper},{"MiddleBand",point.Middle},{"LowerBand",point.Lower},{"Tdi",point.Line},{"Signal",point.Signal}}:null);
+        }
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
         var rsiSignal = _rsiSignal.Next(rsi, isFinal);
@@ -674,6 +683,7 @@ public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDispos
 
     public void Dispose()
     {
+        if (_wide is not null) { _wide.Dispose(); return; }
         _rsi.Dispose();
         _rsiSignal.Dispose();
         _stdDev.Dispose();

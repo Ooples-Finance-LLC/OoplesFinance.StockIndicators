@@ -35867,8 +35867,8 @@
     "module": "numerical",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
     "scope": "internal static ComputeBuffer ComputeTradersDynamicIndexFast(",
-    "before": "if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)",
-    "after": "if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides && length2 < 0)",
+    "before": "TradersDynamicWindow.Calculate(data, maType, length1, length2, length3, length4)",
+    "after": "TradersDynamicWindow.Calculate(data, maType, length1, length2 + 1, length3, length4)",
     "filter": "FullyQualifiedName~CompositeStageParityTests"
   },
   {
@@ -91333,5 +91333,126 @@
     "after": "output.WritableSpan[i]=-values[i]",
     "filter": "FullyQualifiedName~TechnicalRankNumericalTests.RoutesMatchIndependentWeightedComponents",
     "scope": "internal static ComputeBuffer ComputeTechnicalRankFast("
+  },
+  {
+    "id": "traders-dynamic-gains",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "change.Mantissa>0?change:default",
+    "after": "change.Mantissa<0?change:default",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-losses",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "-change.Mantissa,change.UpperShift",
+    "after": "change.Mantissa,change.UpperShift",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-flat",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "price==_price",
+    "after": "price!=_price",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-center-period",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "_center=new(kind,length2,1,true)",
+    "after": "_center=new(kind,length2+1,1,true)",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-fast-period",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "_fast=new(kind,length3,1,true)",
+    "after": "_fast=new(kind,length3+1,1,true)",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-slow-period",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "_slow=new(kind,length4,1,true)",
+    "after": "_slow=new(kind,length4+1,1,true)",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-width",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "1.6185*Deviation(rsi)",
+    "after": "1.5*Deviation(rsi)",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-expiry",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "_history.Skip(1).Append(current)",
+    "after": "_history.Take(_period-1).Append(current)",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-variance",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "variance/=_period;",
+    "after": "variance/=(_period+1);",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-lower",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "lower=center-offset",
+    "after": "lower=center+offset",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-signals",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "slope>_previousSlope",
+    "after": "slope<_previousSlope",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-preview",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "if(final)",
+    "after": "if(final || price != 0)",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-reset",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Helpers/TradersDynamicWindow.cs",
+    "before": "_started=false;",
+    "after": "_started=true;",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.ExtremePricesPreserveAllBandsSignalsPreviewAndReset"
+  },
+  {
+    "id": "traders-dynamic-reference",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.TradersDynamic.cs",
+    "before": "SmoothStrengthStage(input,l3,kind)",
+    "after": "SmoothStrengthStage(input,l3+1,kind)",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.RoutesMatchIndependentRsiBands"
+  },
+  {
+    "id": "traders-dynamic-fast",
+    "module": "traders-dynamic-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rented.WritableSpan[i]=values[i]",
+    "after": "rented.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~TradersDynamicNumericalTests.FastOutputSelectionPreservesCallerAndInvalidInputDoesNotPublish",
+    "scope": "internal static ComputeBuffer ComputeTradersDynamicIndexFast("
   }
 ]

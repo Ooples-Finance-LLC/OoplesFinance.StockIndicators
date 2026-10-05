@@ -20421,6 +20421,14 @@ internal static partial class IndicatorCompute
         int length3 = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length2 = 34, int length4 = 7,
         TradersDynamicSeries series = TradersDynamicSeries.Tdi)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var result = TradersDynamicWindow.Calculate(data, maType, length1, length2, length3, length4);
+            var key = series switch { TradersDynamicSeries.UpperBand => "UpperBand", TradersDynamicSeries.LowerBand => "LowerBand",
+                TradersDynamicSeries.MiddleBand => "MiddleBand", TradersDynamicSeries.Signal => "Signal", _ => "Tdi" };
+            var values = result.Outputs[key]; var rented = context.Rent(values.Count);
+            for (var i=0;i<values.Count;i++) rented.WritableSpan[i]=values[i]; return rented;
+        }
         // CalculateTradersDynamicIndex publishes five series off one relative strength index of the chained
         // series: Tdi is its length3 average, Signal its length4 average, and the three bands sit around the
         // index's OWN signal line, offset by 1.6185 deviations of the index over length2. Only Tdi was being

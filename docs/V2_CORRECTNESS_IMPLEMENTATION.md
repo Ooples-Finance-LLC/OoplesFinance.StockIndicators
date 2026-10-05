@@ -6085,3 +6085,18 @@ the original reset survivor receives no credit. Nine integration checks passed
 converging-trend behavior. Enrollment is 6,991/7,131, leaving 140 configurations
 across 15 types (`si-technicalrank1231-inventory.json`). Final assurance remains
 incomplete.
+
+
+### Traders Dynamic Index qualification (batch 1241)
+
+All 13 configurations preserve the RSI, three smoothing periods, population
+standard deviation and five output series. Supported averages retain rounded
+stages and exact signal comparisons; histories allocate as observations arrive.
+The independent reference retains translated-coordinate deviation rounding and
+its exact exceptional-range fallback. All 102 focused checks passed, including
+existing composite-stage parity checks. All 16 compiled faults were caught
+(`si-tdi1233-qualified.json`), including the migrated RSI-signal stage anchor.
+Fourteen main integration checks passed (`tdi1239-integration.trx`), preserving
+Technical Rank and Reverse RSI hands. Enrollment is 7,004/7,131, leaving 127
+configurations across 14 types (`si-tdi1240-inventory.json`). Final assurance
+remains incomplete.
