@@ -1561,3 +1561,9 @@ average, five-term forecast, and recursive linear extrapolation. Each unpublishe
 stage rounds with an extended upper exponent. The forecast horizon remains
 clamped to the history period; work scales with that horizon, while forecast
 storage is fixed at five samples. No new public period maximum is imposed.
+
+
+Ultimate Momentum retains its existing relative settling tolerance and flat
+EMA/Wilder RSI hold. Its band position uses full population variance; money flow
+uses exact signed products and bounded ratio rules. Rounded unpublished blend
+and gain/loss stages have extended upper exponents. Length6 remains unused.

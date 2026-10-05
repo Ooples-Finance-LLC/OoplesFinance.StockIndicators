@@ -6245,3 +6245,22 @@ credit; an impulse in the fourth input catches it. Five main integration checks
 passed (`mesav21343-integration.trx`). Enrollment is 7,086/7,131, leaving 45
 configurations across four types (`si-mesav21346-inventory.json`). Final assurance
 remains incomplete.
+
+
+### Ultimate Momentum qualification (batch 1362)
+
+Fifteen configurations retain the McClellan/band/money-flow blend, its explicit
+relative settling tolerance, flat recursive-RSI hold, full simple-average warmup,
+and unused Length6. Exact money-flow products and moments, certified band
+position and extended blend/gain/loss stages preserve finite strength outputs
+when intermediates exceed binary64. Histories grow with received observations;
+public, fast and native routes prevalidate input. Custom averaging callbacks and
+unsupported averages retain existing routes.
+
+All 112 focused checks passed after correcting signed money-flow denominator
+normalization. All 16 compiled behavioral faults were caught
+(`si-ultimatemomentum1355-qualified.json`). Five main integration checks passed
+(`ultimatemomentum1361-integration.trx`), including tiny-band-multiplier and
+caller-state regressions. Enrollment is 7,101/7,131, leaving 30 configurations
+across three types (`si-ultimatemomentum1362-inventory.json`). Final assurance
+remains incomplete.

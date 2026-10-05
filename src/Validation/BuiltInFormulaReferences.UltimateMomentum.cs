@@ -8,6 +8,7 @@ internal static partial class BuiltInFormulaReferences
     private static FormulaDefinition? UltimateMomentumFormula(IBuiltInIndicator indicator)
     {
         if (indicator.CreateOptions() is not UltimateMomentumIndicatorSpecOptions options) return null;
+        if (UltimateMomentumWindow.Supports(options.MaType)) return new("Utm",new[]{"Utm"},bars=>UltimateMomentumOutputs(bars,indicator));
         var kind = AverageKind(options, 1);
         if (kind == 0) return null;
         return new("Utm", new[] { "Utm" }, bars =>

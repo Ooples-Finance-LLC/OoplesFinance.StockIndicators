@@ -2135,6 +2135,10 @@ internal static partial class BuiltInFormulaReferences
             var mesaV2Keys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for(var slot=0;slot<mesaV2Keys.Length;slot++){var key=mesaV2Keys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>MesaPredictV2Outputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.UltimateMomentumIndicator && builtIn.CreateOptions() is UltimateMomentumIndicatorSpecOptions ultimateMomentum && UltimateMomentumWindow.Supports(ultimateMomentum.MaType))
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>UltimateMomentumOutputs(bars,builtIn,indicator.Source is not null)["Utm"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

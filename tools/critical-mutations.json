@@ -92618,5 +92618,133 @@
     "before": "4.525,-8.45,8.145",
     "after": "4.125,-8.45,8.145",
     "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-flow-direction",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "price>_previous?product",
+    "after": "price<_previous?product",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-flow-expiry",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "_positive+positive-old.Positive",
+    "after": "_positive+positive",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-direction-expiry",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "-(removed>0?1:0)",
+    "after": "-(removed<0?1:0)",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-ratio",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "U(100)*advances",
+    "after": "U(100)*declines",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-net-sign",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "(advances-declines)",
+    "after": "(declines-advances)",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-variance",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "count*squares-sum*sum",
+    "after": "count*squares",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-center",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "current-center",
+    "after": "current+center",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-band-weight",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "200*position",
+    "after": "100*position",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-flow-weight",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "3*U(f1)+3*U(f2)",
+    "after": "2*U(f1)+3*U(f2)",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-settling",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "1.4210854715202004e-14",
+    "after": "1.0",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-strength",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "loss.IsZero?100",
+    "after": "loss.IsZero?0",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.FlatBlendKeepsRsiConventionAndFullSimpleWarmup"
+  },
+  {
+    "id": "ultimate-momentum-gain",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "BigInteger.Max(0,change)",
+    "after": "BigInteger.Max(0,-change)",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-preview",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "if(final){if(_directions.Count",
+    "after": "if(true){if(_directions.Count",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-reset",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "_hasBlend=false;}",
+    "after": "_hasBlend=true;}",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-signal",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Helpers/UltimateMomentumWindow.cs",
+    "before": "slope.Sign>0&&slope>_previousSlope",
+    "after": "slope.Sign>0&&slope<_previousSlope",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "ultimate-momentum-reference",
+    "module": "ultimate-momentum-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.UltimateMomentumExact.cs",
+    "before": "new R(200)*position",
+    "after": "new R(100)*position",
+    "filter": "FullyQualifiedName~UltimateMomentumNumericalTests.ExtremePricesVolumesAndBandsPreserveSignalsPreviewAndReset"
   }
 ]

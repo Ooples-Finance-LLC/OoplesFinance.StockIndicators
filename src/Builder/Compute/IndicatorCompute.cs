@@ -1926,6 +1926,8 @@ internal static partial class IndicatorCompute
                 => ComputeVervoortModifiedBandsFast(data,context,vm.MaType,vm.Length1,vm.Length2,vm.SmoothLength,vm.StdDevMult,spec.OutputKey ?? "PercentB"),
             EhlersFourierSeriesAnalysisSpecOptions fourier when spec.OutputKey is null or "Wave" or "Roc"
                 => ComputeFourierSeriesFast(data,context,fourier.Length,fourier.Bw,spec.OutputKey ?? "Wave"),
+            UltimateMomentumIndicatorSpecOptions ultimate when !ComponentAverage.HasOverrides && UltimateMomentumWindow.Supports(ultimate.MaType) && spec.OutputKey is null or "Utm"
+                => ComputeUltimateMomentumFast(data,context,ultimate.MaType,ultimate.Length1,ultimate.Length2,ultimate.Length3,ultimate.Length4,ultimate.Length5,ultimate.StdDevMult),
             VervoortVolatilityBandsSpecOptions vvb => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2,
@@ -16913,6 +16915,12 @@ internal static partial class IndicatorCompute
     {
         var result=FourierSeriesWindow.Calculate(data,length,bandwidth);var values=result.Outputs[key];var buffer=context.Rent(values.Count);
         for(var i=0;i<values.Count;i++)buffer.WritableSpan[i]=values[i];return buffer;
+    }
+
+    internal static ComputeBuffer ComputeUltimateMomentumFast(StockData data,ComputeContext context,MovingAvgType kind,int strength,int fast,int middle,int slow,int band,double multiplier)
+    {
+        var result=UltimateMomentumWindow.Calculate(data,kind,strength,fast,middle,slow,band,multiplier);var buffer=context.Rent(result.Values.Count);
+        for(var i=0;i<result.Values.Count;i++)buffer.WritableSpan[i]=result.Values[i];return buffer;
     }
 
     internal static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8,

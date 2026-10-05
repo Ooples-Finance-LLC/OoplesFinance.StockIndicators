@@ -21,6 +21,11 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 13, int length2 = 19, int length3 = 21, int length4 = 39,
         int length5 = 50, int length6 = 200, double stdDevMult = 1.5)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides && UltimateMomentumWindow.Supports(maType))
+        {
+            var safe=UltimateMomentumWindow.Calculate(stockData,maType,length1,length2,length3,length4,length5,stdDevMult);
+            stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Utm",safe.Values}});stockData.SetSignals(safe.Signals);stockData.SetCustomValues(safe.Values);stockData.IndicatorName=IndicatorName.UltimateMomentumIndicator;return stockData;
+        }
         // The components that read their own default input - a typical or median price - read the
         // CALLER's series instead whenever one is chained, and by the time this calculation calls them
         // an earlier component has already published its output onto CustomValuesList, which they would

@@ -717,18 +717,22 @@ public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Utm")]
 public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly McClellanOscillatorState _mo;
+    private readonly UltimateMomentumWindow? _safe;
+    private bool _selected;
+    private readonly McClellanOscillatorState _mo = null!;
     private double _previousBlend;
     private bool _hasBlend;
-    private readonly UltimateMomentumBand _bbPct;
-    private readonly MoneyFlowIndexState _mfi1;
-    private readonly MoneyFlowIndexState _mfi2;
-    private readonly MoneyFlowIndexState _mfi3;
-    private readonly UltimateMomentumStrength _strength;
+    private readonly UltimateMomentumBand _bbPct = null!;
+    private readonly MoneyFlowIndexState _mfi1 = null!;
+    private readonly MoneyFlowIndexState _mfi2 = null!;
+    private readonly MoneyFlowIndexState _mfi3 = null!;
+    private readonly UltimateMomentumStrength _strength = null!;
 
     public UltimateMomentumIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 13, int length2 = 19,
         int length3 = 21, int length4 = 39, int length5 = 50, int length6 = 200, double stdDevMult = 1.5)
     {
+        _safe=UltimateMomentumWindow.Supports(maType)?new(maType,length1,length2,length3,length4,length5,stdDevMult):null;
+        if(_safe is not null)return;
         _ = length6;
         _mo = new McClellanOscillatorState(maType, length2, length4, 9, 1000);
         _bbPct = new UltimateMomentumBand(maType, length5, stdDevMult);
@@ -744,6 +748,7 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
     // ones that must switch to reading the close.
     void ICustomInputConsumer.ReadCloseAsInput()
     {
+        _selected=true;if(_safe is not null)return;
         ((ICustomInputConsumer)_mfi1).ReadCloseAsInput();
         ((ICustomInputConsumer)_mfi2).ReadCloseAsInput();
         ((ICustomInputConsumer)_mfi3).ReadCloseAsInput();
@@ -751,6 +756,7 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
 
     public void Reset()
     {
+        if(_safe is not null){_safe.Reset();return;}
         _previousBlend = 0; _hasBlend = false;
         _mo.Reset();
         _bbPct.Reset();
@@ -763,6 +769,8 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
+        if(_safe is not null){var typical=_selected?bar.Close:RollingMoneyFlowIndex.TypicalPrice(bar.High,bar.Low,bar.Close);var p=_safe.Next(bar.Close,typical,bar.Volume,isFinal);return new(p.Value,includeOutputs?new Dictionary<string,double>{{"Utm",p.Value}}:null);}
+
         var moResult = _mo.Update(bar, isFinal, includeOutputs: true);
         var moOutputs = moResult.Outputs!;
         var advSum = moOutputs["AdvSum"];
@@ -793,6 +801,7 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
 
     public void Dispose()
     {
+        if(_safe is not null){_safe.Dispose();return;}
         _mo.Dispose();
         _bbPct.Dispose();
         _mfi1.Dispose();
