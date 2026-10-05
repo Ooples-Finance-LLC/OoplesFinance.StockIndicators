@@ -2111,6 +2111,11 @@ internal static partial class BuiltInFormulaReferences
             var smoothKeys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for(var slot=0;slot<smoothKeys.Length;slot++){var key=smoothKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>VervoortSmoothedOutputs(bars,builtIn,indicator.Source is not null)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.VolumeFlowIndicator && AverageKind(builtIn.CreateOptions(),1) is 1 or 2 or 3 or 6)
+        {
+            var flowKeys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<flowKeys.Length;slot++){var key=flowKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>VolumeFlowOutputs(bars,builtIn,indicator.Source is not null)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

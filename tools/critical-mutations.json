@@ -91982,5 +91982,134 @@
     "after": "rentedSmooth.WritableSpan[i]=-values[i]",
     "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.RoutesMatchIndependentTwoLegFormula",
     "scope": "internal static ComputeBuffer ComputeVervoortSmoothedOscillatorFast("
+  },
+  {
+    "id": "volume-flow-log",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "StableLogRatio.Of(price,_previousPrice)",
+    "after": "(price>0 && _previousPrice>0?Math.Log(price)-Math.Log(_previousPrice):0)",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.AdjacentLargePricesRetainLogarithmicCutoff"
+  },
+  {
+    "id": "volume-flow-variance-expiry",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "var expired=_returns.Count==_variancePeriod?_returns.Peek():BigInteger.Zero",
+    "after": "var expired=BigInteger.Zero",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ExtremePricesAndVolumesPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "volume-flow-variance-center",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "_variancePeriod*squares-sum*sum",
+    "after": "_variancePeriod*squares+sum*sum",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ConstantLogReturnHasZeroCenteredVariance"
+  },
+  {
+    "id": "volume-flow-cutoff",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "Number.Of(close)*Number.Of(_coefficient)",
+    "after": "Number.Of(close)*Number.Of(1)",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ConstantLogReturnHasZeroCenteredVariance"
+  },
+  {
+    "id": "volume-flow-previous-cap",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "_previousAverage*U(_volumeCoefficient)",
+    "after": "average*U(_volumeCoefficient)",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.HandUsesPreviousVolumeCapAndCurrentNormalization"
+  },
+  {
+    "id": "volume-flow-cap-min",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "BigInteger.Min(U(volume),cap)",
+    "after": "BigInteger.Max(U(volume),cap)",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.HandUsesPreviousVolumeCapAndCurrentNormalization"
+  },
+  {
+    "id": "volume-flow-sell",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "?-capped:BigInteger.Zero",
+    "after": "?capped:BigInteger.Zero",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.HandUsesPreviousVolumeCapAndCurrentNormalization"
+  },
+  {
+    "id": "volume-flow-sum-expiry",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "_flows.Count==_flowPeriod?_flows.Peek():BigInteger.Zero",
+    "after": "_flows.Count>_flowPeriod?_flows.Peek():BigInteger.Zero",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ExtremePricesAndVolumesPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "volume-flow-normalize",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "BigInteger.Abs(average)",
+    "after": "BigInteger.One<<1074",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.HandUsesPreviousVolumeCapAndCurrentNormalization"
+  },
+  {
+    "id": "volume-flow-signal",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "_signal.Next(line,final)",
+    "after": "_signal.Next(Value(normalized),final)",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ExtremePricesAndVolumesPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "volume-flow-histogram",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "var difference=U(line)-U(signal)",
+    "after": "var difference=U(line)+U(signal)",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ExtremePricesAndVolumesPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "volume-flow-trade",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "Signal.StrongBuy:roundedDifference",
+    "after": "Signal.StrongSell:roundedDifference",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ExtremePricesAndVolumesPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "volume-flow-preview",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "if(final){if(_returns",
+    "after": "if(true){if(_returns",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ExtremePricesAndVolumesPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "volume-flow-reset",
+    "module": "volume-flow-numerical",
+    "file": "src/Helpers/VolumeFlowWindow.cs",
+    "before": "_hasPrevious=false",
+    "after": "_hasPrevious=true",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.ResetDoesNotInventFirstChangeForSignedVolume"
+  },
+  {
+    "id": "volume-flow-reference",
+    "module": "volume-flow-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.VolumeFlow.cs",
+    "before": "flows[i]=Compare(factor)<0?capped",
+    "after": "flows[i]=Compare(factor)<0?R(0)",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.RoutesMatchIndependentCappedFlow"
+  },
+  {
+    "id": "volume-flow-fast",
+    "module": "volume-flow-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rentedFlow.WritableSpan[i]=values[i]",
+    "after": "rentedFlow.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~VolumeFlowNumericalTests.RoutesMatchIndependentCappedFlow",
+    "scope": "internal static ComputeBuffer ComputeVolumeFlowIndicatorFast("
   }
 ]

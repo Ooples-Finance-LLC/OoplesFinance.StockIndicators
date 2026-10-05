@@ -19754,6 +19754,11 @@ internal static partial class IndicatorCompute
         int length2 = 30, int signalLength = 5, int smoothLength = 3, double coef = 0.2, double vcoef = 2.5,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, MacdSeries series = MacdSeries.Line)
     {
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result=VolumeFlowWindow.Calculate(data,maType,length1,length2,signalLength,smoothLength,coef,vcoef);var values=result.Outputs[series==MacdSeries.Signal?"Signal":series==MacdSeries.Histogram?"Histogram":"Vfi"];var rentedFlow=context.Rent(values.Count);
+            for(var i=0;i<values.Count;i++)rentedFlow.WritableSpan[i]=values[i];return rentedFlow;
+        }
         // CalculateVolumeFlowIndicator works on the typical price, or on the chained series when one is
         // chained. It compares each bar's typical price change against a cutoff set by the close, the deviation
         // of the log returns over length2 and a coefficient, and counts the bar's volume - capped at a multiple

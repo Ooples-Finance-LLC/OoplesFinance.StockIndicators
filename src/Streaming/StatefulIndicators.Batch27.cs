@@ -8,17 +8,19 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Vfi")]
 public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
+    private readonly VolumeFlowWindow? _safe;
+    private bool _selected;
     private readonly int _length1;
     private readonly int _length2;
     private readonly double _coef;
     private readonly double _vcoef;
-    private readonly RollingWindowSum _vcpSum;
+    private readonly RollingWindowSum _vcpSum = null!;
 
     // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _vinter;
-    private readonly IMovingAverageSmoother _volumeMa;
-    private readonly IMovingAverageSmoother _vfiMa;
-    private readonly IMovingAverageSmoother _signalMa;
+    private readonly RollingStandardDeviation _vinter = null!;
+    private readonly IMovingAverageSmoother _volumeMa = null!;
+    private readonly IMovingAverageSmoother _vfiMa = null!;
+    private readonly IMovingAverageSmoother _signalMa = null!;
     private StreamingInputResolver _input;
     private double _prevValue;
     private double _prevVave;
@@ -27,6 +29,8 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
     public VolumeFlowIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 130, int length2 = 30,
         int signalLength = 5, int smoothLength = 3, double coef = 0.2, double vcoef = 2.5)
     {
+        _safe=StrengthWindow.Supports(maType)?new(maType,length1,length2,signalLength,smoothLength,coef,vcoef):null;
+        if(_safe is not null)return;
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
         _coef = coef;
@@ -42,11 +46,12 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
 
     public IndicatorName Name => IndicatorName.VolumeFlowIndicator;
 
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
+    void ICustomInputConsumer.ReadCloseAsInput()
+    { _selected=true;_input = new StreamingInputResolver(InputName.Close, null); }
 
     public void Reset()
     {
+        if(_safe is not null){_safe.Reset();return;}
         _vcpSum.Reset();
         _vinter.Reset();
         _volumeMa.Reset();
@@ -59,6 +64,12 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        if(_safe is not null)
+        {
+            StreamingInputValidation.Validate(bar);var typical=new ExactMeanAccumulator();typical.Add(bar.High);typical.Add(bar.Low);typical.Add(bar.Close);
+            var point=_safe.Next(_selected?bar.Close:typical.Mean(3),bar.Close,bar.Volume,isFinal);
+            return new(point.Line,includeOutputs?new Dictionary<string,double>{{"Vfi",point.Line},{"Signal",point.Signal},{"Histogram",point.Histogram}}:null);
+        }
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var inter = value > 0 && prevValue > 0 ? Math.Log(value) - Math.Log(prevValue) : 0;
@@ -102,6 +113,7 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
 
     public void Dispose()
     {
+        if(_safe is not null){_safe.Dispose();return;}
         _vcpSum.Dispose();
         _vinter.Dispose();
         _volumeMa.Dispose();

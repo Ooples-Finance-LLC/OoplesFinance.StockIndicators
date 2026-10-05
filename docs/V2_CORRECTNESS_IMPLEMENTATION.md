@@ -6161,3 +6161,18 @@ reset survivor and crediting its targeted repair (`si-vsmooth1285-qualified.json
 Seven main integration checks passed (`vsmooth1286-integration.trx`).
 Enrollment is 7,040/7,131, leaving 91 configurations across nine types
 (`si-vsmooth1288-inventory.json`). Final assurance remains incomplete.
+
+
+### Volume Flow qualification (batch 1306)
+
+Thirteen configurations retain the previous-volume cap, current-volume
+normalization, full-window log-return deviation and separate signal average.
+Stable logarithmic ratios distinguish adjacent large prices. Exact variance
+and algebraic cutoff comparisons avoid overflowing products; extended rounded
+averages and lazy histories preserve finite results and large-period startup.
+All 100 distinct focused checks passed. All 16 compiled faults were caught
+(`si-volumeflow1301-qualified.json`); centered-variance and signed-volume
+reset survivors were excluded and caught by targeted regressions. Eleven main
+integration checks passed (`volumeflow1303-integration.trx`). Enrollment is
+7,053/7,131, leaving 78 configurations across eight types
+(`si-volumeflow1306-inventory.json`). Final assurance remains incomplete.

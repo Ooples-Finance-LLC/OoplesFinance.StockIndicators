@@ -1524,3 +1524,12 @@ existing relative small-spread cutoff is retained. The secondary uses rounded
 rainbow stages and the typical-price blend with the original asymmetric
 stochastic denominator. Core/registry now use the public primary formula,
 with the core length mapped to band period and other public defaults retained.
+
+
+### Volume Flow logarithmic cutoff and volume cap
+
+Log returns use stable positive-price ratios, retaining zero for nonpositive
+endpoints. The full-window population variance feeds an exact algebraic cutoff
+comparison. The signed flow is capped by the previous volume average and
+normalized by the current one. Signal and histogram stages retain their
+rounded-average contract; default typical-price means are rounded once.

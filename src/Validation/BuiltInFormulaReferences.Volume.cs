@@ -82,30 +82,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Tvi", line), ("Signal", Average(line, length, kind)));
                 });
             case IndicatorName.VolumeFlowIndicator:
-                if (kind == 0) return null;
-                return new("Vfi", new[] { "Vfi", "Signal", "Histogram" }, bars =>
-                {
-                    var flowPeriod = Integer(options, "Length1", 130);
-                    var variancePeriod = Integer(options, "Length2", 30);
-                    var prices = bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray();
-                    var returns = prices.Select((p, i) => i == 0 || p <= 0 || prices[i - 1] <= 0 ? 0 : Math.Log(p / prices[i - 1])).ToArray();
-                    var deviations = PopulationVariance(returns, variancePeriod).Select(Math.Sqrt).ToArray();
-                    var volume = Average(bars.Select(b => b.Volume).ToArray(), flowPeriod, kind);
-                    var cutoffScale = Number(options, .2, "Coef");
-                    var volumeCap = Number(options, 2.5, "Vcoef");
-                    var flow = prices.Select((p, i) =>
-                    {
-                        if (i == 0) return 0;
-                        var change = p - prices[i - 1];
-                        var threshold = bars[i].Close * deviations[i] * cutoffScale;
-                        var capped = Math.Min(bars[i].Volume, volumeCap * volume[i - 1]);
-                        return change > threshold ? capped : change < -threshold ? -capped : 0;
-                    }).ToArray();
-                    var normalized = flow.Select((_, i) => volume[i] == 0 ? 0 : Window(flow, i, flowPeriod).Sum() / volume[i]).ToArray();
-                    var line = Average(normalized, Integer(options, "SmoothLength", 3), kind);
-                    var signal = Average(line, Integer(options, "SignalLength", 5), 3);
-                    return Outputs(("Vfi", line), ("Signal", signal), ("Histogram", line.Zip(signal, (v, m) => v - m).ToArray()));
-                });
+                if(kind==0)return null;
+                return new("Vfi",new[]{"Vfi","Signal","Histogram"},bars=>VolumeFlowOutputs(bars,indicator));
             case IndicatorName.UpsideDownsideVolume:
                 return Single("Udv", bars =>
                 {

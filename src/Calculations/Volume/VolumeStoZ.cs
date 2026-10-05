@@ -454,6 +454,11 @@ public static partial class Calculations
     public static StockData CalculateVolumeFlowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3,
         double coef = 0.2, double vcoef = 2.5)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result=VolumeFlowWindow.Calculate(stockData,maType,length1,length2,signalLength,smoothLength,coef,vcoef);
+            stockData.SetOutputValues(()=>result.Outputs);stockData.SetCustomValues(result.Outputs["Vfi"]);stockData.SetSignals(result.Signals);stockData.IndicatorName=IndicatorName.VolumeFlowIndicator;return stockData;
+        }
         List<double> interList = new(stockData.Count);
         List<double> tempList = new(stockData.Count);
         List<double> vcpList = new(stockData.Count);
