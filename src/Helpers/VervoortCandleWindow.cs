@@ -54,7 +54,7 @@ internal sealed class VervoortCandleWindow : IDisposable
         var downKeep=_longTerm?downSeed || _downSeed && falling:(downSeed || _downSeed) && falling;
         var upTrend=upKeep || _upKeep && narrow && high>=_low;
         var downTrend=_longTerm?(downKeep || _downKeep) && narrow && low<=_high:downKeep || _downKeep && narrow && low<=_high;
-        var up=!downTrend && _downTrend && upTrend;var down=!upTrend && _upTrend && downTrend;
+        var up = !downTrend && _downTrend && upTrend;var down = !upTrend && _upTrend && downTrend;
         var line=up?1:down?-1:_line;
         var trade=line>0?line>_line?Signal.StrongBuy:Signal.Buy:line<0?line<_line?Signal.StrongSell:Signal.Sell:Signal.None;
         if(final)
