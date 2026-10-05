@@ -711,164 +711,19 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
 [PrimaryOutput("Vso")]
 public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly double _stdDevMult;
-    private readonly VervoortBandPosition _bandPosition;
-    private readonly IMovingAverageSmoother _r1Sma;
-    private readonly IMovingAverageSmoother _r2Sma;
-    private readonly IMovingAverageSmoother _r3Sma;
-    private readonly IMovingAverageSmoother _r4Sma;
-    private readonly IMovingAverageSmoother _r5Sma;
-    private readonly IMovingAverageSmoother _r6Sma;
-    private readonly IMovingAverageSmoother _r7Sma;
-    private readonly IMovingAverageSmoother _r8Sma;
-    private readonly IMovingAverageSmoother _r9Sma;
-    private readonly IMovingAverageSmoother _r10Sma;
-    private readonly IMovingAverageSmoother _ema1;
-    private readonly IMovingAverageSmoother _ema2;
-    private readonly IMovingAverageSmoother _tema;
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _wma;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly RollingWindowMin _rbcMinWindow;
-    private readonly RollingWindowSum _fastKSum;
-    private StreamingInputResolver _input;
-
-    public VervoortSmoothedOscillatorState(int length1 = 18,
-        int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
+    private readonly VervoortSmoothedWindow _window;
+    private bool _selected;
+    public VervoortSmoothedOscillatorState(int length1=18,int length2=30,int length3=2,int smoothLength=3,double stdDevMult=2)
+        =>_window=new(length1,length2,length3,smoothLength,stdDevMult);
+    public IndicatorName Name=>IndicatorName.VervoortSmoothedOscillator;
+    void ICustomInputConsumer.ReadCloseAsInput()=>_selected=true;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var resolvedLength3 = Math.Max(1, length3);
-        var resolvedSmoothLength = Math.Max(1, smoothLength);
-        _stdDevMult = stdDevMult;
-        _bandPosition = new VervoortBandPosition(length1, length3, smoothLength, stdDevMult);
-        _r1Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r2Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r3Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r4Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r5Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r6Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r7Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r8Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r9Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r10Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
-        _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
-        _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        // No moving-average type, and no selector: the smoothed series is passed to Next directly.
-        _stdDev = new RollingStandardDeviation(resolvedLength1);
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
-        _highWindow = new RollingWindowMax(resolvedLength2);
-        _lowWindow = new RollingWindowMin(resolvedLength2);
-        _rbcMinWindow = new RollingWindowMin(resolvedLength2);
-        _fastKSum = new RollingWindowSum(resolvedSmoothLength);
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
+        StreamingInputValidation.Validate(bar);var typical=new ExactMeanAccumulator();typical.Add(bar.High);typical.Add(bar.Low);typical.Add(bar.Close);var point=_window.Next(bar.Close,_selected?bar.Close:typical.Mean(3),bar.High,bar.Low,isFinal);
+        return new(point.Line,includeOutputs?new Dictionary<string,double>{{"Vso",point.Line},{"Sk",point.Stochastic}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.VervoortSmoothedOscillator;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _bandPosition.Reset();
-        _r1Sma.Reset();
-        _r2Sma.Reset();
-        _r3Sma.Reset();
-        _r4Sma.Reset();
-        _r5Sma.Reset();
-        _r6Sma.Reset();
-        _r7Sma.Reset();
-        _r8Sma.Reset();
-        _r9Sma.Reset();
-        _r10Sma.Reset();
-        _ema1.Reset();
-        _ema2.Reset();
-        _tema.Reset();
-        _stdDev.Reset();
-        _wma.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _rbcMinWindow.Reset();
-        _fastKSum.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var inputValue = _input.GetValue(bar);
-        var close = bar.Close;
-        var r1 = _r1Sma.Next(close, isFinal);
-        var r2 = _r2Sma.Next(r1, isFinal);
-        var r3 = _r3Sma.Next(r2, isFinal);
-        var r4 = _r4Sma.Next(r3, isFinal);
-        var r5 = _r5Sma.Next(r4, isFinal);
-        var r6 = _r6Sma.Next(r5, isFinal);
-        var r7 = _r7Sma.Next(r6, isFinal);
-        var r8 = _r8Sma.Next(r7, isFinal);
-        var r9 = _r9Sma.Next(r8, isFinal);
-        var r10 = _r10Sma.Next(r9, isFinal);
-        var rainbow = ((5 * r1) + (4 * r2) + (3 * r3) + (2 * r4) + r5 + r6 + r7 + r8 + r9 + r10) / 20d;
-
-        var ema1 = _ema1.Next(rainbow, isFinal);
-        var ema2 = _ema2.Next(ema1, isFinal);
-        var zlrb = (2 * ema1) - ema2;
-        var tz = _tema.Next(zlrb, isFinal);
-        // Vervoort's band width is the deviation of TZ, as the batch computes it - not of the close. Passed
-        // to Next directly, so the series being measured is visible at the call rather than held in a field.
-        var hwidth = _stdDev.Next(tz, isFinal);
-        var wmatz = _wma.Next(tz, isFinal);
-        var zlrbpercb = _bandPosition.Next(close, isFinal);
-
-        var rbc = (rainbow + inputValue) / 2;
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var lowestRbc = isFinal ? _rbcMinWindow.Add(rbc, out _) : _rbcMinWindow.Preview(rbc, out _);
-        var nom = rbc - lowest;
-        var den = highest - lowestRbc;
-        var fastK = den != 0 ? MathHelper.MinOrMax(100 * nom / den, 100, 0) : 0;
-        int fastKCount;
-        var fastKSum = isFinal ? _fastKSum.Add(fastK, out fastKCount) : _fastKSum.Preview(fastK, out fastKCount);
-        var sk = fastKCount > 0 ? fastKSum / fastKCount : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Vso", zlrbpercb },
-                { "Sk", sk }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(zlrbpercb, outputs);
-    }
-
-    public void Dispose()
-    {
-        _bandPosition.Dispose();
-        _r1Sma.Dispose();
-        _r2Sma.Dispose();
-        _r3Sma.Dispose();
-        _r4Sma.Dispose();
-        _r5Sma.Dispose();
-        _r6Sma.Dispose();
-        _r7Sma.Dispose();
-        _r8Sma.Dispose();
-        _r9Sma.Dispose();
-        _r10Sma.Dispose();
-        _ema1.Dispose();
-        _ema2.Dispose();
-        _tema.Dispose();
-        _stdDev.Dispose();
-        _wma.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _rbcMinWindow.Dispose();
-        _fastKSum.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

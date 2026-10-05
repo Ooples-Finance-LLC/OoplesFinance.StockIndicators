@@ -41,39 +41,7 @@ internal static partial class BuiltInFormulaReferences
             });
         }
         if (indicator.BatchName == IndicatorName.VervoortSmoothedOscillator)
-        {
-            var opts = indicator.CreateOptions();
-            var bandPeriod = Integer(opts, "Length1"); var rangePeriod = Integer(opts, "Length2");
-            var cascadePeriod = Integer(opts, "Length3"); var smoothPeriod = Integer(opts, "SmoothLength");
-            var multiplier = Number(opts, 2, "StdDevMult");
-            return new("Vso", new[] { "Vso", "Sk" }, bars =>
-            {
-                var prices = Closes(bars); var layers = new List<double[]>(); var stage = prices;
-                for (var depth = 0; depth < 10; depth++) { stage = Average(stage, cascadePeriod, 1); layers.Add(stage); }
-                var rainbow = prices.Select((_, i) => layers.Select((layer, depth) => layer[i]*Math.Max(1, 5-depth)).Sum()/20).ToArray();
-                var preciseLayers = new List<decimal[]>(); var preciseStage = prices.Select(v => (decimal)v).ToArray();
-                for (var depth = 0; depth < 10; depth++) { preciseStage = MotionDecimalAverage(preciseStage, cascadePeriod, 1); preciseLayers.Add(preciseStage); }
-                var exactRainbow = prices.Select((_, i) => preciseLayers.Select((layer, depth) => layer[i]*Math.Max(1, 5-depth)).Sum()/20).ToArray();
-                var filtered = MotionDecimalAverage(MotionDecimalAverage(exactRainbow, smoothPeriod, 4), smoothPeriod, 5);
-                var center = MotionDecimalAverage(filtered, bandPeriod, 2);
-                var position = filtered.Select((v, i) =>
-                {
-                    if (i+1 < bandPeriod || multiplier == 0) return 0d;
-                    var window = Window(filtered, i, bandPeriod).ToArray(); var mean = window.Average();
-                    var sigma = Math.Sqrt(window.Average(x => Math.Pow((double)(x-mean), 2)));
-                    return sigma <= 64*Math.Pow(2, -52)*(double)window.Max(Math.Abs) ? 0
-                        : 50+50*(double)(v-center[i])/(multiplier*sigma);
-                }).ToArray();
-                var blended = bars.Select((b, i) => (rainbow[i]+(b.High+b.Low+b.Close)/3)/2).ToArray();
-                var stochastic = prices.Select((_, i) =>
-                {
-                    var candles = Window(bars, i, rangePeriod).ToArray();
-                    var denominator = candles.Max(b => b.High)-Window(blended, i, rangePeriod).Min();
-                    return denominator == 0 ? 0 : Clamp(100*(blended[i]-candles.Min(b => b.Low))/denominator, 0, 100);
-                }).ToArray();
-                return Outputs(("Vso", position), ("Sk", stochastic.Select((_, i) => Window(stochastic, i, smoothPeriod).Average()).ToArray()));
-            });
-        }
+            return new("Vso",new[]{"Vso","Sk"},bars=>VervoortSmoothedOutputs(bars,indicator));
 
         var longTerm = indicator.BatchName == IndicatorName.VervoortHeikenAshiLongTermCandlestickOscillator;
         if (!longTerm && indicator.BatchName != IndicatorName.VervoortHeikenAshiCandlestickOscillator) return null;

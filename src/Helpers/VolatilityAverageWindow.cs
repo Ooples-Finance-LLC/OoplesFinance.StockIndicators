@@ -106,7 +106,7 @@ internal sealed class VolatilityAverageWindow : IDisposable
         }
         internal void Reset() { _values.Clear(); _sum = _squares = default; }
     }
-    private sealed class Average
+    internal sealed class Average
     {
         private readonly MovingAvgType _kind;
         private readonly int _length;

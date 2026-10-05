@@ -8951,6 +8951,12 @@ internal static partial class IndicatorCompute
         int length1 = 18, int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2,
         VervoortSmoothedSeries series = VervoortSmoothedSeries.Oscillator)
     {
+        if (!ComponentAverage.HasOverrides)
+        {
+            var result=VervoortSmoothedWindow.Calculate(data,length1,length2,length3,smoothLength,stdDevMult);
+            var values=result.Outputs[series==VervoortSmoothedSeries.Oscillator?"Vso":"Sk"];var rentedSmooth=context.Rent(values.Count);
+            for(var i=0;i<values.Count;i++)rentedSmooth.WritableSpan[i]=values[i];return rentedSmooth;
+        }
         // CalculateVervoortSmoothedOscillator builds a rainbow from ten successive simple averages of the
         // close, weighted 5-4-3-2 then 1 apiece, zero-lags it through a pair of exponential averages, smooths
         // that with a triple exponential average, and reports where the result sits inside a band of

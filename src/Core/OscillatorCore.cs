@@ -4907,35 +4907,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VervoortSmoothedOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(close.Length);
-        var demaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, close.Length);
-            var dema = demaArray.AsSpan(0, close.Length);
-
-            // Calculate EMA
-            MovingAverageCore.ExponentialMovingAverage(close, ema, length);
-            MovingAverageCore.ExponentialMovingAverage(ema, dema, length);
-
-            // Oscillator = 2 * EMA - DEMA (Smoothed)
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = close[i] - (2 * ema[i] - dema[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(demaArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        var prices=close.ToArray();foreach(var price in prices)Streaming.StreamingInputValidation.Finite(price,nameof(close));
+        using var state=new VervoortSmoothedWindow(length,30,2,3,2);
+        for(var i=0;i<prices.Length;i++)output[i]=state.Next(prices[i],prices[i],prices[i],prices[i],true).Line;
     }
 
     /// <summary>

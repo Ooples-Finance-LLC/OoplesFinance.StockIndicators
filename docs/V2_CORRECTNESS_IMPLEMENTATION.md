@@ -6146,3 +6146,18 @@ Seventy focused checks passed and all 14 compiled mutation faults were caught
 (`vvol1269-integration.trx`). Enrollment is 7,026/7,131, leaving 105
 configurations across 10 types (`si-vvol1270-inventory.json`).
 Final assurance remains incomplete.
+
+
+### Vervoort Smoothed Oscillator qualification (batch 1288)
+
+Fourteen configurations preserve the exact primary rainbow/DEMA/TEMA band
+position and the separate rounded stochastic leg, including its existing
+small-spread cutoff. Exact local typical-price means align routes and the
+independent reference. Histories grow with observed samples. The core now
+returns the public primary formula with its existing default band period14.
+All 104 distinct focused checks passed; a strengthened signal-history reset
+check also passed. All 16 compiled faults were caught, excluding the original
+reset survivor and crediting its targeted repair (`si-vsmooth1285-qualified.json`).
+Seven main integration checks passed (`vsmooth1286-integration.trx`).
+Enrollment is 7,040/7,131, leaving 91 configurations across nine types
+(`si-vsmooth1288-inventory.json`). Final assurance remains incomplete.

@@ -753,6 +753,11 @@ public static partial class Calculations
     public static StockData CalculateVervoortSmoothedOscillator(this StockData stockData,
         int length1 = 18, int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result=VervoortSmoothedWindow.Calculate(stockData,length1,length2,length3,smoothLength,stdDevMult);
+            stockData.SetOutputValues(()=>result.Outputs);stockData.SetCustomValues(result.Outputs["Vso"]);stockData.SetSignals(result.Signals);stockData.IndicatorName=IndicatorName.VervoortSmoothedOscillator;return stockData;
+        }
         using var bandPosition = !Builder.Compute.ComponentAverage.HasOverrides ? new Streaming.VervoortBandPosition(length1, length3, smoothLength, stdDevMult) : null;
         List<double> rainbowList = new(stockData.Count);
         List<double> zlrbList = new(stockData.Count);

@@ -84326,7 +84326,7 @@
     "id": "volatility-average-wide-mean-floor",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "Math.Max(1, length)",
     "after": "Math.Max(2, length)",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremePeriodsUseObservedHistory"
@@ -84335,7 +84335,7 @@
     "id": "volatility-average-wide-weight-aging",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "weighted - sum +",
     "after": "weighted + sum +",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
@@ -84344,7 +84344,7 @@
     "id": "volatility-average-wide-mean-expiry",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "if (_history.Count == _length) sum -= _history.Peek();",
     "after": "if (_history.Count > _length) sum -= _history.Peek();",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
@@ -84353,7 +84353,7 @@
     "id": "volatility-average-wide-weight-divisor",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "(long)_length * (_length + 1L) / 2",
     "after": "(long)_length * _length",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
@@ -84362,7 +84362,7 @@
     "id": "volatility-average-wide-sma-warmup",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "_count + 1 < _length",
     "after": "_count + 1 < _length - 1",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.SmaOutputWaitsForCompleteWarmup"
@@ -84371,7 +84371,7 @@
     "id": "volatility-average-wide-ema-warmup",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "_count < _length",
     "after": "_count < _length - 1",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
@@ -84380,7 +84380,7 @@
     "id": "volatility-average-wide-recursive-pole",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "Number.Integer(_length - 1L)",
     "after": "Number.Integer(_length)",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
@@ -84389,7 +84389,7 @@
     "id": "volatility-average-wide-mean-preview",
     "module": "numerical",
     "file": "src/Helpers/VolatilityAverageWindow.cs",
-    "scope": "private sealed class Average",
+    "scope": "internal sealed class Average",
     "before": "if (final)",
     "after": "if (true)",
     "filter": "FullyQualifiedName~VolatilityAverageNumericalTests.ExtremeSignedAndSubnormalPricesRetainPeriods"
@@ -91852,5 +91852,135 @@
     "after": "rentedBand.WritableSpan[i]=-values[i]",
     "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.RoutesMatchIndependentAsymmetricBands",
     "scope": "internal static ComputeBuffer ComputeVervoortVolatilityBandsFast("
+  },
+  {
+    "id": "vervoort-smoothed-cascade-weight",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "rainbow+=exact.Times(Math.Max(1,5-i))",
+    "after": "rainbow+=exact.Times(Math.Max(1,4-i))",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-dema",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "first.Times(2)-second",
+    "after": "first.Times(3)-second",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-tema",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "a.Times(3)-b.Times(3)+c",
+    "after": "a.Times(3)-b.Times(2)+c",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-variance",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "squares.Times(_band)-sum*sum",
+    "after": "squares.Times(_band)+sum*sum",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-cutoff",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "(variance-threshold*threshold).Sign>0",
+    "after": "variance.Sign>0",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.AnalyticBandAndSmallSpreadCutoff"
+  },
+  {
+    "id": "vervoort-smoothed-band-expiry",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "var expired=full?_filtered.Peek():default",
+    "after": "var expired=default(Number)",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-band-multiplier",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "Divide(Number.Of(_multiplier))",
+    "after": "Divide(Number.Of(1))",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-stochastic-numerator",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "blendUnits-ExactVarianceWindow.Units(lowest)",
+    "after": "blendUnits-ExactVarianceWindow.Units(highest)",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.HandKeepsDistinctStochasticLeg"
+  },
+  {
+    "id": "vervoort-smoothed-stochastic-denominator",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "ExactVarianceWindow.Units(highest)-minimum",
+    "after": "ExactVarianceWindow.Units(highest)-ExactVarianceWindow.Units(lowest)",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.HandKeepsDistinctStochasticLeg"
+  },
+  {
+    "id": "vervoort-smoothed-stochastic-expiry",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "sum.Add(_oscillator.Peek(),-1)",
+    "after": "sum.Add(_oscillator.Peek(),1)",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-signals",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "Signal.Buy:stochastic",
+    "after": "Signal.Sell:stochastic",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-preview",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "if(final)\n        {if(_candles",
+    "after": "if(true)\n        {if(_candles",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-reset",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Helpers/VervoortSmoothedWindow.cs",
+    "before": "_previousLine=_previousSk=0",
+    "after": "_previousLine=_previousSk=123",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.ExtremePricesPreserveBothLegsSignalsPreviewAndReset"
+  },
+  {
+    "id": "vervoort-smoothed-reference",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.VervoortSmoothed.cs",
+    "before": "R(3)*v-R(3)*b[i]+c[i]",
+    "after": "R(2)*v-R(3)*b[i]+c[i]",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.RoutesMatchIndependentTwoLegFormula"
+  },
+  {
+    "id": "vervoort-smoothed-core",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "output[i]=state.Next(prices[i],prices[i],prices[i],prices[i],true).Line",
+    "after": "output[i]=-state.Next(prices[i],prices[i],prices[i],prices[i],true).Line",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.CorePreservesPublicPrimaryAndOverlappingInput",
+    "scope": "internal static void VervoortSmoothedOscillator("
+  },
+  {
+    "id": "vervoort-smoothed-fast",
+    "module": "vervoort-smoothed-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rentedSmooth.WritableSpan[i]=values[i]",
+    "after": "rentedSmooth.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~VervoortSmoothedNumericalTests.RoutesMatchIndependentTwoLegFormula",
+    "scope": "internal static ComputeBuffer ComputeVervoortSmoothedOscillatorFast("
   }
 ]

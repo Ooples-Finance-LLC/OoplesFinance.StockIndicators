@@ -1514,3 +1514,13 @@ Rising prices measure reach from the previous low; falling prices use the
 current low. The bands retain their observed-window averages, distinct lower
 multiplier and middle-band formula. Intermediate ranges use extended rounded
 arithmetic and histories allocate only observed samples.
+
+
+### Vervoort Smoothed Oscillator primary and stochastic legs
+
+The primary uses ten exact SMA stages, the 5/4/3/2/1/1/1/1/1/1 rainbow,
+DEMA then TEMA, a weighted center and full-window population deviation. Its
+existing relative small-spread cutoff is retained. The secondary uses rounded
+rainbow stages and the typical-price blend with the original asymmetric
+stochastic denominator. Core/registry now use the public primary formula,
+with the core length mapped to band period and other public defaults retained.
