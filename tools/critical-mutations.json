@@ -93268,5 +93268,13 @@
     "before": "=> MovingAverageCore.EhlersVariableIndexDynamicAverage(input, output, length);",
     "after": "=> MovingAverageCore.Vidya(input, output, length);",
     "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
+  },
+  {
+    "id": "vidya-expanded-fast-ehlers-formula",
+    "module": "vidya-core-routing",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "internal static ComputeBuffer ComputeVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)\n    {\n        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;\n        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);\n        var buffer = context.Rent(inputList.Count);\n        MovingAverageCore.Vidya(inputSpan, buffer.WritableSpan, length);",
+    "after": "internal static ComputeBuffer ComputeVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)\n    {\n        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;\n        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);\n        var buffer = context.Rent(inputList.Count);\n        MovingAverageCore.EhlersVariableIndexDynamicAverage(inputSpan, buffer.WritableSpan, length);",
+    "filter": "FullyQualifiedName~VidyaNumericalTests.BothFastAliasesRetainOrdinaryMomentumAndPeriod"
   }
 ]

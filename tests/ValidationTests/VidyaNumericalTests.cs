@@ -11,6 +11,24 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 public sealed class VidyaNumericalTests
 {
+    [Theory]
+    [InlineData(1, 120d)]
+    [InlineData(3, 100d)]
+    [InlineData(14, 85.33333333333333)]
+    public void BothFastAliasesRetainOrdinaryMomentumAndPeriod(int length, double second)
+    {
+        // Positive momentum gives |CMO| = 1, so the second value is
+        // 80 + (120 - 80) * 2/(length + 1), rounded at the blend stage.
+        var prices = new[] { 80d, 120d };
+        var data = new StockData(prices, prices, prices, prices, new[] { 1d, 1d },
+            new[] { DateTime.UnixEpoch, DateTime.UnixEpoch.AddMinutes(1) });
+        using var context = new ComputeContext();
+        using var compact = IndicatorCompute.ComputeVidyaFast(data, context, length);
+        using var expanded = IndicatorCompute.ComputeVariableIndexDynamicAverageFast(data, context, length);
+        Assert.Equal(new[] { 80d, second }, compact.ToArray());
+        Assert.Equal(new[] { 80d, second }, expanded.ToArray());
+    }
+
     public static IEnumerable<object[]> Cases => IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
         .Where(c => c.Factory() is IBuiltInIndicator b && b.BatchName == IndicatorName.VariableIndexDynamicAverage)
         .Select(c => new object[] { c });

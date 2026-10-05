@@ -6485,3 +6485,24 @@ failures/skips. All 12 original-suite failures observed so far have corrected
 passing reruns. These are test-only repairs: the three candidate-1413 package
 consumers remain valid and active. The original suite, package runs, hosted
 platform checks and actual benchmark timings are still incomplete.
+
+
+### Ordinary VIDYA fast-route correction (batch 1424)
+
+Candidate 1413 exposed reference failures in all five expanded
+`VariableIndexDynamicAverage` configurations. Its fast path still delegated to
+the Ehlers core, whose approved 9/30 alignment made the formulas distinct.
+The expanded fast path now delegates to the existing ordinary VIDYA core,
+matching the compact alias and preserving its period-dependent momentum formula.
+The remaining Ehlers-core callers were checked and select Ehlers explicitly.
+
+All 65 focused ordinary/Ehlers VIDYA checks pass
+(`final1424-vidya-routing.trx`). Three new hand cases cover periods 1, 3 and 14.
+Restoring the wrong core call produces three compiled assertion failures from
+a three-test passing baseline (`si-final1424-qualified.json`): one behavioral
+mutation kill. All 10,766 anchors resolve and 19 mutation/sharding checks pass.
+
+Candidate 1413 is superseded. Its ongoing runs are retained to collect further
+failures; they cannot establish correctness of the corrected package. The
+original full suite still has only the 12 previously repaired failures.
+Corrected exact-package execution and final benchmark timings remain pending.
