@@ -2,7 +2,7 @@
 
 Tracking issue: https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/244
 
-Implementation is in progress. This ledger does not mark the library-wide assurance plan complete.
+All 7,131 numerical configurations are enrolled. Final library-wide assurance remains in progress.
 
 ## Adopted compatibility decisions
 
@@ -6440,3 +6440,30 @@ exact-agreement sweep passes (`final1403-exact-agreement.trx`: one passed,
 zero failed/skipped). All nine failures observed so far in the original suite
 have corrected passing reruns; that suite and the three exact-package consumers
 remain in progress. Benchmark timings have not yet run.
+
+
+### Approved Ehlers VIDYA core/registry alignment (batch 1414)
+
+Core and registry now use the public weighted 9/30 residual-RMS formula. Their
+single legacy length argument is unused, matching the obsolete builder option.
+This supersedes the earlier pending decision and separate ordinary-VIDYA variant.
+The component helper retains its explicit fast/slow parameters.
+
+All 47 distinct focused checks pass across `evidya1411-focused.trx` and
+`evidya1412-core.trx`. Four new fixture failures in the first run were corrected
+by explicitly configuring the component helper's 9/30 periods. Seven compiled
+behavioral faults are caught from a five-check passing baseline, with authenticated
+source evidence (`si-evidya1414-qualified.json`). All 10,765 mutation anchors resolve;
+19 mutation/sharding tooling checks pass.
+
+The updated package builds for net10.0, net8.0 and net461. Its registry consumer
+authenticates the loaded package DLL and passes 2,580 exact value comparisons on
+each framework (`si-final1413-core-net10.log`, `si-final1413-core-net8.log`,
+`si-final1413-core-net461.log`). The updated production source builds on SDK
+10.0.101 with zero warnings/errors (`si-final1414-sdk.log`).
+
+The three full package consumers now evaluate candidate `2.0.0-correctness.local1413`.
+The superseded 1383 consumers were stopped after their process identities were
+verified; their incomplete runs receive no completed package-validation credit.
+The original full suite continues, with all nine failures reported so far covered
+by corrected passing reruns. Final package/platform checks and timings remain pending.

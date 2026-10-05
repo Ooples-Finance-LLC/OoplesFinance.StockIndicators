@@ -3200,15 +3200,16 @@ internal static class MovingAverageCore
     }
 
     /// <summary>
-    /// Computes Ehlers Variable Index Dynamic Average using span-based computation.
+    /// Computes the public Ehlers VIDYA default: weighted residual-RMS windows of 9 and 30.
+    /// The legacy single length argument is unused, like the obsolete builder Length option.
     /// </summary>
     internal static void EhlersVariableIndexDynamicAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        // Same as VIDYA but with Ehlers's formulation
-        Vidya(input, output, length);
+        using var window = new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, 30);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>

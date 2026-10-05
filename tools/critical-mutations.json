@@ -93205,5 +93205,68 @@
     "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
     "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
     "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "ehlers-vidya-core-ordinary-formula",
+    "module": "ehlers-vidya-core-alignment",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersVariableIndexDynamicAverage(",
+    "before": "using var window = new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, 30);\n        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;",
+    "after": "Vidya(input, output, length);",
+    "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
+  },
+  {
+    "id": "ehlers-vidya-core-fast-period",
+    "module": "ehlers-vidya-core-alignment",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersVariableIndexDynamicAverage(",
+    "before": "new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, 30)",
+    "after": "new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 10, 30)",
+    "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
+  },
+  {
+    "id": "ehlers-vidya-core-slow-period",
+    "module": "ehlers-vidya-core-alignment",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersVariableIndexDynamicAverage(",
+    "before": "new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, 30)",
+    "after": "new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, 29)",
+    "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
+  },
+  {
+    "id": "ehlers-vidya-core-average-kind",
+    "module": "ehlers-vidya-core-alignment",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersVariableIndexDynamicAverage(",
+    "before": "new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, 30)",
+    "after": "new EhlersVidyaWindow(MovingAvgType.SimpleMovingAverage, 9, 30)",
+    "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
+  },
+  {
+    "id": "ehlers-vidya-core-legacy-length",
+    "module": "ehlers-vidya-core-alignment",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersVariableIndexDynamicAverage(",
+    "before": "new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, 30)",
+    "after": "new EhlersVidyaWindow(MovingAvgType.WeightedMovingAverage, 9, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
+  },
+  {
+    "id": "ehlers-vidya-core-commit",
+    "module": "ehlers-vidya-core-alignment",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersVariableIndexDynamicAverage(",
+    "before": "window.Next(input[i], true).Value",
+    "after": "window.Next(input[i], false).Value",
+    "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
+  },
+  {
+    "id": "ehlers-vidya-registry-formula",
+    "module": "ehlers-vidya-core-alignment",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct EVidyaCore",
+    "before": "=> MovingAverageCore.EhlersVariableIndexDynamicAverage(input, output, length);",
+    "after": "=> MovingAverageCore.Vidya(input, output, length);",
+    "filter": "FullyQualifiedName~EhlersVidyaCoreAlignmentTests"
   }
 ]

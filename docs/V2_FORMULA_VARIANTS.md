@@ -1504,8 +1504,10 @@ Public and builder routes use the configured fast/slow moving averages (builder
 defaults 9/30), exact squared residual windows, and gain 0.2 times their RMS
 ratio, clamped to [0.01,0.99]. Zero slow energy gives zero gain. The gain is
 rounded once and the convex update is rounded once. The obsolete single Length
-builder option remains unused. Core/registry currently retain their separate
-ordinary VIDYA formula; changing that behavior awaits an explicit decision.
+builder option remains unused. Core/registry now use the same public default
+formula with weighted 9/30 windows; their legacy single length argument is also
+unused. This approved alignment changes core/registry results from ordinary
+VIDYA, which remains available under its own moving-average type.
 
 
 ### Vervoort Volatility Bands directional reach

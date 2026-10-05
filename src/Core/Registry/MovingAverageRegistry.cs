@@ -2232,6 +2232,7 @@ public readonly struct EtmaCore : IMovingAverageCore
     public void ComputeWithVolume(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length) => Compute(input, output, length);
 }
 
+/// <summary>Public Ehlers VIDYA defaults (weighted 9/30); the single length argument is unused.</summary>
 public readonly struct EVidyaCore : IMovingAverageCore
 {
     public bool RequiresOhlc => false;
