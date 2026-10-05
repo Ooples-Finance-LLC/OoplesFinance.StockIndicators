@@ -6228,3 +6228,20 @@ it (`si-fourierseries1317-qualified.json`). Seven main integration checks passed
 (`fourierseries1333-integration.trx`), including shared oracle and earlier route
 regressions. Enrollment is 7,073/7,131, leaving58 configurations across five types
 (`si-fourierseries1335-inventory.json`). Final assurance remains incomplete.
+
+
+### Mesa Predict V2 qualification (batch 1346)
+
+Thirteen configurations retain the high-pass and smoother startup gates, Hann
+or weighted smoothing, five-term forecast, and separate linear extrapolation.
+Extended rounded stages prevent intermediate overflow. Forecast storage holds
+five observations and advances only through the requested horizon; smoothing
+history grows with observations. Public, fast and native routes prevalidate
+input; unsupported averages and custom callbacks retain existing paths.
+
+All 96 distinct focused checks passed and all 16 compiled faults were caught
+(`si-mesav21341-qualified.json`). The original early-start survivor receives no
+credit; an impulse in the fourth input catches it. Five main integration checks
+passed (`mesav21343-integration.trx`). Enrollment is 7,086/7,131, leaving 45
+configurations across four types (`si-mesav21346-inventory.json`). Final assurance
+remains incomplete.

@@ -394,6 +394,11 @@ public static partial class Calculations
     public static StockData CalculateEhlersMesaPredictIndicatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides && MesaPredictV2Window.Supports(maType))
+        {
+            var safe=MesaPredictV2Window.Calculate(stockData,maType,length1,length2,length3,length4);
+            stockData.SetOutputValues(()=>safe.Outputs);stockData.SetSignals(safe.Signals);stockData.SetCustomValues(safe.Outputs["Predict"]);stockData.IndicatorName=IndicatorName.EhlersMesaPredictIndicatorV2;return stockData;
+        }
         length1 = Math.Max(length1, 1);
         length2 = Math.Max(length2, 1);
         length3 = Math.Max(length3, 1);

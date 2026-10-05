@@ -491,9 +491,10 @@ public sealed class EhlersMesaPredictIndicatorV1State : IStreamingIndicatorState
 [PrimaryOutput("Predict")]
 public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState, IDisposable
 {
+    private readonly MesaPredictV2Window? _safe;
     private readonly int _length1;
     private readonly int _length4;
-    private readonly double[] _coefArray;
+    private readonly double[] _coefArray = null!;
     private readonly double _c1;
     private readonly double _c2;
     private readonly double _c3;
@@ -501,10 +502,10 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
     private readonly double _coef2;
     private readonly double _coef3;
     private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly PooledRingBuffer<double> _filtValues;
-    private readonly double[] _xxArray;
-    private readonly double[] _yyArray;
+    private readonly IMovingAverageSmoother _smoother = null!;
+    private readonly PooledRingBuffer<double> _filtValues = null!;
+    private readonly double[] _xxArray = null!;
+    private readonly double[] _yyArray = null!;
     private double _prevValue1;
     private double _prevValue2;
     private double _prevHp1;
@@ -518,6 +519,8 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
     public EhlersMesaPredictIndicatorV2State(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4)
     {
+        _safe=MesaPredictV2Window.Supports(maType)?new(maType,length1,length2,length3,length4):null;
+        if(_safe is not null)return;
         _length1 = Math.Max(1, length1);
         var resolvedLength2 = Math.Max(1, length2);
         var resolvedLength3 = Math.Max(1, length3);
@@ -549,6 +552,7 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
 
     public void Reset()
     {
+        if(_safe is not null){_safe.Reset();return;}
         _smoother.Reset();
         _filtValues.Clear();
         _prevValue1 = 0;
@@ -565,6 +569,8 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
+        if(_safe is not null){var p=_safe.Next(bar.Close,isFinal);return new(p.Predict,includeOutputs?new Dictionary<string,double>{{"Ssf",p.Filter},{"Predict",p.Predict},{"Extrap",p.Extrap}}:null);}
+
         Array.Clear(_xxArray, 0, _xxArray.Length);
         Array.Clear(_yyArray, 0, _yyArray.Length);
 
@@ -637,6 +643,7 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
 
     public void Dispose()
     {
+        if(_safe is not null){_safe.Dispose();return;}
         _smoother.Dispose();
         _filtValues.Dispose();
     }

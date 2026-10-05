@@ -1554,3 +1554,10 @@ Ehlers Fourier Series preserves its three rounded harmonic recurrences and
 normalized algebraic sum, including startup and unresolved Nyquist behavior.
 Window powers and trade comparisons are exact; unpublished harmonic stages use
 extended upper exponents. Histories grow with observed samples.
+
+
+Mesa Predict V2 preserves its high-pass startup, super-smoother, Hann/weighted
+average, five-term forecast, and recursive linear extrapolation. Each unpublished
+stage rounds with an extended upper exponent. The forecast horizon remains
+clamped to the history period; work scales with that horizon, while forecast
+storage is fixed at five samples. No new public period maximum is imposed.

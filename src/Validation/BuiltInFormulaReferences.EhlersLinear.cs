@@ -52,6 +52,8 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.EhlersMesaPredictIndicatorV2:
+                if (options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
+                    return new("Predict",new[]{"Ssf","Predict","Extrap"},bars=>MesaPredictV2Outputs(bars,indicator));
                 var mesaKind = AverageKind(options, 0);
                 var mesaHann = options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType.EhlersHannMovingAverage;
                 if (mesaKind == 0 && !mesaHann) return null;

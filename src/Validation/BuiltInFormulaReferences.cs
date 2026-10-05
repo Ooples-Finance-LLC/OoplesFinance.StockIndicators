@@ -2130,6 +2130,11 @@ internal static partial class BuiltInFormulaReferences
             var fourierKeys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for(var slot=0;slot<fourierKeys.Length;slot++){var key=fourierKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>FourierSeriesOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersMesaPredictIndicatorV2 && builtIn.CreateOptions() is EhlersMesaPredictIndicatorV2SpecOptions mesaV2 && MesaPredictV2Window.Supports(mesaV2.MaType))
+        {
+            var mesaV2Keys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<mesaV2Keys.Length;slot++){var key=mesaV2Keys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>MesaPredictV2Outputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

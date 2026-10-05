@@ -92490,5 +92490,133 @@
     "after": "buffer.WritableSpan[i]=-values[i]",
     "filter": "FullyQualifiedName~FourierSeriesNumericalTests.RoutesMatchIndependentHarmonicSum",
     "scope": "internal static ComputeBuffer ComputeFourierSeriesFast("
+  },
+  {
+    "id": "mesa-v2-startup",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "_count<4?BigInteger.Zero",
+    "after": "_count<3?BigInteger.Zero",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.StartupIgnoresFourthSampleCurvature"
+  },
+  {
+    "id": "mesa-v2-drive",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "value-2*_price1+_price2",
+    "after": "value-_price1+_price2",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-hp-feedback",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "U(_c2)*_hp1",
+    "after": "U(_c2)*_hp2",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-ssf-drive",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "hp+_hp1",
+    "after": "hp-_hp1",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-ssf-feedback",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "2*U(_s2)*_ssf1",
+    "after": "2*U(_s2)*_ssf2",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-hann-mass",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "unit*(_smoothLength+1L)",
+    "after": "unit*(_smoothLength+2L)",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-weighted-mass",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "(BigInteger)_smoothLength*(_smoothLength+1L)/2",
+    "after": "(BigInteger)_smoothLength*(_smoothLength+2L)/2",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-smooth-expiry",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "past[past.Length-lag]",
+    "after": "past[past.Length-1]",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-history",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "lag<_historyLength",
+    "after": "lag<=_historyLength",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.SingleHistoryKeepsOneStepForecastAndLinearExtrapolation"
+  },
+  {
+    "id": "mesa-v2-forecast",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "4.525,-8.45,8.145",
+    "after": "4.125,-8.45,8.145",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.SingleHistoryKeepsOneStepForecastAndLinearExtrapolation"
+  },
+  {
+    "id": "mesa-v2-horizon",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "step<_horizon",
+    "after": "step<_horizon-1",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.SingleHistoryKeepsOneStepForecastAndLinearExtrapolation"
+  },
+  {
+    "id": "mesa-v2-extrapolation",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "2*extrap-older",
+    "after": "2*extrap+older",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-preview",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "if(final){if(_smooth.Count",
+    "after": "if(true){if(_smooth.Count",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-reset",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "_count=0;}",
+    "after": "_count=4;}",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-signal",
+    "module": "mesa-v2-numerical",
+    "file": "src/Helpers/MesaPredictV2Window.cs",
+    "before": "slope.Sign>0&&slope>_slope",
+    "after": "slope.Sign>0&&slope<_slope",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
+  },
+  {
+    "id": "mesa-v2-reference",
+    "module": "mesa-v2-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.MesaPredictV2.cs",
+    "before": "4.525,-8.45,8.145",
+    "after": "4.125,-8.45,8.145",
+    "filter": "FullyQualifiedName~MesaPredictV2NumericalTests.ExtremePricesPreserveForecastSignalsPreviewAndReset"
   }
 ]

@@ -19446,6 +19446,11 @@ internal static partial class IndicatorCompute
         int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4,
         MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, MesaPredictSeries series = MesaPredictSeries.Filter)
     {
+        if (!ComponentAverage.HasOverrides && MesaPredictV2Window.Supports(maType))
+        {
+            var safe=MesaPredictV2Window.Calculate(data,maType,length1,length2,length3,length4);var values=safe.Outputs[series==MesaPredictSeries.Predict?"Predict":series==MesaPredictSeries.Extrapolate?"Extrap":"Ssf"];var safeBuffer=context.Rent(values.Count);
+            for(var i=0;i<values.Count;i++)safeBuffer.WritableSpan[i]=values[i];return safeBuffer;
+        }
         // CalculateEhlersMesaPredictIndicatorV2 high-pass filters the series, super-smooths it, then runs a
         // five-tap autoregression forward over the last length1 filter values. OscillatorCore's routine, which
         // this arm was bound to, took the raw close and produced something else from bar 0 onwards.
