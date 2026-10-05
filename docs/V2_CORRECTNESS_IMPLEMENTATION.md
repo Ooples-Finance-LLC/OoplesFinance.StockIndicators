@@ -6399,3 +6399,17 @@ The original full suite continues, with all five failures observed so far
 reconciled by passing corrected reruns. The rebuilt competitor executable
 uses the package's net10.0 DLL and passes 66,082 workload assertions; timings
 remain pending. Final assurance is still in progress.
+
+
+### Named ATR-channel fixture repair (batch 1389)
+
+The original full suite exposed a sixth fixture failure: its ATR-channel
+case requested batch `Sma` but compared streaming's declared `UpperBand`
+primary. The case now names `Sma` on both sides. A directly runnable fixture
+regression and five existing primary-output/independent-formula checks pass
+(`final1389-range-output.trx`). The initial display-name filter selected only
+the five supporting checks, so it was not credited as testing the repaired
+case. Production/package bytes are unchanged.
+
+Sonar and CodeRabbit pass on production commit `080a12af`; 12 hosted jobs
+remain queued. Full-suite and exact-package consumers remain active.
