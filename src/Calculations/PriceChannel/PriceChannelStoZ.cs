@@ -264,6 +264,11 @@ public static partial class Calculations
     public static StockData CalculateVervoortVolatilityBands(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 8, int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result=VervoortVolatilityWindow.Calculate(stockData,maType,length1,length2,devMult,lowBandMult);
+            stockData.SetOutputValues(()=>result.Outputs);stockData.SetCustomValues(new List<double>());stockData.SetSignals(result.Signals);stockData.IndicatorName=IndicatorName.VervoortVolatilityBands;return stockData;
+        }
         List<double> typicalList = new(stockData.Count);
         List<double> deviationList = new(stockData.Count);
         List<double> ubList = new(stockData.Count);

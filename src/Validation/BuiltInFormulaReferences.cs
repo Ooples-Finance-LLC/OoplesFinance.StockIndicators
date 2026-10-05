@@ -2101,6 +2101,11 @@ internal static partial class BuiltInFormulaReferences
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>EhlersVidyaOutputs(bars,builtIn)["Evidya"],IndicatorErrorBudget.Exact);yield break;
         }
+        if (builtIn.BatchName == IndicatorName.VervoortVolatilityBands && AverageKind(builtIn.CreateOptions(),3) is 1 or 2 or 3 or 6)
+        {
+            var vvolKeys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<vvolKeys.Length;slot++){var key=vvolKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>VervoortVolatilityOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

@@ -91739,5 +91739,118 @@
     "before": "new EhlersVariableIndexDynamicAverageState(evidya.MaType, 9, 30)",
     "after": "new EhlersVariableIndexDynamicAverageState(evidya.MaType, 10, 30)",
     "filter": "FullyQualifiedName~EhlersVidyaNumericalTests.RoutesMatchIndependentResidualRmsRatio"
+  },
+  {
+    "id": "vervoort-volatility-mean-period",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "_meanPeriod=Math.Max(1,length1)",
+    "after": "_meanPeriod=Math.Max(1,length1+1)",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-range-period",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "_rangePeriod=Math.Max(1,length2)",
+    "after": "_rangePeriod=Math.Max(1,length2+1)",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-second-mean",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "_second.Next(mean,final)",
+    "after": "_second.Next(value,final)",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-direction",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "price>=_price?",
+    "after": "price<_price?",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-rising-low",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "new RocBankValue(_low),-1",
+    "after": "new RocBankValue(low),-1",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-expiry",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "history.Peek().AddTo(ref sum,-1)",
+    "after": "history.Peek().AddTo(ref sum,1)",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-count",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "count:Math.Min(period,history.Count+1L)",
+    "after": "count:period",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-upper",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "Combine(center,width,1)",
+    "after": "Combine(center,width,-1)",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-lower",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "width.Multiply(_lowerMultiplier)",
+    "after": "width.Multiply(_deviation)",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-signals",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "slope>_previousSlope",
+    "after": "slope<_previousSlope",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-preview",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "if(final){_price=price",
+    "after": "if(final || price != 0){_price=price",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-reset",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Helpers/VervoortVolatilityWindow.cs",
+    "before": "_price=_low=0;",
+    "after": "_price=_low=17;",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.ExtremeRangesPreserveSignalsPreviewResetAndAllBands"
+  },
+  {
+    "id": "vervoort-volatility-reference",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.VervoortVolatility.cs",
+    "before": "Round(v+width[i])",
+    "after": "Round(v-width[i])",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.RoutesMatchIndependentAsymmetricBands"
+  },
+  {
+    "id": "vervoort-volatility-fast",
+    "module": "vervoort-volatility-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rentedBand.WritableSpan[i]=values[i]",
+    "after": "rentedBand.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~VervoortVolatilityNumericalTests.RoutesMatchIndependentAsymmetricBands",
+    "scope": "internal static ComputeBuffer ComputeVervoortVolatilityBandsFast("
   }
 ]

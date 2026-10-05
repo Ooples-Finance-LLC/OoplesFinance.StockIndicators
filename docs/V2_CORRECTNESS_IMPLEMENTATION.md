@@ -6133,3 +6133,16 @@ integration checks passed (`evidya1265-integration.trx`). Enrollment is
 (`si-evidya1267-inventory.json`). The separate core/registry formula alignment
 remains pending approval; those existing VIDYA routes were not changed.
 Final assurance remains incomplete.
+
+
+### Vervoort Volatility Bands qualification (batch 1270)
+
+Nine configurations preserve directional reach, observed-window means and the
+distinct middle-band formula. Extended rounded ranges and deviations avoid
+intermediate overflow; exact signal comparisons and lazy histories preserve
+small changes and large-period startup. Callback paths remain available.
+Seventy focused checks passed and all 14 compiled mutation faults were caught
+(`si-vvol1263-qualified.json`). Eleven main integration checks passed
+(`vvol1269-integration.trx`). Enrollment is 7,026/7,131, leaving 105
+configurations across 10 types (`si-vvol1270-inventory.json`).
+Final assurance remains incomplete.

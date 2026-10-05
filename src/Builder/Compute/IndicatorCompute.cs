@@ -16891,6 +16891,13 @@ internal static partial class IndicatorCompute
         int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var result=VervoortVolatilityWindow.Calculate(data,maType,length1,length2,devMult,lowBandMult);
+            var key=band==ChannelBand.Upper?"UpperBand":band==ChannelBand.Lower?"LowerBand":"MiddleBand";
+            var values=result.Outputs[key];var rentedBand=context.Rent(values.Count);
+            for(var i=0;i<values.Count;i++)rentedBand.WritableSpan[i]=values[i];return rentedBand;
+        }
         // CalculateVervoortVolatilityBands measures the bar's reach - from the previous low when the series
         // rose, from the current low when it fell - and offsets the twice averaged series by a multiple of
         // that reach, by a smaller multiple below than above. The midline is a plain average of the once

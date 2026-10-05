@@ -205,6 +205,7 @@ internal static partial class BuiltInFormulaReferences
                         ("LowerBand", center.Select((v, i) => v - widths[i]).ToArray()));
                 });
             case IndicatorName.VervoortVolatilityBands:
+                if (kind is 1 or 2 or 3 or 6) return new("MiddleBand",new[]{"UpperBand","MiddleBand","LowerBand"},bars=>VervoortVolatilityOutputs(bars,indicator));
                 return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
                 {
                     var first = Integer(options, "Length1", 8); var second = Integer(options, "Length2", 13);

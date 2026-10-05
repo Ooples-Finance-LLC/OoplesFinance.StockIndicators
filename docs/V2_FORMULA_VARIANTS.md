@@ -1506,3 +1506,11 @@ ratio, clamped to [0.01,0.99]. Zero slow energy gives zero gain. The gain is
 rounded once and the convex update is rounded once. The obsolete single Length
 builder option remains unused. Core/registry currently retain their separate
 ordinary VIDYA formula; changing that behavior awaits an explicit decision.
+
+
+### Vervoort Volatility Bands directional reach
+
+Rising prices measure reach from the previous low; falling prices use the
+current low. The bands retain their observed-window averages, distinct lower
+multiplier and middle-band formula. Intermediate ranges use extended rounded
+arithmetic and histories allocate only observed samples.

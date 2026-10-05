@@ -874,13 +874,14 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
 [PrimaryOutput("MiddleBand")]
 public sealed class VervoortVolatilityBandsState : IStreamingIndicatorState, IDisposable
 {
+    private readonly VervoortVolatilityWindow? _wide;
     private readonly double _devMult;
     private readonly double _lowBandMult;
-    private readonly IMovingAverageSmoother _medianAvg;
-    private readonly IMovingAverageSmoother _medianAvgEma;
-    private readonly IMovingAverageSmoother _devHighMa;
-    private readonly RollingWindowSum _medianAvgSum;
-    private readonly RollingWindowSum _typicalSum;
+    private readonly IMovingAverageSmoother _medianAvg = null!;
+    private readonly IMovingAverageSmoother _medianAvgEma = null!;
+    private readonly IMovingAverageSmoother _devHighMa = null!;
+    private readonly RollingWindowSum _medianAvgSum = null!;
+    private readonly RollingWindowSum _typicalSum = null!;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
     private double _prevLow;
@@ -889,6 +890,7 @@ public sealed class VervoortVolatilityBandsState : IStreamingIndicatorState, IDi
     public VervoortVolatilityBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 8,
         int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9)
     {
+        if (StrengthWindow.Supports(maType)) { _wide=new(maType,length1,length2,devMult,lowBandMult); return; }
         var resolvedLength1 = Math.Max(1, length1);
         var resolvedLength2 = Math.Max(1, length2);
         _devMult = devMult;
@@ -905,6 +907,7 @@ public sealed class VervoortVolatilityBandsState : IStreamingIndicatorState, IDi
 
     public void Reset()
     {
+        if(_wide is not null){_wide.Reset();return;}
         _medianAvg.Reset();
         _medianAvgEma.Reset();
         _devHighMa.Reset();
@@ -917,6 +920,8 @@ public sealed class VervoortVolatilityBandsState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if(_wide is not null){var point=_wide.Next(bar.Close,bar.Low,isFinal);return new(point.Middle,includeOutputs?new Dictionary<string,double>{{"UpperBand",point.Upper},{"MiddleBand",point.Middle},{"LowerBand",point.Lower}}:null);}
         var value = _input.GetValue(bar);
         var medianAvg = _medianAvg.Next(value, isFinal);
         var medianAvgEma = _medianAvgEma.Next(medianAvg, isFinal);
@@ -960,6 +965,7 @@ public sealed class VervoortVolatilityBandsState : IStreamingIndicatorState, IDi
 
     public void Dispose()
     {
+        if(_wide is not null){_wide.Dispose();return;}
         _medianAvg.Dispose();
         _medianAvgEma.Dispose();
         _devHighMa.Dispose();
