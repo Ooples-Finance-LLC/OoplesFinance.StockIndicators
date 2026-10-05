@@ -3006,49 +3006,8 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void R2AdaptiveRegression(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            // Preserve this regression-based variant's partial-window fit.
-            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var n = Math.Min(i + 1, length);
-
-                // Calculate R-squared
-                double sumResiduals = 0, sumTotal = 0;
-                double mean = 0;
-                for (var j = 0; j < n; j++)
-                {
-                    mean += input[i - j];
-                }
-                mean /= n;
-
-                for (var j = 0; j < n; j++)
-                {
-                    var val = input[i - j];
-                    var predicted = lsmaBuffer[i - j];
-                    sumResiduals += (val - predicted) * (val - predicted);
-                    sumTotal += (val - mean) * (val - mean);
-                }
-
-                var r2 = sumTotal > 0 ? 1 - (sumResiduals / sumTotal) : 0;
-                r2 = Math.Max(0, Math.Min(1, r2));
-
-                // Blend LSMA with current value based on R2
-                var currentValue = input[i];
-                var lsma = lsmaBuffer[i];
-                output[i] = (r2 * lsma) + ((1 - r2) * currentValue);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(lsmaBuffer);
-        }
+        // Preserve this regression-based variant's partial-window fit.
+        R2AdaptiveWindow.Core(input,output,length);
     }
 
     /// <summary>

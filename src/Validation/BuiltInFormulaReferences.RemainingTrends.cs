@@ -39,37 +39,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.RecursiveRelativeStrengthIndex:
                 return new("Rrsi", new[] { "Rrsi" }, bars => RecursiveRsiOutputs(bars, indicator));
             case IndicatorName.R2AdaptiveRegression:
-                return new("R2ar", new[] { "R2ar" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var linear = RegressionEndpoints(prices, length);
-                    var mean = Average(prices, length, kind);
-                    var variance = PopulationVariance(prices, length);
-                    var lagged = new double[bars.Count]; var errors = new double[bars.Count];
-                    var adaptive = new double[bars.Count]; var result = new double[bars.Count];
-                    double Correlation(double[] source, int i)
-                    {
-                        var first = Math.Max(0, i-length+1);
-                        var x = source.Skip(first).Take(i-first+1).ToArray();
-                        var y = prices.Skip(first).Take(i-first+1).ToArray();
-                        var xMean = x.Average(); var yMean = y.Average();
-                        var norm = x.Sum(v => (v-xMean)*(v-xMean))*y.Sum(v => (v-yMean)*(v-yMean));
-                        return norm == 0 ? 0 : x.Select((v, j) => (v-xMean)*(y[j]-yMean)).Sum()/Math.Sqrt(norm);
-                    }
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        lagged[i] = i == 0 ? prices[i] : result[i-1];
-                        var center = Window(lagged, i, length).Average();
-                        errors[i] = Math.Pow(lagged[i]-center, 2);
-                        var energy = Window(errors, i, length).Average();
-                        var gain = energy == 0 ? 0 : Math.Sqrt(variance[i]/energy)*Correlation(lagged, i);
-                        adaptive[i] = mean[i]+gain*(lagged[i]-center);
-                        var linearWeight = Math.Pow(Correlation(linear, i), 2);
-                        var adaptiveWeight = Math.Pow(Correlation(adaptive, i), 2);
-                        result[i] = lagged[i]+linearWeight*(linear[i]-lagged[i])+adaptiveWeight*(adaptive[i]-lagged[i]);
-                    }
-                    return Outputs(("R2ar", result));
-                });
+                return new("R2ar",new[]{"R2ar"},bars=>R2AdaptiveOutputs(bars,indicator));
             case IndicatorName.RobustWeightingOscillator:
                 return new("Rwo", new[] { "Rwo" }, bars => RobustWeightingOutputs(bars, indicator));
             default: return null;

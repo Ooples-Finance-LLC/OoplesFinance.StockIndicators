@@ -12037,6 +12037,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeR2AdaptiveRegressionFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result=R2AdaptiveWindow.Calculate(data,maType,length);var rentedR2=context.Rent(result.Values.Count);for(var i=0;i<result.Values.Count;i++)rentedR2.WritableSpan[i]=result.Values[i];return rentedR2;
+        }
+
         // CalculateR2AdaptiveRegression blends three estimates of the series by how well each explains it: the
         // linear regression line, a line fitted to the indicator's OWN previous output, and that previous
         // output itself, weighted by the squared correlations of the first two and whatever is left over. The

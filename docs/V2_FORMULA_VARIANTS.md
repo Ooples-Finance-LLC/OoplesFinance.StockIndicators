@@ -1541,3 +1541,10 @@ The outer population deviation uses rounded percent readings and its separate
 period, centered on50. Exact comparisons and certified algebraic rounding apply
 to the six supported basic average types; custom callbacks remain on the legacy
 path. Histories allocate only for observations received.
+
+
+R2 Adaptive Regression retains its public three-estimate correlation blend and
+full-window activation of the secondary estimate. Core/registry intentionally
+retain their separate regression-residual blend. Both routes use exact moments,
+extended intermediate arithmetic and prevalidation; this change does not claim
+formula equivalence between those variants.

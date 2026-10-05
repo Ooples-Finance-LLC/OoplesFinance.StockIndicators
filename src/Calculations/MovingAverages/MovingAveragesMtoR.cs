@@ -696,6 +696,10 @@ public static partial class Calculations
     public static StockData CalculateR2AdaptiveRegression(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result=R2AdaptiveWindow.Calculate(stockData,maType,length);stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"R2ar",result.Values}});stockData.SetCustomValues(result.Values);stockData.SetSignals(result.Signals);stockData.IndicatorName=IndicatorName.R2AdaptiveRegression;return stockData;
+        }
         List<double> outList = new(stockData.Count);
         List<double> tempList = new(stockData.Count);
         List<double> x2List = new(stockData.Count);

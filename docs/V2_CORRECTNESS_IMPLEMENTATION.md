@@ -6194,3 +6194,20 @@ run1312 receives no credit. Published Smoothed and Volume Flow changes
 were preserved (`si-vmodified1311-integration-proof.json`). Enrollment is
 7,064/7,131, leaving 67 configurations across seven types
 (`si-vmodified1316-inventory.json`). Final assurance remains incomplete.
+
+
+### R2 Adaptive Regression qualification (batch 1332)
+
+Five configurations now use exact paired moments and squared-correlation weights,
+certified secondary-estimate rounding, extended regression endpoints and output,
+and lazy history. Public, fast and native routes retain the three-estimate blend;
+core/registry retain their documented separate regression-residual blend with
+safe arithmetic and overlapping-span support. Custom averaging callbacks retain
+the existing path.
+
+All 43 distinct focused checks passed. All15 compiled behavioral faults were
+caught, excluding the original warmup survivor and crediting the new five-period
+regression (`si-r2adaptive1317-qualified.json`). Six main integration checks passed
+(`r2adaptive1329-integration.trx`). Enrollment is 7,069/7,131, leaving62
+configurations across six types (`si-r2adaptive1332-inventory.json`). Final
+assurance remains incomplete.

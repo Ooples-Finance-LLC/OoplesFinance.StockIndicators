@@ -92248,5 +92248,126 @@
     "before": "if(low==high)return low;",
     "after": "if(precision>=64)return low;",
     "filter": "FullyQualifiedName~VervoortModifiedNumericalTests.AlgebraicBoundsResolveBothSidesOfHalfUlp"
+  },
+  {
+    "id": "r2-adaptive-covariance",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "var cov=n*xy-sx*sy",
+    "after": "var cov=n*xy+sx*sy",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-pair-expiry",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "var old=full?_history.Peek():default",
+    "after": "var old=default((BigInteger X,BigInteger Y))",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-weight",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "Number.Integer(cov*cov)",
+    "after": "Number.Integer(vx*vy)",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-lag-seed",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "_hasPrevious?_previous:input",
+    "after": "_hasPrevious?_previous:BigInteger.Zero",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.HandPreservesPartialFitAndFullVarianceWarmup"
+  },
+  {
+    "id": "r2-adaptive-gain-sign",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "lag.Covariance*difference",
+    "after": "lag.Covariance*difference.Times(-1)",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-gain-warmup",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "lag.Count==_period?",
+    "after": "lag.Count>=1?",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.GainWaitsForFullWindow"
+  },
+  {
+    "id": "r2-adaptive-energy-expiry",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "_errors.Count==_period?_errors.Peek():default",
+    "after": "_errors.Count>_period?_errors.Peek():default",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-first-weight",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "first*Number.Integer(y1-x2)",
+    "after": "first*Number.Integer(x2-y1)",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-second-weight",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "second*Number.Integer(y2-x2)",
+    "after": "second*Number.Integer(x2-y2)",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-preview",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "if(final){if(_errors",
+    "after": "if(true){if(_errors",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-reset",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "_hasPrevious=false",
+    "after": "_hasPrevious=true",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-signals",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "Signal.StrongBuy:slope",
+    "after": "Signal.StrongSell:slope",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.ExtremePricesPreserveBlendSignalsPreviewAndReset"
+  },
+  {
+    "id": "r2-adaptive-core-weight",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Helpers/R2AdaptiveWindow.cs",
+    "before": "total-history.Count*errors",
+    "after": "total+history.Count*errors",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.CoreRetainsItsSeparateRegressionResidualFormula"
+  },
+  {
+    "id": "r2-adaptive-reference",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.R2Adaptive.cs",
+    "before": "w1*linear[i]+w2*adaptive[i]",
+    "after": "w1*linear[i]-w2*adaptive[i]",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.RoutesMatchIndependentThreeEstimateBlend"
+  },
+  {
+    "id": "r2-adaptive-fast",
+    "module": "r2-adaptive-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rentedR2.WritableSpan[i]=result.Values[i]",
+    "after": "rentedR2.WritableSpan[i]=-result.Values[i]",
+    "filter": "FullyQualifiedName~R2AdaptiveNumericalTests.RoutesMatchIndependentThreeEstimateBlend",
+    "scope": "internal static ComputeBuffer ComputeR2AdaptiveRegressionFast("
   }
 ]

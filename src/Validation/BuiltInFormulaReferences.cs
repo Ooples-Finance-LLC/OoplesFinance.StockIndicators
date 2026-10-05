@@ -2121,6 +2121,10 @@ internal static partial class BuiltInFormulaReferences
             var modifiedKeys=builtIn.BatchOutputKey is {} selected?new[]{selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for(var slot=0;slot<modifiedKeys.Length;slot++){var key=modifiedKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>VervoortModifiedOutputs(bars,builtIn,indicator.Source is not null)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.R2AdaptiveRegression && AverageKind(builtIn.CreateOptions(),1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>R2AdaptiveOutputs(bars,builtIn)["R2ar"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

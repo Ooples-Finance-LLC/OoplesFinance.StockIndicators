@@ -890,24 +890,27 @@ public sealed class QuickMovingAverageState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("R2ar")]
 public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDisposable
 {
+    private readonly R2AdaptiveWindow? _safe;
     private readonly int _length;
-    private readonly LinearRegressionState _linreg;
+    private readonly LinearRegressionState _linreg = null!;
 
     // The numerator of a slope whose denominator is the window deviation built below, so the two halves have
     // to be the same quantity. See issue #223.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly RollingWindowCorrelation _x2Correlation;
-    private readonly RollingWindowCorrelation _y1Correlation;
-    private readonly RollingWindowCorrelation _y2Correlation;
-    private readonly RollingWindowSum _x2Sum;
-    private readonly RollingWindowSum _x2PowSum;
+    private readonly RollingStandardDeviation _stdDev = null!;
+    private readonly IMovingAverageSmoother _sma = null!;
+    private readonly RollingWindowCorrelation _x2Correlation = null!;
+    private readonly RollingWindowCorrelation _y1Correlation = null!;
+    private readonly RollingWindowCorrelation _y2Correlation = null!;
+    private readonly RollingWindowSum _x2Sum = null!;
+    private readonly RollingWindowSum _x2PowSum = null!;
     private readonly StreamingInputResolver _input;
     private double _prevOut;
     private bool _hasPrev;
 
     public R2AdaptiveRegressionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
     {
+        _safe=StrengthWindow.Supports(maType)?new(maType,length):null;
+        if(_safe is not null)return;
         _length = Math.Max(1, length);
         _linreg = new LinearRegressionState(_length);
         _stdDev = new RollingStandardDeviation(_length);
@@ -924,6 +927,7 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
 
     public void Reset()
     {
+        if(_safe is not null){_safe.Reset();return;}
         _linreg.Reset();
         _stdDev.Reset();
         _sma.Reset();
@@ -938,6 +942,10 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        if(_safe is not null)
+        {
+            StreamingInputValidation.Validate(bar);var point=_safe.Next(bar.Close,isFinal);return new(point.Value,includeOutputs?new Dictionary<string,double>{{"R2ar",point.Value}}:null);
+        }
         var value = _input.GetValue(bar);
         var stdDev = _stdDev.Next(value, isFinal);
         var sma = _sma.Next(value, isFinal);
@@ -981,6 +989,7 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
 
     public void Dispose()
     {
+        if(_safe is not null){_safe.Dispose();return;}
         _linreg.Dispose();
         _stdDev.Dispose();
         _sma.Dispose();
