@@ -6100,3 +6100,19 @@ Fourteen main integration checks passed (`tdi1239-integration.trx`), preserving
 Technical Rank and Reverse RSI hands. Enrollment is 7,004/7,131, leaving 127
 configurations across 14 types (`si-tdi1240-inventory.json`). Final assurance
 remains incomplete.
+
+
+### Vervoort Heiken Ashi candle pair qualification (batch 1258)
+
+Both candle oscillators retain their asymmetric trend predicates and latched
+-1/0/+1 outputs, including the long-term custom short-candle factor. Extended
+rounded means and TEMA/zero-lag stages avoid overflow; body/range comparisons
+use exact products. The former core candle-difference approximation now uses
+the public latch formulas, with overlap-safe and empty-span handling. Independent
+references account for selected inputs separately from default OHLC averages.
+All eight configurations passed 63 distinct focused checks. All 18 compiled
+faults were caught (`si-vervoort1245-qualified.json`); the initial long-term gate
+survivor was excluded and caught by a custom-factor regression. Eleven main
+integration checks passed (`vervoort1254-integration.trx`). Enrollment is
+7,012/7,131, leaving 119 configurations across 12 types
+(`si-vervoort1257-inventory.json`). Final assurance remains incomplete.

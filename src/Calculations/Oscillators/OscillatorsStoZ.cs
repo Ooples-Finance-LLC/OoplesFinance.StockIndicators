@@ -875,6 +875,12 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 55,
         double factor = 1.1)
     {
+        if (VervoortCandleWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result=VervoortCandleWindow.Calculate(stockData,true,maType,length, factor);
+            stockData.SetOutputValues(() => new Dictionary<string,List<double>>{{"Vhaltco",result.Values}});
+            stockData.SetCustomValues(result.Values);stockData.SetSignals(result.Signals);stockData.IndicatorName=IndicatorName.VervoortHeikenAshiLongTermCandlestickOscillator;return stockData;
+        }
         List<double> haoList = new(stockData.Count);
         List<double> hacList = new(stockData.Count);
         List<double> medianPriceList = new(stockData.Count);
@@ -1109,6 +1115,12 @@ public static partial class Calculations
     public static StockData CalculateVervoortHeikenAshiCandlestickOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ZeroLagTripleExponentialMovingAverage, int length = 34)
     {
+        if (VervoortCandleWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var result=VervoortCandleWindow.Calculate(stockData,false,maType,length);
+            stockData.SetOutputValues(() => new Dictionary<string,List<double>>{{"Vhaco",result.Values}});
+            stockData.SetCustomValues(result.Values);stockData.SetSignals(result.Signals);stockData.IndicatorName=IndicatorName.VervoortHeikenAshiCandlestickOscillator;return stockData;
+        }
         List<double> haoList = new(stockData.Count);
         List<double> hacList = new(stockData.Count);
         List<double> medianPriceList = new(stockData.Count);

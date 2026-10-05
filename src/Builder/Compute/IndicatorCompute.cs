@@ -9452,6 +9452,11 @@ internal static partial class IndicatorCompute
         ComputeContext context, int length = 34,
         MovingAvgType maType = MovingAvgType.ZeroLagTripleExponentialMovingAverage)
     {
+        if (VervoortCandleWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var values=VervoortCandleWindow.Calculate(data,false,maType,length).Values;var rentedCandle=context.Rent(values.Count);
+            for(var i=0;i<values.Count;i++)rentedCandle.WritableSpan[i]=values[i];return rentedCandle;
+        }
         // CalculateVervoortHeikenAshiCandlestickOscillator compares a zero-lag projection of the smoothed
         // Heiken Ashi close against the same projection of the median price, and latches at +1 when a down run
         // ends while an up run is live, at -1 in the mirror case, holding its previous value otherwise. The
@@ -9561,6 +9566,11 @@ internal static partial class IndicatorCompute
         ComputeContext context, int length = 55, double factor = 1.1,
         MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage)
     {
+        if (VervoortCandleWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var values=VervoortCandleWindow.Calculate(data,true,maType,length, factor).Values;var rentedCandle=context.Rent(values.Count);
+            for(var i=0;i<values.Count;i++)rentedCandle.WritableSpan[i]=values[i];return rentedCandle;
+        }
         // CalculateVervoortHeikenAshiLongTermCandlestickOscillator latches at +1 when a down run ends while an
         // up run is live, at -1 in the mirror case, and holds its previous value otherwise. The two runs are
         // deliberately asymmetric in the batch - the up run keeps on `keepAll1 || (prevKeepAll1 && keep13)`

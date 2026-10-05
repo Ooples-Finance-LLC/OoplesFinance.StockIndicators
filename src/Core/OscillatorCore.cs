@@ -5203,60 +5203,12 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VervoortHeikenAshiCandlestickOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var haCloseArray = pool.Rent(close.Length);
-        var haOpenArray = pool.Rent(close.Length);
-        var temaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var haClose = haCloseArray.AsSpan(0, close.Length);
-            var haOpen = haOpenArray.AsSpan(0, close.Length);
-            var tema = temaArray.AsSpan(0, close.Length);
-
-            // Calculate Heiken Ashi values
-            haClose[0] = (high[0] + low[0] + close[0] + open[0]) / 4;
-            haOpen[0] = (open[0] + close[0]) / 2;
-
-            for (var i = 1; i < close.Length; i++)
-            {
-                haClose[i] = (high[i] + low[i] + close[i] + open[i]) / 4;
-                haOpen[i] = (haOpen[i - 1] + haClose[i - 1]) / 2;
-            }
-
-            // Calculate HA difference and apply TEMA smoothing
-            var haDiff = pool.Rent(close.Length);
-            try
-            {
-                var diff = haDiff.AsSpan(0, close.Length);
-                for (var i = 0; i < close.Length; i++)
-                {
-                    diff[i] = haClose[i] - haOpen[i];
-                }
-
-                MovingAverageCore.TripleExponentialMovingAverage(diff, tema, length);
-
-                for (var i = 0; i < close.Length; i++)
-                {
-                    output[i] = tema[i];
-                }
-            }
-            finally
-            {
-                pool.Return(haDiff);
-            }
-        }
-        finally
-        {
-            pool.Return(haCloseArray);
-            pool.Return(haOpenArray);
-            pool.Return(temaArray);
-        }
+        if(output.Length<close.Length || high.Length!=close.Length || low.Length!=close.Length || open.Length!=close.Length)throw new ArgumentException("Candle spans must have matching lengths and sufficient output space.");
+        var highs=high.ToArray();var lows=low.ToArray();var opens=open.ToArray();var closes=close.ToArray();
+        foreach(var values in new[]{highs,lows,opens,closes})foreach(var value in values)Streaming.StreamingInputValidation.Finite(value,nameof(close));
+        using var state=new VervoortCandleWindow(false,MovingAvgType.ZeroLagTripleExponentialMovingAverage,length);
+        for(var i=0;i<closes.Length;i++)
+        {var sum=new ExactMeanAccumulator();sum.Add(highs[i]);sum.Add(lows[i]);sum.Add(opens[i]);sum.Add(closes[i]);output[i]=state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value;}
     }
 
     /// <summary>
@@ -5264,8 +5216,12 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VervoortHeikenAshiLongTermCandlestickOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 55)
     {
-        // Same as regular version but with longer default period
-        VervoortHeikenAshiCandlestickOscillator(high, low, close, open, output, length);
+        if(output.Length<close.Length || high.Length!=close.Length || low.Length!=close.Length || open.Length!=close.Length)throw new ArgumentException("Candle spans must have matching lengths and sufficient output space.");
+        var highs=high.ToArray();var lows=low.ToArray();var opens=open.ToArray();var closes=close.ToArray();
+        foreach(var values in new[]{highs,lows,opens,closes})foreach(var value in values)Streaming.StreamingInputValidation.Finite(value,nameof(close));
+        using var state=new VervoortCandleWindow(true,MovingAvgType.TripleExponentialMovingAverage,length);
+        for(var i=0;i<closes.Length;i++)
+        {var sum=new ExactMeanAccumulator();sum.Add(highs[i]);sum.Add(lows[i]);sum.Add(opens[i]);sum.Add(closes[i]);output[i]=state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value;}
     }
 
     /// <summary>

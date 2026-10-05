@@ -2092,6 +2092,11 @@ internal static partial class BuiltInFormulaReferences
             var tdiKeys=builtIn.BatchOutputKey is {} selected ? new[]{selected} : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for(var slot=0;slot<tdiKeys.Length;slot++){var key=tdiKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>TradersDynamicOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName is IndicatorName.VervoortHeikenAshiCandlestickOscillator or IndicatorName.VervoortHeikenAshiLongTermCandlestickOscillator)
+        {
+            var key=builtIn.BatchName==IndicatorName.VervoortHeikenAshiCandlestickOscillator?"Vhaco":"Vhaltco";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>VervoortCandleOutputs(bars,builtIn,indicator.Source is not null)[key],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

@@ -1486,3 +1486,13 @@ The six terms and their left-associative sum retain binary64 stage precision
 with an extended upper exponent. Clamp [0,100] only after the completed sum.
 Periods and startup behavior remain unchanged; signal comparisons distinguish
 exact changes between rounded ranks.
+
+
+### Vervoort Heiken Ashi candle core alignment
+
+Both core candle oscillators now return the public latched trend (-1, 0, +1),
+using their respective zero-lag TEMA and TEMA smoothing defaults. The short
+variant retains its 0.35 body/range predicate. The long variant retains its
+configurable factor (default 1.1) and requires its down-trend short-candle gate
+for both current and retained keeping states. Selected sources replace the
+full-typical input; original open/high/low candle fields retain their roles.

@@ -91454,5 +91454,153 @@
     "after": "rented.WritableSpan[i]=-values[i]",
     "filter": "FullyQualifiedName~TradersDynamicNumericalTests.FastOutputSelectionPreservesCallerAndInvalidInputDoesNotPublish",
     "scope": "internal static ComputeBuffer ComputeTradersDynamicIndexFast("
+  },
+  {
+    "id": "vervoort-candle-ha-open",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "Round(_input+_open,2)",
+    "after": "Round(_input-_open,2)",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-ha-close",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "BigInteger.Min(U(low),haOpen)",
+    "after": "BigInteger.Max(U(low),haOpen)",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-median",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "Round(U(high)+U(low),2)",
+    "after": "Round(U(high)-U(low),2)",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-tema",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "first.AddTo(ref sum,3)",
+    "after": "first.AddTo(ref sum,2)",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-zero-lag",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "Round(2*first-Tema(first,3,final))",
+    "after": "Round(first-Tema(first,3,final))",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-projection",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "Round(2*first-second)",
+    "after": "Round(first-second)",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-narrow-factor",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "U(longTerm?factor:.35)",
+    "after": "U(longTerm?0:.35)",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-up-seed",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "projectedMid>=projectedHa",
+    "after": "projectedMid<projectedHa",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-down-seed",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "projectedMid<projectedHa",
+    "after": "projectedMid>=projectedHa",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-short-latch",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "var line=up?1:down?-1:_line;",
+    "after": "var line=up?1:down?-1:0;",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ShortHandLatchesOnlyWhenTheOppositeRunEnds"
+  },
+  {
+    "id": "vervoort-candle-long-asymmetry",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "(downKeep || _downKeep) && narrow && low<=_high",
+    "after": "downKeep || _downKeep && narrow && low<=_high",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.LongCustomFactorPreservesDownTrendGate"
+  },
+  {
+    "id": "vervoort-candle-preview",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "if(final)",
+    "after": "if(final || input != 0)",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-reset",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Helpers/VervoortCandleWindow.cs",
+    "before": "_upSeed=_downSeed=_upKeep=_downKeep=_upTrend=_downTrend=false;",
+    "after": "_upSeed=_downSeed=_upKeep=_downKeep=_upTrend=_downTrend=true;",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.ExtremeCandlesPreserveComparisonsPreviewResetAndSignals"
+  },
+  {
+    "id": "vervoort-candle-reference",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.VervoortCandles.cs",
+    "before": "R(3)*first[i]-R(3)*second[i]+third[i]",
+    "after": "R(2)*first[i]-R(3)*second[i]+third[i]",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.RoutesMatchIndependentCandleLatches"
+  },
+  {
+    "id": "vervoort-candle-core-short",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "output[i]=state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value",
+    "after": "output[i]=-state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.CoreMatchesPublicLatchAndProtectsOverlappingSpans",
+    "scope": "internal static void VervoortHeikenAshiCandlestickOscillator("
+  },
+  {
+    "id": "vervoort-candle-fast-short",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rentedCandle.WritableSpan[i]=values[i]",
+    "after": "rentedCandle.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.RoutesMatchIndependentCandleLatches",
+    "scope": "internal static ComputeBuffer ComputeVervoortHeikenAshiCandlestickOscillatorFast("
+  },
+  {
+    "id": "vervoort-candle-core-long",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "output[i]=state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value",
+    "after": "output[i]=-state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.CoreMatchesPublicLatchAndProtectsOverlappingSpans",
+    "scope": "internal static void VervoortHeikenAshiLongTermCandlestickOscillator("
+  },
+  {
+    "id": "vervoort-candle-fast-long",
+    "module": "vervoort-candle-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "rentedCandle.WritableSpan[i]=values[i]",
+    "after": "rentedCandle.WritableSpan[i]=-values[i]",
+    "filter": "FullyQualifiedName~VervoortCandleNumericalTests.RoutesMatchIndependentCandleLatches",
+    "scope": "internal static ComputeBuffer ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast("
   }
 ]

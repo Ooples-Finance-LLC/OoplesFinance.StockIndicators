@@ -306,6 +306,7 @@ public sealed class VerticalHorizontalMovingAverageState : IStreamingIndicatorSt
 [PrimaryOutput("Vhaco")]
 public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
+    private readonly VervoortCandleWindow? _wide;
     private readonly IMovingAverageSmoother _haMa1;
     private readonly IMovingAverageSmoother _haMa2;
     private readonly IMovingAverageSmoother _medianMa1;
@@ -328,6 +329,7 @@ public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingInd
 
     public VervoortHeikenAshiCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.ZeroLagTripleExponentialMovingAverage, int length = 34)
     {
+        if (VervoortCandleWindow.Supports(maType)) _wide=new(false,maType,length);
         var resolved = Math.Max(1, length);
         _haMa1 = MovingAverageSmootherFactory.Create(maType, resolved);
         _haMa2 = MovingAverageSmootherFactory.Create(maType, resolved);
@@ -343,6 +345,7 @@ public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingInd
 
     public void Reset()
     {
+        _wide?.Reset();
         _haMa1.Reset();
         _haMa2.Reset();
         _medianMa1.Reset();
@@ -365,7 +368,10 @@ public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingInd
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var inputValue = _input.GetValue(bar);
+        if (_wide is not null)
+        {var point=_wide.Next(inputValue,bar.High,bar.Low,bar.Open,bar.Close,isFinal);return new(point.Value,includeOutputs?new Dictionary<string,double>{{"Vhaco",point.Value}}:null);}
         var prevInput = _hasPrev ? _prevInput : 0;
         var prevHao = _hasPrev ? _prevHao : 0;
         var hao = (prevInput + prevHao) / 2;
@@ -435,6 +441,7 @@ public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingInd
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _haMa1.Dispose();
         _haMa2.Dispose();
         _medianMa1.Dispose();
@@ -445,6 +452,7 @@ public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingInd
 [PrimaryOutput("Vhaltco")]
 public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
+    private readonly VervoortCandleWindow? _wide;
     private readonly IMovingAverageSmoother _tacMa1;
     private readonly IMovingAverageSmoother _tacMa2;
     private readonly IMovingAverageSmoother _thlMa1;
@@ -468,6 +476,7 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
 
     public VervoortHeikenAshiLongTermCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 55, double factor = 1.1)
     {
+        if (VervoortCandleWindow.Supports(maType)) _wide=new(true,maType,length, factor);
         var resolved = Math.Max(1, length);
         _tacMa1 = MovingAverageSmootherFactory.Create(maType, resolved);
         _tacMa2 = MovingAverageSmootherFactory.Create(maType, resolved);
@@ -484,6 +493,7 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
 
     public void Reset()
     {
+        _wide?.Reset();
         _tacMa1.Reset();
         _tacMa2.Reset();
         _thlMa1.Reset();
@@ -506,7 +516,10 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var inputValue = _input.GetValue(bar);
+        if (_wide is not null)
+        {var point=_wide.Next(inputValue,bar.High,bar.Low,bar.Open,bar.Close,isFinal);return new(point.Value,includeOutputs?new Dictionary<string,double>{{"Vhaltco",point.Value}}:null);}
         var prevInput = _hasPrev ? _prevInput : 0;
         var prevHao = _hasPrev ? _prevHao : 0;
         var hao = (prevInput + prevHao) / 2;
@@ -573,6 +586,7 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _tacMa1.Dispose();
         _tacMa2.Dispose();
         _thlMa1.Dispose();
