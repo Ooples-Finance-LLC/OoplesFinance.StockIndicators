@@ -8027,7 +8027,7 @@ public sealed class PriceOscillatorSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class ReverseEngineeringRsiSpecOptions : IIndicatorSpecOptions
 {
-    public ReverseEngineeringRsiSpecOptions(int length, double rsiLevel = 50) { Length = Math.Max(1, length); RsiLevel = rsiLevel; }
+    public ReverseEngineeringRsiSpecOptions(int length, double rsiLevel = 50) { Helpers.ReverseRsiWindow.Validate(length, rsiLevel); Length = length; RsiLevel = rsiLevel; }
     public int Length { get; }
     public double RsiLevel { get; }
 }

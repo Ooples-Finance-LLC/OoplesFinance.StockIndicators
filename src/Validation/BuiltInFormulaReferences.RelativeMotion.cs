@@ -471,29 +471,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.RahulMohindarOscillator:
                 return new("Rmo", new[] { "Rmo", "SwingTrade1", "SwingTrade2", "SwingTrade3" }, bars => RmoOutputs(bars, indicator));
             case IndicatorName.ReverseEngineeringRelativeStrengthIndex:
-                return new("Rersi", new[] { "Rersi" }, bars =>
-                {
-                    var target = Number(options, 50, "RsiLevel") / 100;
-                    var retention = 1 - 1d / length;
-                    var changes = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        // Seeded gain/loss histories expanded as geometric observation weights.
-                        var gains = Math.Pow(retention, i + 1);
-                        var losses = gains;
-                        for (var j = 1; j <= i; j++)
-                        {
-                            var weight = Math.Pow(retention, i - j) / length;
-                            gains += weight * Math.Max(0, changes[j]);
-                            losses += weight * Math.Max(0, -changes[j]);
-                        }
-                        // Solve the next Wilder gain/loss ratio for the requested RSI level.
-                        var displacement = (length - 1) * (target * losses - (1 - target) * gains);
-                        result[i] = bars[i].Close + displacement / (displacement >= 0 ? 1 - target : target);
-                    }
-                    return Outputs(("Rersi", result));
-                });
+                return new("Rersi", new[] { "Rersi" }, bars => ReverseRsiOutputs(bars, indicator));
             case IndicatorName.HistoricalVolatilityPercentile:
                 return new("Hvp", new[] { "Hvp", "Signal" }, bars =>
                 {

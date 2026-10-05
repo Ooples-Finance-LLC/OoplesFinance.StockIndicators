@@ -805,65 +805,14 @@ public sealed class ReversalPointsState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Rersi")]
 public sealed class ReverseEngineeringRelativeStrengthIndexState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly double _rsiLevel;
-    private readonly double _k;
-    private readonly StreamingInputResolver _input;
-    private double _prevAuc;
-    private double _prevAdc;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public ReverseEngineeringRelativeStrengthIndexState(int length = 14, double rsiLevel = 50)
-    {
-        _length = Math.Max(1, length);
-        _rsiLevel = rsiLevel;
-        var expPeriod = (2 * _length) - 1;
-        _k = 2d / (expPeriod + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _prevAuc = 1;
-        _prevAdc = 1;
-    }
-
+    private readonly ReverseRsiWindow _window;
+    public ReverseEngineeringRelativeStrengthIndexState(int length = 14, double rsiLevel = 50) => _window = new(length, rsiLevel);
     public IndicatorName Name => IndicatorName.ReverseEngineeringRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _prevAuc = 1;
-        _prevAdc = 1;
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diffUp = _hasPrev ? value - prevValue : 0;
-        var diffDown = _hasPrev ? prevValue - value : 0;
-        var auc = value > prevValue ? (_k * diffUp) + ((1 - _k) * _prevAuc) : (1 - _k) * _prevAuc;
-        var adc = value > prevValue ? ((1 - _k) * _prevAdc) : (_k * diffDown) + ((1 - _k) * _prevAdc);
-        var rsiValue = (_length - 1) * ((adc * _rsiLevel / (100 - _rsiLevel)) - auc);
-        var revRsi = rsiValue >= 0 ? value + rsiValue : value + (rsiValue * (100 - _rsiLevel) / _rsiLevel);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevAuc = auc;
-            _prevAdc = adc;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rersi", revRsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(revRsi, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string,double> { ["Rersi"] = point.Value } : null);
     }
 }
 

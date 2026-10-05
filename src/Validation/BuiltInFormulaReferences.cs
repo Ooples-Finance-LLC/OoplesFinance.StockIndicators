@@ -2077,6 +2077,11 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => StationaryLevelsOscillatorOutputs(bars, builtIn)["Selo"], IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ReverseEngineeringRelativeStrengthIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ReverseRsiOutputs(bars, builtIn)["Rersi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuadraticRegression)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => QuadraticProjectionOutputs(bars, builtIn)["QuadReg"], IndicatorErrorBudget.Exact);

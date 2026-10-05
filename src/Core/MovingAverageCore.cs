@@ -3432,41 +3432,12 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ReverseEngineeringRsi(ReadOnlySpan<double> input, Span<double> output, int length = 14, double rsiLevel = 50)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        double expPeriod = (2 * length) - 1;
-        var k = 2 / (expPeriod + 1);
-        double prevAuc = 1;
-        double prevAdc = 1;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var change = currentValue - prevValue;
-
-            double auc, adc;
-            if (currentValue > prevValue)
-            {
-                var gain = i >= 1 ? change : 0;
-                auc = (k * gain) + ((1 - k) * prevAuc);
-                adc = (1 - k) * prevAdc;
-            }
-            else
-            {
-                var loss = i >= 1 ? Math.Abs(change) : 0;
-                auc = (1 - k) * prevAuc;
-                adc = (k * loss) + ((1 - k) * prevAdc);
-            }
-
-            var rsiValue = (length - 1) * ((adc * rsiLevel / (100 - rsiLevel)) - auc);
-            var revRsi = rsiValue >= 0 ? currentValue + rsiValue : currentValue + (rsiValue * (100 - rsiLevel) / rsiLevel);
-            output[i] = revRsi;
-
-            prevAuc = auc;
-            prevAdc = adc;
-        }
+        ReverseRsiWindow.Validate(length, rsiLevel);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var prices = input.ToArray();
+        foreach (var value in prices) Streaming.StreamingInputValidation.Finite(value, nameof(input));
+        var state = new ReverseRsiWindow(length, rsiLevel);
+        for (var i = 0; i < prices.Length; i++) output[i] = state.Next(prices[i], true).Value;
     }
 
     /// <summary>

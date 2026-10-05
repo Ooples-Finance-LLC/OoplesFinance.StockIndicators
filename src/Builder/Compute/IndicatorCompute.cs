@@ -12851,10 +12851,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeReverseEngineeringRsiFast(StockData data, ComputeContext context, int length = 14, double rsiLevel = 50)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ReverseEngineeringRsi(inputSpan, buffer.WritableSpan, length, rsiLevel);
+        var values = ReverseRsiWindow.Calculate(data, length, rsiLevel).Values;
+        var buffer = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++) buffer.WritableSpan[i] = values[i];
         return buffer;
     }
 

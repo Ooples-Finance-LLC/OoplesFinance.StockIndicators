@@ -57,10 +57,6 @@ OoplesFinance.StockIndicators.Indicators.R2AdaptiveRegression/longer-periods
 OoplesFinance.StockIndicators.Indicators.R2AdaptiveRegression/minimum-periods
 OoplesFinance.StockIndicators.Indicators.R2AdaptiveRegression/shorter-periods
 OoplesFinance.StockIndicators.Indicators.R2AdaptiveRegression/weighted-average
-OoplesFinance.StockIndicators.Indicators.ReverseEngineeringRsi/default
-OoplesFinance.StockIndicators.Indicators.ReverseEngineeringRsi/longer-periods
-OoplesFinance.StockIndicators.Indicators.ReverseEngineeringRsi/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ReverseEngineeringRsi/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TechnicalRank/default
 OoplesFinance.StockIndicators.Indicators.TechnicalRank/longer-length1
 OoplesFinance.StockIndicators.Indicators.TechnicalRank/longer-length2

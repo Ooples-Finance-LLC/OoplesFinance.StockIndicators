@@ -1466,3 +1466,13 @@ range deques avoid eager period-sized allocation. The core follows this formula
 with SMA. The single average callback and fast caller isolation are preserved.
 The separate Stationary Extrapolated Levels indicator retains its existing
 formula and implementation.
+
+
+### Reverse Engineering RSI inverse domain
+
+Periods must be at least two and the finite target RSI must satisfy 0 < target < 100.
+Both Wilder gain and loss histories retain their seed of one. The inverse solves
+for the next price at the target; exact slope decisions remain distinguishable
+even if published prices round to ties. Certified intervals retain binary64
+outputs, with exact replay for ambiguity. Observations are retained for that
+replay; bounded interval arithmetic does not imply bounded total stream memory.

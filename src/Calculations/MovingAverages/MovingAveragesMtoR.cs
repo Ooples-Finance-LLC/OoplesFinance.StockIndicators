@@ -884,44 +884,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateReverseEngineeringRelativeStrengthIndex(this StockData stockData, int length = 14, double rsiLevel = 50)
     {
-        List<double> aucList = new(stockData.Count);
-        List<double> adcList = new(stockData.Count);
-        List<double> revRsiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double expPeriod = (2 * length) - 1;
-        var k = 2 / (expPeriod + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevAuc = i >= 1 ? aucList[i - 1] : 1;
-            var prevAdc = i >= 1 ? adcList[i - 1] : 1;
-
-            var auc = currentValue > prevValue ? (k * MinPastValues(i, 1, currentValue - prevValue)) + ((1 - k) * prevAuc) : (1 - k) * prevAuc;
-            aucList.Add(auc);
-
-            var adc = currentValue > prevValue ? ((1 - k) * prevAdc) : (k * MinPastValues(i, 1, prevValue - currentValue)) + ((1 - k) * prevAdc);
-            adcList.Add(adc);
-
-            var rsiValue = (length - 1) * ((adc * rsiLevel / (100 - rsiLevel)) - auc);
-            var prevRevRsi = GetLastOrDefault(revRsiList);
-            var revRsi = rsiValue >= 0 ? currentValue + rsiValue : currentValue + (rsiValue * (100 - rsiLevel) / rsiLevel);
-            revRsiList.Add(revRsi);
-
-            var signal = GetCompareSignal(currentValue - revRsi, prevValue - prevRevRsi);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rersi", revRsiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(revRsiList);
-        stockData.IndicatorName = IndicatorName.ReverseEngineeringRelativeStrengthIndex;
-
+        var result = ReverseRsiWindow.Calculate(stockData, length, rsiLevel);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rersi", result.Values } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Signals);
+        stockData.SetCustomValues(result.Values); stockData.IndicatorName = IndicatorName.ReverseEngineeringRelativeStrengthIndex;
         return stockData;
     }
 

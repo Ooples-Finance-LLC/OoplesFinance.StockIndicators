@@ -91042,5 +91042,159 @@
     "after": "AsReadOnlySpan(input), length + 1)",
     "filter": "FullyQualifiedName~StationaryLevelsOscillatorNumericalTests.CallbackKeepsItsPeriodAndFastCallerState",
     "scope": "public static StockData CalculateStationaryExtrapolatedLevelsOscillator("
+  },
+  {
+    "id": "reverse-rsi-exact-period-domain",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "if (length < 2)",
+    "after": "if (length < 1)",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.UndefinedRequestsAreRejectedBeforePublishingOrWriting"
+  },
+  {
+    "id": "reverse-rsi-exact-target-domain",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "target > 0 && target < 100",
+    "after": "target >= 0 && target < 100",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.UndefinedRequestsAreRejectedBeforePublishingOrWriting"
+  },
+  {
+    "id": "reverse-rsi-exact-seed",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "_seed = 2 * _target - 1",
+    "after": "_seed = 2 * _target",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-gain-kick",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "-(1 - _target) * change",
+    "after": "-_target * change",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-loss-kick",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": ": -_target * change",
+    "after": ": -(1 - _target) * change",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-recurrence",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "_moment * Interval.Exact(_length - 1)",
+    "after": "_moment * Interval.Exact(_length)",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-branch-factor",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "branch > 0 ? 1 - _target : _target",
+    "after": "branch > 0 ? _target : 1 - _target",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-inverse",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "var inverse = Interval.Exact(value) + displacement",
+    "after": "var inverse = Interval.Exact(value) - displacement",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.IndependentHandSolvesTheNextWilderStep"
+  },
+  {
+    "id": "reverse-rsi-exact-signal",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "var slope = Interval.Exact(0) - displacement",
+    "after": "var slope = displacement",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.LongConvergingTrendRetainsExactAccelerationWithoutReplay"
+  },
+  {
+    "id": "reverse-rsi-exact-delta",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "kick - _previousKick",
+    "after": "kick + _previousKick",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-acceleration",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "delta * Interval.Exact(-Factor(branch))",
+    "after": "delta * Interval.Exact(Factor(branch))",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.LongConvergingTrendRetainsExactAccelerationWithoutReplay"
+  },
+  {
+    "id": "reverse-rsi-exact-exact-replay",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "while (_exactCount < _observations.Count)",
+    "after": "while (_exactCount < _observations.Count && _length < 0)",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.AmbiguousCancellationUsesExactReplay"
+  },
+  {
+    "id": "reverse-rsi-exact-exact-moment",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "((_length - 1) * _exactMoment + kick) / _length",
+    "after": "((_length - 1) * _exactMoment - kick) / _length",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.AmbiguousCancellationUsesExactReplay"
+  },
+  {
+    "id": "reverse-rsi-exact-exact-publication",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "(value + displacement).Publish()",
+    "after": "(value - displacement).Publish()",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.AmbiguousCancellationUsesExactReplay"
+  },
+  {
+    "id": "reverse-rsi-exact-preview",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "if (final)\n        {\n            _observations.Add(price)",
+    "after": "if (true)\n        {\n            _observations.Add(price)",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-reset",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Helpers/ReverseRsiWindow.cs",
+    "before": "_observations.Clear(); _moment = Interval.Exact(_seed);",
+    "after": "_observations.Clear(); _moment = Interval.Exact(0);",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.ExtremeValuesAndInteriorTargetsPreserveSignalsPreviewAndReset"
+  },
+  {
+    "id": "reverse-rsi-exact-reference",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ReverseRsi.cs",
+    "before": "t * loss - (R(1) - t) * gain",
+    "after": "t * loss + (R(1) - t) * gain",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.IndependentHandSolvesTheNextWilderStep"
+  },
+  {
+    "id": "reverse-rsi-exact-core",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "state.Next(prices[i], true).Value",
+    "after": "-state.Next(prices[i], true).Value",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.CoreAndRegistryPreserveFormulaAndOverlappingSpans",
+    "scope": "internal static void ReverseEngineeringRsi("
+  },
+  {
+    "id": "reverse-rsi-exact-fast",
+    "module": "reverse-rsi-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan[i] = values[i]",
+    "after": "buffer.WritableSpan[i] = -values[i]",
+    "filter": "FullyQualifiedName~ReverseRsiNumericalTests.RoutesMatchIndependentSeededGainLossInverse",
+    "scope": "internal static ComputeBuffer ComputeReverseEngineeringRsiFast("
   }
 ]

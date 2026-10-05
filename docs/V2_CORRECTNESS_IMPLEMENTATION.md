@@ -6054,3 +6054,18 @@ Levels indicator, Robust Weighting and Time and Money behavior. All 10,491 ancho
 validate. Enrollment is 6,965/7,131, leaving 166 configurations across 17 types
 (`si-stationary1192-inventory.json`). PR #246 remains draft; final assurance is
 incomplete.
+
+
+### Reverse Engineering RSI qualification (batch 1214)
+
+All four configurations use certified interval evaluation of the seeded Wilder
+inverse, with exact rational replay only for ambiguous rounding or signals.
+Undefined inverse requests reject periods below two and nonfinite targets or
+targets outside the open interval (0,100), before publication. Independent
+seeded gain/loss references, all routes, core/registry aliases, overlapping spans,
+preview/reset and extreme cancellation passed 37 distinct focused checks.
+A 2,048-bar converging trend retains exact acceleration without replay.
+All 19 compiled faults were caught (`si-reversersi1206-qualified.json`);
+11 main integration checks passed (`reversersi1212-integration.trx`). Enrollment
+is 6,969/7,131, leaving 162 configurations across 16 types
+(`si-reversersi1213-inventory.json`). Final assurance remains incomplete.
