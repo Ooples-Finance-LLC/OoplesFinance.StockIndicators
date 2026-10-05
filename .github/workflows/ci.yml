@@ -12,11 +12,9 @@ jobs:
     permissions:
       contents: read
 
-  formula-contracts:
-    name: Formula contracts (${{ matrix.os }}, ${{ matrix.framework }})
+  formula-build:
+    name: Build contracts (${{ matrix.os }}, ${{ matrix.framework }})
     runs-on: ${{ matrix.os }}
-    # Complete numerical contracts exceed 30 minutes on the full inventory.
-    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
@@ -42,8 +40,7 @@ jobs:
           dotnet-version: |
             8.x
             10.x
-      - name: Execute shared contracts through the public consumer API
-        run: dotnet run --project tools/CorrectnessVerifier/CorrectnessVerifier.csproj --configuration Release --framework ${{ matrix.framework }} -- correctness-evidence.xml
+      - run: dotnet build tools/CorrectnessVerifier/CorrectnessVerifier.csproj -c Release -f ${{ matrix.framework }}
       - uses: actions/setup-python@v6
         if: matrix.os == 'ubuntu-latest' && matrix.framework == 'net10.0'
         with:
@@ -54,8 +51,103 @@ jobs:
         run: |
           dotnet build tools/NumericalBacklogScanner/NumericalBacklogScanner.csproj -c Release -p:IndicatorAssembly="$GITHUB_WORKSPACE/src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll"
           python -m unittest discover -s tools/NumericalBacklogScanner/tests -v
+          python -m unittest discover -s tools/tests -v
+      - uses: actions/upload-artifact@v7
+        with:
+          name: contract-binary-${{ matrix.os }}-${{ matrix.framework }}
+          path: tools/CorrectnessVerifier/bin/Release/${{ matrix.framework }}/
+          if-no-files-found: error
+
+  formula-shards:
+    name: Contracts (${{ matrix.target.os }}, ${{ matrix.target.framework }}, shard ${{ matrix.shard }})
+    needs: formula-build
+    runs-on: ${{ matrix.target.os }}
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        target:
+          - { os: windows-latest, framework: net461 }
+          - { os: windows-latest, framework: net8.0 }
+          - { os: ubuntu-latest, framework: net8.0 }
+          - { os: ubuntu-latest, framework: net10.0 }
+          - { os: macos-latest, framework: net8.0 }
+          - { os: macos-latest, framework: net10.0 }
+    steps:
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.x
+            10.x
+      - uses: actions/download-artifact@v8
+        with:
+          name: contract-binary-${{ matrix.target.os }}-${{ matrix.target.framework }}
+          path: verifier
+      - name: Execute assigned contracts against the shared binary
+        shell: pwsh
+        run: |
+          if ('${{ matrix.target.framework }}' -eq 'net461') {
+            & ./verifier/CorrectnessVerifier.exe correctness-evidence.xml --shard-index ${{ matrix.shard }} --shard-count 20
+          } else {
+            & dotnet ./verifier/CorrectnessVerifier.dll correctness-evidence.xml --shard-index ${{ matrix.shard }} --shard-count 20
+          }
+          if ($LASTEXITCODE -ne 0) { throw "Contract shard failed: $LASTEXITCODE" }
       - uses: actions/upload-artifact@v7
         if: always()
+        with:
+          name: correctness-${{ matrix.target.os }}-${{ matrix.target.framework }}-${{ matrix.shard }}
+          path: correctness-evidence.xml
+          if-no-files-found: error
+
+  formula-contracts:
+    # Preserve the existing per-platform gate names; no partial shard can pass them.
+    name: Formula contracts (${{ matrix.os }}, ${{ matrix.framework }})
+    needs: [formula-build, formula-shards]
+    if: always()
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            framework: net461
+          - os: windows-latest
+            framework: net8.0
+          - os: ubuntu-latest
+            framework: net8.0
+          - os: ubuntu-latest
+            framework: net10.0
+          - os: macos-latest
+            framework: net8.0
+          - os: macos-latest
+            framework: net10.0
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Require all shard jobs to succeed
+        env:
+          BUILD_RESULT: ${{ needs.formula-build.result }}
+          SHARD_RESULT: ${{ needs.formula-shards.result }}
+        run: test "$BUILD_RESULT" = success && test "$SHARD_RESULT" = success
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: correctness-${{ matrix.os }}-${{ matrix.framework }}-*
+          path: shards
+      - name: Require complete disjoint coverage and identical binaries
+        run: python tools/merge_correctness_shards.py --input shards --output correctness-evidence.xml --count 20
+      - name: Enforce formula and numerical evidence gates
+        shell: pwsh
+        run: |
+          [xml]$evidence = Get-Content correctness-evidence.xml -Raw
+          & ./tools/Assert-CorrectnessFormulaEvidence.ps1 -Evidence $evidence
+          & ./tools/Assert-CorrectnessNumericalEvidence.ps1 -Evidence $evidence
+      - uses: actions/upload-artifact@v7
         with:
           name: correctness-${{ matrix.os }}-${{ matrix.framework }}
           path: correctness-evidence.xml
@@ -99,7 +191,7 @@ jobs:
       - name: Build the library, which builds and loads the source generator
         run: dotnet build src/OoplesFinance.StockIndicators.csproj --configuration Release --framework net10.0
 
-  build-and-test:
+  unit-build:
     runs-on: windows-latest
 
     steps:
@@ -132,12 +224,82 @@ jobs:
       - name: Restore test dependencies
         run: dotnet restore tests/OoplesFinance.StockIndicators.Tests.Unit.csproj
 
-      - name: Build and run tests
-        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --framework net10.0 --verbosity normal --logger trx --results-directory ./test-results
+      - name: Build unit tests once for all shards
+        run: dotnet build tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --framework net10.0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Discover the complete method inventory
+        run: python tools/unit_test_shards.py plan --assembly tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.dll --plan unit-plan.json --output discovery --count 20
+      - uses: actions/upload-artifact@v7
+        with:
+          name: unit-binary
+          path: tests/bin/Release/net10.0/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        with:
+          name: unit-plan
+          path: unit-plan.json
+          if-no-files-found: error
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v7
+  unit-shards:
+    name: Unit tests (shard ${{ matrix.shard }})
+    needs: unit-build
+    runs-on: windows-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.x
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v8
+        with:
+          name: unit-binary
+          path: tests/bin/Release/net10.0
+      - uses: actions/download-artifact@v8
+        with:
+          name: unit-plan
+      - name: Run the assigned test methods
+        run: python tools/unit_test_shards.py run --assembly tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.dll --plan unit-plan.json --output test-results --index ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: test-results
-          path: ./test-results
+          name: unit-results-${{ matrix.shard }}
+          path: test-results/
+          if-no-files-found: error
+
+  build-and-test:
+    needs: [unit-build, unit-shards]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Require every unit shard to succeed
+        env:
+          BUILD_RESULT: ${{ needs.unit-build.result }}
+          SHARD_RESULT: ${{ needs.unit-shards.result }}
+        run: test "$BUILD_RESULT" = success && test "$SHARD_RESULT" = success
+      - uses: actions/download-artifact@v8
+        with:
+          name: unit-plan
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: unit-results-*
+          path: test-results
+      - name: Verify complete unit-test coverage from actual TRX results
+        run: python tools/unit_test_shards.py merge --plan unit-plan.json --output test-results

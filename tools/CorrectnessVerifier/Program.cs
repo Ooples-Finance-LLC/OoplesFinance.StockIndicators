@@ -5,15 +5,28 @@ using OoplesFinance.StockIndicators.Validation;
 
 // Standalone public-API consumer: the same executable can validate a source build or an exact NuGet package.
 // Evidence describes executed contracts, not an assertion that all mathematical specifications were reviewed.
-if (args.Length > 2)
-    throw new ArgumentException("Usage: CorrectnessVerifier [output.xml] [comma-separated configuration filters]. Extra arguments would omit requested configurations.");
+var shardIndex = -1;
+var shardCount = 0;
+if (args.Length == 5 && args[1] == "--shard-index" && args[3] == "--shard-count")
+{
+    shardIndex = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    shardCount = int.Parse(args[4], System.Globalization.CultureInfo.InvariantCulture);
+    if (shardCount < 1 || shardIndex < 0 || shardIndex >= shardCount)
+        throw new ArgumentException("Invalid shard index/count.");
+}
+else if (args.Length > 2 || args.Skip(1).Any(a => a.StartsWith("--", StringComparison.Ordinal)))
+    throw new ArgumentException("Usage: CorrectnessVerifier [output.xml] [comma-separated configuration filters], or output.xml --shard-index I --shard-count N.");
 var output = args.Length > 0 ? args[0] : "correctness-evidence.xml";
-var filters = args.Length > 1 ? args[1].Split(',') : Array.Empty<string>();
+var filters = args.Length == 2 ? args[1].Split(',') : Array.Empty<string>();
 var assembly = typeof(IIndicator).Assembly;
 var cases = IndicatorValidationDiscovery.Discover(new[] { assembly });
 var pairs = IndicatorValidationDiscovery.DiscoverMultiSeries(new[] { assembly });
-var work = cases.Select(c => (Name: c.ToString(), Run: (Func<Task<IndicatorValidationReport>>)(() => IndicatorValidation.ValidateAsync(c))))
+var inventory = cases.Select(c => (Name: c.ToString(), Run: (Func<Task<IndicatorValidationReport>>)(() => IndicatorValidation.ValidateAsync(c))))
     .Concat(pairs.Select(c => (Name: c.ToString(), Run: (Func<Task<IndicatorValidationReport>>)(() => Task.FromResult(MultiSeriesIndicatorValidation.Validate(c))))))
+    .OrderBy(c => c.Name, StringComparer.Ordinal).ToArray();
+if (inventory.Select(c => c.Name).Distinct(StringComparer.Ordinal).Count() != inventory.Length)
+    throw new InvalidOperationException("Duplicate discovered configuration names.");
+var work = inventory.Where((_, index) => shardCount == 0 || index % shardCount == shardIndex)
     .Where(c => filters.Length == 0 || filters.Any(f => c.Name.IndexOf(f, StringComparison.Ordinal) >= 0)).ToArray();
 if (work.Length == 0) throw new InvalidOperationException("No configurations selected; an empty run cannot pass.");
 var reports = new IndicatorValidationReport?[work.Length];
@@ -31,7 +44,12 @@ await Task.WhenAll(Enumerable.Range(0, Math.Min(8, Environment.ProcessorCount)).
 using (var writer = XmlWriter.Create(output, new XmlWriterSettings { Indent = true }))
 {
     writer.WriteStartElement("correctnessEvidence");
-    writer.WriteAttributeString("scope", filters.Length == 0 ? "all-discovered-configurations" : "filtered");
+    writer.WriteAttributeString("scope", shardCount > 0 ? "shard" : filters.Length == 0 ? "all-discovered-configurations" : "filtered");
+    if (shardCount > 0)
+    {
+        writer.WriteAttributeString("shardIndex", shardIndex.ToString());
+        writer.WriteAttributeString("shardCount", shardCount.ToString());
+    }
     writer.WriteAttributeString("requiredNumericalFixtures", string.Join(",",
         IndicatorAdversarialCases.Generate(2, 244).Select(fixture => fixture.Name)));
     writer.WriteAttributeString("assembly", assembly.FullName);
@@ -43,6 +61,12 @@ using (var writer = XmlWriter.Create(output, new XmlWriterSettings { Indent = tr
     writer.WriteAttributeString("os", Environment.OSVersion.ToString());
     writer.WriteAttributeString("pointerBits", (IntPtr.Size * 8).ToString());
     writer.WriteAttributeString("utc", DateTime.UtcNow.ToString("O"));
+    if (shardCount > 0)
+    {
+        writer.WriteStartElement("inventory");
+        foreach (var item in inventory) writer.WriteElementString("name", item.Name);
+        writer.WriteEndElement();
+    }
     for (var i = 0; i < work.Length; i++)
     {
         var report = reports[i];

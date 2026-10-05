@@ -34,7 +34,7 @@ jobs:
     needs: mutation-plan
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 20
       matrix: ${{ fromJSON(needs.mutation-plan.outputs.matrix) }}
     runs-on: windows-latest
     timeout-minutes: 90
