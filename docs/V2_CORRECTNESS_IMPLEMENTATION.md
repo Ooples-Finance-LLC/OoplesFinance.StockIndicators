@@ -6429,3 +6429,14 @@ observed so far have passing corrected reruns. Production bytes are unchanged.
 The final production source also builds on SDK 10.0.101 with zero warnings
 and errors (`si-final1396-sdk.log`). Full-suite and exact-package consumers
 remain active; final timings remain outstanding.
+
+
+### Exact-agreement ledger repair (batch 1403)
+
+The original full suite's ninth observed failure identified ten rounding
+exceptions whose outputs now agree exactly. Removed those obsolete exceptions
+without changing the comparison or production arithmetic. The complete
+exact-agreement sweep passes (`final1403-exact-agreement.trx`: one passed,
+zero failed/skipped). All nine failures observed so far in the original suite
+have corrected passing reruns; that suite and the three exact-package consumers
+remain in progress. Benchmark timings have not yet run.

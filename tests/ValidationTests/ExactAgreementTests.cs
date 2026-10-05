@@ -32,18 +32,7 @@ public sealed class ExactAgreementTests
         // Centered population moments and compensated sums change operation order.
         // These additional outputs were measured within the existing 1e-8 route budget.
         "CloseToCloseVolatility.Ctcv",
-        "CommoditySelectionIndex.Signal",
-        "EhlersSuperPassbandFilter.LowerBand",
-        "EhlersSuperPassbandFilter.UpperBand",
         "GarmanKlassVolatility.Gcv",
-        "HirashimaSugitaRS.LowerBand2",
-        "HirashimaSugitaRS.UpperBand2",
-        "JrcFractalDimension.Jrcfd",
-        "JrcFractalDimension.Signal",
-
-        "MacZVwapIndicator.Histogram",
-        "MacZVwapIndicator.Macz",
-        "MacZVwapIndicator.Signal",
     };
 
     [Fact]
