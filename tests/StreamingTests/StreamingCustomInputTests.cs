@@ -148,6 +148,52 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             $"indicators compared. Disagreements ({disagreements.Count}): {string.Join(" | ", disagreements)}");
     }
 
+    [Theory]
+    [InlineData(typeof(EhlersAdaptiveStochasticIndicatorV1State))]
+    [InlineData(typeof(KlingerVolumeOscillatorState))]
+    [InlineData(typeof(MobilityOscillatorState))]
+    [InlineData(typeof(TrueRangeAdjustedExponentialMovingAverageState))]
+    [InlineData(typeof(TurboStochasticsFastState))]
+    [InlineData(typeof(TurboStochasticsSlowState))]
+    [InlineData(typeof(UltimateTraderOscillatorState))]
+    [InlineData(typeof(PrimeNumberBandsState))]
+    [InlineData(typeof(RSINGIndicatorState))]
+    [InlineData(typeof(RetentionAccelerationFilterState))]
+    [InlineData(typeof(SellGravitationIndexState))]
+    public void NativeCustomRangeMatchesBatchAcrossPreviewAndReset(Type type)
+    {
+        var bars = StockTestData.Take(80).ToList();
+        var construction = FindDefaultConstruction(type)!.Value;
+        using var state = new CustomInputState(Build(construction), LogClose);
+        var expected = Flatten((StockData)InvokeBatch(IndicatorInvoker.GetMethod(state.Name)!, bars, CustomSeries.OutOfRange));
+        for (var replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            var actual = new Dictionary<string, List<double>>(StringComparer.Ordinal) { [Primary] = new() };
+            foreach (var t in bars)
+            {
+                var bar = new OhlcvBar("TEST", BarTimeframe.Tick, t.Date, t.Date,
+                    t.Open, t.High, t.Low, t.Close, t.Volume, true);
+                var distraction = new OhlcvBar("TEST", BarTimeframe.Tick, t.Date, t.Date,
+                    t.Open, t.High, t.Low, t.Close * 1.1, t.Volume, false);
+                state.Update(distraction, false, false);
+                var preview = state.Update(bar, false, true);
+                var committed = state.Update(bar, true, true);
+                Assert.Equal(preview.Value, committed.Value);
+                actual[Primary].Add(committed.Value);
+                foreach (var pair in committed.Outputs!)
+                {
+                    Assert.Equal(preview.Outputs![pair.Key], pair.Value);
+                    if (!actual.TryGetValue(pair.Key, out var values)) actual[pair.Key] = values = new();
+                    values.Add(pair.Value);
+                }
+            }
+            var failures = new List<string>();
+            Compare(type.Name, expected, actual, failures);
+            failures.Should().BeEmpty();
+        }
+    }
+
     private static void Compare(string label, Dictionary<string, List<double>> batch,
         Dictionary<string, List<double>> streamed, List<string> disagreements)
     {

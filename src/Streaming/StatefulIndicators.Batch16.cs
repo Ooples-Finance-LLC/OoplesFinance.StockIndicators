@@ -306,8 +306,9 @@ public sealed class KirshenbaumBandsState : IStreamingIndicatorState, IDisposabl
 }
 
 [PrimaryOutput("Kvo")]
-public sealed class KlingerVolumeOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class KlingerVolumeOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly KlingerWindow _window;
     private readonly StreamingInputResolver _input;
     public KlingerVolumeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,

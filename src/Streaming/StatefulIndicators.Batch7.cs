@@ -196,8 +196,9 @@ public sealed class EhlersAdaptiveRsiFisherTransformV1State : IStreamingIndicato
 }
 
 [PrimaryOutput("Easi")]
-public sealed class EhlersAdaptiveStochasticIndicatorV1State : IStreamingIndicatorState, IDisposable
+public sealed class EhlersAdaptiveStochasticIndicatorV1State : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly AdaptiveRangeV1Window _window;
 
     public EhlersAdaptiveStochasticIndicatorV1State(double cycPart = .5) => _window = new AdaptiveRangeV1Window(cycPart, false, .015);

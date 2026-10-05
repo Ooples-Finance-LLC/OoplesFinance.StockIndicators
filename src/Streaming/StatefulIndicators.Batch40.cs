@@ -334,8 +334,9 @@ public sealed class VolumeZoneOscillatorState : IStreamingIndicatorState
 /// average at its own price.
 /// </remarks>
 [PrimaryOutput("Trema")]
-public sealed class TrueRangeAdjustedExponentialMovingAverageState : IStreamingIndicatorState
+public sealed class TrueRangeAdjustedExponentialMovingAverageState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly TrueRangeAdjustedWindow _window;
     public TrueRangeAdjustedExponentialMovingAverageState(int length = 14, double mult = 1.5) => _window = new(length, mult);
     public IndicatorName Name => IndicatorName.TrueRangeAdjustedExponentialMovingAverage;

@@ -263,7 +263,7 @@ public sealed class PriceZoneOscillatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("UpperBand")]
 public sealed class PrimeNumberBandsState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    bool ICustomInputRangePolicy.PreserveOriginalRange => false;
     private readonly PrimeBandWindow _window;
     public PrimeNumberBandsState(int length = 5) => _window = new(length);
     public IndicatorName Name => IndicatorName.PrimeNumberBands;

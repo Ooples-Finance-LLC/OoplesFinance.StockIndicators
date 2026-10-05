@@ -6368,3 +6368,34 @@ import and supplies no verification credit.
 The still-running original full suite has reported three fixture failures; all
 three have passing corrected reruns. Package consumers continue against the
 unchanged immutable production package.
+
+
+### Native custom-input range alignment (batch 1386)
+
+Eleven native states now apply the same custom-input range policy as their
+batch formulas. Ehlers Adaptive Stochastic V1, Klinger, Mobility, True Range
+Adjusted EMA, Turbo Stochastics Fast/Slow and Ultimate Trader preserve candle
+ranges. Prime Bands, RSING, Retention Acceleration and Sell Gravitation derive
+ranges from the custom series. Arithmetic formulas and builder projection
+contracts are unchanged.
+
+All 12 focused regressions pass, including preview/reset checks for each
+state and the Bayesian default-output regression. Six existing selected-source
+checks also pass. Both complete custom-input sweeps (823 states each) and the
+typed streaming sweep (1,866 default/alternate specs) pass
+(`final1379-native-range.trx`, `final1382-selected-routes.trx`,
+`final1381-route-sweeps.trx`). The typed sweep now compares the same selected
+output key as its batch binding.
+
+All 11 compiled policy faults are caught after a 17-check passing baseline:
+nine new faults and two retargeted existing faults, with authenticated source
+archive and behavioral failures (`si-final1386-qualified.json`). All 10,758
+mutation anchors resolve; 19 mutation/sharding tooling checks pass.
+
+The corrected source builds and packages for all three frameworks as
+`2.0.0-correctness.local1383`. Its exact-DLL consumers are running; superseded
+1369 consumers were stopped and provide no completed verification credit.
+The original full suite continues, with all five failures observed so far
+reconciled by passing corrected reruns. The rebuilt competitor executable
+uses the package's net10.0 DLL and passes 66,082 workload assertions; timings
+remain pending. Final assurance is still in progress.

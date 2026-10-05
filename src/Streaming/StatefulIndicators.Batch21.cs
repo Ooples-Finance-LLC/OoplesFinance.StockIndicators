@@ -754,7 +754,7 @@ public sealed class RepulsionMovingAverageState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Raf")]
 public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    bool ICustomInputRangePolicy.PreserveOriginalRange => false;
     private readonly RetentionAccelerationWindow _window;
     public RetentionAccelerationFilterState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.RetentionAccelerationFilter;

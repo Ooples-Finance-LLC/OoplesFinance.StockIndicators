@@ -552,8 +552,9 @@ public sealed class TurboScalerState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Tsf")]
-public sealed class TurboStochasticsFastState : IStreamingIndicatorState, IDisposable
+public sealed class TurboStochasticsFastState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly TurboStochasticsWindow _window;
     public TurboStochasticsFastState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 20, int length2 = 10, int turboLength = 2)
         => _window = new(maType, length1, length2, turboLength, false);
@@ -568,8 +569,9 @@ public sealed class TurboStochasticsFastState : IStreamingIndicatorState, IDispo
 }
 
 [PrimaryOutput("Tsf")]
-public sealed class TurboStochasticsSlowState : IStreamingIndicatorState, IDisposable
+public sealed class TurboStochasticsSlowState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly TurboStochasticsWindow _window;
     public TurboStochasticsSlowState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 20, int length2 = 10, int turboLength = 2)
         => _window = new(maType, length1, length2, turboLength, true);
@@ -871,8 +873,9 @@ public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposa
 }
 
 [PrimaryOutput("Uto")]
-public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly UltimateTraderWindow _window;
     private readonly UltimateTraderWindow.Average _first, _second, _third;
     private readonly StreamingInputResolver _input;

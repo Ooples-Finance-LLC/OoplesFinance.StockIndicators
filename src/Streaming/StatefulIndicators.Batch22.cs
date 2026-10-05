@@ -138,7 +138,7 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Rsing")]
 public sealed class RSINGIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    bool ICustomInputRangePolicy.PreserveOriginalRange => false;
     private readonly RsingWindow _window;
     public RSINGIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.RSINGIndicator;
@@ -496,7 +496,7 @@ public sealed class SelfWeightedMovingAverageState : IStreamingIndicatorState, I
 [PrimaryOutput("Sgi")]
 public sealed class SellGravitationIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    bool ICustomInputRangePolicy.PreserveOriginalRange => false;
     private readonly SellGravitationWindow _window;
     public SellGravitationIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.SellGravitationIndex;

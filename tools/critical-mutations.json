@@ -75354,9 +75354,9 @@
     "module": "numerical",
     "file": "src/Streaming/StatefulIndicators.Batch22.cs",
     "scope": "public sealed class RSINGIndicatorState",
-    "before": "PreserveOriginalRange => true",
-    "after": "PreserveOriginalRange => false",
-    "filter": "FullyQualifiedName~RsingNumericalTests.SelectedSourcePreservesFormula"
+    "before": "PreserveOriginalRange => false",
+    "after": "PreserveOriginalRange => true",
+    "filter": "FullyQualifiedName~RsingNumericalTests.SelectedSourcePreservesFormula|FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
   },
   {
     "id": "sell-gravitation-wide-body",
@@ -75633,9 +75633,9 @@
     "module": "numerical",
     "file": "src/Streaming/StatefulIndicators.Batch22.cs",
     "scope": "public sealed class SellGravitationIndexState",
-    "before": "PreserveOriginalRange => true",
-    "after": "PreserveOriginalRange => false",
-    "filter": "FullyQualifiedName~SellGravitationNumericalTests.SelectedSmoothingOutsideCandlePreservesOriginalFields"
+    "before": "PreserveOriginalRange => false",
+    "after": "PreserveOriginalRange => true",
+    "filter": "FullyQualifiedName~SellGravitationNumericalTests.SelectedSmoothingOutsideCandlePreservesOriginalFields|FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
   },
   {
     "id": "sell-gravitation-wide-fast-output",
@@ -93124,5 +93124,86 @@
     "before": "first[i]=Round(D(.5*(1-alpha))",
     "after": "first[i]=Round(D(.5*(1+alpha))",
     "filter": "FullyQualifiedName~TunedBypassNumericalTests.ExtremePricesPreserveHarmonicsSignalsPreviewAndReset"
+  },
+  {
+    "id": "custom-range-klingervolumeoscillator",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class KlingerVolumeOscillatorState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-mobilityoscillator",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MobilityOscillatorState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-primenumberbands",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class PrimeNumberBandsState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-retentionaccelerationfilter",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RetentionAccelerationFilterState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-turbostochasticsfast",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboStochasticsFastState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-turbostochasticsslow",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TurboStochasticsSlowState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-ultimatetraderoscillator",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class UltimateTraderOscillatorState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-truerangeadjustedexponentialmovingaverage",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class TrueRangeAdjustedExponentialMovingAverageState ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
+  },
+  {
+    "id": "custom-range-ehlersadaptivestochasticindicatorv1",
+    "module": "custom-input-ranges",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveStochasticIndicatorV1State ",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~NativeCustomRangeMatchesBatchAcrossPreviewAndReset"
   }
 ]

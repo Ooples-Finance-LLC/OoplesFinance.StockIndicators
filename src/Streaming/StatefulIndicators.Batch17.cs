@@ -523,8 +523,9 @@ public sealed class MirroredPercentagePriceOscillatorState : IStreamingIndicator
 }
 
 [PrimaryOutput("Mo")]
-public sealed class MobilityOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class MobilityOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly MobilityWindow _window;
     private readonly StreamingInputResolver _input;
     public MobilityOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
