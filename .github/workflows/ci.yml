@@ -15,7 +15,8 @@ jobs:
   formula-contracts:
     name: Formula contracts (${{ matrix.os }}, ${{ matrix.framework }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    # Complete numerical contracts exceed 30 minutes on the full inventory.
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
