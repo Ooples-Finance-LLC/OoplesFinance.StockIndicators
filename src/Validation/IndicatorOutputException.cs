@@ -6,8 +6,10 @@ namespace OoplesFinance.StockIndicators.Validation;
 public sealed class IndicatorOutputException : ArithmeticException
 {
     internal IndicatorOutputException(IIndicator indicator, int slot, int index, double value, IndicatorStartupPolicy policy)
-        : base($"{indicator.GetType().FullName}: Output {slot}, bar {index}: {value:R}; required policy {policy}.")
-    { IndicatorType = indicator.GetType(); OutputSlot = slot; BarIndex = index; Value = value; Policy = policy; }
+        : this(indicator.GetType(), slot, index, value, policy) { }
+    internal IndicatorOutputException(Type type, int slot, int index, double value, IndicatorStartupPolicy policy)
+        : base($"{type.FullName}: Output {slot}, bar {index}: {value:R}; required policy {policy}.")
+    { IndicatorType = type; OutputSlot = slot; BarIndex = index; Value = value; Policy = policy; }
     public Type IndicatorType { get; }
     public int OutputSlot { get; }
     public int BarIndex { get; }

@@ -12,8 +12,29 @@ jobs:
     permissions:
       contents: read
 
+  correctness-package:
+    name: Build the immutable correctness package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.x
+            10.x
+      - name: Package every supported framework once
+        run: dotnet pack src/OoplesFinance.StockIndicators.csproj -c Release -p:Version=2.0.0-ci.${{ github.run_id }}.${{ github.run_attempt }} -p:GeneratePackageOnBuild=false -o candidate
+      - uses: actions/upload-artifact@v7
+        with:
+          name: correctness-package
+          path: candidate/*.nupkg
+          if-no-files-found: error
+
   formula-build:
     name: Build contracts (${{ matrix.os }}, ${{ matrix.framework }})
+    needs: correctness-package
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -40,7 +61,14 @@ jobs:
           dotnet-version: |
             8.x
             10.x
-      - run: dotnet build tools/CorrectnessVerifier/CorrectnessVerifier.csproj -c Release -f ${{ matrix.framework }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: correctness-package
+          path: candidate
+      - name: Build a consumer of the immutable package
+        shell: pwsh
+        run: |
+          & ./tools/Build-CorrectnessPackageConsumer.ps1 -PackagePath (Get-ChildItem candidate/*.nupkg).FullName -TargetFramework '${{ matrix.framework }}'
       - uses: actions/setup-python@v6
         if: matrix.os == 'ubuntu-latest' && matrix.framework == 'net10.0'
         with:
@@ -49,7 +77,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.framework == 'net10.0'
         shell: bash
         run: |
-          dotnet build tools/NumericalBacklogScanner/NumericalBacklogScanner.csproj -c Release -p:IndicatorAssembly="$GITHUB_WORKSPACE/src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll"
+          dotnet build tools/NumericalBacklogScanner/NumericalBacklogScanner.csproj -c Release -p:IndicatorAssembly="$GITHUB_WORKSPACE/tools/CorrectnessVerifier/bin/Release/net10.0/OoplesFinance.StockIndicators.dll"
           python -m unittest discover -s tools/NumericalBacklogScanner/tests -v
           python -m unittest discover -s tools/tests -v
       - uses: actions/upload-artifact@v7
@@ -94,6 +122,13 @@ jobs:
             & dotnet ./verifier/CorrectnessVerifier.dll correctness-evidence.xml --shard-index ${{ matrix.shard }} --shard-count 20
           }
           if ($LASTEXITCODE -ne 0) { throw "Contract shard failed: $LASTEXITCODE" }
+          $identity = Get-Content verifier/package-identity.json -Raw | ConvertFrom-Json
+          [xml]$evidence = Get-Content correctness-evidence.xml -Raw
+          if ($evidence.correctnessEvidence.assemblySha256 -ne $identity.assemblySha256) { throw 'Shard loaded a different package assembly.' }
+          foreach ($key in @('packageSha256', 'packageVersion', 'targetFramework')) {
+            $evidence.correctnessEvidence.SetAttribute($key, $identity.$key)
+          }
+          $evidence.Save([IO.Path]::GetFullPath('correctness-evidence.xml'))
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -145,6 +180,7 @@ jobs:
         shell: pwsh
         run: |
           [xml]$evidence = Get-Content correctness-evidence.xml -Raw
+          if (-not $evidence.correctnessEvidence.packageSha256 -or $evidence.correctnessEvidence.targetFramework -ne '${{ matrix.framework }}') { throw 'Missing exact-package identity.' }
           & ./tools/Assert-CorrectnessFormulaEvidence.ps1 -Evidence $evidence
           & ./tools/Assert-CorrectnessNumericalEvidence.ps1 -Evidence $evidence
       - uses: actions/upload-artifact@v7

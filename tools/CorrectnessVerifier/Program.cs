@@ -21,6 +21,7 @@ var filters = args.Length == 2 ? args[1].Split(',') : Array.Empty<string>();
 var assembly = typeof(IIndicator).Assembly;
 var cases = IndicatorValidationDiscovery.Discover(new[] { assembly });
 var pairs = IndicatorValidationDiscovery.DiscoverMultiSeries(new[] { assembly });
+var pairedNames = new HashSet<string>(pairs.Select(c => c.ToString()), StringComparer.Ordinal);
 var inventory = cases.Select(c => (Name: c.ToString(), Run: (Func<Task<IndicatorValidationReport>>)(() => IndicatorValidation.ValidateAsync(c))))
     .Concat(pairs.Select(c => (Name: c.ToString(), Run: (Func<Task<IndicatorValidationReport>>)(() => Task.FromResult(MultiSeriesIndicatorValidation.Validate(c))))))
     .OrderBy(c => c.Name, StringComparer.Ordinal).ToArray();
@@ -72,6 +73,7 @@ using (var writer = XmlWriter.Create(output, new XmlWriterSettings { Indent = tr
         var report = reports[i];
         writer.WriteStartElement("case");
         writer.WriteAttributeString("name", work[i].Name);
+        writer.WriteAttributeString("inputSeries", pairedNames.Contains(work[i].Name) ? "2" : "1");
         writer.WriteAttributeString("passed", (report?.IsValid == true && errors[i] is null).ToString());
         writer.WriteAttributeString("fixtures", (report?.FixturesCompleted ?? 0).ToString());
         writer.WriteAttributeString("values", (report?.ValuesChecked ?? 0).ToString());

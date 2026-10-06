@@ -17,18 +17,30 @@ internal static partial class BuiltInFormulaReferences
         {
             var p = Closes(primary); var b = Closes(benchmark);
             var result = new Dictionary<string, IReadOnlyList<double>>();
-            double[] Roc(double[] x, int lag) => x.Select((v, i) => i < lag || x[i-lag] == 0 ? 0 : 100*(v/x[i-lag]-1)).ToArray();
+            ReferenceFraction D(double v) => ReferenceFraction.FromDouble(v);
+            ReferenceFraction R(ReferenceFraction v) => RoundRocBankStage(v);
+            var zero = D(0);
+            ReferenceFraction[] Mean(ReferenceFraction[] values, int length) => SmoothRocBankStage(values, length, kind);
+            ReferenceFraction[] Roc(double[] x, int lag) => x.Select((v, i) => i < lag || x[i-lag] == 0 ? zero
+                : R((D(v)-D(x[i-lag]))*D(100)/D(x[i-lag]))).ToArray();
             switch (name)
             {
                 case IndicatorName.ComparePriceMomentumOscillator:
-                    double[] Pmo(double[] x)
+                    ReferenceFraction[] Pmo(double[] x)
                     {
-                        double[] Smooth(double[] source, int period) => source.Select((_, i) => Enumerable.Range(0, i+1)
-                            .Sum(j => source[j]*2/period*Math.Pow(1-2d/period, i-j))).ToArray();
-                        return Smooth(Smooth(Roc(x, 1), Period("length1", 20)), Period("length2", 35));
+                        var roc = Roc(x, 1); var mean = zero; var previous = zero;
+                        var values = new ReferenceFraction[x.Length];
+                        var first = D(Period("length1", 20)); var second = D(Period("length2", 35));
+                        for (var i = 0; i < x.Length; i++)
+                        {
+                            mean = R(((first-D(2))*mean + D(2)*roc[i])/first);
+                            previous = R(((second-D(2))*previous + D(2)*R(mean*D(10)))/second);
+                            values[i] = previous;
+                        }
+                        return values;
                     }
                     var primaryPmo = Pmo(p); var benchmarkPmo = Pmo(b);
-                    result["Cpmo"] = p.Select((_, i) => 10*(primaryPmo[i]-benchmarkPmo[i])).ToArray();
+                    result["Cpmo"] = p.Select((_, i) => R(primaryPmo[i]-benchmarkPmo[i]).ToDouble()).ToArray();
                     break;
                 case IndicatorName.RSMKIndicator:
                     var horizon = Period("length", 90);
@@ -53,35 +65,38 @@ internal static partial class BuiltInFormulaReferences
                     break;
                 case IndicatorName.RelativeNormalizedVolatility:
                     var length = Period("length", 14);
-                    double[] Volatility(double[] source) => Average(source.Select((v, i) =>
+                    ReferenceFraction[] Volatility(double[] source) => Mean(source.Select((v, i) =>
                     {
-                        if (i == 0 || i+1 < length) return 0d;
-                        var sample = Window(source, i, length).Select(BinaryDecimal).ToArray(); var center = sample.Average();
-                        var sigma = Math.Sqrt((double)sample.Average(x => (x-center)*(x-center)));
-                        return sigma == 0 ? 0 : Math.Abs(v-source[i-1])/sigma;
-                    }).ToArray(), length, kind);
+                        if (i == 0 || i+1 < length) return zero;
+                        var sample = Window(source, i, length).Select(D).ToArray();
+                        var center = sample.Aggregate(zero, (sum,x) => sum+x) / D(sample.Length);
+                        var variance = sample.Aggregate(zero, (sum,x) => sum+(x-center)*(x-center)) / D(sample.Length);
+                        var sigma = variance.SqrtToDouble();
+                        return sigma == 0 ? zero : R(R(D(v)-D(source[i-1])).Abs()/D(sigma));
+                    }).ToArray(), length);
                     var stockVolatility = Volatility(p); var marketVolatility = Volatility(b);
-                    result["Rnv"] = p.Select((_, i) => marketVolatility[i] == 0 ? 0 : stockVolatility[i]/marketVolatility[i]).ToArray();
+                    result["Rnv"] = p.Select((_, i) => marketVolatility[i].Sign == 0 ? 0 : R(stockVolatility[i]/marketVolatility[i]).ToDouble()).ToArray();
                     break;
                 case IndicatorName.SectorRotationModel:
                     var first = Period("length1", 25); var second = Period("length2", 75);
                     var stockFirst = Roc(p, first); var stockSecond = Roc(p, second);
                     var marketFirst = Roc(b, first); var marketSecond = Roc(b, second);
-                    var rotation = p.Select((_, i) => 50*(stockFirst[i]+stockSecond[i]-marketFirst[i]-marketSecond[i])).ToArray();
-                    result["Srm"] = rotation; result["Signal"] = Average(rotation, first, kind);
+                    var rotation = p.Select((_, i) => R(D(100)*R(R(R(stockFirst[i]+stockSecond[i])/D(2))-R(R(marketFirst[i]+marketSecond[i])/D(2))))).ToArray();
+                    result["Srm"] = rotation.Select(v=>v.ToDouble()).ToArray();
+                    result["Signal"] = Mean(rotation, first).Select(v=>v.ToDouble()).ToArray();
                     break;
                 case IndicatorName.RelativeStrength3DIndicator:
-                    var ratio = new double[p.Length];
-                    for (var i = 0; i < ratio.Length; i++) ratio[i] = b[i] == 0 ? i == 0 ? 0 : ratio[i-1] : p[i]/b[i]*100;
-                    var fast = Average(ratio, Period("length3", 10), kind); var medium = Average(fast, Period("length2", 7), kind);
-                    var slowLength = Period("length4", 15); var slow = Average(fast, slowLength, kind);
-                    var verySlow = Average(slow, Period("length5", 30), kind);
-                    // Distinct rounded averages cast distinct votes, including a decaying tail.
-                    bool Below(double x, double y) => x < y;
+                    var ratio = new ReferenceFraction[p.Length];
+                    for (var i = 0; i < ratio.Length; i++) ratio[i] = b[i] == 0 ? i == 0 ? zero : ratio[i-1] : R(R(D(p[i])/D(b[i]))*D(100));
+                    var fast = Mean(ratio, Period("length3", 10)); var medium = Mean(fast, Period("length2", 7));
+                    var slowLength = Period("length4", 15); var slow = Mean(fast, slowLength);
+                    var verySlow = Mean(slow, Period("length5", 30));
+                    // Compare before projecting extended-range components to binary64.
+                    bool Below(ReferenceFraction x, ReferenceFraction y) => x.CompareTo(y) < 0;
                     var score = p.Select((_, i) => Below(medium[i], slow[i]) ? 0d : Below(fast[i], medium[i])
                         ? Below(slow[i], verySlow[i]) ? 5 : 9 : Below(slow[i], verySlow[i]) ? 9 : 10).ToArray();
                     var scoreMean = Average(score, Period("length1", 4), kind);
-                    result["Rs3d"] = score.Select((v, i) => v >= 5 || Below(scoreMean[i], v)
+                    result["Rs3d"] = score.Select((v, i) => v >= 5 || scoreMean[i] < v
                         ? (double)Window(score, i, slowLength).Count(x => x >= 5)/slowLength*100 : 0).ToArray();
                     break;
             }

@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
@@ -293,14 +293,15 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
     private readonly PairedSeriesAlignment _alignment = new();
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
-    private readonly RateOfChangeState _primaryRoc1;
-    private readonly RateOfChangeState _primaryRoc2;
-    private readonly RateOfChangeState _marketRoc1;
-    private readonly RateOfChangeState _marketRoc2;
-    private readonly IMovingAverageSmoother _signal;
-    private double _lastMarketRoc1;
-    private double _lastMarketRoc2;
+    private readonly PairedRoc _primaryRoc1;
+    private readonly PairedRoc _primaryRoc2;
+    private readonly PairedRoc _marketRoc1;
+    private readonly PairedRoc _marketRoc2;
+    private readonly PairedAverage _signal;
+    private TechnicalRatingValue _lastMarketRoc1;
+    private TechnicalRatingValue _lastMarketRoc2;
     private bool _hasMarket;
+    private int _index;
 
     public SectorRotationModelState(SeriesKey primarySeries, SeriesKey marketSeries,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 25, int length2 = 75)
@@ -308,11 +309,11 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
         _primarySeries = primarySeries;
         _marketSeries = marketSeries;
         var resolved1 = Math.Max(1, length1);
-        _primaryRoc1 = new RateOfChangeState(resolved1);
-        _primaryRoc2 = new RateOfChangeState(Math.Max(1, length2));
-        _marketRoc1 = new RateOfChangeState(resolved1);
-        _marketRoc2 = new RateOfChangeState(Math.Max(1, length2));
-        _signal = MovingAverageSmootherFactory.Create(maType, resolved1);
+        _primaryRoc1 = new PairedRoc(resolved1);
+        _primaryRoc2 = new PairedRoc(Math.Max(1, length2));
+        _marketRoc1 = new PairedRoc(resolved1);
+        _marketRoc2 = new PairedRoc(Math.Max(1, length2));
+        _signal = new PairedAverage(maType, resolved1);
     }
 
     public IndicatorName Name => IndicatorName.SectorRotationModel;
@@ -328,6 +329,7 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
         _lastMarketRoc1 = 0;
         _lastMarketRoc2 = 0;
         _hasMarket = false;
+        _index = 0;
     }
 
     public MultiSeriesIndicatorStateResult Update(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
@@ -338,8 +340,8 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
 
         if (series.Equals(_marketSeries))
         {
-            var roc1 = _marketRoc1.Update(bar, isFinal, includeOutputs: false).Value;
-            var roc2 = _marketRoc2.Update(bar, isFinal, includeOutputs: false).Value;
+            var roc1 = _marketRoc1.Next(bar.Close, isFinal);
+            var roc2 = _marketRoc2.Next(bar.Close, isFinal);
             if (isFinal)
             {
                 _lastMarketRoc1 = roc1;
@@ -356,11 +358,11 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
-        var bull1 = _primaryRoc1.Update(bar, isFinal, includeOutputs: false).Value;
-        var bull2 = _primaryRoc2.Update(bar, isFinal, includeOutputs: false).Value;
+        var bull1 = _primaryRoc1.Next(bar.Close, false);
+        var bull2 = _primaryRoc2.Next(bar.Close, false);
 
-        double bear1;
-        double bear2;
+        TechnicalRatingValue bear1;
+        TechnicalRatingValue bear2;
         if (_hasMarket)
         {
             bear1 = _lastMarketRoc1;
@@ -368,8 +370,8 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
         }
         else if (context.TryGetLatest(_marketSeries, out var marketBar))
         {
-            bear1 = _marketRoc1.Update(marketBar, isFinal: false, includeOutputs: false).Value;
-            bear2 = _marketRoc2.Update(marketBar, isFinal: false, includeOutputs: false).Value;
+            bear1 = _marketRoc1.Next(marketBar.Close, false);
+            bear2 = _marketRoc2.Next(marketBar.Close, false);
         }
         else
         {
@@ -379,8 +381,10 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
 
         var bull = (bull1 + bull2) / 2;
         var bear = (bear1 + bear2) / 2;
-        var osc = 100 * (bull - bear);
-        var signal = _signal.Next(osc, isFinal);
+        var raw = (TechnicalRatingValue)100d * (bull - bear);
+        var osc = PairedOutput.Publish(GetType(), 0, _index, raw);
+        var signal = PairedOutput.Publish(GetType(), 1, _index, _signal.Next(raw, false));
+        if (isFinal) { _primaryRoc1.Next(bar.Close, true); _primaryRoc2.Next(bar.Close, true); _signal.Next(raw, true); _index++; }
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -398,10 +402,10 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
 
     public void Dispose()
     {
-        _primaryRoc1.Dispose();
-        _primaryRoc2.Dispose();
-        _marketRoc1.Dispose();
-        _marketRoc2.Dispose();
+
+
+
+
         _signal.Dispose();
     }
 }

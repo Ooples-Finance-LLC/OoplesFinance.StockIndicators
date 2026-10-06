@@ -215,6 +215,20 @@ public static partial class Calculations
     public static StockData CalculateRelativeNormalizedVolatility(this StockData stockData, StockData marketData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
+        if (stockData.Count > 0 && stockData.Count == marketData.Count && StrengthWindow.Supports(maType)
+            && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var (marketPrices, _, _, _, _) = GetInputValuesList(marketData);
+            var values = PairedBatch.Run(prices, marketPrices, (p,b) => new Streaming.RelativeNormalizedVolatilityState(p,b,maType,length))["Rnv"];
+            var mean=GetMovingAverageList(stockData,maType,length,prices);
+            var signals = CreateSignalsList(stockData);
+            for (var i=0;i<values.Count;i++) signals?.Add(GetVolatilitySignal(prices[i]-mean[i],i==0?0:prices[i-1]-mean[i-1],values[i],1));
+            stockData.SetOutputValues(() => new Dictionary<string,List<double>> { { "Rnv",values } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName=IndicatorName.RelativeNormalizedVolatility;
+            return stockData;
+        }
+
         List<double> absZsrcList = new(stockData.Count);
         List<double> absZspList = new(stockData.Count);
         List<double> rList = new(stockData.Count);

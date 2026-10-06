@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -2839,6 +2839,19 @@ public static partial class Calculations
     public static StockData CalculateSectorRotationModel(this StockData stockData, StockData marketData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 25, int length2 = 75)
     {
+        if (stockData.Count > 0 && stockData.Count == marketData.Count && StrengthWindow.Supports(maType)
+            && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var (marketPrices, _, _, _, _) = GetInputValuesList(marketData);
+            var outputs = PairedBatch.Run(prices, marketPrices, (p,b) => new Streaming.SectorRotationModelState(p,b,maType,length1,length2));
+            var line=outputs["Signal"]; var signals=CreateSignalsList(stockData);
+            for(var i=0;i<line.Count;i++) signals?.Add(GetCompareSignal(line[i]-(i==0?0:line[i-1]),(i==0?0:line[i-1])-(i<2?0:line[i-2])));
+            stockData.SetOutputValues(() => outputs);
+            stockData.SetSignals(signals); stockData.SetCustomValues(outputs["Srm"]); stockData.IndicatorName=IndicatorName.SectorRotationModel;
+            return stockData;
+        }
+
         List<double> oscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 

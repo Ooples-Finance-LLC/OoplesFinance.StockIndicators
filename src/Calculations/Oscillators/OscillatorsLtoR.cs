@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -2032,6 +2032,22 @@ public static partial class Calculations
             StockData marketData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 4, int length2 = 7, int length3 = 10,
             int length4 = 15, int length5 = 30)
     {
+        if (stockData.Count > 0 && stockData.Count == marketData.Count && StrengthWindow.Supports(maType)
+            && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var (marketPrices, _, _, _, _) = GetInputValuesList(marketData);
+            var values = PairedBatch.Run(prices, marketPrices, (p,b) => new Streaming.RelativeStrength3DIndicatorState(p,b,maType,length1,length2,length3,length4,length5))["Rs3d"];
+            var signals = CreateSignalsList(stockData);
+            for (var i=0;i<values.Count;i++) {
+                var previous=i==0?0:values[i-1]; var earlier=i<2?0:values[i-1];
+                signals?.Add(GetCompareSignal(values[i]-previous,previous-earlier));
+            }
+            stockData.SetOutputValues(() => new Dictionary<string,List<double>> { { "Rs3d",values } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName=IndicatorName.RelativeStrength3DIndicator;
+            return stockData;
+        }
+
         List<double> r1List = new(stockData.Count);
         List<double> rs3List = new(stockData.Count);
         List<double> rs2List = new(stockData.Count);

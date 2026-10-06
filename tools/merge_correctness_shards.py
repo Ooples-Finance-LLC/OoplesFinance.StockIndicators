@@ -17,6 +17,10 @@ def merge(paths, count):
                 'pointerBits', 'requiredNumericalFixtures')
     if any(not first.get(k) for k in identity):
         raise ValueError('Missing evidence identity.')
+    package_identity = ('packageSha256', 'packageVersion', 'targetFramework')
+    if any(first.get(k) is not None for k in package_identity) and any(not first.get(k) for k in package_identity):
+        raise ValueError('Incomplete package identity.')
+    identity += package_identity
     seen, cases = set(), {}
     for root in roots:
         index = int(root.get('shardIndex', '-1'))

@@ -38,6 +38,25 @@ class ContractShardTests(unittest.TestCase):
         self.assertEqual(root.get('scope'), 'all-discovered-configurations')
         self.assertEqual([c.get('name') for c in root.findall('case')], ['a', 'b', 'c'])
 
+    def test_package_identity_is_preserved_and_must_match(self):
+        for path in self.paths:
+            root = ET.parse(path).getroot()
+            root.set('packageSha256', 'candidate')
+            root.set('packageVersion', '2.0.0-test')
+            root.set('targetFramework', 'net10.0')
+            ET.ElementTree(root).write(path)
+        self.assertEqual(merge(self.paths, 2).get('packageSha256'), 'candidate')
+        self.mutate(lambda r: r.set('packageSha256', 'different'))
+        with self.assertRaises(ValueError):
+            merge(self.paths, 2)
+
+    def test_partial_package_identity_is_rejected(self):
+        root = ET.parse(self.paths[0]).getroot()
+        root.set('packageSha256', 'candidate')
+        ET.ElementTree(root).write(self.paths[0])
+        with self.assertRaises(ValueError):
+            merge(self.paths, 2)
+
     def test_missing_and_duplicate_shards_fail(self):
         for paths in [self.paths[:1], [self.paths[0], self.paths[0]]]:
             with self.assertRaises(ValueError):

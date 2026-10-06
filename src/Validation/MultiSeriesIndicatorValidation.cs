@@ -144,17 +144,18 @@ public static class MultiSeriesIndicatorValidation
         if (options.BarsPerFixture < 2 || options.MaximumBarsPerFixture < options.BarsPerFixture) throw new ArgumentOutOfRangeException(nameof(options));
         cancellationToken.ThrowIfCancellationRequested();
         var additional = (options.AdditionalFixtures ?? throw new ArgumentNullException(nameof(options.AdditionalFixtures))).ToArray();
-        var builtInFixtures = IndicatorValidationFixtures.Create(options.BarsPerFixture, 0, false)
+        var builtInFixtures = IndicatorValidationFixtures.Create(options.BarsPerFixture, 0, false, testCase.IndicatorType.Assembly == typeof(IIndicator).Assembly)
             .Concat(testCase.PrimaryDomain.BoundaryFixtures(options.BarsPerFixture, "primary-domain"))
             .Concat(testCase.BenchmarkDomain.BoundaryFixtures(options.BarsPerFixture, "benchmark-domain")).ToArray();
         if (additional.Any(f => f is null || f.Bars.Count > options.MaximumBarsPerFixture)
             || builtInFixtures.Select(f => f.Name).Concat(additional.Select(f => f.Name)).Distinct(StringComparer.Ordinal).Count()
                 != builtInFixtures.Length + additional.Length)
             throw new ArgumentException("Additional fixtures must have unique names and fit the configured bar budget.", nameof(options));
-        var failures = new List<IndicatorValidationFailure>(); int fixtures = 0, values = 0, rejections = 0;
+        var failures = new List<IndicatorValidationFailure>(); int fixtures = 0, values = 0, rejections = 0, outputRejections = 0;
         var fixtureEvidence = new List<IndicatorFixtureEvidence>();
         var slots = Enumerable.Range(0, testCase.OutputKeys.Count).ToArray();
-        var coverage = new IndicatorFormulaCoverage(slots, testCase.Reference is null ? Array.Empty<int>() : slots);
+        var coverage = new IndicatorFormulaCoverage(slots, testCase.Reference is null ? Array.Empty<int>() : slots,
+            overflowReferences: testCase.Reference is null ? Array.Empty<int>() : slots);
         if ((options.RequireFormulaReference || options.RequireMathematicalContract) && testCase.Reference is null)
             failures.Add(new("coverage", "FormulaReference", "No independent paired-series formula was registered."));
         var instances = new HashSet<IMultiSeriesIndicatorState>(StateIdentity.Instance);
@@ -165,6 +166,8 @@ public static class MultiSeriesIndicatorValidation
             var label = fixture.Name+"/"+benchmarkShape;
             var initialValues = values; var initialRejections = rejections; var completed = false;
             var initialFailures = failures.Count;
+            var initialOutputRejections = outputRejections;
+            int? overflowBar = null, overflowSlot = null, overflowSign = null;
             try
             {
                 var benchmark = fixture.Bars.Select((bar, i) => benchmarkShape switch
@@ -178,25 +181,34 @@ public static class MultiSeriesIndicatorValidation
                 var originalBenchmark = benchmark;
                 var primaryBars = fixture.Bars.Select(b => testCase.PrimaryDomain.Violation(b) is null ? b : testCase.PrimaryDomain.ValidExample(b.Time)).ToArray();
                 benchmark = benchmark.Select(b => testCase.BenchmarkDomain.Violation(b) is null ? b : testCase.BenchmarkDomain.ValidExample(b.Time)).ToArray();
+                var expected = testCase.Reference?.Invoke(primaryBars, benchmark);
+                if (expected is not null && (!expected.Keys.OrderBy(k => k).SequenceEqual(testCase.OutputKeys.OrderBy(k => k))
+                    || expected.Values.Any(v => v.Count != primaryBars.Length)))
+                    throw new InvalidOperationException("Reference must return every declared output at every input bar.");
+                var firstOverflow = primaryBars.Length;
+                if (expected is not null)
+                    foreach (var output in expected.Values)
+                        for (var i = 0; i < output.Count; i++)
+                            if (double.IsInfinity(output[i])) { firstOverflow = Math.Min(firstOverflow, i); break; }
+                var finitePrimary = primaryBars.Take(firstOverflow).ToArray();
+                var finiteBenchmark = benchmark.Take(firstOverflow).ToArray();
                 var state = Create();
                 try
                 {
-                    var first = Run(state, primaryBars, benchmark, false, fixture.Bars, originalBenchmark);
+                    var first = Run(state, finitePrimary, finiteBenchmark, false,
+                        fixture.Bars.Take(firstOverflow).ToArray(), originalBenchmark.Take(firstOverflow).ToArray());
                     state.Reset();
-                    var replay = Run(state, primaryBars, benchmark, true);
+                    var replay = Run(state, finitePrimary, finiteBenchmark, true);
                     var fresh = Create();
                     Dictionary<string, List<double>> second;
-                    try { second = Run(fresh, primaryBars, benchmark, false); }
+                    try { second = Run(fresh, finitePrimary, finiteBenchmark, false); }
                     finally { (fresh as IDisposable)?.Dispose(); }
-                    var expected = testCase.Reference?.Invoke(primaryBars, benchmark);
-                    if (expected is not null && !expected.Keys.OrderBy(k => k).SequenceEqual(testCase.OutputKeys.OrderBy(k => k)))
-                        throw new InvalidOperationException("Reference must return every declared output and no undeclared outputs.");
                     foreach (var key in testCase.OutputKeys)
                     {
                         if (!first[key].SequenceEqual(second[key]) || !first[key].SequenceEqual(replay[key]))
                             throw new InvalidOperationException("Fresh, reset, and preview replay disagree for "+key);
-                        if (expected is not null && expected[key].Count != first[key].Count)
-                            throw new InvalidOperationException("Reference output length differs for "+key);
+                        if (first[key].Count != firstOverflow)
+                            throw new InvalidOperationException("Output length differs for "+key);
                         for (var i = 0; i < first[key].Count; i++)
                         {
                             values++; var actual = first[key][i];
@@ -209,6 +221,28 @@ public static class MultiSeriesIndicatorValidation
                             }
                         }
                     }
+                    if (firstOverflow < primaryBars.Length)
+                    {
+                        for (var replayIndex = 0; replayIndex < 2; replayIndex++)
+                        {
+                            var rejected = Create();
+                            try
+                            {
+                                Run(rejected, primaryBars.Take(firstOverflow + 1).ToArray(), benchmark.Take(firstOverflow + 1).ToArray(), false);
+                                throw new InvalidOperationException("Accepted a paired output independently proven to overflow binary64.");
+                            }
+                            catch (IndicatorOutputException ex) when (ex.IndicatorType == testCase.IndicatorType && ex.BarIndex == firstOverflow
+                                && ex.OutputSlot >= 0 && ex.OutputSlot < testCase.OutputKeys.Count
+                                && double.IsInfinity(ex.Value) && ex.Value.Equals(expected![testCase.OutputKeys[ex.OutputSlot]][firstOverflow]))
+                            {
+                                if (overflowSlot.HasValue && (overflowSlot != ex.OutputSlot || overflowSign != Math.Sign(ex.Value)))
+                                    throw new InvalidOperationException("Fresh paired runs rejected different outputs.");
+                                overflowBar = ex.BarIndex; overflowSlot = ex.OutputSlot; overflowSign = Math.Sign(ex.Value);
+                                outputRejections++;
+                            }
+                            finally { (rejected as IDisposable)?.Dispose(); }
+                        }
+                    }
                     fixtures++;
                     completed = true;
                 }
@@ -219,11 +253,12 @@ public static class MultiSeriesIndicatorValidation
             finally
             {
                 fixtureEvidence.Add(new(label, fixture.Bars.Count, values - initialValues,
-                    rejections - initialRejections, completed, completed && failures.Count == initialFailures));
+                    rejections - initialRejections, completed, completed && failures.Count == initialFailures, false,
+                    outputRejections - initialOutputRejections, overflowBar, overflowSlot, overflowSign));
             }
         }
         return new(testCase.ToString(), fixtures, values, testCase.Reference is null ? 0 : slots.Length, failures,
-            coverage, rejections, fixtureEvidence);
+            coverage, rejections, fixtureEvidence, outputRejections);
 
 
         IMultiSeriesIndicatorState Create()
@@ -263,7 +298,13 @@ public static class MultiSeriesIndicatorValidation
                         AtTime(benchmark[i], benchmark[i].Time.AddMinutes(1)), 10);
                     state.Update(context, BenchmarkKey, ToBar(speculativeMarket, BenchmarkKey, false), false, true);
                     var changed = testCase.PrimaryDomain.PreviewExample(primary[i], .25);
-                    state.Update(context, PrimaryKey, ToBar(changed, PrimaryKey, false), false, true);
+                    try { state.Update(context, PrimaryKey, ToBar(changed, PrimaryKey, false), false, true); }
+                    catch (IndicatorOutputException ex) when (ProvesPreviewOverflow(ex, i, changed))
+                    {
+                        // The deliberately changed preview can overflow while the actual pair is
+                        // finite. The independent reference must prove that precise rejection;
+                        // the following original preview/commit still checks state isolation.
+                    }
                     speculative = state.Update(context, PrimaryKey, ToBar(primary[i], PrimaryKey, false), false, true);
                 }
                 store.Update(PrimaryKey, bar);
@@ -278,6 +319,15 @@ public static class MultiSeriesIndicatorValidation
                 }
             }
             return output;
+
+            bool ProvesPreviewOverflow(IndicatorOutputException error, int index, Bar changed)
+            {
+                if (testCase.Reference is null || error.IndicatorType != testCase.IndicatorType || error.BarIndex != index
+                    || error.OutputSlot < 0 || error.OutputSlot >= testCase.OutputKeys.Count || !double.IsInfinity(error.Value)) return false;
+                var changedPrefix = primary.Take(index + 1).ToArray(); changedPrefix[index] = changed;
+                var expected = testCase.Reference(changedPrefix, benchmark.Take(index + 1).ToArray());
+                return expected[testCase.OutputKeys[error.OutputSlot]][index].Equals(error.Value);
+            }
 
             Bar AtTime(Bar b, DateTime time) => new(time, b.Open, b.High, b.Low, b.Close, b.Volume);
 

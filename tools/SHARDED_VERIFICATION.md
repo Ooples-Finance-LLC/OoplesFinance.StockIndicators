@@ -1,7 +1,8 @@
 # Sharded correctness verification
 
-CI builds each platform's contract verifier once, then distributes the unchanged
-binary across 20 shards. Configurations are sorted by ordinal name and assigned
+CI builds one immutable NuGet package containing every supported framework, then
+builds each platform's verifier against that package. The consumer assembly hash
+must match its package entry. Each unchanged consumer is distributed across 20 shards. Configurations are sorted by ordinal name and assigned
 by index modulo 20. The unit suite likewise builds once and uses VSTest's complete
 fully qualified method inventory; all theory rows for a method stay together.
 Mutation workers now allow 20 concurrent jobs as well. Actual concurrency remains
@@ -28,27 +29,18 @@ python tools/merge_correctness_shards.py --input shards --output complete.xml --
 workflow shows their complete arguments. The test filter is carried in runsettings
 to avoid Windows command-line length limits. Sharding does not split an individual
 long-running configuration or theory method, so wall-clock speedup is not guaranteed
-to be exactly 20-fold. CI source-build evidence also does not replace exact-package
-identity verification.
+to be exactly 20-fold. Every CI shard records the loaded package assembly hash and package identity;
+aggregation rejects mismatched packages and preserves that identity in full evidence.
 
-Validation for this change: 43 Python tooling tests; actionlint on both modified
-workflows; verifier builds and a real single-configuration shard on net10.0,
-net8.0 and net461; complete discovery of 7,635 unit methods from the current binary;
-and two real unit shards with successful TRX reconciliation. These smoke checks
-validate the runner and accounting, not completion of the full hosted inventory.
+`overflowReferenceSlots` lists outputs whose independent references can recognize
+unrepresentable results; it does not promise that every configuration overflows.
+The numerical gate requires independent trajectories and retains full finite-value
+or independently proven first-overflow rejection evidence for every required
+fixture. Paired cases declare `inputSeries="2"` and must cover all 18 numerical
+classes with each of five benchmark shapes, including preview and reset replay.
+A missing combination fails the gate.
 
-Overflow-evidence gate correction: `overflowReferenceSlots` lists outputs whose
-independent references can recognize unrepresentable results. It does not promise
-that every configuration must overflow. The numerical gate now requires those
-slots to have independent trajectories and retains the existing finite-execution
-and first-overflow rejection checks for every required fixture. Ten focused gate
-tests passed, including finite-only trajectories, another output rejecting first,
-and missing, malformed or contradictory evidence.
-
-Rechecking the completed package report exposed a separate incomplete area:
-paired-series validation had not included the 18 adversarial numerical classes.
-The gate still rejects those 900 missing case/class combinations. An eight-bar
-focused probe of all 50 paired configurations found 28 failures across Compare
-Price Momentum, Relative Normalized Volatility, Relative Strength 3D and Sector
-Rotation. Those failures need numerical/reference investigation; they are not
-passing final evidence. No production arithmetic was changed by this gate repair.
+The package-consumer build script verifies the assembly extracted from the NuGet
+candidate before sharing it. Each shard checks its actually loaded assembly hash.
+The merge rejects missing or inconsistent package hash, version, and framework
+metadata whenever package evidence is supplied.

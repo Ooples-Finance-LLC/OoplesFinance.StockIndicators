@@ -6530,3 +6530,27 @@ net8 and net461 with authenticated loaded DLLs, and its source builds on SDK
 10.0.101 with zero warnings/errors. It is now superseded by this reference
 repair. Final complete package evidence and actual competitor timings remain
 pending; partial results from older candidates are not final-package evidence.
+
+### Paired-series numerical completion
+
+Compare Price Momentum, Relative Normalized Volatility, Relative Strength 3D and
+Sector Rotation now retain binary64 stage precision with an extended upper exponent
+until cancellation, normalization or voting is complete. Their native and standard
+batch routes share those stages; independent references use rational arithmetic.
+Unrepresentable published outputs reject before committing the primary update.
+Paired validation executes all 18 numerical classes against five benchmark shapes;
+a perturbed preview rejection is accepted only when its independent reference
+proves the same output, bar and infinity sign.
+
+Verification: **107 focused regressions and 2 existing builder/batch parity checks
+passed**; all **50 paired configurations and 4,500 required numerical receipts
+passed on each of net10.0, net8.0 and net461** from immutable package `local1440`.
+**7 compiled behavioral mutation kills** were authenticated against their frozen
+source archive, with 6 passing baseline tests (`si-final1438-qualified.json`).
+All **10,773 mutation anchors** resolve. The oldest supported SDK build passed
+without warnings/errors. **48 tooling tests** and workflow lint passed.
+
+CI now builds one NuGet candidate, authenticates each consumer's assembly against
+that package, and carries package identity through the 20-shard aggregate gates.
+These focused results do not replace full final-package/CI verification or actual
+competitor timings; those remain outstanding.

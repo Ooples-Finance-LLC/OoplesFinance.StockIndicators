@@ -18,6 +18,13 @@ if ($cases.Count -eq 0) { throw 'No numerical case evidence was supplied.' }
 $incomplete = [System.Collections.Generic.List[string]]::new()
 foreach ($case in $cases) {
     if ($case.passed -ne 'True') { throw "Failing case: $($case.name)." }
+    $caseRequired = $required
+    if ($case.inputSeries -eq '2') {
+        $caseRequired = @($required | ForEach-Object {
+            $fixtureName = $_
+            foreach ($shape in @('identical', 'constant', 'independent', 'scaled', 'zero')) { "$fixtureName/$shape" }
+        })
+    } elseif ([string]$case.inputSeries -notin @('', '1')) { throw 'Unknown input-series evidence schema.' }
     # OverflowReferenceSlots declares oracle capability, not a promise that this
     # parameterization produces infinity. Finite trajectories (including bounded
     # outputs and degenerate periods) must pass without manufacturing overflow.
@@ -35,7 +42,7 @@ foreach ($case in $cases) {
         ([string]$_.outputOverflowRejectionsChecked) -notin @('', '0') -or
         [string]$_.outputOverflowBarIndex -or [string]$_.outputOverflowSlot -or [string]$_.outputOverflowSign
     } | ForEach-Object { [string]$_.name })
-    foreach ($name in @(($required + $overflowNames) | Sort-Object -Unique)) {
+    foreach ($name in @(($caseRequired + $overflowNames) | Sort-Object -Unique)) {
         $matches = @($case.fixture | Where-Object { $_.name -ceq $name })
         if ($matches.Count -ne 1 -or $matches[0].passed -ne 'True' -or $matches[0].completed -ne 'True') {
             $incomplete.Add("$($case.name): $name")
@@ -44,7 +51,7 @@ foreach ($case in $cases) {
         $fixtureBars = 0L
         $fixtureValues = 0L
         $receipt = $matches[0]
-        $minimumBars = if ($required -ccontains $name) { 2 } else { 1 }
+        $minimumBars = if ($caseRequired -ccontains $name) { 2 } else { 1 }
         if (-not [long]::TryParse([string]$receipt.inputBars, [ref]$fixtureBars) -or $fixtureBars -lt $minimumBars -or
             -not [long]::TryParse([string]$receipt.valuesChecked, [ref]$fixtureValues) -or $fixtureValues -lt 0) {
             $incomplete.Add("$($case.name): $name has insufficient executed-value evidence")

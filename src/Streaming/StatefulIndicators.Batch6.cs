@@ -11,9 +11,10 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
     private readonly PairedSeriesAlignment _alignment = new();
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
-    private readonly PriceMomentumOscillatorEngine _primaryEngine;
-    private readonly PriceMomentumOscillatorEngine _marketEngine;
-    private double _lastMarket;
+    private readonly PairedPmo _primaryEngine;
+    private readonly PairedPmo _marketEngine;
+    private TechnicalRatingValue _lastMarket;
+    private int _index;
     private bool _hasMarket;
 
     public ComparePriceMomentumOscillatorState(SeriesKey primarySeries, SeriesKey marketSeries,
@@ -21,8 +22,8 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
     {
         _primarySeries = primarySeries;
         _marketSeries = marketSeries;
-        _primaryEngine = new PriceMomentumOscillatorEngine(length1, length2);
-        _marketEngine = new PriceMomentumOscillatorEngine(length1, length2);
+        _primaryEngine = new PairedPmo(length1, length2);
+        _marketEngine = new PairedPmo(length1, length2);
     }
 
     public IndicatorName Name => IndicatorName.ComparePriceMomentumOscillator;
@@ -32,7 +33,8 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
         _alignment.Reset();
         _primaryEngine.Reset();
         _marketEngine.Reset();
-        _lastMarket = 0;
+        _lastMarket = default;
+        _index = 0;
         _hasMarket = false;
     }
 
@@ -44,14 +46,15 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
 
         if (series.Equals(_primarySeries))
         {
-            var primaryPmo = _primaryEngine.Next(bar.Close, isFinal);
+            var primaryPmo = _primaryEngine.Next(bar.Close, false);
             if (!_hasMarket)
             {
                 _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
             }
 
-            var cpmo = primaryPmo - _lastMarket;
+            var cpmo = PairedOutput.Publish(GetType(), 0, _index, primaryPmo - _lastMarket);
+            if (isFinal) { _primaryEngine.Next(bar.Close, true); _index++; }
             IReadOnlyDictionary<string, double>? outputs = null;
             if (includeOutputs)
             {

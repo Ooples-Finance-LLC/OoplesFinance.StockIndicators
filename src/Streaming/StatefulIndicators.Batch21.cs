@@ -341,15 +341,16 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
     private readonly PairedSeriesAlignment _alignment = new();
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
-    private readonly RollingStandardDeviation _primaryStdDev;
-    private readonly RollingStandardDeviation _marketStdDev;
-    private readonly IMovingAverageSmoother _primaryAbsSma;
-    private readonly IMovingAverageSmoother _marketAbsSma;
+    private readonly ExactPopulationWindow _primaryStdDev;
+    private readonly ExactPopulationWindow _marketStdDev;
+    private readonly PairedAverage _primaryAbsSma;
+    private readonly PairedAverage _marketAbsSma;
     private double _prevValue;
     private bool _hasPrev;
     private double _prevMarketValue;
     private bool _hasMarketPrev;
-    private double _latestMarketAbsSma;
+    private TechnicalRatingValue _latestMarketAbsSma;
+    private int _index;
     private bool _hasMarketAbsSma;
 
     public RelativeNormalizedVolatilityState(SeriesKey primarySeries, SeriesKey marketSeries,
@@ -358,10 +359,10 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
         _primarySeries = primarySeries;
         _marketSeries = marketSeries;
         var resolved = Math.Max(1, length);
-        _primaryStdDev = new RollingStandardDeviation(resolved);
-        _marketStdDev = new RollingStandardDeviation(resolved);
-        _primaryAbsSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _marketAbsSma = MovingAverageSmootherFactory.Create(maType, resolved);
+        _primaryStdDev = new ExactPopulationWindow(resolved);
+        _marketStdDev = new ExactPopulationWindow(resolved);
+        _primaryAbsSma = new PairedAverage(maType, resolved);
+        _marketAbsSma = new PairedAverage(maType, resolved);
     }
 
     public IndicatorName Name => IndicatorName.RelativeNormalizedVolatility;
@@ -379,6 +380,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
         _hasMarketPrev = false;
         _latestMarketAbsSma = 0;
         _hasMarketAbsSma = false;
+        _index = 0;
     }
 
     public MultiSeriesIndicatorStateResult Update(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
@@ -390,9 +392,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
         if (series.Equals(_marketSeries))
         {
             var stdDev = _marketStdDev.Next(bar.Close, isFinal);
-            var sp = _hasMarketPrev ? bar.Close - _prevMarketValue : 0;
-            var zsp = stdDev != 0 ? sp / stdDev : 0;
-            var absZsp = Math.Abs(zsp);
+            var absZsp = NormalizedChange(bar.Close, _prevMarketValue, _hasMarketPrev, stdDev);
             var marketAbsZspSma = _marketAbsSma.Next(absZsp, isFinal);
 
             if (isFinal)
@@ -413,24 +413,20 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
-        var stdDevPrimary = _primaryStdDev.Next(bar.Close, isFinal);
-        var d = _hasPrev ? bar.Close - _prevValue : 0;
-        var zsrc = stdDevPrimary != 0 ? d / stdDevPrimary : 0;
-        var absZsrc = Math.Abs(zsrc);
-        var absZsrcSma = _primaryAbsSma.Next(absZsrc, isFinal);
+        var stdDevPrimary = _primaryStdDev.Next(bar.Close, false);
+        var absZsrc = NormalizedChange(bar.Close, _prevValue, _hasPrev, stdDevPrimary);
+        var absZsrcSma = _primaryAbsSma.Next(absZsrc, false);
 
-        double absZspSma;
+        TechnicalRatingValue absZspSma;
         if (_hasMarketAbsSma)
         {
             absZspSma = _latestMarketAbsSma;
         }
         else if (context.TryGetLatest(_marketSeries, out var marketBar))
         {
-            var marketStdDev = _marketStdDev.Next(marketBar.Close, isFinal: false);
-            var sp = _hasMarketPrev ? marketBar.Close - _prevMarketValue : 0;
-            var zsp = marketStdDev != 0 ? sp / marketStdDev : 0;
-            var absZsp = Math.Abs(zsp);
-            absZspSma = _marketAbsSma.Next(absZsp, isFinal: false);
+            var marketStdDev = _marketStdDev.Next(marketBar.Close, false);
+            var absZsp = NormalizedChange(marketBar.Close, _prevMarketValue, _hasMarketPrev, marketStdDev);
+            absZspSma = _marketAbsSma.Next(absZsp, false);
         }
         else
         {
@@ -438,12 +434,15 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
-        var rnv = absZspSma != 0 ? absZsrcSma / absZspSma : 0;
+        var rnv = PairedOutput.Publish(GetType(), 0, _index, absZsrcSma / absZspSma);
 
         if (isFinal)
         {
+            _primaryStdDev.Next(bar.Close, true);
+            _primaryAbsSma.Next(absZsrc, true);
             _prevValue = bar.Close;
             _hasPrev = true;
+            _index++;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -457,6 +456,13 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
 
         _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(true, rnv, outputs);
+    }
+
+    private static TechnicalRatingValue NormalizedChange(double value, double previous, bool hasPrevious, double deviation)
+    {
+        if (!hasPrevious || deviation == 0) return default;
+        var change = (TechnicalRatingValue)value - previous;
+        return new TechnicalRatingValue(System.Numerics.BigInteger.Abs(change.Units)) / deviation;
     }
 
     public void Dispose()
@@ -492,13 +498,13 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
     private readonly int _length4;
-    private readonly IMovingAverageSmoother _fastMa;
-    private readonly IMovingAverageSmoother _medMa;
-    private readonly IMovingAverageSmoother _slowMa;
-    private readonly IMovingAverageSmoother _vSlowMa;
-    private readonly IMovingAverageSmoother _rs2Ma;
+    private readonly PairedAverage _fastMa;
+    private readonly PairedAverage _medMa;
+    private readonly PairedAverage _slowMa;
+    private readonly PairedAverage _vSlowMa;
+    private readonly PairedAverage _rs2Ma;
     private readonly RollingWindowSum _xSum;
-    private double _prevR1;
+    private TechnicalRatingValue _prevR1;
     private bool _hasPrevR1;
     private double _lastMarketValue;
     private bool _hasMarket;
@@ -510,11 +516,11 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
         _primarySeries = primarySeries;
         _marketSeries = marketSeries;
         _length4 = Math.Max(1, length4);
-        _fastMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _medMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _slowMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _vSlowMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length5));
-        _rs2Ma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
+        _fastMa = new PairedAverage(maType, Math.Max(1, length3));
+        _medMa = new PairedAverage(maType, Math.Max(1, length2));
+        _slowMa = new PairedAverage(maType, Math.Max(1, length4));
+        _vSlowMa = new PairedAverage(maType, Math.Max(1, length5));
+        _rs2Ma = new PairedAverage(maType, Math.Max(1, length1));
         _xSum = new RollingWindowSum(_length4);
     }
 
@@ -573,17 +579,17 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
-        var r1 = marketValue != 0 ? bar.Close / marketValue * 100 : _hasPrevR1 ? _prevR1 : 0;
+        var r1 = marketValue != 0 ? (TechnicalRatingValue)bar.Close / marketValue * 100d : _hasPrevR1 ? _prevR1 : 0;
         var fastMa = _fastMa.Next(r1, isFinal);
         var medMa = _medMa.Next(fastMa, isFinal);
         var slowMa = _slowMa.Next(fastMa, isFinal);
         var vSlowMa = _vSlowMa.Next(slowMa, isFinal);
-        double t1 = TechnicalRatingComparison.Compare(fastMa, medMa) >= 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) >= 0 ? 10 : 0;
-        double t2 = TechnicalRatingComparison.Compare(fastMa, medMa) >= 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) < 0 ? 9 : 0;
-        double t3 = TechnicalRatingComparison.Compare(fastMa, medMa) < 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) >= 0 ? 9 : 0;
-        double t4 = TechnicalRatingComparison.Compare(fastMa, medMa) < 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) < 0 ? 5 : 0;
+        double t1 = fastMa.Units.CompareTo(medMa.Units) >= 0 && medMa.Units.CompareTo(slowMa.Units) >= 0 && slowMa.Units.CompareTo(vSlowMa.Units) >= 0 ? 10 : 0;
+        double t2 = fastMa.Units.CompareTo(medMa.Units) >= 0 && medMa.Units.CompareTo(slowMa.Units) >= 0 && slowMa.Units.CompareTo(vSlowMa.Units) < 0 ? 9 : 0;
+        double t3 = fastMa.Units.CompareTo(medMa.Units) < 0 && medMa.Units.CompareTo(slowMa.Units) >= 0 && slowMa.Units.CompareTo(vSlowMa.Units) >= 0 ? 9 : 0;
+        double t4 = fastMa.Units.CompareTo(medMa.Units) < 0 && medMa.Units.CompareTo(slowMa.Units) >= 0 && slowMa.Units.CompareTo(vSlowMa.Units) < 0 ? 5 : 0;
         var rs2 = t1 + t2 + t3 + t4;
-        var rs2Ma = _rs2Ma.Next(rs2, isFinal);
+        var rs2Ma = _rs2Ma.Next(rs2, isFinal).Publish();
         var x = rs2 >= 5 ? 1 : 0;
         var xSum = isFinal ? _xSum.Add(x, out _) : _xSum.Preview(x, out _);
         var rs3 = rs2 >= 5 || TechnicalRatingComparison.Compare(rs2, rs2Ma) > 0 ? xSum / _length4 * 100 : 0;

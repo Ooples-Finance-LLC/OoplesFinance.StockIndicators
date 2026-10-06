@@ -98,6 +98,19 @@ public static partial class Calculations
     public static StockData CalculateComparePriceMomentumOscillator(this StockData stockData, StockData marketDataClass,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 20, int length2 = 35, int signalLength = 10)
     {
+        if (stockData.Count > 0 && stockData.Count == marketDataClass.Count && StrengthWindow.Supports(maType)
+            && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var (marketPrices, _, _, _, _) = GetInputValuesList(marketDataClass);
+            var values = PairedBatch.Run(prices, marketPrices, (p,b) => new Streaming.ComparePriceMomentumOscillatorState(p,b,length1,length2))["Cpmo"];
+            var signals = CreateSignalsList(stockData);
+            for (var i=0;i<values.Count;i++) signals?.Add(GetCompareSignal(values[i], i==0?0:values[i-1]));
+            stockData.SetOutputValues(() => new Dictionary<string,List<double>> { { "Cpmo",values } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName=IndicatorName.ComparePriceMomentumOscillator;
+            return stockData;
+        }
+
         List<double> cpmoList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 

@@ -118,6 +118,21 @@ class NumericalReleaseEvidenceTests(unittest.TestCase):
             root.find("case").attrib.pop(field)
             self.check(root, False)
 
+    def test_paired_cases_require_every_numerical_class_and_benchmark_shape(self):
+        root = self.report()
+        case = root.find("case")
+        case.set("inputSeries", "2")
+        self.check(root, False)
+        for fixture in list(case):
+            case.remove(fixture)
+            for shape in ("identical", "constant", "independent", "scaled", "zero"):
+                copy = ET.fromstring(ET.tostring(fixture))
+                copy.set("name", fixture.get("name") + "/" + shape)
+                case.append(copy)
+        self.check(root, True)
+        case.remove(case[-1])
+        self.check(root, False)
+
     def test_new_generator_classes_automatically_become_required(self):
         root = self.report()
         root.set("requiredNumericalFixtures", ",".join(NAMES + ["future-class"]))

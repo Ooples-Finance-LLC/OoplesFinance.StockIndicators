@@ -1616,3 +1616,22 @@ Histories grow with observations and no quadratic trigonometric tables are
 allocated. Empty requested spectra produce zero. Narrow Int32.MaxValue bin
 ranges avoid integer wrap; the existing period domain remains, with work
 proportional to the requested range and observed window.
+
+### Paired-series numerical stages
+
+Paired Compare Price Momentum and Sector Rotation keep unrepresentable component
+returns until the primary/benchmark subtraction, so identical extreme legs cancel
+to zero. Their return stage rounds the exact percentage difference ratio; PMO uses
+its existing fixed gains 2/N. Relative Strength 3D retains extended-range rounded
+ratio/average stages through exact vote comparisons, preserving the existing
+zero-benchmark carry and score rules. Relative Normalized Volatility uses an exact
+population-deviation window and extended differences before normalization.
+
+These stages reuse the library's established binary64 precision and subnormal
+rounding, extending only the upper exponent for unpublished components. Independent
+paired references use rational arithmetic and independently rounded stages. Standard
+batch routes use the same state calculations; custom-average overrides retain their
+existing dispatch. A genuinely unrepresentable published result raises
+`IndicatorOutputException` identifying the paired state, primary bar and output slot,
+before committing the primary calculation. A corrected primary observation at the
+same timestamp can then be submitted against the already committed benchmark.
