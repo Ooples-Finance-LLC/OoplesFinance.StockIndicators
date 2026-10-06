@@ -1,5 +1,25 @@
 # Upstream integration competitor comparison
 
+## Final correctness-candidate timings (2026-10-05)
+
+The normal BenchmarkDotNet campaign completed all **116 declared rows** (88 batch,
+28 incremental) in 43 minutes. Full retained-output, repeated-write and reset checks
+passed **66,082 assertions** against hash-identical copies of the actual timed binaries;
+the competitor agreement check passed too. Results and binary identities are in
+[the retained artifacts](../benchmarks/results/2026-10-05-correctness/evidence.json),
+with [batch tables](../benchmarks/results/2026-10-05-correctness/batch.github.md) and
+[incremental tables](../benchmarks/results/2026-10-05-correctness/incremental.github.md).
+CSV and compressed raw JSON are retained alongside them.
+
+The run used the default job on source `c2773739`, with affinity mask 255. Verification
+ran on other CPU cores of the same machine; cache, memory and thermal conditions were
+shared. Incremental tests retain fixed-history iteration setup and one update per
+iteration, so their short measurements trigger minimum-iteration-time warnings and
+have substantial noise. These results do not establish an isolated-machine speed
+ranking. Full recomputation is labeled separately from native incremental work.
+
+The earlier integration observations below remain historical evidence.
+
 Commands run on 2026-10-02 against the integration of correctness head `ff46d55c` and upstream `b492abfb`:
 
 ```text

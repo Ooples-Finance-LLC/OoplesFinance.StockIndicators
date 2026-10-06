@@ -233,7 +233,7 @@ public static class MultiSeriesIndicatorValidation
                             }
                             catch (IndicatorOutputException ex) when (ex.IndicatorType == testCase.IndicatorType && ex.BarIndex == firstOverflow
                                 && ex.OutputSlot >= 0 && ex.OutputSlot < testCase.OutputKeys.Count
-                                && double.IsInfinity(ex.Value) && ex.Value.Equals(expected![testCase.OutputKeys[ex.OutputSlot]][firstOverflow]))
+                                && double.IsInfinity(ex.Value) && ex.Value.Equals(expected![testCase.OutputKeys[ex.OutputSlot]][firstOverflow])) // NOSONAR: S1244 - Require the exact signed infinity independently proven for this rejected output.
                             {
                                 if (overflowSlot.HasValue && (overflowSlot != ex.OutputSlot || overflowSign != Math.Sign(ex.Value)))
                                     throw new InvalidOperationException("Fresh paired runs rejected different outputs.");
@@ -326,7 +326,7 @@ public static class MultiSeriesIndicatorValidation
                     || error.OutputSlot < 0 || error.OutputSlot >= testCase.OutputKeys.Count || !double.IsInfinity(error.Value)) return false;
                 var changedPrefix = primary.Take(index + 1).ToArray(); changedPrefix[index] = changed;
                 var expected = testCase.Reference(changedPrefix, benchmark.Take(index + 1).ToArray());
-                return expected[testCase.OutputKeys[error.OutputSlot]][index].Equals(error.Value);
+                return expected[testCase.OutputKeys[error.OutputSlot]][index].Equals(error.Value); // NOSONAR: S1244 - Both values must be the same signed infinity; a tolerance cannot establish overflow.
             }
 
             Bar AtTime(Bar b, DateTime time) => new(time, b.Open, b.High, b.Low, b.Close, b.Volume);
