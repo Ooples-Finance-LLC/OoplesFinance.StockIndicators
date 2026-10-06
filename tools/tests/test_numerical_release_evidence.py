@@ -69,9 +69,28 @@ class NumericalReleaseEvidenceTests(unittest.TestCase):
         root.find("case").append(extra)
         self.check(root, False)
 
-    def test_declaring_overflow_without_exercising_rejection_is_incomplete(self):
+    def test_declaring_overflow_without_independent_trajectory_is_incomplete(self):
         root = self.report()
         root.find("case").set("overflowReferenceSlots", "0")
+        self.check(root, False)
+
+    def test_overflow_capable_reference_can_prove_only_finite_results(self):
+        root = self.report()
+        case = root.find("case")
+        case.set("overflowReferenceSlots", "0")
+        case.set("independentTrajectorySlots", "0")
+        self.check(root, True)
+        # A declaration alone cannot replace actual finite trajectory execution.
+        case.find("fixture").set("valuesChecked", "255")
+        self.check(root, False)
+
+    def test_other_output_can_reject_before_overflow_capable_slot(self):
+        root = self.overflow_report()
+        case = root.find("case")
+        case.set("overflowReferenceSlots", "0,1")
+        case.set("independentTrajectorySlots", "0,1")
+        self.check(root, True)
+        case.set("independentTrajectorySlots", "0")
         self.check(root, False)
 
     def test_complete_oracle_backed_rejection_passes(self):

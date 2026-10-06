@@ -18,12 +18,18 @@ if ($cases.Count -eq 0) { throw 'No numerical case evidence was supplied.' }
 $incomplete = [System.Collections.Generic.List[string]]::new()
 foreach ($case in $cases) {
     if ($case.passed -ne 'True') { throw "Failing case: $($case.name)." }
+    # OverflowReferenceSlots declares oracle capability, not a promise that this
+    # parameterization produces infinity. Finite trajectories (including bounded
+    # outputs and degenerate periods) must pass without manufacturing overflow.
+    # Every required fixture below must still contain full finite-value evidence
+    # or a checked, oracle-backed rejection at the first unrepresentable bar.
+    $trajectorySlots = @(([string]$case.independentTrajectorySlots).Split(',') | Where-Object { $_ -ne '' })
     foreach ($slot in @(([string]$case.overflowReferenceSlots).Split(',') | Where-Object { $_ -ne '' })) {
-        $exercised = @($case.fixture | Where-Object {
-            $_.outputOverflowSlot -ceq $slot -and $_.outputOverflowRejectionsChecked -ceq '2' -and
-            $_.passed -ceq 'True' -and $_.completed -ceq 'True'
-        })
-        if ($exercised.Count -eq 0) { $incomplete.Add("$($case.name): overflow reference slot $slot was never exercised") }
+        $slotNumber = 0L
+        if (-not [long]::TryParse($slot, [ref]$slotNumber) -or $slotNumber -lt 0 -or
+            $trajectorySlots -cnotcontains $slot) {
+            $incomplete.Add("$($case.name): overflow-capable slot $slot lacks an independent trajectory")
+        }
     }
     $overflowNames = @($case.fixture | Where-Object {
         ([string]$_.outputOverflowRejectionsChecked) -notin @('', '0') -or

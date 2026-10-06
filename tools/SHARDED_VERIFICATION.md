@@ -36,3 +36,19 @@ workflows; verifier builds and a real single-configuration shard on net10.0,
 net8.0 and net461; complete discovery of 7,635 unit methods from the current binary;
 and two real unit shards with successful TRX reconciliation. These smoke checks
 validate the runner and accounting, not completion of the full hosted inventory.
+
+Overflow-evidence gate correction: `overflowReferenceSlots` lists outputs whose
+independent references can recognize unrepresentable results. It does not promise
+that every configuration must overflow. The numerical gate now requires those
+slots to have independent trajectories and retains the existing finite-execution
+and first-overflow rejection checks for every required fixture. Ten focused gate
+tests passed, including finite-only trajectories, another output rejecting first,
+and missing, malformed or contradictory evidence.
+
+Rechecking the completed package report exposed a separate incomplete area:
+paired-series validation had not included the 18 adversarial numerical classes.
+The gate still rejects those 900 missing case/class combinations. An eight-bar
+focused probe of all 50 paired configurations found 28 failures across Compare
+Price Momentum, Relative Normalized Volatility, Relative Strength 3D and Sector
+Rotation. Those failures need numerical/reference investigation; they are not
+passing final evidence. No production arithmetic was changed by this gate repair.
