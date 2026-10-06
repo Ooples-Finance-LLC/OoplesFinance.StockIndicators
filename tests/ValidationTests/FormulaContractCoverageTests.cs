@@ -2082,15 +2082,108 @@ public sealed class FormulaContractCoverageTests
     private static IReadOnlyList<IndicatorValidationCase> Discover() =>
         IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly });
 
-    public static IEnumerable<object[]> ReferencedCases => Discover().Select(c => new object[] { c });
+    public static IEnumerable<object[]> ReferencedCases(int partition) =>
+        ConfigurationTestPartitions.Select(Discover(), partition);
 
     [Theory]
-    [MemberData(nameof(ReferencedCases))]
-    public Task EveryReferencedConfigurationPassesItsFormula(IndicatorValidationCase testCase) =>
-        IndicatorValidation.ValidateAndThrowAsync(testCase, new()
-        {
-            RequireFormulaReference = true
-        });
+    [MemberData(nameof(ReferencedCases), 0)]
+    public Task EveryReferencedConfigurationPassesItsFormula00(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 1)]
+    public Task EveryReferencedConfigurationPassesItsFormula01(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 2)]
+    public Task EveryReferencedConfigurationPassesItsFormula02(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 3)]
+    public Task EveryReferencedConfigurationPassesItsFormula03(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 4)]
+    public Task EveryReferencedConfigurationPassesItsFormula04(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 5)]
+    public Task EveryReferencedConfigurationPassesItsFormula05(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 6)]
+    public Task EveryReferencedConfigurationPassesItsFormula06(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 7)]
+    public Task EveryReferencedConfigurationPassesItsFormula07(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 8)]
+    public Task EveryReferencedConfigurationPassesItsFormula08(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 9)]
+    public Task EveryReferencedConfigurationPassesItsFormula09(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 10)]
+    public Task EveryReferencedConfigurationPassesItsFormula10(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 11)]
+    public Task EveryReferencedConfigurationPassesItsFormula11(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 12)]
+    public Task EveryReferencedConfigurationPassesItsFormula12(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 13)]
+    public Task EveryReferencedConfigurationPassesItsFormula13(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 14)]
+    public Task EveryReferencedConfigurationPassesItsFormula14(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 15)]
+    public Task EveryReferencedConfigurationPassesItsFormula15(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 16)]
+    public Task EveryReferencedConfigurationPassesItsFormula16(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 17)]
+    public Task EveryReferencedConfigurationPassesItsFormula17(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 18)]
+    public Task EveryReferencedConfigurationPassesItsFormula18(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
+    [Theory]
+    [MemberData(nameof(ReferencedCases), 19)]
+    public Task EveryReferencedConfigurationPassesItsFormula19(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
 
     [Fact]
     public void EveryMissingConfigurationAndOutputMustBeExplicitlyTracked()

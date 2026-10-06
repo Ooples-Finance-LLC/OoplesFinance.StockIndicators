@@ -4,7 +4,9 @@ CI builds one immutable NuGet package containing every supported framework, then
 builds each platform's verifier against that package. The consumer assembly hash
 must match its package entry. Each unchanged consumer is distributed across 20 shards. Configurations are sorted by ordinal name and assigned
 by index modulo 20. The unit suite likewise builds once and uses VSTest's complete
-fully qualified method inventory; all theory rows for a method stay together.
+fully qualified method inventory. The two library-wide configuration sweeps each
+expose 20 methods with disjoint ordinal partitions, so their thousands of theory
+rows are distributed across all 20 workers. Other theory rows stay with their method.
 Mutation workers now allow 20 concurrent jobs as well. Actual concurrency remains
 subject to GitHub's runner availability and account limits.
 
