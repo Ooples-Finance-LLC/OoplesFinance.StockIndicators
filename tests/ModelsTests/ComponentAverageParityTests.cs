@@ -100,6 +100,53 @@ public sealed class ComponentAverageParityTests
         actual.Skip(40).Should().Contain(v => Math.Abs(v) > 1e-9);
     }
 
+    [Theory]
+    [InlineData(false, false, false)]
+    [InlineData(false, false, true)]
+    [InlineData(false, true, false)]
+    [InlineData(false, true, true)]
+    [InlineData(true, false, false)]
+    [InlineData(true, false, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, true, true)]
+    public async Task PpoComponentStagesPreserveEveryOutput(bool builtInFast, bool builtInSlow, bool builtInSignal)
+    {
+        var bars = Walk(60);
+        IMovingAverage Average(bool builtIn, int length) => builtIn ? new Sma(length) : new MirrorSma(length);
+        var ppo = new Ppo(3, 11, Average(builtInFast, 3), 4,
+            Average(builtInSlow, 11), Average(builtInSignal, 4));
+        var fast = Run(new Sma(3), bars)!;
+        var slow = Run(new Sma(11), bars)!;
+        var line = fast.Select((value, index) => slow[index] == 0 ? 0 : 100 * (value - slow[index]) / slow[index]).ToArray();
+        var signalBars = bars.Select((bar, index) =>
+            new Bar(bar.Time, line[index], line[index], line[index], line[index], bar.Volume)).ToArray();
+        var signal = Run(new Sma(4), signalBars)!;
+        var histogram = line.Select((value, index) => value - signal[index]).ToArray();
+
+        using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(ppo).BuildAsync();
+        run[ppo].ToArray().Should().Equal(line, (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[ppo.Signal].ToArray().Should().Equal(signal, (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[ppo.Histogram].ToArray().Should().Equal(histogram, (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        line.Should().NotEqual(signal);
+        histogram.Should().NotEqual(line);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PpoRejectsMissingSignalComponentBeforePublishing(bool builtIn)
+    {
+        IMovingAverage Average(int length) => builtIn ? new Sma(length) : new MirrorSma(length);
+        var ppo = new Ppo(3, 11, Average(3), 4, Average(11));
+        Func<Task> build = async () =>
+        {
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(Walk(20)))
+                .ConfigureIndicators(ppo).BuildAsync();
+        };
+        await build.Should().ThrowAsync<NotSupportedException>().WithMessage("*asks for 3 averages and was given 2*");
+    }
+
     [Fact]
     public void AnExtraAverageCannotSilentlyReplaceAnOmittedPrecedingStage()
     {
