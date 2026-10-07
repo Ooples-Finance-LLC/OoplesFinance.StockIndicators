@@ -20,6 +20,12 @@ public sealed class GeneratedIndicatorTests
             .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
             .Where(t => t.Namespace == "OoplesFinance.StockIndicators.Indicators")
             .Where(typeof(IIndicator).IsAssignableFrom)
+            // Options metadata is the generator's input. Handwritten comparison indicators
+            // share this namespace but do not have batch specs. Do not filter on IBuiltInIndicator:
+            // the test below must still detect a generated type missing that interface.
+            .Where(t => typeof(IIndicatorSpecOptions).Assembly.GetType(
+                "OoplesFinance.StockIndicators.Builder.Specs." + t.Name + "SpecOptions") is { } options
+                && typeof(IIndicatorSpecOptions).IsAssignableFrom(options))
             .OrderBy(t => t.Name, StringComparer.Ordinal)];
 
     [Fact]

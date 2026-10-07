@@ -74,7 +74,7 @@
     "scope": "public sealed class RSMKIndicatorState",
     "before": "if (isFinal)\n            {\n                _lastMarketValue = bar.Close;",
     "after": "if (true)\n            {\n                _lastMarketValue = bar.Close;",
-    "filter": "FullyQualifiedName~EveryMultiSeriesConfiguration"
+    "filter": "FullyQualifiedName~RsmkBenchmarkPreviewDoesNotReplaceFinalizedBenchmark"
   },
   {
     "id": "future-stream-data",

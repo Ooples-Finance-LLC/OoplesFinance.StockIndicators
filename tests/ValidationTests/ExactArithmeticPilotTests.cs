@@ -63,6 +63,35 @@ public sealed class ExactArithmeticPilotTests
     }
 
     [Fact]
+    public void RsmkBenchmarkPreviewDoesNotReplaceFinalizedBenchmark()
+    {
+        var primary = new SeriesKey("PRIMARY", BarTimeframe.Minutes(1));
+        var benchmark = new SeriesKey("BENCHMARK", BarTimeframe.Minutes(1));
+        var context = new MultiSeriesContext(new SeriesStore());
+        using var state = new RSMKIndicatorState(primary, benchmark, length: 1, smoothLength: 1);
+        OhlcvBar BarFor(string symbol, int index, double value)
+        {
+            var time = DateTime.UnixEpoch.AddMinutes(index);
+            return new(symbol, primary.Timeframe, time, time, value, value, value, value, 1, true);
+        }
+        for (var replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            state.Update(context, benchmark, BarFor("BENCHMARK", 0, 100), true, false);
+            state.Update(context, primary, BarFor("PRIMARY", 0, 100), true, false);
+            state.Update(context, benchmark, BarFor("BENCHMARK", 1, 100), true, false);
+            // A future preview must not overwrite the finalized value paired with primary bar 1.
+            state.Update(context, benchmark, BarFor("BENCHMARK", 2, 400), false, false);
+            var expected = (new Rational(100) * LogSeries(new Rational(11) / new Rational(10))).ToDouble();
+            foreach (var final in new[] { false, false, true })
+            {
+                var actual = state.Update(context, primary, BarFor("PRIMARY", 1, 110), final, false);
+                Assert.InRange(Math.Abs(expected - actual.Value), 0, 2e-12);
+            }
+        }
+    }
+
+    [Fact]
     public async Task RecursiveFilterMatchesItsAnalyticImpulseResponse()
     {
         const int period = 10;
