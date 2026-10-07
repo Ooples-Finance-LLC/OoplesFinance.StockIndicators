@@ -21,8 +21,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var mob1List = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var mob2List = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var mob1List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var mob2List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -33,7 +33,10 @@ public static partial class Calculations
             tfsMobList.Add(tfsMob);
         }
 
-        var tfsMobSignalLineList = GetMovingAverageList(stockData, maType, signalLength, tfsMobList);
+        var finite = FiniteSignalInput.Create(tfsMobList, out var finiteCount);
+        var tfsMobSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finite, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, finite);
+        for (var i = finiteCount; i < tfsMobSignalLineList.Count; i++) tfsMobSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var tfsMob = tfsMobList[i];
@@ -75,15 +78,13 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 45, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
         List<double> macdStochasticHistogramList = new(stockData.Count);
-        List<double> fastStochasticList = new(stockData.Count);
-        List<double> slowStochasticList = new(stockData.Count);
         List<double> macdStochasticList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
 
-        var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var fastEmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var slowEmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -91,19 +92,14 @@ public static partial class Calculations
             var slowEma = slowEmaList[i];
             var hh = highestList[i];
             var ll = lowestList[i];
-            var range = hh - ll;
-
-            var fastStochastic = range != 0 ? (fastEma - ll) / range : 0;
-            fastStochasticList.Add(fastStochastic);
-
-            var slowStochastic = range != 0 ? (slowEma - ll) / range : 0;
-            slowStochasticList.Add(slowStochastic);
-
-            var macdStochastic = 10 * (fastStochastic - slowStochastic);
+            var macdStochastic = RoundedStochasticMacd.Of(fastEma, slowEma, hh, ll);
             macdStochasticList.Add(macdStochastic);
         }
 
-        var macdStochasticSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdStochasticList);
+        var finite = FiniteSignalInput.Create(macdStochasticList, out var finiteCount);
+        var macdStochasticSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finite, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, finite);
+        for (var i = finiteCount; i < macdStochasticSignalLineList.Count; i++) macdStochasticSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var macdStochastic = macdStochasticList[i];

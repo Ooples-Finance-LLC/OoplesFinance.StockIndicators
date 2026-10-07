@@ -132,7 +132,7 @@ public sealed class MovingAverageTypeParityTests
             }
             catch (Exception ex)
             {
-                swallowed.Add(type.Name + ": " + ex.GetType().Name);
+                swallowed.Add(type.Name + ": " + ex.GetType().Name + " - " + ex.Message);
                 continue;
             }
 

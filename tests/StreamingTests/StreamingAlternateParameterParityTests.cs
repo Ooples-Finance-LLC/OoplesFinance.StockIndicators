@@ -118,6 +118,10 @@ public sealed class StreamingAlternateParameterParityTests : GlobalTestData
                 }
             }
 
+            // The generic 1.5 multiplier takes the .667 adaptive gain outside [0, 1].
+            // Match the bounded alternate used by the typed builder fixtures.
+            if (type == typeof(MovingAverageAdaptiveFilterState)) overrides["fastAlpha"] = .8;
+
             if (shared.All(p => p.Name is { } n && Equals(overrides[n], p.DefaultValue)))
             {
                 // Perturbing moved nothing - every shared parameter is a type the alternate set leaves alone - so

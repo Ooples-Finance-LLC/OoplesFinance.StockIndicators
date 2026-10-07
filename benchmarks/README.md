@@ -54,7 +54,7 @@ against Skender.Stock.Indicators 2.7.3, TALib.NETCore 0.5.0, Trady.Analysis 3.2.
 seven indicators. Nothing it references ships: the project is never packed and the library takes no reference
 on any competitor package.
 
-It has three commands that are not timings, and all three exist so a timing cannot be read out of context.
+The following commands check coverage, arithmetic, workloads and allocations without producing timings.
 
 What each library ships, so a missing row is never mistaken for a slow one:
 ```
@@ -70,6 +70,19 @@ Where a measured allocation actually goes, so the adapter is not reported as the
 ```
 dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj -- --alloc
 ```
+
+Verify full-series retention and fixed-history resets before collecting timings:
+```
+dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj -- --verify-workloads
+```
+
+QuanTAlib batch arms retain every output in a preallocated array, like TA-Lib. Incremental arms reset and
+warm state outside the timed operation before each iteration. BenchmarkDotNet's iteration setup uses one
+invocation and no unrolling: each timed operation appends one bar to the same original history. This makes
+individual update timings susceptible to timer noise; inspect BenchmarkDotNet's warnings and distributions.
+Earlier measurements that repeatedly advanced state or retained only QuanTAlib's final value are superseded
+and must not be used for comparative performance claims. The arithmetic examples below describe conventions,
+not fresh performance evidence.
 
 The timings themselves:
 ```

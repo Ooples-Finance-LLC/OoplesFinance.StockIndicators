@@ -18,40 +18,17 @@ public static partial class Calculations
     public static StockData CalculateWellesWilderVolatilitySystem(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63, int length2 = 21, double factor = 3)
     {
-        List<double> vstopList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).ChainedValues;
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length2);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new WilderVolatilityWindow(maType, length1, length2, factor, external); List<double>? atr = null, trend = null;
+        if (external)
         {
-            var currentAtr = atrList[i];
-            var currentEma = emaList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevVStop = GetLastOrDefault(vstopList);
-            var sic = currentValue > currentEma ? highest : lowest;
-            var vstop = currentValue > currentEma ? sic - (factor * currentAtr) : sic + (factor * currentAtr);
-            vstopList.Add(vstop);
-
-            var signal = GetCompareSignal(currentValue - vstop, prevValue - prevVStop);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, length2, ranges);
+            trend = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, length1, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Wwvs", vstopList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vstopList);
-        stockData.IndicatorName = IndicatorName.WellesWilderVolatilitySystem;
-
-        return stockData;
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? atr![i] : null, external ? trend![i] : null); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Wwvs", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.WellesWilderVolatilitySystem; return stockData;
     }
 }
 

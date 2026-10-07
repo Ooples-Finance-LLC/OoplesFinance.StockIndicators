@@ -652,13 +652,13 @@ public readonly struct AarmaCore : IMovingAverageCore
 
 public readonly struct AemaCore : IMovingAverageCore
 {
-    public bool RequiresOhlc => false;
+    public bool RequiresOhlc => true;
     public bool RequiresVolume => false;
     public bool HasExtraParams => false;
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.AdaptiveExponentialMovingAverage(input, output, length);
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(input, output, length);
-    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => Compute(close, output, length);
-    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(close, output, length);
+    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => MovingAverageCore.AdaptiveExponentialMovingAverage(close, high, low, output, length);
+    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => ComputeOhlc(high, low, close, output, length);
     public void ComputeWithVolume(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length) => Compute(input, output, length);
 }
 
@@ -1039,7 +1039,7 @@ public readonly struct JmaCore : IMovingAverageCore
     public bool RequiresOhlc => false;
     public bool RequiresVolume => false;
     public bool HasExtraParams => false;
-    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.JurikMovingAverage(input, output, length);
+    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.JurikMovingAverage(input, output, length, phase: 50);
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(input, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => Compute(close, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(close, output, length);
@@ -1291,7 +1291,12 @@ public readonly struct PolyLsmaCore : IMovingAverageCore
     public bool RequiresOhlc => false;
     public bool RequiresVolume => false;
     public bool HasExtraParams => false;
-    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.PolynomialLeastSquaresMovingAverage(input, output, length);
+    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new OoplesFinance.StockIndicators.Helpers.PolynomialCellWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
+    }
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(input, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => Compute(close, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(close, output, length);
@@ -2227,6 +2232,7 @@ public readonly struct EtmaCore : IMovingAverageCore
     public void ComputeWithVolume(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length) => Compute(input, output, length);
 }
 
+/// <summary>Public Ehlers VIDYA defaults (weighted 9/30); the single length argument is unused.</summary>
 public readonly struct EVidyaCore : IMovingAverageCore
 {
     public bool RequiresOhlc => false;
@@ -2351,12 +2357,12 @@ public readonly struct McGinleyCore : IMovingAverageCore
 
 public readonly struct MhlmaCore : IMovingAverageCore
 {
-    public bool RequiresOhlc => true;
+    public bool RequiresOhlc => false;
     public bool RequiresVolume => false;
     public bool HasExtraParams => false;
-    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.SimpleMovingAverage(input, output, length);
+    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.MiddleHighLowMovingAverage(input, output, length);
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(input, output, length);
-    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => MovingAverageCore.MiddleHighLowMovingAverage(high, low, output, length);
+    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => MovingAverageCore.MiddleHighLowMovingAverage(close, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => ComputeOhlc(high, low, close, output, length);
     public void ComputeWithVolume(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length) => Compute(input, output, length);
 }

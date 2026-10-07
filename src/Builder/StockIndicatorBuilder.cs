@@ -199,6 +199,7 @@ public sealed class StockIndicatorBuilder
         var warmupCount = 0;
         await foreach (var bar in source.ReadWarmupAsync(cancellationToken).ConfigureAwait(false))
         {
+            Validation.IndicatorInputDomain.Finite.Validate(bar);
             opens.Add(bar.Open);
             highs.Add(bar.High);
             lows.Add(bar.Low);
@@ -211,6 +212,7 @@ public sealed class StockIndicatorBuilder
 
         await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
+            Validation.IndicatorInputDomain.Finite.Validate(bar);
             opens.Add(bar.Open);
             highs.Add(bar.High);
             lows.Add(bar.Low);
@@ -235,6 +237,9 @@ public sealed class StockIndicatorBuilder
         }
 
         var handles = new Dictionary<Indicators.IIndicator, SeriesHandle[]>(Indicators.IndicatorIdentity.Comparer);
+        foreach (var indicator in reachable)
+            if (indicator.Source is null)
+                foreach (var bar in bars) Validation.IndicatorInputDomain.For(indicator).Validate(bar);
         foreach (var indicator in reachable)
         {
             Indicators.IndicatorContract.RequireComputable(indicator);
@@ -275,6 +280,8 @@ public sealed class StockIndicatorBuilder
         }
 
         var runtime = Build();
+        try
+        {
         runtime.Start();
 
         var engine = new Indicators.CustomIndicatorEngine(bars, resolveBuiltIn: indicator =>
@@ -313,41 +320,41 @@ public sealed class StockIndicatorBuilder
             }
 
             using var context = new ComputeContext();
-            var values = new double[indicator.Outputs.Count][];
-            var requests = 0;
-            for (var slot = 0; slot < values.Length; slot++)
+            var outputs = new double[indicator.Outputs.Count][];
+            var requestedAverage = false;
+            for (var slot = 0; slot < outputs.Length; slot++)
             {
-                var outputKey = values.Length > 1 ? OutputKeyFor(indicator, slot) : null;
-                if (values.Length > 1 && outputKey is null)
+                var key = outputs.Length > 1 ? OutputKeyFor(indicator, slot) : builtIn.BatchOutputKey;
+                if (outputs.Length > 1 && key is null)
                     throw new NotSupportedException(indicator.GetType().Name
                         + " has no batch output mapping for slot " + slot + ".");
-                var spec = outputKey is null
+                var spec = key is null
                     ? IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions())
-                    : IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions(), outputKey);
-
-                // Each named output repeats the calculation from its first average request.
-                // PPO's line needs two stages; its signal and histogram also need the third.
+                    : IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions(), key);
+                // Each output evaluates the same component graph. Restart its substitution cursor,
+                // so the first average receives the first component for every published output.
                 using (ComponentAverage.Arm(averages))
                 {
                     var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
-                    if (buffer is null)
-                        return (null, ComponentAverage.Requests);
-
+                    if (buffer is null) return (null, 0);
                     using (buffer.Value)
                     {
-                        var exact = ComponentAverage.Requests > 0
-                            && ComponentAverage.Substitutions == ComponentAverage.Requests;
-                        LastAverageLength = ComponentAverage.LengthAsked;
-                        LastAverageRequests = ComponentAverage.Requests;
-                        requests = Math.Max(requests, ComponentAverage.Requests);
-                        if (!exact)
-                            return (null, requests);
-                        values[slot] = buffer.Value.Span.ToArray();
+                        if (ComponentAverage.Substitutions != ComponentAverage.Requests)
+                            return (null, ComponentAverage.Requests);
+                        // A primary output can be independent of the average used
+                        // by its Signal. Require substitution across the indicator,
+                        // while accepting outputs that make no average request.
+                        if (ComponentAverage.Requests > 0)
+                        {
+                            requestedAverage = true;
+                            LastAverageLength = ComponentAverage.LengthAsked;
+                            LastAverageRequests = ComponentAverage.Requests;
+                        }
+                        outputs[slot] = buffer.Value.Span.ToArray();
                     }
                 }
             }
-
-            return (values, requests);
+            return requestedAverage ? (outputs, LastAverageRequests) : (null, 0);
         });
 
         var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
@@ -364,7 +371,14 @@ public sealed class StockIndicatorBuilder
         }
 
         return new Indicators.IndicatorRun(
-            runtime, series2, warmupCount == 0 ? bars : bars.Skip(warmupCount).ToList());
+            runtime, series2, warmupCount == 0 ? bars : bars.Skip(warmupCount).ToList(), warmupCount,
+            reachable.Count == 0 ? 0 : reachable.Max(indicator => indicator.WarmupBars));
+        }
+        catch
+        {
+            runtime.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -429,8 +443,16 @@ public sealed class StockIndicatorBuilder
         {
             PublishBeforeWarmup = _publishBeforeWarmup
         };
-        await run.WarmAsync(cancellationToken).ConfigureAwait(false);
-        return run;
+        try
+        {
+            await run.WarmAsync(cancellationToken).ConfigureAwait(false);
+            return run;
+        }
+        catch
+        {
+            run.Dispose();
+            throw;
+        }
     }
     /// <summary>Walks an indicator's components and chained source, depth first, without repeating one.</summary>
     /// <summary>The period the last substituted average was asked for, so a test can mirror it exactly.</summary>
@@ -451,6 +473,7 @@ public sealed class StockIndicatorBuilder
             return true;
         }
 
+        // A single MovingAvgType cannot represent separately configured smoothing stages.
         if (indicator.Components.Count > 1) return true;
 
         // Uses() - a component that is not one of ours collapses to nothing in CreateOptions, because the
@@ -656,6 +679,9 @@ public sealed class StockIndicatorBuilder
             _signalOptions,
             _backtestOptions,
             _benchmarkOptions,
+            Source.Kind == IndicatorSourceKind.Batch ? _namedSources.ToDictionary(
+                pair => new SeriesKey(new SymbolId(pair.Key), timeframe),
+                pair => pair.Value.BatchData ?? throw new InvalidOperationException("Batch evaluation requires batch data for named source '"+pair.Key+"'.")) : null,
             computePool);
     }
 

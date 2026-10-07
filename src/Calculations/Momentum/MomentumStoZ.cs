@@ -21,12 +21,18 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 13, int length2 = 19, int length3 = 21, int length4 = 39,
         int length5 = 50, int length6 = 200, double stdDevMult = 1.5)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides && UltimateMomentumWindow.Supports(maType))
+        {
+            var safe=UltimateMomentumWindow.Calculate(stockData,maType,length1,length2,length3,length4,length5,stdDevMult);
+            stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Utm",safe.Values}});stockData.SetSignals(safe.Signals);stockData.SetCustomValues(safe.Values);stockData.IndicatorName=IndicatorName.UltimateMomentumIndicator;return stockData;
+        }
         // The components that read their own default input - a typical or median price - read the
         // CALLER's series instead whenever one is chained, and by the time this calculation calls them
         // an earlier component has already published its output onto CustomValuesList, which they would
         // otherwise take for the caller's chain. Unchained this is empty, and they read their own
         // default input exactly as before.
         var callerSeries = stockData.CaptureInputSeries();
+        var (sourcePrices, _, _, _, _) = GetInputValuesList(stockData);
         List<double> utmList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
@@ -37,6 +43,11 @@ public static partial class Calculations
         var moList = moVar.ChainedOutputs["Mo"];
         stockData.RestoreInputSeries(callerSeries);
         var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).ChainedValues;
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var bandPosition = new Streaming.UltimateMomentumBand(maType, length5, stdDevMult);
+            for (var i = 0; i < sourcePrices.Count; i++) bbPctList[i] = bandPosition.Next(sourcePrices[i], true);
+        }
         stockData.RestoreInputSeries(callerSeries);
         var mfi1List = CalculateMoneyFlowIndex(stockData, length2).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
@@ -56,12 +67,21 @@ public static partial class Calculations
             var ratio = decSum != 0 ? advSum / decSum : 0;
 
             var utm = (200 * bbPct) + (100 * ratio) + (2 * mo) + (1.5 * mfi3) + (3 * mfi2) + (3 * mfi1);
+            // RSI must not normalize arithmetic residue from an otherwise settled blend.
+            var previousBlend = i == 0 ? utm : utmList[i-1];
+            if (Math.Abs(utm-previousBlend) <= 1.4210854715202004e-14*Math.Max(Math.Abs(utm), Math.Abs(previousBlend)))
+                utm = previousBlend;
             utmList.Add(utm);
         }
 
         stockData.SetCustomValues(utmList);
         var utmRsiList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).ChainedValues;
         var utmiList = GetMovingAverageList(stockData, maType, length1, utmRsiList);
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var strength = new Streaming.UltimateMomentumStrength(maType, length1);
+            for (var i = 0; i < utmList.Count; i++) utmiList[i] = strength.Next(utmList[i], true);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var utmi = utmiList[i];
@@ -149,44 +169,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSqueezeMomentumIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
-        List<double> diffList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var midprice = (highest + lowest) / 2;
-            var sma = smaList[i];
-            var midpriceSmaAvg = (midprice + sma) / 2;
-
-            var diff = currentValue - midpriceSmaAvg;
-            diffList.Add(diff);
-        }
-
-        stockData.SetCustomValues(diffList);
-        var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var predictedToday = linregList[i];
-            var prevPredictedToday = i >= 1 ? linregList[i - 1] : 0;
-
-            var signal = GetCompareSignal(predictedToday, prevPredictedToday);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Smi", linregList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(linregList);
-        stockData.IndicatorName = IndicatorName.SqueezeMomentumIndicator;
-
+        var values = SqueezeMomentumWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Smi", values.Values.ToList() } });
+        var signals = CreateSignalsList(stockData); signals?.AddRange(values.Trades); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values.Values.ToList()); stockData.IndicatorName = IndicatorName.SqueezeMomentumIndicator;
         return stockData;
     }
 }

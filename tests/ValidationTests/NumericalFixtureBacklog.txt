@@ -1,0 +1,2 @@
+# Existing numerical-fixture enrollment debt for issue #244; not passing execution evidence.
+# Remove entries as their contracts are completed. New indicators/configurations must be enrolled.

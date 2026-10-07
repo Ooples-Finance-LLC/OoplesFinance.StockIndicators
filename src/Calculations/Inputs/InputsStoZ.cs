@@ -20,7 +20,7 @@ public static partial class Calculations
             tpList = new List<double>(seriesList.Count);
             for (var i = 0; i < seriesList.Count; i++)
             {
-                tpList.Add((seriesHighList[i] + seriesLowList[i] + seriesList[i]) / 3);
+                tpList.Add(PriceMean.Of(seriesHighList[i], seriesLowList[i], seriesList[i]));
             }
         }
         else
@@ -68,7 +68,7 @@ public static partial class Calculations
             weightedCloseList = new List<double>(seriesList.Count);
             for (var i = 0; i < seriesList.Count; i++)
             {
-                weightedCloseList.Add((seriesHighList[i] + seriesLowList[i] + (seriesList[i] * 2)) / 4);
+                weightedCloseList.Add(PriceMean.Of(seriesHighList[i], seriesLowList[i], seriesList[i], seriesList[i]));
             }
         }
         else

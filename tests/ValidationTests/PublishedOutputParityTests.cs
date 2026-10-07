@@ -1,6 +1,8 @@
-using System.Reflection;
 using FluentAssertions;
 using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Builder.Compute;
+using OoplesFinance.StockIndicators.Builder.Specs;
+using OoplesFinance.StockIndicators.Validation;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Models;
 
@@ -30,173 +32,6 @@ public sealed class PublishedOutputParityTests
     // the indicator is fixed; the test tells you to.
     private static readonly HashSet<string> KnownDivergences = new(StringComparer.Ordinal)
     {
-        "AccumulativeSwingIndex.Signal",
-        "AdaptiveErgodicCandlestickOscillator.Signal",
-        "Adl.AdlSignal",
-        "AnchoredMomentum.Signal",
-        "BalanceOfPower.BopSignal",
-        "BearPower.Signal",
-        "BearPowerIndicator.Signal",
-        "BilateralStochasticOscillator.Bear",
-        "BilateralStochasticOscillator.Signal",
-        "BullPower.Signal",
-        "BullPowerIndicator.Signal",
-        "ChandeCompositeMomentumIndex.Signal",
-        "ChandeMomentumOscillator.Signal",
-        "ChandeMomentumOscillatorFilter.Signal",
-        "Cmo.Signal",
-        "CommoditySelectionIndex.Signal",
-        "ConditionalAccumulator.Signal",
-        "ConstanceBrownCompositeIndex.FastSignal",
-        "ConstanceBrownCompositeIndex.SlowSignal",
-        "DecisionPointBreadthSwenlinTradingOscillator.Signal",
-        "DeltaMovingAverage.Histogram",
-        "DeltaMovingAverage.Signal",
-        "DiNapoliPreferredStochasticOscillator.Signal",
-        "DonchianChannelWidth.Signal",
-        "DoubleSmoothedMomenta.Signal",
-        "DoubleSmoothedStochastic.Signal",
-        "DoubleStochasticOscillator.Signal",
-        "DTOscillator.Signal",
-        "EhlersAdaptiveCommodityChannelIndexV2.Signal",
-        "EhlersAdaptiveRelativeStrengthIndexV2.Signal",
-        "EhlersAdaptiveStochasticIndicatorV2.Signal",
-        "EhlersAMDetector.Signal",
-        "EhlersBandPassFilterV1.Signal",
-        "EhlersHammingWindowIndicator.Roc",
-        "EhlersHannWindowIndicator.Roc",
-        "EhlersInstantaneousTrendlineV2.Signal",
-        "EhlersPhaseCalculation.Signal",
-        "EhlersRelativeVigorIndex.Signal",
-        "EhlersRestoringPullIndicator.Rpi",
-        "EhlersRestoringPullIndicator.Signal",
-        "EhlersSimpleClipIndicator.Signal",
-        "EhlersSimpleDerivIndicator.Signal",
-        "EhlersSimpleWindowIndicator.Roc",
-        "EhlersStochasticCyberCycle.Signal",
-        "EhlersSuperPassbandFilter.LowerBand",
-        "EhlersSuperPassbandFilter.UpperBand",
-        "EhlersTrendExtraction.Bp",
-        "EhlersTriangleWindowIndicator.Roc",
-        "EhlersTripleDelayLineDetrender.Signal",
-        "EhlersUniversalOscillator.Signal",
-        "EhlersUniversalTradingFilter.LowerBand",
-        "EhlersUniversalTradingFilter.UpperBand",
-        "ElderMarketThermometer.Signal",
-        "ElliottWaveOscillator.Histogram",
-        "ElliottWaveOscillator.Signal",
-        "EnhancedIndex.Signal",
-        "EnhancedWilliamsR.Signal",
-        "ErgodicCandlestickOscillator.Signal",
-        "ErgodicCommoditySelectionIndex.Signal",
-        "ErgodicMeanDeviationIndicator.Signal",
-        "ErgodicPercentagePriceOscillator.Histogram",
-        "ErgodicPercentagePriceOscillator.Signal",
-        "ErgodicTrueStrengthIndexV1.Signal",
-        "FastandSlowKurtosisOscillator.Signal",
-        "FastSlowKurtosisOscillator.Signal",
-        "FearAndGreedIndicator.Signal",
-        "FireflyOscillator.Signal",
-        "FoldedRelativeStrengthIndex.Signal",
-        "ForecastOscillator.Signal",
-        "FreedomOfMovement.Dpl",
-        "GainLossMovingAverage.Signal",
-        "GarmanKlassVolatility.Signal",
-        "GopalakrishnanRangeIndex.Signal",
-        "ImpulsePercentagePriceOscillator.Histogram",
-        "ImpulsePercentagePriceOscillator.Signal",
-        "InternalBarStrengthIndicator.Signal",
-        "JrcFractalDimension.Signal",
-        "KasePeakOscillatorV1.Pk",
-        "KlingerVolumeOscillator.KvoHistogram",
-        "KlingerVolumeOscillator.KvoSignal",
-        "KnowSureThing.Signal",
-        "Kst.Signal",
-        "Kvo.KvoHistogram",
-        "Kvo.KvoSignal",
-        "MacdLine.Histogram",
-        "MacdLine.Signal",
-        "MacZIndicator.Histogram",
-        "MacZIndicator.Signal",
-        "MarketMeannessIndex.MmiSmoothed",
-        "MassIndex.Signal",
-        "MassIndexCore.Signal",
-        "MassThrust.Signal",
-        "MassThrustIndicator.Signal",
-        "MassThrustOscillator.Signal",
-        "MidpointOscillator.Signal",
-        "ModifiedPriceVolumeTrend.Signal",
-        "Momentum.Signal",
-        "MultiVoteOnBalanceVolume.Signal",
-        "NegativeVolumeDisparityIndicator.Signal",
-        "OceanIndicator.Signal",
-        "OnBalanceVolumeModified.Signal",
-        "OnBalanceVolumeReflex.Signal",
-        "PeakValleyEstimation.Sign2",
-        "PeakValleyEstimation.Sign3",
-        "PercentagePriceOscillator.Histogram",
-        "PercentagePriceOscillator.Signal",
-        "PercentagePriceOscillatorLeader.Histogram",
-        "PercentagePriceOscillatorLeader.Signal",
-        "PercentChangeOscillator.Signal",
-        "PhaseChangeIndex.Signal",
-        "PriceChange.Signal",
-        "PriceVolumeRank.FastSignal",
-        "PriceVolumeRank.SlowSignal",
-        "ProjectionBandwidth.Signal",
-        "ProjectionOscillator.Signal",
-        "RainbowOscillator.LowerBand",
-        "RainbowOscillator.UpperBand",
-        "RapidRelativeStrengthIndex.Signal",
-        "ReallySimpleIndicator.Signal",
-        "RelativeMomentumIndex.Histogram",
-        "RelativeMomentumIndex.Signal",
-        "RelativeVigorIndex.Signal",
-        "RelativeVolumeIndicator.Dpl",
-        "Repulse.Signal",
-        "ReverseMovingAverageConvergenceDivergence.Histogram",
-        "ReverseMovingAverageConvergenceDivergence.Signal",
-        "RexOscillator.Signal",
-        "Rsi.Histogram",
-        "Rsi.Signal",
-        "RSINGIndicator.Signal",
-        "Rvi.Signal",
-        "SellGravitationIndex.Signal",
-        "SigmaSpikes.Signal",
-        "SMIErgodicIndicator.Signal",
-        "SmoothedWilliamsAccumulationDistribution.Signal",
-        "StatisticalVolatility.Signal",
-        "StochasticConnorsRelativeStrengthIndex.Signal",
-        "StochasticCustomOscillator.Signal",
-        "StochasticFastOscillator.Signal",
-        "StochasticMacdOscillator.Histogram",
-        "StochasticMacdOscillator.Signal",
-        "StochasticMomentumIndex.Signal",
-        "StochasticRegular.Signal",
-        "StochasticRsiOscillator.Signal",
-        "TFSMboIndicator.Histogram",
-        "TFSMboIndicator.Signal",
-        "TotalPowerIndicator.BearCount",
-        "TotalPowerIndicator.BullCount",
-        "TraderPressureIndex.Bears",
-        "TraderPressureIndex.Bulls",
-        "TradeVolumeIndex.Signal",
-        "TrendAnalysisIndex.Signal",
-        "TrendAnalysisIndicator.Signal",
-        "TrendDetectionIndex.TdiDirection",
-        "TrendExhaustionIndicator.Signal",
-        "TrueStrengthIndex.Signal",
-        "Tsi.Signal",
-        "TurboStochasticsFast.Signal",
-        "TurboStochasticsSlow.Signal",
-        "UltimateTraderOscillator.Signal",
-        "VerticalHorizontalFilter.Signal",
-        "Vhf.Signal",
-        "VolatilityBasedMomentum.Signal",
-        "VolatilityQualityIndex.FastSignal",
-        "VolatilityQualityIndex.SlowSignal",
-        "Vpci.Signal",
-        "WaveTrendOscillator.Signal",
     };
 
     [Fact]
@@ -209,54 +44,43 @@ public sealed class PublishedOutputParityTests
             bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
             bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList());
 
-        var calculations = typeof(StockData).Assembly.GetTypes()
-            .Where(t => t.IsAbstract && t.IsSealed && t.Name == "Calculations")
-            .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Static))
-            .Where(m => m.Name.StartsWith("Calculate", StringComparison.Ordinal))
-            .GroupBy(m => m.Name)
-            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
-
         static bool Same(double[] mine, List<double> theirs) =>
-            mine.Length == theirs.Count && !mine.Where((x, i) => Math.Abs(x - theirs[i]) > 1e-8).Any();
+            mine.Length == theirs.Count && mine.Select((x, i) => double.IsFinite(x) && double.IsFinite(theirs[i])
+                && Math.Abs(x - theirs[i]) <= 1e-8).All(equal => equal);
 
         var diverged = new HashSet<string>(StringComparer.Ordinal);
         var swallowed = new List<string>();
         var compared = 0;
 
-        foreach (var type in typeof(IIndicator).Assembly.GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
-            .Where(t => t.Namespace == "OoplesFinance.StockIndicators.Indicators")
-            .Where(typeof(MultiOutputIndicatorBase).IsAssignableFrom)
-            .OrderBy(t => t.Name, StringComparer.Ordinal))
+        foreach (var testCase in IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
+            .Where(c => c.Name == "default" && typeof(MultiOutputIndicatorBase).IsAssignableFrom(c.IndicatorType)
+                && typeof(IBuiltInIndicator).IsAssignableFrom(c.IndicatorType)))
         {
-            var constructor = type.GetConstructors().FirstOrDefault(c => c.GetParameters().All(p => p.IsOptional));
-            if (constructor is null) { continue; }
-
+            var type = testCase.IndicatorType;
             IIndicator indicator;
             IBuiltInIndicator builtIn;
             try
             {
-                indicator = (IIndicator)constructor.Invoke(constructor.GetParameters().Select(p => p.DefaultValue).ToArray());
-                if (indicator is not IBuiltInIndicator built) { continue; }
-                builtIn = built;
+                indicator = testCase.Factory();
+                builtIn = Assert.IsAssignableFrom<IBuiltInIndicator>(indicator);
             }
-            catch (TargetInvocationException ex)
+            catch (Exception ex)
             {
                 swallowed.Add(type.Name + ": " + (ex.InnerException ?? ex).GetType().Name);
                 continue;
             }
 
-            if (!calculations.TryGetValue("Calculate" + builtIn.BatchName, out var method)) { continue; }
+            var options = builtIn.CreateOptions();
+            Assert.True(BuilderArmBinding.TryGetTarget(options.GetType(), out var target),
+                type.Name + " has no batch target.");
 
             Dictionary<string, List<double>> published;
             try
             {
-                var arguments = method.GetParameters()
-                    .Select((p, i) => i == 0 ? (object?)Batch() : Type.Missing).ToArray();
-                if (method.Invoke(null, arguments) is not StockData result) { continue; }
-                published = result.OutputValues;
+                published = GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToDictionary(key => key,
+                    key => BuilderArmBinding.Compute(Batch(), new IndicatorSpec(builtIn.BatchName, options, key), target));
             }
-            catch (TargetInvocationException ex)
+            catch (Exception ex)
             {
                 swallowed.Add(type.Name + ": " + (ex.InnerException ?? ex).GetType().Name);
                 continue;
@@ -277,11 +101,12 @@ public sealed class PublishedOutputParityTests
                 continue;
             }
 
-            if (mine.Length < 2) { continue; }
+            Assert.True(mine.Length >= 2, type.Name + " must expose multiple outputs.");
 
             // Outputs are in the order the batch publishes its keys, so the two line up by position.
             var keys = published.Keys.ToList();
-            for (var slot = 0; slot < mine.Length && slot < keys.Count; slot++)
+            Assert.Equal(keys.Count, mine.Length);
+            for (var slot = 0; slot < mine.Length; slot++)
             {
                 compared++;
                 if (!Same(mine[slot], published[keys[slot]]))
@@ -301,8 +126,8 @@ public sealed class PublishedOutputParityTests
         var appeared = diverged.Except(KnownDivergences).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var fixedSince = KnownDivergences.Except(diverged).OrderBy(x => x, StringComparer.Ordinal).ToList();
 
-        appeared.Should().BeEmpty(
-            "these series stopped matching their v1 batch - a published output must equal the key it is named for");
+        Assert.True(appeared.Count == 0,
+            "Published outputs differ from their batch keys: " + string.Join(", ", appeared));
 
         fixedSince.Should().BeEmpty(
             "these series now match their batch, so delete them from KnownDivergences - the list has to shrink");

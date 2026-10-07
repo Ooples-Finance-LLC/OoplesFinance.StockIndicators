@@ -40,7 +40,7 @@ public sealed class CloseToCloseVolatilityState : IStreamingIndicatorState, IDis
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var currentReturn = _hasPrev && _prevValue != 0 ? Log(value / _prevValue) : 0;
+        var currentReturn = _hasPrev && _prevValue != 0 ? StableLogRatio.OfSameSign(value, _prevValue) : 0;
 
         double volatility = 0;
         if (_returns.Count + 1 >= _length)
@@ -125,7 +125,7 @@ public sealed class ParkinsonVolatilityState : IStreamingIndicatorState, IDispos
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         _ = _input.GetValue(bar);
-        var logRatio = bar.Low != 0 ? Log(bar.High / bar.Low) : 0;
+        var logRatio = bar.Low != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Low) : 0;
         var squared = logRatio * logRatio;
 
         double volatility = 0;
@@ -196,10 +196,10 @@ public sealed class RogersSatchellVolatilityState : IStreamingIndicatorState, ID
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var logHc = value != 0 ? Log(bar.High / value) : 0;
-        var logHo = bar.Open != 0 ? Log(bar.High / bar.Open) : 0;
-        var logLc = value != 0 ? Log(bar.Low / value) : 0;
-        var logLo = bar.Open != 0 ? Log(bar.Low / bar.Open) : 0;
+        var logHc = value != 0 ? StableLogRatio.OfSameSign(bar.High, value) : 0;
+        var logHo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Open) : 0;
+        var logLc = value != 0 ? StableLogRatio.OfSameSign(bar.Low, value) : 0;
+        var logLo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.Low, bar.Open) : 0;
         var term = (logHc * logHo) + (logLc * logLo);
 
         double volatility = 0;
@@ -250,14 +250,12 @@ public sealed class RogersSatchellVolatilityState : IStreamingIndicatorState, ID
 [PrimaryOutput("Tpv")]
 public sealed class TypicalPriceVolatilityState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactTypicalVolatilityWindow _window;
     private readonly StreamingInputResolver _input;
 
     public TypicalPriceVolatilityState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactTypicalVolatilityWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -265,45 +263,13 @@ public sealed class TypicalPriceVolatilityState : IStreamingIndicatorState, IDis
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var typicalPrice = (bar.High + bar.Low + value) / 3;
-
-        double volatility = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
-            var start = _window.Count - (_length - 1);
-            double sum = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                sum += _window[i];
-            }
-
-            sum += typicalPrice;
-
-            var mean = sum / _length;
-            double sumSquaredDev = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var dev = _window[i] - mean;
-                sumSquaredDev += dev * dev;
-            }
-
-            var currentDev = typicalPrice - mean;
-            sumSquaredDev += currentDev * currentDev;
-
-            volatility = Sqrt(sumSquaredDev / _length);
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(typicalPrice, out _);
-        }
+        var volatility = _window.Next(bar.High, bar.Low, value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -14,50 +14,15 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Di")]
 public sealed class DemandIndexState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private int _barIndex;
-
-    public DemandIndexState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DemandIndexWindow _window = new();
+    public DemandIndexState() { }
     public IndicatorName Name => IndicatorName.DemandIndex;
-
-    public void Reset()
-    {
-        _barIndex = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        double demandIndex = 0;
-        if (_barIndex >= 1)
-        {
-            var range = bar.High - bar.Low;
-            var buyingPressure = value - bar.Low;
-            var sellingPressure = bar.High - value;
-            var buyingPercent = range != 0 ? buyingPressure / range : 0;
-            var sellingPercent = range != 0 ? sellingPressure / range : 0;
-            var buyVolume = bar.Volume * buyingPercent;
-            var sellVolume = bar.Volume * sellingPercent;
-            demandIndex = sellVolume != 0 ? (buyVolume / sellVolume) - 1 : 0;
-        }
-
-        if (isFinal)
-        {
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Di", demandIndex } };
-        }
-
-        return new StreamingIndicatorStateResult(demandIndex, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal).Value;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Di", value } } : null);
     }
 }
 
@@ -115,7 +80,8 @@ public sealed class ElderImpulseSystemState : IStreamingIndicatorState
         {
             var emaRising = trendEma > _prevTrendEma;
             var histogramRising = histogram > _prevHistogram;
-            impulse = emaRising && histogramRising ? 1 : !emaRising && !histogramRising ? -1 : 0;
+            impulse = emaRising && histogramRising ? 1
+                : trendEma < _prevTrendEma && histogram < _prevHistogram ? -1 : 0;
         }
 
         if (isFinal)
@@ -145,77 +111,16 @@ public sealed class ElderImpulseSystemState : IStreamingIndicatorState
 [PrimaryOutput("Spz")]
 public sealed class SimplePriceZoneState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
-    private readonly StreamingInputResolver _input;
-    private double _sumUp;
-    private double _sumDown;
-    private int _barIndex;
-
-    public SimplePriceZoneState(int length = 14)
+    private readonly SimplePriceZoneWindow _window;
+    public SimplePriceZoneState(int length=14)=>_window=new SimplePriceZoneWindow(length);
+    public IndicatorName Name=>IndicatorName.SimplePriceZone;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Close,isFinal);
+        return new StreamingIndicatorStateResult(value,includeOutputs?new Dictionary<string,double>{{"Spz",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.SimplePriceZone;
-
-    public void Reset()
-    {
-        _window.Clear();
-        _sumUp = 0;
-        _sumDown = 0;
-        _barIndex = 0;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-
-        double zone = 0;
-        var sumUp = _sumUp;
-        var sumDown = _sumDown;
-        if (_barIndex >= 1)
-        {
-            var change = value - _window[_window.Count - 1];
-            sumUp += change > 0 ? change : 0;
-            sumDown += change < 0 ? -change : 0;
-
-            // A change enters the sums only from the second bar, so the one leaving is the change into
-            // the bar _length back, which exists only once the window holds the bar before it too.
-            if (_barIndex >= _length + 1)
-            {
-                var prevChange = _window[1] - _window[0];
-                sumUp -= prevChange > 0 ? prevChange : 0;
-                sumDown -= prevChange < 0 ? -prevChange : 0;
-            }
-
-            var total = sumUp + sumDown;
-            zone = total != 0 ? 100 * (sumUp - sumDown) / total : 0;
-        }
-
-        if (isFinal)
-        {
-            _sumUp = sumUp;
-            _sumDown = sumDown;
-            _window.TryAdd(value, out _);
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Spz", zone } };
-        }
-
-        return new StreamingIndicatorStateResult(zone, outputs);
-    }
-
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
 
 /// <summary>
@@ -251,6 +156,7 @@ public sealed class SwingIndexState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var value = _input.GetValue(bar);
         var swingIndex = _hasPrev
             ? WilderSwingIndex.Compute(bar.Open, bar.High, bar.Low, value, _prevOpen, _prevClose, _limitMove)
@@ -284,90 +190,16 @@ public sealed class SwingIndexState : IStreamingIndicatorState
 [PrimaryOutput("Vs")]
 public sealed class VolatilityStopState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _multiplier;
-    private readonly AverageTrueRangeState _averageTrueRange;
-    private readonly StreamingInputResolver _input;
-    private double _prevStop;
-    private bool _trendIsUp = true;
-    private int _barIndex;
-
-    public VolatilityStopState(int length = 14, double multiplier = 2)
-    {
-        _multiplier = multiplier;
-        _averageTrueRange = new AverageTrueRangeState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolatilityStopWindow _window;
+    public VolatilityStopState(int length = 14, double multiplier = 2) => _window = new(length, multiplier);
     public IndicatorName Name => IndicatorName.VolatilityStop;
-
-    public void Reset()
-    {
-        _averageTrueRange.Reset();
-        _prevStop = 0;
-        _trendIsUp = true;
-        _barIndex = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var atr = _averageTrueRange.Update(bar, isFinal, includeOutputs: false).Value;
-
-        double stop;
-        var trendIsUp = _trendIsUp;
-        if (_barIndex == 0)
-        {
-            stop = value;
-        }
-        else
-        {
-            var band = atr * _multiplier;
-            if (trendIsUp)
-            {
-                if (value < _prevStop)
-                {
-                    trendIsUp = false;
-                    stop = value + band;
-                }
-                else
-                {
-                    stop = Math.Max(_prevStop, value - band);
-                }
-            }
-            else
-            {
-                if (value > _prevStop)
-                {
-                    trendIsUp = true;
-                    stop = value - band;
-                }
-                else
-                {
-                    stop = Math.Min(_prevStop, value + band);
-                }
-            }
-        }
-
-        if (isFinal)
-        {
-            _prevStop = stop;
-            _trendIsUp = trendIsUp;
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Vs", stop } };
-        }
-
-        return new StreamingIndicatorStateResult(stop, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Vs", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _averageTrueRange.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 /// <summary>
@@ -379,23 +211,25 @@ public sealed class VolatilityStopState : IStreamingIndicatorState, IDisposable
 /// kept here rather than borrowed.
 /// </remarks>
 [PrimaryOutput("Vmo")]
-public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState
+public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly double _shortK;
-    private readonly double _longK;
-    private readonly StreamingInputResolver _input;
+    private readonly int _shortLength;
+    private readonly int _longLength;
+    private StreamingInputResolver _input;
     private double _shortEma;
     private double _longEma;
     private int _barIndex;
 
     public VolumeMomentumOscillatorState(int shortLength = 5, int longLength = 20)
     {
-        _shortK = 2.0 / (Math.Max(1, shortLength) + 1);
-        _longK = 2.0 / (Math.Max(1, longLength) + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _shortLength = Math.Max(1, shortLength);
+        _longLength = Math.Max(1, longLength);
+        _input = new StreamingInputResolver(InputName.Volume, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumeMomentumOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() => _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -406,22 +240,21 @@ public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var volume = bar.Volume;
+        var volume = _input.GetValue(bar);
 
         double oscillator = 0;
-        var shortEma = _barIndex == 0 ? volume : (volume * _shortK) + (_shortEma * (1 - _shortK));
-        var longEma = _barIndex == 0 ? volume : (volume * _longK) + (_longEma * (1 - _longK));
+        var shortEma = _barIndex == 0 ? volume : RoundedSeededEma.Next(volume, _shortEma, _shortLength);
+        var longEma = _barIndex == 0 ? volume : RoundedSeededEma.Next(volume, _longEma, _longLength);
         if (_barIndex >= 1)
         {
-            oscillator = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+            oscillator = RoundedPercentageChange.Of(shortEma, longEma);
         }
 
         if (isFinal)
         {
             _shortEma = shortEma;
             _longEma = longEma;
-            _barIndex++;
+            _barIndex = 1;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -474,7 +307,7 @@ public sealed class VolumeZoneOscillatorState : IStreamingIndicatorState
 
         var signedEma = _signedVolume.GetNext(signed, isFinal);
         var totalEma = _totalVolume.GetNext(bar.Volume, isFinal);
-        var oscillator = totalEma != 0 ? signedEma / totalEma * 100 : 0;
+        var oscillator = RoundedMomentumRatio.Of(signedEma, totalEma);
 
         if (isFinal)
         {
@@ -501,62 +334,16 @@ public sealed class VolumeZoneOscillatorState : IStreamingIndicatorState
 /// average at its own price.
 /// </remarks>
 [PrimaryOutput("Trema")]
-public sealed class TrueRangeAdjustedExponentialMovingAverageState : IStreamingIndicatorState
+public sealed class TrueRangeAdjustedExponentialMovingAverageState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
-    private readonly double _baseAlpha;
-    private readonly double _mult;
-    private readonly EmaState _averageTrueRange;
-    private readonly StreamingInputResolver _input;
-    private double _value;
-    private double _prevValue;
-    private int _barIndex;
-
-    public TrueRangeAdjustedExponentialMovingAverageState(int length = 14, double mult = 1.5)
-    {
-        var safeLength = Math.Max(1, length);
-        _baseAlpha = 2.0 / (safeLength + 1);
-        _mult = mult;
-        _averageTrueRange = new EmaState(safeLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly TrueRangeAdjustedWindow _window;
+    public TrueRangeAdjustedExponentialMovingAverageState(int length = 14, double mult = 1.5) => _window = new(length, mult);
     public IndicatorName Name => IndicatorName.TrueRangeAdjustedExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _averageTrueRange.Reset();
-        _value = 0;
-        _prevValue = 0;
-        _barIndex = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var previous = _barIndex >= 1 ? _prevValue : value;
-        var highLow = bar.High - bar.Low;
-        var highClose = Math.Abs(bar.High - previous);
-        var lowClose = Math.Abs(bar.Low - previous);
-        var trueRange = Math.Max(highLow, Math.Max(highClose, lowClose));
-
-        var averageTrueRange = _averageTrueRange.GetNext(trueRange, isFinal);
-        var ratio = averageTrueRange != 0 ? trueRange / averageTrueRange : 1;
-        var adjustedAlpha = _baseAlpha * Math.Min(ratio * _mult, 2);
-        var trema = _barIndex == 0 ? value : _value + (adjustedAlpha * (value - _value));
-
-        if (isFinal)
-        {
-            _value = trema;
-            _prevValue = value;
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Trema", trema } };
-        }
-
-        return new StreamingIndicatorStateResult(trema, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Trema", point.Line } } : null);
     }
 }

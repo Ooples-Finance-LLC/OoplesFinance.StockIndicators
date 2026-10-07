@@ -1145,7 +1145,9 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
         {
             var average = WindowAverage(ranges, i, length);
             var deviation = WindowDeviation(ranges, i, length);
-            result[i] = (prices[i] + (-1 * trends[i])) * (average + (stdDev * deviation));
+            // A price displaced by a signed range remains in price units. Multiplying
+            // the anchor by the range encoded the former dimensional error in this oracle.
+            result[i] = prices[i] - trends[i] * (average + (stdDev * deviation));
         }
 
         return result;
