@@ -77764,8 +77764,8 @@
     "module": "numerical",
     "file": "src/Streaming/StatefulIndicators.Batch23.cs",
     "scope": "public sealed class SwamiStochasticsState",
-    "before": "StreamingInputValidation.Validate(bar);",
-    "after": "StreamingInputValidation.Finite(bar.Close, nameof(bar));",
+    "before": "    private readonly StreamingInputResolver _input = new(InputName.Close, null);\n    private readonly SwamiWindow _window;\n    public SwamiStochasticsState(int fastLength = 12, int slowLength = 48) => _window = new(fastLength, slowLength);\n    bool ICustomInputRangePolicy.PreserveOriginalRange => true;\n    public IndicatorName Name => IndicatorName.SwamiStochastics;\n    public void Reset() => _window.Reset();\n    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)\n    {\n        StreamingInputValidation.Validate(bar);\n        var value = _window.Next(_input.GetValue(bar), bar.High, bar.Low, isFinal).Line;",
+    "after": "    private readonly SwamiWindow _window;\n    public SwamiStochasticsState(int fastLength = 12, int slowLength = 48) => _window = new(fastLength, slowLength);\n    bool ICustomInputRangePolicy.PreserveOriginalRange => true;\n    public IndicatorName Name => IndicatorName.SwamiStochastics;\n    public void Reset() => _window.Reset();\n    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)\n    {\n        StreamingInputValidation.Finite(bar.Close, nameof(bar));\n        var value = _window.Next(bar.Close, bar.High, bar.Low, isFinal).Line;",
     "filter": "FullyQualifiedName~SwamiNumericalTests.NonfiniteCandlesCannotAdvanceExtremaOrEitherRecurrence"
   },
   {
