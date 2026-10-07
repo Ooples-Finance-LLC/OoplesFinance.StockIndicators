@@ -42,8 +42,17 @@ public sealed class DelayedPhaseAdaptiveAverage
     /// <summary>Additional startup bars.</summary>
     public int Suppression { get; }
 
-    /// <summary>Publication index capped to the metadata interface's Int32 maximum.</summary>
-    public override int WarmupBars => (int)Math.Min(int.MaxValue, 32L + Suppression);
+    /// <summary>Bars covering publication and convergence of the zero-seeded mother average.</summary>
+    public override int WarmupBars
+    {
+        get
+        {
+            // Every adaptive gain is at least min(fast, slow). After the twelve-bar
+            // filter startup, this many updates contracts the seed error by a factor below 1e-9.
+            var settling = 12L + (long)Math.Ceiling(Math.Log(1e-9) / Math.Log(1 - Math.Min(FastLimit, SlowLimit)));
+            return (int)Math.Min(int.MaxValue, Math.Max(32L + Suppression, settling));
+        }
+    }
 
     /// <summary>Mother average, or zero before publication.</summary>
     public IIndicatorOutput Mama => Outputs[0];

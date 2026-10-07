@@ -935,12 +935,18 @@ public sealed class FormulaContractCoverageTests
     public void ModifiedRsiNormalizesTheWholeGainWindowBeforeFiltering()
     {
         var bars = Enumerable.Range(0, 2).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i), 2, 2, 2, 2, 1)).ToArray();
-        var radius = Math.Exp(-Math.Sqrt(2) * Math.PI / 10);
-        var gain = 1 - 2 * radius * Math.Cos(Math.Sqrt(2) * Math.PI / 10) + radius * radius;
+        var radius = ReferenceFraction.FromDouble(Math.Exp(-Math.Sqrt(2) * Math.PI / 10));
+        var cosine = ReferenceFraction.FromDouble(Math.Cos(Math.Sqrt(2) * Math.PI / 10));
+        var one = new ReferenceFraction(1);
+        var two = new ReferenceFraction(2);
+        // Keep the coefficient polynomial exact, rounding the line before it feeds the signal.
+        var gain = (one - radius) * (one - radius) + two * radius * (one - cosine);
+        var line = gain.ToDouble();
+        var signal = (gain * ReferenceFraction.FromDouble(line) / two).ToDouble();
         var rules = BuiltInFormulaReferences.For(new EhlersModifiedRelativeStrengthIndex()).ToArray();
         Assert.Equal(2, rules.Length);
         foreach (var rule in rules) rule.Check(new IndicatorValidationContext("modified-rsi-hand", bars,
-            [[0, gain], [0, gain * gain / 2]], 0));
+            [[0, line], [0, signal]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new EhlersModifiedStochasticIndicator(1, 2, 2))).Check(
             new IndicatorValidationContext("modified-stochastic-degenerate", bars, [[0, 0]], 0));
     }
