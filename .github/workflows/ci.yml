@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [master, main]
 
+# Keep only the newest CI run for each PR or branch; each run fans out into many shards.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   critical-correctness:
     uses: ./.github/workflows/critical-correctness.yml
