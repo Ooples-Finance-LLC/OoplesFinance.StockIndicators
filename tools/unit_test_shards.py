@@ -69,6 +69,7 @@ def main():
         settings = ET.Element('RunSettings')
         config = ET.SubElement(settings, 'RunConfiguration')
         ET.SubElement(config, 'TestCaseFilter').text = '|'.join('FullyQualifiedName=' + n for n in expected)
+        ET.SubElement(ET.SubElement(settings, 'xUnit'), 'PreEnumerateTheories').text = 'false'
         settings_path = args.output / 'shard.runsettings'
         ET.ElementTree(settings).write(settings_path, encoding='utf-8', xml_declaration=True)
         subprocess.run(['dotnet', 'vstest', str(args.assembly), '/Settings:' + str(settings_path.resolve()),

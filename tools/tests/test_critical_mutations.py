@@ -43,6 +43,7 @@ class MutationEvidenceTests(unittest.TestCase):
             self.assertIn("-p:TargetFrameworks=net10.0", command)
             self.assertIn("--no-restore", command)
             self.assertNotIn("--no-build", command)
+            self.assertEqual("tests/critical-mutations.runsettings", command[command.index("--settings") + 1])
             self.assertEqual("passed", result["outcome"])
 
     def test_timeout_stops_children_and_never_credits_partial_failed_tests(self):

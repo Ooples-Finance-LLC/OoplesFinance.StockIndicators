@@ -65,6 +65,7 @@ def run_tests(worktree, directory, test_filter, timeout):
     directory.mkdir(parents=True, exist_ok=True)
     args = ["dotnet", "test", "tests/OoplesFinance.StockIndicators.Tests.Unit.csproj", "-c", "Release",
             "-f", "net10.0", "-p:TargetFrameworks=net10.0", "-p:GeneratePackageOnBuild=false", "--no-restore", "--disable-build-servers", "--filter", test_filter,
+            "--settings", "tests/critical-mutations.runsettings",
             "--logger", "trx;LogFileName=results.trx", "--results-directory", str(directory), "--verbosity", "quiet"]
     env = dict(os.environ, MSBUILDDISABLENODEREUSE="1", DOTNET_CLI_USE_MSBUILD_SERVER="0")
     started = time.monotonic()
@@ -171,11 +172,14 @@ def main():
                 bundle.write(worktree / source_file["path"], source_file["path"])
         evidence["sourceArchiveSha256"] = hashlib.sha256(archive.read_bytes()).hexdigest()
         # Validate every site before spending time compiling. A stale site is an error, not an exclusion.
+        sources = {}
         for entry in all_entries:
             path = (worktree / entry["file"]).resolve()
             if not path.is_relative_to(worktree):
                 raise ValueError("Mutation path escapes the isolated workspace.")
-            mutate(path.read_text(encoding="utf-8"), entry)
+            if path not in sources:
+                sources[path] = path.read_text(encoding="utf-8")
+            mutate(sources[path], entry)
         with (output / "restore.log").open("w", encoding="utf-8") as log:
             subprocess.run(["dotnet", "restore", "tests/OoplesFinance.StockIndicators.Tests.Unit.csproj"],
                            cwd=worktree, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=args.timeout)
