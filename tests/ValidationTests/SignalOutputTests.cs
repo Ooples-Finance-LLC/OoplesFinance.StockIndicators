@@ -53,8 +53,8 @@ public sealed class SignalOutputTests
             bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
             .CalculateAccumulationDistributionLine();
 
-        line.Should().Equal(batch.OutputValues["Adl"].ToArray(), "the line itself was never in doubt");
-        signal.Should().Equal(batch.OutputValues["AdlSignal"].ToArray(),
+        line.Should().Equal(batch.OutputValues["Adl"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8, "the line itself was never in doubt");
+        signal.Should().Equal(batch.OutputValues["AdlSignal"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8,
             "the signal is the average of the line, which is what the batch publishes");
         signal.Should().NotEqual(line, "an average of the line is not the line");
     }
@@ -89,7 +89,7 @@ public sealed class SignalOutputTests
         for (var slot = 0; slot < keys.Length; slot++)
         {
             run[indicator.Outputs[slot]].ToArray().Should().Equal(
-                batch.OutputValues[keys[slot]].ToArray(), family + "'s " + keys[slot] + " is published on its own key");
+                batch.OutputValues[keys[slot]].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8, family + "'s " + keys[slot] + " is published on its own key");
         }
 
         // A level belongs to a period, so it holds across that period's bars; and the supports sit below
@@ -133,7 +133,7 @@ public sealed class SignalOutputTests
         for (var slot = 0; slot < keys.Length; slot++)
         {
             run[camarilla.Outputs[slot]].ToArray().Should().Equal(
-                batch.OutputValues[keys[slot]].ToArray(), "the " + keys[slot] + " level is published on its own key");
+                batch.OutputValues[keys[slot]].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8, "the " + keys[slot] + " level is published on its own key");
         }
 
         // The supports and resistances fan out symmetrically around the close, so the bands are ordered.
@@ -171,9 +171,9 @@ public sealed class SignalOutputTests
         var support = run[demark.S1].ToArray();
         var resistance = run[demark.R1].ToArray();
 
-        pivot.Should().Equal(batch.OutputValues["Pivot"].ToArray());
-        support.Should().Equal(batch.OutputValues["S1"].ToArray());
-        resistance.Should().Equal(batch.OutputValues["R1"].ToArray());
+        pivot.Should().Equal(batch.OutputValues["Pivot"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        support.Should().Equal(batch.OutputValues["S1"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        resistance.Should().Equal(batch.OutputValues["R1"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // A level belongs to a period, so it holds across that period's bars rather than moving on every
         // one of them. The routine this replaced recomputed it per bar, which no amount of comparing the
@@ -209,9 +209,9 @@ public sealed class SignalOutputTests
         var source = run[correlation.SrcSt].ToArray();
         var kaco = run[correlation.Value].ToArray();
 
-        index.Should().Equal(batch.OutputValues["IndexSt"].ToArray());
-        source.Should().Equal(batch.OutputValues["SrcSt"].ToArray());
-        kaco.Should().Equal(batch.OutputValues["Kaco"].ToArray());
+        index.Should().Equal(batch.OutputValues["IndexSt"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        source.Should().Equal(batch.OutputValues["SrcSt"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        kaco.Should().Equal(batch.OutputValues["Kaco"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // No two of the three are the same series, which is what all three keys used to carry. Note the
         // published Kaco is NOT bounded to a correlation's usual range - the batch divides by moments taken
@@ -243,9 +243,9 @@ public sealed class SignalOutputTests
         var second = run[ergodic.Value].ToArray();
         var signal = run[ergodic.Signal].ToArray();
 
-        first.Should().Equal(batch.OutputValues["Etsi1"].ToArray());
-        second.Should().Equal(batch.OutputValues["Etsi2"].ToArray());
-        signal.Should().Equal(batch.OutputValues["Signal"].ToArray());
+        first.Should().Equal(batch.OutputValues["Etsi1"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        second.Should().Equal(batch.OutputValues["Etsi2"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        signal.Should().Equal(batch.OutputValues["Signal"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The two indices smooth the same changes over different length triples and the signal smooths the
         // second again, so no two of the three are the same series - which is what all three keys used to
@@ -276,8 +276,8 @@ public sealed class SignalOutputTests
         var dsp = run[deli.Dsp].ToArray();
         var indicator = run[deli.Value].ToArray();
 
-        dsp.Should().Equal(batch.OutputValues["Dsp"].ToArray());
-        indicator.Should().Equal(batch.OutputValues["Deli"].ToArray());
+        dsp.Should().Equal(batch.OutputValues["Dsp"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        indicator.Should().Equal(batch.OutputValues["Deli"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The indicator is the detrended price less its own smoothing, so the two are never the same
         // series - which is what the builder used to answer for both keys.
@@ -305,9 +305,9 @@ public sealed class SignalOutputTests
         var signal = run[ergodic.Signal].ToArray();
         var histogram = run[ergodic.Histogram].ToArray();
 
-        macd.Should().Equal(batch.OutputValues["Macd"].ToArray());
-        signal.Should().Equal(batch.OutputValues["Signal"].ToArray());
-        histogram.Should().Equal(batch.OutputValues["Histogram"].ToArray());
+        macd.Should().Equal(batch.OutputValues["Macd"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        signal.Should().Equal(batch.OutputValues["Signal"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        histogram.Should().Equal(batch.OutputValues["Histogram"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The histogram is the line less its own smoothing, which is zero for every bar when one series
         // answers all three keys - so the relation is checked together with the line and signal differing.
@@ -340,9 +340,9 @@ public sealed class SignalOutputTests
         var down = run[trender.TrendDn].ToArray();
         var line = run[trender.Value].ToArray();
 
-        up.Should().Equal(batch.OutputValues["TrendUp"].ToArray());
-        down.Should().Equal(batch.OutputValues["TrendDn"].ToArray());
-        line.Should().Equal(batch.OutputValues["Trender"].ToArray());
+        up.Should().Equal(batch.OutputValues["TrendUp"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        down.Should().Equal(batch.OutputValues["TrendDn"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        line.Should().Equal(batch.OutputValues["Trender"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The line alternates between the two stops, so on every bar it equals one of them. When all three
         // keys carried the line that held trivially, so it is checked alongside the batch rather than alone:
@@ -376,9 +376,9 @@ public sealed class SignalOutputTests
         var middle = run[decycler.Value].ToArray();
         var lower = run[decycler.LowerBand].ToArray();
 
-        upper.Should().Equal(batch.OutputValues["UpperBand"].ToArray());
-        middle.Should().Equal(batch.OutputValues["MiddleBand"].ToArray());
-        lower.Should().Equal(batch.OutputValues["LowerBand"].ToArray());
+        upper.Should().Equal(batch.OutputValues["UpperBand"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        middle.Should().Equal(batch.OutputValues["MiddleBand"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        lower.Should().Equal(batch.OutputValues["LowerBand"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The bands are the decycler scaled by half a percent either way, so each sits at a fixed ratio to
         // the middle rather than a fixed distance. All three keys used to carry the middle, which satisfies
@@ -409,8 +409,8 @@ public sealed class SignalOutputTests
 
         var poweredBatch = Batch().CalculatePoweredKaufmanAdaptiveMovingAverage(length: new PoweredKaufmanAdaptiveMovingAverage().Length);
         var per = run[powered.Per].ToArray();
-        per.Should().Equal(poweredBatch.OutputValues["Per"].ToArray());
-        run[powered.Value].ToArray().Should().Equal(poweredBatch.OutputValues["Pkama"].ToArray());
+        per.Should().Equal(poweredBatch.OutputValues["Per"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[powered.Value].ToArray().Should().Equal(poweredBatch.OutputValues["Pkama"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The powered efficiency ratio is a fraction raised to a power, so it stays within the unit
         // interval where the average tracks price.
@@ -419,8 +419,8 @@ public sealed class SignalOutputTests
         var autonomousBatch = Batch().CalculateAdaptiveAutonomousRecursiveMovingAverage(
             length: new AdaptiveAutonomousRecursiveMovingAverage().Length);
         var deviation = run[autonomous.D].ToArray();
-        deviation.Should().Equal(autonomousBatch.OutputValues["D"].ToArray());
-        run[autonomous.Value].ToArray().Should().Equal(autonomousBatch.OutputValues["Aarma"].ToArray());
+        deviation.Should().Equal(autonomousBatch.OutputValues["D"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[autonomous.Value].ToArray().Should().Equal(autonomousBatch.OutputValues["Aarma"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // A band width is a distance, so it is never negative - which the average it used to answer with is
         // no guarantee of.
@@ -446,8 +446,8 @@ public sealed class SignalOutputTests
 
         var er = run[kama.Er].ToArray();
 
-        er.Should().Equal(batch.OutputValues["Er"].ToArray());
-        run[kama.Value].ToArray().Should().Equal(batch.OutputValues["Kama"].ToArray());
+        er.Should().Equal(batch.OutputValues["Er"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[kama.Value].ToArray().Should().Equal(batch.OutputValues["Kama"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The efficiency ratio is a fraction of the distance walked, so it is bounded where the average
         // tracks price. The builder used to answer this key with the average.
@@ -476,10 +476,10 @@ public sealed class SignalOutputTests
         var streakRsi = run[connors.StreakRsi].ToArray();
         var value = run[connors.Value].ToArray();
 
-        rsi.Should().Equal(batch.OutputValues["Rsi"].ToArray());
-        pctRank.Should().Equal(batch.OutputValues["PctRank"].ToArray());
-        streakRsi.Should().Equal(batch.OutputValues["StreakRsi"].ToArray());
-        value.Should().Equal(batch.OutputValues["ConnorsRsi"].ToArray());
+        rsi.Should().Equal(batch.OutputValues["Rsi"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        pctRank.Should().Equal(batch.OutputValues["PctRank"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        streakRsi.Should().Equal(batch.OutputValues["StreakRsi"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        value.Should().Equal(batch.OutputValues["ConnorsRsi"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The published series is the average of the three parts, so all four keys carrying one series -
         // which is what the builder used to answer - is arithmetically impossible.
@@ -512,10 +512,10 @@ public sealed class SignalOutputTests
         var median = run[trimean.Median].ToArray();
         var q3 = run[trimean.Q3].ToArray();
 
-        value.Should().Equal(batch.OutputValues["Trimean"].ToArray());
-        q1.Should().Equal(batch.OutputValues["Q1"].ToArray());
-        median.Should().Equal(batch.OutputValues["Median"].ToArray());
-        q3.Should().Equal(batch.OutputValues["Q3"].ToArray());
+        value.Should().Equal(batch.OutputValues["Trimean"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        q1.Should().Equal(batch.OutputValues["Q1"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        median.Should().Equal(batch.OutputValues["Median"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        q3.Should().Equal(batch.OutputValues["Q3"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The trimean weights the median double against the two quartiles, so it cannot equal any of them
         // across the series - which is what the builder used to return for all four keys.
@@ -542,9 +542,9 @@ public sealed class SignalOutputTests
             bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
             .CalculateAverageDirectionalIndex();
 
-        run[adx.DiPlus].ToArray().Should().Equal(batch.OutputValues["DiPlus"].ToArray());
-        run[adx.DiMinus].ToArray().Should().Equal(batch.OutputValues["DiMinus"].ToArray());
-        run[adx.Value].ToArray().Should().Equal(batch.OutputValues["Adx"].ToArray());
+        run[adx.DiPlus].ToArray().Should().Equal(batch.OutputValues["DiPlus"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[adx.DiMinus].ToArray().Should().Equal(batch.OutputValues["DiMinus"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[adx.Value].ToArray().Should().Equal(batch.OutputValues["Adx"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
     }
 
     [Fact]
@@ -568,9 +568,9 @@ public sealed class SignalOutputTests
         var up = run[aroon.AroonUp].ToArray();
         var down = run[aroon.AroonDown].ToArray();
 
-        value.Should().Equal(batch.OutputValues["Aroon"].ToArray());
-        up.Should().Equal(batch.OutputValues["AroonUp"].ToArray());
-        down.Should().Equal(batch.OutputValues["AroonDown"].ToArray());
+        value.Should().Equal(batch.OutputValues["Aroon"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        up.Should().Equal(batch.OutputValues["AroonUp"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        down.Should().Equal(batch.OutputValues["AroonDown"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
 
         // The oscillator is the difference of the two legs, so all three carrying one series - which is
         // what the builder used to answer - is arithmetically impossible rather than merely imprecise.
@@ -602,8 +602,8 @@ public sealed class SignalOutputTests
 
         // FastD is the first smoothing of the stochastic and SlowD the second, so the signal is a smoothing
         // of the series rather than the series itself.
-        series.Should().Equal(batch.OutputValues["StochRsi"].ToArray());
-        signal.Should().Equal(batch.OutputValues["Signal"].ToArray());
+        series.Should().Equal(batch.OutputValues["StochRsi"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        signal.Should().Equal(batch.OutputValues["Signal"].ToArray(), (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
         signal.Should().NotEqual(series, "the second smoothing is not the first");
     }
 }

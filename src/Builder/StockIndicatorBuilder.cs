@@ -305,41 +305,49 @@ public sealed class StockIndicatorBuilder
         },
         computeWithAverage: (indicator, averages) =>
         {
-            // The indicator's own calculation, unchanged, with the one average it asks for answered by the
-            // caller's series instead of by a MovingAvgType. Nothing is re-implemented, so the only way this
-            // can be wrong is if the indicator asks for more than one average - which Requests reports.
+            // Compute each declared output with its average requests answered in component order.
+            // A successful primary series alone does not prove that every output can be substituted.
             if (indicator is not Indicators.IBuiltInIndicator builtIn)
             {
                 return (null, 0);
             }
 
-            var spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions());
             using var context = new ComputeContext();
-            // The component was computed over the closes, so it may only stand in for an average the
-            // indicator takes over those same closes - not over a true range or any other series it
-            // derived, where it would be answering a different question.
-            using (ComponentAverage.Arm(averages))
+            var values = new double[indicator.Outputs.Count][];
+            var requests = 0;
+            for (var slot = 0; slot < values.Length; slot++)
             {
-                var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
-                if (buffer is null)
-                {
-                    return (null, 0);
-                }
+                var outputKey = values.Length > 1 ? OutputKeyFor(indicator, slot) : null;
+                if (values.Length > 1 && outputKey is null)
+                    throw new NotSupportedException(indicator.GetType().Name
+                        + " has no batch output mapping for slot " + slot + ".");
+                var spec = outputKey is null
+                    ? IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions())
+                    : IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions(), outputKey);
 
-                using (buffer.Value)
+                // Each named output repeats the calculation from its first average request.
+                // PPO's line needs two stages; its signal and histogram also need the third.
+                using (ComponentAverage.Arm(averages))
                 {
-                    // Exact only when the indicator asked for one average and that one was the caller's.
-                    // Every average the calculation asked for was answered by one the caller supplied.
-                    // The periods no longer have to match: each request takes its own component, so an
-                    // indicator that smooths at two periods is handed two averages rather than one used
-                    // twice - which is what made a difference of averages collapse to zero.
-                    var exact = ComponentAverage.Requests > 0
-                        && ComponentAverage.Substitutions == ComponentAverage.Requests;
-                    LastAverageLength = ComponentAverage.LengthAsked;
-                    LastAverageRequests = ComponentAverage.Requests;
-                    return (exact ? [buffer.Value.Span.ToArray()] : null, ComponentAverage.Requests);
+                    var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
+                    if (buffer is null)
+                        return (null, ComponentAverage.Requests);
+
+                    using (buffer.Value)
+                    {
+                        var exact = ComponentAverage.Requests > 0
+                            && ComponentAverage.Substitutions == ComponentAverage.Requests;
+                        LastAverageLength = ComponentAverage.LengthAsked;
+                        LastAverageRequests = ComponentAverage.Requests;
+                        requests = Math.Max(requests, ComponentAverage.Requests);
+                        if (!exact)
+                            return (null, requests);
+                        values[slot] = buffer.Value.Span.ToArray();
+                    }
                 }
             }
+
+            return (values, requests);
         });
 
         var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
@@ -377,6 +385,13 @@ public sealed class StockIndicatorBuilder
         {
             CollectReachable(indicator, seen, reachable);
         }
+
+        // The live factory cannot represent independently configured average stages.
+        var unsupportedStages = reachable.FirstOrDefault(indicator => indicator is Indicators.IBuiltInIndicator
+            && indicator.Components.Count > 1);
+        if (unsupportedStages is not null)
+            throw new NotSupportedException(unsupportedStages.GetType().Name
+                + " has separately configured average stages. Use a finite source for component substitution.");
 
         var states = new Dictionary<Indicators.IIndicator, object>(Indicators.IndicatorIdentity.Comparer);
         var outputKeys = new Dictionary<Indicators.IIndicator, IReadOnlyList<string>>(
@@ -435,6 +450,8 @@ public sealed class StockIndicatorBuilder
         {
             return true;
         }
+
+        if (indicator.Components.Count > 1) return true;
 
         // Uses() - a component that is not one of ours collapses to nothing in CreateOptions, because the
         // options types name a smoother by MovingAvgType and a caller's own type has no member there.

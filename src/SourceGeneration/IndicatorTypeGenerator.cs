@@ -734,6 +734,18 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 builder.AppendLine("        " + Capitalise(extra) + " = " + extra + ";");
             }
 
+            if (extraAverages.Count > 0)
+            {
+                var previous = Capitalise(options.Parameters[Array.FindIndex(asComponent, value => value)].Name);
+                foreach (var extra in extraAverages)
+                {
+                    var current = Capitalise(extra);
+                    builder.AppendLine("        if (" + current + " is not null && " + previous + " is null)");
+                    builder.AppendLine("            throw new System.ArgumentException(\"Supply the preceding average before " + extra + ".\", nameof(" + extra + "));");
+                    previous = current;
+                }
+            }
+
             if (componentCount > 0)
             {
                 // Explicit rather than a collection expression plus LINQ: generated code with no target type

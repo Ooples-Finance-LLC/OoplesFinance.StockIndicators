@@ -84,15 +84,27 @@ internal sealed class CustomIndicatorEngine
             _ => null
         };
 
-        var values = new double[series.Count];
-        if (state is not IIndicatorState simple)
-        {
-            return values;
-        }
+        if (state is null && indicator is IBuiltInIndicator && _createBuiltInState is not null)
+            (state, _) = _createBuiltInState(indicator);
 
-        for (var i = 0; i < series.Count && i < _bars.Count; i++)
+        if (state is not IIndicatorState && state is not IStreamingIndicatorState)
+            throw new NotSupportedException(indicator.GetType().Name + " has no scalar average state.");
+
+        var values = new double[series.Count];
+        try
         {
-            values[i] = simple.Update(WithClose(_bars[i], series[i]));
+            for (var i = 0; i < series.Count && i < _bars.Count; i++)
+            {
+                var input = WithClose(_bars[i], series[i]);
+                values[i] = state is IIndicatorState simple
+                    ? simple.Update(input)
+                    : ((IStreamingIndicatorState)state).Update(ToOhlcv(input),
+                        isFinal: true, includeOutputs: false).Value;
+            }
+        }
+        finally
+        {
+            (state as IDisposable)?.Dispose();
         }
 
         return values;
@@ -154,22 +166,11 @@ internal sealed class CustomIndicatorEngine
 
         if (state is null && indicator is IBuiltInIndicator && _createBuiltInState is not null)
         {
-            // The streaming state is built from CreateOptions(), which names a smoother by MovingAvgType.
-            // A component that is not one of ours has no member there, so it would be dropped and the
-            // indicator would answer with its default - the right number for a question nobody asked. 370
-            // generated types are in this position: they declare the component correctly and have no
-            // arithmetic of their own to consume it yet. Refusing is the only honest answer until they do.
-            // Every component the caller supplied, in the order the indicator declared them, so the Nth
-            // average a calculation asks for is answered by the Nth one handed over. An indicator that
-            // smooths two things is asking two different questions.
-            var substitutes = new List<IIndicator>();
-            foreach (var component in indicator.Components)
-            {
-                if (component is not IBuiltInMovingAverage)
-                {
-                    substitutes.Add(component);
-                }
-            }
+            // Options carry one average kind. Preserve every supplied stage when that cannot
+            // describe the composition, including built-ins before or after custom averages.
+            var needsSubstitution = indicator.Components.Count > 1
+                || indicator.Components.Any(component => component is not IBuiltInMovingAverage);
+            var substitutes = needsSubstitution ? indicator.Components.ToList() : new List<IIndicator>();
 
             var substitute = substitutes.Count > 0 ? substitutes[0] : null;
 

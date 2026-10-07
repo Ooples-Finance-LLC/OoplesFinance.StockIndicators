@@ -84,6 +84,87 @@ public sealed class ComponentAverageParityTests
             "a difference of two different averages is not identically zero");
     }
 
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void ConfiguredStagesRetainTheirOrderAndPeriods(bool builtInFirst, bool builtInSecond)
+    {
+        var bars = Walk();
+        // Deliberately different from AO defaults: ignoring either period must fail.
+        IMovingAverage first = builtInFirst ? new Sma(3) : new MirrorSma(3);
+        IMovingAverage second = builtInSecond ? new Sma(11) : new MirrorSma(11);
+        var actual = Run(new AwesomeOscillator(5, first, second), bars)!;
+        var expected = Run(new AwesomeOscillator(5, new MirrorSma(3), new MirrorSma(11)), bars)!;
+        actual.Should().Equal(expected, (a, e) => Math.Abs(a - e) <= 1e-8);
+        actual.Skip(40).Should().Contain(v => Math.Abs(v) > 1e-9);
+    }
+
+    [Theory]
+    [InlineData(false, false, false)]
+    [InlineData(false, false, true)]
+    [InlineData(false, true, false)]
+    [InlineData(false, true, true)]
+    [InlineData(true, false, false)]
+    [InlineData(true, false, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, true, true)]
+    public async Task PpoComponentStagesPreserveEveryOutput(bool builtInFast, bool builtInSlow, bool builtInSignal)
+    {
+        var bars = Walk(60);
+        IMovingAverage Average(bool builtIn, int length) => builtIn ? new Sma(length) : new MirrorSma(length);
+        var ppo = new Ppo(3, 11, Average(builtInFast, 3), 4,
+            Average(builtInSlow, 11), Average(builtInSignal, 4));
+        var fast = Run(new Sma(3), bars)!;
+        var slow = Run(new Sma(11), bars)!;
+        var line = fast.Select((value, index) => slow[index] == 0 ? 0 : 100 * (value - slow[index]) / slow[index]).ToArray();
+        var signalBars = bars.Select((bar, index) =>
+            new Bar(bar.Time, line[index], line[index], line[index], line[index], bar.Volume)).ToArray();
+        var signal = Run(new Sma(4), signalBars)!;
+        var histogram = line.Select((value, index) => value - signal[index]).ToArray();
+
+        using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(ppo).BuildAsync();
+        run[ppo].ToArray().Should().Equal(line, (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[ppo.Signal].ToArray().Should().Equal(signal, (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        run[ppo.Histogram].ToArray().Should().Equal(histogram, (actual, expected) => Math.Abs(actual - expected) <= 1e-8);
+        line.Should().NotEqual(signal);
+        histogram.Should().NotEqual(line);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PpoRejectsMissingSignalComponentBeforePublishing(bool builtIn)
+    {
+        IMovingAverage Average(int length) => builtIn ? new Sma(length) : new MirrorSma(length);
+        var ppo = new Ppo(3, 11, Average(3), 4, Average(11));
+        Func<Task> build = async () =>
+        {
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(Walk(20)))
+                .ConfigureIndicators(ppo).BuildAsync();
+        };
+        await build.Should().ThrowAsync<NotSupportedException>().WithMessage("*asks for 3 averages and was given 2*");
+    }
+
+    [Fact]
+    public void AnExtraAverageCannotSilentlyReplaceAnOmittedPrecedingStage()
+    {
+        Assert.Throws<ArgumentException>(() => new AwesomeOscillator(5, null, new Sma(13)));
+    }
+
+    [Fact]
+    public async Task LiveSourceRejectsStagesItCannotRepresent()
+    {
+        var feed = Bars.Live();
+        var builder = new StockIndicatorBuilder().ConfigureSource(feed)
+            .ConfigureIndicators(new AwesomeOscillator(5, new Sma(3), new Sma(11)));
+        Func<Task> build = async () => { using var run = await builder.BuildAsync(); };
+        await build.Should().ThrowAsync<NotSupportedException>()
+            .WithMessage("*separately configured average stages*");
+        feed.Complete();
+    }
+
     [Fact]
     public void SubstitutingAnAverageComputesWhatNamingItComputes()
     {
@@ -167,10 +248,11 @@ public sealed class ComponentAverageParityTests
                     continue;
                 }
 
-                if (asked > 0 && asked != length)
-                {
-                    substituted = Run((IIndicator)ctor.Invoke(Args(new MirrorSma(asked))), bars);
-                }
+                var matchedLength = asked > 0 ? asked : length;
+                substituted = Run((IIndicator)ctor.Invoke(Args(new MirrorSma(matchedLength))), bars);
+                // Multiple configured built-in stages now retain their periods too. Comparing
+                // Sma(20) with MirrorSma(matchedLength) would test different configurations.
+                baseline = Run((IIndicator)ctor.Invoke(Args(new Sma(matchedLength))), bars);
             }
             catch (NotSupportedException)
             {

@@ -78,8 +78,18 @@ public sealed class MovingAverageTypeParityTests
             IBuiltInIndicator builtIn;
             try
             {
+                var defaults = (IIndicator)constructor.Invoke(constructor.GetParameters()
+                    .Select(p => p.DefaultValue).ToArray());
+                if (defaults is not IBuiltInIndicator defaultBuiltIn) continue;
+                var optionsType = defaultBuiltIn.CreateOptions().GetType();
+                bool IsAverageKind(ParameterInfo parameter) => typeof(IMovingAverage).IsAssignableFrom(parameter.ParameterType)
+                    && optionsType.GetConstructors().SelectMany(c => c.GetParameters()).Any(p =>
+                        p.ParameterType == typeof(MovingAvgType)
+                        && string.Equals(p.Name, parameter.Name, StringComparison.OrdinalIgnoreCase));
+                // This sweep changes the common average kind. Extra stage parameters retain
+                // individual periods and are exercised by the component-order regressions.
                 indicator = (IIndicator)constructor.Invoke(constructor.GetParameters()
-                    .Select(p => typeof(IMovingAverage).IsAssignableFrom(p.ParameterType)
+                    .Select(p => IsAverageKind(p)
                         ? Substitute()
                         : p.DefaultValue)
                     .ToArray());
