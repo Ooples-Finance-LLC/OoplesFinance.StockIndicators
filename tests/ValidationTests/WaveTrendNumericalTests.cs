@@ -86,6 +86,14 @@ public sealed class WaveTrendNumericalTests
         Assert.Equal(new[] { Signal.None, Signal.StrongBuy, Signal.StrongSell }, result.Signals);
     }
     [Fact]
+    public void EqualLineAndSignalHaveNoDirectionalMargin()
+    {
+        // A one-bar signal equals the line: adding them would invent a buy.
+        var result = Check(new[] { B(0), B(1) }, signal: 1);
+        Assert.Equal(result.Outputs["Wto"], result.Outputs["Signal"]);
+        Assert.Equal(new[] { Signal.None, Signal.None }, result.Signals);
+    }
+    [Fact]
     public void SubnormalInputsRetainNormalizedMovement()
     {
         var ordinary = Check(new[] { B(0), B(1), B(0), B(-1) });
@@ -95,6 +103,8 @@ public sealed class WaveTrendNumericalTests
     [Fact]
     public void ExactOhlcMeanPreservesCancellationAndTinyMovement()
     {
+        // Normalization cancels uniform price scaling, so also check OHLC4 itself.
+        Assert.Equal(2.5, WaveTrendWindow.Price(1, 2, 3, 4).Publish());
         var bars = new[] { new Bar(DateTime.UnixEpoch, double.MaxValue, double.MaxValue, -double.MaxValue, -double.MaxValue, 1),
             new Bar(DateTime.UnixEpoch, double.MaxValue, double.MaxValue, -double.MaxValue, 0, 1),
             new Bar(DateTime.UnixEpoch, 0, double.Epsilon, 0, 0, 1) };

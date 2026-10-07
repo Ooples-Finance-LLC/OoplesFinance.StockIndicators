@@ -84824,7 +84824,7 @@
     "scope": "internal sealed class WaveTrendWindow",
     "before": "var margin = line - signal;",
     "after": "var margin = line + signal;",
-    "filter": "FullyQualifiedName~WaveTrendNumericalTests.IndependentNormalizationAndSignalHands"
+    "filter": "FullyQualifiedName~WaveTrendNumericalTests.EqualLineAndSignalHaveNoDirectionalMargin"
   },
   {
     "id": "wave-trend-wide-trade-change",

@@ -135,7 +135,7 @@ public sealed class FormulaContractCoverageTests
             (new RandomWalkIndex(1), [[0, 1, -1, 1], [0, -1, 1, -1]]),
             (new RunningEquity(2), [[0, 1, 0, -3]]),
             (new RegressionOscillator(2), [[0, 0, 0, 0]]),
-            (new RecursiveDifferenciator(1), [[1, 1, 0, .2]]),
+            (new RecursiveDifferenciator(1), [[1, 1, 0, .6 - (1 - .6)]]),
             (new RelativeSpreadStrength(1, 1, 1, 1), [[100, 100, 100, 100]]),
             (new SimpleLines(1, 0), [[1, 1, 1, 2]]),
             (new SimpleCycle(1), [[1, 2, 0, 0]])
@@ -569,12 +569,22 @@ public sealed class FormulaContractCoverageTests
     public void VolatilityAdaptivePairsHaveHandCalculatedValues()
     {
         var bars = new[] { 2d, 4, 2, 8 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v, v, v, 1)).ToArray();
+        // The partial-window deviation averages are 1/2 and rounded 5/6.
+        double[] HandLevels(double alpha)
+        {
+            var seed = new ReferenceFraction(2);
+            var gain = ReferenceFraction.FromDouble(alpha);
+            var first = (seed + gain * new ReferenceFraction(2) * new ReferenceFraction(2)).ToDouble();
+            var previous = ReferenceFraction.FromDouble(first);
+            var second = (previous + gain / ReferenceFraction.FromDouble(5d / 6) * (seed - previous)).ToDouble();
+            return [2, first, second];
+        }
         foreach (IIndicator indicator in new IIndicator[] { new ChandeVolatilityIndexDynamicAverageIndicator(2, .2, .04), new VolatilityIndexDynamicAverageIndicator(2, .2, .04) })
         {
             var rules = BuiltInFormulaReferences.For(indicator).ToArray();
             Assert.Equal(2, rules.Length);
             foreach (var rule in rules) rule.Check(new IndicatorValidationContext("volatility-adaptive-hand", bars.Take(3).ToArray(),
-                [[2, 2.8, 2.608], [2, 2.16, 2.15232]], 0));
+                [HandLevels(.2), HandLevels(.04)], 0));
         }
         var uhl = BuiltInFormulaReferences.For(new UhlMaCrossoverSystem(2)).ToArray();
         Assert.Equal(2, uhl.Length);
@@ -640,7 +650,7 @@ public sealed class FormulaContractCoverageTests
         Assert.Equal(8, rules.Length);
         var q = .8 * .0962 * .54 * .0962 * .54;
         foreach (var rule in rules) rule.Check(new IndicatorValidationContext("mama-initial-hand", bars,
-            [[.25], [1], [0], [q], [.396], [.8], [0], [0]], 0));
+            [[.25], [1], [0], [q], [.33 * (.2 * 6)], [.8], [0], [0]], 0));
     }
 
     [Fact]
@@ -882,10 +892,13 @@ public sealed class FormulaContractCoverageTests
     {
         var bars = new[] { 2d, 4 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v, v, v, 1)).ToArray();
         var angle = Math.Sqrt(2) * Math.PI / 12;
-        var radius = Math.Exp(-angle);
+        var radius = ReferenceFraction.FromDouble(Math.Exp(-angle));
+        var one = new ReferenceFraction(1);
+        var gain = (one - radius) * (one - radius)
+            + new ReferenceFraction(2) * radius * (one - ReferenceFraction.FromDouble(Math.Cos(angle)));
         Assert.Single(BuiltInFormulaReferences.For(new EhlersDeviationScaledSuperSmoother(12, 2))).Check(
             new IndicatorValidationContext("deviation-super-hand", bars.Take(1).ToArray(),
-                [[1 - 2 * radius * Math.Cos(angle) + radius * radius]], 0));
+                [[gain.ToDouble()]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new EhlersDeviationScaledMovingAverage())).Check(
             new IndicatorValidationContext("deviation-average-hand", bars, [[.02, .0598]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new EhlersFisherizedDeviationScaledOscillator())).Check(
@@ -925,8 +938,19 @@ public sealed class FormulaContractCoverageTests
         var bars = new[] { 2d, 4, 1 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), 2, Math.Max(2, v), Math.Min(2, v), v, 1)).ToArray();
         Assert.Single(BuiltInFormulaReferences.For(new EhlersFMDemodulatorIndicator(2, 1, maType: new Wma(1)))).Check(
             new IndicatorValidationContext("demodulator-hand", bars, [[0, 1, -1]], 0));
+        // At the second bar only one filtered sample is nonzero. Preserve its
+        // amplitude because the energy root rounds before the final division.
+        var highAngle = 2 * Math.PI / 40;
+        var pole = Math.Cos(highAngle) / (1 + Math.Sin(highAngle));
+        var high = ReferenceFraction.FromDouble((1 + pole) / 2);
+        var lowAngle = 1.414 * Math.PI / 10;
+        var radius = Math.Exp(-lowAngle);
+        var coefficient = ReferenceFraction.FromDouble(1 - 2 * radius * Math.Cos(lowAngle) + radius * radius);
+        var filtered = ReferenceFraction.FromDouble((coefficient * high).ToDouble());
+        var energy = new ReferenceFraction(3) * filtered * filtered;
+        var sine = (filtered / ReferenceFraction.FromDouble(energy.SqrtToDouble())).ToDouble();
         Assert.Single(BuiltInFormulaReferences.For(new EhlersEvenBetterSineWaveIndicator())).Check(
-            new IndicatorValidationContext("sine-wave-hand", bars.Take(2).ToArray(), [[0, 1 / Math.Sqrt(3)]], 0));
+            new IndicatorValidationContext("sine-wave-hand", bars.Take(2).ToArray(), [[0, sine]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new EhlersMarketStateIndicator(1))).Check(
             new IndicatorValidationContext("market-state-hand", bars, [[0, 1, 1]], 0));
     }
@@ -998,7 +1022,7 @@ public sealed class FormulaContractCoverageTests
         var cyber = BuiltInFormulaReferences.For(new EhlersStochasticCyberCycle(1)).ToArray();
         Assert.Equal(2, cyber.Length);
         foreach (var rule in cyber) rule.Check(new IndicatorValidationContext("cyber-stoch-hand", prices,
-            [[-1, -1, -1, -.2], [.0192, -.9408, -.9408, -.9408]], 0));
+            [[-1, -1, -1, (4d / 10 - .5) * 2], [.0192, -.9408, -.9408, -.9408]], 0));
     }
 
     [Fact]
