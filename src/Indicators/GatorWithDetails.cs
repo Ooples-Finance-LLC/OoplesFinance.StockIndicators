@@ -74,7 +74,7 @@ public sealed class GatorWithDetails : MultiOutputIndicatorBase, IIndicatorValid
     /// <remarks>Rejects nonfinite supplied lines and unrepresentable distances. Each enumeration starts fresh.</remarks>
     public static IEnumerable<GatorSample> FromLines(IEnumerable<AlligatorSample> samples)
     {
-        ArgumentNullException.ThrowIfNull(samples);
+        if (samples is null) throw new ArgumentNullException(nameof(samples));
         return Enumerate();
         IEnumerable<GatorSample> Enumerate()
         {
@@ -82,12 +82,12 @@ public sealed class GatorWithDetails : MultiOutputIndicatorBase, IIndicatorValid
             foreach (var row in samples)
             {
                 foreach (var value in new[] { row.Jaw, row.Teeth, row.Lips })
-                    if (value.HasValue && !double.IsFinite(value.Value))
+                    if (value.HasValue && !FrameworkCompatibility.IsFinite(value.Value))
                         throw new ArgumentOutOfRangeException(nameof(samples));
                 var result = transform.Next(row);
                 if (
-                    result.Upper is { } upper && !double.IsFinite(upper)
-                    || result.Lower is { } lower && !double.IsFinite(lower)
+                    result.Upper is { } upper && !FrameworkCompatibility.IsFinite(upper)
+                    || result.Lower is { } lower && !FrameworkCompatibility.IsFinite(lower)
                 )
                     throw new ArithmeticException("Gator distance is not representable.");
                 yield return result;

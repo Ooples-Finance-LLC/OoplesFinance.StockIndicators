@@ -25,9 +25,9 @@ public sealed class WindowStochasticKdj : MultiOutputIndicatorBase, IIndicatorVa
         : base(6)
     {
         StochasticSmaState.Validate(period, kPeriod, dPeriod);
-        if (!double.IsFinite(kFactor) || kFactor <= 0)
+        if (!FrameworkCompatibility.IsFinite(kFactor) || kFactor <= 0)
             throw new ArgumentOutOfRangeException(nameof(kFactor));
-        if (!double.IsFinite(dFactor) || dFactor <= 0)
+        if (!FrameworkCompatibility.IsFinite(dFactor) || dFactor <= 0)
             throw new ArgumentOutOfRangeException(nameof(dFactor));
         Period = period;
         KPeriod = kPeriod;

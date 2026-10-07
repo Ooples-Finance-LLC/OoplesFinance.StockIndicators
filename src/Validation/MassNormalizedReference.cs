@@ -36,7 +36,7 @@ internal static class MassNormalizedReference
                     ) * ReferenceFraction.FromDouble(input);
             }
             result[i] = sum.ToDouble();
-            if (!double.IsFinite(result[i]))
+            if (!FrameworkCompatibility.IsFinite(result[i]))
                 break;
         }
         return result;

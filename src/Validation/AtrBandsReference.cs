@@ -84,8 +84,8 @@ internal static class AtrBandsReference
             if (
                 !width
                 || center.Sign == 0
-                || !double.IsFinite(result[1][i])
-                || !double.IsFinite(result[2][i])
+                || !FrameworkCompatibility.IsFinite(result[1][i])
+                || !FrameworkCompatibility.IsFinite(result[2][i])
             )
                 continue;
             result[3][i] = (

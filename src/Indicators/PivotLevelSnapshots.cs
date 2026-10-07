@@ -155,15 +155,15 @@ public static class PivotLevelSnapshots
 
     private static void Validate(IReadOnlyList<Bar> bars, PivotLevelStyle style)
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (style is < PivotLevelStyle.Standard or > PivotLevelStyle.Woodie)
             throw new ArgumentOutOfRangeException(nameof(style));
         foreach (var b in bars)
             if (
-                !double.IsFinite(b.Open)
-                || !double.IsFinite(b.High)
-                || !double.IsFinite(b.Low)
-                || !double.IsFinite(b.Close)
+                !FrameworkCompatibility.IsFinite(b.Open)
+                || !FrameworkCompatibility.IsFinite(b.High)
+                || !FrameworkCompatibility.IsFinite(b.Low)
+                || !FrameworkCompatibility.IsFinite(b.Close)
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
     }
@@ -188,7 +188,7 @@ public static class PivotLevelSnapshots
         double Q(BigInteger n, BigInteger d)
         {
             var value = ExactMeanAccumulator.UnitRatio(n, d);
-            return double.IsFinite(value)
+            return FrameworkCompatibility.IsFinite(value)
                 ? value
                 : throw new OverflowException("Pivot level is not representable.");
         }

@@ -16,11 +16,11 @@ public static class JurikAdaptiveSnapshot
         int volatilityPeriod = 10
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
-        if (period < 1 || volatilityPeriod < 1 || !double.IsFinite(phase))
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
+        if (period < 1 || volatilityPeriod < 1 || !FrameworkCompatibility.IsFinite(phase))
             throw new ArgumentOutOfRangeException(nameof(period));
         foreach (var b in bars)
-            if (!double.IsFinite(b.Close))
+            if (!FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = new double[bars.Count];
         if (bars.Count == 0)
@@ -34,7 +34,7 @@ public static class JurikAdaptiveSnapshot
         var length = Math.Max(Math.Log(Math.Sqrt(period - 1)) / Math.Log(2) + 2, 0);
         var power = Math.Max(length - 2, .5);
         var maximum = Math.Pow(length, 1 / power);
-        var phaseGain = Math.Clamp(phase * .01 + 1.5, .5, 2.5) + 1;
+        var phaseGain = FrameworkCompatibility.Clamp(phase * .01 + 1.5, .5, 2.5) + 1;
         var shortHistory = new Queue<BigInteger>();
         var prices = new Queue<BigInteger>();
         BigInteger upper = 0,
@@ -84,7 +84,7 @@ public static class JurikAdaptiveSnapshot
             );
             jma = Stage(jma + det1, 1);
             var value = ExactMeanAccumulator.UnitRatio(jma, 1);
-            if (!double.IsFinite(value))
+            if (!FrameworkCompatibility.IsFinite(value))
                 throw new OverflowException("Jurik output is not representable.");
             result[i] = value;
         }

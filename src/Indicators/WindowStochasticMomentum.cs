@@ -203,7 +203,7 @@ public sealed class DoubleSmoothedStochasticMomentum
             var index = numerator.Ratio(denominator);
             outputs[0] = index;
             outputs[2] = 1;
-            if (!double.IsFinite(index))
+            if (!FrameworkCompatibility.IsFinite(index))
                 return;
             _signal = _signalStarted
                 ? Smooth(new RocBankValue(index), new RocBankValue(_signal), signalPeriod).Publish()

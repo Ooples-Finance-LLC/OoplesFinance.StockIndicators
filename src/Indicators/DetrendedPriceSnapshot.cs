@@ -18,11 +18,11 @@ public static class DetrendedPriceSnapshot
         int period = 20
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
         foreach (var bar in bars)
-            if (!double.IsFinite(bar.Close))
+            if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = Enumerable
             .Range(0, bars.Count)
@@ -42,7 +42,7 @@ public static class DetrendedPriceSnapshot
             difference.Add(bars[end - offset].Close);
             difference.Add(mean, -1);
             var value = difference.Mean(1);
-            if (!double.IsFinite(value))
+            if (!FrameworkCompatibility.IsFinite(value))
                 throw new OverflowException("Detrended price is not representable.");
             result[end - offset] = new(value, mean);
         }

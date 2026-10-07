@@ -34,7 +34,7 @@ public sealed class PriceCandlePattern : MultiOutputIndicatorBase, IIndicatorVal
         var value = percent ?? (kind == PriceCandleKind.RelativeDoji ? .1 : 95);
         var minimum = kind == PriceCandleKind.RelativeDoji ? 0 : 80;
         var maximum = kind == PriceCandleKind.RelativeDoji ? .5 : 100;
-        if (!double.IsFinite(value) || value < minimum || value > maximum)
+        if (!FrameworkCompatibility.IsFinite(value) || value < minimum || value > maximum)
             throw new ArgumentOutOfRangeException(nameof(percent));
         Kind = kind;
         Percent = value;

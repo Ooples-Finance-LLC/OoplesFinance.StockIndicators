@@ -26,7 +26,7 @@ public sealed class PriceTranscendentalTransform
     public PriceTranscendentalTransform(PriceTranscendentalOperation operation)
         : base(2)
     {
-        if (!Enum.IsDefined(operation))
+        if (!Enum.IsDefined(operation.GetType(), operation))
             throw new ArgumentOutOfRangeException(nameof(operation));
         Operation = operation;
     }

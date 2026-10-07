@@ -18,7 +18,7 @@ public static class DynamicMomentumSnapshot
         int lowerLimit = 5
     )
     {
-        ArgumentNullException.ThrowIfNull(values);
+        if (values is null) throw new ArgumentNullException(nameof(values));
         if (
             deviationPeriod < 1
             || smoothingPeriod < 1
@@ -28,7 +28,7 @@ public static class DynamicMomentumSnapshot
         )
             throw new ArgumentOutOfRangeException(nameof(deviationPeriod));
         foreach (var value in values)
-            if (value.HasValue && !double.IsFinite(value.Value))
+            if (value.HasValue && !FrameworkCompatibility.IsFinite(value.Value))
                 throw new ArgumentOutOfRangeException(nameof(values));
         var deviations = new double?[values.Count];
         var result = new double?[values.Count];

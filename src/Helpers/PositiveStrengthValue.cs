@@ -32,9 +32,9 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
             return 0;
         var gap =
             numerator.Exponent
-            + numerator.Mantissa.GetBitLength()
+            + FrameworkCompatibility.GetBitLength(numerator.Mantissa)
             - denominator.Exponent
-            - denominator.Mantissa.GetBitLength();
+            - FrameworkCompatibility.GetBitLength(denominator.Mantissa);
         if (gap > 4096)
             return double.PositiveInfinity;
         if (gap < -4096)
@@ -56,8 +56,8 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
         if (a.IsZero && b.IsZero)
             return default;
         var top = Math.Max(
-            a.IsZero ? long.MinValue : aExponent + a.GetBitLength(),
-            b.IsZero ? long.MinValue : bExponent + b.GetBitLength()
+            a.IsZero ? long.MinValue : aExponent + FrameworkCompatibility.GetBitLength(a),
+            b.IsZero ? long.MinValue : bExponent + FrameworkCompatibility.GetBitLength(b)
         );
         var bottom =
             a.IsZero ? bExponent
@@ -72,7 +72,7 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
             if (exponent >= cut)
                 return value << (int)(exponent - cut);
             var shift = cut - exponent;
-            if (shift >= value.GetBitLength())
+            if (shift >= FrameworkCompatibility.GetBitLength(value))
             {
                 sticky = true;
                 return 0;
@@ -83,7 +83,7 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
         }
         var numerator = Align(a, aExponent) + Align(b, bExponent);
         BigInteger denominator = divisor;
-        var exponent = (int)(numerator.GetBitLength() - denominator.GetBitLength());
+        var exponent = (int)(FrameworkCompatibility.GetBitLength(numerator) - FrameworkCompatibility.GetBitLength(denominator));
         if (
             exponent >= 0
                 ? numerator < (denominator << exponent)
@@ -100,7 +100,7 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
         if (half > 0 || half == 0 && (sticky || !mantissa.IsEven))
             mantissa++;
         var resultExponent = cut + quantum;
-        if (mantissa.GetBitLength() > 53)
+        if (FrameworkCompatibility.GetBitLength(mantissa) > 53)
         {
             mantissa >>= 1;
             resultExponent++;
@@ -122,9 +122,9 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
             return 100;
         var gap =
             gain.Exponent
-            + gain.Mantissa.GetBitLength()
+            + FrameworkCompatibility.GetBitLength(gain.Mantissa)
             - loss.Exponent
-            - loss.Mantissa.GetBitLength();
+            - FrameworkCompatibility.GetBitLength(loss.Mantissa);
         // Beyond this gap the small term cannot affect any binary64 result,
         // including the RSI subnormal rounding boundary or either CMO endpoint.
         if (gap > 4096)

@@ -31,11 +31,11 @@ internal static class WindowDeviationBandsReference
             result[2][i] = (center - half).ToDouble();
             if (half.Sign != 0)
                 result[3][i] = (
-                    (window[^1] - center + half) / (new ReferenceFraction(2) * half)
+                    (window[window.Length - 1] - center + half) / (new ReferenceFraction(2) * half)
                 ).ToDouble();
             if (variance.Sign > 0)
             {
-                var delta = window[^1] - exactMean;
+                var delta = window[window.Length - 1] - exactMean;
                 result[4][i] = delta.Sign * (delta * delta / variance).SqrtToDouble();
             }
             if (center.Sign != 0)

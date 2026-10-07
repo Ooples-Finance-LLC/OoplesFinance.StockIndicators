@@ -84,8 +84,8 @@ internal static class ReturnBetaReference
                 || selection != ReturnBetaSelection.All
                 || !result[1][i].HasValue
                 || !result[2][i].HasValue
-                || !double.IsFinite(result[1][i]!.Value)
-                || !double.IsFinite(result[2][i]!.Value)
+                || !FrameworkCompatibility.IsFinite(result[1][i]!.Value)
+                || !FrameworkCompatibility.IsFinite(result[2][i]!.Value)
             )
                 continue;
             var up = ReferenceFraction.FromDouble(result[1][i]!.Value);

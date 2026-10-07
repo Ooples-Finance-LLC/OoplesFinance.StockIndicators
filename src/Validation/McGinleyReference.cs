@@ -41,7 +41,7 @@ internal static class McGinleyReference
             var ratio = m.Sign == 0 ? new ReferenceFraction(1) : x / m;
             var squared = ratio * ratio;
             previous = (m + (x - m) / (scale * squared * squared)).ToDouble();
-            if (!double.IsFinite(previous))
+            if (!FrameworkCompatibility.IsFinite(previous))
             {
                 result[i] = previous;
                 return result;

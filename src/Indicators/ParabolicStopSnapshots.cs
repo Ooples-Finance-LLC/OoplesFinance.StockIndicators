@@ -22,18 +22,18 @@ public static class ParabolicStopSnapshots
     private static double Publish(BigInteger value)
     {
         var result = ExactMeanAccumulator.UnitRatio(value, 1);
-        return double.IsFinite(result)
+        return FrameworkCompatibility.IsFinite(result)
             ? result
             : throw new OverflowException("Parabolic stop is not representable.");
     }
 
     private static void Validate(IReadOnlyList<Bar> bars, params double[] parameters)
     {
-        ArgumentNullException.ThrowIfNull(bars);
-        if (parameters.Any(v => !double.IsFinite(v)))
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
+        if (parameters.Any(v => !FrameworkCompatibility.IsFinite(v)))
             throw new ArgumentOutOfRangeException(nameof(parameters));
         foreach (var b in bars)
-            if (!double.IsFinite(b.High) || !double.IsFinite(b.Low))
+            if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
                 throw new ArgumentOutOfRangeException(nameof(bars));
     }
 

@@ -20,7 +20,7 @@ public sealed class FilteredDeviationAverage
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(scaleFactor) || scaleFactor <= 0 || scaleFactor > 1)
+        if (!FrameworkCompatibility.IsFinite(scaleFactor) || scaleFactor <= 0 || scaleFactor > 1)
             throw new ArgumentOutOfRangeException(nameof(scaleFactor));
         Period = period;
         ScaleFactor = scaleFactor;

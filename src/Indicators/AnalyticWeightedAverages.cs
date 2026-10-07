@@ -18,7 +18,7 @@ public sealed class GaussianWeightedAverage
     {
         if (period < 2)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(sigma) || sigma == 0) // NOSONAR: Exact zero is the undefined Gaussian width.
+        if (!FrameworkCompatibility.IsFinite(sigma) || sigma == 0) // NOSONAR: Exact zero is the undefined Gaussian width.
             throw new ArgumentOutOfRangeException(nameof(sigma));
         Period = period;
         Sigma = sigma;

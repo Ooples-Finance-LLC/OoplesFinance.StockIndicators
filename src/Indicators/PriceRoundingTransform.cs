@@ -21,7 +21,7 @@ public sealed class PriceRoundingTransform : MultiOutputIndicatorBase, IIndicato
     public PriceRoundingTransform(PriceRoundingOperation operation)
         : base(2)
     {
-        if (!Enum.IsDefined(operation))
+        if (!Enum.IsDefined(operation.GetType(), operation))
             throw new ArgumentOutOfRangeException(nameof(operation));
         Operation = operation;
     }

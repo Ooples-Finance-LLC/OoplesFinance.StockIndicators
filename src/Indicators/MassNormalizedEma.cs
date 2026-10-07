@@ -36,7 +36,7 @@ public sealed class MassNormalizedEma : IndicatorBase, IMovingAverage, IIndicato
 
     internal static void ValidateAlpha(double alpha, string name)
     {
-        if (!double.IsFinite(alpha) || alpha <= 0 || alpha > 1)
+        if (!FrameworkCompatibility.IsFinite(alpha) || alpha <= 0 || alpha > 1)
             throw new ArgumentOutOfRangeException(name);
     }
 

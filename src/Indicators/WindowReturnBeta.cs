@@ -119,7 +119,7 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
         : base(14)
     {
         PairStatisticsWindow.Validate(period, market, evaluation);
-        if (!Enum.IsDefined(selection))
+        if (!Enum.IsDefined(selection.GetType(), selection))
             throw new ArgumentOutOfRangeException(nameof(selection));
         Period = period;
         Selection = selection;
@@ -237,8 +237,8 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 selection != ReturnBetaSelection.All
                 || output[8] == 0
                 || output[9] == 0
-                || !double.IsFinite(output[1])
-                || !double.IsFinite(output[2])
+                || !FrameworkCompatibility.IsFinite(output[1])
+                || !FrameworkCompatibility.IsFinite(output[2])
             )
                 return;
             var up = new ExactMeanAccumulator();

@@ -83,7 +83,7 @@ public sealed class AwesomeWithDetails : MultiOutputIndicatorBase, IIndicatorVal
             ).ToDouble();
             result[0][i] = oscillator;
             result[2][i] = 1;
-            if (!double.IsFinite(oscillator) || prices[i] == 0)
+            if (!FrameworkCompatibility.IsFinite(oscillator) || prices[i] == 0)
                 continue; // NOSONAR: Exact zero defines the ratio domain.
             result[1][i] = (
                 new ReferenceFraction(100)
@@ -145,7 +145,7 @@ public sealed class AwesomeWithDetails : MultiOutputIndicatorBase, IIndicatorVal
             var oscillator = difference.Mean(1);
             output[0] = oscillator;
             output[2] = 1;
-            if (!double.IsFinite(oscillator) || price == 0)
+            if (!FrameworkCompatibility.IsFinite(oscillator) || price == 0)
                 return; // NOSONAR: Exact zero defines the ratio domain.
             var numerator = new ExactMeanAccumulator();
             numerator.Add(oscillator, 100);

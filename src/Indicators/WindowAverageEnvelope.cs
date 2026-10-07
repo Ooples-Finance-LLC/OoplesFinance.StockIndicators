@@ -61,7 +61,7 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
             )
         )
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(percentOffset) || percentOffset <= 0)
+        if (!FrameworkCompatibility.IsFinite(percentOffset) || percentOffset <= 0)
             throw new ArgumentOutOfRangeException(nameof(percentOffset));
         Period = period;
         PercentOffset = percentOffset;
@@ -120,7 +120,7 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
         {
             output[0][i] = center[(int)i];
             output[3][i] = 1;
-            if (!double.IsFinite(center[(int)i]))
+            if (!FrameworkCompatibility.IsFinite(center[(int)i]))
             {
                 output[1][i] = output[2][i] = center[(int)i];
                 continue;
@@ -223,7 +223,7 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
             }
             output[0] = center;
             output[3] = 1;
-            if (!double.IsFinite(center))
+            if (!FrameworkCompatibility.IsFinite(center))
                 return; // The enclosing runtime rejects the nonfinite centerline.
             var upper = new ExactMeanAccumulator();
             upper.Add(center, 100);

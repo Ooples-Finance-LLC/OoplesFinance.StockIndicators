@@ -57,6 +57,8 @@ public static partial class IndicatorValidationDiscovery
         {
             var replacements = registered.Where(c => c.IndicatorType == type).ToArray();
             if (replacements.Length > 0) { result.AddRange(replacements); continue; }
+            var dependencyCases = ComparisonDependencyCases(type).ToArray();
+            if (dependencyCases.Length > 0) { result.AddRange(dependencyCases); continue; }
             var ctor = type.GetConstructors().OrderByDescending(c => c.GetParameters().Length)
                 .FirstOrDefault(c => c.GetParameters().All(p => CanSupply(type, p)));
             if (ctor is null || type.ContainsGenericParameters)
@@ -84,7 +86,7 @@ public static partial class IndicatorValidationDiscovery
                         var selectedScale = scale;
                         result.Add(new IndicatorValidationCase(type,
                             (scale == 0 ? "minimum-" : "longer-") + period.Name,
-                            () => (IIndicator)ctor.Invoke(parameters.Select((p, i) =>
+                            () => CreateAutomatic(type, ctor, parameters.Select((p, i) =>
                                 Argument(type, p, i, p == selected ? selectedScale : 1, false)).ToArray())));
                     }
             }
@@ -119,7 +121,7 @@ public static partial class IndicatorValidationDiscovery
             result.AddRange(DiNapoliPeriodCases(type));
 
             void Add(string name, double scale, bool weighted) => result.Add(new IndicatorValidationCase(type, name,
-                () => (IIndicator)ctor.Invoke(parameters.Select((p, i) => Argument(type, p, i, scale, weighted)).ToArray())));
+                () => CreateAutomatic(type, ctor, parameters.Select((p, i) => Argument(type, p, i, scale, weighted)).ToArray())));
         }
         return result.AsReadOnly();
     }
@@ -578,7 +580,7 @@ public static partial class IndicatorValidationDiscovery
             || p.Name.IndexOf("smooth", StringComparison.OrdinalIgnoreCase) >= 0
             || p.Name.IndexOf("momentum", StringComparison.OrdinalIgnoreCase) >= 0);
 
-    private static bool CanSupply(Type type, ParameterInfo p) => p.IsOptional || SpecDefault(type, p) is not null || IsPeriod(p)
+    private static bool CanSupply(Type type, ParameterInfo p) => p.IsOptional || ComparisonRequiredArgument(type, p) is not null || SpecDefault(type, p) is not null || IsPeriod(p)
         || p.ParameterType == typeof(IMovingAverage) || p.ParameterType == typeof(MovingAvgType);
 
     // Generated constructors sometimes expose required arguments whose options overload declares
@@ -593,11 +595,14 @@ public static partial class IndicatorValidationDiscovery
 
     private static object? Argument(Type type, ParameterInfo p, int index, double scale, bool weighted)
     {
+        if (type == typeof(NullableStrengthOscillator) && p.Name == "momentumPeriod") return 1;
+        var required = ComparisonRequiredArgument(type, p);
+        if (!p.IsOptional && required is not null) return required;
         var declaredDefault = p.IsOptional ? p : SpecDefault(type, p);
         if (IsPeriod(p))
         {
             var baseline = declaredDefault is not null ? (int)declaredDefault.DefaultValue! : 7 + 6 * index;
-            var minimum = type == typeof(ReverseEngineeringRsi) ? 2 : 1;
+            var minimum = MinimumPeriod(type, p.Name!);
             return scale == 1 ? baseline : Math.Max(minimum, (int)Math.Round(baseline * scale)); // NOSONAR: S1244 - One is an exact discrete configuration selector, not a measured value.
         }
         if (p.ParameterType == typeof(IMovingAverage) && (weighted || !p.IsOptional))

@@ -22,9 +22,9 @@ public sealed class DelayedPhaseAdaptiveAverage
     )
         : base(4)
     {
-        if (!double.IsFinite(fastLimit) || fastLimit < .01 || fastLimit > .99)
+        if (!FrameworkCompatibility.IsFinite(fastLimit) || fastLimit < .01 || fastLimit > .99)
             throw new ArgumentOutOfRangeException(nameof(fastLimit));
-        if (!double.IsFinite(slowLimit) || slowLimit < .01 || slowLimit > .99)
+        if (!FrameworkCompatibility.IsFinite(slowLimit) || slowLimit < .01 || slowLimit > .99)
             throw new ArgumentOutOfRangeException(nameof(slowLimit));
         if (suppression < 0)
             throw new ArgumentOutOfRangeException(nameof(suppression));

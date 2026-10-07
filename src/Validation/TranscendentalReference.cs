@@ -18,7 +18,7 @@ internal static class TranscendentalReference
         var magnitude = Math.Abs(x);
         if (
             operation == PriceTranscendentalOperation.HyperbolicSine
-            && magnitude < Math.ScaleB(1, -27)
+            && magnitude < (1d / 134217728d)
         )
             return x;
         if (magnitude > 800)

@@ -25,7 +25,7 @@ internal static class PriceRelativeReference
         {
             if (b[i].Sign != 0)
                 r[0][i] = (e[i] / b[i]).ToDouble();
-            if (r[0][i].HasValue && !double.IsFinite(r[0][i]!.Value))
+            if (r[0][i].HasValue && !FrameworkCompatibility.IsFinite(r[0][i]!.Value))
                 return r;
             if (period.HasValue && i >= period.Value)
             {

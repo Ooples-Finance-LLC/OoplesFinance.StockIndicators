@@ -11,11 +11,11 @@ public static class HurstSnapshot
     /// Each partition discards its oldest remainder. The Anis-Lloyd correction uses an exact half-integer gamma recurrence up to size 340 and the conventional asymptotic factor thereafter.</remarks>
     public static IReadOnlyList<HurstValue> Calculate(IReadOnlyList<Bar> bars, int period = 100)
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 20)
             throw new ArgumentOutOfRangeException(nameof(period));
         foreach (var b in bars)
-            if (!double.IsFinite(b.Close))
+            if (!FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = Enumerable
             .Range(0, bars.Count)
@@ -31,7 +31,7 @@ public static class HurstSnapshot
             var ratio = c / p;
             returns[i] =
                 c <= 0 || p <= 0 ? double.NaN
-                : ratio > 0 && double.IsFinite(ratio) ? Math.Log(ratio)
+                : ratio > 0 && FrameworkCompatibility.IsFinite(ratio) ? Math.Log(ratio)
                 : Math.Log(c) - Math.Log(p);
         }
         var sizes = Enumerable
@@ -108,6 +108,6 @@ public static class HurstSnapshot
             denominator += (x[i] - xm) * (x[i] - xm);
         }
         var value = numerator / denominator;
-        return double.IsFinite(value) ? value : null;
+        return FrameworkCompatibility.IsFinite(value) ? value : null;
     }
 }

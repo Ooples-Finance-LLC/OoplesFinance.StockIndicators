@@ -19,7 +19,7 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(percentile) || percentile < 0 || percentile > 1)
+        if (!FrameworkCompatibility.IsFinite(percentile) || percentile < 0 || percentile > 1)
             throw new ArgumentOutOfRangeException(nameof(percentile));
         Period = period;
         Percentile = percentile;
@@ -56,7 +56,7 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
             var sorted = bars.Skip(i + 1 - count)
                 .Take(count)
                 .Select(b => b.Close)
-                .Order()
+                .OrderBy(value => value)
                 .ToArray();
             if (AverageDuringWarmup && count < Period)
                 values[i] = (

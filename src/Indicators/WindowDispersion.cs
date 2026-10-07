@@ -39,7 +39,7 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!Enum.IsDefined(output))
+        if (!Enum.IsDefined(output.GetType(), output))
             throw new ArgumentOutOfRangeException(nameof(output));
         if (double.IsNaN(multiplier) || double.IsInfinity(multiplier))
             throw new ArgumentOutOfRangeException(nameof(multiplier));
@@ -100,7 +100,7 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
                 result[i] = scale.Sign * (variance * scale * scale).SqrtToDouble();
             else if (variance.Sign != 0)
             {
-                var deviation = (values[^1] - mean) * scale;
+                var deviation = (values[values.Length - 1] - mean) * scale;
                 result[i] = deviation.Sign * (deviation * deviation / variance).SqrtToDouble();
             }
         }

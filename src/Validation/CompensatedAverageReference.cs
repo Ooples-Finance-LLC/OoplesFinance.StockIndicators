@@ -36,7 +36,7 @@ internal static class CompensatedAverageReference
                 total += new ReferenceFraction(weight) * value;
             }
             output[i] = total.ToDouble();
-            if (!double.IsFinite(output[i]))
+            if (!FrameworkCompatibility.IsFinite(output[i]))
                 break;
         }
         return output;

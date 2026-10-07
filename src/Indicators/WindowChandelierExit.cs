@@ -35,7 +35,7 @@ public sealed class WindowChandelierExit : MultiOutputIndicatorBase, IIndicatorV
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(multiplier))
+        if (!FrameworkCompatibility.IsFinite(multiplier))
             throw new ArgumentOutOfRangeException(nameof(multiplier));
         if (selection < ChandelierExitSelection.Long || selection > ChandelierExitSelection.Both)
             throw new ArgumentOutOfRangeException(nameof(selection));

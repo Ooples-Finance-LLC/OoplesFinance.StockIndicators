@@ -12,7 +12,7 @@ internal static class StrengthReference
         var (n, d) = value.Components;
         if (n.IsZero)
             return new(0);
-        var exponent = (int)(n.GetBitLength() - d.GetBitLength());
+        var exponent = (int)(FrameworkCompatibility.GetBitLength(n) - FrameworkCompatibility.GetBitLength(d));
         if (exponent >= 0 ? n < (d << exponent) : (n << -exponent) < d)
             exponent--;
         var shift = exponent - 52;

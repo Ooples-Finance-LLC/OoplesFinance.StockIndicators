@@ -94,7 +94,7 @@ public sealed class StandardDeviationWithDetails
             result[4][i] = result[5][i] = 1;
             if (variance.Sign > 0)
             {
-                var delta = window[^1] - mean;
+                var delta = window[window.Length - 1] - mean;
                 result[2][i] = delta.Sign * (delta * delta / variance).SqrtToDouble();
                 result[6][i] = 1;
             }

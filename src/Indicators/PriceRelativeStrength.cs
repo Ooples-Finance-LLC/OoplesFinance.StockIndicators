@@ -125,7 +125,7 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
             var b = ExactVarianceWindow.Units(PairStatisticsWindow.Select(bar, basis));
             double? ratio = b.IsZero ? null : Divide(e, b);
             Put(ratio, 0, output);
-            if (ratio.HasValue && !double.IsFinite(ratio.Value))
+            if (ratio.HasValue && !FrameworkCompatibility.IsFinite(ratio.Value))
                 return;
             if (mean.HasValue)
             {

@@ -29,7 +29,7 @@ internal static class ClassicStochasticRsiReference
             var value =
                 spread.Sign == 0
                     ? 0
-                    : (new ReferenceFraction(100) * (window[^1] - minimum) / spread).ToDouble();
+                    : (new ReferenceFraction(100) * (window[window.Length - 1] - minimum) / spread).ToDouble();
             raw.Add(new Bar(bars[i].Time, value, value, value, value, 0));
         }
         var signal = ClassicAverageReference.Values(raw, owner.SignalAverage);

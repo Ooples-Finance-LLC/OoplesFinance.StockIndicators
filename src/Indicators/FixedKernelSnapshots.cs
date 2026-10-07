@@ -86,7 +86,7 @@ public static class WindowedSincSnapshot
                 nameof(taps),
                 "The selected window must define a nonzero kernel."
             );
-        if (!Enum.IsDefined(window))
+        if (!Enum.IsDefined(window.GetType(), window))
             throw new ArgumentOutOfRangeException(nameof(window));
         if (bars.Count == 0)
             return Array.Empty<double>();
@@ -110,7 +110,7 @@ public static class WindowedSincSnapshot
             };
             var x = Math.PI * (k - center) / period;
             weights[k] = w * (k == center ? 1 : Math.Sin(x) / x); // NOSONAR: S1244 - Integer/half-integer tap positions identify the exact sinc center.
-            if (!double.IsFinite(weights[k]))
+            if (!FrameworkCompatibility.IsFinite(weights[k]))
                 throw new ArgumentException("The selected kernel is undefined.");
             mass.Add(weights[k]);
         }
@@ -124,7 +124,7 @@ public static class WindowedSincSnapshot
             for (var k = 0; k < taps; k++)
                 sum.AddProduct(bars[Math.Min(i, start + k)].Close, weights[k]);
             output[i] = sum.Ratio(mass);
-            if (!double.IsFinite(output[i]))
+            if (!FrameworkCompatibility.IsFinite(output[i]))
                 throw new OverflowException("Sinc output is not representable.");
         }
         return output;
@@ -135,9 +135,9 @@ internal static class FixedKernelSnapshotInput
 {
     internal static void Validate(IReadOnlyList<Bar> bars)
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         foreach (var bar in bars)
-            if (!double.IsFinite(bar.Close))
+            if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
     }
 }

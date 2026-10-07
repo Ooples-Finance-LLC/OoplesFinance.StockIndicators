@@ -32,7 +32,7 @@ public sealed class WilderStrengthOscillator
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!Enum.IsDefined(convention))
+        if (!Enum.IsDefined(convention.GetType(), convention))
             throw new ArgumentOutOfRangeException(nameof(convention));
         if (unstablePeriods < 0)
             throw new ArgumentOutOfRangeException(nameof(unstablePeriods));

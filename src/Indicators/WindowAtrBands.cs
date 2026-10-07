@@ -39,7 +39,7 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
             throw new ArgumentOutOfRangeException(nameof(centerPeriod));
         if (atrPeriod < 1)
             throw new ArgumentOutOfRangeException(nameof(atrPeriod));
-        if (!double.IsFinite(multiplier))
+        if (!FrameworkCompatibility.IsFinite(multiplier))
             throw new ArgumentOutOfRangeException(nameof(multiplier));
         if (
             centerMode < AtrBandCenterMode.Simple
@@ -198,8 +198,8 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
             if (
                 !width
                 || _center == 0 // NOSONAR: Width is undefined only at an exactly zero center.
-                || !double.IsFinite(output[1])
-                || !double.IsFinite(output[2])
+                || !FrameworkCompatibility.IsFinite(output[1])
+                || !FrameworkCompatibility.IsFinite(output[2])
             )
                 return;
             var numerator = new ExactMeanAccumulator();

@@ -25,14 +25,14 @@ public static class RegressionChannelSnapshot
         double deviations = 2
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         var length = period ?? bars.Count;
         if (length < 2)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(deviations) || deviations <= 0)
+        if (!FrameworkCompatibility.IsFinite(deviations) || deviations <= 0)
             throw new ArgumentOutOfRangeException(nameof(deviations));
         foreach (var bar in bars)
-            if (!double.IsFinite(bar.Close))
+            if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = Enumerable
             .Range(0, bars.Count)
@@ -54,12 +54,12 @@ public static class RegressionChannelSnapshot
             for (var j = 0; j < length; j++)
             {
                 var center = window.LineAt(j);
-                if (!double.IsFinite(center))
+                if (!FrameworkCompatibility.IsFinite(center))
                     throw new OverflowException("Regression center is not representable.");
                 var units = ExactVarianceWindow.Units(center);
                 var upper = ExactMeanAccumulator.UnitRatio(units + width, 1);
                 var lower = ExactMeanAccumulator.UnitRatio(units - width, 1);
-                if (!double.IsFinite(upper) || !double.IsFinite(lower))
+                if (!FrameworkCompatibility.IsFinite(upper) || !FrameworkCompatibility.IsFinite(lower))
                     throw new OverflowException("Regression channel is not representable.");
                 result[start + j] = new(center, upper, lower, j == 0);
             }

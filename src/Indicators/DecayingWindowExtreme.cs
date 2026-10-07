@@ -15,7 +15,7 @@ public sealed class DecayingWindowExtreme : IndicatorBase, IIndicatorValidationC
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(decay) || decay < 0)
+        if (!FrameworkCompatibility.IsFinite(decay) || decay < 0)
             throw new ArgumentOutOfRangeException(nameof(decay));
         Period = period;
         Maximum = maximum;

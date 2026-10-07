@@ -23,7 +23,7 @@ public static class KlingerVolumeSnapshot
         int signalPeriod = 13
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (fastPeriod < 3)
             throw new ArgumentOutOfRangeException(nameof(fastPeriod));
         if (slowPeriod <= fastPeriod)
@@ -32,10 +32,10 @@ public static class KlingerVolumeSnapshot
             throw new ArgumentOutOfRangeException(nameof(signalPeriod));
         foreach (var b in bars)
             if (
-                !double.IsFinite(b.High)
-                || !double.IsFinite(b.Low)
-                || !double.IsFinite(b.Close)
-                || !double.IsFinite(b.Volume)
+                !FrameworkCompatibility.IsFinite(b.High)
+                || !FrameworkCompatibility.IsFinite(b.Low)
+                || !FrameworkCompatibility.IsFinite(b.Close)
+                || !FrameworkCompatibility.IsFinite(b.Volume)
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var fast = new EmaDifferenceSignal.Average(fastPeriod, false);
@@ -81,8 +81,8 @@ public static class KlingerVolumeSnapshot
                         ? ExactMeanAccumulator.UnitRatio(average.Value, 1)
                         : null;
                     if (
-                        !double.IsFinite(value)
-                        || signalValue.HasValue && !double.IsFinite(signalValue.Value)
+                        !FrameworkCompatibility.IsFinite(value)
+                        || signalValue.HasValue && !FrameworkCompatibility.IsFinite(signalValue.Value)
                     )
                         throw new OverflowException("Klinger output is not representable.");
                     result[i] = new(value, signalValue);

@@ -53,7 +53,7 @@ public sealed class CompensatedExponentialAverage
 
         public void Reset()
         {
-            Array.Clear(_stages);
+            Array.Clear(_stages, 0, _stages.Length);
             _residual = 1;
         }
 

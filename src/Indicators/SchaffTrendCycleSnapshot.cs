@@ -19,7 +19,7 @@ public static class SchaffTrendCycleSnapshot
         int slowPeriod = 50
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (cyclePeriod < 1)
             throw new ArgumentOutOfRangeException(nameof(cyclePeriod));
         if (fastPeriod < 1)
@@ -27,7 +27,7 @@ public static class SchaffTrendCycleSnapshot
         if (slowPeriod <= fastPeriod)
             throw new ArgumentOutOfRangeException(nameof(slowPeriod));
         foreach (var bar in bars)
-            if (!double.IsFinite(bar.Close))
+            if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = new double?[bars.Count];
         var fast = new EmaDifferenceSignal.Average(fastPeriod, false);

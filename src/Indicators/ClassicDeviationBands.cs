@@ -23,9 +23,9 @@ public sealed class ClassicDeviationBands : MultiOutputIndicatorBase, IIndicator
     )
         : base(6)
     {
-        if (!double.IsFinite(upperFactor) || upperFactor < 0)
+        if (!FrameworkCompatibility.IsFinite(upperFactor) || upperFactor < 0)
             throw new ArgumentOutOfRangeException(nameof(upperFactor));
-        if (!double.IsFinite(lowerFactor) || lowerFactor < 0)
+        if (!FrameworkCompatibility.IsFinite(lowerFactor) || lowerFactor < 0)
             throw new ArgumentOutOfRangeException(nameof(lowerFactor));
         Average = new(period, method, firstPriceSeed, suppression);
         Period = period;

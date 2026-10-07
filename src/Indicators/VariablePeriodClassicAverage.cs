@@ -27,7 +27,7 @@ public sealed class VariablePeriodClassicAverage
     )
         : base(2)
     {
-        ArgumentNullException.ThrowIfNull(periodSelector);
+        if (periodSelector is null) throw new ArgumentNullException(nameof(periodSelector));
         if (minimumPeriod < 1 || minimumPeriod > maximumPeriod)
             throw new ArgumentOutOfRangeException(nameof(minimumPeriod));
         MaximumAverage = new(maximumPeriod, method, firstPriceSeed, suppression);
@@ -119,7 +119,7 @@ public sealed class VariablePeriodClassicAverage
             if (publish)
             {
                 var selection = owner.PeriodSelector(bar);
-                if (!double.IsFinite(selection))
+                if (!FrameworkCompatibility.IsFinite(selection))
                     throw new ArgumentOutOfRangeException(
                         nameof(owner.PeriodSelector),
                         "The selected period must be finite."

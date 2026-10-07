@@ -35,11 +35,11 @@ public sealed class CandleArithmetic : MultiOutputIndicatorBase, IIndicatorValid
     )
         : base(2)
     {
-        if (!Enum.IsDefined(operation))
+        if (!Enum.IsDefined(operation.GetType(), operation))
             throw new ArgumentOutOfRangeException(nameof(operation));
-        if (!Enum.IsDefined(left))
+        if (!Enum.IsDefined(left.GetType(), left))
             throw new ArgumentOutOfRangeException(nameof(left));
-        if (!Enum.IsDefined(right))
+        if (!Enum.IsDefined(right.GetType(), right))
             throw new ArgumentOutOfRangeException(nameof(right));
         Operation = operation;
         Left = left;

@@ -25,7 +25,7 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!Enum.IsDefined(convention))
+        if (!Enum.IsDefined(convention.GetType(), convention))
             throw new ArgumentOutOfRangeException(nameof(convention));
         Period = period;
         Convention = convention;
@@ -57,7 +57,7 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
         PathRatioConvention convention = PathRatioConvention.AbsoluteFraction
     )
     {
-        ArgumentNullException.ThrowIfNull(values);
+        if (values is null) throw new ArgumentNullException(nameof(values));
         var specification = new WindowPathRatio(period, convention);
         return Enumerate();
         IEnumerable<double?> Enumerate()
@@ -65,10 +65,10 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
             var calculator = new Calculator(specification.Period, specification.Convention);
             foreach (var value in values)
             {
-                if (value.HasValue && !double.IsFinite(value.Value))
+                if (value.HasValue && !FrameworkCompatibility.IsFinite(value.Value))
                     throw new ArgumentOutOfRangeException(nameof(values));
                 var result = calculator.Next(value);
-                if (result.HasValue && !double.IsFinite(result.Value))
+                if (result.HasValue && !FrameworkCompatibility.IsFinite(result.Value))
                     throw new ArithmeticException("Path ratio is not representable.");
                 yield return result;
             }

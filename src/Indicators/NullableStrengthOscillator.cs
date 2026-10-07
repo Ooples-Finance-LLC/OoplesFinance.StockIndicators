@@ -33,7 +33,7 @@ public sealed class NullableStrengthOscillator
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!Enum.IsDefined(convention))
+        if (!Enum.IsDefined(convention.GetType(), convention))
             throw new ArgumentOutOfRangeException(nameof(convention));
         if (momentumPeriod < 1 || !IsMomentum(convention) && momentumPeriod != 1)
             throw new ArgumentOutOfRangeException(nameof(momentumPeriod));
@@ -78,7 +78,7 @@ public sealed class NullableStrengthOscillator
         int momentumPeriod = 1
     )
     {
-        ArgumentNullException.ThrowIfNull(values);
+        if (values is null) throw new ArgumentNullException(nameof(values));
         var specification = new NullableStrengthOscillator(period, convention, momentumPeriod);
         return Enumerate();
         IEnumerable<double?> Enumerate()
@@ -90,10 +90,10 @@ public sealed class NullableStrengthOscillator
             );
             foreach (var value in values)
             {
-                if (value.HasValue && !double.IsFinite(value.Value))
+                if (value.HasValue && !FrameworkCompatibility.IsFinite(value.Value))
                     throw new ArgumentOutOfRangeException(nameof(values));
                 var result = calculator.Next(value);
-                if (result.HasValue && !double.IsFinite(result.Value))
+                if (result.HasValue && !FrameworkCompatibility.IsFinite(result.Value))
                     throw new ArithmeticException("Strength ratio is not representable.");
                 yield return result;
             }

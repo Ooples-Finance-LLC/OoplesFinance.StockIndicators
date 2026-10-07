@@ -33,7 +33,7 @@ public sealed class QuarticDynamicAverage : MultiOutputIndicatorBase, IIndicator
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(factor) || factor <= 0)
+        if (!FrameworkCompatibility.IsFinite(factor) || factor <= 0)
             throw new ArgumentOutOfRangeException(nameof(factor));
         if (startup is not (McGinleyStartup.Immediate or McGinleyStartup.ResetDelay))
             throw new ArgumentOutOfRangeException(nameof(startup));
@@ -131,7 +131,7 @@ public sealed class QuarticDynamicAverage : MultiOutputIndicatorBase, IIndicator
                     divisor
                 );
             }
-            if (!double.IsFinite(next))
+            if (!FrameworkCompatibility.IsFinite(next))
             {
                 output[0] = next;
                 return;

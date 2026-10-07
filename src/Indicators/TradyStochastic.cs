@@ -66,7 +66,7 @@ public sealed class FiftySeedStochastic : IndicatorBase, IIndicatorValidationCon
                 var scaled = bottom;
                 scaled.ScaleByPowerOfTwo(shift);
                 var value = top.Ratio(scaled);
-                if (double.IsFinite(value))
+                if (FrameworkCompatibility.IsFinite(value))
                     return new RocBankValue(value, shift);
             }
         }
@@ -158,8 +158,8 @@ public sealed class StochasticSmaKdj : MultiOutputIndicatorBase, IIndicatorValid
             if (
                 !a.HasValue
                 || !b.HasValue
-                || !double.IsFinite(output[0])
-                || !double.IsFinite(output[1])
+                || !FrameworkCompatibility.IsFinite(output[0])
+                || !FrameworkCompatibility.IsFinite(output[1])
             )
                 return;
             var j = new ExactMeanAccumulator();

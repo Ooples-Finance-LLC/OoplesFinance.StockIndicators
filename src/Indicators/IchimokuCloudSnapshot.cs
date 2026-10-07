@@ -80,7 +80,7 @@ public static class IchimokuCloudSnapshot
         int? backwardOffset = null
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (conversionPeriod < 1)
             throw new ArgumentOutOfRangeException(nameof(conversionPeriod));
         if (basePeriod < 1)
@@ -94,7 +94,7 @@ public static class IchimokuCloudSnapshot
         if (backward < 0)
             throw new ArgumentOutOfRangeException(nameof(backwardOffset));
         foreach (var b in bars)
-            if (!double.IsFinite(b.High) || !double.IsFinite(b.Low) || !double.IsFinite(b.Close))
+            if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low) || !FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var conversion = Midpoints(bars, conversionPeriod);
         var basis = Midpoints(bars, basePeriod);

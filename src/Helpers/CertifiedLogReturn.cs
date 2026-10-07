@@ -45,7 +45,7 @@ internal static class CertifiedLogReturn
         var d = ExactVarianceWindow.Units(Math.Abs(previous));
         if (n == d)
             return 0;
-        var exponent = (int)(n.GetBitLength() - d.GetBitLength());
+        var exponent = (int)(FrameworkCompatibility.GetBitLength(n) - FrameworkCompatibility.GetBitLength(d));
         if (exponent >= 0 ? n < (d << exponent) : (n << -exponent) < d)
             exponent--;
         if (exponent < 0)

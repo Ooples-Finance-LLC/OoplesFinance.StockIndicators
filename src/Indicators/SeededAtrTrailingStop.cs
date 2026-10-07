@@ -34,7 +34,7 @@ public sealed class SeededAtrTrailingStop : MultiOutputIndicatorBase, IIndicator
     {
         if (period < 2)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(multiplier) || multiplier <= 0)
+        if (!FrameworkCompatibility.IsFinite(multiplier) || multiplier <= 0)
             throw new ArgumentOutOfRangeException(nameof(multiplier));
         if (basis is < AtrTrailBasis.Close or > AtrTrailBasis.Midpoint)
             throw new ArgumentOutOfRangeException(nameof(basis));

@@ -27,7 +27,7 @@ public sealed class DeviationRatioAdaptiveAverage
         var length = longPeriod == 0 ? 4L * shortPeriod : longPeriod;
         if (length < 1 || length > int.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(longPeriod));
-        if (!double.IsFinite(alpha))
+        if (!FrameworkCompatibility.IsFinite(alpha))
             throw new ArgumentOutOfRangeException(nameof(alpha));
         ShortPeriod = shortPeriod;
         LongPeriod = (int)length;

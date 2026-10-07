@@ -128,7 +128,7 @@ internal static class CircularReference
     {
         if (value.IsZero)
             return 0;
-        var root = BigInteger.One << (int)((value.GetBitLength() + 1) / 2);
+        var root = BigInteger.One << (int)((FrameworkCompatibility.GetBitLength(value) + 1) / 2);
         while (true)
         {
             var next = (root + value / root) / 2;

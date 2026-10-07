@@ -76,8 +76,8 @@ public sealed class VolumeWeightedPrice
             var price = TypicalPrice
                 ? (R(bar.High) + R(bar.Low) + R(bar.Close)) / new ReferenceFraction(3)
                 : R(bar.Close);
-            weighted.Add(weighted[^1] + price * R(bar.Volume));
-            mass.Add(mass[^1] + R(bar.Volume));
+            weighted.Add(weighted[weighted.Count - 1] + price * R(bar.Volume));
+            mass.Add(mass[mass.Count - 1] + R(bar.Volume));
             var count = mass.Count - 1;
             if (Period is int required && count < required)
                 continue;

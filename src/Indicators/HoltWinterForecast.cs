@@ -31,11 +31,11 @@ public sealed class HoltWinterForecast : IndicatorBase, IMovingAverage, IIndicat
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(levelFactor))
+        if (!FrameworkCompatibility.IsFinite(levelFactor))
             throw new ArgumentOutOfRangeException(nameof(levelFactor));
-        if (!double.IsFinite(trendFactor))
+        if (!FrameworkCompatibility.IsFinite(trendFactor))
             throw new ArgumentOutOfRangeException(nameof(trendFactor));
-        if (!double.IsFinite(accelerationFactor))
+        if (!FrameworkCompatibility.IsFinite(accelerationFactor))
             throw new ArgumentOutOfRangeException(nameof(accelerationFactor));
         Period = period;
         LevelFactor = levelFactor;
@@ -73,8 +73,8 @@ public sealed class HoltWinterForecast : IndicatorBase, IMovingAverage, IIndicat
     {
         var derived = (2 - levelFactor) / levelFactor;
         if (
-            !double.IsFinite(levelFactor)
-            || !double.IsFinite(derived)
+            !FrameworkCompatibility.IsFinite(levelFactor)
+            || !FrameworkCompatibility.IsFinite(derived)
             || derived < 1
             || derived >= (double)int.MaxValue + 1
         )

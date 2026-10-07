@@ -29,7 +29,7 @@ public static class RenkoSnapshot
     )
     {
         Validate(bars);
-        if (!double.IsFinite(brickSize) || brickSize <= 0)
+        if (!FrameworkCompatibility.IsFinite(brickSize) || brickSize <= 0)
             throw new ArgumentOutOfRangeException(nameof(brickSize));
         return Enumerate();
         IEnumerable<RenkoBrick> Enumerate()
@@ -61,7 +61,7 @@ public static class RenkoSnapshot
             double Price(BigInteger value)
             {
                 var published = ExactMeanAccumulator.UnitRatio(value, scale);
-                if (!double.IsFinite(published))
+                if (!FrameworkCompatibility.IsFinite(published))
                     throw new OverflowException("Renko price is not representable.");
                 return published;
             }
@@ -93,7 +93,7 @@ public static class RenkoSnapshot
                 if (quantity.IsZero)
                     continue;
                 var share = ExactMeanAccumulator.UnitRatio(volume, quantity);
-                if (!double.IsFinite(share))
+                if (!FrameworkCompatibility.IsFinite(share))
                     throw new OverflowException("Renko volume is not representable.");
                 for (BigInteger j = 0; j < quantity; j++)
                 {
@@ -137,13 +137,13 @@ public static class RenkoSnapshot
 
     private static void Validate(IReadOnlyList<Bar> bars)
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         foreach (var b in bars)
             if (
-                !double.IsFinite(b.High)
-                || !double.IsFinite(b.Low)
-                || !double.IsFinite(b.Close)
-                || !double.IsFinite(b.Volume)
+                !FrameworkCompatibility.IsFinite(b.High)
+                || !FrameworkCompatibility.IsFinite(b.Low)
+                || !FrameworkCompatibility.IsFinite(b.Close)
+                || !FrameworkCompatibility.IsFinite(b.Volume)
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
     }

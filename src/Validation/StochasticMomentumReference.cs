@@ -73,7 +73,7 @@ internal static class StochasticMomentumReference
                 continue;
             }
             var index = (new ReferenceFraction(200) * delta2 / range2).ToDouble();
-            if (!double.IsFinite(index))
+            if (!FrameworkCompatibility.IsFinite(index))
             {
                 result[i] =
                     slot == 0 ? index

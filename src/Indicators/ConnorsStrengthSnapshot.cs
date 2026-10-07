@@ -28,7 +28,7 @@ public static class ConnorsStrengthSnapshot
         int rankPeriod = 100
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (rsiPeriod < 2)
             throw new ArgumentOutOfRangeException(nameof(rsiPeriod));
         if (streakPeriod < 2)
@@ -36,7 +36,7 @@ public static class ConnorsStrengthSnapshot
         if (rankPeriod < 2)
             throw new ArgumentOutOfRangeException(nameof(rankPeriod));
         foreach (var bar in bars)
-            if (!double.IsFinite(bar.Close))
+            if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var rsi = (IMultiOutputState)
             new WilderStrengthOscillator(

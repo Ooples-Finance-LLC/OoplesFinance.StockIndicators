@@ -14,11 +14,11 @@ public static class RelativeVolatilitySnapshot
     /// <summary>Calculates the sample-deviation relative volatility convention for a period of at least two.</summary>
     public static IReadOnlyList<double> Calculate(IReadOnlyList<Bar> bars, int period = 14)
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 2)
             throw new ArgumentOutOfRangeException(nameof(period));
         foreach (var bar in bars)
-            if (!double.IsFinite(bar.Close))
+            if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var up = new Leg(period);
         var down = new Leg(period);
@@ -68,7 +68,7 @@ public static class RelativeVolatilitySnapshot
                         numerator,
                         denominator << (2 * shift)
                     );
-                    if (!double.IsFinite(root))
+                    if (!FrameworkCompatibility.IsFinite(root))
                         continue;
                     deviation = ExactVarianceWindow.Units(root) << shift;
                     break;

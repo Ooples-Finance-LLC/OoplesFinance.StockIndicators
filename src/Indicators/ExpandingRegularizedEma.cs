@@ -20,7 +20,7 @@ public sealed class ExpandingRegularizedEma
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(lambda) || lambda < 0)
+        if (!FrameworkCompatibility.IsFinite(lambda) || lambda < 0)
             throw new ArgumentOutOfRangeException(nameof(lambda));
         Period = period;
         Lambda = lambda;

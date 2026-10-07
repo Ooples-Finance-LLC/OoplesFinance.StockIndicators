@@ -214,9 +214,9 @@ internal sealed class PairStatisticsWindow(int period)
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!Enum.IsDefined(left))
+        if (!Enum.IsDefined(left.GetType(), left))
             throw new ArgumentOutOfRangeException(nameof(left));
-        if (!Enum.IsDefined(right))
+        if (!Enum.IsDefined(right.GetType(), right))
             throw new ArgumentOutOfRangeException(nameof(right));
     }
 

@@ -21,7 +21,7 @@ public static class FractalSnapshot
         bool useClose = false
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (leftSpan < 2)
             throw new ArgumentOutOfRangeException(nameof(leftSpan));
         if (rightSpan < 2)
@@ -29,8 +29,8 @@ public static class FractalSnapshot
         foreach (var bar in bars)
             if (
                 useClose
-                    ? !double.IsFinite(bar.Close)
-                    : !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
+                    ? !FrameworkCompatibility.IsFinite(bar.Close)
+                    : !FrameworkCompatibility.IsFinite(bar.High) || !FrameworkCompatibility.IsFinite(bar.Low)
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = Enumerable

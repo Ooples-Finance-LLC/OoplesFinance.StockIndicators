@@ -18,7 +18,7 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(factor))
+        if (!FrameworkCompatibility.IsFinite(factor))
             throw new ArgumentOutOfRangeException(nameof(factor));
         Period = period;
         Factor = factor;

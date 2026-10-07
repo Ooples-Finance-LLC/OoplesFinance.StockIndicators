@@ -32,13 +32,13 @@ public static class ZigZagSnapshot
         bool highLow = false
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
-        if (!double.IsFinite(percentChange) || percentChange <= 0)
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
+        if (!FrameworkCompatibility.IsFinite(percentChange) || percentChange <= 0)
             throw new ArgumentOutOfRangeException(nameof(percentChange));
         foreach (var b in bars)
             if (
-                !double.IsFinite(b.Close)
-                || highLow && (!double.IsFinite(b.High) || !double.IsFinite(b.Low))
+                !FrameworkCompatibility.IsFinite(b.Close)
+                || highLow && (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = Enumerable
@@ -84,9 +84,9 @@ public static class ZigZagSnapshot
             firstKind
         );
         var points = new List<Point> { initial };
-        while (points[^1].Index < bars.Count - 1)
+        while (points[points.Count - 1].Index < bars.Count - 1)
         {
-            var last = points[^1];
+            var last = points[points.Count - 1];
             var rising = last.Kind == ZigZagPointKind.Low;
             var candidate = new Point(
                 last.Index,

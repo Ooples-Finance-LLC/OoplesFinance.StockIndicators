@@ -35,7 +35,7 @@ public sealed class NullableStochasticRsi : MultiOutputIndicatorBase, IIndicator
     /// A later all-missing RSI window still produces the specified one-half result.</remarks>
     public static IEnumerable<double?> FromValues(IEnumerable<double?> values, int period = 14)
     {
-        ArgumentNullException.ThrowIfNull(values);
+        if (values is null) throw new ArgumentNullException(nameof(values));
         var rsi = NullableStrengthOscillator.FromValues(values, period);
         return Enumerate();
         IEnumerable<double?> Enumerate()

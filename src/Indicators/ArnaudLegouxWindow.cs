@@ -25,9 +25,9 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(offset))
+        if (!FrameworkCompatibility.IsFinite(offset))
             throw new ArgumentOutOfRangeException(nameof(offset));
-        if (!double.IsFinite(sigma))
+        if (!FrameworkCompatibility.IsFinite(sigma))
             throw new ArgumentOutOfRangeException(nameof(sigma));
         Period = period;
         Offset = offset;

@@ -14,9 +14,9 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
     /// <summary>Creates a filter from a nonempty finite newest-first kernel.</summary>
     public NormalizedConvolution(IEnumerable<double> kernel)
     {
-        ArgumentNullException.ThrowIfNull(kernel);
+        if (kernel is null) throw new ArgumentNullException(nameof(kernel));
         _kernel = kernel.ToArray();
-        if (_kernel.Length == 0 || _kernel.Any(v => !double.IsFinite(v)))
+        if (_kernel.Length == 0 || _kernel.Any(v => !FrameworkCompatibility.IsFinite(v)))
             throw new ArgumentException(
                 "A kernel must contain at least one finite weight and no nonfinite weights.",
                 nameof(kernel)

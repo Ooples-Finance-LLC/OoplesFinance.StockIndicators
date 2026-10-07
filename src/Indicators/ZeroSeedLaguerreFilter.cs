@@ -15,7 +15,7 @@ public sealed class ZeroSeedLaguerreFilter : IndicatorBase, IIndicatorValidation
     /// <summary>Creates a zero-seeded filter with finite gamma in [0,1].</summary>
     public ZeroSeedLaguerreFilter(double gamma = .1)
     {
-        if (!double.IsFinite(gamma) || gamma < 0 || gamma > 1)
+        if (!FrameworkCompatibility.IsFinite(gamma) || gamma < 0 || gamma > 1)
             throw new ArgumentOutOfRangeException(nameof(gamma));
         Gamma = gamma;
     }
@@ -72,7 +72,7 @@ public sealed class ZeroSeedLaguerreFilter : IndicatorBase, IIndicatorValidation
     {
         private readonly RocBankValue[] _stages = new RocBankValue[4];
 
-        public void Reset() => Array.Clear(_stages);
+        public void Reset() => Array.Clear(_stages, 0, _stages.Length);
 
         private static void Product(
             ref ExactMeanAccumulator sum,

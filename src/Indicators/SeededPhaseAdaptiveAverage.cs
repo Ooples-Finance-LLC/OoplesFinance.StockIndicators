@@ -27,9 +27,9 @@ public sealed class SeededPhaseAdaptiveAverage
     )
         : base(4)
     {
-        if (!double.IsFinite(fastLimit) || fastLimit <= 0 || fastLimit > 1)
+        if (!FrameworkCompatibility.IsFinite(fastLimit) || fastLimit <= 0 || fastLimit > 1)
             throw new ArgumentOutOfRangeException(nameof(fastLimit));
-        if (!double.IsFinite(slowLimit) || slowLimit <= 0 || slowLimit > fastLimit)
+        if (!FrameworkCompatibility.IsFinite(slowLimit) || slowLimit <= 0 || slowLimit > fastLimit)
             throw new ArgumentOutOfRangeException(nameof(slowLimit));
         FastLimit = fastLimit;
         SlowLimit = slowLimit;

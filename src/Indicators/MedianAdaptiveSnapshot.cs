@@ -19,13 +19,13 @@ public static class MedianAdaptiveSnapshot
         double threshold = .002
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(threshold))
+        if (!FrameworkCompatibility.IsFinite(threshold))
             throw new ArgumentOutOfRangeException(nameof(threshold));
         foreach (var bar in bars)
-            if (!double.IsFinite(bar.Close))
+            if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = new double[bars.Count];
         var history = new Queue<double>();

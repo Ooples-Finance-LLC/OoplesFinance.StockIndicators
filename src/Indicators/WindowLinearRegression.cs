@@ -37,7 +37,7 @@ public sealed class WindowLinearRegression : IndicatorBase, IIndicatorValidation
     {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!Enum.IsDefined(output))
+        if (!Enum.IsDefined(output.GetType(), output))
             throw new ArgumentOutOfRangeException(nameof(output));
         Period = period;
         Output = output;

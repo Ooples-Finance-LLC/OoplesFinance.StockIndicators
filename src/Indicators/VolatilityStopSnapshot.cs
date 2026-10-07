@@ -26,16 +26,16 @@ public static class VolatilityStopSnapshot
         double multiplier = 3
     )
     {
-        ArgumentNullException.ThrowIfNull(bars);
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 2)
             throw new ArgumentOutOfRangeException(nameof(period));
-        if (!double.IsFinite(multiplier) || multiplier <= 0)
+        if (!FrameworkCompatibility.IsFinite(multiplier) || multiplier <= 0)
             throw new ArgumentOutOfRangeException(nameof(multiplier));
         foreach (var bar in bars)
             if (
-                !double.IsFinite(bar.High)
-                || !double.IsFinite(bar.Low)
-                || !double.IsFinite(bar.Close)
+                !FrameworkCompatibility.IsFinite(bar.High)
+                || !FrameworkCompatibility.IsFinite(bar.Low)
+                || !FrameworkCompatibility.IsFinite(bar.Close)
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
         if (bars.Count == 0)
@@ -91,7 +91,7 @@ public static class VolatilityStopSnapshot
                 double? value = stops[i].HasValue
                     ? ExactMeanAccumulator.UnitRatio(stops[i]!.Value, 1)
                     : null;
-                if (value.HasValue && !double.IsFinite(value.Value))
+                if (value.HasValue && !FrameworkCompatibility.IsFinite(value.Value))
                     throw new OverflowException("Volatility stop is not representable.");
                 return new VolatilityStopValue(
                     value,

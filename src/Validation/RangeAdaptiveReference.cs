@@ -30,7 +30,7 @@ internal static class RangeAdaptiveReference
                     (F(first.Max()) - F(first.Min()) + F(second.Max()) - F(second.Min())) / F(half)
                     + F(double.Epsilon);
                 var dimension = Math.Log((b / a).ToDouble()) / Math.Log(2);
-                var gain = F(Math.Clamp(Math.Exp(-4.6 * (dimension - 1)), .01, 1));
+                var gain = F(FrameworkCompatibility.Clamp(Math.Exp(-4.6 * (dimension - 1)), .01, 1));
                 prior = R(gain * F(bars[i].Close) + (F(1) - gain) * prior);
             }
             result[i] = prior.ToDouble();
@@ -67,7 +67,7 @@ internal static class RangeAdaptiveReference
                 .Aggregate(F(0), (s, f) => s + f * f);
             var normalized =
                 sum.Sign == 0 ? 0 : (F(period) * filters[i] * filters[i] / sum).SqrtToDouble();
-            var gain = F(Math.Clamp(scale * normalized * 5 / period, .1, 1));
+            var gain = F(FrameworkCompatibility.Clamp(scale * normalized * 5 / period, .1, 1));
             prior = R(gain * F(bars[i].Close) + (F(1) - gain) * prior);
             result[i] = prior.ToDouble();
         }

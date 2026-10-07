@@ -24,7 +24,7 @@ public sealed class PriceCircularTransform : MultiOutputIndicatorBase, IIndicato
     public PriceCircularTransform(PriceCircularOperation operation)
         : base(2)
     {
-        if (!Enum.IsDefined(operation))
+        if (!Enum.IsDefined(operation.GetType(), operation))
             throw new ArgumentOutOfRangeException(nameof(operation));
         Operation = operation;
     }
