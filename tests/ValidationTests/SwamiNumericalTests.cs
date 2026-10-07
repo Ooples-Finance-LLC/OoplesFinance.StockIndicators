@@ -101,6 +101,10 @@ public sealed class SwamiNumericalTests
         var source = new PriceChange(); var indicator = new SwamiStochastics(1, 3).Of(source);
         using var run = await new StockIndicatorBuilder().ConfigureSource(OoplesFinance.StockIndicators.Indicators.Bars.From(bars)).ConfigureIndicators(source, indicator).BuildAsync();
         var selected = run[source].ToArray(); Assert.All(selected, v => Assert.True(v < 7)); var projected = bars.Select((b, i) => new Bar(b.Time, b.Open, b.High, b.Low, selected[i], b.Volume)).ToArray(); var expected = BuiltInFormulaReferences.SwamiValues(projected, 1, 3).Line; Assert.Equal(expected, run[indicator].ToArray());
+        // The native wrapper applies ICustomInputRangePolicy; the object routes above do not.
+        using var native = new CustomInputState(new SwamiStochasticsState(1, 3),
+            bar => selected[(int)(bar.EndTime - DateTime.UnixEpoch).TotalMinutes]);
+        Assert.Equal(expected, bars.Select(bar => native.Update(Native(bar), true, true).Value));
         var feed = OoplesFinance.StockIndicators.Indicators.Bars.Live(); using var live = await new StockIndicatorBuilder().ConfigureSource(feed).PublishBeforeWarmup().ConfigureIndicators(source, indicator).BuildAsync(); foreach (var b in bars) feed.Publish(b); feed.Complete(); var actual = new List<double>();
         await foreach (var snapshot in live) actual.Add(snapshot[indicator]); Assert.Equal(expected, actual);
     }
