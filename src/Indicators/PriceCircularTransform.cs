@@ -82,9 +82,15 @@ public sealed class PriceCircularTransform : MultiOutputIndicatorBase, IIndicato
                 return;
             output[0] = operation switch
             {
+#if NETFRAMEWORK
+                PriceCircularOperation.Sine => FrameworkCircularMath.Value(x, 0),
+                PriceCircularOperation.Cosine => FrameworkCircularMath.Value(x, 1),
+                PriceCircularOperation.Tangent => FrameworkCircularMath.Value(x, 2),
+#else
                 PriceCircularOperation.Sine => Math.Sin(x),
                 PriceCircularOperation.Cosine => Math.Cos(x),
                 PriceCircularOperation.Tangent => Math.Tan(x),
+#endif
                 PriceCircularOperation.ArcSine => Math.Asin(x),
                 PriceCircularOperation.ArcCosine => Math.Acos(x),
                 _ => Math.Atan(x),
