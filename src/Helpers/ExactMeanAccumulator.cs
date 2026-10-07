@@ -45,6 +45,12 @@ internal struct ExactMeanAccumulator
         else AddSmall(-value._small, value._scale);
     }
 
+    internal void AddExact(ExactMeanAccumulator value)
+    {
+        if (value._wide) AddLarge(value._large, value._scale);
+        else AddSmall(value._small, value._scale);
+    }
+
     internal void Add(double value, BigInteger weight)
     {
         if (weight >= int.MinValue && weight <= int.MaxValue)

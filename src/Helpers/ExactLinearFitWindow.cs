@@ -100,6 +100,16 @@ internal sealed class ExactLinearFitWindow : IDisposable
             }
         }
         internal double Next => At(_n + 1);
+        internal double WindowIntercept => At(1 - _n);
+        internal double OneBasedWindowIntercept => At(-1 - _n);
+        internal double OneBasedGlobalIntercept => At(_n - 3 - 2 * _index);
+        internal double WindowPosition(int position) => At(2 * new BigInteger(position) - (_n - 1));
+        internal double EndpointWeights(int period, bool averageDuringWarmup)
+        {
+            if (averageDuringWarmup && _n < period) return ExactMeanAccumulator.UnitRatio(_sum, _n);
+            var massFactor = 4 * new BigInteger(period) + 1 - 3 * _n;
+            return ExactMeanAccumulator.UnitRatio(_sum * massFactor + 3 * _covariance, _n * massFactor);
+        }
         internal double GlobalIntercept => At(_n - 1 - 2 * _index);
         // Normalize the exact residual before rounding, even when the hidden endpoint overflows.
         internal double PercentResidual(double value)

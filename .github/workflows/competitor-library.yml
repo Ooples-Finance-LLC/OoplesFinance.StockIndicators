@@ -1,0 +1,173 @@
+name: Competitor library correctness
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'benchmarks/**'
+      - '.github/workflows/competitor-library.yml'
+      - 'scripts/*competitor*.py'
+  push:
+    branches: [master, main]
+    paths:
+      - 'src/**'
+      - 'benchmarks/**'
+      - '.github/workflows/competitor-library.yml'
+      - 'scripts/*competitor*.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: competitor-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      shards: ${{ steps.shards.outputs.matrix }}
+      count: ${{ steps.shards.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: python -m unittest discover -s scripts -p "test_verify_competitor*.py"
+      - name: Build comparison and contract binaries once
+        run: >-
+          dotnet build benchmarks/OoplesFinance.StockIndicators.CompetitorTests
+          -c Release -p:GeneratePackageOnBuild=false
+      - name: Discover compiled contract methods
+        run: >-
+          python scripts/run-competitor-contracts.py discover
+          benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
+          contract-methods.json
+      - name: Check committed API inventory
+        run: |
+          dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --comparison-manifest actual-manifest.json
+          diff -u benchmarks/competitor-library-manifest.json actual-manifest.json
+      - name: Select up to 20 parallel shards
+        id: shards
+        run: |
+          python - <<'PY'
+          import json, os
+          rows = json.load(open('benchmarks/competitor-library-manifest.json', encoding='utf-8'))
+          count = min(20, sum(row['Status'] == 'paired' for row in rows))
+          if count < 1: raise ValueError('No implemented comparisons')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              print('matrix=' + json.dumps(list(range(count))), file=output)
+              print('count=' + str(count), file=output)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: competitor-binaries
+          path: benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: competitor-contract-binaries
+          path: |
+            benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/
+            contract-methods.json
+          retention-days: 7
+  contracts:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: ${{ fromJSON(needs.build.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: competitor-contract-binaries
+          path: contracts
+      - name: Verify assigned contracts and require complete execution
+        run: >-
+          python scripts/run-competitor-contracts.py run
+          contracts/benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
+          contracts/contract-methods.json
+          ${{ matrix.shard }} ${{ needs.build.outputs.count }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: competitor-contract-results-${{ matrix.shard }}
+          path: contract-results-${{ matrix.shard }}/
+          retention-days: 7
+  correctness:
+    needs: build
+    runs-on: ubuntu-latest
+    # A shard can contain multiple quadratic Trady APIs; retain all repeated-call checks.
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: ${{ fromJSON(needs.build.outputs.shards) }}
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: competitor-binaries
+          path: binaries
+      - name: Verify complete trajectories
+        run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --verify-library-shard ${{ matrix.shard }} ${{ needs.build.outputs.count }} shard-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: competitor-shard-${{ matrix.shard }}
+          path: shard-${{ matrix.shard }}.json
+          retention-days: 7
+  complete-union:
+    needs: [build, contracts, correctness]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: competitor-shard-*
+          path: results
+          merge-multiple: true
+      - run: python scripts/verify-competitor-shards.py benchmarks/competitor-library-manifest.json results ${{ needs.build.outputs.count }}
+  performance:
+    needs: [build, complete-union]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: ${{ fromJSON(needs.build.outputs.shards) }}
+    env:
+      COMPARISON_SHARD: ${{ matrix.shard }}
+      COMPARISON_SHARDS: ${{ needs.build.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: competitor-binaries
+          path: binaries
+      - name: Measure both arms using the verified binaries
+        run: >-
+          dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll
+          --filter '*LibraryPairBenchmarks*'
+          --exporters json --artifacts performance
+      - name: Require timings for every assigned arm and size
+        run: >-
+          python scripts/verify-competitor-performance.py benchmarks/competitor-library-manifest.json
+          performance ${{ matrix.shard }} ${{ needs.build.outputs.count }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: competitor-performance-${{ matrix.shard }}
+          path: performance/
+          retention-days: 14
