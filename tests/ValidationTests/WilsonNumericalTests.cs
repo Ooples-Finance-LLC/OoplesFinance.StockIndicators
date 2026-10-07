@@ -19,6 +19,10 @@ public sealed class WilsonNumericalTests
         => new OrdinalFamilyNumericalTests().CheckRoutes(c, route, bars => BuiltInFormulaReferences.WilsonOutputs(bars, (IBuiltInIndicator)c.Factory()), IndicatorErrorBudget.Exact);
     [Theory, MemberData(nameof(Cases))]
     public Task NumericalClassesAreEnrolled(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().PublicConfigurationsPassEveryNumericalClass(c);
+    [Fact]
+    public Task DefaultConfigurationRetainsNumericalEnrollment() =>
+        NumericalClassesAreEnrolled(new IndicatorValidationCase(typeof(WilsonRelativePriceChannel), "default",
+            () => new WilsonRelativePriceChannel()));
     [Theory, MemberData(nameof(Cases))]
     public void EveryOutputRejectsFaults(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().EveryPublishedOutputRejectsAnInjectedValueFault(c);
     [Theory, MemberData(nameof(Cases))]

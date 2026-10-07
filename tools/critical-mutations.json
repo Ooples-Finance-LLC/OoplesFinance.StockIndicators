@@ -80110,7 +80110,7 @@
     "file": "src/Helpers/UberTrendWindow.cs",
     "scope": "internal sealed class UberTrendWindow",
     "before": "_started ? current - _previousPrice : default",
-    "after": "current - _previousPrice",
+    "after": "_started ? current - _previousPrice : current",
     "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
   },
   {
@@ -80137,7 +80137,7 @@
     "file": "src/Helpers/UberTrendWindow.cs",
     "scope": "internal sealed class UberTrendWindow",
     "before": "change.Sign < 0 ? default(Number) - change : default",
-    "after": "change.Sign < 0 ? change : default",
+    "after": "change.Sign > 0 ? default(Number) - change : default",
     "filter": "FullyQualifiedName~UberTrendNumericalTests.IndependentDirectionalVolumeAndSignalHand"
   },
   {
@@ -84779,7 +84779,7 @@
     "scope": null,
     "before": "WilsonRelativePriceChannel or ",
     "after": "",
-    "filter": "FullyQualifiedName~WilsonNumericalTests.NumericalClassesAreEnrolled"
+    "filter": "FullyQualifiedName~WilsonNumericalTests.DefaultConfigurationRetainsNumericalEnrollment"
   },
   {
     "id": "wave-trend-wide-ohlc-open",

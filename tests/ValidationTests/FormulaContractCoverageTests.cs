@@ -606,12 +606,15 @@ public sealed class FormulaContractCoverageTests
         var trend = BuiltInFormulaReferences.For(new EhlersInstantaneousTrendlineV1()).ToArray();
         Assert.Equal(2, trend.Length);
         foreach (var rule in trend) rule.Check(new IndicatorValidationContext("cycle-trend-hand", bars, [[2], [.8]], 0));
-        var q = .4 * (.1759 * .396 + .4607);
+        // The initial six-bar estimate is rounded after each smoothing stage.
+        var initialPeriod = .2 * 6;
+        var smoothPeriod = .33 * initialPeriod;
+        var q = .4 * (.1759 * smoothPeriod + .4607);
         var real = 1.57 * q;
         var enhanced = BuiltInFormulaReferences.For(new EhlersEnhancedSignalToNoiseRatio(6)).ToArray();
         Assert.Equal(4, enhanced.Length);
         foreach (var rule in enhanced) rule.Check(new IndicatorValidationContext("enhanced-noise-hand", bars,
-            [[.33 * 10 * Math.Log10((q * q + real * real) / .1)], [real], [q], [.396]], 0));
+            [[.33 * 10 * Math.Log10((q * q + real * real) / .1)], [real], [q], [smoothPeriod]], 0));
     }
 
     [Fact]
@@ -961,9 +964,18 @@ public sealed class FormulaContractCoverageTests
             new IndicatorValidationContext("gravity-trigger-hand", bars, [[.0192, 0, 0, 0]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new EhlersImpulseReaction(1, 2, 0))).Check(
             new IndicatorValidationContext("reaction-hand", bars, [[50, 25, 100d / 6, 12.5]], 0));
-        var decay = Math.Cos(.99) / (1 + Math.Sin(.99));
+        // Preserve the formula's binary64 coefficient evaluation; the equivalent
+        // trigonometric identity rounds differently before the recurrence begins.
+        var cosine = Math.Cos(.99);
+        var decay = 1 / cosine - Math.Sqrt(1 / (cosine * cosine) - 1);
+        // The two Hann taps differ by rounding, so their normalized first weight
+        // cannot be replaced by one half even for this two-bar smoothing window.
+        var firstTap = ReferenceFraction.FromDouble(1 - Math.Cos(2 * Math.PI * (1d / 3)));
+        var secondTap = ReferenceFraction.FromDouble(1 - Math.Cos(2 * Math.PI * (2d / 3)));
+        var firstBand = ReferenceFraction.FromDouble(2 * (1 - decay));
+        var firstResponse = (firstBand * firstTap / (firstTap + secondTap)).ToDouble();
         Assert.Single(BuiltInFormulaReferences.For(new EhlersImpulseResponse(1))).Check(
-            new IndicatorValidationContext("impulse-response-hand", bars, [[0, 0, 0, 1 - decay]], 0));
+            new IndicatorValidationContext("impulse-response-hand", bars, [[0, 0, 0, firstResponse]], 0));
     }
 
     [Fact]
@@ -1311,7 +1323,11 @@ public sealed class FormulaContractCoverageTests
             [.25, Math.Sqrt(97d / 512), Math.Sqrt(6337d / 8192)], [-.25, -Math.Sqrt(97d / 512), -Math.Sqrt(6337d / 8192)]);
         var impulse = Enumerable.Range(0, 7).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i), i == 0 ? 1 : 0,
             i == 0 ? 1 : 0, i == 0 ? 1 : 0, i == 0 ? 1 : 0, 1)).ToArray();
-        Check(new EhlersTripleDelayLineDetrender(1, new Sma()), impulse, [1, 0, 0, 0, 0, 0, -1.712], [1, 0, 0, 0, 0, 0, -1.712]);
+        // At lag six, retain the two delay stages' binary64 rounding.
+        var secondDelay = (.088 - 1) + 1.2;
+        var delayedImpulse = -2 + secondDelay;
+        Check(new EhlersTripleDelayLineDetrender(1, new Sma()), impulse,
+            [1, 0, 0, 0, 0, 0, delayedImpulse], [1, 0, 0, 0, 0, 0, delayedImpulse]);
         void Check(IIndicator indicator, Bar[] input, params double[][] expected)
         {
             var rules = BuiltInFormulaReferences.For(indicator).ToArray();
