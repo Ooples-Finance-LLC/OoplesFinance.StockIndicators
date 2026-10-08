@@ -8,6 +8,37 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 
+# Deliberate smoke profile: algebraic hand fixtures plus core numerical/input regressions.
+# Nightly/manual runs keep the complete discovered inventory.
+FOCUSED_CLASSES = {
+    'BollingerBandsTests', 'CeilingCycleTests', 'MovingAverageTests',
+    'MovingAverageFastPathTests', 'OscillatorTests', 'RollingOrderStatisticTests',
+    'RsiTests', 'WilderTests', 'WilderSwingIndexTests',
+    'FormulaContractCoverageTests', 'DelayedPhaseWarmupTests',
+    'SymmetricKernelNumericalTests', 'SourceGeneratorRoslynFloorTests',
+    'StockDataLazyViewTests', 'IndicatorVocabularyTests', 'BarAggregatorTests',
+}
+FOCUSED_METHODS = {
+    'WaveTrendNumericalTests.ExactOhlcMeanPreservesCancellationAndTinyMovement',
+    'WaveTrendNumericalTests.EqualLineAndSignalHaveNoDirectionalMargin',
+    'WaveTrendNumericalTests.IndependentNormalizationAndSignalHands',
+}
+
+
+def select_methods(names, profile):
+    if profile == 'exhaustive':
+        return names
+    if profile != 'focused':
+        raise ValueError('Unknown test profile.')
+    selected = [name for name in names if (
+        name.rsplit('.', 2)[-2] in FOCUSED_CLASSES
+        or '.'.join(name.split('.')[-2:]) in FOCUSED_METHODS)
+        and '.EveryReferencedConfigurationPassesItsFormula' not in name]
+    if not selected:
+        raise ValueError('Focused test profile selected no methods.')
+    return selected
+
+
 def read_plan(path):
     plan = json.loads(path.read_text(encoding='utf-8'))
     names = plan['methods']
@@ -43,17 +74,22 @@ def main():
     parser.add_argument('--plan', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--count', type=int, default=20)
+    parser.add_argument('--profile', choices=['focused', 'exhaustive'], default='exhaustive')
     parser.add_argument('--index', type=int)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     if args.action == 'plan':
         listing = args.output / 'discovered.txt'
         subprocess.run(['dotnet', 'vstest', str(args.assembly), '/ListFullyQualifiedTests',
-                        '/ListTestsTargetPath:' + str(listing.resolve())], check=True)
+                        '/ListTestsTargetPath:' + str(listing.resolve()),
+                        '/Settings:' + str(Path(__file__).resolve().parents[1] / 'tests' / 'critical-mutations.runsettings')], check=True)
         names = sorted(set(listing.read_text(encoding='utf-8-sig').splitlines()))
         if any(not n or any(c in n for c in '|&=()') for n in names):
             raise ValueError('Unsupported filter characters in discovered names.')
-        plan = {'methods': names, 'count': args.count,
+        discovered_count = len(names)
+        names = select_methods(names, args.profile)
+        plan = {'methods': names, 'count': args.count, 'profile': args.profile,
+                'discoveredMethodCount': discovered_count,
                 'assemblySha256': hashlib.sha256(args.assembly.read_bytes()).hexdigest(),
                 'sourceRevision': os.environ.get('GITHUB_SHA', 'local-uncommitted')}
         args.plan.write_text(json.dumps(plan, indent=2), encoding='utf-8')
@@ -91,7 +127,7 @@ def main():
         if receipt['planSha256'] != hashlib.sha256(args.plan.read_bytes()).hexdigest():
             raise ValueError('Unit shard plan mismatch.')
         total += check_trx(path.with_name('results.trx'), plan['methods'][index::plan['count']])
-    print(f"All {len(plan['methods'])} discovered methods covered exactly once; {total} passing test cases.")
+    print(f"{plan.get('profile', 'exhaustive')} profile: {len(plan['methods'])} planned methods covered exactly once; {total} passing test cases.")
 
 
 if __name__ == '__main__':

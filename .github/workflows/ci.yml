@@ -5,19 +5,27 @@ on:
     branches: [master, main]
   pull_request:
     branches: [master, main]
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 # Keep only the newest CI run for each PR or branch; each run fans out into many shards.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   critical-correctness:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/critical-correctness.yml
     permissions:
       contents: read
 
   correctness-package:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     name: Build the immutable correctness package
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +46,7 @@ jobs:
           if-no-files-found: error
 
   formula-build:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     name: Build contracts (${{ matrix.os }}, ${{ matrix.framework }})
     needs: correctness-package
     runs-on: ${{ matrix.os }}
@@ -92,6 +101,7 @@ jobs:
           if-no-files-found: error
 
   formula-shards:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     name: Contracts (${{ matrix.target.os }}, ${{ matrix.target.framework }}, shard ${{ matrix.shard }})
     needs: formula-build
     runs-on: ${{ matrix.target.os }}
@@ -145,7 +155,7 @@ jobs:
     # Preserve the existing per-platform gate names; no partial shard can pass them.
     name: Formula contracts (${{ matrix.os }}, ${{ matrix.framework }})
     needs: [formula-build, formula-shards]
-    if: always()
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -270,8 +280,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Discover the complete method inventory
-        run: python tools/unit_test_shards.py plan --assembly tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.dll --plan unit-plan.json --output discovery --count 20
+      - name: Verify CI selection and evidence accounting
+        run: python -m unittest discover -s tools/tests -v
+      - name: Plan the selected test profile
+        env:
+          TEST_PROFILE: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'exhaustive' || 'focused' }}
+        run: python tools/unit_test_shards.py plan --assembly tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.dll --plan unit-plan.json --output discovery --count 20 --profile $env:TEST_PROFILE
       - uses: actions/upload-artifact@v7
         with:
           name: unit-binary
@@ -287,7 +301,7 @@ jobs:
     name: Unit tests (shard ${{ matrix.shard }})
     needs: unit-build
     runs-on: windows-latest
-    timeout-minutes: 360
+    timeout-minutes: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 360 || 20 }}
     strategy:
       fail-fast: false
       max-parallel: 20
