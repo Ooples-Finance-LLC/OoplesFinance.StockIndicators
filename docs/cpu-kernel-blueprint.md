@@ -1,6 +1,6 @@
 # Reusable CPU indicator blueprint
 
-The eight pilots retain the library's numerical definitions while separating arithmetic from builder, result-object, and buffer ownership costs. The [measured results](../benchmarks/results/eight-cpu-pilots/README.md) include both wins and remaining gaps. Existing public APIs remain available. `IndicatorKernels` provides an explicit reusable route for applications that already own their input and output storage.
+The eight pilots retain the library's numerical definitions while separating arithmetic from builder, result-object, and buffer ownership costs. The [measured results](../benchmarks/results/eight-cpu-pilots/README.md) show lower measured means for all eight batch and streaming kernels at both tested sizes. Existing public APIs remain available. `IndicatorKernels` provides an explicit reusable route for applications that already own their input and output storage.
 
 ```csharp
 using OoplesFinance.StockIndicators.Indicators;
@@ -24,10 +24,10 @@ All input OHLCV values must be finite. Short output buffers and nonfinite batch 
 | `ScaledTrueRange(divisor)` | Unsmoothed range divided by divisor, including first bar | Ordered extrema, certified exact subtraction and division, compact exact fallback |
 | `RollingPivots(period, offset, style)` | PP, S1, S2, S3, S4, R1, R2, R3, R4; unavailable levels are NaN | Monotonic extrema, retained history, exact integer-weighted formulas |
 | `Fractal(leftSpan, rightSpan, useClose)` | Bear, Bull confirmed **for the center rightSpan bars ago** | Monotonic queues retain exact ties; retrospective placement belongs to the caller |
-| `RickshawMan(dojiPeriod, nearPeriod)` | 100 or zero | Reserved exact-range histories and rolling threshold sums |
+| `RickshawMan(dojiPeriod, nearPeriod)` | 100 or zero | Exact integer-grid rings and Int128 thresholds; lossless general-state fallback |
 | `BullishShortBody(period, percentile)` | One or zero | Reserved percentile window; stop rank counting once its outcome is certain |
 | `Sma(period)` | Zero before a complete window, then the exact mean | Reserved ring and compact exact rolling sum |
-| `Jurik(period, phase, volatilityPeriod)` | One value per observation, preserving rounded recurrence stages | Monotonic extrema, reserved histories, fixed-width exact dyadics with wide fallback |
+| `Jurik(period, phase, volatilityPeriod)` | One value per observation, preserving rounded recurrence stages | Monotonic extrema, certified fused recurrence, lazy exact dyadics and wide fallback |
 
 Scaled true range matches the pinned QuanTAlib ATR bar route, which is not a conventional smoothed ATR. Fractals expose confirmation time explicitly; they cannot publish an unconfirmed center as a live value. The full competitor catalog documents these semantic differences and independently verifies each side's formula.
 
@@ -37,7 +37,9 @@ No approximate mode or error tolerance is introduced. Pivot formulas retain exac
 
 True range illustrates a reusable certificate: hardware division is used only when an error-free subtraction proves its numerator is exact. Otherwise compact exact arithmetic handles the complete ratio. No nearby distinct values are treated as ties.
 
-On .NET 8 and .NET 10, Jurik uses correctly rounded fused multiply-add when both operands are exactly representable doubles. A blend additionally requires an error-free TwoSum certificate for its subtraction. Other ordinary stages use signed 128-bit dyadics while their magnitude fits 127 bits. Before every shift, addition, product, or ratio it checks whether the exact operation fits. Otherwise it delegates to arbitrary precision. Recurrence rounding is ties-to-even, including subnormal results. Wider stages use the established extended-exponent fallback. .NET Framework 4.6.1 uses the exact fallback throughout.
+On .NET 8 and .NET 10, Jurik retains rounded stages as doubles, avoiding repeated integer decoding. Error-free TwoSum and FMA residuals express exact differences and products as short expansions. Each residual-error bound is rounded outward with `BitIncrement`; the fast result is accepted only when the bound lies strictly inside both neighboring half-ULP gaps. Exact midpoint ambiguity, unsafe product exponents, overflow and subnormal boundaries fall back to signed 128-bit dyadics or arbitrary precision. Product exponent guards ensure FMA residuals do not silently underflow. No tolerance is used. The ordinary path is separate from wide arithmetic so it avoids that path's large temporary state; powers with an exact exponent of one use the identity result. Wider stages retain the established extended-exponent rounding. .NET Framework 4.6.1 uses exact fallback arithmetic.
+
+Rickshaw chooses an exact binary grid with exponent headroom, accepts only lossless conversions whose signed magnitudes are below 2^62, and stores range rings as integers. Range differences fit signed 64 bits; period-weighted thresholds and rolling sums fit Int128 even at the largest accepted integer periods. A grid miss transfers both retained histories, in order and without floating-point rounding, to the general exact state. A preview can evaluate this fallback without switching committed state. Reset retains capacity. These guarantees are covered by threshold fixtures and mature-window transition tests, including extreme/subnormal and inverted candles.
 
 Zero allocation is a **verified steady-state workload property**, not a promise for every finite binary64 input. Compact sums can also fall back for very wide exponent spans. The tests require zero bytes on ordinary fixtures and the actual 10,000-bar benchmark fixtures for all eight kernels on .NET 10. Setup, newly owned results from the public APIs, and arbitrary-precision fallback are outside that guarantee. BenchmarkDotNet's in-process memory diagnostics can include harness allocations; the dedicated thread-allocation gates isolate kernel work.
 
@@ -84,4 +86,28 @@ python scripts/verify-cpu-kernel-performance.py performance $env:COMPARISON_PAIR
 
 Use a clean artifact directory for each run. The verifier requires each selected arm at both 1,000 and 10,000 bars, real measurements, allocation diagnostics, and full untruncated pair identifiers. A successful process exit alone is insufficient.
 
-Ordinary pairs use 16 invocations, eight warmups, and five measured iterations to reduce tier-transition distortion. Trady short-day uses one invocation with three warmups and three measured iterations because one 10,000-bar call can take over a minute. Setup independently checks a bounded fixture and checks the complete kernel trajectory against the public route. Comprehensive competitor formula/isolation checks remain in the existing correctness campaign.
+Ordinary pairs automatically calibrate invocation counts with a 100 ms iteration target, eight warmups, and five measured iterations. This replaces the original fixed 16-invocation configuration, which produced very short, noisy measurements for fast kernels. Trady short-day uses one invocation with three warmups and three measured iterations because one 10,000-bar call can take over a minute. Setup independently checks a bounded fixture and checks the complete kernel trajectory against the public route. Comprehensive competitor formula/isolation checks remain in the existing correctness campaign.
+
+
+## PerfView findings behind the final optimizations
+
+Microsoft-signed PerfView 3.2.8 collected four elevated native ETW traces for the initial PR implementation: Jurik and Rickshaw, each with Ooples batch and its competitor. Each process ran the verified 10,000-bar workload for two seconds of warmup and 15 seconds of measurement. Exports were filtered to the measured dotnet process and checked against its logged PID. The percentages below are **exclusive** samples (inclusive percentages must not be added).
+
+| Trace | Selected exclusive samples | Resulting change |
+|---|---|---|
+| Jurik Ooples | Next 24.37%; dyadic Add 15.49%, SumProduct 9.50%, Multiply 8.91%, Blend 6.68%, Subtract 5.45%, RoundedDouble 4.96% | Keep rounded values as doubles; certify fused expansion results; move wide temporaries off the common path |
+| Jurik QuanTAlib | Calculation 35.61%; several native frames unresolved | Compare the actual paired runtime; do not attribute unresolved frames to guessed functions |
+| Rickshaw Ooples | Update 33.16%; Matches 26.78%; accumulator Add 8.39%; AddWeighted 7.30% | Exact integer-grid rings and direct Int128 predicates |
+| Rickshaw TA-Lib | CandleRange 56.05%; comparison adapter 28.59%; dictionary lookup 7.11% | Preserve the competitor workload, including its existing API/adapter costs |
+
+A subsequent managed sampled-thread trace of an intermediate Jurik implementation identified remaining dispatch/temporary-state cost. Separating the wide path and certifying nonrepresentable differences removed it without changing stage rounding. Final acceptance uses the paired BenchmarkDotNet measurements, not profiler-instrumented timings. Whole ETW traces stay local because they include unrelated system processes.
+
+The committed profiling harness reproduces one verified arm:
+
+```powershell
+# Run PerfView from an elevated shell; paths are examples.
+PerfView.exe /AcceptEula /NoGui /NoNGenRundown /DataFile:Jma.etl run dotnet.exe benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cpu-pilot QuanTAlib.Jma CpuBatch 15
+PerfView.exe /AcceptEula /NoGui UserCommand SaveCPUStacksAsCsv Jma.etl.zip dotnet 10 GreatestMSec
+```
+
+Use `Competitor` for the paired arm and `TaLib.Candles.RickshawMan` for the candle pair. Verify the exported process PID against `PROFILE START`; selecting only the last process named dotnet can accidentally select a concurrent build. The profiling harness also supports `CpuStreaming` and `PublicApi`.

@@ -105,6 +105,29 @@ public sealed class RickshawManCandle : IndicatorBase, IIndicatorValidationContr
             return value;
         }
 
+#if !NETFRAMEWORK
+        internal void Seed(long[] doji, int dojiCount, int dojiPosition,
+            long[] near, int nearCount, int nearPosition, int exponent, int seen)
+        {
+            Reset();
+            SeedWindow(doji, dojiCount, dojiPosition, exponent, _dojiHistory, ref _doji);
+            SeedWindow(near, nearCount, nearPosition, exponent, _nearHistory, ref _near);
+            _seen = seen;
+        }
+        private static void SeedWindow(long[] values, int count, int position, int exponent,
+            Queue<ExactMeanAccumulator> history, ref ExactMeanAccumulator sum)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var value = values[(count == values.Length ? position + i : i) % values.Length];
+                var range = new ExactMeanAccumulator();
+                range.Add(value >> 32); range.ScaleByPowerOfTwo(32);
+                range.Add((uint)(value & uint.MaxValue)); range.ScaleByPowerOfTwo(exponent);
+                history.Enqueue(range); sum.AddExact(range);
+            }
+        }
+#endif
+
         private static void AddWeighted(ref ExactMeanAccumulator sum, double value, long weight)
         {
             if (weight >= int.MinValue && weight <= int.MaxValue) sum.Add(value, (int)weight);

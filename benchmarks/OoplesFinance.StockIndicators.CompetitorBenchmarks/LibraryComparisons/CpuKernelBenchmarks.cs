@@ -38,7 +38,7 @@ internal static class CpuKernelPilots
                 var value = source < 0 || column.Present is not null && !column.Present[source]
                     ? double.NaN : column.Values[source];
                 var actual = output[i * kernel.OutputCount + slot];
-                if (!actual.Equals(value))
+                if (!actual.Equals(value)) // NOSONAR: the kernel contract requires exact values, including matching NaNs.
                     throw new InvalidOperationException($"{id} kernel differs at row {i}, slot {slot}: {actual:R} != {value:R}.");
             }
         }
@@ -51,7 +51,7 @@ internal static class CpuKernelPilots
 [Config(typeof(CpuKernelTimingConfig))]
 public class CpuKernelBenchmarks
 {
-    public IEnumerable<string> Cases => Environment.GetEnvironmentVariable("COMPARISON_PAIR") is { } id
+    public static IEnumerable<string> Cases => Environment.GetEnvironmentVariable("COMPARISON_PAIR") is { } id
         ? CpuKernelPilots.Ids.Where(value => value == id) : CpuKernelPilots.Ids;
     [ParamsSource(nameof(Cases))] public string PairId { get; set; } = "";
     [Params(1_000, 10_000)] public int Bars { get; set; }
@@ -96,8 +96,9 @@ public sealed class CpuKernelTimingConfig : ManualConfig
         // API bounded when selected (or when running the whole catalog at once).
         var pair = Environment.GetEnvironmentVariable("COMPARISON_PAIR");
         var slow = pair is null or "Trady.Candlestick.BullishShortDay";
-        AddJob(Job.ShortRun.WithToolchain(new InProcessEmitToolchain(TimeSpan.FromMinutes(30), true))
-            .WithInvocationCount(slow ? 1 : 16).WithUnrollFactor(1)
-            .WithWarmupCount(slow ? 3 : 8).WithIterationCount(slow ? 3 : 5));
+        var job = Job.ShortRun.WithToolchain(new InProcessEmitToolchain(TimeSpan.FromMinutes(30), true))
+            .WithUnrollFactor(1).WithWarmupCount(slow ? 3 : 8).WithIterationCount(slow ? 3 : 5);
+        AddJob(slow ? job.WithInvocationCount(1)
+            : job.WithMinIterationTime(Perfolizer.Horology.TimeInterval.FromMilliseconds(100)));
     }
 }

@@ -58,7 +58,11 @@ public static class IndicatorKernels
     public static IndicatorKernel RickshawMan(int dojiPeriod = 10, int nearPeriod = 5)
     {
         _ = new RickshawManCandle(dojiPeriod, nearPeriod);
+#if NETFRAMEWORK
         return new ScalarKernel(new RickshawManCandle.State(dojiPeriod, nearPeriod, true));
+#else
+        return new ScalarKernel(new RickshawGridState(dojiPeriod, nearPeriod));
+#endif
     }
     /// <summary>Bullish short body, returning one or zero. Reserves the percentile window.</summary>
     public static IndicatorKernel BullishShortBody(int period = 20, decimal percentile = .25m)

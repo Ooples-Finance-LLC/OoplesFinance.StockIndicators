@@ -1,6 +1,7 @@
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 using OoplesFinance.StockIndicators.Indicators;
 using Xunit;
+using OoplesFinance.StockIndicators.Builder;
 
 namespace OoplesFinance.StockIndicators.CompetitorTests;
 
@@ -185,6 +186,70 @@ public sealed class CpuKernelTests
         var kernel = IndicatorKernels.Jurik(13, 27, 7);
         var output = new double[prices.Length]; kernel.Process(bars, output);
         Assert.Equal(expected, output);
+    }
+
+    [Theory]
+    [InlineData(-900)]
+    [InlineData(-500)]
+    [InlineData(0)]
+    [InlineData(500)]
+    [InlineData(900)]
+    [InlineData(1000)]
+    public void FusedJurikAcrossScalesAndCancellationMatchesIndependentRounding(int exponent)
+    {
+        var random = new Random(761);
+        var prices = Enumerable.Range(0, 256).Select(i => Math.ScaleB(
+            i % 41 == 0 ? -random.NextDouble() : 1 + random.NextDouble() / 8, exponent)).ToArray();
+        var bars = prices.Select(p => new Bar(default, 0, 0, 0, p, 0)).ToArray();
+        foreach (var period in new[] { 2, 7, 20 })
+        {
+            var expected = JurikComparison.Reference(prices, period, -27, 5, false);
+            var actual = new double[prices.Length];
+            IndicatorKernels.Jurik(period, -27, 5).Process(bars, actual);
+            Assert.Equal(expected, actual);
+        }
+    }
+
+    [Theory]
+    [InlineData(1, 3)]
+    [InlineData(3, 1)]
+    [InlineData(10, 5)]
+    public async Task RickshawGridFallbackPreviewAndResetPreserveExactWindows(int doji, int near)
+    {
+        var bars = Enumerable.Range(0, 70).Select(i => new Bar(default,
+            i % 2 == 0 ? 100 : -100, 110 + i % 3, -110 - i % 7,
+            i % 2 == 0 ? 100.25 : -100.25, 0)).ToArray();
+        bars[35] = new Bar(default, double.Epsilon, double.MaxValue, -double.MaxValue, 0, 0);
+        bars[48] = new Bar(default, -2, -4, 5, 1, 0); // Inverted ranges remain algebraic inputs.
+        var exact = new RickshawManCandle(doji, near);
+        using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(exact).BuildAsync();
+        var expected = run[exact.Outputs[0]].ToArray();
+        var kernel = IndicatorKernels.RickshawMan(doji, near);
+        var row = new double[1];
+        for (var pass = 0; pass < 2; pass++)
+        {
+            kernel.Reset();
+            for (var i = 0; i < bars.Length; i++)
+            {
+                kernel.Preview(bars[35], row); // A grid miss must not consume the alternative.
+                kernel.Preview(bars[i], row); Assert.Equal(expected[i], row[0]);
+                kernel.Update(bars[i], row); Assert.Equal(expected[i], row[0]);
+            }
+        }
+    }
+
+    [Fact]
+    public void RickshawGridMatchesIndependentThresholdFixtures()
+    {
+        for (var i = 0; i < KickingRickshawComparison.RickshawCandidates.Length; i++)
+            foreach (var reverse in new[] { false, true })
+            {
+                var bars = KickingRickshawComparison.RickshawBars(i, reverse);
+                var values = new double[bars.Length];
+                IndicatorKernels.RickshawMan().Process(bars, values);
+                Assert.Equal(KickingRickshawComparison.RickshawCandidates[i].Expected, values[^1]);
+            }
     }
 
     [Fact]

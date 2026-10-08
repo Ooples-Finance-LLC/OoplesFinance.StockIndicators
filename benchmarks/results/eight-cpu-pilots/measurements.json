@@ -22,20 +22,21 @@
   "ProductionSourceLfSha256": {
     "src/Helpers/ExactMeanAccumulator.cs": "cbcc8b18f2f1b62f4573cbb45461198ae74ae117d53ccd1c398f262ffdccb269",
     "src/Helpers/ExtremeDeque.cs": "65c696d30efd6af2baa0bd26f9a4bfbca61995375e65cf625d182bbbc098be93",
-    "src/Helpers/JurikDyadic.cs": "2b5a881a69f75f97be4abc1752fa0f708a63f5751c9052f9839156fd1e4fb6c0",
+    "src/Helpers/JurikDyadic.cs": "9efcf693e310911f2656897dc12dda90b45dfc8dfbb410cc44c51201261425d3",
     "src/Indicators/FractalSnapshot.cs": "00af3bcab13d4fad22f320a1c406f9ba066fed2c9dd5f2d4bb842f9feb01f631",
-    "src/Indicators/IndicatorKernel.cs": "abf5a8ffcc52e7c207f248f37e836c2465e2a81102e5f1daea96ba7944303d5a",
+    "src/Indicators/IndicatorKernel.cs": "453f4846357b3c6b6aaf04bb981fb5458696ef4c02bbcb6641ffd509ba480324",
     "src/Indicators/IndicatorState.cs": "63fdb1e4381d3032df77a176724ca0f3b3233b0baaeab983b2eefbdbb2e67790",
-    "src/Indicators/JurikAdaptiveSnapshot.cs": "1ff5ccf45a4841ae55b67dbd3198d161b49f25d19d39dca36f45449f904fcfe9",
+    "src/Indicators/JurikAdaptiveSnapshot.cs": "429dc195567f7439b577bbec022d0420bea8ca51fc18aa3cb4b486fb3e8a7a7c",
     "src/Indicators/PercentileCandles.cs": "4226706fe3f1715a1ea1c371852ad207dfca87df9e1ee3e89d12c840471022c6",
     "src/Indicators/PivotLevelSnapshots.cs": "4ee4c63b950ed7f418359991cfc3328ffd543ed59f2da5c9897cbe90af0c1e79",
-    "src/Indicators/RickshawManCandle.cs": "87eb12a8a1e4049f1f9d411b0f1a34707d2dc8da0fb3ab96d75b9c441c326210",
+    "src/Indicators/RickshawGridState.cs": "5c5c5839bd05c17f58e8a1bf3578378a86ae3ff6ca448c49a09a6d641ec4341e",
+    "src/Indicators/RickshawManCandle.cs": "f0a9e8d58299932f16ae0954964ab346dab45792822b9128c1512972abeeba92",
     "src/Indicators/ScaledTrueRange.cs": "3bb96dc02b83fbaa50266a7590eec7408d69430364b91eb806f8819427fa335e",
     "src/Indicators/WindowCpuKernels.cs": "c93892e429d62cf54648b11e1e899ee0cb7a973a06ce62761445bfcd1c5e9d7a"
   },
   "Protocol": {
-    "OrdinaryPairs": "16 invocations, 8 warmups, 5 measurements; in-process BDN ShortRun",
-    "TradyShortDay": "1 invocation, 3 warmups, 3 measurements; unchanged competitor reused from measured baseline",
+    "OrdinaryPairs": "Final: automatic invocation calibration with 100 ms target, 8 warmups, 5 measurements, in-process BDN ShortRun. Historical baseline: 16 invocations, 8 warmups, 5 measurements.",
+    "TradyShortDay": "Unchanged prior measurements retained: 1 invocation, 3 warmups, 3 measurements; unchanged competitor reused from measured baseline.",
     "Sizes": [
       1000,
       10000
@@ -60,30 +61,31 @@
         "AllocatedBytes": 392782
       },
       "PublicApi": {
-        "MeanNanoseconds": 1221810.625,
-        "StandardDeviationNanoseconds": 3777.9489723261217,
-        "Samples": 5,
-        "AllocatedBytes": 18416
+        "MeanNanoseconds": 142772.0703125,
+        "StandardDeviationNanoseconds": 229.8226510327787,
+        "Samples": 4,
+        "AllocatedBytes": 18128
       },
       "Competitor": {
-        "MeanNanoseconds": 716071.875,
-        "StandardDeviationNanoseconds": 881.1465660338996,
-        "Samples": 4,
-        "AllocatedBytes": 392842
+        "MeanNanoseconds": 262775.6640625,
+        "StandardDeviationNanoseconds": 11299.853516025896,
+        "Samples": 5,
+        "AllocatedBytes": 392499
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 1228635.9375,
-        "StandardDeviationNanoseconds": 6892.818528412379,
-        "Samples": 4,
-        "AllocatedBytes": 228
+        "MeanNanoseconds": 165509.94140625,
+        "StandardDeviationNanoseconds": 12461.062487587065,
+        "Samples": 5,
+        "AllocatedBytes": 12
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 1228826.5625,
-        "StandardDeviationNanoseconds": 10616.964332643536,
+        "MeanNanoseconds": 201077.3681640625,
+        "StandardDeviationNanoseconds": 1111.3573110063223,
         "Samples": 4,
-        "AllocatedBytes": 291
-      }
+        "AllocatedBytes": 6
+      },
+      "FinalMeasurementFile": "identity-jma/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "QuanTAlib.Jma",
@@ -101,30 +103,31 @@
         "AllocatedBytes": 3971140
       },
       "PublicApi": {
-        "MeanNanoseconds": 12385681.25,
-        "StandardDeviationNanoseconds": 32594.322462214695,
-        "Samples": 4,
-        "AllocatedBytes": 162791
+        "MeanNanoseconds": 2027585,
+        "StandardDeviationNanoseconds": 171311.39346168764,
+        "Samples": 5,
+        "AllocatedBytes": 162217
       },
       "Competitor": {
-        "MeanNanoseconds": 1979745.3125,
-        "StandardDeviationNanoseconds": 7422.91352383232,
-        "Samples": 4,
-        "AllocatedBytes": 3971245
+        "MeanNanoseconds": 2640822.8125,
+        "StandardDeviationNanoseconds": 77261.86933649186,
+        "Samples": 5,
+        "AllocatedBytes": 3970976
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 12374187.5,
-        "StandardDeviationNanoseconds": 306040.78408512403,
-        "Samples": 5,
-        "AllocatedBytes": 357
+        "MeanNanoseconds": 1775082.421875,
+        "StandardDeviationNanoseconds": 70425.04057598108,
+        "Samples": 4,
+        "AllocatedBytes": 84
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 12268451.5625,
-        "StandardDeviationNanoseconds": 7802.030276299347,
-        "Samples": 4,
-        "AllocatedBytes": 357
-      }
+        "MeanNanoseconds": 1740563.75,
+        "StandardDeviationNanoseconds": 51564.96171206944,
+        "Samples": 5,
+        "AllocatedBytes": 84
+      },
+      "FinalMeasurementFile": "identity-jma/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "QuanTAlib.Atr",
@@ -142,30 +145,31 @@
         "AllocatedBytes": 89399
       },
       "PublicApi": {
-        "MeanNanoseconds": 1946551.5625,
-        "StandardDeviationNanoseconds": 57466.47513963218,
-        "Samples": 4,
-        "AllocatedBytes": 270768
+        "MeanNanoseconds": 148067.578125,
+        "StandardDeviationNanoseconds": 1301.9573807897177,
+        "Samples": 5,
+        "AllocatedBytes": 270704
       },
       "Competitor": {
-        "MeanNanoseconds": 340092.1875,
-        "StandardDeviationNanoseconds": 46691.00064268943,
+        "MeanNanoseconds": 63925.09765625,
+        "StandardDeviationNanoseconds": 6542.913075983595,
         "Samples": 4,
-        "AllocatedBytes": 89525
+        "AllocatedBytes": 89179
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 56190.625,
-        "StandardDeviationNanoseconds": 505.4005218636008,
-        "Samples": 4,
-        "AllocatedBytes": 294
+        "MeanNanoseconds": 16106.68701171875,
+        "StandardDeviationNanoseconds": 680.4628186427251,
+        "Samples": 5,
+        "AllocatedBytes": 0
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 63420.3125,
-        "StandardDeviationNanoseconds": 159.21151745921574,
+        "MeanNanoseconds": 15237.75634765625,
+        "StandardDeviationNanoseconds": 1837.3195215178362,
         "Samples": 4,
-        "AllocatedBytes": 357
-      }
+        "AllocatedBytes": 1
+      },
+      "FinalMeasurementFile": "final/QuanTAlib.Atr/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "QuanTAlib.Atr",
@@ -183,30 +187,31 @@
         "AllocatedBytes": 881567
       },
       "PublicApi": {
-        "MeanNanoseconds": 1797307.5,
-        "StandardDeviationNanoseconds": 49930.51977185397,
+        "MeanNanoseconds": 2233148.75,
+        "StandardDeviationNanoseconds": 20971.47533169497,
         "Samples": 5,
-        "AllocatedBytes": 3799523
+        "AllocatedBytes": 3799134
       },
       "Competitor": {
-        "MeanNanoseconds": 471568.75,
-        "StandardDeviationNanoseconds": 6111.786342115262,
-        "Samples": 4,
-        "AllocatedBytes": 881525
+        "MeanNanoseconds": 663366.6015625,
+        "StandardDeviationNanoseconds": 7292.724657596676,
+        "Samples": 5,
+        "AllocatedBytes": 881191
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 114203.125,
-        "StandardDeviationNanoseconds": 1240.048932166254,
-        "Samples": 4,
-        "AllocatedBytes": 294
+        "MeanNanoseconds": 158084.150390625,
+        "StandardDeviationNanoseconds": 5895.92688777642,
+        "Samples": 5,
+        "AllocatedBytes": 4
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 222191.25,
-        "StandardDeviationNanoseconds": 82218.84936805094,
+        "MeanNanoseconds": 160789.208984375,
+        "StandardDeviationNanoseconds": 11324.281578560765,
         "Samples": 5,
-        "AllocatedBytes": 357
-      }
+        "AllocatedBytes": 3
+      },
+      "FinalMeasurementFile": "final/QuanTAlib.Atr/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "Skender.GetRollingPivots",
@@ -224,30 +229,31 @@
         "AllocatedBytes": 748715
       },
       "PublicApi": {
-        "MeanNanoseconds": 2358632.5,
-        "StandardDeviationNanoseconds": 292829.22182108765,
+        "MeanNanoseconds": 676163.4375,
+        "StandardDeviationNanoseconds": 8699.876778267106,
         "Samples": 5,
         "AllocatedBytes": 397520
       },
       "Competitor": {
-        "MeanNanoseconds": 1895339.0625,
-        "StandardDeviationNanoseconds": 64579.7985003745,
-        "Samples": 4,
-        "AllocatedBytes": 748694
+        "MeanNanoseconds": 963596.71875,
+        "StandardDeviationNanoseconds": 108803.10962160079,
+        "Samples": 5,
+        "AllocatedBytes": 748333
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 471398.4375,
-        "StandardDeviationNanoseconds": 7141.044389580444,
-        "Samples": 4,
-        "AllocatedBytes": 165
+        "MeanNanoseconds": 601063.671875,
+        "StandardDeviationNanoseconds": 37759.47270562657,
+        "Samples": 5,
+        "AllocatedBytes": 0
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 685615.625,
-        "StandardDeviationNanoseconds": 23796.81132350859,
-        "Samples": 4,
-        "AllocatedBytes": 357
-      }
+        "MeanNanoseconds": 584853.984375,
+        "StandardDeviationNanoseconds": 39354.91199241726,
+        "Samples": 5,
+        "AllocatedBytes": 22
+      },
+      "FinalMeasurementFile": "final/Skender.GetRollingPivots/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "Skender.GetRollingPivots",
@@ -265,30 +271,31 @@
         "AllocatedBytes": 7493104
       },
       "PublicApi": {
-        "MeanNanoseconds": 8352526.25,
-        "StandardDeviationNanoseconds": 1544567.6587603022,
+        "MeanNanoseconds": 7683280,
+        "StandardDeviationNanoseconds": 372446.19000464963,
         "Samples": 5,
-        "AllocatedBytes": 3936294
+        "AllocatedBytes": 3936065
       },
       "Competitor": {
-        "MeanNanoseconds": 15304251.25,
-        "StandardDeviationNanoseconds": 1205464.6850174495,
+        "MeanNanoseconds": 12189452.5,
+        "StandardDeviationNanoseconds": 699405.7479500901,
         "Samples": 5,
-        "AllocatedBytes": 7491841
+        "AllocatedBytes": 7491656
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 5710551.875,
-        "StandardDeviationNanoseconds": 627858.2470484232,
+        "MeanNanoseconds": 5900578.75,
+        "StandardDeviationNanoseconds": 504846.7562120336,
+        "Samples": 5,
+        "AllocatedBytes": 136
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 6166560,
+        "StandardDeviationNanoseconds": 176274.10172087105,
         "Samples": 5,
         "AllocatedBytes": 354
       },
-      "CpuStreaming": {
-        "MeanNanoseconds": 6238253.125,
-        "StandardDeviationNanoseconds": 229945.63323705815,
-        "Samples": 4,
-        "AllocatedBytes": 0
-      }
+      "FinalMeasurementFile": "final/Skender.GetRollingPivots/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "Skender.GetFractal",
@@ -306,30 +313,31 @@
         "AllocatedBytes": 167831
       },
       "PublicApi": {
-        "MeanNanoseconds": 255148.4375,
-        "StandardDeviationNanoseconds": 2100.2007282539025,
-        "Samples": 4,
-        "AllocatedBytes": 154600
+        "MeanNanoseconds": 93124.2578125,
+        "StandardDeviationNanoseconds": 18486.501189533443,
+        "Samples": 5,
+        "AllocatedBytes": 154568
       },
       "Competitor": {
-        "MeanNanoseconds": 867779.6875,
-        "StandardDeviationNanoseconds": 12770.65256975115,
+        "MeanNanoseconds": 799315.234375,
+        "StandardDeviationNanoseconds": 130231.88023833405,
         "Samples": 4,
-        "AllocatedBytes": 167807
+        "AllocatedBytes": 167479
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 79648.75,
-        "StandardDeviationNanoseconds": 567.3815955774385,
+        "MeanNanoseconds": 37535.6884765625,
+        "StandardDeviationNanoseconds": 3385.846683655596,
         "Samples": 5,
-        "AllocatedBytes": 270
+        "AllocatedBytes": 1
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 95023.75,
-        "StandardDeviationNanoseconds": 308.391745593166,
-        "Samples": 5,
-        "AllocatedBytes": 336
-      }
+        "MeanNanoseconds": 36381.6162109375,
+        "StandardDeviationNanoseconds": 744.7712585125178,
+        "Samples": 4,
+        "AllocatedBytes": 1
+      },
+      "FinalMeasurementFile": "final/Skender.GetFractal/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "Skender.GetFractal",
@@ -347,30 +355,31 @@
         "AllocatedBytes": 1661576
       },
       "PublicApi": {
-        "MeanNanoseconds": 802115.625,
-        "StandardDeviationNanoseconds": 31236.122960511068,
+        "MeanNanoseconds": 1189937.5,
+        "StandardDeviationNanoseconds": 70206.46296037317,
         "Samples": 4,
-        "AllocatedBytes": 1540946
+        "AllocatedBytes": 1540962
       },
       "Competitor": {
-        "MeanNanoseconds": 6001843.75,
-        "StandardDeviationNanoseconds": 7944.571980813903,
+        "MeanNanoseconds": 7989020.833333333,
+        "StandardDeviationNanoseconds": 800598.2721996559,
         "Samples": 4,
-        "AllocatedBytes": 1661810
+        "AllocatedBytes": 1661960
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 444092.5,
-        "StandardDeviationNanoseconds": 4320.29729879785,
+        "MeanNanoseconds": 524067.421875,
+        "StandardDeviationNanoseconds": 33503.76657929673,
         "Samples": 5,
-        "AllocatedBytes": 249
+        "AllocatedBytes": 23
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 433890.625,
-        "StandardDeviationNanoseconds": 2254.99012608703,
+        "MeanNanoseconds": 535171.015625,
+        "StandardDeviationNanoseconds": 20905.16296096929,
         "Samples": 5,
-        "AllocatedBytes": 378
-      }
+        "AllocatedBytes": 23
+      },
+      "FinalMeasurementFile": "final/Skender.GetFractal/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "TaLib.Candles.RickshawMan",
@@ -388,30 +397,31 @@
         "AllocatedBytes": 12683
       },
       "PublicApi": {
-        "MeanNanoseconds": 2230902.5,
-        "StandardDeviationNanoseconds": 21097.309236754576,
+        "MeanNanoseconds": 325165.4296875,
+        "StandardDeviationNanoseconds": 23749.35978438154,
         "Samples": 5,
-        "AllocatedBytes": 272616
+        "AllocatedBytes": 272552
       },
       "Competitor": {
-        "MeanNanoseconds": 841152.5,
-        "StandardDeviationNanoseconds": 5687.531936723521,
+        "MeanNanoseconds": 117136.9140625,
+        "StandardDeviationNanoseconds": 8740.979924938596,
         "Samples": 5,
-        "AllocatedBytes": 12743
+        "AllocatedBytes": 12374
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 130420.3125,
-        "StandardDeviationNanoseconds": 174.20765566319952,
-        "Samples": 4,
-        "AllocatedBytes": 186
+        "MeanNanoseconds": 68754.90234375,
+        "StandardDeviationNanoseconds": 8504.99694730815,
+        "Samples": 5,
+        "AllocatedBytes": 2
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 144247.5,
-        "StandardDeviationNanoseconds": 1190.871857611053,
-        "Samples": 5,
-        "AllocatedBytes": 66
-      }
+        "MeanNanoseconds": 66178.23486328125,
+        "StandardDeviationNanoseconds": 1499.126128051861,
+        "Samples": 4,
+        "AllocatedBytes": 3
+      },
+      "FinalMeasurementFile": "final/TaLib.Candles.RickshawMan/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "TaLib.Candles.RickshawMan",
@@ -429,30 +439,31 @@
         "AllocatedBytes": 120533
       },
       "PublicApi": {
-        "MeanNanoseconds": 2518551.25,
-        "StandardDeviationNanoseconds": 27758.678752666707,
+        "MeanNanoseconds": 3567594.0625,
+        "StandardDeviationNanoseconds": 89461.782566854,
         "Samples": 5,
-        "AllocatedBytes": 3801608
+        "AllocatedBytes": 3801679
       },
       "Competitor": {
-        "MeanNanoseconds": 775356.25,
-        "StandardDeviationNanoseconds": 422.01772277160745,
+        "MeanNanoseconds": 1137294.7265625,
+        "StandardDeviationNanoseconds": 46717.30868201987,
         "Samples": 4,
-        "AllocatedBytes": 120599
+        "AllocatedBytes": 120413
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 835952.5,
-        "StandardDeviationNanoseconds": 2871.4842634080374,
+        "MeanNanoseconds": 750778.0078125,
+        "StandardDeviationNanoseconds": 56001.617534573474,
         "Samples": 5,
-        "AllocatedBytes": 294
+        "AllocatedBytes": 22
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 1009431.875,
-        "StandardDeviationNanoseconds": 199680.38786239125,
-        "Samples": 5,
-        "AllocatedBytes": 357
-      }
+        "MeanNanoseconds": 754950.5859375,
+        "StandardDeviationNanoseconds": 31584.12625514378,
+        "Samples": 4,
+        "AllocatedBytes": 7
+      },
+      "FinalMeasurementFile": "final/TaLib.Candles.RickshawMan/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "TaLib.Functions.Asin",
@@ -470,30 +481,31 @@
         "AllocatedBytes": 33872
       },
       "PublicApi": {
-        "MeanNanoseconds": 2060678.125,
-        "StandardDeviationNanoseconds": 11535.7556689696,
-        "Samples": 4,
-        "AllocatedBytes": 312306
+        "MeanNanoseconds": 287010.390625,
+        "StandardDeviationNanoseconds": 10928.854363580287,
+        "Samples": 5,
+        "AllocatedBytes": 312129
       },
       "Competitor": {
-        "MeanNanoseconds": 71020.3125,
-        "StandardDeviationNanoseconds": 1599.229754379172,
-        "Samples": 4,
-        "AllocatedBytes": 33956
+        "MeanNanoseconds": 30410.1513671875,
+        "StandardDeviationNanoseconds": 1604.3193218703334,
+        "Samples": 5,
+        "AllocatedBytes": 33563
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 59700,
-        "StandardDeviationNanoseconds": 412.7209004480712,
-        "Samples": 4,
-        "AllocatedBytes": 270
+        "MeanNanoseconds": 21874.50927734375,
+        "StandardDeviationNanoseconds": 2331.570035374302,
+        "Samples": 5,
+        "AllocatedBytes": 1
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 56043.75,
-        "StandardDeviationNanoseconds": 891.3867356540594,
+        "MeanNanoseconds": 24396.30615234375,
+        "StandardDeviationNanoseconds": 2123.4627488265337,
         "Samples": 5,
-        "AllocatedBytes": 375
-      }
+        "AllocatedBytes": 1
+      },
+      "FinalMeasurementFile": "final/TaLib.Functions.Asin/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "TaLib.Functions.Asin",
@@ -511,30 +523,31 @@
         "AllocatedBytes": 330896
       },
       "PublicApi": {
-        "MeanNanoseconds": 2294608.125,
-        "StandardDeviationNanoseconds": 103888.42943047725,
+        "MeanNanoseconds": 2806220.3125,
+        "StandardDeviationNanoseconds": 65806.36219004588,
         "Samples": 5,
-        "AllocatedBytes": 4211818
+        "AllocatedBytes": 4212027
       },
       "Competitor": {
-        "MeanNanoseconds": 218664.0625,
-        "StandardDeviationNanoseconds": 1644.802221836514,
-        "Samples": 4,
-        "AllocatedBytes": 330938
+        "MeanNanoseconds": 288763.8671875,
+        "StandardDeviationNanoseconds": 9158.350005986522,
+        "Samples": 5,
+        "AllocatedBytes": 330956
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 144526.25,
-        "StandardDeviationNanoseconds": 1363.5489081804144,
-        "Samples": 5,
-        "AllocatedBytes": 255
+        "MeanNanoseconds": 206452.63671875,
+        "StandardDeviationNanoseconds": 7342.363984170057,
+        "Samples": 4,
+        "AllocatedBytes": 12
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 147800,
-        "StandardDeviationNanoseconds": 1451.3261715582753,
+        "MeanNanoseconds": 257646.8359375,
+        "StandardDeviationNanoseconds": 7865.161697995405,
         "Samples": 5,
-        "AllocatedBytes": 378
-      }
+        "AllocatedBytes": 12
+      },
+      "FinalMeasurementFile": "final/TaLib.Functions.Asin/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "Trady.Candlestick.BullishShortDay",
@@ -634,30 +647,31 @@
         "AllocatedBytes": 781629
       },
       "PublicApi": {
-        "MeanNanoseconds": 1811578.125,
-        "StandardDeviationNanoseconds": 54856.19801752123,
+        "MeanNanoseconds": 241110.78125,
+        "StandardDeviationNanoseconds": 61111.32107604669,
         "Samples": 5,
-        "AllocatedBytes": 298104
+        "AllocatedBytes": 298024
       },
       "Competitor": {
-        "MeanNanoseconds": 2280690.625,
-        "StandardDeviationNanoseconds": 1206566.850346664,
+        "MeanNanoseconds": 1082061.25,
+        "StandardDeviationNanoseconds": 29415.445952276314,
         "Samples": 5,
-        "AllocatedBytes": 781610
+        "AllocatedBytes": 781032
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 97620.3125,
-        "StandardDeviationNanoseconds": 262.61778111608004,
-        "Samples": 4,
-        "AllocatedBytes": 249
+        "MeanNanoseconds": 62758.8037109375,
+        "StandardDeviationNanoseconds": 1531.6276627186417,
+        "Samples": 5,
+        "AllocatedBytes": 3
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 99515,
-        "StandardDeviationNanoseconds": 760.815249419989,
+        "MeanNanoseconds": 59540.44921875,
+        "StandardDeviationNanoseconds": 3238.758996452638,
         "Samples": 5,
-        "AllocatedBytes": 399
-      }
+        "AllocatedBytes": 3
+      },
+      "FinalMeasurementFile": "final/Trady.Indicator.SimpleMovingAverage/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     },
     {
       "Pair": "Trady.Indicator.SimpleMovingAverage",
@@ -675,30 +689,31 @@
         "AllocatedBytes": 7719378
       },
       "PublicApi": {
-        "MeanNanoseconds": 1841606.25,
-        "StandardDeviationNanoseconds": 28292.842237481196,
-        "Samples": 4,
-        "AllocatedBytes": 4043166
+        "MeanNanoseconds": 2209787.1875,
+        "StandardDeviationNanoseconds": 65472.976700151,
+        "Samples": 5,
+        "AllocatedBytes": 4043195
       },
       "Competitor": {
-        "MeanNanoseconds": 10351861.25,
-        "StandardDeviationNanoseconds": 53353.57506912025,
+        "MeanNanoseconds": 12696242.5,
+        "StandardDeviationNanoseconds": 952696.876741561,
         "Samples": 5,
-        "AllocatedBytes": 7719436
+        "AllocatedBytes": 7719388
       },
       "CompetitorReusedFromBaseline": false,
       "CpuBatch": {
-        "MeanNanoseconds": 525112.5,
-        "StandardDeviationNanoseconds": 1835.8020783388888,
+        "MeanNanoseconds": 615669.23828125,
+        "StandardDeviationNanoseconds": 5829.661625573205,
         "Samples": 4,
-        "AllocatedBytes": 420
+        "AllocatedBytes": 27
       },
       "CpuStreaming": {
-        "MeanNanoseconds": 497109.375,
-        "StandardDeviationNanoseconds": 691.5505675654334,
-        "Samples": 4,
-        "AllocatedBytes": 438
-      }
+        "MeanNanoseconds": 628004.21875,
+        "StandardDeviationNanoseconds": 33624.06800906383,
+        "Samples": 5,
+        "AllocatedBytes": 12
+      },
+      "FinalMeasurementFile": "final/Trady.Indicator.SimpleMovingAverage/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuKernelBenchmarks-report-full-compressed.json"
     }
   ]
 }
