@@ -13,7 +13,9 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 public class CpuBuilderBenchmarks
 {
     public static IEnumerable<string> Cases => Environment.GetEnvironmentVariable("COMPARISON_PAIR") is { } id
-        ? CpuBuilderWorkload.PairIds.Where(value => value == id) : CpuBuilderWorkload.PairIds;
+        ? CpuBuilderWorkload.PairIds.Where(value => value == id)
+        : Environment.GetEnvironmentVariable("COMPARISON_FAMILY") is { } family
+            ? CpuBuilderWorkload.FamilyPairs(family) : CpuBuilderWorkload.PairIds;
     [ParamsSource(nameof(Cases))] public string PairId { get; set; } = "";
     [Params(1_000, 10_000)] public int Bars { get; set; }
     private CpuNativeWorkload _work = null!;
@@ -44,7 +46,8 @@ public sealed class CpuBuilderTimingConfig : ManualConfig
 {
     public CpuBuilderTimingConfig()
     {
-        var slow = Environment.GetEnvironmentVariable("COMPARISON_PAIR") is null
+        var slow = (Environment.GetEnvironmentVariable("COMPARISON_PAIR")
+            ?? Environment.GetEnvironmentVariable("COMPARISON_FAMILY")) is null
             or "Trady.Candlestick.BullishShortDay" or "Trady.Candlestick.BullishShortDay.Tuple";
         var job = Job.ShortRun.WithToolchain(new InProcessEmitToolchain(TimeSpan.FromMinutes(30), true))
             .WithUnrollFactor(1).WithWarmupCount(slow ? 3 : 8).WithIterationCount(slow ? 3 : 5);
@@ -58,6 +61,14 @@ internal static class CpuBuilderWorkload
     internal static readonly string[] PairIds = [.. CpuKernelPilots.Ids,
         "Skender.GetSma", "Skender.GetSma.Tuple", "TaLib.Functions.Sma", "QuanTAlib.Sma",
         "Trady.Indicator.SimpleMovingAverage.Tuple", "Trady.Candlestick.BullishShortDay.Tuple"];
+    internal static IEnumerable<string> FamilyPairs(string family) => family switch
+    {
+        "Trady.Indicator.SimpleMovingAverage" => PairIds.Where(id => id.Contains("SimpleMovingAverage", StringComparison.Ordinal)
+            || id.Contains(".Sma", StringComparison.Ordinal) || id.Contains(".GetSma", StringComparison.Ordinal)),
+        "Trady.Candlestick.BullishShortDay" => PairIds.Where(id => id.StartsWith(family, StringComparison.Ordinal)),
+        _ when CpuKernelPilots.Ids.Contains(family) => [family],
+        _ => throw new ArgumentOutOfRangeException(nameof(family))
+    };
     internal static IIndicator Create(string pair) => CpuNativeWorkload.CanonicalPair(pair) switch
     {
         "QuanTAlib.Jma" => new JurikAdaptive(20, 0, 10),
@@ -97,16 +108,16 @@ internal static class CpuBuilderWorkload
             var expectedOutput = expected.Outputs[names[slot]];
             for (var i = 0; i < values.Length; i++)
             {
-                var present = presentSlot < 0 || run[indicator.Outputs[presentSlot]][i] == 1;
+                var present = presentSlot < 0 || run[indicator.Outputs[presentSlot]][i].Equals(1d);
                 var expectedPresent = expectedOutput.Present?[i] ?? !double.IsNaN(expectedOutput.Values[i]);
                 // SMA's warmup is finite zero in our public builder contract.
                 if (indicator is Sma && i < 19)
                 {
-                    if (values[i] != 0) throw new InvalidOperationException("Unexpected SMA startup.");
+                    if (!values[i].Equals(0d)) throw new InvalidOperationException("Unexpected SMA startup.");
                     continue;
                 }
                 if (present != expectedPresent || (present && !values[i].Equals(expectedOutput.Values[i]))
-                    || (!present && values[i] != 0))
+                    || (!present && !values[i].Equals(0d)))
                     throw new InvalidOperationException($"{work.PairId}: builder output {slot}, bar {i} differs from its public reference.");
             }
         }

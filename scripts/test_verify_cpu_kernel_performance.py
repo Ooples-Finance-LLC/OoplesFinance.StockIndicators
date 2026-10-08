@@ -86,6 +86,11 @@ class CpuPerformanceEvidenceTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 module.verify(directory, "Pilot", suite="builder")
 
+    def test_sma_family_requires_all_four_libraries_and_direct_input_routes(self):
+        self.assertEqual({"QuanTAlib.Sma", "Skender.GetSma", "Skender.GetSma.Tuple", "TaLib.Functions.Sma",
+                          "Trady.Indicator.SimpleMovingAverage", "Trady.Indicator.SimpleMovingAverage.Tuple"},
+                         set(module.builder_family_pairs("Trady.Indicator.SimpleMovingAverage")))
+
 
 if __name__ == "__main__":
     unittest.main()

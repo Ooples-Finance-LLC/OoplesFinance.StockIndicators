@@ -32,6 +32,8 @@ def verify(directory, pair, methods=None, suite="kernel"):
                 continue
             # Parameters is a display field and truncates longer pair IDs.
             parameters = re.search(r'\(Bars: (\d+), PairId: "([^"]+)"\)', row.get("FullName", ""))
+            if parameters is not None and parameters[2] != pair and suite == "builder":
+                continue  # Other complete pairs share this family's runner/report.
             if parameters is None or parameters[2] != pair:
                 raise ValueError("Unexpected pair in pilot report")
             key = (row["Method"], int(parameters[1]))
@@ -57,11 +59,29 @@ def verify(directory, pair, methods=None, suite="kernel"):
     return rows
 
 
+def builder_family_pairs(family):
+    if family == "Trady.Indicator.SimpleMovingAverage":
+        return [family, family + ".Tuple", "Skender.GetSma", "Skender.GetSma.Tuple",
+                "TaLib.Functions.Sma", "QuanTAlib.Sma"]
+    if family == "Trady.Candlestick.BullishShortDay":
+        return [family, family + ".Tuple"]
+    supported_methods(family)  # Reject unknown families.
+    return [family]
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory")
     parser.add_argument("pair")
     parser.add_argument("--methods", nargs="+", help="Explicit subset for diagnostic runs only")
     parser.add_argument("--suite", choices=["kernel", "builder"], default="kernel")
+    parser.add_argument("--family", action="store_true", help="Require every builder route in this family")
     args = parser.parse_args()
-    print(json.dumps(verify(args.directory, args.pair, args.methods, args.suite), indent=2))
+    if args.family:
+        if args.suite != "builder" or args.methods:
+            parser.error("--family requires --suite builder and the complete method set")
+        rows = [row for pair in builder_family_pairs(args.pair)
+                for row in verify(args.directory, pair, suite="builder")]
+    else:
+        rows = verify(args.directory, args.pair, args.methods, args.suite)
+    print(json.dumps(rows, indent=2))

@@ -1,13 +1,32 @@
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 using OoplesFinance.StockIndicators.Indicators;
+using OoplesFinance.StockIndicators.Validation;
 using Xunit;
 
 namespace OoplesFinance.StockIndicators.CompetitorTests;
 
 public sealed class CpuBuilderBenchmarkTests
 {
+    public static IEnumerable<object[]> FormulaCases => IndicatorValidationDiscovery.Discover([typeof(JurikAdaptive).Assembly])
+        .Where(c => c.IndicatorType == typeof(JurikAdaptive) || c.IndicatorType == typeof(RollingPivotLevels)
+            || c.IndicatorType == typeof(RetrospectiveFractals)).Select(c => new object[] { c });
+
+    [Theory, MemberData(nameof(FormulaCases))]
+    public Task NewBuilderIndicatorsPassRegisteredIndependentFormulas(IndicatorValidationCase testCase) =>
+        IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
+
     public static IEnumerable<object[]> Cases => CpuBuilderWorkload.PairIds.Select(id => new object[] { id });
+    [Fact]
+    public void FamilyPartitionIncludesEveryMatchingSmaCompetitorOnOneRunner()
+    {
+        var expected = new[] { "QuanTAlib.Sma", "Skender.GetSma", "Skender.GetSma.Tuple", "TaLib.Functions.Sma",
+            "Trady.Indicator.SimpleMovingAverage", "Trady.Indicator.SimpleMovingAverage.Tuple" };
+        Assert.Equal(expected.Order(), CpuBuilderWorkload.FamilyPairs("Trady.Indicator.SimpleMovingAverage").Order());
+        var all = CpuKernelPilots.Ids.SelectMany(CpuBuilderWorkload.FamilyPairs).ToArray();
+        Assert.Equal(CpuBuilderWorkload.PairIds.Order(), all.Order());
+        Assert.Equal(all.Length, all.Distinct().Count());
+    }
     [Theory, MemberData(nameof(Cases))]
     public void BuilderOutputsMatchExistingVerifiedPublicContracts(string id)
     {

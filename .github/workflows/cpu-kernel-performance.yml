@@ -68,11 +68,11 @@ jobs:
     timeout-minutes: 60
     strategy:
       fail-fast: false
-      max-parallel: 14
+      max-parallel: 8
       matrix:
-        pair: [QuanTAlib.Jma, QuanTAlib.Atr, Skender.GetRollingPivots, Skender.GetFractal, TaLib.Candles.RickshawMan, TaLib.Functions.Asin, Trady.Candlestick.BullishShortDay, Trady.Indicator.SimpleMovingAverage, Skender.GetSma, Skender.GetSma.Tuple, TaLib.Functions.Sma, QuanTAlib.Sma, Trady.Indicator.SimpleMovingAverage.Tuple, Trady.Candlestick.BullishShortDay.Tuple]
+        pair: [QuanTAlib.Jma, QuanTAlib.Atr, Skender.GetRollingPivots, Skender.GetFractal, TaLib.Candles.RickshawMan, TaLib.Functions.Asin, Trady.Candlestick.BullishShortDay, Trady.Indicator.SimpleMovingAverage]
     env:
-      COMPARISON_PAIR: ${{ matrix.pair }}
+      COMPARISON_FAMILY: ${{ matrix.pair }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -83,7 +83,7 @@ jobs:
           name: cpu-pilot-binaries
           path: binaries
       - run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter '*CpuBuilderBenchmarks*' --exporters json --artifacts performance
-      - run: python scripts/verify-cpu-kernel-performance.py performance "$COMPARISON_PAIR" --suite builder > performance/verified.json
+      - run: python scripts/verify-cpu-kernel-performance.py performance "$COMPARISON_FAMILY" --suite builder --family > performance/verified.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

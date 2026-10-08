@@ -52,6 +52,6 @@ dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release
 python scripts/verify-cpu-kernel-performance.py builder-performance TaLib.Functions.Sma --suite builder
 ```
 
-The manual CPU performance workflow defaults to the builder suite and runs fourteen routes independently. Before the workflow reaches the default branch, adding the `run-builder-benchmarks` PR label explicitly starts the same builder campaign. Kernel diagnostics remain separately selectable. Regression checks cover complete output placement/presence and compare native routes to existing independently verified contracts. Evidence validation rejects missing methods/sizes, failed/dry measurements, invalid allocations, and substituted kernel reports.
+The manual CPU performance workflow defaults to the builder suite and runs eight indicator families in parallel, with all competitors for each family on the same runner. Before the workflow reaches the default branch, adding the `run-builder-benchmarks` PR label explicitly starts the same builder campaign. Kernel diagnostics remain separately selectable. Regression checks cover complete output placement/presence and compare native routes to existing independently verified contracts. Evidence validation rejects missing methods/sizes, failed/dry measurements, invalid allocations, and substituted kernel reports.
 
 Results are pending the new campaign. No builder win is claimed while those measurements are outstanding.

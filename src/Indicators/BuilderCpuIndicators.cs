@@ -1,3 +1,5 @@
+using OoplesFinance.StockIndicators.Validation;
+
 namespace OoplesFinance.StockIndicators.Indicators;
 
 // Complete-history calculations cannot be represented by a live Update method.
@@ -8,7 +10,7 @@ internal interface IHistoricalIndicator
 }
 
 /// <summary>Volatility-adaptive Jurik smoothing, using the JurikAdaptiveSnapshot recurrence.</summary>
-public sealed class JurikAdaptive : IndicatorBase
+public sealed class JurikAdaptive : IndicatorBase, IIndicatorValidationContract
 {
     /// <summary>Creates the adaptive recurrence with exact rounded stages.</summary>
     public JurikAdaptive(int period = 20, double phase = 0, int volatilityPeriod = 10)
@@ -24,7 +26,14 @@ public sealed class JurikAdaptive : IndicatorBase
     /// <summary>Short volatility window.</summary>
     public int VolatilityPeriod { get; }
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(IndicatorKernels.Jurik(Period, Phase, VolatilityPeriod));
+    public IEnumerable<IndicatorValidationRule> ValidationRules =>
+        [IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+            bars => BuilderCpuReferences.Jurik(bars, Period, Phase, VolatilityPeriod), IndicatorErrorBudget.Exact)];
+    /// <inheritdoc/>
+    // The builder's output policy rejects infinity with its precise slot/bar
+    // evidence; standalone kernels retain their immediate OverflowException.
+    protected internal override object CreateState() => new State(
+        new JurikCpuKernel(Period, Phase, VolatilityPeriod, Math.Max(Period, VolatilityPeriod), rejectOverflow: false));
 
     private sealed class State(IndicatorKernel kernel) : IIndicatorState
     {
@@ -41,7 +50,7 @@ public sealed class JurikAdaptive : IndicatorBase
 /// <summary>Previous-window pivot levels, with explicit presence outputs.</summary>
 /// <remarks>Absent values are zero and their corresponding IsDefined output is zero.
 /// Values and presence flags follow PP,S1,S2,S3,S4,R1,R2,R3,R4 order.</remarks>
-public sealed class RollingPivotLevels : MultiOutputIndicatorBase
+public sealed class RollingPivotLevels : MultiOutputIndicatorBase, IIndicatorValidationContract
 {
     /// <summary>Creates pivots over a preceding window with an optional gap.</summary>
     public RollingPivotLevels(int period = 20, int offset = 0, PivotLevelStyle style = PivotLevelStyle.Standard) : base(18)
@@ -58,6 +67,10 @@ public sealed class RollingPivotLevels : MultiOutputIndicatorBase
     public int Offset { get; }
     /// <summary>Pivot formula.</summary>
     public PivotLevelStyle Style { get; }
+    /// <inheritdoc/>
+    public IEnumerable<IndicatorValidationRule> ValidationRules => Enumerable.Range(0, 18).Select(slot =>
+        IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+            bars => BuilderCpuReferences.Pivots(bars, Period, Offset, Style)[slot], IndicatorErrorBudget.Exact));
     /// <inheritdoc/>
     public override int WarmupBars => Period + Offset;
     /// <summary>Pivot point.</summary>
@@ -87,7 +100,7 @@ public sealed class RollingPivotLevels : MultiOutputIndicatorBase
         return Outputs[9 + level.Slot];
     }
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(IndicatorKernels.RollingPivots(Period, Offset, Style));
+    protected internal override object CreateState() => new State(new PivotCpuKernel(Period, Offset, Style, rejectOverflow: false));
     private sealed class State(IndicatorKernel kernel) : IMultiOutputState
     {
         public void Reset() => kernel.Reset();
@@ -106,7 +119,7 @@ public sealed class RollingPivotLevels : MultiOutputIndicatorBase
 /// <summary>Strict retrospective fractals at their center bars, for finite builder sources.</summary>
 /// <remarks>Requires rightSpan future bars. Live sources are rejected; this indicator must
 /// not be used as a causal trading signal. Absent values are zero with a zero presence flag.</remarks>
-public sealed class RetrospectiveFractals : MultiOutputIndicatorBase, IHistoricalIndicator
+public sealed class RetrospectiveFractals : MultiOutputIndicatorBase, IHistoricalIndicator, IIndicatorValidationContract
 {
     /// <summary>Creates a complete-history high/low or close fractal calculation.</summary>
     public RetrospectiveFractals(int leftSpan = 2, int rightSpan = 2, bool useClose = false) : base(4)
@@ -121,6 +134,10 @@ public sealed class RetrospectiveFractals : MultiOutputIndicatorBase, IHistorica
     public int RightSpan { get; }
     /// <summary>Whether to compare closes instead of highs and lows.</summary>
     public bool UseClose { get; }
+    /// <inheritdoc/>
+    public IEnumerable<IndicatorValidationRule> ValidationRules => Enumerable.Range(0, 4).Select(slot =>
+        IndicatorValidationRule.Reference(slot,
+            bars => BuilderCpuReferences.Fractals(bars, LeftSpan, RightSpan, UseClose)[slot], IndicatorErrorBudget.Exact));
     /// <summary>Strict local high, or zero when absent.</summary>
     public IIndicatorOutput Bear => Outputs[0];
     /// <summary>Strict local low, or zero when absent.</summary>

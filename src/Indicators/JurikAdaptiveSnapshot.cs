@@ -41,12 +41,13 @@ internal sealed class JurikCpuKernel : IndicatorKernel
     private readonly double _beta, _power, _maximum, _phaseGain, _bandBase, _volatilityWeight;
     private readonly ExtremeDeque _highs, _lows;
     private readonly JurikDyadic[] _history;
+    private readonly bool _rejectOverflow;
     private int _historyPosition, _historyCount;
     private long _seen;
     private JurikDyadic _upper, _lower, _ma, _det0, _det1, _jma, _vsum, _avolty;
-    internal JurikCpuKernel(int period, double phase, int volatilityPeriod, int capacity)
+    internal JurikCpuKernel(int period, double phase, int volatilityPeriod, int capacity, bool rejectOverflow = true)
     {
-        _period = period; _volatilityPeriod = volatilityPeriod;
+        _period = period; _volatilityPeriod = volatilityPeriod; _rejectOverflow = rejectOverflow;
         _beta = .45 * (period - 1) / (.45 * (period - 1) + 2);
         var length = Math.Max(Math.Log(Math.Sqrt(period - 1)) / Math.Log(2) + 2, 0);
         _power = Math.Max(length - 2, .5);
@@ -267,7 +268,7 @@ internal sealed class JurikCpuKernel : IndicatorKernel
         det1.Multiply(alpha * alpha); det1.AddExact(ma2); det1 = Stage(det1);
         jma = JurikDyadic.SumProduct(jma, det1, 1);
         var value = jma.Mean(1);
-        if (!FrameworkCompatibility.IsFinite(value))
+        if (_rejectOverflow && !FrameworkCompatibility.IsFinite(value))
             throw new OverflowException("Jurik output is not representable.");
 
         if (commit)

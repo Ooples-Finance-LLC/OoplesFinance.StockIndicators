@@ -24,7 +24,7 @@ internal sealed class FractalCpuKernel(int left, int right, bool useClose) : Ind
     }
 }
 
-internal sealed class PivotCpuKernel(int period, int offset, PivotLevelStyle style) : IndicatorKernel
+internal sealed class PivotCpuKernel(int period, int offset, PivotLevelStyle style, bool rejectOverflow = true) : IndicatorKernel
 {
     private readonly Bar[] _history = new Bar[checked(period + offset)];
     private readonly ExtremeDeque _highs = new(period, true), _lows = new(period, false);
@@ -39,7 +39,7 @@ internal sealed class PivotCpuKernel(int period, int offset, PivotLevelStyle sty
         if (_seen < _history.Length) output.Fill(double.NaN);
         else PivotLevelSnapshots.FillLevels(bar.Open,
             _highs.NextValue(previous.High, first), _lows.NextValue(previous.Low, first),
-            previous.Close, style, output);
+            previous.Close, style, output, rejectOverflow);
         if (commit)
         {
             if (end >= 0)

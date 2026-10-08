@@ -187,7 +187,7 @@ public static class PivotLevelSnapshots
     }
 
     internal static void FillLevels(double open, double high, double low, double close,
-        PivotLevelStyle style, Span<double> values)
+        PivotLevelStyle style, Span<double> values, bool rejectOverflow = true)
     {
         values.Fill(double.NaN);
         double Q(int ow, int hw, int lw, int cw, int denominator)
@@ -195,7 +195,7 @@ public static class PivotLevelSnapshots
             var sum = new ExactMeanAccumulator();
             sum.Add(open, ow); sum.Add(high, hw); sum.Add(low, lw); sum.Add(close, cw);
             var value = sum.Mean(denominator);
-            return FrameworkCompatibility.IsFinite(value)
+            return !rejectOverflow || FrameworkCompatibility.IsFinite(value)
                 ? value : throw new OverflowException("Pivot level is not representable.");
         }
         if (style == PivotLevelStyle.Camarilla)
