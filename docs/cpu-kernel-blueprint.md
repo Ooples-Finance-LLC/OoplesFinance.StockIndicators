@@ -1,6 +1,6 @@
 # Reusable CPU indicator blueprint
 
-The eight pilots retain the library's numerical definitions while separating arithmetic from builder, result-object, and buffer ownership costs. The [measured results](../benchmarks/results/eight-cpu-pilots/README.md) show lower measured means for all eight batch and streaming kernels at both tested sizes. Existing public APIs remain available. `IndicatorKernels` provides an explicit reusable route for applications that already own their input and output storage.
+The eight pilots retain the library's numerical definitions while separating arithmetic from builder, result-object, and buffer ownership costs. The [measured results](../benchmarks/results/eight-cpu-pilots/README.md) distinguish owning batch, reusable batch, and supported streaming comparisons. The earlier claim of eight batch and streaming wins used allocating correctness adapters and is superseded. Existing public APIs remain available. `IndicatorKernels` provides an explicit reusable route for applications that already own their input and output storage.
 
 ```csharp
 using OoplesFinance.StockIndicators.Indicators;
@@ -16,11 +16,11 @@ kernel.Update(bars[0], next);  // commits it
 
 `Process` continues the current state, so chunking a source has the same result as processing it in one batch. Reset before an independent batch. Instances are owned by one consumer and are not thread safe. Reset retains window capacity. These factories reserve their windows up front; unlike snapshot APIs, very large requested windows require correspondingly large setup storage.
 
-All input OHLCV values must be finite. Short output buffers and nonfinite batch inputs are rejected before consuming any bars. A numerical overflow can leave an earlier batch prefix committed; callers should reset before retrying a failed batch. Output slots beyond the requested rows are untouched. Undefined results use `double.NaN`, with the layouts below.
+Bar kernels require all OHLCV input values to be finite. The close-only Asin overload follows the IEEE contract described below. Short output buffers and nonfinite batch inputs are rejected before consuming any bars. A numerical overflow can leave an earlier batch prefix committed; callers should reset before retrying a failed batch. Output slots beyond the requested rows are untouched. Undefined results use `double.NaN`, with the layouts below.
 
 | Factory | Output layout and timing | Reusable technique |
 |---|---|---|
-| `Asin()` | Arcsine of close; NaN outside [-1,1] | Direct arithmetic into caller storage |
+| `Asin()` / `Asin(closes, output)` | Arcsine of close; NaN outside [-1,1] | Bar kernel or direct close-span computation; the latter matches TA-Lib's input shape |
 | `ScaledTrueRange(divisor)` | Unsmoothed range divided by divisor, including first bar | Ordered extrema, certified exact subtraction and division, compact exact fallback |
 | `RollingPivots(period, offset, style)` | PP, S1, S2, S3, S4, R1, R2, R3, R4; unavailable levels are NaN | Monotonic extrema, retained history, exact integer-weighted formulas |
 | `Fractal(leftSpan, rightSpan, useClose)` | Bear, Bull confirmed **for the center rightSpan bars ago** | Monotonic queues retain exact ties; retrospective placement belongs to the caller |
@@ -84,9 +84,9 @@ dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release
 python scripts/verify-cpu-kernel-performance.py performance $env:COMPARISON_PAIR
 ```
 
-Use a clean artifact directory for each run. The verifier requires each selected arm at both 1,000 and 10,000 bars, real measurements, allocation diagnostics, and full untruncated pair identifiers. A successful process exit alone is insufficient.
+Use a clean artifact directory for each run. The verifier requires the supported matched arms at both 1,000 and 10,000 bars, real measurements, allocation diagnostics, and full untruncated pair identifiers. It rejects legacy adapter-based methods and unsupported substitutions. A successful process exit alone is insufficient.
 
-Ordinary pairs automatically calibrate invocation counts with a 100 ms iteration target, eight warmups, and five measured iterations. This replaces the original fixed 16-invocation configuration, which produced very short, noisy measurements for fast kernels. Trady short-day uses one invocation with three warmups and three measured iterations because one 10,000-bar call can take over a minute. Setup independently checks a bounded fixture and checks the complete kernel trajectory against the public route. Comprehensive competitor formula/isolation checks remain in the existing correctness campaign.
+Ordinary pairs automatically calibrate invocation counts with a 100 ms iteration target, eight warmups, and five measured iterations. This replaces the original fixed 16-invocation configuration, which produced very short, noisy measurements for fast kernels. Trady short-day uses one invocation with three warmups and three measured iterations because one 10,000-bar call can take over a minute. Setup checks independent formulas on a bounded fixture, direct competitor outputs against the complete native reference, and complete kernel/owning trajectories against the public route. Successful validation is cached only after completion within the benchmark process; it does not cache timed results. Comprehensive competitor formula/isolation checks remain in the existing correctness campaign.
 
 
 ## PerfView findings behind the final optimizations
@@ -100,14 +100,35 @@ Microsoft-signed PerfView 3.2.8 collected four elevated native ETW traces for th
 | Rickshaw Ooples | Update 33.16%; Matches 26.78%; accumulator Add 8.39%; AddWeighted 7.30% | Exact integer-grid rings and direct Int128 predicates |
 | Rickshaw TA-Lib | CandleRange 56.05%; comparison adapter 28.59%; dictionary lookup 7.11% | Preserve the competitor workload, including its existing API/adapter costs |
 
-A subsequent managed sampled-thread trace of an intermediate Jurik implementation identified remaining dispatch/temporary-state cost. Separating the wide path and certifying nonrepresentable differences removed it without changing stage rounding. Final acceptance uses the paired BenchmarkDotNet measurements, not profiler-instrumented timings. Whole ETW traces stay local because they include unrelated system processes.
+A subsequent managed sampled-thread trace of an intermediate Jurik implementation identified remaining dispatch/temporary-state cost. Separating the wide path and certifying nonrepresentable differences removed it without changing stage rounding. Those traces describe the historical adapter-based harness. Current acceptance uses the direct native BenchmarkDotNet measurements, not those profiler-instrumented timings. Whole ETW traces stay local because they include unrelated system processes.
 
 The committed profiling harness reproduces one verified arm:
 
 ```powershell
 # Run PerfView from an elevated shell; paths are examples.
-PerfView.exe /AcceptEula /NoGui /NoNGenRundown /DataFile:Jma.etl run dotnet.exe benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cpu-pilot QuanTAlib.Jma CpuBatch 15
+PerfView.exe /AcceptEula /NoGui /NoNGenRundown /DataFile:Jma.etl run dotnet.exe benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cpu-pilot QuanTAlib.Jma OoplesOwnedBatch 15
 PerfView.exe /AcceptEula /NoGui UserCommand SaveCPUStacksAsCsv Jma.etl.zip dotnet 10 GreatestMSec
 ```
 
-Use `Competitor` for the paired arm and `TaLib.Candles.RickshawMan` for the candle pair. Verify the exported process PID against `PROFILE START`; selecting only the last process named dotnet can accidentally select a concurrent build. The profiling harness also supports `CpuStreaming` and `PublicApi`.
+Use `CompetitorOwnedBatch` for the paired arm and `TaLib.Candles.RickshawMan` for the candle pair. Verify the exported process PID against `PROFILE START`; selecting only the last process named dotnet can accidentally select a concurrent build. The profiling harness also supports `OoplesReusableBatch` and `CompetitorReusableBatch` for supported TA-Lib pairs. Streaming timings use the BenchmarkDotNet lifecycle described below.
+
+
+## Matched benchmark boundaries and adversarial review
+
+The timed methods in `CpuKernelBenchmarks` call `CpuNativeWorkload` directly. None calls `ComparisonPair.Competitor`, `ComparisonSeries`, reference arithmetic, reflection, nullable projection, presence-mask construction, or dictionary packaging. Those belong exclusively to setup and verification.
+
+| Workload | Ooples | Competitor | Available pairs |
+|---|---|---|---|
+| Owning batch | Fresh kernel and owned flat output; Asin directly allocates its close-span output | Fresh native state where needed and the native owned output collection/buffer | All eight |
+| Reusable batch | Prepared buffers and reset kernel; direct close-span Asin | Direct TA-Lib span call into prepared native buffers | Asin and Rickshaw |
+| Streaming | Fresh state/storage outside timing, then every incremental update stored | Fresh QuanTAlib state/storage outside timing, then every incremental update stored | JMA and ATR |
+
+Owning Ooples measurements compose the new kernel APIs; they are not the legacy builder route. Skender and Trady return eager native collections, which are returned directly without another `ToArray`. Tests assert materialization and independent ownership. Native result types retain their own costs: Skender/Trady include dated result objects, Rickshaw returns packed integers, and Ooples uses flat doubles. These API comparisons do not isolate identical machine-level arithmetic or promise identical precision.
+
+Streaming uses a separate job with exactly one invocation per iteration, 64 independent sequences per invocation, and `OperationsPerInvoke=64`. The evidence verifier rejects calibrated multi-invocation streaming results. Iteration setup constructs both sides' state and output storage outside timing. Every result is retained. The reported operation is one complete 1,000- or 10,000-update sequence, not one update. This measures updates from fresh state, not an indefinitely warmed live stream. We do not use QuanTAlib JMA's incomplete history reset or label a batch-only API as streaming.
+
+Input preparation is outside timing for both sides, including QuanTAlib TValue objects. Decimal-native libraries receive shared prices on a 1/1024 grid, exactly representable as both double and decimal. Period is 20, JMA phase is zero and volatility period is 10, Rickshaw periods are 10/5, and fractal left/right spans are 20/20. Owning fractal output is shifted to its center bar inside timing, matching the competitor's placement; incremental kernels retain confirmation-time placement. Owning warmup/null/NaN conventions and numerical rounding differences remain explicitly documented in the pair references.
+
+The close-span Asin API follows IEEE `Math.Asin` behavior, including NaN for infinities and NaN inputs, matching TA-Lib. It validates buffer length before writes, allows exact in-place operation, rejects partial overlap, and leaves extra output slots untouched. The original bar API additionally validates all OHLCV fields. The direct bar comparison lost to TA-Lib; the close-only API was explicitly approved to match TA-Lib's input shape. Both interfaces remain tested; changing the benchmark input contract must never be presented as speeding up the old bar API.
+
+Adversarial review covered all PR production changes and the benchmark lifecycle. Resolved findings were asymmetric allocation/setup, timed correctness normalization, unsupported streaming substitutions, incomplete native reset, redundant native-result copying, decimal input rounding, fractal placement, validation-cache failure handling, and acceptance of old benchmark evidence. The review also checked exact-rounding guards, Rickshaw grid bounds/fallback transfer, monotonic-deque ties, preview/reset/chunking, overflow rejection, and result observability. Regression tests cover the affected behavior; this is an internal review, not an independent external audit.

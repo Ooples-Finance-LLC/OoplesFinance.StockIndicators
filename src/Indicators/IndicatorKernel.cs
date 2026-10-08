@@ -48,6 +48,18 @@ public static class IndicatorKernels
 {
     /// <summary>Arcsine of close in radians; values outside [-1,1] are absent (NaN).</summary>
     public static IndicatorKernel Asin() => new AsinKernel();
+    /// <summary>Writes the IEEE arcsine of each close in radians into caller-owned storage.</summary>
+    /// <remarks>Values outside [-1,1], infinities, and NaN produce NaN, matching
+    /// Math.Asin. Short outputs and partially overlapping buffers are rejected before writes.
+    /// Exact in-place operation is supported; extra output slots are untouched.</remarks>
+    public static void Asin(ReadOnlySpan<double> closes, Span<double> output)
+    {
+        if (output.Length < closes.Length)
+            throw new ArgumentException("Output buffer is too short.", nameof(output));
+        if (closes.Overlaps(output, out var offset) && offset != 0)
+            throw new ArgumentException("Buffers must be disjoint or start at the same element.", nameof(output));
+        for (var i = 0; i < closes.Length; i++) output[i] = Math.Asin(closes[i]);
+    }
     /// <summary>Unsmoothed true range divided by a positive divisor.</summary>
     public static IndicatorKernel ScaledTrueRange(int divisor = 14)
     {

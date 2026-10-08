@@ -12,7 +12,7 @@ spec.loader.exec_module(module)
 
 class CpuPerformanceEvidenceTests(unittest.TestCase):
     def setUp(self):
-        self.methods = ["PublicApi", "Competitor", "CpuBatch", "CpuStreaming"]
+        self.methods = ["OoplesOwnedBatch", "CompetitorOwnedBatch", "OoplesReusableBatch", "CompetitorReusableBatch"]
         self.rows = [{"Type": "CpuKernelBenchmarks", "Method": method,
                       "Parameters": f"Bars={bars}&PairId=Pilot",
                       "FullName": f'CpuKernelBenchmarks.{method}(Bars: {bars}, PairId: "Pilot")',
@@ -41,6 +41,31 @@ class CpuPerformanceEvidenceTests(unittest.TestCase):
             rows[0][field] = value
             with self.subTest(field=field, value=value), self.assertRaises(ValueError):
                 self.check(rows)
+
+    def test_capabilities_exclude_unmatched_workloads(self):
+        self.assertEqual(2, len(module.supported_methods("Skender.GetFractal")))
+        self.assertIn("CompetitorStreaming", module.supported_methods("QuanTAlib.Jma"))
+        self.assertNotIn("CompetitorReusableBatch", module.supported_methods("QuanTAlib.Jma"))
+        self.assertIn("CompetitorReusableBatch", module.supported_methods("TaLib.Functions.Asin"))
+        self.assertNotIn("CompetitorStreaming", module.supported_methods("TaLib.Functions.Asin"))
+
+    def test_legacy_adapter_results_are_rejected(self):
+        self.rows[0]["Method"] = "Competitor"
+        with self.assertRaises(ValueError):
+            self.check(self.rows)
+
+    def test_streaming_cannot_reuse_state_across_calibrated_invocations(self):
+        self.methods = ["OoplesStreaming", "CompetitorStreaming"]
+        self.rows = [{"Type": "CpuKernelBenchmarks", "Method": method,
+                      "FullName": f'CpuKernelBenchmarks.{method}(Bars: {bars}, PairId: "Pilot")',
+                      "Statistics": {"Mean": 100, "N": 3},
+                      "Memory": {"BytesAllocatedPerOperation": 0},
+                      "Measurements": [{"IterationMode": "Workload", "IterationStage": "Actual", "Operations": 64}]}
+                     for method in self.methods for bars in (1000, 10000)]
+        self.assertEqual(4, len(self.check(self.rows)))
+        self.rows[0]["Measurements"][0]["Operations"] = 128
+        with self.assertRaises(ValueError):
+            self.check(self.rows)
 
     def test_unexpected_pair(self):
         self.rows[0]["FullName"] = 'CpuKernelBenchmarks.PublicApi(Bars: 1000, PairId: "Wrong")'

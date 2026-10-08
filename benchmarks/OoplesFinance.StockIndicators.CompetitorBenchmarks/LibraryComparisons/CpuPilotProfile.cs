@@ -9,25 +9,25 @@ internal static class CpuPilotProfile
     internal static void Run(string id, string arm, int seconds)
     {
         if (seconds < 1 || seconds > 300) throw new ArgumentOutOfRangeException(nameof(seconds));
-        if (arm is not ("CpuBatch" or "CpuStreaming" or "Competitor" or "PublicApi"))
+        if (arm is not ("OoplesOwnedBatch" or "CompetitorOwnedBatch" or "OoplesReusableBatch" or "CompetitorReusableBatch"))
             throw new ArgumentOutOfRangeException(nameof(arm));
-        var pair = ComparisonPairs.Get(id);
-        var data = ComparisonVerifier.BenchmarkFixture(pair, 10_000);
+        var work = new CpuNativeWorkload(id, 10_000);
+        if (arm.Contains("Reusable", StringComparison.Ordinal) && !CpuNativeWorkload.SupportsReusable(id))
+            throw new NotSupportedException(id + " has no reusable native batch API.");
+        work.Verify();
         var kernel = CpuKernelPilots.Create(id);
-        var output = new double[data.Count * kernel.OutputCount];
-        CpuKernelPilots.Verify(id, data, kernel, output);
-        ComparisonVerifier.Check(pair, ComparisonVerifier.BenchmarkFixture(pair, 160), 20, verifyIsolation: false);
+        var output = new double[work.Data.Count * kernel.OutputCount];
         object? result = null;
         void Invoke()
         {
-            if (arm == "Competitor") result = pair.Competitor(data, 20);
-            else if (arm == "PublicApi") result = pair.Ooples(data, 20);
+            if (arm == "CompetitorOwnedBatch") result = work.NativeOwned();
+            else if (arm == "OoplesOwnedBatch") result = work.OoplesOwned();
+            else if (arm == "CompetitorReusableBatch") result = work.NativeReusable();
             else
             {
-                kernel.Reset();
-                if (arm == "CpuBatch") kernel.Process(data.IndicatorBars, output);
-                else for (var i = 0; i < data.Count; i++)
-                    kernel.Update(data.IndicatorBars[i], output.AsSpan(i * kernel.OutputCount, kernel.OutputCount));
+                if (id == "TaLib.Functions.Asin") IndicatorKernels.Asin(work.Data.Closes, output);
+                else { kernel.Reset(); kernel.Process(work.Data.IndicatorBars, output); }
+                result = output;
             }
         }
         var timer = Stopwatch.StartNew();

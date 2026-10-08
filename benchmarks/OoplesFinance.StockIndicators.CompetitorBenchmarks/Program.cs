@@ -1,6 +1,14 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+if (args.Length == 3 && args[0] == "--verify-cpu-native")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    new CpuNativeWorkload(args[1], count).Verify();
+    Console.WriteLine($"Verified direct native and Ooples outputs: {args[1]}, {count} bars.");
+    return;
+}
+
 if (args.Length == 4 && args[0] == "--profile-cpu-pilot")
 {
     CpuPilotProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));

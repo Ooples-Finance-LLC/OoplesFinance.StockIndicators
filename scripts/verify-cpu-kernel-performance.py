@@ -6,7 +6,22 @@ import re
 from pathlib import Path
 
 
-def verify(directory, pair, methods):
+def supported_methods(pair):
+    pairs = {"QuanTAlib.Jma", "QuanTAlib.Atr", "Skender.GetRollingPivots", "Skender.GetFractal",
+             "TaLib.Candles.RickshawMan", "TaLib.Functions.Asin", "Trady.Candlestick.BullishShortDay",
+             "Trady.Indicator.SimpleMovingAverage"}
+    if pair not in pairs:
+        raise ValueError("Unknown pilot pair: " + pair)
+    methods = ["OoplesOwnedBatch", "CompetitorOwnedBatch"]
+    if pair.startswith("QuanTAlib."):
+        methods += ["OoplesStreaming", "CompetitorStreaming"]
+    if pair.startswith("TaLib."):
+        methods += ["OoplesReusableBatch", "CompetitorReusableBatch"]
+    return methods
+
+
+def verify(directory, pair, methods=None):
+    methods = supported_methods(pair) if methods is None else methods
     expected = {(method, bars) for method in methods for bars in (1000, 10000)}
     seen = set()
     rows = []
@@ -28,6 +43,11 @@ def verify(directory, pair, methods):
                 raise ValueError("Missing or invalid timing: " + str(key))
             if allocated is None or not math.isfinite(allocated) or allocated < 0:
                 raise ValueError("Missing allocation measurement: " + str(key))
+            if "Streaming" in key[0]:
+                measurements = [m for m in row.get("Measurements", [])
+                                if m.get("IterationMode") == "Workload" and m.get("IterationStage") == "Actual"]
+                if not measurements or any(m.get("Operations") != 64 for m in measurements):
+                    raise ValueError("Streaming must measure one invocation of 64 fresh sequences: " + str(key))
             seen.add(key)
             rows.append({"Pair": pair, "Method": key[0], "Bars": key[1],
                          "MeanNanoseconds": mean, "AllocatedBytes": allocated})
@@ -40,6 +60,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory")
     parser.add_argument("pair")
-    parser.add_argument("--methods", nargs="+", default=["PublicApi", "Competitor", "CpuBatch", "CpuStreaming"])
+    parser.add_argument("--methods", nargs="+", help="Explicit subset for diagnostic runs only")
     args = parser.parse_args()
     print(json.dumps(verify(args.directory, args.pair, args.methods), indent=2))

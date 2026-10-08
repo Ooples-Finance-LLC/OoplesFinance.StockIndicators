@@ -17,7 +17,7 @@ jobs:
           dotnet-version: '10.0.x'
       - run: python -m unittest discover -s scripts -p test_verify_cpu_kernel_performance.py
       - run: dotnet build benchmarks/OoplesFinance.StockIndicators.CompetitorTests -c Release -p:GeneratePackageOnBuild=false
-      - run: dotnet test benchmarks/OoplesFinance.StockIndicators.CompetitorTests -c Release --no-build --filter FullyQualifiedName~CpuKernelTests
+      - run: dotnet test benchmarks/OoplesFinance.StockIndicators.CompetitorTests -c Release --no-build --filter "FullyQualifiedName~CpuKernelTests|FullyQualifiedName~CpuNativeBenchmarkTests|FullyQualifiedName~AsinSpanTests"
       - uses: actions/upload-artifact@v4
         with:
           name: cpu-pilot-binaries

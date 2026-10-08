@@ -1,28 +1,59 @@
-# Eight CPU pilot measurements
+# Eight CPU pilots: direct native comparisons
 
-All eight reusable batch kernels and all eight reusable streaming kernels have lower measured means than their paired competitors at both 1,000 and 10,000 bars. These are workload-specific local results, not universal rankings. Existing owning APIs are reported separately.
+These results replace the earlier adapter-inclusive “all eight batch and streaming wins” claim. Timed competitor arms now call native APIs directly. Input preparation, correctness normalization and references are outside timing for both sides. See [raw statistics and contracts](measurements.json), [benchmark methods](../../OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/CpuKernelBenchmarks.cs), [native calls](../../OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/CpuNativeWorkload.cs), and the [reviewed blueprint](../../../docs/cpu-kernel-blueprint.md).
 
-AMD Ryzen 9 3950X, Windows 11 x64, .NET 10.0.12, BenchmarkDotNet 0.15.8. The [machine-readable results](measurements.json) retain both sizes, sample counts, standard deviations, raw allocation diagnostics, and normalized source hashes. See the [blueprint](../../../docs/cpu-kernel-blueprint.md) for contracts and reproduction.
+All rows below are milliseconds per 10,000 observations. Ratio = competitor / Ooples; above 1 favors Ooples. The JSON contains both sizes, variability, confidence intervals, sample counts, raw allocations and report hashes. Close differences are not proof of a stable advantage.
 
-Times below are milliseconds per 10,000 bars. Ratios are competitor time divided by kernel time; above 1 favors our kernel.
+## Owning batch
 
-| Pair | Previous public | Current public | Competitor | CPU batch | CPU stream | Batch win | Stream win |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| QuanTAlib.Jma | 299.282 | 2.028 | 2.641 | 1.775 | 1.741 | 1.49x | 1.52x |
-| QuanTAlib.Atr | 14.465 | 2.233 | 0.663 | 0.158 | 0.161 | 4.20x | 4.13x |
-| Skender.GetRollingPivots | 45.822 | 7.683 | 12.189 | 5.901 | 6.167 | 2.07x | 1.98x |
-| Skender.GetFractal | 1.249 | 1.190 | 7.989 | 0.524 | 0.535 | 15.24x | 14.93x |
-| TaLib.Candles.RickshawMan | 2.772 | 3.568 | 1.137 | 0.751 | 0.755 | 1.51x | 1.51x |
-| TaLib.Functions.Asin | 2.133 | 2.806 | 0.289 | 0.206 | 0.258 | 1.40x | 1.12x |
-| Trady.Candlestick.BullishShortDay | 4.718 | 3.385 | 92,723.128 | 0.920 | 0.993 | 100738.56x | 93411.26x |
-| Trady.Indicator.SimpleMovingAverage | 2.012 | 2.210 | 12.696 | 0.616 | 0.628 | 20.62x | 20.22x |
+Both sides create fresh state where required and return owned output. Ooples composes its new kernel APIs, not the legacy builder route. Native eager collections are returned directly without extra copies. Fractal results are placed at their center bars on both sides.
 
-Seven ordinary pairs were measured serially after implementation, with automatic invocation calibration targeting 100 ms, eight warmups, and five measured iterations. Some retained sample counts are four after BenchmarkDotNet outlier filtering. Historical public baselines used 16 invocations with the same warmup/measurement counts; their different timing protocol is retained explicitly rather than presented as a matched new campaign.
+| Pair | Ooples | Native competitor | Ratio |
+|---|---:|---:|---:|
+| QuanTAlib.Jma | 1.693 | 2.076 | 1.23x |
+| QuanTAlib.Atr | 0.188 | 0.655 | 3.49x |
+| Skender.GetRollingPivots | 4.787 | 7.297 | 1.52x |
+| Skender.GetFractal | 0.481 | 6.204 | 12.89x |
+| TaLib.Candles.RickshawMan | 0.802 | 1.097 | 1.37x |
+| TaLib.Functions.Asin | 0.146 | 0.171 | 1.17x |
+| Trady.Candlestick.BullishShortDay | 0.922 | 112,621.225 | 122164.29x |
+| Trady.Indicator.SimpleMovingAverage | 0.540 | 10.023 | 18.57x |
 
-The unchanged Trady short-day kernel and competitor measurements are reused from the previous campaign (one invocation, three warmups, three measurements). That very slow competitor campaign overlapped some builds/tests; treat its enormous ratio as an order-of-magnitude result. Asin and SMA owning implementations are unchanged; timing fluctuations there are not claimed implementation improvements. Close rankings need a dedicated runner and repeated measurements on the target hardware.
+## Reusable batch
 
-Dedicated thread-allocation tests require **zero steady-state bytes for all eight kernels**, including reset, on ordinary and actual 10,000-bar benchmark fixtures. BenchmarkDotNet's small in-process harness allocations remain unmodified in the raw evidence. Setup, owning output APIs, and extreme-input arbitrary-precision fallback may allocate.
+Caller-owned buffers on both sides. Asin uses the approved close-only IEEE span API; Rickshaw uses prepared OHLC inputs. Other pairs have no verified equivalent reusable fresh-batch arm and are not assigned wins.
 
-PerfView identified Jurik's exact-number conversion/arithmetic and Rickshaw's rolling threshold state as the two losing paths. Jurik now retains rounded doubles, certifies fused expansion rounding, isolates wide fallback, and eliminates exact identity powers. Rickshaw uses exact integer-grid windows with lossless transfer to the general state on a grid miss. Neither optimization introduces a tolerance or an approximate default. See the blueprint for the profiler evidence and the correctness arguments.
+| Pair | Ooples | Native competitor | Ratio |
+|---|---:|---:|---:|
+| TaLib.Candles.RickshawMan | 0.737 | 1.071 | 1.45x |
+| TaLib.Functions.Asin | 0.121 | 0.165 | 1.36x |
 
-Verification: 168 focused contract tests, including independent references, extreme exponents, exact threshold fixtures, preview/reset and allocation gates; four performance-evidence verifier tests. Library builds target net10.0, net8.0, and net461; runtime tests and these timings use net10.0. The manual performance workflow runs eight pairs in parallel after one build. Normal PR contract discovery includes the new tests.
+## Streaming
+
+Fresh state and output storage outside timing for both sides. Each operation is one full sequence of incremental updates. A fixed-invocation job prevents repeated sequences from accidentally continuing state; its operation count is checked in the report verifier. Batch-only competitors are not substituted.
+
+| Pair | Ooples | Native competitor | Ratio |
+|---|---:|---:|---:|
+| QuanTAlib.Jma | 1.894 | 2.103 | 1.11x |
+| QuanTAlib.Atr | 0.183 | 0.624 | 3.41x |
+
+The closest streaming comparisons are at **1,000 observations** (milliseconds):
+
+| Pair | Ooples | Native competitor | Ratio |
+|---|---:|---:|---:|
+| QuanTAlib.Jma | 0.189 | 0.196 | 1.04x |
+| QuanTAlib.Atr | 0.051 | 0.053 | 1.03x |
+
+These small streaming differences and the overlapping Asin confidence intervals do not establish a decisive advantage. Both sizes and all supported workloads are retained; no loss or near-tie is excluded to produce an eight-win headline.
+
+## Interpretation and verification
+
+The API workload boundaries are matched; the libraries still have native result-type and arithmetic differences. Skender/Trady return dated objects and use decimal arithmetic; Ooples returns flat doubles with its documented exact stages. Rickshaw uses packed native integers versus Ooples doubles. QuanTAlib's pinned ATR bar route is scaled true range, not a conventional smoothed ATR. These contracts are checked independently rather than assumed equivalent from indicator names.
+
+The original bar-input Asin direct comparison was slower (0.191 ms reusable versus TA-Lib's 0.169 ms). The new close-only API matches TA-Lib's input and IEEE nonfinite behavior; it does not establish a speedup of the unchanged bar API. Earlier adapter-based reports and discarded multi-invocation streaming measurements are not mixed into these tables.
+
+Trady short-day was measured again from scratch. A native 10,000-bar call takes roughly two minutes on this machine; it is a pathological library path, not a general competitor characteristic. One warmup overlapped a build/test; measured samples ran after that work completed. Ordinary samples were collected serially. No prior Trady timing was reused.
+
+Validation: 185 affected contract/API tests and seven evidence-verifier tests; final build results are recorded in the PR. Tests cover independent references, exact arithmetic fallbacks, lifecycle, delayed placement, direct eager ownership, native streaming initialization, IEEE Asin, buffer aliasing and rejection, and allocation gates. Existing bar kernels and the new close-only API have isolated zero-allocation checks. Raw BenchmarkDotNet harness allocations are retained.
+
+Adversarial review findings and fixes are recorded in the blueprint. The manual CI workflow builds once, runs the affected checks, and measures eight pairs on independent runners with capability-aware evidence validation.
