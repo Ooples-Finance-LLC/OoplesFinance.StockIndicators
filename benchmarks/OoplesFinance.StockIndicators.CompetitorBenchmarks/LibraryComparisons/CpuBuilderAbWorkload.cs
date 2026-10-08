@@ -11,6 +11,8 @@ internal sealed class CpuBuilderAbWorkload
     private delegate void SmaCore(ReadOnlySpan<double> input, Span<double> output, int length);
     private readonly CpuNativeWorkload _work;
     private readonly Func<IReadOnlyList<Bar>, IIndicator, double[][]>? _engine;
+    private readonly Func<IReadOnlyList<Bar>, IIndicator, double[][]>? _preparedEngine;
+    private readonly IReadOnlyList<Bar>? _preparedBars;
     private readonly SmaCore? _sma;
 
     internal CpuBuilderAbWorkload(string id, int count)
@@ -39,10 +41,24 @@ internal sealed class CpuBuilderAbWorkload
             var call = Expression.Call(Expression.New(ctor, arguments),
                 type.GetMethod("Compute", BindingFlags.Instance | BindingFlags.NonPublic)!, indicator);
             _engine = Expression.Lambda<Func<IReadOnlyList<Bar>, IIndicator, double[][]>>(call, bars, indicator).Compile();
+            arguments[^1] = Expression.Constant(true);
+            call = Expression.Call(Expression.New(ctor, arguments),
+                type.GetMethod("Compute", BindingFlags.Instance | BindingFlags.NonPublic)!, indicator);
+            _preparedEngine = Expression.Lambda<Func<IReadOnlyList<Bar>, IIndicator, double[][]>>(call, bars, indicator).Compile();
+            var historyType = assembly.GetType("OoplesFinance.StockIndicators.Indicators.OwnedBarHistory", true)!;
+            _preparedBars = (IReadOnlyList<Bar>)Activator.CreateInstance(historyType, nonPublic: true)!;
+            historyType.GetMethod("ExpectAdditional", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(_preparedBars, [count]);
+            var add = historyType.GetMethod("Add", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            foreach (var bar in _work.Data.IndicatorBars) add.Invoke(_preparedBars, [bar]);
         }
         // Verify every materialized engine output, including presence flags and warmup.
         var spec = CpuBuilderWorkload.Create(id);
         using var run = CpuBuilderWorkload.Build(_work, spec).GetAwaiter().GetResult();
+        // Build above validates the same private fixture copied into prepared history.
+        // Prepared excludes input ownership/validation, but invokes the actual batch
+        // engine route and still allocates fresh state and every output per call.
+        var prepared = PreparedOwned();
         var direct = ComputeOwned();
         if (direct.Length != spec.Outputs.Count) throw new InvalidOperationException("A/B slot mismatch.");
         for (var slot = 0; slot < direct.Length; slot++)
@@ -50,7 +66,7 @@ internal sealed class CpuBuilderAbWorkload
             var expected = run[spec.Outputs[slot]];
             if (direct[slot].Length != expected.Length) throw new InvalidOperationException("A/B length mismatch.");
             for (var i = 0; i < expected.Length; i++)
-                if (!direct[slot][i].Equals(expected[i]))
+                if (!direct[slot][i].Equals(expected[i]) || !prepared[slot][i].Equals(expected[i]))
                     throw new InvalidOperationException($"A/B output mismatch at {slot}/{i}.");
         }
         var kernelId = id == "TaLib.Functions.Sma" ? "Trady.Indicator.SimpleMovingAverage" : id;
@@ -75,4 +91,7 @@ internal sealed class CpuBuilderAbWorkload
         kernel.Process(_work.Data.IndicatorBars, output);
         return output;
     }
+
+    internal double[][] PreparedOwned() => _sma is not null ? ComputeOwned()
+        : _preparedEngine!(_preparedBars!, CpuBuilderWorkload.Create(_work.PairId));
 }

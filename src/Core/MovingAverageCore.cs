@@ -16,6 +16,10 @@ internal static class MovingAverageCore
 
         if (length == 1) { input.CopyTo(output); return; }
 
+#if !NETFRAMEWORK
+        if (TryExactGridSimpleMovingAverage(input, output, length)) return;
+#endif
+
         double sum = 0;
         var exactRequired = false;
         double roundoff = 0;
@@ -71,6 +75,44 @@ internal static class MovingAverageCore
             }
         }
     }
+
+#if !NETFRAMEWORK
+    // All sums are integer multiples of a common power of two. The certificate
+    // bounds even the add-before-eviction intermediate to at most 53 bits, so
+    // additions, cancellation and periodic rebuilds in the guarded path are exact.
+    // Division therefore rounds the identical exact sum. Noncertified data retains
+    // every guard and fallback above; this does not introduce an approximate mode.
+    internal static bool TryExactGridSimpleMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        if (length < 2 || output.Length < input.Length || input.Overlaps(output)) return false;
+        var grid = int.MaxValue;
+        var largest = int.MinValue;
+        var windowBits = System.Numerics.BitOperations.Log2((uint)length) + 1;
+        foreach (var value in input)
+        {
+            var bits = (ulong)(BitConverter.DoubleToInt64Bits(value) & long.MaxValue);
+            if (bits == 0) continue;
+            var exponent = (int)(bits >> 52);
+            if (exponent is 0 or 2047) return false;
+            var significand = (bits & 0xfffffffffffffUL) | (1UL << 52);
+            grid = Math.Min(grid, exponent - 1075 + System.Numerics.BitOperations.TrailingZeroCount(significand));
+            largest = Math.Max(largest, exponent - 1023);
+            // Keep division and partial sums comfortably within the normal range.
+            if (grid < -512 || largest > 500 || largest - grid + windowBits > 52) return false;
+        }
+        var warmup = Math.Min(length - 1, input.Length);
+        output.Slice(0, warmup).Clear();
+        double sum = 0;
+        for (var i = 0; i < warmup; i++) sum += input[i];
+        for (var i = warmup; i < input.Length; i++)
+        {
+            sum += input[i];
+            output[i] = sum / length;
+            sum -= input[i - warmup];
+        }
+        return true;
+    }
+#endif
 
     /// <summary>
     /// The variable-length average's next length: the one decision, in one place.

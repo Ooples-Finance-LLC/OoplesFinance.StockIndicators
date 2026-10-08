@@ -8,17 +8,18 @@ internal static class CpuBuilderProfile
     internal static void Run(string id, string arm, int seconds)
     {
         if (seconds is < 1 or > 300) throw new ArgumentOutOfRangeException(nameof(seconds));
-        if (arm is not ("Builder" or "Native" or "Compute" or "Kernel")) throw new ArgumentOutOfRangeException(nameof(arm));
+        if (arm is not ("Builder" or "Native" or "Compute" or "Kernel" or "Prepared")) throw new ArgumentOutOfRangeException(nameof(arm));
         if (!CpuBuilderWorkload.PairIds.Contains(id)) throw new ArgumentOutOfRangeException(nameof(id));
         var benchmark = new CpuBuilderBenchmarks { PairId = id, Bars = 10_000 };
         benchmark.Setup();
-        var ab = arm is "Compute" or "Kernel" ? new CpuBuilderAbWorkload(id, 10_000) : null;
+        var ab = arm is "Compute" or "Kernel" or "Prepared" ? new CpuBuilderAbWorkload(id, 10_000) : null;
         object? result = null;
         void Invoke()
         {
             if (arm == "Builder") benchmark.OoplesBuilderBatch().GetAwaiter().GetResult();
             else if (arm == "Compute") result = ab!.ComputeOwned();
             else if (arm == "Kernel") result = ab!.KernelOwned();
+            else if (arm == "Prepared") result = ab!.PreparedOwned();
             else result = benchmark.CompetitorNativeBatch();
         }
         var timer = Stopwatch.StartNew();

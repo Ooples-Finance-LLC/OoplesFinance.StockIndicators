@@ -3,7 +3,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 // A fixed binary grid is exact for ordinary windows. An unrepresentable input
 // transfers the retained ranges to the general exact state before evaluation.
-internal sealed class RickshawGridState(int dojiPeriod, int nearPeriod) : IPreviewIndicatorState
+internal sealed class RickshawGridState(int dojiPeriod, int nearPeriod) : IPreviewIndicatorState, IOwnedHistoryBatchState
 {
     private readonly long[] _dojiHistory = new long[dojiPeriod], _nearHistory = new long[nearPeriod];
     private readonly int _warmup = Math.Max(dojiPeriod, nearPeriod);
@@ -20,6 +20,18 @@ internal sealed class RickshawGridState(int dojiPeriod, int nearPeriod) : IPrevi
         _fallback?.Reset();
     }
     public double Update(in Bar bar) => Update(bar, true);
+    public bool TryComputeBatch(OwnedBarHistory bars, double[][] output)
+    {
+        var offset = 0;
+        var values = output[0];
+        for (var chunk = 0; chunk < bars.ChunkCount; chunk++)
+        {
+            var input = bars.Chunk(chunk);
+            for (var i = 0; i < input.Length; i++) values[offset + i] = Update(input[i]);
+            offset += input.Length;
+        }
+        return true;
+    }
     public double Update(in Bar bar, bool commit)
     {
         if (_useFallback) return _fallback!.Update(bar, commit);

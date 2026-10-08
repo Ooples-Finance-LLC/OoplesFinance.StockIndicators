@@ -67,9 +67,32 @@ public sealed class PriceCircularTransform : MultiOutputIndicatorBase, IIndicato
         Operation is not (PriceCircularOperation.ArcSine or PriceCircularOperation.ArcCosine)
         || x is >= -1 and <= 1;
 
-    private sealed class State(PriceCircularOperation operation) : IMultiOutputState
+    private sealed class State(PriceCircularOperation operation) : IMultiOutputState, IOwnedHistoryBatchState
     {
         public void Reset() { }
+
+        public bool TryComputeBatch(OwnedBarHistory bars, double[][] output)
+        {
+            if (operation != PriceCircularOperation.ArcSine) return false;
+            var values = output[0];
+            var present = output[1];
+            var offset = 0;
+            for (var chunk = 0; chunk < bars.ChunkCount; chunk++)
+            {
+                var input = bars.Chunk(chunk);
+                for (var i = 0; i < input.Length; i++)
+                {
+                    var close = input[i].Close;
+                    if (close is >= -1 and <= 1)
+                    {
+                        values[offset + i] = Math.Asin(close);
+                        present[offset + i] = 1;
+                    }
+                }
+                offset += input.Length;
+            }
+            return true;
+        }
 
         public void Update(in Bar bar, Span<double> output)
         {

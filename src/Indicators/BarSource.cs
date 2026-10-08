@@ -47,7 +47,7 @@ public interface IBarSource
 // synchronous; arbitrary IBarSource implementations continue through ReadAsync.
 internal interface ISynchronousBarSource
 {
-    void AppendValidated(List<Bar> destination, CancellationToken cancellationToken);
+    void AppendValidated(OwnedBarHistory destination, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -142,14 +142,13 @@ public static class Bars
 
         public bool IsFinite => true;
 
-        public void AppendValidated(List<Bar> destination, CancellationToken cancellationToken)
+        public void AppendValidated(OwnedBarHistory destination, CancellationToken cancellationToken)
         {
             // Only inspect storage types whose count is side-effect free. Never count by
             // enumerating, or trust arbitrary user collection getters during source setup.
             var count = _items is T[] array ? array.Length
                 : _items.GetType() == typeof(List<T>) ? ((List<T>)_items).Count : 0;
-            if (count <= int.MaxValue - destination.Count && destination.Capacity < destination.Count + count)
-                destination.Capacity = destination.Count + count;
+            destination.ExpectAdditional(count);
             foreach (var item in _items)
             {
                 cancellationToken.ThrowIfCancellationRequested();

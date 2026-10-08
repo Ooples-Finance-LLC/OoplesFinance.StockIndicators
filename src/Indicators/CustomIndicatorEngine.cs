@@ -254,6 +254,10 @@ internal sealed class CustomIndicatorEngine
             results[i] = new double[_bars.Count];
         }
 
+        if (rawFinite && chained is null && _bars is OwnedBarHistory owned
+            && state is IOwnedHistoryBatchState batchState && batchState.TryComputeBatch(owned, results))
+            return Remember(indicator, results);
+
         var componentValues = new double[components.Length];
         var outputValues = new double[outputCount];
 

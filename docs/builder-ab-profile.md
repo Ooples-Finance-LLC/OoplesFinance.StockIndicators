@@ -1,9 +1,10 @@
 # Builder A/B diagnosis
 
-This investigation covers the three losses in the eight-pilot CI campaign: Asin,
+The baseline investigation covers the three losses in the eight-pilot CI campaign: Asin,
 SMA and Rickshaw. It separates builder orchestration from our arithmetic and
-compares the actual TA-Lib.NETCore 0.5.0 source. No production behavior changes
-are included in this diagnostic batch.
+compares the actual TA-Lib.NETCore 0.5.0 source. The baseline measurements below
+use production commit `cf49cfe5`; the following implementation section records
+the fixes made after that diagnosis.
 
 ## Measurement boundaries
 
@@ -174,3 +175,38 @@ for this harness/documentation-only batch.
 are committed. Raw ETL ZIPs, CPU stack exports, GCStats logs/CSVs and exact
 collection scripts remain under `C:/Users/cheat/temp/si-perfview/builder-ab/`
 (GCStats CSVs are in the PerfView cache paths recorded by those logs).
+
+## Implementation following the diagnosis
+
+- Owned history now uses chunks of at most 1,024 bars, avoiding a large-object
+  backing array while retaining independent snapshots and later legacy builds.
+  Warmup publication uses a read-only view of that owned history rather than
+  copying the published bars into another large array. This changes allocation
+  shape, not the requirement to own the input.
+- Asin and the existing exact Rickshaw grid state can process those chunks
+  directly after components have executed. The shortcut requires validated raw
+  input and no chained source. General/chained validation, output validation,
+  presence columns and Rickshaw's exact fallback remain in place.
+- SMA checks whether every input lies on a common binary grid and every possible
+  intermediate sum fits in 53 significant bits. If certified, additions and
+  evictions are exact; removing roundoff tracking and periodic rebuilding cannot
+  change the rounded result. The final division uses the same exact sum. The
+  certificate conservatively excludes extreme exponents, subnormals, nonfinite
+  inputs, overlap and overly wide grids. All other inputs retain the existing
+  guarded implementation. Ordinary decimal prices need not qualify.
+
+The A/B harness adds `Prepared`: prevalidated, independently owned history is
+built during setup, then each call creates a fresh engine/state and all output
+arrays using the actual batch shortcut. SMA's Prepared arm is its direct core,
+like Compute. The original Compute arm remains unchanged in scope, so its
+standalone validation cost is still visible. Both sets of complete outputs are
+checked against the public builder before timing.
+
+Verification: 125 focused regression checks and 111 competitor-facing checks
+passed; Release library builds passed for net10.0, net8.0 and net461. The focused
+checks include independent rational SMA rounding, late certificate rejection,
+negative/signed-zero inputs, chunk boundaries, warmup ownership, chained Asin,
+Rickshaw fallback, graph composition and legacy builder reuse. Adversarial review
+also covered partial last chunks, source count hints, disposal, and the unchanged
+general validation routes. Checked-conversion issues exposed by the initial run
+were corrected before the successful rerun.

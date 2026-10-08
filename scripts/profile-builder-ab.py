@@ -28,7 +28,7 @@ metadata = {
 results = []
 for repeat in range(args.repeats):
     for pair in ("TaLib.Functions.Asin", "TaLib.Functions.Sma", "TaLib.Candles.RickshawMan"):
-        arms = ["Builder", "Compute", "Kernel", "Native"]
+        arms = ["Builder", "Compute", "Prepared", "Kernel", "Native"]
         if repeat % 2:
             arms.reverse()
         for arm in arms:

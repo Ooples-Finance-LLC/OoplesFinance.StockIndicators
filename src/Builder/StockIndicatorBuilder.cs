@@ -186,7 +186,7 @@ public sealed class StockIndicatorBuilder
             return await BuildLiveAsync(source, cancellationToken).ConfigureAwait(false);
         }
 
-        var bars = new List<Indicators.Bar>();
+        var bars = new Indicators.OwnedBarHistory();
 
         // Warm-up is consumed first and contributes to state, but not published history.
         var warmupCount = 0;
@@ -365,7 +365,7 @@ public sealed class StockIndicatorBuilder
         }
 
         return new Indicators.IndicatorRun(
-            runtime, series2, warmupCount == 0 ? bars : bars.Skip(warmupCount).ToList(), warmupCount,
+            runtime, series2, bars.AfterWarmup(warmupCount), warmupCount,
             reachable.Count == 0 ? 0 : reachable.Max(indicator => indicator.WarmupBars));
         }
         catch
