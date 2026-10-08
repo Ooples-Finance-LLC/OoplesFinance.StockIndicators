@@ -1,0 +1,14 @@
+{
+  "TaLib.Candles.RickshawMan-Builder.etl.zip": "9e08f1d9a3c4af46dcd990d5b561d26b786f84ca6f53dd69c3f98bd06339f32e",
+  "TaLib.Candles.RickshawMan-Compute.etl.zip": "bdbbf3850bace5aafbbcac3ddeace1a63343dfea54f31bd678c318c0dc71b8c3",
+  "TaLib.Candles.RickshawMan-Kernel.etl.zip": "23cce714cb167083b08149827e8e0d2ce6996e45b8e5cd158d52e56727336b62",
+  "TaLib.Candles.RickshawMan-Native.etl.zip": "5711bebbed17ace30d3177f4f71c46af29ca000897b38771fac84a0a3e0513f4",
+  "TaLib.Functions.Asin-Builder.etl.zip": "7c90b7f7fb4bccd6ef40f07e68cd15b19767e8f927a29eb546075852d9515f59",
+  "TaLib.Functions.Asin-Compute.etl.zip": "758da635eb9c9acad398cd391774833d8fa9c95dc973aa2f3736f476be7cb69f",
+  "TaLib.Functions.Asin-Kernel.etl.zip": "1d76da54dba253a395bdca271604f8c3008a2906632bed5fb236d1fcd6563a3a",
+  "TaLib.Functions.Asin-Native.etl.zip": "f497264c69b9a3cc6d07f92dc07c27367009706ad5ae29ee4b8abed3e2348bfb",
+  "TaLib.Functions.Sma-Builder.etl.zip": "b38fe75d57e392b391c7a3dd8534fef7a8106cd0ab06ec7fcfb81f230730e8bf",
+  "TaLib.Functions.Sma-Compute.etl.zip": "c64b00978baba85389d96443bb9ac791f90884a121df0ddac21a0ecd088427f4",
+  "TaLib.Functions.Sma-Kernel.etl.zip": "987c7b10ad0fc092f29e016c0a31e378977a5c4531847b830e8b0508319fad52",
+  "TaLib.Functions.Sma-Native.etl.zip": "b523e24bd9571582690454000bcbef584f7e7f07ebf44aa884da5f84a606a1c4"
+}
