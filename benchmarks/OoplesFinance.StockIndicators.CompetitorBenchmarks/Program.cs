@@ -9,6 +9,12 @@ if (args.Length == 3 && args[0] == "--verify-cpu-native")
     return;
 }
 
+if (args.Length == 4 && args[0] == "--profile-builder")
+{
+    CpuBuilderProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
+    return;
+}
+
 if (args.Length == 4 && args[0] == "--profile-cpu-pilot")
 {
     CpuPilotProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
