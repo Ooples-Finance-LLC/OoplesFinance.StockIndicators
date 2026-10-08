@@ -210,25 +210,10 @@ public sealed class StockIndicatorBuilder
             }
         }
 
-        // The source was read once. Allocate its columns once, at the actual size,
-        // and transfer our private lists instead of copying them into StockData.
-        var opens = new List<double>(bars.Count);
-        var highs = new List<double>(bars.Count);
-        var lows = new List<double>(bars.Count);
-        var closes = new List<double>(bars.Count);
-        var volumes = new List<double>(bars.Count);
-        var dates = new List<DateTime>(bars.Count);
-        foreach (var bar in bars)
-        {
-            opens.Add(bar.Open);
-            highs.Add(bar.High);
-            lows.Add(bar.Low);
-            closes.Add(bar.Close);
-            volumes.Add(bar.Volume);
-            dates.Add(bar.Time);
-        }
-        var batch = StockData.FromOwnedColumns(opens, highs, lows, closes, volumes, dates);
-        _configuredSource = IndicatorDataSource.FromBatch(batch);
+        // Custom states read owned bars directly. Defer the legacy column bridge
+        // until a built-in evaluator or component-average calculation requests it.
+        var batch = new Lazy<StockData>(() => CreateOwnedBatch(bars));
+        _configuredSource = IndicatorDataSource.FromValidatedHistory(batch);
 
         // Everything reachable, not just what was configured: an indicator used as a component or chained
         // onto still has to be computed, and a built-in one still belongs in the evaluator rather than being
@@ -242,8 +227,13 @@ public sealed class StockIndicatorBuilder
 
         var handles = new Dictionary<Indicators.IIndicator, SeriesHandle[]>(Indicators.IndicatorIdentity.Comparer);
         foreach (var indicator in reachable)
-            if (indicator.Source is null)
-                foreach (var bar in bars) Validation.IndicatorInputDomain.For(indicator).Validate(bar);
+        {
+            if (indicator.Source is not null) continue;
+            var domain = Validation.IndicatorInputDomain.StableFor(indicator);
+            if (ReferenceEquals(domain, Validation.IndicatorInputDomain.Finite)) continue;
+            foreach (var bar in bars)
+                (domain ?? Validation.IndicatorInputDomain.For(indicator)).Validate(bar);
+        }
         foreach (var indicator in reachable)
         {
             Indicators.IndicatorContract.RequireComputable(indicator);
@@ -339,7 +329,7 @@ public sealed class StockIndicatorBuilder
                 // so the first average receives the first component for every published output.
                 using (ComponentAverage.Arm(averages))
                 {
-                    var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
+                    var buffer = IndicatorCompute.TryComputeFast(batch.Value, spec, context);
                     if (buffer is null) return (null, 0);
                     using (buffer.Value)
                     {
@@ -359,7 +349,7 @@ public sealed class StockIndicatorBuilder
                 }
             }
             return requestedAverage ? (outputs, LastAverageRequests) : (null, 0);
-        });
+        }, finiteInputValidated: true);
 
         var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
         foreach (var indicator in _configuredIndicators)
@@ -383,6 +373,26 @@ public sealed class StockIndicatorBuilder
             runtime.Dispose();
             throw;
         }
+    }
+
+    private static StockData CreateOwnedBatch(IReadOnlyList<Indicators.Bar> bars)
+    {
+        var opens = new List<double>(bars.Count);
+        var highs = new List<double>(bars.Count);
+        var lows = new List<double>(bars.Count);
+        var closes = new List<double>(bars.Count);
+        var volumes = new List<double>(bars.Count);
+        var dates = new List<DateTime>(bars.Count);
+        foreach (var bar in bars)
+        {
+            opens.Add(bar.Open);
+            highs.Add(bar.High);
+            lows.Add(bar.Low);
+            closes.Add(bar.Close);
+            volumes.Add(bar.Volume);
+            dates.Add(bar.Time);
+        }
+        return StockData.FromOwnedColumns(opens, highs, lows, closes, volumes, dates);
     }
 
     /// <summary>

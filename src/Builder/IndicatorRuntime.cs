@@ -335,6 +335,14 @@ public sealed class IndicatorRuntime : IDisposable
 
     private void StartBatch()
     {
+        if (_nodes.Count == 0 && _activeSeries.Count == 0 && _keys.Count == 0
+            && _batchSources.Count == 0 && _source.HasUnmaterializedValidatedHistory)
+        {
+            // Preserve publication/signals/notifications, but an empty evaluator has no
+            // reason to materialize columns from the typed builder's validated history.
+            Publish(new IndicatorSnapshot(new Dictionary<SeriesHandle, ReadOnlyMemory<double>>(), _keys));
+            return;
+        }
         var data = _source.BatchData ?? throw new InvalidOperationException("Batch source missing data.");
         // Validate once per source before any graph evaluation or snapshot publication.
         foreach (var source in _batchSources.Values.Concat(new[] { data }).Distinct())

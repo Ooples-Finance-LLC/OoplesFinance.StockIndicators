@@ -30,16 +30,21 @@ public interface IDataProviderDefaults
 /// </summary>
 public sealed class IndicatorDataSource
 {
+    private readonly StockData? _batchData;
+    private readonly Lazy<StockData>? _validatedHistoryBatch;
+
     private IndicatorDataSource(
         IndicatorSourceKind kind,
         StockData? batchData,
         IStreamSource? streamSource,
         IDataProviderDefaults? providerDefaults,
         SymbolId? symbol,
-        BarTimeframe? timeframe)
+        BarTimeframe? timeframe,
+        Lazy<StockData>? validatedHistoryBatch = null)
     {
         Kind = kind;
-        BatchData = batchData;
+        _batchData = batchData;
+        _validatedHistoryBatch = validatedHistoryBatch;
         StreamSource = streamSource;
         ProviderDefaults = providerDefaults;
         Symbol = symbol;
@@ -54,7 +59,14 @@ public sealed class IndicatorDataSource
     /// <summary>
     /// Gets the batch data (when Kind is Batch).
     /// </summary>
-    public StockData? BatchData { get; }
+    public StockData? BatchData => _batchData ?? _validatedHistoryBatch?.Value;
+
+    // Only the typed builder uses this factory, after validating and owning every bar.
+    internal static IndicatorDataSource FromValidatedHistory(Lazy<StockData> batch) =>
+        new(IndicatorSourceKind.Batch, null, null, null, null, null, batch);
+
+    // Once columns have been exposed, ordinary mutable StockData validation applies again.
+    internal bool HasUnmaterializedValidatedHistory => _validatedHistoryBatch is { IsValueCreated: false };
 
     /// <summary>
     /// Gets the stream source (when Kind is Streaming).

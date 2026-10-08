@@ -54,6 +54,7 @@ internal sealed class CustomIndicatorEngine
     // currently being visited, and reaching one of them again is the cycle.
     private readonly HashSet<IIndicator> _visiting = new(IndicatorIdentity.Comparer);
     private readonly IReadOnlyList<Bar> _bars;
+    private readonly bool _finiteInputValidated;
     private static readonly BarTimeframe Timeframe = BarTimeframe.Minutes(1);
 
     private readonly Func<IIndicator, double[][]?> _resolveBuiltIn;
@@ -111,9 +112,11 @@ internal sealed class CustomIndicatorEngine
     internal CustomIndicatorEngine(IReadOnlyList<Bar> bars, Func<IIndicator, double[][]?> resolveBuiltIn,
         Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? createBuiltInState = null,
         Func<IIndicator, IReadOnlyList<Func<IReadOnlyList<double>, int, IReadOnlyList<double>>>,
-            (double[][]? Values, int Requests)>? computeWithAverage = null)
+            (double[][]? Values, int Requests)>? computeWithAverage = null,
+        bool finiteInputValidated = false)
     {
         _bars = bars;
+        _finiteInputValidated = finiteInputValidated;
         _resolveBuiltIn = resolveBuiltIn;
         _createBuiltInState = createBuiltInState;
         _computeWithAverage = computeWithAverage;
@@ -143,8 +146,10 @@ internal sealed class CustomIndicatorEngine
 
         // A built-in was computed by the evaluator, which is the whole point of routing them there: the
         // custom engine never re-implements a calculation the library already has.
-        if (indicator.Source is null)
-            foreach (var bar in _bars) Validation.IndicatorInputDomain.For(indicator).Validate(bar);
+        var domain = Validation.IndicatorInputDomain.StableFor(indicator);
+        var rawFinite = _finiteInputValidated && ReferenceEquals(domain, Validation.IndicatorInputDomain.Finite);
+        if (indicator.Source is null && !rawFinite)
+            foreach (var bar in _bars) (domain ?? Validation.IndicatorInputDomain.For(indicator)).Validate(bar);
         var builtIn = _resolveBuiltIn(indicator);
         if (builtIn is not null)
         {
@@ -258,7 +263,8 @@ internal sealed class CustomIndicatorEngine
             // means. The rest of the bar is left alone: an indicator reading highs and lows still gets them.
             if (chained is not null && state is ICustomInputConsumer consumer) consumer.ReadCloseAsInput();
             var input = chained is null ? _bars[bar] : WithClose(_bars[bar], chained[bar]);
-            Validation.IndicatorInputDomain.For(indicator).Validate(input);
+            if (chained is not null || !rawFinite)
+                (domain ?? Validation.IndicatorInputDomain.For(indicator)).Validate(input);
 
             for (var i = 0; i < components.Length; i++)
             {

@@ -79,6 +79,11 @@ public sealed class IndicatorInputDomain
             ? PositiveClose : Finite;
     }
 
+    // A customer's domain getter may depend on state or have observable calls. Never
+    // cache it or infer that its next result will equal its current result.
+    internal static IndicatorInputDomain? StableFor(IIndicator indicator) =>
+        indicator is IIndicatorInputDomainContract ? null : For(indicator);
+
     public string? Violation(in Bar bar)
     {
         var hasRanges = _ranges.Count != 0;

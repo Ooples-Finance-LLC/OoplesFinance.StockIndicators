@@ -88,3 +88,14 @@ Verification: 69 focused unit checks and 131 competitor-facing checks passed on 
 | Bullish short body | 3,720,990 | 1,051,766 |
 
 The complete eight-family CI benchmark campaign is required to judge throughput and remaining losses. This allocation reduction does not establish eight performance wins.
+
+
+## Second implementation batch
+
+The column bridge is now lazy. An empty legacy graph over the builder's privately owned, validated history still publishes its snapshot and runs notifications, without materializing OHLCV columns. Named sources, explicit subscriptions, keys, nonempty graphs and already-exposed mutable columns keep the normal evaluator/validation path. A later legacy `Build()` materializes the retained original history correctly.
+
+Default finite checks are skipped only for unchanged raw bars with the builder's validation proof. Stable library domains are resolved once; customer `InputDomain` getters retain their original calls. Chained closes still receive their domain checks before state updates, and direct engine callers without validation proof still validate raw bars.
+
+Adversarial review added checks for publication, delayed legacy use, mutable exposed columns, invalid named sources, customer domain-getter calls, invalid chained values, and untrusted direct engine use. The final review found an explicit unknown-subscription edge case; its normal evaluator error is now covered and preserved. Verification passed 107 focused unit checks, 131 competitor-facing checks, and a final 32-check affected subset after that guard. All three library frameworks built successfully after the final change.
+
+The new eight-route allocation probe completed with successful setup checks. Approximate bytes/call: SMA 1,292,569; Asin 647,396; Rickshaw 567,829; scaled true range 566,872; Jurik 570,699; pivots 1,934,385; fractals 1,846,888; short body 569,333. The custom-only allocation regression now requires less than 800 KB for 10,000 bars. These are allocation diagnostics, not throughput wins. Source logs: `C:/Users/cheat/temp/si-perfview/builder-second-fix-allocations.log`.

@@ -86,9 +86,9 @@ public sealed class BuilderStorageTests
         using var run = Build(bars);
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
         Assert.Equal(bars.Length, run.BarCount);
-        // Owned history, six columns and two output columns fit below this bound.
-        // The former geometrically-grown history/columns and duplicate copies exceeded 3 MB.
-        Assert.True(allocated < 1_500_000, $"Allocated {allocated:N0} bytes for one fresh builder.");
+        // Custom-only runs own history and two outputs, without legacy OHLCV columns.
+        // The former eager bridge alone added another six full-size columns.
+        Assert.True(allocated < 800_000, $"Allocated {allocated:N0} bytes for one fresh builder.");
     }
 
     [Theory]
@@ -108,6 +108,118 @@ public sealed class BuilderStorageTests
             Assert.StartsWith(name + " must be finite.", exception.Message);
         }
         IndicatorInputDomain.Finite.Validate(new Bar(default, double.Epsilon, -double.MaxValue, double.MaxValue, -0d, 0));
+    }
+
+    [Fact]
+    public void EmptyLegacyGraphStillPublishesWithoutMaterializingValidatedHistory()
+    {
+        var deferred = new Lazy<StockData>(() => throw new InvalidOperationException("Unnecessary column materialization"));
+        using var runtime = new StockIndicatorBuilder(IndicatorDataSource.FromValidatedHistory(deferred)).Build();
+        var publications = 0;
+        runtime.Updated += _ => publications++;
+        runtime.Start();
+        runtime.Start();
+        Assert.Equal(1, publications);
+        Assert.NotNull(runtime.Latest);
+        Assert.False(deferred.IsValueCreated);
+    }
+
+    [Fact]
+    public void UnknownLegacySubscriptionPreservesTheOrdinaryEvaluatorError()
+    {
+        static StockData Data() => new(new[] { 1d }, new[] { 2d }, new[] { 0d }, new[] { 1d }, new[] { 0d }, new[] { DateTime.UnixEpoch });
+        using var ordinary = new StockIndicatorBuilder(IndicatorDataSource.FromBatch(Data())).Build();
+        var deferred = new Lazy<StockData>(Data);
+        using var optimized = new StockIndicatorBuilder(IndicatorDataSource.FromValidatedHistory(deferred)).Build();
+        ordinary.Subscribe(default(SeriesHandle));
+        optimized.Subscribe(default(SeriesHandle));
+        var expected = Record.Exception(() => ordinary.Start());
+        var actual = Record.Exception(() => optimized.Start());
+        Assert.NotNull(expected);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.GetType(), actual.GetType());
+        Assert.Equal(expected.Message, actual.Message);
+        Assert.True(deferred.IsValueCreated);
+    }
+
+    [Fact]
+    public async Task DeferredHistoryRemainsAvailableForLaterLegacyEvaluation()
+    {
+        var bars = Enumerable.Range(0, 6).Select(Candle).ToArray();
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(new ScaledTrueRange());
+        using var typed = await builder.BuildAsync();
+        bars[0] = Candle(1000);
+        SeriesHandle average = default;
+        using var legacy = builder.ConfigureIndicators(catalog => average = catalog.Sma(3)).Build();
+        legacy.Start();
+        Assert.Equal(new[] { 0d, 0d, 3d, 4d, 5d, 6d }, legacy.GetSeries(average).ToArray());
+    }
+
+    [Fact]
+    public void MaterializedDeferredDataAndNamedSourcesStillReceiveFullValidation()
+    {
+        static StockData Data() => new(new[] { 1d }, new[] { 2d }, new[] { 0d }, new[] { 1d }, new[] { 0d }, new[] { DateTime.UnixEpoch });
+        var source = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(Data));
+        source.BatchData!.OpenPrices[0] = double.NaN;
+        using var changed = new StockIndicatorBuilder(source).Build();
+        Assert.Throws<ArgumentOutOfRangeException>(() => changed.Start());
+        var named = Data();
+        named.ClosePrices[0] = double.NaN;
+        var untouched = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(Data));
+        using var withNamed = new StockIndicatorBuilder(untouched)
+            .AddDataSource("invalid", IndicatorDataSource.FromBatch(named)).Build();
+        Assert.Throws<ArgumentOutOfRangeException>(() => withNamed.Start());
+    }
+
+    [Fact]
+    public async Task CustomerDomainGettersKeepTheirValidationCalls()
+    {
+        var indicator = new DomainProbe(IndicatorInputDomain.Finite);
+        using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(Enumerable.Range(0, 5).Select(Candle)))
+            .ConfigureIndicators(indicator).BuildAsync();
+        Assert.Equal(15, indicator.Reads); // Eager graph validation, engine entry, then each update.
+        Assert.Equal(Enumerable.Range(0, 5).Select(i => (double)i + 2), run[indicator].ToArray());
+    }
+
+    [Fact]
+    public async Task ChainedInputStillChecksTheDerivedCloseBeforeConsumingIt()
+    {
+        var indicator = new DomainProbe(IndicatorInputDomain.PositiveClose);
+        indicator.Of(new NegativeClose());
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(new[] { Candle(0) })).ConfigureIndicators(indicator).BuildAsync());
+        Assert.Equal(0, indicator.Updates);
+    }
+
+    [Fact]
+    public void EngineWithoutValidationProofRejectsInvalidRawBars()
+    {
+        var engine = new CustomIndicatorEngine(new[] { new Bar(default, double.NaN, 2, 0, 1, 0) }, _ => null);
+        Assert.Throws<ArgumentOutOfRangeException>(() => engine.Compute(new ScaledTrueRange()));
+    }
+
+    private sealed class DomainProbe(IndicatorInputDomain domain) : IndicatorBase, IIndicatorInputDomainContract
+    {
+        public int Reads { get; private set; }
+        public int Updates { get; private set; }
+        public IndicatorInputDomain InputDomain { get { Reads++; return domain; } }
+        protected internal override object CreateState() => new State(this);
+        private sealed class State(DomainProbe owner) : IIndicatorState
+        {
+            public void Reset() => owner.Updates = 0;
+            public double Update(in Bar bar) { owner.Updates++; return bar.Close; }
+        }
+    }
+
+    private sealed class NegativeClose : IndicatorBase
+    {
+        protected internal override object CreateState() => new State();
+        private sealed class State : IIndicatorState
+        {
+            public void Reset() { }
+            public double Update(in Bar bar) => -Math.Abs(bar.Close);
+        }
     }
 
     private sealed class AsyncSource(Bar[] bars) : IBarSource
