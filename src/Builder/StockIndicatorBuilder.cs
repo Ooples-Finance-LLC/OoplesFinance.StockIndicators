@@ -186,44 +186,48 @@ public sealed class StockIndicatorBuilder
             return await BuildLiveAsync(source, cancellationToken).ConfigureAwait(false);
         }
 
-        var opens = new List<double>();
-        var highs = new List<double>();
-        var lows = new List<double>();
-        var closes = new List<double>();
-        var volumes = new List<double>();
-        var dates = new List<DateTime>();
         var bars = new List<Indicators.Bar>();
 
-        // Warm-up first, and counted, so the indicators see it but the caller does not. A finite source that
-        // carries warm-up would otherwise either publish it as real bars or not be warmed at all.
+        // Warm-up is consumed first and contributes to state, but not published history.
         var warmupCount = 0;
         await foreach (var bar in source.ReadWarmupAsync(cancellationToken).ConfigureAwait(false))
         {
             Validation.IndicatorInputDomain.Finite.Validate(bar);
-            opens.Add(bar.Open);
-            highs.Add(bar.High);
-            lows.Add(bar.Low);
-            closes.Add(bar.Close);
-            volumes.Add(bar.Volume);
-            dates.Add(bar.Time);
             bars.Add(bar);
             warmupCount++;
         }
 
-        await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
+        if (source is Indicators.ISynchronousBarSource synchronous)
         {
-            Validation.IndicatorInputDomain.Finite.Validate(bar);
+            synchronous.AppendValidated(bars, cancellationToken);
+        }
+        else
+        {
+            await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                Validation.IndicatorInputDomain.Finite.Validate(bar);
+                bars.Add(bar);
+            }
+        }
+
+        // The source was read once. Allocate its columns once, at the actual size,
+        // and transfer our private lists instead of copying them into StockData.
+        var opens = new List<double>(bars.Count);
+        var highs = new List<double>(bars.Count);
+        var lows = new List<double>(bars.Count);
+        var closes = new List<double>(bars.Count);
+        var volumes = new List<double>(bars.Count);
+        var dates = new List<DateTime>(bars.Count);
+        foreach (var bar in bars)
+        {
             opens.Add(bar.Open);
             highs.Add(bar.High);
             lows.Add(bar.Low);
             closes.Add(bar.Close);
             volumes.Add(bar.Volume);
             dates.Add(bar.Time);
-            bars.Add(bar);
         }
-
-
-        var batch = new StockData(opens, highs, lows, closes, volumes, dates);
+        var batch = StockData.FromOwnedColumns(opens, highs, lows, closes, volumes, dates);
         _configuredSource = IndicatorDataSource.FromBatch(batch);
 
         // Everything reachable, not just what was configured: an indicator used as a component or chained

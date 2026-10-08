@@ -65,4 +65,26 @@ Use `Native` for the paired competitor. Read the process ID from the profile log
 
 Review the complete diff before building. Run focused builder graph, source/warmup, live-lifecycle and validation contracts plus the eight pilot correctness checks. Add targeted regressions for single enumeration, cancellation, snapshots, independent run ownership, disposal, chained domain errors and any changed state route. Verify Rickshaw grid-to-general transitions and large-period short histories if that route changes. Keep exact assertions exact.
 
-Build affected target frameworks only where shared code or framework-conditional routing changes. Benchmark 1,000 and 10,000 observations through fresh builders against the full eligible inventory, retaining confidence intervals and allocation results. Include off-grid/adversarial numerical workloads without using pathological competitor runtimes to manufacture a speedup claim. Repeat PerfView only for unresolved residual costs. No library implementation changes are included in this profiling batch.
+Build affected target frameworks only where shared code or framework-conditional routing changes. Benchmark 1,000 and 10,000 observations through fresh builders against the full eligible inventory, retaining confidence intervals and allocation results. Include off-grid/adversarial numerical workloads without using pathological competitor runtimes to manufacture a speedup claim. Repeat PerfView only for unresolved residual costs. The original profiling batch changed no library behavior. The first implementation batch is recorded below.
+
+
+## First implementation batch
+
+The finite builder now drains built-in enumerable sources synchronously in one pass, reserves history for arrays/lists with known counts, creates columns at their actual size, and transfers those private columns into `StockData`. The public `StockData` constructor continues to copy caller input. The common finite-domain check has a direct fast path; all validation calls and failure diagnostics remain. Rickshaw uses the existing exact grid state for windows up to 4,096, retaining the lazy general state for larger periods and the existing .NET Framework route. This is an internal eligibility threshold, not a public period limit. Legacy runtime construction and column materialization remain for the next measured iteration.
+
+Adversarial review covered single enumeration, projection cancellation/disposal, mutable caller input, async-source equivalence, warmup snapshots, validation diagnostics, independent Rickshaw formulas, grid-to-general transitions, preview/reset, and huge periods on short input. Added regressions cover these risks and bound fresh-builder transform allocation below 1.5 MB at 10,000 bars.
+
+Verification: 69 focused unit checks and 131 competitor-facing checks passed on net10.0; library builds passed net10.0, net8.0 and net461. Existing package support warnings remain. A warmed allocation probe used the same profiler harness with a one-second measurement loop after two seconds of warmup. Every setup correctness check passed. The shell's final log redirection failed after all eight probes completed; the following values are taken from their captured terminal output, not an output file. Host activity makes these unsuitable as timing claims.
+
+| Family | Before bytes/call | After bytes/call |
+|---|---:|---:|
+| SMA | 3,961,535 | 1,292,556 |
+| Asin | 3,798,405 | 1,129,236 |
+| Rickshaw | 3,720,535 | 1,049,649 |
+| Scaled true range | 3,718,102 | 1,049,226 |
+| Jurik | 3,722,204 | 1,053,162 |
+| Rolling pivots | 5,084,806 | 2,416,462 |
+| Fractals | 4,997,541 | 2,328,837 |
+| Bullish short body | 3,720,990 | 1,051,766 |
+
+The complete eight-family CI benchmark campaign is required to judge throughput and remaining losses. This allocation reduction does not establish eight performance wins.

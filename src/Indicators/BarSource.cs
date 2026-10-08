@@ -43,6 +43,13 @@ public interface IBarSource
     IAsyncEnumerable<Bar> ReadWarmupAsync(CancellationToken cancellationToken = default);
 }
 
+// The built-in enumerable adapter has no asynchronous I/O. Keep its one-pass drain
+// synchronous; arbitrary IBarSource implementations continue through ReadAsync.
+internal interface ISynchronousBarSource
+{
+    void AppendValidated(List<Bar> destination, CancellationToken cancellationToken);
+}
+
 /// <summary>
 /// Builds a <see cref="IBarSource"/> from what a caller already has.
 /// </summary>
@@ -122,7 +129,7 @@ public static class Bars
     /// </remarks>
     public static LiveBarSource Live() => new();
 
-    private sealed class EnumerableBarSource<T> : IBarSource
+    private sealed class EnumerableBarSource<T> : IBarSource, ISynchronousBarSource
     {
         private readonly IEnumerable<T> _items;
         private readonly Func<T, Bar> _project;
@@ -134,6 +141,23 @@ public static class Bars
         }
 
         public bool IsFinite => true;
+
+        public void AppendValidated(List<Bar> destination, CancellationToken cancellationToken)
+        {
+            // Only inspect storage types whose count is side-effect free. Never count by
+            // enumerating, or trust arbitrary user collection getters during source setup.
+            var count = _items is T[] array ? array.Length
+                : _items.GetType() == typeof(List<T>) ? ((List<T>)_items).Count : 0;
+            if (count <= int.MaxValue - destination.Count && destination.Capacity < destination.Count + count)
+                destination.Capacity = destination.Count + count;
+            foreach (var item in _items)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var bar = _project(item);
+                Validation.IndicatorInputDomain.Finite.Validate(bar);
+                destination.Add(bar);
+            }
+        }
 
         public async IAsyncEnumerable<Bar> ReadAsync(
             [EnumeratorCancellation] CancellationToken cancellationToken = default)

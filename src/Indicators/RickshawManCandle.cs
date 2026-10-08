@@ -29,7 +29,16 @@ public sealed class RickshawManCandle : IndicatorBase, IIndicatorValidationContr
     public override int WarmupBars => Math.Max(DojiPeriod, NearPeriod);
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(DojiPeriod, NearPeriod);
+    protected internal override object CreateState()
+    {
+#if !NETFRAMEWORK
+        // The grid state reserves its windows. Bound only fast-path eligibility,
+        // not the public period contract: huge periods retain lazy general storage.
+        if (DojiPeriod <= 4096 && NearPeriod <= 4096)
+            return new RickshawGridState(DojiPeriod, NearPeriod);
+#endif
+        return new State(DojiPeriod, NearPeriod);
+    }
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>

@@ -100,6 +100,14 @@ public sealed class IndicatorInputDomain
 
     public void Validate(in Bar bar)
     {
+        // The ubiquitous finite-only domain needs no field-mask/range loop.
+        // Failed checks still use Violation to preserve field ordering and diagnostics.
+        if (ReferenceEquals(this, Finite)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Open)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.High)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Low)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Close)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Volume)) return;
         var violation = Violation(bar);
         if (violation is not null) throw new ArgumentOutOfRangeException(nameof(bar), violation);
     }
