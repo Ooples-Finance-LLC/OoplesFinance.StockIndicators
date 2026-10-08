@@ -108,7 +108,7 @@ internal static class CpuBuilderWorkload
             var expectedOutput = expected.Outputs[names[slot]];
             for (var i = 0; i < values.Length; i++)
             {
-                var present = presentSlot < 0 || run[indicator.Outputs[presentSlot]][i].Equals(1d);
+                var present = presentSlot < 0 || run[indicator.Outputs[presentSlot]][i].Equals(1d); // NOSONAR: S1244 - presence flags must be exactly one.
                 var expectedPresent = expectedOutput.Present?[i] ?? !double.IsNaN(expectedOutput.Values[i]);
                 // SMA's warmup is finite zero in our public builder contract.
                 if (indicator is Sma && i < 19)
@@ -116,7 +116,7 @@ internal static class CpuBuilderWorkload
                     if (!values[i].Equals(0d)) throw new InvalidOperationException("Unexpected SMA startup.");
                     continue;
                 }
-                if (present != expectedPresent || (present && !values[i].Equals(expectedOutput.Values[i]))
+                if (present != expectedPresent || (present && !values[i].Equals(expectedOutput.Values[i])) // NOSONAR: S1244 - builder routing must preserve the exact public output.
                     || (!present && !values[i].Equals(0d)))
                     throw new InvalidOperationException($"{work.PairId}: builder output {slot}, bar {i} differs from its public reference.");
             }
