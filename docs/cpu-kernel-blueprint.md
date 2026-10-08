@@ -2,6 +2,15 @@
 
 The kernel timings below are diagnostic evidence, not proof of builder performance or superiority over the strongest competitor. The [public builder suite](../benchmarks/results/eight-cpu-pilots/builder-comparisons.md) includes the complete builder lifecycle and all eligible competitors from the inventory for these eight formulas.
 
+## Acceptance criteria for subsequent indicators
+
+- Measure the normal public builder path, including configuration, execution, materialized results, and disposal. A faster kernel is useful evidence, but does not establish a faster library API.
+- Inventory every matching competitor before timing. Preserve losing results and use the fastest eligible native route as the target; do not select a slower library to claim a win.
+- Run all candidates for a family on the same runner with identical inputs and parameters. Record differences in numerical definitions, warmup, result shape, and retrospective placement. A similarly named but different formula cannot establish a win for the requested indicator.
+- Keep input preparation and correctness normalization outside timing for both sides. Include required native setup and output ownership; never add unnecessary adapter work to the competitor.
+- Verify independent formulas, output presence, and lifecycle behavior before profiling the complete builder workload. Inspect its allocations and CPU profile before deciding whether to optimize arithmetic, graph setup, validation, or copies.
+- Publish sample counts, allocations, confidence intervals, source revision, and every included route. Treat overlapping intervals as inconclusive and restrict claims to the measured workload and versions.
+
 The eight pilots retain the library's numerical definitions while separating arithmetic from builder, result-object, and buffer ownership costs. The [measured results](../benchmarks/results/eight-cpu-pilots/README.md) distinguish owning batch, reusable batch, and supported streaming comparisons. The earlier claim of eight batch and streaming wins used allocating correctness adapters and is superseded. Existing public APIs remain available. `IndicatorKernels` provides an explicit reusable route for applications that already own their input and output storage.
 
 ```csharp
