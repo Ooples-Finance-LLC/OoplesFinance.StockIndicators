@@ -50,10 +50,33 @@ Notes:
 ## Head-to-head against other libraries
 
 A second project, `benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks`, measures this library
-against Skender.Stock.Indicators 2.7.3, TALib.NETCore 0.5.0, Trady.Analysis 3.2.8 and QuanTAlib 1.0.0 over
-seven indicators. Nothing it references ships: the project is never packed and the library takes no reference
+against Skender.Stock.Indicators 2.7.3, TALib.NETCore 0.5.0, Trady.Analysis 3.2.8 and QuanTAlib 1.0.0.
+The full-library suite covers **401 paired APIs**: Skender 84, TA-Lib 160, Trady 107, and QuanTAlib 50,
+including candlesticks. Each pair has a correctness trajectory check and separate BenchmarkDotNet timings
+for both libraries at 1,000 and 10,000 bars: **1,604 measured arms**. The inventory also records 16 unavailable
+competitor APIs and four utilities; unavailable implementations cannot yield comparative timings.
+Nothing it references ships: the project is never packed and the library takes no reference
 on any competitor package.
 
+**[Full per-indicator timing and allocation results](results/2026-10-08-full-library/README.md)**
+include every measured pair, speed ratios, dispersion, raw samples, and source identity.
+The competitor workflow runs correctness before timing and publishes the consolidated
+`competitor-performance-summary` artifact, retained for 90 days. Its aggregation gate rejects missing,
+duplicate, or unexpected arms and incomplete shards. The committed snapshot preserves the successful
+pre-merge run; later CI artifacts identify their own measured revision.
+
+Run the full-library benchmark locally (this can take substantial time):
+
+```text
+dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks -- --filter '*LibraryPairBenchmarks*' --exporters json
+```
+
+Set `COMPARISON_PAIR` to an ID in [the API inventory](competitor-library-manifest.json) to measure one pair,
+or set both `COMPARISON_SHARD` (zero-based) and `COMPARISON_SHARDS` to partition the complete suite.
+Both measured delegates retain their output series and pass a setup correctness check. These are batch
+comparisons at the registered formula conventions, not full-library streaming performance measurements.
+
+The older seven-indicator batch/incremental suite remains available through the commands below.
 The following commands check coverage, arithmetic, workloads and allocations without producing timings.
 
 What each library ships, so a missing row is never mistaken for a slow one:
