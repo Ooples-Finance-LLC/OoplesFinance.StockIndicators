@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def verify(manifest_path, artifacts, shard, total):
+def verify(manifest_path, artifacts, shard, total, *, quiet=False):
     if total < 1 or shard < 0 or shard >= total:
         raise ValueError("Invalid performance shard")
     manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
@@ -14,7 +14,7 @@ def verify(manifest_path, artifacts, shard, total):
     expected = {(pair, bars, arm) for pair in pairs for bars in (1000, 10000) for arm in ("Ooples", "Competitor")}
     if not expected:
         raise ValueError("No assigned performance pairs")
-    actual = set()
+    actual = {}
     for path in Path(artifacts).rglob("*-report-full*.json"):
         report = json.loads(path.read_text(encoding="utf-8-sig"))
         for result in report["Benchmarks"]:
@@ -29,10 +29,12 @@ def verify(manifest_path, artifacts, shard, total):
             stats = result.get("Statistics")
             if not stats or stats["N"] < 3 or not math.isfinite(stats["Mean"]) or stats["Mean"] <= 0:
                 raise ValueError("Missing or insufficient measured timings: " + str(key))
-            actual.add(key)
-    if actual != expected:
-        raise ValueError("Missing performance arms: " + str(sorted(expected - actual)))
-    print(f"Verified timings for {len(actual)} arms across {len(pairs)} pairs.")
+            actual[key] = result
+    if set(actual) != expected:
+        raise ValueError("Missing performance arms: " + str(sorted(expected - set(actual))))
+    if not quiet:
+        print(f"Verified timings for {len(actual)} arms across {len(pairs)} pairs.")
+    return actual
 
 
 if __name__ == "__main__":

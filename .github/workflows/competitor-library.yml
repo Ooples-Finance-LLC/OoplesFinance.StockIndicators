@@ -171,3 +171,44 @@ jobs:
           name: competitor-performance-${{ matrix.shard }}
           path: performance/
           retention-days: 14
+  performance-summary:
+    needs: [build, performance]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require all performance shards to pass
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          PERFORMANCE_RESULT: ${{ needs.performance.result }}
+        run: test "$BUILD_RESULT" = success && test "$PERFORMANCE_RESULT" = success
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: competitor-performance-[0-9]*
+          path: performance-shards
+      - name: Publish complete per-indicator comparisons
+        run: >-
+          python scripts/report-competitor-performance.py benchmarks/competitor-library-manifest.json
+          performance-shards ${{ needs.build.outputs.count }} performance-summary
+          --source-sha "$GITHUB_SHA"
+          --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - name: Link the consolidated report in the workflow summary
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          evidence = json.loads(Path('performance-summary/evidence.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f"## Full-library performance\n\n{evidence['pairedIndicators']} paired APIs; {evidence['measuredArms']} measured arms.\n\n")
+              summary.write("Download **competitor-performance-summary** from this run for every indicator's timing, dispersion, allocation, and ratio, plus raw evidence.\n\n")
+              summary.write("Both libraries are measured at 1,000 and 10,000 bars. Unavailable APIs are listed explicitly. Shared-runner ShortRun timings are diagnostic, not speed guarantees.\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: competitor-performance-summary
+          path: performance-summary/
+          if-no-files-found: error
+          retention-days: 90

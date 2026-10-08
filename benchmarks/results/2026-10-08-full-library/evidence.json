@@ -1,0 +1,490 @@
+{
+  "sourceSha": "848a5ec887ec9c8d24a22948ecfe747ece60c82f",
+  "runUrl": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/37705611793",
+  "pairedIndicators": 401,
+  "measuredArms": 1604,
+  "shards": 20,
+  "manifestSha256": "aeb48edc20f36b44872f32789366b1d89a3e52056c87c49a7dfef96362cd8b00",
+  "reports": [
+    {
+      "artifactPath": "competitor-performance-0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/00-report.json.gz",
+      "sha256": "069eea707e80f9afb1c96cb1cdd5055da10dbb301694e8bb27ed63499b5b9565",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-1/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/01-report.json.gz",
+      "sha256": "a5e3267bd2eaf2e75c2543a56f6b17b387e9da4d84c027a0659a4ea1b9212642",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "INTEL XEON PLATINUM 8573C",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-2/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/02-report.json.gz",
+      "sha256": "e1fe49451766ef3fa8e679f3b4cba1164144868fc96e1fc52798994fcababb12",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-3/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/03-report.json.gz",
+      "sha256": "13d1c2c1f06704f2c5f05e8d55772e06963e818ef5c74463fc1018b4e6588c82",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-4/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/04-report.json.gz",
+      "sha256": "e24979c0b38efd06891f2901aac9e9338785da899608598c2b4c82f7febdca27",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V45",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-5/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/05-report.json.gz",
+      "sha256": "97ec0350539e2b97d7fcc747eb9c0205bb3c2f6519b077b653cb4b25dd2bb4ea",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "INTEL XEON PLATINUM 8573C",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-6/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/06-report.json.gz",
+      "sha256": "be8d1586f5030d615c6d81aaa0596afeb6588a0da2156e4fc7a66fe7495a6f0c",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-7/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/07-report.json.gz",
+      "sha256": "16407570594294a8e94b1b574430b2adff19caef69f30fe5303cb17b5455a01d",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V45",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-8/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/08-report.json.gz",
+      "sha256": "6fd77d4bac0e2e55d9548791b8faef39ee6ab71799787ff041879aa546d15d41",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-9/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/09-report.json.gz",
+      "sha256": "02d8acfae3fe488baf6c8af963eb10f1fecbad00c0c1b275e4055df7b8a50052",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-10/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/10-report.json.gz",
+      "sha256": "f4a3902552872a563ad055a7a3de9fc2e861fd284a3861606b3c4ee9bd67c7b7",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "INTEL XEON PLATINUM 8573C",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-11/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/11-report.json.gz",
+      "sha256": "a8853aa2f79e1e5168bab045d218fae0fba20e8a14984d141adbfd579b9f3019",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V45",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-12/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/12-report.json.gz",
+      "sha256": "2b161d9bcaadf6afd089cc9e0f70a36f09dd9b17a158798b74b6e1362c61996a",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-13/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/13-report.json.gz",
+      "sha256": "b8b0b502638acc221601949fd33ea0cc1679499ee0dd234df2ae3f07d487feca",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V45",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-14/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/14-report.json.gz",
+      "sha256": "15300ac6f8feb407b96845219bf025f39fbd0e6ff9e3fe7a94341891eebbf34b",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V74",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-15/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/15-report.json.gz",
+      "sha256": "dcd2a14f0b067ca1b56fc8903a62dae7253fcf26a62c3c228d322c25dcf931cf",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V45",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-16/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/16-report.json.gz",
+      "sha256": "1c9e36b55ecc1a16a49095005a685956674e93a7173e02096e225a12fe9803cd",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-17/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/17-report.json.gz",
+      "sha256": "dbae22d55fe2e7db39387e5b40a12a306dcde6710891cc72b05f23aab30b13dc",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-18/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/18-report.json.gz",
+      "sha256": "f5e138d3bb57c9a89cd12a21a821eacf12988a418fce93513b51b1e4f6c40f0b",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "artifactPath": "competitor-performance-19/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "file": "raw/19-report.json.gz",
+      "sha256": "4329eb944fc3a6bb50518fe83cb8d903198c4eef728356f66aa383b23090d8de",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V45",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    }
+  ]
+}
