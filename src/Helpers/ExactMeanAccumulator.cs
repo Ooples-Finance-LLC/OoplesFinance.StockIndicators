@@ -51,6 +51,19 @@ internal struct ExactMeanAccumulator
         else AddSmall(value._small, value._scale);
     }
 
+    // Exact scaling without first rounding an accumulated difference to double.
+    // Used by recurrences whose rounding boundary is the complete weighted sum.
+    internal void Multiply(double factor)
+    {
+        var multiplier = new ExactMeanAccumulator();
+        multiplier.Add(factor);
+        if (IsZero || multiplier.IsZero) { this = default; return; }
+        var scale = checked(_scale + multiplier._scale - 1074);
+        var product = (_wide ? _large : new BigInteger(_small)) * multiplier._small;
+        this = default;
+        AddLarge(product, scale);
+    }
+
     internal void Add(double value, BigInteger weight)
     {
         if (weight >= int.MinValue && weight <= int.MaxValue)

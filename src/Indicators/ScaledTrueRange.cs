@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -52,7 +51,7 @@ public sealed class ScaledTrueRange : IndicatorBase, IIndicatorValidationContrac
         return values;
     }
 
-    private sealed class State(int divisor) : IIndicatorState
+    internal sealed class State(int divisor, bool rejectOverflow = false) : IPreviewIndicatorState
     {
         private double _previous;
         private bool _started;
@@ -63,22 +62,47 @@ public sealed class ScaledTrueRange : IndicatorBase, IIndicatorValidationContrac
             _started = false;
         }
 
-        public double Update(in Bar bar)
+        public double Update(in Bar bar) => Update(bar, true);
+
+        public double Update(in Bar bar, bool commit)
         {
-            var high = ExactVarianceWindow.Units(bar.High);
-            var low = ExactVarianceWindow.Units(bar.Low);
-            var range = high - low;
-            if (_started)
+            // max(H-L, |H-P|, |L-P|) is the distance between the
+            // largest and smallest of H, L and P, for a valid candle.
+            // Keep the general expression for callers with inverted ranges.
+            double value;
+            if (!_started || bar.High >= bar.Low)
             {
-                var previous = ExactVarianceWindow.Units(_previous);
-                range = BigInteger.Max(
-                    range,
-                    BigInteger.Max(BigInteger.Abs(high - previous), BigInteger.Abs(low - previous))
-                );
+                var high = _started ? Math.Max(bar.High, _previous) : bar.High;
+                var low = _started ? Math.Min(bar.Low, _previous) : bar.Low;
+                var difference = high - low;
+                var virtualLow = difference - high;
+                // Error-free TwoSum certifies the complete subtraction. Only an
+                // exact difference may use hardware division for the final rounding.
+                var error = (high - (difference - virtualLow)) + (-low - virtualLow);
+                value = FrameworkCompatibility.IsFinite(difference) && error == 0 // NOSONAR: exact error certificate.
+                    ? difference == 0 ? 0 : difference / divisor
+                    : Difference(high, low).Mean(divisor);
             }
-            _started = true;
-            _previous = bar.Close;
-            return ExactMeanAccumulator.UnitRatio(range, divisor);
+            else
+            {
+                var range = Difference(bar.High, bar.Low);
+                var upper = Difference(Math.Max(bar.High, _previous), Math.Min(bar.High, _previous));
+                var lower = Difference(Math.Max(bar.Low, _previous), Math.Min(bar.Low, _previous));
+                var comparison = upper; comparison.Subtract(range);
+                if (comparison.Sign > 0) range = upper;
+                comparison = lower; comparison.Subtract(range);
+                if (comparison.Sign > 0) range = lower;
+                value = range.Mean(divisor);
+            }
+            if (rejectOverflow && !FrameworkCompatibility.IsFinite(value)) throw new OverflowException("True range is not representable.");
+            if (commit) { _started = true; _previous = bar.Close; }
+            return value;
+        }
+        private static ExactMeanAccumulator Difference(double left, double right)
+        {
+            var value = new ExactMeanAccumulator();
+            value.Add(left); value.Add(right, -1);
+            return value;
         }
     }
 }

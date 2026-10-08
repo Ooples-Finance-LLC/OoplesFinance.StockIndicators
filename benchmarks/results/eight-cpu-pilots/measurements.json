@@ -1,0 +1,704 @@
+{
+  "BaselineCommit": "f720f254",
+  "Host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9587)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.401",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "ProductionSourceLfSha256": {
+    "src/Helpers/ExactMeanAccumulator.cs": "cbcc8b18f2f1b62f4573cbb45461198ae74ae117d53ccd1c398f262ffdccb269",
+    "src/Helpers/ExtremeDeque.cs": "65c696d30efd6af2baa0bd26f9a4bfbca61995375e65cf625d182bbbc098be93",
+    "src/Helpers/JurikDyadic.cs": "2b5a881a69f75f97be4abc1752fa0f708a63f5751c9052f9839156fd1e4fb6c0",
+    "src/Indicators/FractalSnapshot.cs": "00af3bcab13d4fad22f320a1c406f9ba066fed2c9dd5f2d4bb842f9feb01f631",
+    "src/Indicators/IndicatorKernel.cs": "abf5a8ffcc52e7c207f248f37e836c2465e2a81102e5f1daea96ba7944303d5a",
+    "src/Indicators/IndicatorState.cs": "63fdb1e4381d3032df77a176724ca0f3b3233b0baaeab983b2eefbdbb2e67790",
+    "src/Indicators/JurikAdaptiveSnapshot.cs": "1ff5ccf45a4841ae55b67dbd3198d161b49f25d19d39dca36f45449f904fcfe9",
+    "src/Indicators/PercentileCandles.cs": "4226706fe3f1715a1ea1c371852ad207dfca87df9e1ee3e89d12c840471022c6",
+    "src/Indicators/PivotLevelSnapshots.cs": "4ee4c63b950ed7f418359991cfc3328ffd543ed59f2da5c9897cbe90af0c1e79",
+    "src/Indicators/RickshawManCandle.cs": "87eb12a8a1e4049f1f9d411b0f1a34707d2dc8da0fb3ab96d75b9c441c326210",
+    "src/Indicators/ScaledTrueRange.cs": "3bb96dc02b83fbaa50266a7590eec7408d69430364b91eb806f8819427fa335e",
+    "src/Indicators/WindowCpuKernels.cs": "c93892e429d62cf54648b11e1e899ee0cb7a973a06ce62761445bfcd1c5e9d7a"
+  },
+  "Protocol": {
+    "OrdinaryPairs": "16 invocations, 8 warmups, 5 measurements; in-process BDN ShortRun",
+    "TradyShortDay": "1 invocation, 3 warmups, 3 measurements; unchanged competitor reused from measured baseline",
+    "Sizes": [
+      1000,
+      10000
+    ],
+    "Period": 20,
+    "Notes": "Different APIs have different ownership and output shapes. Compare rows with their named contracts. No universal speed guarantee."
+  },
+  "Results": [
+    {
+      "Pair": "QuanTAlib.Jma",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 30055485.9375,
+        "StandardDeviationNanoseconds": 122214.8864635863,
+        "Samples": 4,
+        "AllocatedBytes": 19576136
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 846376.25,
+        "StandardDeviationNanoseconds": 72037.39065474088,
+        "Samples": 5,
+        "AllocatedBytes": 392782
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 1221810.625,
+        "StandardDeviationNanoseconds": 3777.9489723261217,
+        "Samples": 5,
+        "AllocatedBytes": 18416
+      },
+      "Competitor": {
+        "MeanNanoseconds": 716071.875,
+        "StandardDeviationNanoseconds": 881.1465660338996,
+        "Samples": 4,
+        "AllocatedBytes": 392842
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 1228635.9375,
+        "StandardDeviationNanoseconds": 6892.818528412379,
+        "Samples": 4,
+        "AllocatedBytes": 228
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 1228826.5625,
+        "StandardDeviationNanoseconds": 10616.964332643536,
+        "Samples": 4,
+        "AllocatedBytes": 291
+      }
+    },
+    {
+      "Pair": "QuanTAlib.Jma",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 299281933.75,
+        "StandardDeviationNanoseconds": 3072730.715635931,
+        "Samples": 5,
+        "AllocatedBytes": 195685244
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 3198806.875,
+        "StandardDeviationNanoseconds": 810556.6911104406,
+        "Samples": 5,
+        "AllocatedBytes": 3971140
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 12385681.25,
+        "StandardDeviationNanoseconds": 32594.322462214695,
+        "Samples": 4,
+        "AllocatedBytes": 162791
+      },
+      "Competitor": {
+        "MeanNanoseconds": 1979745.3125,
+        "StandardDeviationNanoseconds": 7422.91352383232,
+        "Samples": 4,
+        "AllocatedBytes": 3971245
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 12374187.5,
+        "StandardDeviationNanoseconds": 306040.78408512403,
+        "Samples": 5,
+        "AllocatedBytes": 357
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 12268451.5625,
+        "StandardDeviationNanoseconds": 7802.030276299347,
+        "Samples": 4,
+        "AllocatedBytes": 357
+      }
+    },
+    {
+      "Pair": "QuanTAlib.Atr",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 3651085.9375,
+        "StandardDeviationNanoseconds": 522118.2839219471,
+        "Samples": 4,
+        "AllocatedBytes": 1742192
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 412785.9375,
+        "StandardDeviationNanoseconds": 70074.76520188247,
+        "Samples": 4,
+        "AllocatedBytes": 89399
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 1946551.5625,
+        "StandardDeviationNanoseconds": 57466.47513963218,
+        "Samples": 4,
+        "AllocatedBytes": 270768
+      },
+      "Competitor": {
+        "MeanNanoseconds": 340092.1875,
+        "StandardDeviationNanoseconds": 46691.00064268943,
+        "Samples": 4,
+        "AllocatedBytes": 89525
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 56190.625,
+        "StandardDeviationNanoseconds": 505.4005218636008,
+        "Samples": 4,
+        "AllocatedBytes": 294
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 63420.3125,
+        "StandardDeviationNanoseconds": 159.21151745921574,
+        "Samples": 4,
+        "AllocatedBytes": 357
+      }
+    },
+    {
+      "Pair": "QuanTAlib.Atr",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 14464632.5,
+        "StandardDeviationNanoseconds": 90434.07111675333,
+        "Samples": 5,
+        "AllocatedBytes": 18518982
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 525067.1875,
+        "StandardDeviationNanoseconds": 6031.118036121114,
+        "Samples": 4,
+        "AllocatedBytes": 881567
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 1797307.5,
+        "StandardDeviationNanoseconds": 49930.51977185397,
+        "Samples": 5,
+        "AllocatedBytes": 3799523
+      },
+      "Competitor": {
+        "MeanNanoseconds": 471568.75,
+        "StandardDeviationNanoseconds": 6111.786342115262,
+        "Samples": 4,
+        "AllocatedBytes": 881525
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 114203.125,
+        "StandardDeviationNanoseconds": 1240.048932166254,
+        "Samples": 4,
+        "AllocatedBytes": 294
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 222191.25,
+        "StandardDeviationNanoseconds": 82218.84936805094,
+        "Samples": 5,
+        "AllocatedBytes": 357
+      }
+    },
+    {
+      "Pair": "Skender.GetRollingPivots",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 4171337.5,
+        "StandardDeviationNanoseconds": 115540.28628104673,
+        "Samples": 5,
+        "AllocatedBytes": 6323760
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 1617714.0625,
+        "StandardDeviationNanoseconds": 22544.9506859583,
+        "Samples": 4,
+        "AllocatedBytes": 748715
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 2358632.5,
+        "StandardDeviationNanoseconds": 292829.22182108765,
+        "Samples": 5,
+        "AllocatedBytes": 397520
+      },
+      "Competitor": {
+        "MeanNanoseconds": 1895339.0625,
+        "StandardDeviationNanoseconds": 64579.7985003745,
+        "Samples": 4,
+        "AllocatedBytes": 748694
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 471398.4375,
+        "StandardDeviationNanoseconds": 7141.044389580444,
+        "Samples": 4,
+        "AllocatedBytes": 165
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 685615.625,
+        "StandardDeviationNanoseconds": 23796.81132350859,
+        "Samples": 4,
+        "AllocatedBytes": 357
+      }
+    },
+    {
+      "Pair": "Skender.GetRollingPivots",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 45822382.8125,
+        "StandardDeviationNanoseconds": 115799.60042108216,
+        "Samples": 4,
+        "AllocatedBytes": 64291248
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 10151756.25,
+        "StandardDeviationNanoseconds": 514263.4930397427,
+        "Samples": 5,
+        "AllocatedBytes": 7493104
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 8352526.25,
+        "StandardDeviationNanoseconds": 1544567.6587603022,
+        "Samples": 5,
+        "AllocatedBytes": 3936294
+      },
+      "Competitor": {
+        "MeanNanoseconds": 15304251.25,
+        "StandardDeviationNanoseconds": 1205464.6850174495,
+        "Samples": 5,
+        "AllocatedBytes": 7491841
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 5710551.875,
+        "StandardDeviationNanoseconds": 627858.2470484232,
+        "Samples": 5,
+        "AllocatedBytes": 354
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 6238253.125,
+        "StandardDeviationNanoseconds": 229945.63323705815,
+        "Samples": 4,
+        "AllocatedBytes": 0
+      }
+    },
+    {
+      "Pair": "Skender.GetFractal",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 305917.1875,
+        "StandardDeviationNanoseconds": 7260.596378096292,
+        "Samples": 4,
+        "AllocatedBytes": 265320
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 979459.375,
+        "StandardDeviationNanoseconds": 24336.752845490686,
+        "Samples": 4,
+        "AllocatedBytes": 167831
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 255148.4375,
+        "StandardDeviationNanoseconds": 2100.2007282539025,
+        "Samples": 4,
+        "AllocatedBytes": 154600
+      },
+      "Competitor": {
+        "MeanNanoseconds": 867779.6875,
+        "StandardDeviationNanoseconds": 12770.65256975115,
+        "Samples": 4,
+        "AllocatedBytes": 167807
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 79648.75,
+        "StandardDeviationNanoseconds": 567.3815955774385,
+        "Samples": 5,
+        "AllocatedBytes": 270
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 95023.75,
+        "StandardDeviationNanoseconds": 308.391745593166,
+        "Samples": 5,
+        "AllocatedBytes": 336
+      }
+    },
+    {
+      "Pair": "Skender.GetFractal",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 1249445.3125,
+        "StandardDeviationNanoseconds": 8345.704944198842,
+        "Samples": 4,
+        "AllocatedBytes": 2659737
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 5950546.875,
+        "StandardDeviationNanoseconds": 10836.878226108292,
+        "Samples": 4,
+        "AllocatedBytes": 1661576
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 802115.625,
+        "StandardDeviationNanoseconds": 31236.122960511068,
+        "Samples": 4,
+        "AllocatedBytes": 1540946
+      },
+      "Competitor": {
+        "MeanNanoseconds": 6001843.75,
+        "StandardDeviationNanoseconds": 7944.571980813903,
+        "Samples": 4,
+        "AllocatedBytes": 1661810
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 444092.5,
+        "StandardDeviationNanoseconds": 4320.29729879785,
+        "Samples": 5,
+        "AllocatedBytes": 249
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 433890.625,
+        "StandardDeviationNanoseconds": 2254.99012608703,
+        "Samples": 5,
+        "AllocatedBytes": 378
+      }
+    },
+    {
+      "Pair": "TaLib.Candles.RickshawMan",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 2312435.9375,
+        "StandardDeviationNanoseconds": 41282.471239505816,
+        "Samples": 4,
+        "AllocatedBytes": 273192
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 846941.875,
+        "StandardDeviationNanoseconds": 26229.344328561667,
+        "Samples": 5,
+        "AllocatedBytes": 12683
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 2230902.5,
+        "StandardDeviationNanoseconds": 21097.309236754576,
+        "Samples": 5,
+        "AllocatedBytes": 272616
+      },
+      "Competitor": {
+        "MeanNanoseconds": 841152.5,
+        "StandardDeviationNanoseconds": 5687.531936723521,
+        "Samples": 5,
+        "AllocatedBytes": 12743
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 130420.3125,
+        "StandardDeviationNanoseconds": 174.20765566319952,
+        "Samples": 4,
+        "AllocatedBytes": 186
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 144247.5,
+        "StandardDeviationNanoseconds": 1190.871857611053,
+        "Samples": 5,
+        "AllocatedBytes": 66
+      }
+    },
+    {
+      "Pair": "TaLib.Candles.RickshawMan",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 2771514.0625,
+        "StandardDeviationNanoseconds": 14636.532467845369,
+        "Samples": 4,
+        "AllocatedBytes": 3801748
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 782885.9375,
+        "StandardDeviationNanoseconds": 3492.951887819957,
+        "Samples": 4,
+        "AllocatedBytes": 120533
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 2518551.25,
+        "StandardDeviationNanoseconds": 27758.678752666707,
+        "Samples": 5,
+        "AllocatedBytes": 3801608
+      },
+      "Competitor": {
+        "MeanNanoseconds": 775356.25,
+        "StandardDeviationNanoseconds": 422.01772277160745,
+        "Samples": 4,
+        "AllocatedBytes": 120599
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 835952.5,
+        "StandardDeviationNanoseconds": 2871.4842634080374,
+        "Samples": 5,
+        "AllocatedBytes": 294
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 1009431.875,
+        "StandardDeviationNanoseconds": 199680.38786239125,
+        "Samples": 5,
+        "AllocatedBytes": 357
+      }
+    },
+    {
+      "Pair": "TaLib.Functions.Asin",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 1916715,
+        "StandardDeviationNanoseconds": 35608.82489153841,
+        "Samples": 5,
+        "AllocatedBytes": 312306
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 84800,
+        "StandardDeviationNanoseconds": 888.1306444812423,
+        "Samples": 4,
+        "AllocatedBytes": 33872
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 2060678.125,
+        "StandardDeviationNanoseconds": 11535.7556689696,
+        "Samples": 4,
+        "AllocatedBytes": 312306
+      },
+      "Competitor": {
+        "MeanNanoseconds": 71020.3125,
+        "StandardDeviationNanoseconds": 1599.229754379172,
+        "Samples": 4,
+        "AllocatedBytes": 33956
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 59700,
+        "StandardDeviationNanoseconds": 412.7209004480712,
+        "Samples": 4,
+        "AllocatedBytes": 270
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 56043.75,
+        "StandardDeviationNanoseconds": 891.3867356540594,
+        "Samples": 5,
+        "AllocatedBytes": 375
+      }
+    },
+    {
+      "Pair": "TaLib.Functions.Asin",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 2132627.5,
+        "StandardDeviationNanoseconds": 44444.236611384724,
+        "Samples": 5,
+        "AllocatedBytes": 4211824
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 199429.6875,
+        "StandardDeviationNanoseconds": 5222.630480957369,
+        "Samples": 4,
+        "AllocatedBytes": 330896
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 2294608.125,
+        "StandardDeviationNanoseconds": 103888.42943047725,
+        "Samples": 5,
+        "AllocatedBytes": 4211818
+      },
+      "Competitor": {
+        "MeanNanoseconds": 218664.0625,
+        "StandardDeviationNanoseconds": 1644.802221836514,
+        "Samples": 4,
+        "AllocatedBytes": 330938
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 144526.25,
+        "StandardDeviationNanoseconds": 1363.5489081804144,
+        "Samples": 5,
+        "AllocatedBytes": 255
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 147800,
+        "StandardDeviationNanoseconds": 1451.3261715582753,
+        "Samples": 5,
+        "AllocatedBytes": 378
+      }
+    },
+    {
+      "Pair": "Trady.Candlestick.BullishShortDay",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 2884966.6666666665,
+        "StandardDeviationNanoseconds": 70696.62886823766,
+        "Samples": 3,
+        "AllocatedBytes": 272992
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 682378700,
+        "StandardDeviationNanoseconds": 7711578.457747804,
+        "Samples": 3,
+        "AllocatedBytes": 1191291840
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 2477866.6666666665,
+        "StandardDeviationNanoseconds": 36729.32525017759,
+        "Samples": 3,
+        "AllocatedBytes": 273040
+      },
+      "Competitor": {
+        "MeanNanoseconds": 682378700,
+        "StandardDeviationNanoseconds": 7711578.457747804,
+        "Samples": 3,
+        "AllocatedBytes": 1191291840
+      },
+      "CompetitorReusedFromBaseline": true,
+      "CpuBatch": {
+        "MeanNanoseconds": 569300,
+        "StandardDeviationNanoseconds": 10450.358845513392,
+        "Samples": 3,
+        "AllocatedBytes": 6672
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 933516.6666666666,
+        "StandardDeviationNanoseconds": 16294.886723550224,
+        "Samples": 3,
+        "AllocatedBytes": 6048
+      }
+    },
+    {
+      "Pair": "Trady.Candlestick.BullishShortDay",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 4717900,
+        "StandardDeviationNanoseconds": 570530.9194075287,
+        "Samples": 3,
+        "AllocatedBytes": 3804160
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 92723128366.66667,
+        "StandardDeviationNanoseconds": 3452849630.333132,
+        "Samples": 3,
+        "AllocatedBytes": 119476210744
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 3385016.6666666665,
+        "StandardDeviationNanoseconds": 155352.67404629162,
+        "Samples": 3,
+        "AllocatedBytes": 3804496
+      },
+      "Competitor": {
+        "MeanNanoseconds": 92723128366.66667,
+        "StandardDeviationNanoseconds": 3452849630.333132,
+        "Samples": 3,
+        "AllocatedBytes": 119476210744
+      },
+      "CompetitorReusedFromBaseline": true,
+      "CpuBatch": {
+        "MeanNanoseconds": 920433.3333333334,
+        "StandardDeviationNanoseconds": 11675.758362236405,
+        "Samples": 3,
+        "AllocatedBytes": 7008
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 992633.3333333334,
+        "StandardDeviationNanoseconds": 2510.64400768669,
+        "Samples": 3,
+        "AllocatedBytes": 5664
+      }
+    },
+    {
+      "Pair": "Trady.Indicator.SimpleMovingAverage",
+      "Bars": 1000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 1830287.5,
+        "StandardDeviationNanoseconds": 22905.8087440446,
+        "Samples": 5,
+        "AllocatedBytes": 298104
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 2575672.5,
+        "StandardDeviationNanoseconds": 1011391.8538060866,
+        "Samples": 5,
+        "AllocatedBytes": 781629
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 1811578.125,
+        "StandardDeviationNanoseconds": 54856.19801752123,
+        "Samples": 5,
+        "AllocatedBytes": 298104
+      },
+      "Competitor": {
+        "MeanNanoseconds": 2280690.625,
+        "StandardDeviationNanoseconds": 1206566.850346664,
+        "Samples": 5,
+        "AllocatedBytes": 781610
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 97620.3125,
+        "StandardDeviationNanoseconds": 262.61778111608004,
+        "Samples": 4,
+        "AllocatedBytes": 249
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 99515,
+        "StandardDeviationNanoseconds": 760.815249419989,
+        "Samples": 5,
+        "AllocatedBytes": 399
+      }
+    },
+    {
+      "Pair": "Trady.Indicator.SimpleMovingAverage",
+      "Bars": 10000,
+      "BeforePublicApi": {
+        "MeanNanoseconds": 2012014.0625,
+        "StandardDeviationNanoseconds": 17624.199431434074,
+        "Samples": 4,
+        "AllocatedBytes": 4043704
+      },
+      "BeforeCompetitor": {
+        "MeanNanoseconds": 10382925,
+        "StandardDeviationNanoseconds": 188389.27233175328,
+        "Samples": 5,
+        "AllocatedBytes": 7719378
+      },
+      "PublicApi": {
+        "MeanNanoseconds": 1841606.25,
+        "StandardDeviationNanoseconds": 28292.842237481196,
+        "Samples": 4,
+        "AllocatedBytes": 4043166
+      },
+      "Competitor": {
+        "MeanNanoseconds": 10351861.25,
+        "StandardDeviationNanoseconds": 53353.57506912025,
+        "Samples": 5,
+        "AllocatedBytes": 7719436
+      },
+      "CompetitorReusedFromBaseline": false,
+      "CpuBatch": {
+        "MeanNanoseconds": 525112.5,
+        "StandardDeviationNanoseconds": 1835.8020783388888,
+        "Samples": 4,
+        "AllocatedBytes": 420
+      },
+      "CpuStreaming": {
+        "MeanNanoseconds": 497109.375,
+        "StandardDeviationNanoseconds": 691.5505675654334,
+        "Samples": 4,
+        "AllocatedBytes": 438
+      }
+    }
+  ]
+}

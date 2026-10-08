@@ -1,3 +1,5 @@
+using OoplesFinance.StockIndicators.Helpers;
+
 namespace OoplesFinance.StockIndicators.Indicators;
 
 /// <summary>Strict local high and low values; either may be absent independently.</summary>
@@ -40,8 +42,8 @@ public static class FractalSnapshot
         var width = (long)leftSpan + rightSpan + 1;
         if (width > bars.Count)
             return result;
-        var highs = new Extreme(true);
-        var lows = new Extreme(false);
+        var highs = new ExtremeDeque((int)width, true);
+        var lows = new ExtremeDeque((int)width, false);
         for (var end = 0; end < bars.Count; end++)
         {
             var start = (long)end - width + 1;
@@ -77,30 +79,4 @@ public static class FractalSnapshot
         return result;
     }
 
-    private sealed class Extreme(bool maximum)
-    {
-        private readonly LinkedList<(int Index, double Value)> _candidates = new();
-
-        internal void Add(int index, double value, long first)
-        {
-            while (_candidates.First is { } head && head.Value.Index < first)
-                _candidates.RemoveFirst();
-            while (
-                _candidates.Last is { } tail
-                && (maximum ? tail.Value.Value < value : tail.Value.Value > value)
-            )
-                _candidates.RemoveLast();
-            _candidates.AddLast((index, value));
-        }
-
-        internal double? UniqueAt(int index)
-        {
-            var head = _candidates.First;
-            if (head is null || head.Value.Index != index)
-                return null;
-            return head.Next is { } next && next.Value.Value == head.Value.Value // NOSONAR: Exact ties invalidate strict extrema; adjacent prices must remain distinct.
-                ? null
-                : head.Value.Value;
-        }
-    }
 }
