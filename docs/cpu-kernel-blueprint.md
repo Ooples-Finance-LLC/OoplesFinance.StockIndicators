@@ -1,5 +1,7 @@
 # Reusable CPU indicator blueprint
 
+The kernel timings below are diagnostic evidence, not proof of builder performance or superiority over the strongest competitor. The [public builder suite](../benchmarks/results/eight-cpu-pilots/builder-comparisons.md) includes the complete builder lifecycle and all eligible competitors from the inventory for these eight formulas.
+
 The eight pilots retain the library's numerical definitions while separating arithmetic from builder, result-object, and buffer ownership costs. The [measured results](../benchmarks/results/eight-cpu-pilots/README.md) distinguish owning batch, reusable batch, and supported streaming comparisons. The earlier claim of eight batch and streaming wins used allocating correctness adapters and is superseded. Existing public APIs remain available. `IndicatorKernels` provides an explicit reusable route for applications that already own their input and output storage.
 
 ```csharp

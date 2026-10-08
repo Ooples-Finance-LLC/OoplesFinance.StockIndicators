@@ -72,6 +72,20 @@ class CpuPerformanceEvidenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.check(self.rows)
 
+    def test_builder_evidence_cannot_be_replaced_by_kernel_timings(self):
+        rows = [{"Type": "CpuBuilderBenchmarks", "Method": method,
+                 "FullName": f'CpuBuilderBenchmarks.{method}(Bars: {bars}, PairId: "Pilot")',
+                 "Statistics": {"Mean": 100, "N": 3}, "Memory": {"BytesAllocatedPerOperation": 0}}
+                for method in ("OoplesBuilderBatch", "CompetitorNativeBatch") for bars in (1000, 10000)]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "builder-full-compressed.json"
+            path.write_text(json.dumps({"Benchmarks": rows}), encoding="utf-8")
+            self.assertEqual(4, len(module.verify(directory, "Pilot", suite="builder")))
+            rows[0]["Type"] = "CpuKernelBenchmarks"
+            path.write_text(json.dumps({"Benchmarks": rows}), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                module.verify(directory, "Pilot", suite="builder")
+
 
 if __name__ == "__main__":
     unittest.main()

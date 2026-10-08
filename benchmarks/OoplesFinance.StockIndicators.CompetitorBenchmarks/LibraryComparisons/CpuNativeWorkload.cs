@@ -13,20 +13,27 @@ internal sealed class CpuNativeWorkload
     internal string PairId { get; }
     internal CompetitorData Data { get; }
     private readonly QuanTAlib.TValue[] _values;
+    private readonly (DateTime, double)[] _tuples;
+    private readonly decimal?[] _decimalCloses;
+    private readonly (decimal Open, decimal Close)[] _bodies;
     private readonly double[] _doubleOutput;
     private readonly int[] _integerOutput;
-    internal CpuNativeWorkload(string pairId, int count)
+    internal CpuNativeWorkload(string pairId, int count, bool commonGrid = false)
     {
         PairId = pairId;
-        var data = ComparisonVerifier.BenchmarkFixture(ComparisonPairs.Get(pairId), count);
+        var data = ComparisonVerifier.BenchmarkFixture(ComparisonPairs.Get(CanonicalPair(pairId)), count);
         // Decimal-native libraries receive exactly the same binary-grid values,
         // not decimal-rounded approximations of the double fixture.
-        Data = pairId.StartsWith("Trady.", StringComparison.Ordinal) || pairId.StartsWith("Skender.", StringComparison.Ordinal)
+        Data = commonGrid || pairId.StartsWith("Trady.", StringComparison.Ordinal) || pairId.StartsWith("Skender.", StringComparison.Ordinal)
             ? CompetitorData.FromOhlcv(Grid(data.Opens), Grid(data.Highs), Grid(data.Lows), Grid(data.Closes), Grid(data.Volumes))
             : data;
         _values = Data.Closes.Select(v => new QuanTAlib.TValue(v, true, false)).ToArray();
+        _tuples = Data.Dates.Zip(Data.Closes, (date, close) => (date, close)).ToArray();
+        _decimalCloses = Data.Closes.Select(value => (decimal?)value).ToArray();
+        _bodies = Data.Opens.Zip(Data.Closes, (open, close) => ((decimal)open, (decimal)close)).ToArray();
         _doubleOutput = new double[count]; _integerOutput = new int[count];
     }
+    internal static string CanonicalPair(string id) => id.EndsWith(".Tuple", StringComparison.Ordinal) ? id[..^6] : id;
     private static double[] Grid(double[] values) => values.Select(v => Math.Round(v * 1024) / 1024).ToArray();
     internal static bool SupportsReusable(string id) => id is "TaLib.Functions.Asin" or "TaLib.Candles.RickshawMan";
     internal static bool SupportsStreaming(string id) => id is "QuanTAlib.Jma" or "QuanTAlib.Atr";
@@ -53,6 +60,7 @@ internal sealed class CpuNativeWorkload
     {
         "QuanTAlib.Jma" => new QuanTAlib.Jma(20, 0, 10),
         "QuanTAlib.Atr" => new QuanTAlib.Atr(20),
+        "QuanTAlib.Sma" => new QuanTAlib.Sma(20),
         _ => throw new NotSupportedException(PairId + " has no streaming pilot API.")
     };
     internal void RunOoplesStream(IndicatorKernel kernel, double[] output)
@@ -65,6 +73,8 @@ internal sealed class CpuNativeWorkload
             for (var i = 0; i < Data.Count; i++) output[i] = jma.Calc(_values[i]).Value;
         else if (model is QuanTAlib.Atr atr)
             for (var i = 0; i < Data.Count; i++) output[i] = atr.Calc(Data.Bars[i]).Value;
+        else if (model is QuanTAlib.Sma sma)
+            for (var i = 0; i < Data.Count; i++) output[i] = sma.Calc(_values[i]).Value;
         else throw new NotSupportedException(model.GetType().Name);
     }
     internal object NativeOwned()
@@ -73,11 +83,20 @@ internal sealed class CpuNativeWorkload
         {
             case "QuanTAlib.Jma":
             case "QuanTAlib.Atr":
+            case "QuanTAlib.Sma":
                 var output = new double[Data.Count];
                 RunNativeStream(NewNativeStream(), output);
                 return output;
             case "TaLib.Functions.Asin":
                 var doubles = new double[Data.Count]; Asin(doubles); return doubles;
+            case "TaLib.Functions.Sma":
+                var averages = new double[Data.Count];
+                Functions.Sma<double>(Data.Closes, System.Range.All, averages, out _, 20);
+                return averages;
+            case "Skender.GetSma":
+                return Data.Quotes.GetSma(20);
+            case "Skender.GetSma.Tuple":
+                return _tuples.GetSma(20);
             case "TaLib.Candles.RickshawMan":
                 var integers = new int[Data.Count]; Rickshaw(integers); return integers;
             case "Skender.GetRollingPivots":
@@ -88,6 +107,10 @@ internal sealed class CpuNativeWorkload
                 return new Trady.Analysis.Candlestick.BullishShortDay(Data.Candles, 20, .25m).Compute();
             case "Trady.Indicator.SimpleMovingAverage":
                 return Data.Candles.Sma(20);
+            case "Trady.Indicator.SimpleMovingAverage.Tuple":
+                return new Trady.Analysis.Indicator.SimpleMovingAverageByTuple(_decimalCloses, 20).Compute();
+            case "Trady.Candlestick.BullishShortDay.Tuple":
+                return new Trady.Analysis.Candlestick.BullishShortDayByTuple(_bodies, 20, .25m).Compute();
             default: throw new ArgumentOutOfRangeException(nameof(PairId));
         }
     }
@@ -138,14 +161,27 @@ internal sealed class CpuNativeWorkload
     }
     internal ComparisonSeries Normalize(object native)
     {
+        if (PairId == "TaLib.Functions.Sma")
+        {
+            var values = new double[Data.Count];
+            Array.Fill(values, double.NaN);
+            Array.Copy((double[])native, 0, values, 19, Data.Count - 19);
+            return new(19, values);
+        }
         if (PairId == "TaLib.Candles.RickshawMan")
         {
             var values = new double[Data.Count]; var packed = (int[])native;
             for (var i = 10; i < values.Length; i++) values[i] = packed[i - 10];
             return new(10, values);
         }
-        if (native is double[] doubles) return new(0, doubles);
+        if (native is double[] doubles) return new(PairId == "QuanTAlib.Sma" ? 19 : 0, doubles);
         var rows = ((IEnumerable)native).Cast<object>().ToArray();
+        if (PairId == "Trady.Indicator.SimpleMovingAverage.Tuple")
+            return new(19, rows.Select(value => value is null ? double.NaN : (double)(decimal)value).ToArray());
+        if (PairId == "Trady.Candlestick.BullishShortDay.Tuple")
+            return new(0, rows.Select(value => (bool)value ? 1d : 0d).ToArray());
+        if (PairId is "Skender.GetSma" or "Skender.GetSma.Tuple")
+            return new(19, rows.Cast<SmaResult>().Select(row => row.Sma ?? double.NaN).ToArray());
         if (PairId.StartsWith("Trady.", StringComparison.Ordinal))
         {
             var values = rows.Select(row => row.GetType().GetProperty("Tick")!.GetValue(row))

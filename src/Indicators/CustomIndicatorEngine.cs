@@ -151,6 +151,18 @@ internal sealed class CustomIndicatorEngine
             return Remember(indicator, builtIn);
         }
 
+        if (indicator is IHistoricalIndicator historical)
+        {
+            var selected = _bars;
+            if (indicator.Source is not null)
+            {
+                var source = Compute(indicator.Source)[IndicatorContract.PrimaryOutput(indicator.Source).Slot];
+                selected = _bars.Select((bar, i) => WithClose(bar, source[i])).ToArray();
+                foreach (var bar in selected) Validation.IndicatorInputDomain.For(indicator).Validate(bar);
+            }
+            return Remember(indicator, historical.CalculateHistory(selected));
+        }
+
         // ZigZag redraws prior legs and therefore requires the complete selected
         // series. A streaming state cannot represent its published path.
         if (indicator is IBuiltInIndicator wholeSeries && wholeSeries.BatchName == IndicatorName.ZigZag

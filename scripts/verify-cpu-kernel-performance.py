@@ -20,14 +20,15 @@ def supported_methods(pair):
     return methods
 
 
-def verify(directory, pair, methods=None):
-    methods = supported_methods(pair) if methods is None else methods
+def verify(directory, pair, methods=None, suite="kernel"):
+    methods = (["OoplesBuilderBatch", "CompetitorNativeBatch"] if suite == "builder"
+               else supported_methods(pair)) if methods is None else methods
     expected = {(method, bars) for method in methods for bars in (1000, 10000)}
     seen = set()
     rows = []
     for report in Path(directory).rglob("*full-compressed.json"):
         for row in json.loads(report.read_text(encoding="utf-8-sig"))["Benchmarks"]:
-            if row.get("Type") != "CpuKernelBenchmarks":
+            if row.get("Type") != ("CpuBuilderBenchmarks" if suite == "builder" else "CpuKernelBenchmarks"):
                 continue
             # Parameters is a display field and truncates longer pair IDs.
             parameters = re.search(r'\(Bars: (\d+), PairId: "([^"]+)"\)', row.get("FullName", ""))
@@ -61,5 +62,6 @@ if __name__ == "__main__":
     parser.add_argument("directory")
     parser.add_argument("pair")
     parser.add_argument("--methods", nargs="+", help="Explicit subset for diagnostic runs only")
+    parser.add_argument("--suite", choices=["kernel", "builder"], default="kernel")
     args = parser.parse_args()
-    print(json.dumps(verify(args.directory, args.pair, args.methods), indent=2))
+    print(json.dumps(verify(args.directory, args.pair, args.methods, args.suite), indent=2))

@@ -1,5 +1,7 @@
 # Eight CPU pilots: direct native comparisons
 
+**Kernel diagnostics only.** These measurements bypass the builder and selected one competitor per family. They do not establish public-builder performance or an advantage over the strongest competitor. See the [builder suite and full candidate selection](builder-comparisons.md) for the primary comparison.
+
 These results replace the earlier adapter-inclusive “all eight batch and streaming wins” claim. Timed competitor arms now call native APIs directly. Input preparation, correctness normalization and references are outside timing for both sides. See [raw statistics and contracts](measurements.json), [benchmark methods](../../OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/CpuKernelBenchmarks.cs), [native calls](../../OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/CpuNativeWorkload.cs), and the [reviewed blueprint](../../../docs/cpu-kernel-blueprint.md).
 
 All rows below are milliseconds per 10,000 observations. Ratio = competitor / Ooples; above 1 favors Ooples. The JSON contains both sizes, variability, confidence intervals, sample counts, raw allocations and report hashes. Close differences are not proof of a stable advantage.
