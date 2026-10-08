@@ -1,0 +1,73 @@
+using Average = OoplesFinance.StockIndicators.Helpers.UnroundedMovingAverage;
+using OoplesFinance.StockIndicators.Streaming;
+using OoplesFinance.StockIndicators.Builder.Compute;
+using Number = OoplesFinance.StockIndicators.Helpers.MacZWindow.Number;
+namespace OoplesFinance.StockIndicators.Helpers;
+internal sealed class TrendAnalysisIndexWindow : IDisposable
+{
+    private readonly int _width;
+    private readonly Average _mean, _signal;
+    private readonly LinkedList<(long Index, Number Value)> _highs = new(), _lows = new();
+    private long _index;
+    private Number _previousSlope;
+    internal TrendAnalysisIndexWindow(MovingAvgType kind, int length1, int length2)
+    { _width = Math.Max(1, length2); _mean = new(kind, length1); _signal = new(kind, length2); }
+    private Number Extreme(LinkedList<(long Index, Number Value)> deque, Number value, bool maximum, bool final)
+    {
+        var expiry = _index - _width + 1;
+        var first = deque.First; while (first is not null && first.Value.Index < expiry) first = first.Next;
+        var result = first is null || (maximum ? (value - first.Value.Value).Sign > 0 : (value - first.Value.Value).Sign < 0) ? value : first.Value.Value;
+        if (final)
+        {
+            while (deque.First is { } old && old.Value.Index < expiry) deque.RemoveFirst();
+            while (deque.Last is { } last && (maximum ? (last.Value.Value - value).Sign <= 0 : (last.Value.Value - value).Sign >= 0)) deque.RemoveLast();
+            deque.AddLast((_index, value));
+        }
+        return result;
+    }
+    private Number RangeRatio(Number price, Number mean, bool final)
+    {
+        var high = Extreme(_highs, mean, true, final); var low = Extreme(_lows, mean, false, final);
+        var line = price.Sign == 0 ? default : (high - low).Times(100).Divide(price);
+        if (final) _index++;
+        return line;
+    }
+    private (double Line, double SignalLine, Signal Trade) Finish(Number line, Number signal, Number slope, bool final)
+    {
+        var acceleration = slope - _previousSlope;
+        var trade = (line - signal).Sign < 0 ? Signal.None
+            : slope.Sign > 0 && acceleration.Sign > 0 ? Signal.StrongBuy : slope.Sign < 0 && acceleration.Sign < 0 ? Signal.StrongSell
+            : slope.Sign > 0 ? Signal.Buy : slope.Sign < 0 ? Signal.Sell : Signal.None;
+        if (final) _previousSlope = slope;
+        return (line.Publish(), signal.Publish(), trade);
+    }
+    internal (double Line, double SignalLine, Signal Trade) Next(double price, bool final)
+    {
+        StreamingInputValidation.Finite(price, nameof(price)); var value = Number.Of(price); var mean = _mean.Next(value, final);
+        var line = RangeRatio(value, mean, final); return Finish(line, _signal.Next(line, final), value - mean, final);
+    }
+    internal static (double[] Line, double[] SignalLine, Signal[] Trades) Calculate(StockData data, MovingAvgType kind, int length1, int length2, bool includeSignal = true)
+    {
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
+        var prices = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        foreach (var price in prices) StreamingInputValidation.Finite(price, nameof(prices));
+        using var window = new TrendAnalysisIndexWindow(kind, length1, length2);
+        var means = new Number[prices.Count]; var values = new Number[prices.Count];
+        var line = new double[prices.Count]; var signal = new double[prices.Count]; var trades = new Signal[prices.Count];
+        var customMean = ComponentAverage.HasOverrides ? ComponentAverage.Take(prices.ToArray(), length1) : null;
+        for (var i = 0; i < prices.Count; i++)
+        {
+            var price = Number.Of(prices[i]); means[i] = customMean is null ? window._mean.Next(price, true) : Number.Of(customMean[i]);
+            values[i] = window.RangeRatio(price, means[i], true); line[i] = values[i].Publish();
+        }
+        var customSignal = includeSignal && ComponentAverage.HasOverrides ? ComponentAverage.Take(line, length2) : null;
+        for (var i = 0; i < prices.Count; i++)
+        {
+            var threshold = !includeSignal ? default : customSignal is null ? window._signal.Next(values[i], true) : Number.Of(customSignal[i]);
+            (_, signal[i], trades[i]) = window.Finish(values[i], threshold, Number.Of(prices[i]) - means[i], true);
+        }
+        return (line, signal, trades);
+    }
+    internal void Reset() { _mean.Reset(); _signal.Reset(); _highs.Clear(); _lows.Clear(); _index = 0; _previousSlope = default; }
+    public void Dispose() { Reset(); _mean.Dispose(); _signal.Dispose(); }
+}

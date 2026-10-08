@@ -1,0 +1,25 @@
+{
+  "sourceRevision": "c2773739f6c1ccd5737c62d030825ca451194421",
+  "rows": 116,
+  "job": "Default; incremental retains IterationSetup and InvocationCount=1",
+  "elapsedSeconds": 2590.07,
+  "timedAssemblySha256": {
+    "OoplesFinance.StockIndicators.dll": "8D7DE8887923DD7D7EFD0A5512563490E66D6623642F676F7D3C059741B75D18",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "EF417AE4BD9886DB05754F45BFC3BC51539AC21289E38EBBABD72368A78D969E"
+  },
+  "agreement": "passed against hash-identical timed binaries",
+  "workloadAssertionsPassed": 66082,
+  "limitations": [
+    "Shared machine; verification confined to other CPU cores. Cache, memory and thermal conditions remain shared.",
+    "Incremental single-update measurements trigger BenchmarkDotNet MinIterationTime warnings and have substantial noise.",
+    "Full-recompute competitors are labeled separately from native incremental implementations."
+  ],
+  "artifactsSha256": {
+    "batch.csv": "596e2420593211224b27205c85b00499b92e5faf95724a61b1795448db6bf994",
+    "batch.github.md": "318ec2139158e26d25843ec5d9e53fcd16d54672d2255f5b8fc4f57470ca801f",
+    "batch.json.gz": "fee0e81d466a88b6d5b322a335c80cb426c2af2b9380e52c51955a998d0700ad",
+    "incremental.csv": "5f08a32705a3d642e86664cfbaf36d134058c455389829f5144df5a7ae7eb4e1",
+    "incremental.github.md": "3eff8b288e70ba1abfea44f64c99ababd1c863e860d21e7a0903d277cefe88a0",
+    "incremental.json.gz": "6e7ae18279ef237a3fd1507343d160044bfbd93aa5fda2eb1d146afb409a243c"
+  }
+}

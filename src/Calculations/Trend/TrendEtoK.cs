@@ -106,76 +106,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateGrandTrendForecasting(this StockData stockData, int length = 100, int forecastLength = 200, double mult = 2)
     {
-        List<double> upperList = new(stockData.Count);
-        List<double> lowerList = new(stockData.Count);
-        List<double> tList = new(stockData.Count);
-        List<double> trendList = new(stockData.Count);
-        List<double> chgList = new(stockData.Count);
-        List<double> fcastList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<double> bullSlopeList = new(stockData.Count);
-        List<double> bearSlopeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum tSumWindow = new();
-        RollingSum diffSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevT = i >= length ? tList[i - length] : currentValue;
-            var priorT = i >= forecastLength ? tList[i - forecastLength] : 0;
-            var prevFcast = i >= forecastLength ? fcastList[i - forecastLength] : 0;
-            var prevChg = i >= length ? chgList[i - length] : currentValue;
-
-            var chg = 0.9 * prevT;
-            chgList.Add(chg);
-
-            var t = (0.9 * prevT) + (0.1 * currentValue) + (chg - prevChg);
-            tList.Add(t);
-            tSumWindow.Add(t);
-
-            var trend = tSumWindow.Average(length);
-            trendList.Add(trend);
-
-            var fcast = t + (t - priorT);
-            fcastList.Add(fcast);
-
-            var diff = Math.Abs(currentValue - prevFcast);
-            diffList.Add(diff);
-            diffSumWindow.Add(diff);
-
-            var diffSma = diffSumWindow.Average(forecastLength);
-            var dev = diffSma * mult;
-
-            var upper = fcast + dev;
-            upperList.Add(upper);
-
-            var lower = fcast - dev;
-            lowerList.Add(lower);
-
-            var prevBullSlope = i >= 1 ? bullSlopeList[i - 1] : 0;
-            var bullSlope = currentValue - Math.Max(fcast, Math.Max(t, trend));
-            bullSlopeList.Add(bullSlope);
-
-            var prevBearSlope = i >= 1 ? bearSlopeList[i - 1] : 0;
-            var bearSlope = currentValue - Math.Min(fcast, Math.Min(t, trend));
-            bearSlopeList.Add(bearSlope);
-
-            var signal = GetBullishBearishSignal(bullSlope, prevBullSlope, bearSlope, prevBearSlope);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Gtf", trendList },
-            { "UpperBand", upperList },
-            { "MiddleBand", fcastList },
-            { "LowerBand", lowerList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trendList);
-        stockData.IndicatorName = IndicatorName.GrandTrendForecasting;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new GrandForecastWindow(length, forecastLength, mult);
+        var points = input.Select(v => window.Next(v, true)).ToArray();
+        var trend = points.Select(v => v.Trend).ToList(); var upper = points.Select(v => v.Upper).ToList();
+        var middle = points.Select(v => v.Middle).ToList(); var lower = points.Select(v => v.Lower).ToList();
+        var signals = CreateSignalsList(stockData); signals?.AddRange(points.Select(v => v.Trade));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Gtf", trend }, { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(trend); stockData.IndicatorName = IndicatorName.GrandTrendForecasting;
         return stockData;
     }
 

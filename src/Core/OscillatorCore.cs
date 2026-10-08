@@ -1,3 +1,4 @@
+﻿using OoplesFinance.StockIndicators.Streaming;
 using System;
 using System.Buffers;
 using OoplesFinance.StockIndicators.Core.Registry;
@@ -28,29 +29,9 @@ internal static class OscillatorCore
             return;
         }
 
-        // CalculateRelativeStrengthIndex smooths its gains and losses with WellesWilderMovingAverage from
-        // the first bar, with no simple average to seed it and no blank run-in. Seeding the two averages
-        // from a simple mean over the first fourteen changes, and publishing nothing until then, put this
-        // arm on a different curve from the indicator for the whole series rather than just its opening.
-        var k = 1.0 / length;
-        double avgGain = 0;
-        double avgLoss = 0;
+        using var window = new PriceRsiWindow(MovingAvgType.WildersSmoothingMethod, length, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            var change = i >= 1 ? input[i] - input[i - 1] : 0;
-            var gain = change > 0 ? change : 0;
-            var loss = change < 0 ? -change : 0;
-
-            avgGain = (gain * k) + (avgGain * (1 - k));
-            avgLoss = (loss * k) + (avgLoss * (1 - k));
-
-            var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-
-            // No losses at all is a full reading, no gains at all is an empty one, which is how the
-            // indicator reports an opening bar that has neither.
-            output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : Math.Min(100, Math.Max(0, 100 - (100 / (1 + rs))));
-        }
     }
 
     /// <summary>
@@ -75,7 +56,7 @@ internal static class OscillatorCore
             else
             {
                 var prevValue = input[i - length];
-                output[i] = prevValue != 0 ? ((input[i] - prevValue) / prevValue) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(input[i], prevValue);
             }
         }
     }
@@ -128,8 +109,7 @@ internal static class OscillatorCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            var range = highestHigh - lowestLow;
-            output[i] = range != 0 ? -100 * (highestHigh - close[i]) / range : 0;
+            output[i] = WilliamsRangePosition.Percent(close[i], lowestLow, highestHigh);
         }
     }
 
@@ -143,40 +123,10 @@ internal static class OscillatorCore
     /// <param name="length">Period (default 20).</param>
     internal static void CommodityChannelIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        const double constant = 0.015;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            // Typical Price
-            var tp = (high[i] + low[i] + close[i]) / 3;
-
-            // Before the window fills, the batch indicator averages what has arrived rather than returning
-
-            // nothing, so the run-in shortens the window instead of blanking it.
-
-            // Calculate SMA of TP
-            double tpSum = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                tpSum += (high[j] + low[j] + close[j]) / 3;
-            }
-            var smaTP = tpSum / length;
-
-            // Calculate Mean Deviation
-            double meanDev = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                meanDev += Math.Abs((high[j] + low[j] + close[j]) / 3 - smaTP);
-            }
-            meanDev /= length;
-
-            output[i] = meanDev != 0 ? (tp - smaTP) / (constant * meanDev) : 0;
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length)
+            throw new ArgumentException("Input and output spans must cover every close.");
+        using var window = new CommodityIndexWindow(MovingAvgType.SimpleMovingAverage, length, .015, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(CommodityIndexWindow.TypicalPrice(high[i], low[i], close[i]), true);
     }
 
     /// <summary>
@@ -208,12 +158,7 @@ internal static class OscillatorCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            // Divided before it is scaled, and clamped, exactly as CalculateStochasticOscillator writes it.
-            // Scaling first is the same value in exact arithmetic and a different one in doubles: the two
-            // parted company in the last two bits, which an equality comparison of the published series sees.
-            output[i] = highestHigh - lowestLow != 0
-                ? MathHelper.MinOrMax((close[i] - lowestLow) / (highestHigh - lowestLow) * 100, 100, 0)
-                : 0;
+            output[i] = ClampedRangePosition.Percent(close[i], lowestLow, highestHigh);
         }
     }
 
@@ -233,7 +178,9 @@ internal static class OscillatorCore
         {
             var k = kArray.AsSpan(0, close.Length);
             StochasticK(high, low, close, k, kLength);
-            MovingAverageCore.SimpleMovingAverage(k, output, dLength);
+            if (close.IsEmpty) return;
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, dLength));
+            for (var i = 0; i < close.Length; i++) output[i] = mean.Next(k[i], true);
         }
         finally
         {
@@ -263,78 +210,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AverageDirectionalIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var k = 1.0 / length;
-        double prevPlusDm = 0;
-        double prevMinusDm = 0;
-        double prevTr = 0;
-        double prevAdx = 0;
-        double plusDmSum = 0;
-        double minusDmSum = 0;
-        double trSum = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate +DM, -DM, TR
-            var upMove = high[i] - high[i - 1];
-            var downMove = low[i - 1] - low[i];
-            var plusDm = (upMove > downMove && upMove > 0) ? upMove : 0;
-            var minusDm = (downMove > upMove && downMove > 0) ? downMove : 0;
-
-            var highLow = high[i] - low[i];
-            var highClose = Math.Abs(high[i] - close[i - 1]);
-            var lowClose = Math.Abs(low[i] - close[i - 1]);
-            var tr = Math.Max(highLow, Math.Max(highClose, lowClose));
-
-            if (i < length)
-            {
-                plusDmSum += plusDm;
-                minusDmSum += minusDm;
-                trSum += tr;
-                output[i] = 0;
-            }
-            else if (i == length)
-            {
-                plusDmSum += plusDm;
-                minusDmSum += minusDm;
-                trSum += tr;
-                prevPlusDm = plusDmSum;
-                prevMinusDm = minusDmSum;
-                prevTr = trSum;
-
-                var plusDi = prevTr != 0 ? 100 * prevPlusDm / prevTr : 0;
-                var minusDi = prevTr != 0 ? 100 * prevMinusDm / prevTr : 0;
-                var diSum = plusDi + minusDi;
-                var dx = diSum != 0 ? 100 * Math.Abs(plusDi - minusDi) / diSum : 0;
-                prevAdx = dx;
-                output[i] = dx;
-            }
-            else
-            {
-                // Wilder's smoothing
-                prevPlusDm = prevPlusDm - (prevPlusDm / length) + plusDm;
-                prevMinusDm = prevMinusDm - (prevMinusDm / length) + minusDm;
-                prevTr = prevTr - (prevTr / length) + tr;
-
-                var plusDi = prevTr != 0 ? 100 * prevPlusDm / prevTr : 0;
-                var minusDi = prevTr != 0 ? 100 * prevMinusDm / prevTr : 0;
-                var diSum = plusDi + minusDi;
-                var dx = diSum != 0 ? 100 * Math.Abs(plusDi - minusDi) / diSum : 0;
-
-                prevAdx = ((prevAdx * (length - 1)) + dx) / length;
-                output[i] = prevAdx;
-            }
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new DirectionalIndexWindow(MovingAvgType.WildersSmoothingMethod, Math.Max(1, length), Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Adx;
     }
 
     /// <summary>
@@ -342,45 +220,7 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ChandeMomentumOscillator(ReadOnlySpan<double> input, Span<double> output, int length)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double sumUp = 0;
-        double sumDown = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var change = input[i] - input[i - 1];
-            var up = change > 0 ? change : 0;
-            var down = change < 0 ? -change : 0;
-
-            sumUp += up;
-            sumDown += down;
-
-            if (i > length)
-            {
-                var oldChange = input[i - length] - input[i - length - 1];
-                var oldUp = oldChange > 0 ? oldChange : 0;
-                var oldDown = oldChange < 0 ? -oldChange : 0;
-                sumUp -= oldUp;
-                sumDown -= oldDown;
-            }
-
-            // CalculateChandeMomentumOscillator sums its rises and falls with RollingSum.Sum(length),
-            // which adds up however many changes have arrived rather than waiting for a full window, so
-            // the oscillator reads from the second bar. Blanking the run-in here published nothing over
-            // the first thirteen bars where the indicator already had an answer.
-            var sumTotal = sumUp + sumDown;
-            output[i] = sumTotal != 0 ? 100 * (sumUp - sumDown) / sumTotal : 0;
-        }
+        ChandeMomentumWindow.Compute(input, output, length);
     }
 
     /// <summary>
@@ -406,7 +246,7 @@ internal static class OscillatorCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = slowEma[i] != 0 ? 100 * (fastEma[i] - slowEma[i]) / slowEma[i] : 0;
+                output[i] = RoundedPercentageChange.Of(fastEma[i], slowEma[i]);
             }
         }
         finally
@@ -454,49 +294,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void UltimateOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length1 = 7, int length2 = 14, int length3 = 28)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double bp1Sum = 0, tr1Sum = 0;
-        double bp2Sum = 0, tr2Sum = 0;
-        double bp3Sum = 0, tr3Sum = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var prevClose = close[i - 1];
-            var trueLow = Math.Min(low[i], prevClose);
-            var trueHigh = Math.Max(high[i], prevClose);
-            var bp = close[i] - trueLow;
-            var tr = trueHigh - trueLow;
-
-            bp1Sum += bp; tr1Sum += tr;
-            bp2Sum += bp; tr2Sum += tr;
-            bp3Sum += bp; tr3Sum += tr;
-
-            if (i >= length1) { var idx = i - length1; bp1Sum -= close[idx] - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); tr1Sum -= Math.Max(high[idx], close[Math.Max(0, idx - 1)]) - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); }
-            if (i >= length2) { var idx = i - length2; bp2Sum -= close[idx] - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); tr2Sum -= Math.Max(high[idx], close[Math.Max(0, idx - 1)]) - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); }
-            if (i >= length3) { var idx = i - length3; bp3Sum -= close[idx] - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); tr3Sum -= Math.Max(high[idx], close[Math.Max(0, idx - 1)]) - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); }
-
-            if (i >= length3 - 1)
-            {
-                var avg1 = tr1Sum != 0 ? bp1Sum / tr1Sum : 0;
-                var avg2 = tr2Sum != 0 ? bp2Sum / tr2Sum : 0;
-                var avg3 = tr3Sum != 0 ? bp3Sum / tr3Sum : 0;
-                output[i] = 100 * ((4 * avg1) + (2 * avg2) + avg3) / 7;
-            }
-            else
-            {
-                output[i] = 0;
-            }
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Input and output spans must cover all closes.");
+        var window = new UltimatePressureWindow(length1, length2, length3);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     /// <summary>
@@ -504,59 +304,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TrueStrengthIndex(ReadOnlySpan<double> input, Span<double> output, int longLength = 25, int shortLength = 13)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var pcArray = pool.Rent(input.Length);
-        var absPcArray = pool.Rent(input.Length);
-        var pcEma1Array = pool.Rent(input.Length);
-        var pcEma2Array = pool.Rent(input.Length);
-        var absPcEma1Array = pool.Rent(input.Length);
-        var absPcEma2Array = pool.Rent(input.Length);
-
-        try
-        {
-            var pc = pcArray.AsSpan(0, input.Length);
-            var absPc = absPcArray.AsSpan(0, input.Length);
-            var pcEma1 = pcEma1Array.AsSpan(0, input.Length);
-            var pcEma2 = pcEma2Array.AsSpan(0, input.Length);
-            var absPcEma1 = absPcEma1Array.AsSpan(0, input.Length);
-            var absPcEma2 = absPcEma2Array.AsSpan(0, input.Length);
-
-            // Price change
-            pc[0] = 0;
-            absPc[0] = 0;
-            for (var i = 1; i < input.Length; i++)
-            {
-                pc[i] = input[i] - input[i - 1];
-                absPc[i] = Math.Abs(pc[i]);
-            }
-
-            // Double smoothed price change
-            MovingAverageCore.ExponentialMovingAverage(pc, pcEma1, longLength);
-            MovingAverageCore.ExponentialMovingAverage(pcEma1, pcEma2, shortLength);
-
-            // Double smoothed absolute price change
-            MovingAverageCore.ExponentialMovingAverage(absPc, absPcEma1, longLength);
-            MovingAverageCore.ExponentialMovingAverage(absPcEma1, absPcEma2, shortLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = absPcEma2[i] != 0 ? 100 * pcEma2[i] / absPcEma2[i] : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(pcArray);
-            pool.Return(absPcArray);
-            pool.Return(pcEma1Array);
-            pool.Return(pcEma2Array);
-            pool.Return(absPcEma1Array);
-            pool.Return(absPcEma2Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        using var window = new StrengthWindow(MovingAvgType.ExponentialMovingAverage, new[] { longLength, shortLength }, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -569,37 +320,15 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-
-        try
+        using var rsi = new PriceRsiWindow(MovingAvgType.WildersSmoothingMethod, rsiLength, input.Length);
+        using var high = new OoplesFinance.StockIndicators.Streaming.RollingWindowMax(Math.Max(1, stochLength));
+        using var low = new OoplesFinance.StockIndicators.Streaming.RollingWindowMin(Math.Max(1, stochLength));
+        using var smoothing = new StrengthAverage(MovingAvgType.WildersSmoothingMethod, 3, input.Length);
+        for (var i = 0; i < input.Length; i++)
         {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            RelativeStrengthIndex(input, rsi, rsiLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < rsiLength + stochLength - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
-                var highestRsi = double.MinValue;
-                var lowestRsi = double.MaxValue;
-                for (var j = i - stochLength + 1; j <= i; j++)
-                {
-                    if (rsi[j] > highestRsi) highestRsi = rsi[j];
-                    if (rsi[j] < lowestRsi) lowestRsi = rsi[j];
-                }
-
-                var range = highestRsi - lowestRsi;
-                output[i] = range != 0 ? 100 * (rsi[i] - lowestRsi) / range : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(rsiArray);
+            var value = rsi.Next(input[i], true);
+            var upper = high.Add(value, out _); var lower = low.Add(value, out _);
+            output[i] = smoothing.Next(new StrengthValue(ClampedRangePosition.Percent(value, lower, upper)), true).Mantissa;
         }
     }
 
@@ -715,8 +444,7 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var range = high[i] - low[i];
-            output[i] = range != 0 ? (close[i] - open[i]) / range : 0;
+            output[i] = RoundedBalanceOfPower.Of(open[i], high[i], low[i], close[i]);
         }
     }
 
@@ -784,34 +512,14 @@ internal static class OscillatorCore
     internal static void DetrendedPriceOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var offset = (length / 2) + 1;
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(input.Length);
-
-        try
+        var resolved = Math.Max(1, length);
+        var offset = MathHelper.MinOrMax((int)Math.Ceiling(resolved / 2d + 1));
+        using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(resolved);
+        for (var i = 0; i < input.Length; i++)
         {
-            var sma = smaArray.AsSpan(0, input.Length);
-            MovingAverageCore.SimpleMovingAverage(input, sma, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i >= offset)
-                {
-                    output[i] = input[i - offset] - sma[i];
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
+            var average = mean.Next(input[i], true);
+            output[i] = (i >= offset ? input[i - offset] : 0) - average;
         }
     }
 
@@ -854,38 +562,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void Trix(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1Array = pool.Rent(input.Length);
-        var ema2Array = pool.Rent(input.Length);
-        var ema3Array = pool.Rent(input.Length);
-
-        try
-        {
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-            var ema2 = ema2Array.AsSpan(0, input.Length);
-            var ema3 = ema3Array.AsSpan(0, input.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(input, ema1, length);
-            MovingAverageCore.ExponentialMovingAverage(ema1, ema2, length);
-            MovingAverageCore.ExponentialMovingAverage(ema2, ema3, length);
-
-            output[0] = 0;
-            for (var i = 1; i < input.Length; i++)
-            {
-                output[i] = ema3[i - 1] != 0 ? 10000 * (ema3[i] - ema3[i - 1]) / ema3[i - 1] : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-            pool.Return(ema3Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrixWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Publish();
     }
 
     /// <summary>
@@ -893,41 +572,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RelativeVigorIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length + 3)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Numerator: (Close-Open) + 2*(Close[1]-Open[1]) + 2*(Close[2]-Open[2]) + (Close[3]-Open[3])
-            double numSum = 0;
-            double denomSum = 0;
-
-            for (var j = 0; j < length; j++)
-            {
-                var idx = i - j;
-                var co0 = close[idx] - open[idx];
-                var co1 = idx >= 1 ? close[idx - 1] - open[idx - 1] : 0;
-                var co2 = idx >= 2 ? close[idx - 2] - open[idx - 2] : 0;
-                var co3 = idx >= 3 ? close[idx - 3] - open[idx - 3] : 0;
-                numSum += (co0 + (2 * co1) + (2 * co2) + co3) / 6;
-
-                var hl0 = high[idx] - low[idx];
-                var hl1 = idx >= 1 ? high[idx - 1] - low[idx - 1] : 0;
-                var hl2 = idx >= 2 ? high[idx - 2] - low[idx - 2] : 0;
-                var hl3 = idx >= 3 ? high[idx - 3] - low[idx - 3] : 0;
-                denomSum += (hl0 + (2 * hl1) + (2 * hl2) + hl3) / 6;
-            }
-
-            output[i] = denomSum != 0 ? numSum / denomSum : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RelativeVigorWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], open[i], high[i], low[i], true).Value;
     }
 
     /// <summary>
@@ -935,30 +582,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexPlus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a full
-        // window, and it measures the first bar against a previous low and high of zero, so bar zero carries
-        // its own high and low instead of nothing. Blanking the run-in here made the two part company on
-        // every bar before the window filled and agree on every bar after it.
-        for (var i = 0; i < close.Length; i++)
-        {
-            double vmPlus = 0;
-            double trSum = 0;
-
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var prevClose = j > 0 ? close[j - 1] : close[j];
-                var prevLow = j > 0 ? low[j - 1] : 0;
-                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                vmPlus += Math.Abs(high[j] - prevLow);
-            }
-
-            output[i] = trSum != 0 ? vmPlus / trSum : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Plus;
     }
 
     /// <summary>
@@ -966,30 +592,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexMinus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a full
-        // window, and it measures the first bar against a previous low and high of zero, so bar zero carries
-        // its own high and low instead of nothing. Blanking the run-in here made the two part company on
-        // every bar before the window filled and agree on every bar after it.
-        for (var i = 0; i < close.Length; i++)
-        {
-            double vmMinus = 0;
-            double trSum = 0;
-
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var prevClose = j > 0 ? close[j - 1] : close[j];
-                var prevHigh = j > 0 ? high[j - 1] : 0;
-                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                vmMinus += Math.Abs(low[j] - prevHigh);
-            }
-
-            output[i] = trSum != 0 ? vmMinus / trSum : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Minus;
     }
 
     /// <summary>
@@ -997,54 +602,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void MassIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int emaLength = 9, int sumLength = 25)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-        var ema1Array = pool.Rent(high.Length);
-        var ema2Array = pool.Rent(high.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, high.Length);
-            var ema1 = ema1Array.AsSpan(0, high.Length);
-            var ema2 = ema2Array.AsSpan(0, high.Length);
-
-            // High-Low range
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            // Double EMA of range
-            MovingAverageCore.ExponentialMovingAverage(range, ema1, emaLength);
-            MovingAverageCore.ExponentialMovingAverage(ema1, ema2, emaLength);
-
-            // Sum of ratio
-            double sum = 0;
-            for (var i = 0; i < high.Length; i++)
-            {
-                var ratio = ema2[i] != 0 ? ema1[i] / ema2[i] : 0;
-                sum += ratio;
-
-                if (i >= sumLength)
-                {
-                    var oldRatio = ema2[i - sumLength] != 0 ? ema1[i - sumLength] / ema2[i - sumLength] : 0;
-                    sum -= oldRatio;
-                }
-
-                output[i] = i >= sumLength - 1 ? sum : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-        }
+        if(output.Length<high.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new MassIndexWindow(MovingAvgType.ExponentialMovingAverage,emaLength,emaLength,sumLength,9,high.Length);
+        for(var i=0;i<high.Length;i++)output[i]=window.Next(high[i],low[i],true).Value;
     }
 
     /// <summary>
@@ -1057,6 +617,7 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (high.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
         var medianArray = pool.Rent(high.Length);
         var fastSmaArray = pool.Rent(high.Length);
@@ -1071,11 +632,11 @@ internal static class OscillatorCore
             // Median price
             for (var i = 0; i < high.Length; i++)
             {
-                median[i] = (high[i] + low[i]) / 2;
+                median[i] = PriceMean.Of(high[i], low[i]);
             }
 
-            MovingAverageCore.SimpleMovingAverage(median, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(median, slowSma, slowLength);
+            BollingerArithmetic.Mean(median, fastSma, fastLength);
+            BollingerArithmetic.Mean(median, slowSma, slowLength);
 
             for (var i = 0; i < high.Length; i++)
             {
@@ -1100,6 +661,7 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (high.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
         var aoArray = pool.Rent(high.Length);
         var aoSmaArray = pool.Rent(high.Length);
@@ -1110,11 +672,12 @@ internal static class OscillatorCore
             var aoSma = aoSmaArray.AsSpan(0, high.Length);
 
             AwesomeOscillator(high, low, ao, fastLength, slowLength);
-            MovingAverageCore.SimpleMovingAverage(ao, aoSma, signalLength);
+            var finite = FiniteSignalInput.Create(ao.ToArray(), out var finiteCount);
+            BollingerArithmetic.Mean(Compatibility.SpanCompat.AsReadOnlySpan(finite), aoSma, signalLength);
 
             for (var i = 0; i < high.Length; i++)
             {
-                output[i] = ao[i] - aoSma[i];
+                output[i] = i < finiteCount ? ao[i] - aoSma[i] : double.NaN;
             }
         }
         finally
@@ -1148,7 +711,7 @@ internal static class OscillatorCore
 
             for (var i = 0; i < volume.Length; i++)
             {
-                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(fastEma[i], slowEma[i]);
             }
         }
         finally
@@ -1211,6 +774,9 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        rsiLength = Math.Max(1, rsiLength);
+        streakLength = Math.Max(1, streakLength);
+        rocLength = Math.Max(1, rocLength);
         var pool = ArrayPool<double>.Shared;
         var rsiArray = pool.Rent(close.Length);
         var streakArray = pool.Rent(close.Length);
@@ -1255,29 +821,19 @@ internal static class OscillatorCore
             // RSI of streak
             RelativeStrengthIndex(streak, streakRsi, streakLength);
 
-            // Percent rank of ROC
+            // Strict percentile rank against the previous ROC observations, using a fixed denominator.
+            using var history = new ReturnOrderStatistic(rocLength);
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < rocLength)
-                {
-                    rocRank[i] = 0;
-                    continue;
-                }
-
-                var currentRoc = close[i - 1] != 0 ? (close[i] - close[i - 1]) / close[i - 1] : 0;
-                int count = 0;
-                for (var j = i - rocLength; j < i; j++)
-                {
-                    var prevRoc = close[j] != 0 && j > 0 ? (close[j] - close[j - 1]) / close[j - 1] : 0;
-                    if (prevRoc < currentRoc) count++;
-                }
-                rocRank[i] = (double)count / rocLength * 100;
+                var previous = i > 0 ? close[i - 1] : 0;
+                rocRank[i] = 100d * history.CountLessThan(close[i], previous) / rocLength;
+                history.Add(close[i], previous);
             }
 
             // Combine all three
             for (var i = 0; i < close.Length; i++)
             {
-                output[i] = (rsi[i] + streakRsi[i] + rocRank[i]) / 3;
+                output[i] = ConnorsValue.Combine(rsi[i], rocRank[i], streakRsi[i]);
             }
         }
         finally
@@ -1295,41 +851,9 @@ internal static class OscillatorCore
     internal static void PriceMomentumOscillator(ReadOnlySpan<double> input, Span<double> output, int firstLength = 35, int secondLength = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocArray = pool.Rent(input.Length);
-        var ema1Array = pool.Rent(input.Length);
-
-        try
-        {
-            var roc = rocArray.AsSpan(0, input.Length);
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-
-            // ROC
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i == 0)
-                {
-                    roc[i] = 0;
-                }
-                else
-                {
-                    roc[i] = input[i - 1] != 0 ? ((input[i] / input[i - 1]) - 1) * 100 : 0;
-                }
-            }
-
-            // Double EMA
-            MovingAverageCore.ExponentialMovingAverage(roc, ema1, firstLength);
-            MovingAverageCore.ExponentialMovingAverage(ema1, output, secondLength);
-        }
-        finally
-        {
-            pool.Return(rocArray);
-            pool.Return(ema1Array);
-        }
+        using var window = new PriceMomentumWindow(MovingAvgType.ExponentialMovingAverage, firstLength, secondLength, 10, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -1340,60 +864,10 @@ internal static class OscillatorCore
         int sma1 = 10, int sma2 = 10, int sma3 = 10, int sma4 = 15)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocA = pool.Rent(input.Length);
-        var rocB = pool.Rent(input.Length);
-        var rocC = pool.Rent(input.Length);
-        var rocD = pool.Rent(input.Length);
-        var smaA = pool.Rent(input.Length);
-        var smaB = pool.Rent(input.Length);
-        var smaC = pool.Rent(input.Length);
-        var smaD = pool.Rent(input.Length);
-
-        try
-        {
-            var rocASpan = rocA.AsSpan(0, input.Length);
-            var rocBSpan = rocB.AsSpan(0, input.Length);
-            var rocCSpan = rocC.AsSpan(0, input.Length);
-            var rocDSpan = rocD.AsSpan(0, input.Length);
-            var smaASpan = smaA.AsSpan(0, input.Length);
-            var smaBSpan = smaB.AsSpan(0, input.Length);
-            var smaCSpan = smaC.AsSpan(0, input.Length);
-            var smaDSpan = smaD.AsSpan(0, input.Length);
-
-            // Calculate ROCs
-            RateOfChange(input, rocASpan, roc1);
-            RateOfChange(input, rocBSpan, roc2);
-            RateOfChange(input, rocCSpan, roc3);
-            RateOfChange(input, rocDSpan, roc4);
-
-            // Smooth ROCs with SMAs
-            MovingAverageCore.SimpleMovingAverage(rocASpan, smaASpan, sma1);
-            MovingAverageCore.SimpleMovingAverage(rocBSpan, smaBSpan, sma2);
-            MovingAverageCore.SimpleMovingAverage(rocCSpan, smaCSpan, sma3);
-            MovingAverageCore.SimpleMovingAverage(rocDSpan, smaDSpan, sma4);
-
-            // KST = weighted sum
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = smaASpan[i] + (smaBSpan[i] * 2) + (smaCSpan[i] * 3) + (smaDSpan[i] * 4);
-            }
-        }
-        finally
-        {
-            pool.Return(rocA);
-            pool.Return(rocB);
-            pool.Return(rocC);
-            pool.Return(rocD);
-            pool.Return(smaA);
-            pool.Return(smaB);
-            pool.Return(smaC);
-            pool.Return(smaD);
-        }
+        using var bank = new RocBankWindow(MovingAvgType.SimpleMovingAverage, new[] { roc1, roc2, roc3, roc4 },
+            new[] { sma1, sma2, sma3, sma4 }, new[] { 1, 2, 3, 4 }, 9, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = bank.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -1419,7 +893,7 @@ internal static class OscillatorCore
             {
                 if (input[j] < input[i]) count++;
             }
-            output[i] = (double)count / length * 100;
+            output[i] = 100d * count / length;
         }
     }
 
@@ -1428,34 +902,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ChoppinessIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateChoppinessIndex sums true range and takes its extremes over however many bars have
-        // arrived, so the run-in is measured rather than blank. On the first bar the range and the sum are
-        // the same span, which makes the logarithm zero of its own accord.
-        for (var i = 0; i < close.Length; i++)
-        {
-            // Sum of ATR
-            double atrSum = 0;
-            var highestHigh = double.MinValue;
-            var lowestLow = double.MaxValue;
-
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var prevClose = j > 0 ? close[j - 1] : close[j];
-                var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                atrSum += tr;
-
-                if (high[j] > highestHigh) highestHigh = high[j];
-                if (low[j] < lowestLow) lowestLow = low[j];
-            }
-
-            var range = highestHigh - lowestLow;
-            output[i] = range > 0 ? 100 * Math.Log10(atrSum / range) / Math.Log10(length) : 0;
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Input and output spans must cover all closes.");
+        var window = new ChoppinessWindow(length); for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     /// <summary>
@@ -1509,7 +957,10 @@ internal static class OscillatorCore
         {
             var macdLine = macdLineArray.AsSpan(0, input.Length);
             MacdLine(input, macdLine, fastLength, slowLength);
-            MovingAverageCore.ExponentialMovingAverage(macdLine, output, signalLength);
+            var finiteCount = 0;
+            while (finiteCount < macdLine.Length && !double.IsInfinity(macdLine[finiteCount])) finiteCount++;
+            MovingAverageCore.ExponentialMovingAverage(macdLine.Slice(0, finiteCount), output.Slice(0, finiteCount), signalLength);
+            output.Slice(finiteCount, input.Length - finiteCount).Fill(double.NaN);
         }
         finally
         {
@@ -1537,7 +988,10 @@ internal static class OscillatorCore
             var signalLine = signalLineArray.AsSpan(0, input.Length);
 
             MacdLine(input, macdLine, fastLength, slowLength);
-            MovingAverageCore.ExponentialMovingAverage(macdLine, signalLine, signalLength);
+            var finiteCount = 0;
+            while (finiteCount < macdLine.Length && !double.IsInfinity(macdLine[finiteCount])) finiteCount++;
+            MovingAverageCore.ExponentialMovingAverage(macdLine.Slice(0, finiteCount), signalLine.Slice(0, finiteCount), signalLength);
+            signalLine.Slice(finiteCount, input.Length - finiteCount).Fill(double.NaN);
 
             for (var i = 0; i < input.Length; i++)
             {
@@ -1596,50 +1050,16 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Relative Momentum Index.
     /// </summary>
-    internal static void RelativeMomentumIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14, int momentum = 4)
+    internal static void RelativeMomentumIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14, int momentum = 3)
     {
         if (output.Length < input.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double upSum = 0;
-        double downSum = 0;
-        var k = 1.0 / length;
+        using var window = new RelativeMomentumWindow(MovingAvgType.WildersSmoothingMethod, length, momentum, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < momentum)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var change = input[i] - input[i - momentum];
-            var up = change > 0 ? change : 0;
-            var down = change < 0 ? Math.Abs(change) : 0;
-
-            if (i < length + momentum)
-            {
-                upSum += up;
-                downSum += down;
-                output[i] = 0;
-            }
-            else if (i == length + momentum)
-            {
-                upSum += up;
-                downSum += down;
-                var total = upSum + downSum;
-                output[i] = total != 0 ? 100 * upSum / total : 50;
-            }
-            else
-            {
-                upSum = (up * k) + (upSum * (1 - k));
-                downSum = (down * k) + (downSum * (1 - k));
-                var total = upSum + downSum;
-                output[i] = total != 0 ? 100 * upSum / total : 50;
-            }
-        }
     }
 
     /// <summary>
@@ -1652,28 +1072,10 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double upSum = 0;
-        double downSum = 0;
+        if (open.Length < close.Length) throw new ArgumentException("Open span must be at least close length.", nameof(open));
+        using var window = new IntradayGainLossWindow(length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], open[i], true);
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            var up = close[i] > open[i] ? close[i] - open[i] : 0;
-            var down = close[i] < open[i] ? open[i] - close[i] : 0;
-
-            upSum += up;
-            downSum += down;
-
-            if (i >= length)
-            {
-                var oldUp = close[i - length] > open[i - length] ? close[i - length] - open[i - length] : 0;
-                var oldDown = close[i - length] < open[i - length] ? open[i - length] - close[i - length] : 0;
-                upSum -= oldUp;
-                downSum -= oldDown;
-            }
-
-            var total = upSum + downSum;
-            output[i] = i >= length - 1 && total != 0 ? 100 * upSum / total : 0;
-        }
     }
 
     /// <summary>
@@ -1681,39 +1083,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void SwingIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, double limitMove = 0)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var cy = close[i - 1];
-            var oy = open[i - 1];
-            var c = close[i];
-            var o = open[i];
-            var h = high[i];
-            var l = low[i];
-
-            var k = Math.Max(h - cy, l - cy);
-            var tr = Math.Max(Math.Max(h - l, Math.Abs(h - cy)), Math.Abs(l - cy));
-
-            var sh = Math.Abs(cy - oy);
-            var r = tr - 0.5 * Math.Abs(c - o) + 0.25 * sh;
-
-            if (r != 0 && tr != 0)
-            {
-                var limit = limitMove > 0 ? limitMove : tr;
-                var si = 50 * ((c - cy) + 0.5 * (c - o) + 0.25 * (cy - oy)) / r * k / limit;
-                output[i] = si;
-            }
-            else
-            {
-                output[i] = 0;
-            }
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) output[i] = i == 0 ? 0 : WilderSwingIndex.Compute(open[i], high[i], low[i], close[i], open[i - 1], close[i - 1], limitMove);
     }
 
     /// <summary>
@@ -1721,30 +1092,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AccumulativeSwingIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, double limitMove = 0)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var siArray = pool.Rent(close.Length);
-
-        try
-        {
-            var si = siArray.AsSpan(0, close.Length);
-            SwingIndex(open, high, low, close, si, limitMove);
-
-            double asi = 0;
-            for (var i = 0; i < close.Length; i++)
-            {
-                asi += si[i];
-                output[i] = asi;
-            }
-        }
-        finally
-        {
-            pool.Return(siArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AccumulatedSwingWindow(MovingAvgType.SimpleMovingAverage, 1, limitMove, Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], high[i], low[i], close[i], true).Value;
     }
 
     /// <summary>
@@ -1753,39 +1103,9 @@ internal static class OscillatorCore
     internal static void CoppockCurve(ReadOnlySpan<double> input, Span<double> output, int longRocLength = 14, int shortRocLength = 11, int wmaLength = 10)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocSumArray = pool.Rent(input.Length);
-
-        try
-        {
-            var rocSum = rocSumArray.AsSpan(0, input.Length);
-
-            // Calculate sum of long and short ROC
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < longRocLength)
-                {
-                    rocSum[i] = 0;
-                }
-                else
-                {
-                    var longRoc = input[i - longRocLength] != 0 ? (input[i] - input[i - longRocLength]) / input[i - longRocLength] * 100 : 0;
-                    var shortRoc = i >= shortRocLength && input[i - shortRocLength] != 0 ? (input[i] - input[i - shortRocLength]) / input[i - shortRocLength] * 100 : 0;
-                    rocSum[i] = longRoc + shortRoc;
-                }
-            }
-
-            // WMA of ROC sum
-            MovingAverageCore.WeightedMovingAverage(rocSum, output, wmaLength);
-        }
-        finally
-        {
-            pool.Return(rocSumArray);
-        }
+        using var window = new RocBankWindow(MovingAvgType.WeightedMovingAverage, new[] { shortRocLength, longRocLength }, new[] { 1, 1 }, new[] { 1, 1 }, wmaLength, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Signal;
     }
 
     /// <summary>
@@ -1798,23 +1118,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var linRegArray = pool.Rent(input.Length);
-
-        try
-        {
-            var linReg = linRegArray.AsSpan(0, input.Length);
-            MovingAverageCore.LinearRegression(input, linReg, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = input[i] != 0 ? ((input[i] - linReg[i]) / input[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(linRegArray);
-        }
+        using var regression = new ExactLinearFitWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = regression.Next(input[i], true).PercentResidual(input[i]);
     }
 
     /// <summary>
@@ -1878,57 +1183,12 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Polarized Fractal Efficiency.
     /// </summary>
-    internal static void PolarizedFractalEfficiency(ReadOnlySpan<double> close, Span<double> output, int length = 10, int smoothLength = 5)
+    internal static void PolarizedFractalEfficiency(ReadOnlySpan<double> close, Span<double> output, int length = 9, int smoothLength = 5)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var pfeRawArray = pool.Rent(close.Length);
-
-        try
-        {
-            var pfeRaw = pfeRawArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length)
-                {
-                    pfeRaw[i] = 0;
-                    continue;
-                }
-
-                // Calculate price path (sum of absolute changes)
-                double pricePath = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    pricePath += Math.Abs(close[j] - close[j - 1]);
-                }
-
-                // Calculate direct distance
-                var directDist = close[i] - close[i - length];
-                var sign = directDist >= 0 ? 1 : -1;
-
-                if (pricePath != 0)
-                {
-                    var efficiency = Math.Sqrt(directDist * directDist + length * length) / pricePath;
-                    pfeRaw[i] = sign * efficiency * 100;
-                }
-                else
-                {
-                    pfeRaw[i] = 0;
-                }
-            }
-
-            // Smooth with EMA
-            MovingAverageCore.ExponentialMovingAverage(pfeRaw, output, smoothLength);
-        }
-        finally
-        {
-            pool.Return(pfeRawArray);
-        }
+        using var window = new PolarizedEfficiencyWindow(MovingAvgType.ExponentialMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -2019,24 +1279,7 @@ internal static class OscillatorCore
     /// </summary>
     internal static void KlingerSignal(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int fastLength = 34, int slowLength = 55, int signalLength = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var kvoArray = pool.Rent(close.Length);
-
-        try
-        {
-            var kvo = kvoArray.AsSpan(0, close.Length);
-            VolumeCore.KlingerVolumeOscillator(high, low, close, volume, kvo, fastLength, slowLength);
-            MovingAverageCore.ExponentialMovingAverage(kvo, output, signalLength);
-        }
-        finally
-        {
-            pool.Return(kvoArray);
-        }
+        KlingerWindow.Core(high, low, close, volume, output, fastLength, slowLength, signalLength, true);
     }
 
     /// <summary>
@@ -2044,64 +1287,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PriceZoneOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var emaCloseArray = pool.Rent(close.Length);
-        var sumRArray = pool.Rent(close.Length);
-        var sumSArray = pool.Rent(close.Length);
-
-        try
-        {
-            var emaClose = emaCloseArray.AsSpan(0, close.Length);
-            MovingAverageCore.ExponentialMovingAverage(close, emaClose, length);
-
-            var sumR = sumRArray.AsSpan(0, close.Length);
-            var sumS = sumSArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var cp = close[i];
-                var tc = emaClose[i];
-
-                sumR[i] = cp > tc ? cp - tc : 0;
-                sumS[i] = cp < tc ? tc - cp : 0;
-            }
-
-            var pool2 = ArrayPool<double>.Shared;
-            var emaSumRArray = pool2.Rent(close.Length);
-            var emaSumSArray = pool2.Rent(close.Length);
-
-            try
-            {
-                var emaSumR = emaSumRArray.AsSpan(0, close.Length);
-                var emaSumS = emaSumSArray.AsSpan(0, close.Length);
-
-                MovingAverageCore.ExponentialMovingAverage(sumR, emaSumR, length);
-                MovingAverageCore.ExponentialMovingAverage(sumS, emaSumS, length);
-
-                for (var i = 0; i < close.Length; i++)
-                {
-                    var r = emaSumR[i];
-                    var s = emaSumS[i];
-                    output[i] = r + s != 0 ? 100 * r / (r + s) : 50;
-                }
-            }
-            finally
-            {
-                pool2.Return(emaSumRArray);
-                pool2.Return(emaSumSArray);
-            }
-        }
-        finally
-        {
-            pool.Return(emaCloseArray);
-            pool.Return(sumRArray);
-            pool.Return(sumSArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new PriceZoneWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -2109,30 +1297,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ElderForceIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var forceArray = pool.Rent(close.Length);
-
-        try
-        {
-            var force = forceArray.AsSpan(0, close.Length);
-
-            force[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                force[i] = (close[i] - close[i - 1]) * volume[i];
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(force, output, length);
-        }
-        finally
-        {
-            pool.Return(forceArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ForceWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true);
     }
 
     /// <summary>
@@ -2140,33 +1307,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PrettyGoodOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(close.Length);
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, close.Length);
-            var atr = atrArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.SimpleMovingAverage(close, sma, length);
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = atr[i] != 0 ? (close[i] - sma[i]) / atr[i] : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-            pool.Return(atrArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new PrettyGoodWindow(MovingAvgType.SimpleMovingAverage,length,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true);
     }
 
     /// <summary>
@@ -2174,57 +1317,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RelativeVolatilityIndex(ReadOnlySpan<double> close, Span<double> output, int length = 14, int stdDevLength = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(close.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, close.Length);
-            VolatilityCore.StandardDeviation(close, stdDev, stdDevLength);
-
-            double upSum = 0, downSum = 0;
-            double upEma = 0, downEma = 0;
-            var k = 1.0 / length;
-
-            for (var i = 1; i < close.Length; i++)
-            {
-                var change = close[i] - close[i - 1];
-                var upMove = change > 0 ? stdDev[i] : 0;
-                var downMove = change < 0 ? stdDev[i] : 0;
-
-                if (i < length)
-                {
-                    upSum += upMove;
-                    downSum += downMove;
-                    output[i] = 0;
-                }
-                else if (i == length)
-                {
-                    upSum += upMove;
-                    downSum += downMove;
-                    upEma = upSum / length;
-                    downEma = downSum / length;
-                    output[i] = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                }
-                else
-                {
-                    upEma = (upMove * k) + (upEma * (1 - k));
-                    downEma = (downMove * k) + (downEma * (1 - k));
-                    output[i] = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                }
-            }
-
-            output[0] = 0;
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var state = new Streaming.RelativeVolatilityIndexCore(length, stdDevLength);
+        for (var i = 0; i < close.Length; i++) output[i] = state.Next(close[i], true);
     }
 
     /// <summary>
@@ -2232,29 +1327,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void Qstick(ReadOnlySpan<double> open, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var diffArray = pool.Rent(close.Length);
-
-        try
-        {
-            var diff = diffArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                diff[i] = close[i] - open[i];
-            }
-
-            MovingAverageCore.SimpleMovingAverage(diff, output, length);
-        }
-        finally
-        {
-            pool.Return(diffArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new OpenCloseAverageWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], close[i], true).Signal;
     }
 
     /// <summary>
@@ -2263,132 +1338,12 @@ internal static class OscillatorCore
     internal static void SpecialK(ReadOnlySpan<double> input, Span<double> output)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var roc10Array = pool.Rent(input.Length);
-        var roc15Array = pool.Rent(input.Length);
-        var roc20Array = pool.Rent(input.Length);
-        var roc30Array = pool.Rent(input.Length);
-        var roc50Array = pool.Rent(input.Length);
-        var roc65Array = pool.Rent(input.Length);
-        var roc75Array = pool.Rent(input.Length);
-        var roc100Array = pool.Rent(input.Length);
-        var roc195Array = pool.Rent(input.Length);
-        var roc265Array = pool.Rent(input.Length);
-        var roc390Array = pool.Rent(input.Length);
-        var roc530Array = pool.Rent(input.Length);
-
-        try
-        {
-            var roc10 = roc10Array.AsSpan(0, input.Length);
-            var roc15 = roc15Array.AsSpan(0, input.Length);
-            var roc20 = roc20Array.AsSpan(0, input.Length);
-            var roc30 = roc30Array.AsSpan(0, input.Length);
-            var roc50 = roc50Array.AsSpan(0, input.Length);
-            var roc65 = roc65Array.AsSpan(0, input.Length);
-            var roc75 = roc75Array.AsSpan(0, input.Length);
-            var roc100 = roc100Array.AsSpan(0, input.Length);
-            var roc195 = roc195Array.AsSpan(0, input.Length);
-            var roc265 = roc265Array.AsSpan(0, input.Length);
-            var roc390 = roc390Array.AsSpan(0, input.Length);
-            var roc530 = roc530Array.AsSpan(0, input.Length);
-
-            RateOfChange(input, roc10, 10);
-            RateOfChange(input, roc15, 15);
-            RateOfChange(input, roc20, 20);
-            RateOfChange(input, roc30, 30);
-            RateOfChange(input, roc50, 50);
-            RateOfChange(input, roc65, 65);
-            RateOfChange(input, roc75, 75);
-            RateOfChange(input, roc100, 100);
-            RateOfChange(input, roc195, 195);
-            RateOfChange(input, roc265, 265);
-            RateOfChange(input, roc390, 390);
-            RateOfChange(input, roc530, 530);
-
-            var pool2 = ArrayPool<double>.Shared;
-            var sma10Array = pool2.Rent(input.Length);
-            var sma15Array = pool2.Rent(input.Length);
-            var sma20Array = pool2.Rent(input.Length);
-            var sma50Array = pool2.Rent(input.Length);
-            var sma65Array = pool2.Rent(input.Length);
-            var sma75Array = pool2.Rent(input.Length);
-            var sma100Array = pool2.Rent(input.Length);
-            var sma130Array = pool2.Rent(input.Length);
-            var sma195Array = pool2.Rent(input.Length);
-            var sma265Array = pool2.Rent(input.Length);
-            var sma390Array = pool2.Rent(input.Length);
-            var sma530Array = pool2.Rent(input.Length);
-
-            try
-            {
-                var sma10 = sma10Array.AsSpan(0, input.Length);
-                var sma15 = sma15Array.AsSpan(0, input.Length);
-                var sma20 = sma20Array.AsSpan(0, input.Length);
-                var sma50 = sma50Array.AsSpan(0, input.Length);
-                var sma65 = sma65Array.AsSpan(0, input.Length);
-                var sma75 = sma75Array.AsSpan(0, input.Length);
-                var sma100 = sma100Array.AsSpan(0, input.Length);
-                var sma130 = sma130Array.AsSpan(0, input.Length);
-                var sma195 = sma195Array.AsSpan(0, input.Length);
-                var sma265 = sma265Array.AsSpan(0, input.Length);
-                var sma390 = sma390Array.AsSpan(0, input.Length);
-                var sma530 = sma530Array.AsSpan(0, input.Length);
-
-                MovingAverageCore.SimpleMovingAverage(roc10, sma10, 10);
-                MovingAverageCore.SimpleMovingAverage(roc15, sma15, 10);
-                MovingAverageCore.SimpleMovingAverage(roc20, sma20, 10);
-                MovingAverageCore.SimpleMovingAverage(roc30, sma50, 15);
-                MovingAverageCore.SimpleMovingAverage(roc50, sma65, 50);
-                MovingAverageCore.SimpleMovingAverage(roc65, sma75, 65);
-                MovingAverageCore.SimpleMovingAverage(roc75, sma100, 75);
-                MovingAverageCore.SimpleMovingAverage(roc100, sma130, 100);
-                MovingAverageCore.SimpleMovingAverage(roc195, sma195, 130);
-                MovingAverageCore.SimpleMovingAverage(roc265, sma265, 130);
-                MovingAverageCore.SimpleMovingAverage(roc390, sma390, 195);
-                MovingAverageCore.SimpleMovingAverage(roc530, sma530, 265);
-
-                for (var i = 0; i < input.Length; i++)
-                {
-                    output[i] = sma10[i] + sma15[i] * 2 + sma20[i] * 3 + sma50[i] * 4 +
-                                sma65[i] + sma75[i] * 2 + sma100[i] * 3 + sma130[i] * 4 +
-                                sma195[i] + sma265[i] * 2 + sma390[i] * 3 + sma530[i] * 4;
-                }
-            }
-            finally
-            {
-                pool2.Return(sma10Array);
-                pool2.Return(sma15Array);
-                pool2.Return(sma20Array);
-                pool2.Return(sma50Array);
-                pool2.Return(sma65Array);
-                pool2.Return(sma75Array);
-                pool2.Return(sma100Array);
-                pool2.Return(sma130Array);
-                pool2.Return(sma195Array);
-                pool2.Return(sma265Array);
-                pool2.Return(sma390Array);
-                pool2.Return(sma530Array);
-            }
-        }
-        finally
-        {
-            pool.Return(roc10Array);
-            pool.Return(roc15Array);
-            pool.Return(roc20Array);
-            pool.Return(roc30Array);
-            pool.Return(roc50Array);
-            pool.Return(roc65Array);
-            pool.Return(roc75Array);
-            pool.Return(roc100Array);
-            pool.Return(roc195Array);
-            pool.Return(roc265Array);
-            pool.Return(roc390Array);
-            pool.Return(roc530Array);
-        }
+        using var bank = new RocBankWindow(MovingAvgType.SimpleMovingAverage,
+            new[] { 10, 15, 20, 30, 40, 65, 75, 100, 195, 265, 390, 530 },
+            new[] { 10, 10, 10, 15, 50, 65, 75, 100, 130, 130, 130, 195 },
+            new[] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 }, 10, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = bank.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -2407,11 +1362,11 @@ internal static class OscillatorCore
         try
         {
             var ma = maArray.AsSpan(0, close.Length);
-            MovingAverageCore.SimpleMovingAverage(close, ma, length);
+            BollingerArithmetic.Mean(close, ma, length);
 
             for (var i = 0; i < close.Length; i++)
             {
-                output[i] = ma[i] != 0 ? ((close[i] - ma[i]) / ma[i]) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(close[i], ma[i]);
             }
         }
         finally
@@ -2425,51 +1380,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DirectionalTrendIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var upMoveArray = pool.Rent(close.Length);
-        var downMoveArray = pool.Rent(close.Length);
-        var plusDiArray = pool.Rent(close.Length);
-        var minusDiArray = pool.Rent(close.Length);
-
-        try
-        {
-            var upMove = upMoveArray.AsSpan(0, close.Length);
-            var downMove = downMoveArray.AsSpan(0, close.Length);
-            var plusDi = plusDiArray.AsSpan(0, close.Length);
-            var minusDi = minusDiArray.AsSpan(0, close.Length);
-
-            upMove[0] = 0;
-            downMove[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                var upMovement = high[i] - high[i - 1];
-                var downMovement = low[i - 1] - low[i];
-
-                upMove[i] = upMovement > downMovement && upMovement > 0 ? upMovement : 0;
-                downMove[i] = downMovement > upMovement && downMovement > 0 ? downMovement : 0;
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(upMove, plusDi, length);
-            MovingAverageCore.ExponentialMovingAverage(downMove, minusDi, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var sum = plusDi[i] + minusDi[i];
-                output[i] = sum != 0 ? ((plusDi[i] - minusDi[i]) / sum) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(upMoveArray);
-            pool.Return(downMoveArray);
-            pool.Return(plusDiArray);
-            pool.Return(minusDiArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must cover the input.");
+        if (close.IsEmpty) return;
+        using var window = new DirectionalStrengthWindow(MovingAvgType.ExponentialMovingAverage, length, capacityHint: close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], true);
     }
 
     /// <summary>
@@ -2533,61 +1448,11 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Dynamic Momentum Index.
     /// </summary>
-    internal static void DynamicMomentumIndex(ReadOnlySpan<double> close, Span<double> output, int minLength = 3, int maxLength = 30)
+    internal static void DynamicMomentumIndex(ReadOnlySpan<double> close, Span<double> output, int minLength = 5, int maxLength = 30)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(close.Length);
-        var stdDevSmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, close.Length);
-            var stdDevSma = stdDevSmaArray.AsSpan(0, close.Length);
-
-            VolatilityCore.StandardDeviation(close, stdDev, 5);
-            MovingAverageCore.SimpleMovingAverage(stdDev, stdDevSma, 10);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Calculate dynamic period
-                var ratio = stdDevSma[i] != 0 ? stdDev[i] / stdDevSma[i] : 1;
-                var dynamicLength = (int)(14 / ratio);
-                dynamicLength = Math.Max(minLength, Math.Min(maxLength, dynamicLength));
-
-                // Calculate RSI with dynamic length
-                if (i < dynamicLength)
-                {
-                    output[i] = 50;
-                    continue;
-                }
-
-                double gains = 0;
-                double losses = 0;
-                for (var j = i - dynamicLength + 1; j <= i; j++)
-                {
-                    var change = close[j] - close[j - 1];
-                    if (change > 0)
-                        gains += change;
-                    else
-                        losses -= change;
-                }
-
-                var avgGain = gains / dynamicLength;
-                var avgLoss = losses / dynamicLength;
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-                output[i] = 100 - (100 / (1 + rs));
-            }
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-            pool.Return(stdDevSmaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new DynamicMomentumWindow(MovingAvgType.SimpleMovingAverage, 5, 10, 14, minLength, maxLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
 
     /// <summary>
@@ -2637,73 +1502,18 @@ internal static class OscillatorCore
     /// </summary>
     internal static void Demarker(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var deMaxArray = pool.Rent(high.Length);
-        var deMinArray = pool.Rent(high.Length);
-        var smaMaxArray = pool.Rent(high.Length);
-        var smaMinArray = pool.Rent(high.Length);
-
-        try
-        {
-            var deMax = deMaxArray.AsSpan(0, high.Length);
-            var deMin = deMinArray.AsSpan(0, high.Length);
-            var smaMax = smaMaxArray.AsSpan(0, high.Length);
-            var smaMin = smaMinArray.AsSpan(0, high.Length);
-
-            deMax[0] = 0;
-            deMin[0] = 0;
-            for (var i = 1; i < high.Length; i++)
-            {
-                deMax[i] = high[i] > high[i - 1] ? high[i] - high[i - 1] : 0;
-                deMin[i] = low[i] < low[i - 1] ? low[i - 1] - low[i] : 0;
-            }
-
-            MovingAverageCore.SimpleMovingAverage(deMax, smaMax, length);
-            MovingAverageCore.SimpleMovingAverage(deMin, smaMin, length);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                var sum = smaMax[i] + smaMin[i];
-                output[i] = sum != 0 ? smaMax[i] / sum : 0.5;
-            }
-        }
-        finally
-        {
-            pool.Return(deMaxArray);
-            pool.Return(deMinArray);
-            pool.Return(smaMaxArray);
-            pool.Return(smaMinArray);
-        }
+        DeMarker(high, low, output, length);
     }
 
     /// <summary>
     /// Computes Smoothed Rate of Change.
     /// </summary>
-    internal static void SmoothedRateOfChange(ReadOnlySpan<double> input, Span<double> output, int rocLength = 12, int smoothLength = 3)
+    internal static void SmoothedRateOfChange(ReadOnlySpan<double> input, Span<double> output, int rocLength = 21, int smoothLength = 13)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocArray = pool.Rent(input.Length);
-
-        try
-        {
-            var roc = rocArray.AsSpan(0, input.Length);
-            RateOfChange(input, roc, rocLength);
-            MovingAverageCore.ExponentialMovingAverage(roc, output, smoothLength);
-        }
-        finally
-        {
-            pool.Return(rocArray);
-        }
+        using var window = new SmoothedReturnWindow(MovingAvgType.ExponentialMovingAverage, rocLength, smoothLength, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2735,8 +1545,8 @@ internal static class OscillatorCore
             var fastEma = fastEmaArray.AsSpan(0, close.Length);
             var slowEma = slowEmaArray.AsSpan(0, close.Length);
 
-            MovingAverageCore.SimpleMovingAverage(close, fastEma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(close, slowEma, slowLength);
+            BollingerArithmetic.Mean(close, fastEma, fastLength);
+            BollingerArithmetic.Mean(close, slowEma, slowLength);
 
             for (var i = 0; i < close.Length; i++)
             {
@@ -2998,51 +1808,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PremierStochastic(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 8, int smoothLength = 25)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var stochArray = pool.Rent(close.Length);
-        var normalizedArray = pool.Rent(close.Length);
-        var smoothed1Array = pool.Rent(close.Length);
-        var smoothed2Array = pool.Rent(close.Length);
-
-        try
-        {
-            var stoch = stochArray.AsSpan(0, close.Length);
-            var normalized = normalizedArray.AsSpan(0, close.Length);
-            var smoothed1 = smoothed1Array.AsSpan(0, close.Length);
-            var smoothed2 = smoothed2Array.AsSpan(0, close.Length);
-
-            StochasticK(high, low, close, stoch, length);
-
-            // Normalize to -0.5 to +0.5 range
-            for (var i = 0; i < close.Length; i++)
-            {
-                normalized[i] = 0.1 * (stoch[i] - 50);
-            }
-
-            // Double smoothing
-            int emaLength = (int)Math.Sqrt(smoothLength);
-            MovingAverageCore.ExponentialMovingAverage(normalized, smoothed1, emaLength);
-            MovingAverageCore.ExponentialMovingAverage(smoothed1, smoothed2, emaLength);
-
-            // Final transformation
-            for (var i = 0; i < close.Length; i++)
-            {
-                var exp = Math.Exp(smoothed2[i]);
-                output[i] = (exp - 1) / (exp + 1);
-            }
-        }
-        finally
-        {
-            pool.Return(stochArray);
-            pool.Return(normalizedArray);
-            pool.Return(smoothed1Array);
-            pool.Return(smoothed2Array);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length) throw new ArgumentException("High span must be at least input length.", nameof(high));
+        if (low.Length < close.Length) throw new ArgumentException("Low span must be at least input length.", nameof(low));
+        using var window = new PremierStochasticWindow(MovingAvgType.ExponentialMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true);
     }
 
     /// <summary>
@@ -3194,55 +1964,20 @@ internal static class OscillatorCore
     /// </summary>
     internal static void BayesianOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 50;
-                continue;
-            }
-
-            var upCount = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                if (close[j] > close[j - 1])
-                {
-                    upCount++;
-                }
-            }
-
-            // Bayesian probability of up move given recent history
-            output[i] = 100.0 * upCount / length;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new BayesianWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Down;
     }
 
     /// <summary>
     /// Computes Anchored Momentum.
-    /// Measures momentum relative to a specific bar.
+    /// Compares the default seven-bar EMA with the available history in the derived anchor window.
     /// </summary>
     internal static void AnchoredMomentum(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var anchor = close[i - length];
-            output[i] = anchor > 0 ? 100 * (close[i] - anchor) / anchor : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new AnchoredMomentumWindow(MovingAvgType.ExponentialMovingAverage,7,8,length,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true).Value;
     }
 
     /// <summary>
@@ -3280,35 +2015,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void CenterOfLinearity(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate center of mass of price action
-            double sumProduct = 0;
-            double sumPrices = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var price = close[i - length + 1 + j];
-                sumProduct += (j + 1) * price;
-                sumPrices += price;
-            }
-
-            var centerOfMass = sumPrices > 0 ? sumProduct / sumPrices : length / 2.0;
-            var expectedCenter = (length + 1) / 2.0;
-
-            // Normalize to -100 to +100 range
-            output[i] = 100 * (centerOfMass - expectedCenter) / expectedCenter;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new CenterLinearityWindow(length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -3360,44 +2068,10 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var gainsArray = pool.Rent(close.Length);
-        var lossesArray = pool.Rent(close.Length);
-        var avgGainArray = pool.Rent(close.Length);
-        var avgLossArray = pool.Rent(close.Length);
+        // The public alias retains an obsolete downLength; the formula has one count window.
+        _ = downLength;
+        AsymmetricalRelativeStrengthIndex(close, output, upLength);
 
-        try
-        {
-            var gains = gainsArray.AsSpan(0, close.Length);
-            var losses = lossesArray.AsSpan(0, close.Length);
-            var avgGain = avgGainArray.AsSpan(0, close.Length);
-            var avgLoss = avgLossArray.AsSpan(0, close.Length);
-
-            gains[0] = 0;
-            losses[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                var change = close[i] - close[i - 1];
-                gains[i] = change > 0 ? change : 0;
-                losses[i] = change < 0 ? -change : 0;
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(gains, avgGain, upLength);
-            MovingAverageCore.ExponentialMovingAverage(losses, avgLoss, downLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var rs = avgLoss[i] > 0 ? avgGain[i] / avgLoss[i] : 100;
-                output[i] = 100 - 100 / (1 + rs);
-            }
-        }
-        finally
-        {
-            pool.Return(gainsArray);
-            pool.Return(lossesArray);
-            pool.Return(avgGainArray);
-            pool.Return(avgLossArray);
-        }
     }
 
     /// <summary>
@@ -3459,42 +2133,11 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // The public alias retains obsolete min/max options; its underlying price filter uses Wilder(14).
+        using var rsi = new PriceRsiWindow(MovingAvgType.WildersSmoothingMethod, 14, close.Length);
+        double previous = 0;
         for (var i = 0; i < close.Length; i++)
-        {
-            if (i < maxLength)
-            {
-                output[i] = 50;
-                continue;
-            }
-
-            // Calculate efficiency ratio to adapt period
-            var change = Math.Abs(close[i] - close[i - maxLength]);
-            double volatility = 0;
-            for (var j = i - maxLength + 1; j <= i; j++)
-            {
-                volatility += Math.Abs(close[j] - close[j - 1]);
-            }
-
-            var er = volatility > 0 ? change / volatility : 0;
-
-            // Higher efficiency = shorter period
-            var adaptivePeriod = (int)(maxLength - er * (maxLength - minLength));
-            adaptivePeriod = Math.Max(minLength, Math.Min(maxLength, adaptivePeriod));
-
-            // Calculate RSI with adaptive period
-            double sumGain = 0, sumLoss = 0;
-            for (var j = i - adaptivePeriod + 1; j <= i; j++)
-            {
-                var delta = close[j] - close[j - 1];
-                if (delta > 0)
-                    sumGain += delta;
-                else
-                    sumLoss -= delta;
-            }
-
-            var rs = sumLoss > 0 ? sumGain / sumLoss : 100;
-            output[i] = 100 - 100 / (1 + rs);
-        }
+            output[i] = previous = AdaptiveRsiBlend.Next(close[i], previous, rsi.Next(close[i], true));
     }
 
     #region Additional Batch 8
@@ -3504,50 +2147,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void SmoothedWilliamsR(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, int smoothLength = 3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rawWr = pool.Rent(close.Length);
-
-        try
-        {
-            // Calculate raw Williams %R
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    rawWr[i] = -50;
-                    continue;
-                }
-
-                double highestHigh = double.MinValue;
-                double lowestLow = double.MaxValue;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    if (high[j] > highestHigh) highestHigh = high[j];
-                    if (low[j] < lowestLow) lowestLow = low[j];
-                }
-
-                rawWr[i] = highestHigh != lowestLow
-                    ? (highestHigh - close[i]) / (highestHigh - lowestLow) * -100
-                    : -50;
-            }
-
-            // Smooth the Williams %R
-            var k = 2.0 / (smoothLength + 1);
-            output[0] = rawWr[0];
-            for (var i = 1; i < close.Length; i++)
-            {
-                output[i] = rawWr[i] * k + output[i - 1] * (1 - k);
-            }
-        }
-        finally
-        {
-            pool.Return(rawWr);
-        }
+        var window = new SmoothedWilliamsWindow(length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     /// <summary>
@@ -3590,8 +2191,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var fastK = 2.0 / (fastLength + 1);
-        var slowK = 2.0 / (slowLength + 1);
+        if (input.Length == 0) return;
+
         double fastEma = input[0];
         double slowEma = input[0];
 
@@ -3603,9 +2204,9 @@ internal static class OscillatorCore
             }
             else
             {
-                fastEma = input[i] * fastK + fastEma * (1 - fastK);
-                slowEma = input[i] * slowK + slowEma * (1 - slowK);
-                output[i] = slowEma != 0 ? (fastEma - slowEma) / slowEma * 100 : 0;
+                fastEma = RoundedSeededEma.Next(input[i], fastEma, fastLength);
+                slowEma = RoundedSeededEma.Next(input[i], slowEma, slowLength);
+                output[i] = RoundedPercentageChange.Of(fastEma, slowEma);
             }
         }
     }
@@ -3652,8 +2253,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var shortK = 2.0 / (shortLength + 1);
-        var longK = 2.0 / (longLength + 1);
+        if (volume.Length == 0) return;
+
         double shortEma = volume[0];
         double longEma = volume[0];
 
@@ -3665,9 +2266,9 @@ internal static class OscillatorCore
             }
             else
             {
-                shortEma = volume[i] * shortK + shortEma * (1 - shortK);
-                longEma = volume[i] * longK + longEma * (1 - longK);
-                output[i] = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+                shortEma = RoundedSeededEma.Next(volume[i], shortEma, shortLength);
+                longEma = RoundedSeededEma.Next(volume[i], longEma, longLength);
+                output[i] = RoundedPercentageChange.Of(shortEma, longEma);
             }
         }
     }
@@ -3677,31 +2278,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TrendContinuationFactor(ReadOnlySpan<double> close, Span<double> output, int length = 35)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double plusCf = 0, minusCf = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var change = close[j] - close[j - 1];
-                if (change > 0)
-                    plusCf += change;
-                else
-                    minusCf += Math.Abs(change);
-            }
-
-            output[i] = plusCf + minusCf != 0 ? (plusCf - minusCf) / (plusCf + minusCf) * 100 : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendContinuationWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Plus;
     }
 
     /// <summary>
@@ -3792,44 +2371,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ChandeMomentumOscillatorAbsolute(ReadOnlySpan<double> input, Span<double> output, int length = 9)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double sumUp = 0, sumDown = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var change = input[i] - input[i - 1];
-            var up = change > 0 ? change : 0;
-            var down = change < 0 ? -change : 0;
-
-            if (i < length)
-            {
-                sumUp += up;
-                sumDown += down;
-                output[i] = 0;
-            }
-            else
-            {
-                var oldChange = input[i - length] - (i > length ? input[i - length - 1] : 0);
-                var oldUp = oldChange > 0 ? oldChange : 0;
-                var oldDown = oldChange < 0 ? -oldChange : 0;
-                sumUp = sumUp - oldUp + up;
-                sumDown = sumDown - oldDown + down;
-
-                var total = sumUp + sumDown;
-                var cmo = total != 0 ? 100 * (sumUp - sumDown) / total : 0;
-                output[i] = Math.Abs(cmo);
-            }
-        }
+        ChandeMomentumWindow.Compute(input, output, length);
+        var resolved = Math.Max(1, length);
+        for (var i = 0; i < input.Length; i++) output[i] = i < resolved ? 0 : Math.Abs(output[i]);
     }
 
     /// <summary>
@@ -3837,23 +2381,7 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PercentChange(ReadOnlySpan<double> input, Span<double> output, int length = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var prevValue = input[i - length];
-                output[i] = prevValue != 0 ? (input[i] - prevValue) / prevValue * 100 : 0;
-            }
-        }
+        OscillatorCore.RateOfChange(input, output, Math.Max(1, length));
     }
 
     /// <summary>
@@ -3865,6 +2393,8 @@ internal static class OscillatorCore
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
+
+        if (input.Length == 0) return;
 
         output[0] = 0;
         for (var i = 1; i < input.Length; i++)
@@ -3901,7 +2431,7 @@ internal static class OscillatorCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            output[i] = (high[i] + low[i]) / 2;
+            output[i] = PriceMean.Of(high[i], low[i]);
         }
     }
 
@@ -3917,7 +2447,7 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (open[i] + high[i] + low[i] + close[i]) / 4;
+            output[i] = PriceMean.Of(open[i], high[i], low[i], close[i]);
         }
     }
 
@@ -3933,54 +2463,19 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (high[i] + low[i] + close[i]) / 3;
+            output[i] = PriceMean.Of(high[i], low[i], close[i]);
         }
     }
 
     /// <summary>
-    /// Computes Double Smoothed Momenta (EMA of EMA of momentum).
+    /// Computes Double Smoothed Momenta (twice-smoothed displacement divided by twice-smoothed range).
     /// </summary>
-    internal static void DoubleSmoothedMomenta(ReadOnlySpan<double> input, Span<double> output, int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    internal static void DoubleSmoothedMomenta(ReadOnlySpan<double> input, Span<double> output, int momentumLength = 2, int firstSmooth = 5, int secondSmooth = 25)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // First compute momentum (price difference over period)
-        var pool = ArrayPool<double>.Shared;
-        var momentumArray = pool.Rent(input.Length);
-        var firstEmaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var momentum = momentumArray.AsSpan(0, input.Length);
-
-            // Momentum = current - previous (by momentumLength)
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < momentumLength)
-                {
-                    momentum[i] = 0;
-                }
-                else
-                {
-                    momentum[i] = input[i] - input[i - momentumLength];
-                }
-            }
-
-            // First EMA of momentum
-            var firstEma = firstEmaArray.AsSpan(0, input.Length);
-            MovingAverageCore.ExponentialMovingAverage(momentum, firstEma, firstSmooth);
-
-            // Second EMA (double smoothing)
-            MovingAverageCore.ExponentialMovingAverage(firstEma, output, secondSmooth);
-        }
-        finally
-        {
-            pool.Return(momentumArray);
-            pool.Return(firstEmaArray);
-        }
+        using var window = new MomentaRangeWindow(MovingAvgType.ExponentialMovingAverage, momentumLength, firstSmooth, secondSmooth, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -3989,32 +2484,21 @@ internal static class OscillatorCore
     internal static void HighLowIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
     {
         if (output.Length < high.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        length = Math.Max(1, length);
+        var highs = new RollingMinMax(length);
+        var lows = new RollingMinMax(length);
+        using var advances = new OoplesFinance.StockIndicators.Streaming.RollingWindowSum(length);
+        using var declines = new OoplesFinance.StockIndicators.Streaming.RollingWindowSum(length);
+        using var mean = OoplesFinance.StockIndicators.Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, length);
+        double previousHigh = 0, previousLow = 0;
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length)
-            {
-                output[i] = 50; // neutral
-                continue;
-            }
-
-            var newHighs = 0;
-            var newLows = 0;
-
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var prevHigh = j > 0 ? high[j - 1] : high[0];
-                var prevLow = j > 0 ? low[j - 1] : low[0];
-
-                if (high[j] > prevHigh) newHighs++;
-                if (low[j] < prevLow) newLows++;
-            }
-
-            var total = newHighs + newLows;
-            output[i] = total != 0 ? (double)newHighs / total * 100 : 50;
+            highs.Add(high[i]); lows.Add(low[i]);
+            var up = advances.Add(highs.Max > previousHigh ? 1 : 0, out _);
+            var down = declines.Add(lows.Min < previousLow ? 1 : 0, out _);
+            output[i] = mean.Next(up + down == 0 ? 0 : 100 * up / (up + down), true);
+            previousHigh = highs.Max; previousLow = lows.Min;
         }
     }
 
@@ -4030,7 +2514,7 @@ internal static class OscillatorCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            output[i] = volume[i] != 0 ? (high[i] - low[i]) / volume[i] : 0;
+            output[i] = RoundedRangeRatio.Of(high[i], low[i], volume[i]);
         }
     }
 
@@ -4094,7 +2578,7 @@ internal static class OscillatorCore
             // Sort and get median
             Array.Sort(window);
             output[i] = length % 2 == 0
-                ? (window[length / 2 - 1] + window[length / 2]) / 2
+                ? PriceMean.Of(window[length / 2 - 1], window[length / 2])
                 : window[length / 2];
         }
     }
@@ -4117,7 +2601,7 @@ internal static class OscillatorCore
             }
             else
             {
-                output[i] = Math.Log(input[i] / input[i - length]);
+                output[i] = StableLogRatio.Of(input[i], input[i - length]);
             }
         }
     }
@@ -4140,7 +2624,7 @@ internal static class OscillatorCore
             }
             else
             {
-                output[i] = (input[i] - input[i - length]) / input[i - length];
+                output[i] = RoundedRangeRatio.Of(input[i], input[i - length], input[i - length]);
             }
         }
     }
@@ -4155,11 +2639,11 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double sum = 0;
+        var sum = new ExactMeanAccumulator();
         for (var i = 0; i < input.Length; i++)
         {
-            sum += input[i];
-            output[i] = sum;
+            sum.Add(input[i]);
+            output[i] = sum.Mean(1);
         }
     }
 
@@ -4266,54 +2750,18 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes Chande Momentum Oscillator Absolute Average (CMOA smoothed with EMA).
+    /// Computes the absolute scaled mean of three rounded momentum ratios.
     /// </summary>
-    internal static void ChandeMomentumOscillatorAbsoluteAverage(ReadOnlySpan<double> input, Span<double> output, int cmoLength = 9, int emaLength = 5)
-    {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var cmoaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var cmoa = cmoaArray.AsSpan(0, input.Length);
-            ChandeMomentumOscillatorAbsolute(input, cmoa, cmoLength);
-            MovingAverageCore.ExponentialMovingAverage(cmoa, output, emaLength);
-        }
-        finally
-        {
-            pool.Return(cmoaArray);
-        }
-    }
+    internal static void ChandeMomentumOscillatorAbsoluteAverage(ReadOnlySpan<double> input, Span<double> output,
+        int length1 = 5, int length2 = 10, int length3 = 20)
+        => ChandeMomentumAverageWindow.Compute(input, output, length1, length2, length3, true);
 
     /// <summary>
-    /// Computes Chande Momentum Oscillator Average (CMO smoothed with EMA).
+    /// Computes the scaled mean of three rounded momentum ratios.
     /// </summary>
-    internal static void ChandeMomentumOscillatorAverage(ReadOnlySpan<double> input, Span<double> output, int cmoLength = 9, int emaLength = 5)
-    {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var cmoArray = pool.Rent(input.Length);
-
-        try
-        {
-            var cmo = cmoArray.AsSpan(0, input.Length);
-            ChandeMomentumOscillator(input, cmo, cmoLength);
-            MovingAverageCore.ExponentialMovingAverage(cmo, output, emaLength);
-        }
-        finally
-        {
-            pool.Return(cmoArray);
-        }
-    }
+    internal static void ChandeMomentumOscillatorAverage(ReadOnlySpan<double> input, Span<double> output,
+        int length1 = 5, int length2 = 10, int length3 = 20)
+        => ChandeMomentumAverageWindow.Compute(input, output, length1, length2, length3, false);
 
     /// <summary>
     /// Computes Double Stochastic Oscillator.
@@ -4380,38 +2828,13 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes DTOscillator (DeMarker-based oscillator with stochastic smoothing).
+    /// Computes DT Oscillator (stochastic of RSI with arithmetic smoothing).
     /// </summary>
     internal static void DTOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int rsiLength = 13, int stochLength = 8, int smaLength = 5)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(close.Length);
-        var stochArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, close.Length);
-            var stoch = stochArray.AsSpan(0, close.Length);
-
-            // Calculate RSI
-            RelativeStrengthIndex(close, rsi, rsiLength);
-
-            // Apply stochastic to RSI
-            StochasticKOnValues(rsi, stoch, stochLength);
-
-            // Smooth with SMA
-            MovingAverageCore.SimpleMovingAverage(stoch, output, smaLength);
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-            pool.Return(stochArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new DtOscillatorWindow(MovingAvgType.WildersSmoothingMethod, rsiLength, stochLength, smaLength, 3);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
 
     /// <summary>
@@ -4497,90 +2920,24 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemandOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var demandArray = pool.Rent(close.Length);
-        var supplyArray = pool.Rent(close.Length);
-
-        try
-        {
-            var demand = demandArray.AsSpan(0, close.Length);
-            var supply = supplyArray.AsSpan(0, close.Length);
-
-            // Calculate buying pressure (demand) and selling pressure (supply)
-            for (var i = 0; i < close.Length; i++)
-            {
-                var range = high[i] - low[i];
-                if (range > 0)
-                {
-                    var buyingPressure = (close[i] - low[i]) / range * volume[i];
-                    var sellingPressure = (high[i] - close[i]) / range * volume[i];
-                    demand[i] = buyingPressure;
-                    supply[i] = sellingPressure;
-                }
-                else
-                {
-                    demand[i] = 0;
-                    supply[i] = 0;
-                }
-            }
-
-            // Sum over period and calculate oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                double sumDemand = 0, sumSupply = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    sumDemand += demand[j];
-                    sumSupply += supply[j];
-                }
-
-                var total = sumDemand + sumSupply;
-                output[i] = total != 0 ? (sumDemand - sumSupply) / total * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(demandArray);
-            pool.Return(supplyArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length || volume.Length < close.Length) throw new ArgumentException("Candle spans must cover the close input.");
+        // The legacy single length selects output smoothing; the range stages retain public defaults.
+        using var window = new DemandOscillatorWindow(MovingAvgType.ExponentialMovingAverage, 10, 2, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true).Line;
     }
 
     /// <summary>
     /// Computes Double Smoothed Relative Strength Index.
     /// </summary>
-    internal static void DoubleSmoothedRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output, int rsiLength = 14, int smoothLength = 5)
+    internal static void DoubleSmoothedRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output,
+        int length1 = 2, int length2 = 5, int length3 = 25)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        using var window = new RangeGainLossWindow(MovingAvgType.ExponentialMovingAverage, Math.Max(2, length1), new[] { length2, length3 }, length3, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
 
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-        var ema1Array = pool.Rent(input.Length);
-
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-
-            RelativeStrengthIndex(input, rsi, rsiLength);
-            MovingAverageCore.ExponentialMovingAverage(rsi, ema1, smoothLength);
-            MovingAverageCore.ExponentialMovingAverage(ema1, output, smoothLength);
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-            pool.Return(ema1Array);
-        }
     }
 
     /// <summary>
@@ -4623,26 +2980,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AverageMoneyFlowOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var mfiArray = pool.Rent(close.Length);
-
-        try
-        {
-            var mfi = mfiArray.AsSpan(0, close.Length);
-            VolumeCore.MoneyFlowIndex(high, low, close, volume, mfi, length);
-
-            // Apply SMA smoothing
-            MovingAverageCore.SimpleMovingAverage(mfi, output, length);
-        }
-        finally
-        {
-            pool.Return(mfiArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < close.Length) throw new ArgumentException("Volume span must be at least close length.", nameof(volume));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must be at least close length.");
+        using var window = new AverageMoneyFlowWindow(MovingAvgType.WeightedMovingAverage, length, 3);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true).Value;
     }
 
     /// <summary>
@@ -4650,58 +2992,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DeMarker(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var deMaxArray = pool.Rent(high.Length);
-        var deMinArray = pool.Rent(high.Length);
-
-        try
-        {
-            var deMax = deMaxArray.AsSpan(0, high.Length);
-            var deMin = deMinArray.AsSpan(0, high.Length);
-
-            // Calculate DeMax and DeMin
-            deMax[0] = 0;
-            deMin[0] = 0;
-
-            for (var i = 1; i < high.Length; i++)
-            {
-                var highDiff = high[i] - high[i - 1];
-                var lowDiff = low[i - 1] - low[i];
-
-                deMax[i] = highDiff > 0 ? highDiff : 0;
-                deMin[i] = lowDiff > 0 ? lowDiff : 0;
-            }
-
-            // Calculate DeMarker
-            for (var i = 0; i < high.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 0.5;
-                    continue;
-                }
-
-                double sumMax = 0, sumMin = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sumMax += deMax[j];
-                    sumMin += deMin[j];
-                }
-
-                var total = sumMax + sumMin;
-                output[i] = total != 0 ? sumMax / total : 0.5;
-            }
-        }
-        finally
-        {
-            pool.Return(deMaxArray);
-            pool.Return(deMinArray);
-        }
+        if (output.Length < high.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (low.Length < high.Length) throw new ArgumentException("Low span must be at least high length.", nameof(low));
+        using var window = new DemarkerWindow(MovingAvgType.SimpleMovingAverage, length, high.Length);
+        for (var i = 0; i < high.Length; i++) output[i] = window.Next(high[i], low[i], true);
     }
 
     /// <summary>
@@ -4807,30 +3101,18 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes CCT Stoch RSI (CCT version of Stochastic RSI).
     /// </summary>
-    internal static void CCTStochRsi(ReadOnlySpan<double> input, Span<double> output, int rsiLength = 14, int stochLength = 5, int smaLength = 3)
+    internal static void CCTStochRsi(ReadOnlySpan<double> input, Span<double> output, int rsiLength = 21,
+        int numeratorLength = 8, int rangeLength = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.Length == 0) return;
+        using var rsi = new OoplesFinance.StockIndicators.Streaming.RsiState(maType, rsiLength);
+        var numerator = new RollingMinMax(Math.Max(1, numeratorLength));
+        var range = new RollingMinMax(Math.Max(1, rangeLength));
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-        var stochArray = pool.Rent(input.Length);
-
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            var stoch = stochArray.AsSpan(0, input.Length);
-
-            RelativeStrengthIndex(input, rsi, rsiLength);
-            StochasticKOnValues(rsi, stoch, stochLength);
-            MovingAverageCore.SimpleMovingAverage(stoch, output, smaLength);
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-            pool.Return(stochArray);
+            var value = rsi.Next(input[i], true); numerator.Add(value); range.Add(value);
+            output[i] = CctRsiRatio.Percent(value, numerator.Min, range.Min, range.Max);
         }
     }
 
@@ -4969,38 +3251,20 @@ internal static class OscillatorCore
 
     /// <summary>
     /// Computes DiNapoli Percentage Price Oscillator.
-    /// Uses DiNapoli's preferred periods of 3.0 and 3.7 for DEMA calculation.
+    /// Uses the fractional-period, zero-seeded fast and slow averages.
     /// </summary>
-    internal static void DiNapoliPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 3, int longLength = 7)
+    internal static void DiNapoliPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output,
+        double sc = 8.3896, double lc = 17.5185)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var fastCoefficient = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        var slowCoefficient = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        double fast = 0, slow = 0;
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortDemaArray = pool.Rent(input.Length);
-        var longDemaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var shortDema = shortDemaArray.AsSpan(0, input.Length);
-            var longDema = longDemaArray.AsSpan(0, input.Length);
-
-            // Calculate short and long DEMA
-            MovingAverageCore.DoubleExponentialMovingAverage(input, shortDema, shortLength);
-            MovingAverageCore.DoubleExponentialMovingAverage(input, longDema, longLength);
-
-            // Calculate PPO: ((shortDema - longDema) / longDema) * 100
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = longDema[i] != 0 ? ((shortDema[i] - longDema[i]) / longDema[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(shortDemaArray);
-            pool.Return(longDemaArray);
+            fast = RoundedFractionalEma.Next(input[i], fast, fastCoefficient);
+            slow = RoundedFractionalEma.Next(input[i], slow, slowCoefficient);
+            output[i] = RoundedFractionalEma.Percentage(fast, slow);
         }
     }
 
@@ -5061,66 +3325,11 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Ergodic Percentage Price Oscillator.
     /// </summary>
-    internal static void ErgodicPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 5, int longLength = 20, int signalLength = 5)
+    internal static void ErgodicPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 5, int longLength = 32, int signalLength = 5)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var priceChangeArray = pool.Rent(input.Length);
-        var absPriceChangeArray = pool.Rent(input.Length);
-        var emaShortPcArray = pool.Rent(input.Length);
-        var emaLongPcArray = pool.Rent(input.Length);
-        var emaShortAbsArray = pool.Rent(input.Length);
-        var emaLongAbsArray = pool.Rent(input.Length);
-
-        try
-        {
-            var priceChange = priceChangeArray.AsSpan(0, input.Length);
-            var absPriceChange = absPriceChangeArray.AsSpan(0, input.Length);
-            var emaShortPc = emaShortPcArray.AsSpan(0, input.Length);
-            var emaLongPc = emaLongPcArray.AsSpan(0, input.Length);
-            var emaShortAbs = emaShortAbsArray.AsSpan(0, input.Length);
-            var emaLongAbs = emaLongAbsArray.AsSpan(0, input.Length);
-
-            // Calculate price changes
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i == 0)
-                {
-                    priceChange[i] = 0;
-                    absPriceChange[i] = 0;
-                }
-                else
-                {
-                    priceChange[i] = input[i] - input[i - 1];
-                    absPriceChange[i] = Math.Abs(priceChange[i]);
-                }
-            }
-
-            // Apply double smoothing
-            MovingAverageCore.ExponentialMovingAverage(priceChange, emaShortPc, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(emaShortPc, emaLongPc, longLength);
-            MovingAverageCore.ExponentialMovingAverage(absPriceChange, emaShortAbs, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(emaShortAbs, emaLongAbs, longLength);
-
-            // Calculate oscillator
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = emaLongAbs[i] != 0 ? (emaLongPc[i] / emaLongAbs[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(priceChangeArray);
-            pool.Return(absPriceChangeArray);
-            pool.Return(emaShortPcArray);
-            pool.Return(emaLongPcArray);
-            pool.Return(emaShortAbsArray);
-            pool.Return(emaLongAbsArray);
-        }
+        // This core publishes the raw long-minus-short percentage line. Signal length affects only
+        // the separately published signal, not the primary series.
+        PercentagePriceOscillator(input, output, longLength, shortLength);
     }
 
     /// <summary>
@@ -5348,10 +3557,9 @@ internal static class OscillatorCore
 
         length = Math.Max(1, length);
 
-        // CalculateGannSwingOscillator turns when the rolling extreme of the last few bars breaks the one
-        // before it and that one had already broken its own predecessor - two consecutive extremes moving
-        // the same way, not a single bar beating the running high. This tracked the latter, and it ignored
-        // the length entirely, so it swung on bars the indicator never counted as a swing.
+        // A strict local minimum in three consecutive rolling highs selects +1; a strict
+        // local maximum in the rolling lows selects -1. Simultaneous events select +1.
+        // With no event, retain the preceding oscillator value.
         double swing = 0;
         double prevHighest1 = 0, prevHighest2 = 0;
         double prevLowest1 = 0, prevLowest2 = 0;
@@ -5458,43 +3666,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void FireflyOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 10, int smoothLength = 3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var zlemaArray = pool.Rent(close.Length);
-        var atrArray = pool.Rent(close.Length);
-        var rawArray = pool.Rent(close.Length);
-
-        try
-        {
-            var zlema = zlemaArray.AsSpan(0, close.Length);
-            var atr = atrArray.AsSpan(0, close.Length);
-            var raw = rawArray.AsSpan(0, close.Length);
-
-            // Calculate ZLEMA of close
-            MovingAverageCore.ZeroLagEma(close, zlema, length);
-
-            // Calculate ATR
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            // Calculate raw oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                raw[i] = atr[i] != 0 ? (close[i] - zlema[i]) / atr[i] : 0;
-            }
-
-            // Smooth the result
-            MovingAverageCore.SimpleMovingAverage(raw, output, smoothLength);
-        }
-        finally
-        {
-            pool.Return(zlemaArray);
-            pool.Return(atrArray);
-            pool.Return(rawArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Candle spans must cover the close input.");
+        using var window = new FireflyWindow(MovingAvgType.ZeroLagExponentialMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Line;
     }
 
     /// <summary>
@@ -5635,51 +3810,17 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Impulse Percentage Price Oscillator.
     /// </summary>
-    internal static void ImpulsePercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 12, int longLength = 26, int signalLength = 9)
+    internal static void ImpulsePercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 34)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        using var middle = new ZeroLagExponentialMovingAverageSmoother(Math.Max(1, length));
+        using var boundary = MovingAverageSmootherFactory.Create(MovingAvgType.WildersSmoothingMethod, Math.Max(1, length));
+        // A close-only input represents bars with high=low=close.
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortEmaArray = pool.Rent(input.Length);
-        var longEmaArray = pool.Rent(input.Length);
-        var ppoArray = pool.Rent(input.Length);
-        var signalArray = pool.Rent(input.Length);
-
-        try
-        {
-            var shortEma = shortEmaArray.AsSpan(0, input.Length);
-            var longEma = longEmaArray.AsSpan(0, input.Length);
-            var ppo = ppoArray.AsSpan(0, input.Length);
-            var signal = signalArray.AsSpan(0, input.Length);
-
-            // Calculate EMAs
-            MovingAverageCore.ExponentialMovingAverage(input, shortEma, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(input, longEma, longLength);
-
-            // Calculate PPO
-            for (var i = 0; i < input.Length; i++)
-            {
-                ppo[i] = longEma[i] != 0 ? ((shortEma[i] - longEma[i]) / longEma[i]) * 100 : 0;
-            }
-
-            // Calculate signal line
-            MovingAverageCore.ExponentialMovingAverage(ppo, signal, signalLength);
-
-            // Impulse = PPO - Signal (histogram)
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = ppo[i] - signal[i];
-            }
-        }
-        finally
-        {
-            pool.Return(shortEmaArray);
-            pool.Return(longEmaArray);
-            pool.Return(ppoArray);
-            pool.Return(signalArray);
+            var level = boundary.Next(input[i], true);
+            output[i] = RoundedImpulseOscillator.Line(middle.Next(input[i], true), level, level, true);
         }
     }
 
@@ -5693,35 +3834,32 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (input.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
         var fastSmaArray = pool.Rent(input.Length);
         var slowSmaArray = pool.Rent(input.Length);
-        var diffArray = pool.Rent(input.Length);
 
         try
         {
             var fastSma = fastSmaArray.AsSpan(0, input.Length);
             var slowSma = slowSmaArray.AsSpan(0, input.Length);
-            var diff = diffArray.AsSpan(0, input.Length);
 
             // Calculate SMAs
-            MovingAverageCore.SimpleMovingAverage(input, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(input, slowSma, slowLength);
+            BollingerArithmetic.Mean(input, fastSma, fastLength);
+            BollingerArithmetic.Mean(input, slowSma, slowLength);
 
             // Calculate difference
             for (var i = 0; i < input.Length; i++)
             {
-                diff[i] = fastSma[i] - slowSma[i];
+                output[i] = fastSma[i] - slowSma[i];
             }
 
-            // Apply signal smoothing
-            MovingAverageCore.SimpleMovingAverage(diff, output, signalLength);
+            // The primary series is the raw mean difference; signalLength affects only the separate signal output.
         }
         finally
         {
             pool.Return(fastSmaArray);
             pool.Return(slowSmaArray);
-            pool.Return(diffArray);
         }
     }
 
@@ -5756,37 +3894,27 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Mirrored Percentage Price Oscillator.
     /// </summary>
-    internal static void MirroredPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 12, int longLength = 26)
+    internal static void MirroredPercentagePriceOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> close,
+        Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        if (open.Length != close.Length) throw new ArgumentException("Open and close spans must have equal lengths.", nameof(open));
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
-        var shortEmaArray = pool.Rent(input.Length);
-        var longEmaArray = pool.Rent(input.Length);
-
+        var openArray = pool.Rent(close.Length);
+        var closeArray = pool.Rent(close.Length);
         try
         {
-            var shortEma = shortEmaArray.AsSpan(0, input.Length);
-            var longEma = longEmaArray.AsSpan(0, input.Length);
-
-            // Calculate EMAs
-            MovingAverageCore.ExponentialMovingAverage(input, shortEma, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(input, longEma, longLength);
-
-            // Calculate mirrored PPO: invert sign when crossing zero
-            for (var i = 0; i < input.Length; i++)
-            {
-                var ppo = longEma[i] != 0 ? ((shortEma[i] - longEma[i]) / longEma[i]) * 100 : 0;
-                output[i] = i > 0 && output[i - 1] * ppo < 0 ? -ppo : ppo;
-            }
+            var openMean = openArray.AsSpan(0, close.Length);
+            var closeMean = closeArray.AsSpan(0, close.Length);
+            MovingAverageCore.ExponentialMovingAverage(open, openMean, length);
+            MovingAverageCore.ExponentialMovingAverage(close, closeMean, length);
+            for (var i = 0; i < close.Length; i++) output[i] = RoundedPercentageChange.Of(closeMean[i], openMean[i]);
         }
         finally
         {
-            pool.Return(shortEmaArray);
-            pool.Return(longEmaArray);
+            pool.Return(openArray);
+            pool.Return(closeArray);
         }
     }
 
@@ -5795,51 +3923,14 @@ internal static class OscillatorCore
     /// </summary>
     internal static void MobilityOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(close.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, close.Length);
-
-            // Calculate normalized range
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i == 0)
-                {
-                    range[i] = high[i] - low[i];
-                }
-                else
-                {
-                    var tr = Math.Max(high[i] - low[i], Math.Max(Math.Abs(high[i] - close[i - 1]), Math.Abs(low[i] - close[i - 1])));
-                    range[i] = tr;
-                }
-            }
-
-            // Calculate mobility as rolling sum normalized
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                var sum = 0.0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    sum += range[j];
-                }
-
-                output[i] = close[i] != 0 ? (sum / length) / close[i] * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length)
+            throw new ArgumentException("High, low and close must have equal lengths.");
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) MobilityWindow.Validate(high[i], low[i], close[i]);
+        using var window = new MobilityWindow(MovingAvgType.WeightedMovingAverage, 10, length, 7);
+        var values = new double[close.Length];
+        for (var i = 0; i < values.Length; i++) values[i] = window.Next(high[i], low[i], close[i], true).Line;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>
@@ -5870,76 +3961,26 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PriceCycleOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        // A price-only input represents flat candles; callers with OHLC use the overload below.
+        PriceCycleOscillator(input,input,input,output,length);
+    }
 
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, input.Length);
-
-            // Calculate SMA
-            MovingAverageCore.SimpleMovingAverage(input, sma, length);
-
-            // Calculate oscillator as percentage deviation from SMA
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = sma[i] != 0 ? ((input[i] - sma[i]) / sma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-        }
+    internal static void PriceCycleOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 22)
+    {
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new PriceCycleWindow(MovingAvgType.SimpleMovingAverage,length,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true);
     }
 
     /// <summary>
     /// Computes Price Volume Oscillator.
     /// </summary>
-    internal static void PriceVolumeOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int shortLength = 5, int longLength = 10)
+    internal static void PriceVolumeOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> priceOutput, Span<double> volumeOutput, int length1 = 50, int length2 = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var pvArray = pool.Rent(close.Length);
-        var shortEmaArray = pool.Rent(close.Length);
-        var longEmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var pv = pvArray.AsSpan(0, close.Length);
-            var shortEma = shortEmaArray.AsSpan(0, close.Length);
-            var longEma = longEmaArray.AsSpan(0, close.Length);
-
-            // Calculate price * volume
-            for (var i = 0; i < close.Length; i++)
-            {
-                pv[i] = close[i] * volume[i];
-            }
-
-            // Calculate EMAs of PV
-            MovingAverageCore.ExponentialMovingAverage(pv, shortEma, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(pv, longEma, longLength);
-
-            // Calculate oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = longEma[i] != 0 ? ((shortEma[i] - longEma[i]) / longEma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(pvArray);
-            pool.Return(shortEmaArray);
-            pool.Return(longEmaArray);
-        }
+        if (volume.Length != close.Length || priceOutput.Length < close.Length || volumeOutput.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and sufficient output spans are required.");
+        using var prices = new LaggedBalanceWindow(length1); using var volumes = new LaggedBalanceWindow(length2);
+        for (var i = 0; i < close.Length; i++) { priceOutput[i] = prices.Next(close[i], true); volumeOutput[i] = volumes.Next(volume[i], true); }
     }
 
     #endregion
@@ -5951,30 +3992,17 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ProjectionOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must cover every close.");
+        // Capture inputs before output writes so overlapping spans retain their input contract.
+        var highs=high.Slice(0,close.Length).ToArray(); var lows=low.Slice(0,close.Length).ToArray(); var prices=close.ToArray();
+        for (var i=0;i<prices.Length;i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+            Streaming.StreamingInputValidation.Finite(highs[i],nameof(high)); Streaming.StreamingInputValidation.Finite(lows[i],nameof(low));
+            Streaming.StreamingInputValidation.Finite(prices[i],nameof(close));
         }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 50;
-                continue;
-            }
-
-            var hh = high[i];
-            var ll = low[i];
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                if (high[j] > hh) hh = high[j];
-                if (low[j] < ll) ll = low[j];
-            }
-
-            var range = hh - ll;
-            output[i] = range != 0 ? ((close[i] - ll) / range) * 100 : 50;
-        }
+        using var bands=new Streaming.ProjectionBandsCalculator(length);
+        for (var i=0;i<prices.Length;i++) output[i]=Streaming.ProjectionBandsSnapshot.Publish(bands.Update(highs[i],lows[i],true).Oscillator(prices[i]));
     }
 
     /// <summary>
@@ -6022,28 +4050,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RegressionOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var lrArray = pool.Rent(input.Length);
-
-        try
-        {
-            var lr = lrArray.AsSpan(0, input.Length);
-
-            // Calculate linear regression
-            TrendCore.LinearRegressionSlope(input, lr, length);
-
-            // Apply smoothing
-            MovingAverageCore.SimpleMovingAverage(lr, output, length / 2 > 0 ? length / 2 : 1);
-        }
-        finally
-        {
-            pool.Return(lrArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var regression = new ExactLinearFitWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = regression.Next(input[i], true).PercentFitResidual(input[i]);
     }
 
     /// <summary>
@@ -6051,40 +4060,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RexOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var tvbArray = pool.Rent(close.Length);
-        var emaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var tvb = tvbArray.AsSpan(0, close.Length);
-            var ema = emaArray.AsSpan(0, close.Length);
-
-            // Calculate True Value Bar (TVB)
-            for (var i = 0; i < close.Length; i++)
-            {
-                tvb[i] = (3 * close[i]) - (high[i] + low[i] + open[i]);
-            }
-
-            // Apply EMA
-            MovingAverageCore.ExponentialMovingAverage(tvb, ema, length);
-
-            // Output is the TVB EMA
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = ema[i];
-            }
-        }
-        finally
-        {
-            pool.Return(tvbArray);
-            pool.Return(emaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RexWindow(MovingAvgType.ExponentialMovingAverage, length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], open[i], high[i], low[i], true).Value;
     }
 
     /// <summary>
@@ -6148,73 +4126,29 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Wave Trend Oscillator.
     /// </summary>
-    internal static void WaveTrendOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int channelLength = 10, int avgLength = 21)
+    internal static void WaveTrendOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        Span<double> output, int channelLength = 10, int avgLength = 21)
+        => WaveTrendCore(ReadOnlySpan<double>.Empty, high, low, close, output, channelLength, avgLength, false);
+
+    // OHLC-aware public-formula overload. The three-price overload remains an HLC3 variant.
+    internal static void WaveTrendOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        ReadOnlySpan<double> close, Span<double> output, int channelLength = 10, int avgLength = 21)
+        => WaveTrendCore(open, high, low, close, output, channelLength, avgLength, true);
+
+    private static void WaveTrendCore(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        ReadOnlySpan<double> close, Span<double> output, int channel, int average, bool ohlc)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var hlc3Array = pool.Rent(close.Length);
-        var emaHlc3Array = pool.Rent(close.Length);
-        var absDevArray = pool.Rent(close.Length);
-        var emaDevArray = pool.Rent(close.Length);
-        var ciArray = pool.Rent(close.Length);
-        var tciArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hlc3 = hlc3Array.AsSpan(0, close.Length);
-            var emaHlc3 = emaHlc3Array.AsSpan(0, close.Length);
-            var absDev = absDevArray.AsSpan(0, close.Length);
-            var emaDev = emaDevArray.AsSpan(0, close.Length);
-            var ci = ciArray.AsSpan(0, close.Length);
-            var tci = tciArray.AsSpan(0, close.Length);
-
-            // Calculate HLC/3
-            for (var i = 0; i < close.Length; i++)
-            {
-                hlc3[i] = (high[i] + low[i] + close[i]) / 3;
-            }
-
-            // Calculate EMA of HLC/3
-            MovingAverageCore.ExponentialMovingAverage(hlc3, emaHlc3, channelLength);
-
-            // Calculate absolute deviation
-            for (var i = 0; i < close.Length; i++)
-            {
-                absDev[i] = Math.Abs(hlc3[i] - emaHlc3[i]);
-            }
-
-            // Calculate EMA of deviation
-            MovingAverageCore.ExponentialMovingAverage(absDev, emaDev, channelLength);
-
-            // Calculate CI
-            for (var i = 0; i < close.Length; i++)
-            {
-                var d = emaDev[i] * 0.015;
-                ci[i] = d != 0 ? (hlc3[i] - emaHlc3[i]) / d : 0;
-            }
-
-            // Calculate TCI (Wave Trend)
-            MovingAverageCore.ExponentialMovingAverage(ci, tci, avgLength);
-
-            // Output
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = tci[i];
-            }
-        }
-        finally
-        {
-            pool.Return(hlc3Array);
-            pool.Return(emaHlc3Array);
-            pool.Return(absDevArray);
-            pool.Return(emaDevArray);
-            pool.Return(ciArray);
-            pool.Return(tciArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length || ohlc && open.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Input lengths must agree and output must fit every input.");
+        foreach (var value in open) StreamingInputValidation.Finite(value, nameof(open));
+        foreach (var value in high) StreamingInputValidation.Finite(value, nameof(high));
+        foreach (var value in low) StreamingInputValidation.Finite(value, nameof(low));
+        foreach (var value in close) StreamingInputValidation.Finite(value, nameof(close));
+        using var window = new WaveTrendWindow(MovingAvgType.ExponentialMovingAverage, channel, average, 4);
+        var values = new double[close.Length];
+        for (var i = 0; i < values.Length; i++)
+            values[i] = window.Next(ohlc ? WaveTrendWindow.Price(open[i], high[i], low[i], close[i]) : WaveTrendWindow.Price(high[i], low[i], close[i]), true).Line;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>
@@ -6222,91 +4156,22 @@ internal static class OscillatorCore
     /// </summary>
     internal static void WamiOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var adArray = pool.Rent(close.Length);
-        var emaAdArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ad = adArray.AsSpan(0, close.Length);
-            var emaAd = emaAdArray.AsSpan(0, close.Length);
-
-            // Calculate Williams %AD
-            for (var i = 0; i < close.Length; i++)
-            {
-                var trueHigh = i > 0 ? Math.Max(high[i], close[i - 1]) : high[i];
-                var trueLow = i > 0 ? Math.Min(low[i], close[i - 1]) : low[i];
-                var range = trueHigh - trueLow;
-
-                ad[i] = range != 0 ? (close[i] - trueLow) - (trueHigh - close[i]) : 0;
-            }
-
-            // Apply EMA
-            MovingAverageCore.ExponentialMovingAverage(ad, emaAd, length);
-
-            // Output
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = emaAd[i];
-            }
-        }
-        finally
-        {
-            pool.Return(adArray);
-            pool.Return(emaAdArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        using var window = new WamiWindow(MovingAvgType.ExponentialMovingAverage, length, capacityHint: close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
     /// Computes Volume Accumulation Oscillator.
     /// </summary>
-    internal static void VolumeAccumulationOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int shortLength = 5, int longLength = 10)
+    internal static void VolumeAccumulationOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var vaArray = pool.Rent(close.Length);
-        var shortEmaArray = pool.Rent(close.Length);
-        var longEmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var va = vaArray.AsSpan(0, close.Length);
-            var shortEma = shortEmaArray.AsSpan(0, close.Length);
-            var longEma = longEmaArray.AsSpan(0, close.Length);
-
-            // Calculate volume accumulation
-            for (var i = 0; i < close.Length; i++)
-            {
-                var hl = high[i] - low[i];
-                var clv = hl != 0 ? ((close[i] - low[i]) - (high[i] - close[i])) / hl : 0;
-                va[i] = clv * volume[i];
-            }
-
-            // Calculate EMAs
-            MovingAverageCore.ExponentialMovingAverage(va, shortEma, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(va, longEma, longLength);
-
-            // Oscillator = short - long
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = shortEma[i] - longEma[i];
-            }
-        }
-        finally
-        {
-            pool.Return(vaArray);
-            pool.Return(shortEmaArray);
-            pool.Return(longEmaArray);
-        }
+        if (volume.Length != close.Length || high.Length != close.Length || low.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Accumulation);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(0, high[i], low[i], close[i], volume[i], true);
     }
 
     #endregion
@@ -6318,104 +4183,35 @@ internal static class OscillatorCore
     /// </summary>
     internal static void KasePeakOscillatorV1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 30)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var trueRangeArray = pool.Rent(close.Length);
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var trueRange = trueRangeArray.AsSpan(0, close.Length);
-            var atr = atrArray.AsSpan(0, close.Length);
-
-            // Calculate True Range
-            VolatilityCore.TrueRange(high, low, close, trueRange);
-            MovingAverageCore.SimpleMovingAverage(trueRange, atr, length);
-
-            // Calculate oscillator based on trend strength
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length || atr[i] == 0)
-                {
-                    output[i] = 0;
-                }
-                else
-                {
-                    var momentum = close[i] - close[i - length];
-                    output[i] = momentum / (atr[i] * Math.Sqrt(length));
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(trueRangeArray);
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Candle spans must cover every close.");
+        var highs = high.Slice(0, close.Length).ToArray(); var lows = low.Slice(0, close.Length).ToArray(); var prices = close.ToArray();
+        foreach (var values in new[] { highs, lows, prices }) foreach (var value in values) StreamingInputValidation.Finite(value, nameof(close));
+        using var state = new KasePeakV1Window(length, 3);
+        for (var i = 0; i < prices.Length; i++) output[i] = state.Next(highs[i], lows[i], prices[i], true).Level;
     }
 
     /// <summary>
-    /// Computes Varadi Oscillator using percentage changes.
+    /// Computes the Varadi percentile rank, treating price-only input as flat candles.
     /// </summary>
     internal static void VaradiOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+        => VaradiOscillator(close, close, close, output, length);
+
+    internal static void VaradiOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> high,
+        ReadOnlySpan<double> low, Span<double> output, int length = 10,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        if (high.Length != close.Length || low.Length != close.Length)
+            throw new ArgumentException("Candle spans must have equal lengths.");
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var pctChangeArray = pool.Rent(close.Length);
-        var absChangeArray = pool.Rent(close.Length);
-        var sumPctArray = pool.Rent(close.Length);
-        var sumAbsArray = pool.Rent(close.Length);
-
-        try
-        {
-            var pctChange = pctChangeArray.AsSpan(0, close.Length);
-            var absChange = absChangeArray.AsSpan(0, close.Length);
-            var sumPct = sumPctArray.AsSpan(0, close.Length);
-            var sumAbs = sumAbsArray.AsSpan(0, close.Length);
-
-            // Calculate percentage changes
-            pctChange[0] = 0;
-            absChange[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                if (close[i - 1] != 0)
-                {
-                    pctChange[i] = (close[i] - close[i - 1]) / close[i - 1];
-                    absChange[i] = Math.Abs(pctChange[i]);
-                }
-            }
-
-            // Calculate rolling sums
-            MovingAverageCore.SimpleMovingAverage(pctChange, sumPct, length);
-            MovingAverageCore.SimpleMovingAverage(absChange, sumAbs, length);
-
-            // Calculate oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (sumAbs[i] != 0)
-                {
-                    output[i] = (sumPct[i] * length) / (sumAbs[i] * length);
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(pctChangeArray);
-            pool.Return(absChangeArray);
-            pool.Return(sumPctArray);
-            pool.Return(sumAbsArray);
-        }
+        foreach (var value in close) StreamingInputValidation.Finite(value, nameof(close));
+        foreach (var value in high) StreamingInputValidation.Finite(value, nameof(high));
+        foreach (var value in low) StreamingInputValidation.Finite(value, nameof(low));
+        using var window = new VaradiWindow(maType, length);
+        var values = new double[close.Length];
+        for (var i = 0; i < close.Length; i++) values[i] = window.Next(close[i], high[i], low[i], true).Value;
+        values.AsSpan().CopyTo(output);
     }
 
     /// <summary>
@@ -6506,104 +4302,32 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Ultimate Trader Oscillator combining multiple momentum measures.
     /// </summary>
-    internal static void UltimateTraderOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int shortLength = 5, int mediumLength = 10, int longLength = 20)
+    internal static void UltimateTraderOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high,
+        ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output,
+        int lbLength = 5, int smoothLength = 4, int rangeLength = 2,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rsiShortArray = pool.Rent(close.Length);
-        var rsiMediumArray = pool.Rent(close.Length);
-        var rsiLongArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rsiShort = rsiShortArray.AsSpan(0, close.Length);
-            var rsiMedium = rsiMediumArray.AsSpan(0, close.Length);
-            var rsiLong = rsiLongArray.AsSpan(0, close.Length);
-
-            // Calculate RSI at different timeframes
-            RelativeStrengthIndex(close, rsiShort, shortLength);
-            RelativeStrengthIndex(close, rsiMedium, mediumLength);
-            RelativeStrengthIndex(close, rsiLong, longLength);
-
-            // Weighted average (4-2-1 weighting)
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = (rsiShort[i] * 4 + rsiMedium[i] * 2 + rsiLong[i]) / 7.0;
-            }
-        }
-        finally
-        {
-            pool.Return(rsiShortArray);
-            pool.Return(rsiMediumArray);
-            pool.Return(rsiLongArray);
-        }
+        if (output.Length < close.Length || open.Length != close.Length || high.Length != close.Length ||
+            low.Length != close.Length || volume.Length != close.Length)
+            throw new ArgumentException("OHLCV spans must have equal lengths and the output must fit the input.");
+        var raw = new double[close.Length];
+        var window = new UltimateTraderWindow(lbLength, rangeLength);
+        // Read the complete input before writing, including shifted aliases.
+        for (var i = 0; i < raw.Length; i++) raw[i] = window.Next(open[i], high[i], low[i], close[i], volume[i], true);
+        using var first = new UltimateTraderWindow.Average(maType, lbLength);
+        using var second = new UltimateTraderWindow.Average(maType, smoothLength);
+        for (var i = 0; i < raw.Length; i++) output[i] = second.Next(first.Next(raw[i], true), true);
     }
 
     /// <summary>
     /// Computes Smoothed Delta Ratio Oscillator using delta ratios.
     /// </summary>
-    internal static void SmoothedDeltaRatioOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14, int smoothLength = 3)
+    internal static void SmoothedDeltaRatioOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 100)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var deltaRatioArray = pool.Rent(close.Length);
-        var smoothedArray = pool.Rent(close.Length);
-
-        try
-        {
-            var deltaRatio = deltaRatioArray.AsSpan(0, close.Length);
-            var smoothed = smoothedArray.AsSpan(0, close.Length);
-
-            // Calculate delta ratio
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length)
-                {
-                    deltaRatio[i] = 0;
-                }
-                else
-                {
-                    var upSum = 0.0;
-                    var downSum = 0.0;
-                    for (var j = i - length + 1; j <= i; j++)
-                    {
-                        var delta = close[j] - close[j - 1];
-                        if (delta > 0) upSum += delta;
-                        else downSum += Math.Abs(delta);
-                    }
-
-                    if (upSum + downSum != 0)
-                    {
-                        deltaRatio[i] = (upSum - downSum) / (upSum + downSum) * 100;
-                    }
-                    else
-                    {
-                        deltaRatio[i] = 0;
-                    }
-                }
-            }
-
-            // Smooth the result
-            MovingAverageCore.SimpleMovingAverage(deltaRatio, smoothed, smoothLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = smoothed[i];
-            }
-        }
-        finally
-        {
-            pool.Return(deltaRatioArray);
-            pool.Return(smoothedArray);
-        }
+        using var window = new SmoothedDeltaWindow(MovingAvgType.SimpleMovingAverage, length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -6650,64 +4374,15 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes Robust Weighting Oscillator using outlier-resistant statistics.
+    /// Computes Robust Weighting Oscillator as a smoothed regression residual.
     /// </summary>
     internal static void RobustWeightingOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var windowArray = pool.Rent(length);
-
-        try
-        {
-            var window = windowArray.AsSpan(0, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                }
-                else
-                {
-                    // Copy window
-                    for (var j = 0; j < length; j++)
-                    {
-                        window[j] = close[i - length + 1 + j];
-                    }
-
-                    // Sort for median
-                    var sortedWindow = window.ToArray();
-                    Array.Sort(sortedWindow);
-                    var median = sortedWindow[length / 2];
-
-                    // Calculate MAD (Median Absolute Deviation)
-                    var mad = 0.0;
-                    for (var j = 0; j < length; j++)
-                    {
-                        mad += Math.Abs(window[j] - median);
-                    }
-                    mad /= length;
-
-                    if (mad != 0)
-                    {
-                        output[i] = (close[i] - median) / (mad * 1.4826); // 1.4826 is the consistency constant
-                    }
-                    else
-                    {
-                        output[i] = 0;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(windowArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var prices = close.ToArray();
+        foreach (var value in prices) StreamingInputValidation.Finite(value, nameof(close));
+        using var state = new RobustWeightingWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < prices.Length; i++) output[i] = state.Next(prices[i], true).Value;
     }
 
     #endregion
@@ -6779,61 +4454,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void StochasticCustomOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int kPeriod = 14, int dPeriod = 3, int smoothPeriod = 3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var kArray = pool.Rent(close.Length);
-        var smoothKArray = pool.Rent(close.Length);
-        var dArray = pool.Rent(close.Length);
-
-        try
-        {
-            var k = kArray.AsSpan(0, close.Length);
-            var smoothK = smoothKArray.AsSpan(0, close.Length);
-            var d = dArray.AsSpan(0, close.Length);
-
-            // Calculate raw %K
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < kPeriod - 1)
-                {
-                    k[i] = 50;
-                }
-                else
-                {
-                    var highest = high[i];
-                    var lowest = low[i];
-                    for (var j = i - kPeriod + 1; j <= i; j++)
-                    {
-                        if (high[j] > highest) highest = high[j];
-                        if (low[j] < lowest) lowest = low[j];
-                    }
-
-                    var range = highest - lowest;
-                    k[i] = range != 0 ? (close[i] - lowest) / range * 100 : 50;
-                }
-            }
-
-            // Smooth %K
-            MovingAverageCore.SimpleMovingAverage(k, smoothK, smoothPeriod);
-
-            // Calculate %D
-            MovingAverageCore.SimpleMovingAverage(smoothK, d, dPeriod);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = smoothK[i] - d[i];
-            }
-        }
-        finally
-        {
-            pool.Return(kArray);
-            pool.Return(smoothKArray);
-            pool.Return(dArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new StochasticCustomWindow(MovingAvgType.SimpleMovingAverage, kPeriod, smoothPeriod, dPeriod);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true).Line;
     }
 
     /// <summary>
@@ -6941,20 +4564,11 @@ internal static class OscillatorCore
     /// </remarks>
     internal static void SupportAndResistanceOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            // The first bar has no previous close, so its true range is simply high - low.
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
-            var trueRange = CalculationsHelper.CalculateTrueRange(high[i], low[i], prevClose);
-            output[i] = trueRange != 0
-                ? MathHelper.MinOrMax((high[i] - open[i] + (close[i] - low[i])) / (2 * trueRange), 1, 0)
-                : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (open.Length < close.Length || high.Length < close.Length || low.Length < close.Length)
+            throw new ArgumentException("Candle spans must cover the close input.");
+        var window = new SupportResistanceOscillatorWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], high[i], low[i], close[i], true).Line;
     }
 
     /// <summary>
@@ -7003,73 +4617,22 @@ internal static class OscillatorCore
     /// </summary>
     internal static void NthOrderDifferencingOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14, int order = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateNthOrderDifferencingOscillator subtracts one binomially weighted sum of earlier bars
-        // from the arriving value, reading a bar that has not arrived as zero rather than blanking the
-        // result. Differencing the series in place instead, and blanking each pass, agreed only once
-        // both lookbacks had filled: before that the earlier passes had been zeroed, not merely zero.
-        for (var i = 0; i < close.Length; i++)
-        {
-            double sum = 0;
-            double weight = 1;
-
-            for (var j = 0; j <= order; j++)
-            {
-                var lookback = length * (j + 1);
-                var prevValue = i >= lookback ? close[i - lookback] : 0;
-                double sign = Math.Sign(((j + 1) % 2) - 0.5);
-                weight *= (order - j) / (double)(j + 1);
-                sum += prevValue * weight * sign;
-            }
-
-            output[i] = close[i] - sum;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new NthDifferenceWindow(length, order, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
     /// Computes Osc Oscillator (general purpose oscillator).
     /// </summary>
-    internal static void OscOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 5, int slowLength = 10)
+    internal static void OscOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 7, int slowLength = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastMaArray = pool.Rent(close.Length);
-        var slowMaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastMa = fastMaArray.AsSpan(0, close.Length);
-            var slowMa = slowMaArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(close, fastMa, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(close, slowMa, slowLength);
-
-            // Oscillator = (fast - slow) / slow * 100
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (slowMa[i] != 0)
-                {
-                    output[i] = (fastMa[i] - slowMa[i]) / slowMa[i] * 100;
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(fastMaArray);
-            pool.Return(slowMaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        using var fast = new StrengthAverage(MovingAvgType.SimpleMovingAverage, fastLength, close.Length);
+        using var slow = new StrengthAverage(MovingAvgType.SimpleMovingAverage, slowLength, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] =
+            slow.Next(new StrengthValue(close[i]), true).Mantissa - fast.Next(new StrengthValue(close[i]), true).Mantissa;
     }
 
     #endregion
@@ -7081,29 +4644,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersCenterOfGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateEhlersCenterofGravityOscillator reads a bar that has not arrived as zero and keeps
-        // the full set of weights, so the centre of gravity of a partly filled window is measured rather
-        // than blanked. Those leading zeros contribute to neither sum, which leaves the opening bars
-        // weighted towards the newest price.
-        for (var i = 0; i < close.Length; i++)
-        {
-            var num = 0.0;
-            var denom = 0.0;
-
-            for (var j = 0; j < length; j++)
-            {
-                var price = i >= j ? close[i - j] : 0;
-                num += (j + 1) * price;
-                denom += price;
-            }
-
-            output[i] = denom != 0 ? (-num / denom) + ((length + 1) / 2.0) : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new CenterGravityWindow(length,close.Length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -7111,45 +4653,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersDecyclerOscillatorV1(ReadOnlySpan<double> close, Span<double> output, int shortLength = 10, int longLength = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortHpArray = pool.Rent(close.Length);
-        var longHpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var shortHp = shortHpArray.AsSpan(0, close.Length);
-            var longHp = longHpArray.AsSpan(0, close.Length);
-
-            var alphaShort = (Math.Cos(2 * Math.PI / shortLength) + Math.Sin(2 * Math.PI / shortLength) - 1) / Math.Cos(2 * Math.PI / shortLength);
-            var alphaLong = (Math.Cos(2 * Math.PI / longLength) + Math.Sin(2 * Math.PI / longLength) - 1) / Math.Cos(2 * Math.PI / longLength);
-
-            // High-pass filter
-            shortHp[0] = 0;
-            longHp[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                shortHp[i] = (1 - alphaShort / 2) * (1 - alphaShort / 2) * (close[i] - 2 * close[Math.Max(0, i - 1)] + close[Math.Max(0, i - 2)]) +
-                            2 * (1 - alphaShort) * shortHp[i - 1] - (1 - alphaShort) * (1 - alphaShort) * (i > 1 ? shortHp[i - 2] : 0);
-                longHp[i] = (1 - alphaLong / 2) * (1 - alphaLong / 2) * (close[i] - 2 * close[Math.Max(0, i - 1)] + close[Math.Max(0, i - 2)]) +
-                           2 * (1 - alphaLong) * longHp[i - 1] - (1 - alphaLong) * (1 - alphaLong) * (i > 1 ? longHp[i - 2] : 0);
-            }
-
-            // Oscillator = short decycler - long decycler
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = (close[i] - shortHp[i]) - (close[i] - longHp[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(shortHpArray);
-            pool.Return(longHpArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        // This span publishes FastEdo. The slow period belongs to the companion
+        // output, as in the typed indicator; retain the legacy parameter signature.
+        var window = new DecyclerOscillatorWindow(shortLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -7208,78 +4716,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersUniversalOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var whitenArray = pool.Rent(close.Length);
-        var filtArray = pool.Rent(close.Length);
-
-        try
-        {
-            var whiten = whitenArray.AsSpan(0, close.Length);
-            var filt = filtArray.AsSpan(0, close.Length);
-
-            var a1 = Math.Exp(-1.414 * Math.PI / length);
-            var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length);
-            var c2 = b1;
-            var c3 = -a1 * a1;
-            var c1 = 1 - c2 - c3;
-
-            // Whitening
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < 1)
-                {
-                    whiten[i] = close[i];
-                }
-                else
-                {
-                    whiten[i] = close[i] - close[i - 1];
-                }
-            }
-
-            // Super smoother filter
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < 2)
-                {
-                    filt[i] = whiten[i];
-                }
-                else
-                {
-                    filt[i] = c1 * (whiten[i] + whiten[i - 1]) / 2 + c2 * filt[i - 1] + c3 * filt[i - 2];
-                }
-            }
-
-            // RMS normalization
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length)
-                {
-                    output[i] = 0;
-                }
-                else
-                {
-                    var rms = 0.0;
-                    for (var j = 0; j < length; j++)
-                    {
-                        rms += filt[i - j] * filt[i - j];
-                    }
-                    rms = Math.Sqrt(rms / length);
-
-                    output[i] = rms != 0 ? filt[i] / rms : 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(whitenArray);
-            pool.Return(filtArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new UniversalOscillatorWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Line(close[i], true);
     }
+
 
     /// <summary>
     /// Computes Ehlers Recursive Median Oscillator.
@@ -7343,47 +4784,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersStochasticCenterOfGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 8)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var cgArray = pool.Rent(close.Length);
-
-        try
-        {
-            var cg = cgArray.AsSpan(0, close.Length);
-
-            // Calculate Center of Gravity
-            EhlersCenterOfGravityOscillator(close, cg, length);
-
-            // Stochastic of CG
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 50;
-                }
-                else
-                {
-                    var highest = cg[i];
-                    var lowest = cg[i];
-                    for (var j = i - length + 1; j <= i; j++)
-                    {
-                        if (cg[j] > highest) highest = cg[j];
-                        if (cg[j] < lowest) lowest = cg[j];
-                    }
-
-                    var range = highest - lowest;
-                    output[i] = range != 0 ? (cg[i] - lowest) / range * 100 : 50;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(cgArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new StochasticGravityWindow(length,close.Length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -7505,35 +4907,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VervoortSmoothedOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(close.Length);
-        var demaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, close.Length);
-            var dema = demaArray.AsSpan(0, close.Length);
-
-            // Calculate EMA
-            MovingAverageCore.ExponentialMovingAverage(close, ema, length);
-            MovingAverageCore.ExponentialMovingAverage(ema, dema, length);
-
-            // Oscillator = 2 * EMA - DEMA (Smoothed)
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = close[i] - (2 * ema[i] - dema[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(demaArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        var prices=close.ToArray();foreach(var price in prices)Streaming.StreamingInputValidation.Finite(price,nameof(close));
+        using var state=new VervoortSmoothedWindow(length,30,2,3,2);
+        for(var i=0;i<prices.Length;i++)output[i]=state.Next(prices[i],prices[i],prices[i],prices[i],true).Line;
     }
 
     /// <summary>
@@ -7575,47 +4952,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void LinearQuadraticConvergenceDivergenceOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var linRegArray = pool.Rent(close.Length);
-        var quadRegArray = pool.Rent(close.Length);
-
-        try
-        {
-            var linReg = linRegArray.AsSpan(0, close.Length);
-            var quadReg = quadRegArray.AsSpan(0, close.Length);
-
-            // Linear regression
-            MovingAverageCore.LinearRegression(close, linReg, length);
-
-            // Quadratic approximation (use DEMA as proxy for quadratic behavior)
-            MovingAverageCore.ExponentialMovingAverage(close, quadReg, length);
-            var emaOfEma = pool.Rent(close.Length);
-            try
-            {
-                var eofe = emaOfEma.AsSpan(0, close.Length);
-                MovingAverageCore.ExponentialMovingAverage(quadReg, eofe, length);
-
-                // Output = Linear - Quadratic convergence
-                for (var i = 0; i < close.Length; i++)
-                {
-                    output[i] = linReg[i] - (2 * quadReg[i] - eofe[i]);
-                }
-            }
-            finally
-            {
-                pool.Return(emaOfEma);
-            }
-        }
-        finally
-        {
-            pool.Return(linRegArray);
-            pool.Return(quadRegArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var input = close.ToArray();
+        foreach (var price in input) Streaming.StreamingInputValidation.Finite(price, nameof(close));
+        using var state = new LinearQuadraticWindow(MovingAvgType.SimpleMovingAverage, length, 25);
+        for (var i = 0; i < input.Length; i++) output[i] = state.Next(input[i], true);
     }
 
     /// <summary>
@@ -7623,36 +4964,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void StationaryExtrapolatedLevelsOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var linRegArray = pool.Rent(close.Length);
-        var slopeArray = pool.Rent(close.Length);
-
-        try
-        {
-            var linReg = linRegArray.AsSpan(0, close.Length);
-            var slope = slopeArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.LinearRegression(close, linReg, length);
-            TrendCore.LinearRegressionSlope(close, slope, length);
-
-            // Extrapolated level = linReg + slope (projected one bar ahead)
-            // Oscillator = close - extrapolated level
-            for (var i = 0; i < close.Length; i++)
-            {
-                var extrapolated = linReg[i] + slope[i];
-                output[i] = close[i] - extrapolated;
-            }
-        }
-        finally
-        {
-            pool.Return(linRegArray);
-            pool.Return(slopeArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var prices = close.ToArray();
+        foreach (var value in prices) StreamingInputValidation.Finite(value, nameof(close));
+        using var state = new StationaryLevelsOscillatorWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < prices.Length; i++) output[i] = state.Next(prices[i], true).Value;
     }
 
     /// <summary>
@@ -7660,57 +4976,29 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PercentagePriceOscillatorLeader(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12, int slowLength = 26)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        var fast = new double[close.Length];
+        var slow = new double[close.Length];
+        MovingAverageCore.ExponentialMovingAverage(close, fast, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(close, slow, slowLength);
+        var fastDistance = new List<double>(close.Length);
+        var slowDistance = new List<double>(close.Length);
+        for (var i = 0; i < close.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+            fastDistance.Add(close[i] - fast[i]);
+            slowDistance.Add(close[i] - slow[i]);
         }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastEmaArray = pool.Rent(close.Length);
-        var slowEmaArray = pool.Rent(close.Length);
-        var fastSlopeArray = pool.Rent(close.Length);
-        var slowSlopeArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastEma = fastEmaArray.AsSpan(0, close.Length);
-            var slowEma = slowEmaArray.AsSpan(0, close.Length);
-            var fastSlope = fastSlopeArray.AsSpan(0, close.Length);
-            var slowSlope = slowSlopeArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(close, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(close, slowEma, slowLength);
-
-            // Calculate slopes
-            for (var i = 1; i < close.Length; i++)
-            {
-                fastSlope[i] = fastEma[i] - fastEma[i - 1];
-                slowSlope[i] = slowEma[i] - slowEma[i - 1];
-            }
-
-            // Leader = PPO + scaled slope difference
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (slowEma[i] != 0)
-                {
-                    var ppo = (fastEma[i] - slowEma[i]) / slowEma[i] * 100;
-                    var slopeDiff = (fastSlope[i] - slowSlope[i]) / (Math.Abs(slowEma[i]) / 100 + 0.001);
-                    output[i] = ppo + slopeDiff;
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-            pool.Return(fastSlopeArray);
-            pool.Return(slowSlopeArray);
-        }
+        var firstFinite = FiniteSignalInput.Create(fastDistance, out var firstCount);
+        var secondFinite = FiniteSignalInput.Create(slowDistance, out var secondCount);
+        var first = new double[close.Length];
+        var second = new double[close.Length];
+        MovingAverageCore.ExponentialMovingAverage(Compatibility.SpanCompat.AsReadOnlySpan(firstFinite), first, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(Compatibility.SpanCompat.AsReadOnlySpan(secondFinite), second, slowLength);
+        for (var i = 0; i < close.Length; i++) output[i] = i >= firstCount || i >= secondCount ? double.NaN
+            : RoundedFractionalEma.Percentage(fast[i] + first[i], slow[i] + second[i]);
     }
+
 
     /// <summary>
     /// Computes Kaufman Adaptive Correlation Oscillator.
@@ -7781,66 +5069,21 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Stochastic Moving Average Convergence Divergence Oscillator.
     /// </summary>
-    internal static void StochasticMacdOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12, int slowLength = 26, int signalLength = 9, int stochLength = 14)
+    internal static void StochasticMacdOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12,
+        int slowLength = 26, int signalLength = 9, int stochLength = 45)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        var fast = new double[close.Length];
+        var slow = new double[close.Length];
+        MovingAverageCore.ExponentialMovingAverage(close, fast, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(close, slow, slowLength);
+        var window = new RollingMinMax(Math.Max(1, stochLength));
+        // This close-only overload treats each input as a bar with high=low=close.
+        for (var i = 0; i < close.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var macdLineArray = pool.Rent(close.Length);
-        var stochMacdArray = pool.Rent(close.Length);
-
-        try
-        {
-            var macdLine = macdLineArray.AsSpan(0, close.Length);
-            var stochMacd = stochMacdArray.AsSpan(0, close.Length);
-
-            // Calculate MACD line
-            var fastEma = pool.Rent(close.Length);
-            var slowEma = pool.Rent(close.Length);
-            try
-            {
-                MovingAverageCore.ExponentialMovingAverage(close, fastEma.AsSpan(0, close.Length), fastLength);
-                MovingAverageCore.ExponentialMovingAverage(close, slowEma.AsSpan(0, close.Length), slowLength);
-                for (var i = 0; i < close.Length; i++)
-                {
-                    macdLine[i] = fastEma[i] - slowEma[i];
-                }
-            }
-            finally
-            {
-                pool.Return(fastEma);
-                pool.Return(slowEma);
-            }
-
-            // Calculate Stochastic of MACD
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < stochLength - 1)
-                {
-                    output[i] = 50;
-                }
-                else
-                {
-                    var highest = macdLine[i];
-                    var lowest = macdLine[i];
-                    for (var j = i - stochLength + 1; j <= i; j++)
-                    {
-                        if (macdLine[j] > highest) highest = macdLine[j];
-                        if (macdLine[j] < lowest) lowest = macdLine[j];
-                    }
-
-                    var range = highest - lowest;
-                    output[i] = range != 0 ? (macdLine[i] - lowest) / range * 100 : 50;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(macdLineArray);
-            pool.Return(stochMacdArray);
+            window.Add(close[i]);
+            output[i] = RoundedStochasticMacd.Of(fast[i], slow[i], window.Max, window.Min);
         }
     }
 
@@ -7935,60 +5178,12 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VervoortHeikenAshiCandlestickOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var haCloseArray = pool.Rent(close.Length);
-        var haOpenArray = pool.Rent(close.Length);
-        var temaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var haClose = haCloseArray.AsSpan(0, close.Length);
-            var haOpen = haOpenArray.AsSpan(0, close.Length);
-            var tema = temaArray.AsSpan(0, close.Length);
-
-            // Calculate Heiken Ashi values
-            haClose[0] = (high[0] + low[0] + close[0] + open[0]) / 4;
-            haOpen[0] = (open[0] + close[0]) / 2;
-
-            for (var i = 1; i < close.Length; i++)
-            {
-                haClose[i] = (high[i] + low[i] + close[i] + open[i]) / 4;
-                haOpen[i] = (haOpen[i - 1] + haClose[i - 1]) / 2;
-            }
-
-            // Calculate HA difference and apply TEMA smoothing
-            var haDiff = pool.Rent(close.Length);
-            try
-            {
-                var diff = haDiff.AsSpan(0, close.Length);
-                for (var i = 0; i < close.Length; i++)
-                {
-                    diff[i] = haClose[i] - haOpen[i];
-                }
-
-                MovingAverageCore.TripleExponentialMovingAverage(diff, tema, length);
-
-                for (var i = 0; i < close.Length; i++)
-                {
-                    output[i] = tema[i];
-                }
-            }
-            finally
-            {
-                pool.Return(haDiff);
-            }
-        }
-        finally
-        {
-            pool.Return(haCloseArray);
-            pool.Return(haOpenArray);
-            pool.Return(temaArray);
-        }
+        if(output.Length<close.Length || high.Length!=close.Length || low.Length!=close.Length || open.Length!=close.Length)throw new ArgumentException("Candle spans must have matching lengths and sufficient output space.");
+        var highs=high.ToArray();var lows=low.ToArray();var opens=open.ToArray();var closes=close.ToArray();
+        foreach(var values in new[]{highs,lows,opens,closes})foreach(var value in values)Streaming.StreamingInputValidation.Finite(value,nameof(close));
+        using var state=new VervoortCandleWindow(false,MovingAvgType.ZeroLagTripleExponentialMovingAverage,length);
+        for(var i=0;i<closes.Length;i++)
+        {var sum=new ExactMeanAccumulator();sum.Add(highs[i]);sum.Add(lows[i]);sum.Add(opens[i]);sum.Add(closes[i]);output[i]=state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value;}
     }
 
     /// <summary>
@@ -7996,8 +5191,12 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VervoortHeikenAshiLongTermCandlestickOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 55)
     {
-        // Same as regular version but with longer default period
-        VervoortHeikenAshiCandlestickOscillator(high, low, close, open, output, length);
+        if(output.Length<close.Length || high.Length!=close.Length || low.Length!=close.Length || open.Length!=close.Length)throw new ArgumentException("Candle spans must have matching lengths and sufficient output space.");
+        var highs=high.ToArray();var lows=low.ToArray();var opens=open.ToArray();var closes=close.ToArray();
+        foreach(var values in new[]{highs,lows,opens,closes})foreach(var value in values)Streaming.StreamingInputValidation.Finite(value,nameof(close));
+        using var state=new VervoortCandleWindow(true,MovingAvgType.TripleExponentialMovingAverage,length);
+        for(var i=0;i<closes.Length;i++)
+        {var sum=new ExactMeanAccumulator();sum.Add(highs[i]);sum.Add(lows[i]);sum.Add(opens[i]);sum.Add(closes[i]);output[i]=state.Next(sum.Mean(4),highs[i],lows[i],opens[i],closes[i],true).Value;}
     }
 
     /// <summary>
@@ -8049,40 +5248,9 @@ internal static class OscillatorCore
     internal static void DecisionPointPriceMomentumOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 35, int signalLength = 20)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocArray = pool.Rent(close.Length);
-        var smoothArray = pool.Rent(close.Length);
-        var smoothedArray = pool.Rent(close.Length);
-
-        try
-        {
-            var roc = rocArray.AsSpan(0, close.Length);
-            var smooth = smoothArray.AsSpan(0, close.Length);
-            var smoothed = smoothedArray.AsSpan(0, close.Length);
-
-            // Calculate ROC
-            RateOfChange(close, roc, 1);
-
-            // Double smoothing with EMA
-            MovingAverageCore.ExponentialMovingAverage(roc, smooth, length);
-            MovingAverageCore.ExponentialMovingAverage(smooth, smoothed, signalLength);
-
-            // Scale by 10 for readability
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = smoothed[i] * 10;
-            }
-        }
-        finally
-        {
-            pool.Return(rocArray);
-            pool.Return(smoothArray);
-            pool.Return(smoothedArray);
-        }
+        using var window = new PriceMomentumWindow(MovingAvgType.ExponentialMovingAverage, length, signalLength, 10, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>
@@ -8090,113 +5258,36 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TFSMboPercentagePriceOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 25, int slowLength = 200)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastEmaArray = pool.Rent(close.Length);
-        var slowEmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastEma = fastEmaArray.AsSpan(0, close.Length);
-            var slowEma = slowEmaArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(close, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(close, slowEma, slowLength);
-
-            // TFS MBO PPO = ((fast - slow) / slow) * 100
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        using var fast = new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength));
+        using var slow = new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength));
+        for (var i = 0; i < close.Length; i++) output[i] = RoundedPercentageChange.Of(fast.Next(close[i], true), slow.Next(close[i], true));
     }
 
     /// <summary>
     /// Computes TFS Volume Oscillator.
     /// </summary>
-    internal static void TFSVolumeOscillator(ReadOnlySpan<double> volume, Span<double> output, int fastLength = 13, int slowLength = 55)
+    internal static void TFSVolumeOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 7)
     {
-        if (output.Length < volume.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastEmaArray = pool.Rent(volume.Length);
-        var slowEmaArray = pool.Rent(volume.Length);
-
-        try
-        {
-            var fastEma = fastEmaArray.AsSpan(0, volume.Length);
-            var slowEma = slowEmaArray.AsSpan(0, volume.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(volume, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(volume, slowEma, slowLength);
-
-            // Volume oscillator = ((fast - slow) / slow) * 100
-            for (var i = 0; i < volume.Length; i++)
-            {
-                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-        }
+        if (volume.Length != close.Length || open.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Tfs);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], 0, 0, close[i], volume[i], true);
     }
 
     /// <summary>
     /// Computes Mass Thrust Oscillator.
     /// Uses advancing/declining price ratio as proxy for breadth.
     /// </summary>
+    internal static void MassThrustOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 10)
+    {
+        MassThrustWindow.Compute(close, volume, output, length, true);
+    }
+
     internal static void MassThrustOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var thrustArray = pool.Rent(close.Length);
-        var emaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var thrust = thrustArray.AsSpan(0, close.Length);
-            var ema = emaArray.AsSpan(0, close.Length);
-
-            // Calculate daily thrust (advance/decline ratio proxy)
-            thrust[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                var change = close[i] - close[i - 1];
-                thrust[i] = change > 0 ? 1 : (change < 0 ? -1 : 0);
-            }
-
-            // Smooth with EMA
-            MovingAverageCore.ExponentialMovingAverage(thrust, ema, length);
-
-            // Scale to percentage
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = ema[i] * 100;
-            }
-        }
-        finally
-        {
-            pool.Return(thrustArray);
-            pool.Return(emaArray);
-        }
+        MassThrustWindow.Compute(close, ReadOnlySpan<double>.Empty, output, length, true, true);
     }
 
     /// <summary>
@@ -8205,38 +5296,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void SimpleLines(ReadOnlySpan<double> close, Span<double> output, int length = 10, double mult = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var s = 0.01 * 100 * (1.0 / length);
-
-        // Initialize first value
-        output[0] = close[0];
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var prevA = output[i - 1];
-            var prevA2 = i >= 2 ? output[i - 2] : close[0];
-
-            // x = currentValue + ((prevA - prevA2) * mult)
-            var x = close[i] + ((prevA - prevA2) * mult);
-
-            // a = x > prevA + s ? prevA + s : x < prevA - s ? prevA - s : prevA
-            if (x > prevA + s)
-            {
-                output[i] = prevA + s;
-            }
-            else if (x < prevA - s)
-            {
-                output[i] = prevA - s;
-            }
-            else
-            {
-                output[i] = prevA;
-            }
-        }
+        var kernel = new Streaming.SimpleLinesKernel(length, mult);
+        for (var i = 0; i < close.Length; i++) output[i] = kernel.Next(close[i], true);
     }
 
     /// <summary>
@@ -8310,23 +5371,9 @@ internal static class OscillatorCore
     /// <param name="gamma">Trend smoothing factor (0-1).</param>
     internal static void DoubleExponentialSmoothing(ReadOnlySpan<double> input, Span<double> output, double alpha = 0.01, double gamma = 0.9)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (input.Length == 0) return;
-
-        output[0] = input[0];
-        if (input.Length == 1) return;
-
-        output[1] = (alpha * input[1]) + ((1 - alpha) * output[0]);
-
-        for (var i = 2; i < input.Length; i++)
-        {
-            var sChg = output[i - 1] - output[i - 2];
-            output[i] = (alpha * input[i]) + ((1 - alpha) * (output[i - 1] + (gamma * (sChg + ((1 - gamma) * sChg)))));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DoubleSmoothingWindow(alpha, gamma);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -8343,13 +5390,13 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var alpha = length > 2 ? 2.0 / (length + 1) : 0.67;
+        if (high.IsEmpty) return;
+        var alpha = length > 2 ? 2.0 / (length + 1d) : 0.67;
         var alpha2 = alpha / 2;
 
-        // Initialize with first price
-        var prevHigh = high.Length > 0 ? high[0] : 0;
-        var prevLow = low.Length > 0 ? low[0] : 0;
-        var price0 = (Math.Max(high[0], prevHigh) + Math.Min(low[0], prevLow)) / 2;
+        // The absent prior bar contributes zero to the first two-bar range.
+        double prevHigh = 0, prevLow = 0;
+        var price0 = PriceMean.Of(Math.Max(high[0], prevHigh), Math.Min(low[0], prevLow));
         var ema1 = price0;
         var ema2 = price0;
         output[0] = 0;
@@ -8362,10 +5409,10 @@ internal static class OscillatorCore
             prevLow = low[i - 1];
             var h = Math.Max(currentHigh, prevHigh);
             var l = Math.Min(currentLow, prevLow);
-            var price = (h + l) / 2;
+            var price = PriceMean.Of(h, l);
 
-            ema1 = (alpha * price) + ((1 - alpha) * ema1);
-            ema2 = (alpha2 * price) + ((1 - alpha2) * ema2);
+            ema1 = VidyaBlend.Compute(ema1, price, alpha);
+            ema2 = VidyaBlend.Compute(ema2, price, alpha2);
             output[i] = ema1 - ema2;
         }
     }
@@ -8379,31 +5426,8 @@ internal static class OscillatorCore
     /// <param name="output">Output span for results.</param>
     internal static void BelkhayateTiming(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentHigh = high[i];
-            var currentLow = low[i];
-            var prevHigh1 = i >= 1 ? high[i - 1] : 0;
-            var prevLow1 = i >= 1 ? low[i - 1] : 0;
-            var prevHigh2 = i >= 2 ? high[i - 2] : 0;
-            var prevLow2 = i >= 2 ? low[i - 2] : 0;
-            var prevHigh3 = i >= 3 ? high[i - 3] : 0;
-            var prevLow3 = i >= 3 ? low[i - 3] : 0;
-            var prevHigh4 = i >= 4 ? high[i - 4] : 0;
-            var prevLow4 = i >= 4 ? low[i - 4] : 0;
-
-            var middle = (((currentHigh + currentLow) / 2) + ((prevHigh1 + prevLow1) / 2) + ((prevHigh2 + prevLow2) / 2) +
-                          ((prevHigh3 + prevLow3) / 2) + ((prevHigh4 + prevLow4) / 2)) / 5;
-            var scale = ((currentHigh - currentLow + (prevHigh1 - prevLow1) + (prevHigh2 - prevLow2) + (prevHigh3 - prevLow3) +
-                          (prevHigh4 - prevLow4)) / 5) * 0.2;
-
-            output[i] = scale != 0 ? (close[i] - middle) / scale : 0;
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Input and output spans must cover all closes.");
+        var window = new BelkhayateWindow(); for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     #endregion
@@ -8450,20 +5474,7 @@ internal static class OscillatorCore
     /// <param name="length">Lookback length.</param>
     internal static void PerformanceIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= length ? input[i - length] : 0;
-
-            // MinPastValues equivalent: only compute if we have enough history
-            var change = i >= length ? currentValue - prevValue : 0;
-            output[i] = prevValue != 0 ? change * 100 / prevValue : 0;
-        }
+        OscillatorCore.RateOfChange(input, output, Math.Max(1, length));
     }
 
     /// <summary>
@@ -8479,33 +5490,41 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Use a rolling window to count up days
-        Span<double> conditions = stackalloc double[Math.Min(length, input.Length)];
-        var condSum = 0.0;
-        var windowIdx = 0;
-
-        for (var i = 0; i < input.Length; i++)
+        var storage = ArrayPool<double>.Shared.Rent(Math.Min(length, input.Length));
+        try
         {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            double cond = currentValue > prevValue ? 1 : 0;
+            // Use a rolling window to count up days
+            var conditions = storage.AsSpan(0, Math.Min(length, input.Length));
+            var condSum = 0.0;
+            var windowIdx = 0;
 
-            if (i < length)
+            for (var i = 0; i < input.Length; i++)
             {
-                // Building up the window
-                conditions[i] = cond;
-                condSum += cond;
-            }
-            else
-            {
-                // Rolling window - remove oldest, add newest
-                condSum -= conditions[windowIdx];
-                conditions[windowIdx] = cond;
-                condSum += cond;
-                windowIdx = (windowIdx + 1) % length;
-            }
+                var currentValue = input[i];
+                var prevValue = i >= 1 ? input[i - 1] : 0;
+                double cond = i > 0 && currentValue > prevValue ? 1 : 0;
 
-            output[i] = length != 0 ? condSum / length * 100 : 0;
+                if (i < length)
+                {
+                    // Building up the window
+                    conditions[i] = cond;
+                    condSum += cond;
+                }
+                else
+                {
+                    // Rolling window - remove oldest, add newest
+                    condSum -= conditions[windowIdx];
+                    conditions[windowIdx] = cond;
+                    condSum += cond;
+                    windowIdx = (windowIdx + 1) % length;
+                }
+
+                output[i] = length != 0 ? 100d * condSum / length : 0;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(storage);
         }
     }
 
@@ -8541,19 +5560,10 @@ internal static class OscillatorCore
     /// <param name="factor">Scaling factor.</param>
     internal static void MultiLevelIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 14, double factor = 10000)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var prevOpen = i >= length ? open[i - length] : 0;
-            var currentOpen = open[i];
-            var currentClose = close[i];
-
-            output[i] = (currentClose - currentOpen - (currentClose - prevOpen)) * factor;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (open.Length < close.Length) throw new ArgumentException("Open span must be at least input length.", nameof(open));
+        var window = new MultiLevelWindow(length, factor);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], true);
     }
 
     /// <summary>
@@ -8565,62 +5575,10 @@ internal static class OscillatorCore
     /// <param name="slowLength">Slow period.</param>
     internal static void MarketDirectionIndicator(ReadOnlySpan<double> input, Span<double> output, int fastLength = 13, int slowLength = 55)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Pre-allocate rolling sum buffer
-        Span<double> sumBuffer = stackalloc double[Math.Min(slowLength, input.Length)];
-        var bufferIdx = 0;
-        var totalSum = 0.0;
-        var prevCp2 = 0.0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-
-            // Maintain rolling sum for slowLength
-            if (i < slowLength)
-            {
-                sumBuffer[i] = currentValue;
-                totalSum += currentValue;
-            }
-            else
-            {
-                totalSum -= sumBuffer[bufferIdx];
-                sumBuffer[bufferIdx] = currentValue;
-                totalSum += currentValue;
-                bufferIdx = (bufferIdx + 1) % slowLength;
-            }
-
-            // Calculate partial sums for fast and slow lengths
-            var len1Sum = 0.0; // fastLength - 1
-            var len2Sum = 0.0; // slowLength - 1
-
-            var count1 = Math.Min(fastLength - 1, i + 1);
-            var count2 = Math.Min(slowLength - 1, i + 1);
-
-            for (var j = 0; j < count2; j++)
-            {
-                var idx = i - j;
-                if (idx >= 0)
-                {
-                    var val = input[idx];
-                    len2Sum += val;
-                    if (j < count1)
-                    {
-                        len1Sum += val;
-                    }
-                }
-            }
-
-            var cp2 = slowLength != fastLength ? ((fastLength * len2Sum) - (slowLength * len1Sum)) / (slowLength - fastLength) : 0;
-            var avg = (currentValue + prevValue) / 2;
-            output[i] = avg != 0 ? 100 * (prevCp2 - cp2) / avg : 0;
-            prevCp2 = cp2;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < input.Length; i++) StreamingInputValidation.Finite(input[i], nameof(input));
+        var window = new MarketDirectionWindow(fastLength, slowLength);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     // NthOrderDifferencingOscillator already implemented above in Batch 11
@@ -8634,19 +5592,7 @@ internal static class OscillatorCore
     /// <param name="power">Scaling power.</param>
     internal static void MorphedSineWave(ReadOnlySpan<double> input, Span<double> output, int length = 14, double power = 100)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var p = length / (2 * Math.PI);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var c = (currentValue * power) + Math.Sin(i / p);
-            output[i] = c / power;
-        }
+        MorphedSineWindow.Compute(input, output, length, power);
     }
 
     // MarketFacilitationIndex and VolumeAccumulationOscillator already implemented above
@@ -8666,34 +5612,9 @@ internal static class OscillatorCore
     /// <param name="length">Averaging period length.</param>
     internal static void InternalBarStrength(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        Span<double> ibs = stackalloc double[close.Length > 1024 ? 0 : close.Length];
-        var ibsArray = close.Length > 1024 ? new double[close.Length] : null;
-        var ibsSpan = ibsArray is not null ? ibsArray.AsSpan() : ibs;
-
-        // Calculate raw IBS for each bar
-        for (var i = 0; i < close.Length; i++)
-        {
-            var range = high[i] - low[i];
-            ibsSpan[i] = range != 0 ? (close[i] - low[i]) / range * 100 : 50;
-        }
-
-        // Calculate rolling average of IBS
-        double sum = 0;
-        for (var i = 0; i < close.Length; i++)
-        {
-            sum += ibsSpan[i];
-            if (i >= length)
-            {
-                sum -= ibsSpan[i - length];
-            }
-            var count = Math.Min(i + 1, length);
-            output[i] = sum / count;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new InternalBarStrengthWindow(length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true).Value;
     }
 
     /// <summary>
@@ -8714,7 +5635,7 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (open[i] + high[i] + low[i] + close[i]) / 4;
+            output[i] = PriceMean.Of(open[i], high[i], low[i], close[i]);
         }
     }
 
@@ -8727,42 +5648,10 @@ internal static class OscillatorCore
     /// <param name="length">Period length.</param>
     internal static void ZScore(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateZScore divides a deviation from a simple moving average by a standard deviation, and
-            // both of those blank their run-in, so a zero denominator makes the score itself zero until the
-            // window fills. A shortened window here measured a spread against a mean drawn from fewer bars.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate SMA
-            double sum = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var sma = sum / length;
-
-            // Calculate standard deviation
-            double sumSquaredDev = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var dev = input[j] - sma;
-                sumSquaredDev += dev * dev;
-            }
-            var stdDev = Math.Sqrt(sumSquaredDev / length);
-
-            // Calculate Z-Score
-            output[i] = stdDev != 0 ? (input[i] - sma) / stdDev : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must cover every input.", nameof(output));
+        using var average = new StrengthAverage(MovingAvgType.SimpleMovingAverage, length, input.Length);
+        using var state = new StandardizedScoreWindow(length, false);
+        for (var i = 0; i < input.Length; i++) output[i] = state.Next(input[i], average.Next(new StrengthValue(input[i]), true).Mantissa, true, true);
     }
 
     /// <summary>
@@ -8772,20 +5661,18 @@ internal static class OscillatorCore
     /// <param name="input">Input values (typically normalized RSI or other oscillator).</param>
     /// <param name="output">Output span for results.</param>
     /// <param name="length">Period for scaling.</param>
-    internal static void InverseFisherTransform(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    internal static void InverseFisherTransform(ReadOnlySpan<double> input, Span<double> output, int length = 5, int smoothLength = 9,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var rsi = new RsiState(maType, length);
+        using var average = StrengthWindow.Supports(maType) ? new StrengthAverage(maType, smoothLength, input.Length) : null;
+        using var fallback = average is null ? MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength)) : null;
         for (var i = 0; i < input.Length; i++)
         {
-            var x = input[i];
-            // Normalize to -5 to 5 range for better transform behavior
-            var normalized = x * 0.1;
-            var exp2x = Math.Exp(2 * normalized);
-            output[i] = (exp2x - 1) / (exp2x + 1);
+            var scaled = .1 * (rsi.Next(input[i], true) - 50);
+            var value = average is null ? fallback!.Next(scaled, true) : average.Next(new StrengthValue(scaled), true).Mantissa;
+            output[i] = Math.Tanh(value);
         }
     }
 
@@ -8797,8 +5684,10 @@ internal static class OscillatorCore
     /// <param name="length">Period length.</param>
     internal static void FastZScore(ReadOnlySpan<double> input, Span<double> output, int length = 5)
     {
-        // FastZScore uses same formula as ZScore but with shorter default period
-        ZScore(input, output, length);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must cover every input.", nameof(output));
+        using var average = new StrengthAverage(MovingAvgType.SimpleMovingAverage, length, input.Length);
+        using var state = new StandardizedScoreWindow(length, true);
+        for (var i = 0; i < input.Length; i++) output[i] = state.Next(input[i], average.Next(new StrengthValue(input[i]), true).Mantissa, true, true);
     }
 
     /// <summary>
@@ -8815,39 +5704,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateSkewness returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate mean
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var mean = sum / length;
-
-            // Calculate variance and third moment
-            double sumSquaredDev = 0;
-            double sumCubedDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var dev = input[j] - mean;
-                sumSquaredDev += dev * dev;
-                sumCubedDev += dev * dev * dev;
-            }
-            var variance = sumSquaredDev / length;
-            var stdDev = Math.Sqrt(variance);
-
-            // Skewness = E[(X-μ)³] / σ³
-            output[i] = stdDev != 0 ? (sumCubedDev / length) / (stdDev * stdDev * stdDev) : 0;
-        }
+        using var window = new ExactSkewnessWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -8902,44 +5760,8 @@ internal static class OscillatorCore
     /// <param name="length">Period length.</param>
     internal static void SimplePriceZone(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double sumUp = 0;
-        double sumDn = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var change = close[i] - close[i - 1];
-            var up = change > 0 ? change : 0;
-            var dn = change < 0 ? -change : 0;
-
-            sumUp += up;
-            sumDn += dn;
-
-            // A change enters the sums only from the second bar, so the one leaving is
-            // change[i - length], which exists only once i - length >= 1. Removing it at
-            // i == length subtracted a raw price that was never added.
-            if (i >= length + 1)
-            {
-                var prevChange = close[i - length] - close[i - length - 1];
-                var prevUp = prevChange > 0 ? prevChange : 0;
-                var prevDn = prevChange < 0 ? -prevChange : 0;
-                sumUp -= prevUp;
-                sumDn -= prevDn;
-            }
-
-            var total = sumUp + sumDn;
-            output[i] = total != 0 ? 100 * (sumUp - sumDn) / total : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.");
+        var window=new SimplePriceZoneWindow(length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -8958,35 +5780,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            // CalculateTypicalPriceVolatility returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate mean of typical prices
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var tp = (high[j] + low[j] + close[j]) / 3;
-                sum += tp;
-            }
-            var mean = sum / length;
-
-            // Calculate standard deviation
-            double sumSquaredDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var tp = (high[j] + low[j] + close[j]) / 3;
-                var dev = tp - mean;
-                sumSquaredDev += dev * dev;
-            }
-            output[i] = Math.Sqrt(sumSquaredDev / length);
-        }
+        using var window = new ExactTypicalVolatilityWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     #endregion
@@ -8998,61 +5793,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemarkRangeExpansionIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 5)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var s1Array = pool.Rent(close.Length);
-        var s2Array = pool.Rent(close.Length);
-
-        try
-        {
-            var s1 = s1Array.AsSpan(0, close.Length);
-            var s2 = s2Array.AsSpan(0, close.Length);
-
-            // Calculate s1 and s2 values
-            for (var i = 0; i < close.Length; i++)
-            {
-                var prevHigh2 = i >= 2 ? high[i - 2] : 0;
-                var prevHigh5 = i >= 5 ? high[i - 5] : 0;
-                var prevHigh6 = i >= 6 ? high[i - 6] : 0;
-                var prevLow2 = i >= 2 ? low[i - 2] : 0;
-                var prevLow5 = i >= 5 ? low[i - 5] : 0;
-                var prevLow6 = i >= 6 ? low[i - 6] : 0;
-                var prevClose7 = i >= 7 ? close[i - 7] : 0;
-                var prevClose8 = i >= 8 ? close[i - 8] : 0;
-
-                double n = (high[i] >= prevLow5 || high[i] >= prevLow6) && (low[i] <= prevHigh5 || low[i] <= prevHigh6) ? 0 : 1;
-                double m = prevHigh2 >= prevClose8 && (prevLow2 <= prevClose7 || prevLow2 <= prevClose8) ? 0 : 1;
-                var sVal = high[i] - prevHigh2 + (low[i] - prevLow2);
-
-                s1[i] = n * m * sVal;
-                s2[i] = Math.Abs(sVal);
-            }
-
-            // Calculate rolling sums and REI
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                double s1Sum = 0, s2Sum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    s1Sum += s1[j];
-                    s2Sum += s2[j];
-                }
-
-                output[i] = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(s1Array);
-            pool.Return(s2Array);
-        }
+        if(high.Length!=close.Length||low.Length!=close.Length||output.Length<close.Length)throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        var window=new DemarkRangeWindow(length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true);
     }
 
     /// <summary>
@@ -9060,55 +5803,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemarkPressureRatioV1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var bpArray = pool.Rent(close.Length);
-        var spArray = pool.Rent(close.Length);
-
-        try
-        {
-            var bp = bpArray.AsSpan(0, close.Length);
-            var sp = spArray.AsSpan(0, close.Length);
-
-            // Calculate buying and selling pressure
-            for (var i = 0; i < close.Length; i++)
-            {
-                var prevClose = i >= 1 ? close[i - 1] : 0;
-                var gapup = prevClose != 0 ? (open[i] - prevClose) / prevClose : 0;
-                var gapdown = open[i] != 0 ? (prevClose - open[i]) / open[i] : 0;
-
-                bp[i] = gapup > 0.15 ? (high[i] - prevClose + close[i] - low[i]) * volume[i] :
-                    close[i] > open[i] ? (close[i] - open[i]) * volume[i] : 0;
-
-                sp[i] = gapdown > 0.15 ? (prevClose - low[i] + high[i] - close[i]) * volume[i] :
-                    close[i] < open[i] ? (close[i] - open[i]) * volume[i] : 0;
-            }
-
-            // Calculate rolling sums and pressure ratio
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                double bpSum = 0, spSum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    bpSum += bp[j];
-                    spSum += sp[j];
-                }
-
-                output[i] = bpSum - spSum != 0 ? Math.Min(Math.Max(100 * bpSum / (bpSum - spSum), 0), 100) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(bpArray);
-            pool.Return(spArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length || open.Length != close.Length || volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var pressure = new DemarkPressureWindow(length, false);
+        for (var i = 0; i < close.Length; i++) output[i] = pressure.Next(open[i], high[i], low[i], close[i], volume[i], true);
     }
 
     /// <summary>
@@ -9116,53 +5814,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemarkPressureRatioV2(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var bpArray = pool.Rent(close.Length);
-        var spArray = pool.Rent(close.Length);
-
-        try
-        {
-            var bp = bpArray.AsSpan(0, close.Length);
-            var sp = spArray.AsSpan(0, close.Length);
-
-            // Calculate buying and selling pressure
-            for (var i = 0; i < close.Length; i++)
-            {
-                var delta = close[i] - open[i];
-                var trueRange = high[i] - low[i];
-                var ratio = trueRange != 0 ? delta / trueRange : 0;
-
-                bp[i] = delta > 0 ? ratio * volume[i] : 0;
-                sp[i] = delta < 0 ? ratio * volume[i] : 0;
-            }
-
-            // Calculate rolling sums and pressure ratio. CalculateDemarkPressureRatioV2 totals its two
-            // pressures with RollingSum.Sum(length), which adds up however many bars have arrived, so the
-            // ratio is measured from the first bar and only falls back to the neutral fifty when there is
-            // no pressure on either side.
-            for (var i = 0; i < close.Length; i++)
-            {
-                double bpSum = 0, spSum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    bpSum += bp[j];
-                    spSum += sp[j];
-                }
-
-                var denom = bpSum + Math.Abs(spSum);
-                output[i] = denom != 0 ? Math.Min(Math.Max(100 * bpSum / denom, 0), 100) : 50;
-            }
-        }
-        finally
-        {
-            pool.Return(bpArray);
-            pool.Return(spArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length || open.Length != close.Length || volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var pressure = new DemarkPressureWindow(length, true);
+        for (var i = 0; i < close.Length; i++) output[i] = pressure.Next(open[i], high[i], low[i], close[i], volume[i], true);
     }
 
     /// <summary>
@@ -9273,52 +5928,26 @@ internal static class OscillatorCore
     /// </summary>
     internal static void OscarIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 8)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must cover input length.");
         for (var i = 0; i < close.Length; i++)
         {
-            highWindow.Add(high[i]);
-            lowWindow.Add(low[i]);
-
-            var highest = highWindow.Max;
-            var lowest = lowWindow.Min;
-            var range = highest - lowest;
-            var rough = range != 0 ? Math.Min(Math.Max((close[i] - lowest) / range * 100, 0), 100) : 0;
-            var prevOscar = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = (prevOscar / 6) + (rough / 3);
+            OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(close[i], nameof(close));
+            OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(high[i], nameof(high));
+            OoplesFinance.StockIndicators.Streaming.StreamingInputValidation.Finite(low[i], nameof(low));
         }
+        using var window = new OscarWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true).Value;
     }
 
     /// <summary>
-    /// Computes Narrow Bandpass Filter using Blackman-Harris window.
+    /// Computes Narrow Bandpass Filter using a Blackman window.
     /// </summary>
     internal static void NarrowBandpassFilter(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                var x = j / (double)(length - 1);
-                var win = 0.42 - (0.5 * Math.Cos(2 * Math.PI * x)) + (0.08 * Math.Cos(4 * Math.PI * x));
-                var w = Math.Sin(2 * Math.PI * j / length) * win;
-                sum += prevValue * w;
-            }
-            output[i] = sum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new NarrowBandpassWindow(length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -9341,7 +5970,7 @@ internal static class OscillatorCore
 
             var highest = highWindow.Max;
             var lowest = lowWindow.Min;
-            output[i] = (highest + lowest) / 2;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 
@@ -9349,51 +5978,11 @@ internal static class OscillatorCore
     /// Computes Williams Fractals - identifies swing highs and lows.
     /// Returns 1 for up fractal, -1 for down fractal, 0 otherwise.
     /// </summary>
-    internal static void WilliamsFractals(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> upFractalOutput, Span<double> downFractalOutput, int length = 2)
+    internal static void WilliamsFractals(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        Span<double> upFractalOutput, Span<double> downFractalOutput, int length = 2)
     {
-        if (upFractalOutput.Length < high.Length || downFractalOutput.Length < high.Length)
-        {
-            throw new ArgumentException("Output spans must be at least input length.", nameof(upFractalOutput));
-        }
-
-        for (var i = 0; i < high.Length; i++)
-        {
-            var prevHigh = i >= length - 2 ? high[i - (length - 2)] : 0;
-            var prevHigh1 = i >= length - 1 ? high[i - (length - 1)] : 0;
-            var prevHigh2 = i >= length ? high[i - length] : 0;
-            var prevHigh3 = i >= length + 1 ? high[i - (length + 1)] : 0;
-            var prevHigh4 = i >= length + 2 ? high[i - (length + 2)] : 0;
-            var prevHigh5 = i >= length + 3 ? high[i - (length + 3)] : 0;
-            var prevHigh6 = i >= length + 4 ? high[i - (length + 4)] : 0;
-            var prevHigh7 = i >= length + 5 ? high[i - (length + 5)] : 0;
-            var prevHigh8 = i >= length + 8 ? high[i - (length + 6)] : 0;
-            var prevLow = i >= length - 2 ? low[i - (length - 2)] : 0;
-            var prevLow1 = i >= length - 1 ? low[i - (length - 1)] : 0;
-            var prevLow2 = i >= length ? low[i - length] : 0;
-            var prevLow3 = i >= length + 1 ? low[i - (length + 1)] : 0;
-            var prevLow4 = i >= length + 2 ? low[i - (length + 2)] : 0;
-            var prevLow5 = i >= length + 3 ? low[i - (length + 3)] : 0;
-            var prevLow6 = i >= length + 4 ? low[i - (length + 4)] : 0;
-            var prevLow7 = i >= length + 5 ? low[i - (length + 5)] : 0;
-            var prevLow8 = i >= length + 8 ? low[i - (length + 6)] : 0;
-
-            double upFractal = (prevHigh4 < prevHigh2 && prevHigh3 < prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) ||
-                (prevHigh5 < prevHigh2 && prevHigh4 < prevHigh2 && prevHigh3 == prevHigh2 && prevHigh1 < prevHigh2) ||
-                (prevHigh6 < prevHigh2 && prevHigh5 < prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
-                prevHigh < prevHigh2) || (prevHigh7 < prevHigh2 && prevHigh6 < prevHigh2 && prevHigh5 == prevHigh2 && prevHigh4 == prevHigh2 &&
-                prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) || (prevHigh8 < prevHigh2 && prevHigh7 < prevHigh2 &&
-                prevHigh6 == prevHigh2 && prevHigh5 <= prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
-                prevHigh < prevHigh2) ? 1 : 0;
-            upFractalOutput[i] = upFractal;
-
-            double dnFractal = (prevLow4 > prevLow2 && prevLow3 > prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow5 > prevLow2 &&
-                prevLow4 > prevLow2 && prevLow3 == prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow6 > prevLow2 &&
-                prevLow5 > prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ||
-                (prevLow7 > prevLow2 && prevLow6 > prevLow2 && prevLow5 == prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 &&
-                prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow8 > prevLow2 && prevLow7 > prevLow2 && prevLow6 == prevLow2 &&
-                prevLow5 >= prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ? 1 : 0;
-            downFractalOutput[i] = dnFractal;
-        }
+        WilliamsFractalPattern.Calculate(high, upFractalOutput, length, upper: true);
+        WilliamsFractalPattern.Calculate(low, downFractalOutput, length, upper: false);
     }
 
     /// <summary>
@@ -9401,31 +5990,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void UpsideDownsideVolume(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 50)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var upVolSum = new RollingSum();
-        var downVolSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentClose = close[i];
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-            var currentVolume = volume[i];
-
-            var upVol = currentClose > prevClose ? currentVolume : 0;
-            var downVol = currentClose < prevClose ? -currentVolume : 0;
-
-            upVolSum.Add(upVol);
-            downVolSum.Add(downVol);
-
-            var upSum = upVolSum.Sum(length);
-            var downSum = downVolSum.Sum(length);
-
-            output[i] = downSum != 0 ? upSum / downSum : 0;
-        }
+        if (volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.UpsideDownside);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(0, 0, 0, close[i], volume[i], true);
     }
 
     /// <summary>
@@ -9433,35 +6001,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexIndicatorPlus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var vmPlusSum = new RollingSum();
-        var trSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentHigh = high[i];
-            var currentLow = low[i];
-            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
-            // opening true range the plain high-low span. Falling back to zero instead made it the whole
-            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
-            var prevLow = i >= 1 ? low[i - 1] : 0;
-
-            var vmPlus = Math.Abs(currentHigh - prevLow);
-            vmPlusSum.Add(vmPlus);
-
-            var tr = Math.Max(currentHigh - currentLow, Math.Max(Math.Abs(currentHigh - prevClose), Math.Abs(currentLow - prevClose)));
-            trSum.Add(tr);
-
-            var vmPlusSumVal = vmPlusSum.Sum(length);
-            var trSumVal = trSum.Sum(length);
-
-            output[i] = trSumVal != 0 ? vmPlusSumVal / trSumVal : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Plus;
     }
 
     /// <summary>
@@ -9469,35 +6011,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexIndicatorMinus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var vmMinusSum = new RollingSum();
-        var trSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentHigh = high[i];
-            var currentLow = low[i];
-            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
-            // opening true range the plain high-low span. Falling back to zero instead made it the whole
-            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
-            var prevHigh = i >= 1 ? high[i - 1] : 0;
-
-            var vmMinus = Math.Abs(currentLow - prevHigh);
-            vmMinusSum.Add(vmMinus);
-
-            var tr = Math.Max(currentHigh - currentLow, Math.Max(Math.Abs(currentHigh - prevClose), Math.Abs(currentLow - prevClose)));
-            trSum.Add(tr);
-
-            var vmMinusSumVal = vmMinusSum.Sum(length);
-            var trSumVal = trSum.Sum(length);
-
-            output[i] = trSumVal != 0 ? vmMinusSumVal / trSumVal : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Minus;
     }
 
     /// <summary>
@@ -9510,50 +6026,31 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-
+        length = Math.Max(1, length);
         for (var i = 0; i < close.Length; i++)
         {
-            highWindow.Add(high[i]);
-            lowWindow.Add(low[i]);
-
-            var hh = highWindow.Max;
-            var ll = lowWindow.Min;
             var cbl = close[i];
-            int hCount = 0, lCount = 0;
-
-            for (var j = 0; j <= length && i >= j; j++)
+            int highPivot = 0, lowPivot = 0;
+            var highest = high[i - 0];
+            var lowest = low[i - 0];
+            for (var offset = 1; offset < length && offset <= i; offset++)
             {
-                var currentLow = low[i - j];
-                var currentHigh = high[i - j];
-
-                if (currentLow == ll)
+                var h = high[i - offset]; var l = low[i - offset];
+                if (h > highest) { highest = h; highPivot = offset; }
+                if (l < lowest) { lowest = l; lowPivot = offset; }
+            }
+            // The latest extreme determines direction; an outside-bar tie uses its high.
+            var rising = highPivot <= lowPivot;
+            var pivot = rising ? highPivot : lowPivot;
+            var level = rising ? low[i - pivot] : high[i - pivot];
+            var count = 0;
+            for (var offset = pivot + 1; offset <= pivot + length && offset <= i; offset++)
+            {
+                var candidate = rising ? low[i - offset] : high[i - offset];
+                if (rising ? candidate < level : candidate > level)
                 {
-                    for (var k = j + 1; k <= j + length && i >= k; k++)
-                    {
-                        var prevHigh = high[i - k];
-                        lCount += prevHigh > currentHigh ? 1 : 0;
-                        if (lCount == 2)
-                        {
-                            cbl = prevHigh;
-                            break;
-                        }
-                    }
-                }
-
-                if (currentHigh == hh)
-                {
-                    for (var k = j + 1; k <= j + length && i >= k; k++)
-                    {
-                        var prevLow = low[i - k];
-                        hCount += prevLow > currentLow ? 1 : 0;
-                        if (hCount == 2)
-                        {
-                            cbl = prevLow;
-                            break;
-                        }
-                    }
+                    level = candidate;
+                    if (++count == 2) { cbl = level; break; }
                 }
             }
             output[i] = cbl;
@@ -9565,52 +6062,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersTrendflex(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var period = 0.5 * length;
-        var a1 = Math.Exp(-Math.Sqrt(2) * Math.PI / period);
-        var b1 = 2 * a1 * Math.Cos(Math.Sqrt(2) * Math.PI / period);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var pool = ArrayPool<double>.Shared;
-        var filterArray = pool.Rent(close.Length);
-
-        try
-        {
-            var filter = filterArray.AsSpan(0, close.Length);
-            double ms = 0;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevFilter1 = i >= 1 ? filter[i - 1] : 0;
-                var prevFilter2 = i >= 2 ? filter[i - 2] : 0;
-
-                filter[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-
-                double sum = 0;
-                for (var j = 1; j <= length; j++)
-                {
-                    var prevFilterCount = i >= j ? filter[i - j] : 0;
-                    sum += filter[i] - prevFilterCount;
-                }
-                sum /= length;
-
-                ms = (0.04 * sum * sum) + (0.96 * ms);
-                output[i] = ms > 0 ? sum / Math.Sqrt(ms) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(filterArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TrendflexWindow(length); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -9618,59 +6071,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersReflex(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var period = 0.5 * length;
-        var a1 = Math.Exp(-Math.Sqrt(2) * Math.PI / period);
-        var b1 = 2 * a1 * Math.Cos(Math.Sqrt(2) * Math.PI / period);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var pool = ArrayPool<double>.Shared;
-        var filterArray = pool.Rent(close.Length);
-        var slopeArray = pool.Rent(close.Length);
-
-        try
-        {
-            var filter = filterArray.AsSpan(0, close.Length);
-            var slope = slopeArray.AsSpan(0, close.Length);
-            double ms = 0;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevFilter1 = i >= 1 ? filter[i - 1] : 0;
-                var prevFilter2 = i >= 2 ? filter[i - 2] : 0;
-
-                filter[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-
-                var prevFilterLength = i >= length ? filter[i - length] : 0;
-                slope[i] = length > 0 ? (filter[i] - prevFilterLength) / length : 0;
-
-                double sum = 0;
-                for (var j = 1; j <= length; j++)
-                {
-                    var slopeCount = i >= j ? slope[i - j] : 0;
-                    var filterCount = i >= j ? filter[i - j] : 0;
-                    sum += filter[i] + (j * slopeCount) - filterCount;
-                }
-                sum /= length;
-
-                ms = (0.04 * sum * sum) + (0.96 * ms);
-                output[i] = ms > 0 ? sum / Math.Sqrt(ms) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(filterArray);
-            pool.Return(slopeArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TrendflexWindow(length, reflex: true); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -9679,27 +6081,12 @@ internal static class OscillatorCore
     internal static void EhlersCorrelationTrendIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
         if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
+            throw new ArgumentException("Output spans must be at least input length.");
+        using var correlation = new EhlersCorrelationWindow(length, true);
         for (var i = 0; i < close.Length; i++)
         {
-            double sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = i >= j ? close[i - j] : 0;
-                sx += j;
-                sy += prevValue;
-                sxx += j * j;
-                sxy += j * prevValue;
-                syy += prevValue * prevValue;
-            }
-
-            var denom = Math.Sqrt((length * sxx - sx * sx) * (length * syy - sy * sy));
-            output[i] = denom != 0 ? (length * sxy - sx * sy) / denom : 0;
+            var value = correlation.Next(close[i], true);
+            output[i] = value.Real;
         }
     }
 
@@ -9708,80 +6095,22 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TrendTriggerFactor(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 15)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-
-        var pool = ArrayPool<double>.Shared;
-        var highestArray = pool.Rent(high.Length);
-        var lowestArray = pool.Rent(high.Length);
-
-        try
-        {
-            // First pass: compute highest and lowest values at each point
-            for (var i = 0; i < high.Length; i++)
-            {
-                highWindow.Add(high[i]);
-                lowWindow.Add(low[i]);
-                highestArray[i] = highWindow.Max;
-                lowestArray[i] = lowWindow.Min;
-            }
-
-            // Second pass: compute TTF
-            for (var i = 0; i < high.Length; i++)
-            {
-                var highest = highestArray[i];
-                var lowest = lowestArray[i];
-                var prevHighest = i >= length ? highestArray[i - length] : 0;
-                var prevLowest = i >= length ? lowestArray[i - length] : 0;
-                var buyPower = highest - prevLowest;
-                var sellPower = prevHighest - lowest;
-
-                output[i] = buyPower + sellPower != 0 ? 200 * (buyPower - sellPower) / (buyPower + sellPower) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(highestArray);
-            pool.Return(lowestArray);
-        }
+        if (output.Length < high.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendTriggerWindow(length);
+        for (var i = 0; i < high.Length; i++) output[i] = window.Next(high[i], low[i], true);
     }
 
     /// <summary>
     /// Computes Trend Detection Index.
     /// </summary>
-    internal static void TrendDetectionIndex(ReadOnlySpan<double> close, Span<double> output, int length1 = 20, int length2 = 40)
+    internal static void TrendDetectionIndex(ReadOnlySpan<double> close, Span<double> output, int length1 = 20, int length2 = 40,
+        bool direction = false)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(length1, length2);
-        var momSum = new RollingSum();
-        var momAbsSum = new RollingSum();
-
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendDetectionWindow(length1, length2);
         for (var i = 0; i < close.Length; i++)
         {
-            // CalculateTrendDetectionIndex passes its momentum through MinPastValues, which reports zero
-            // until the lookback has arrived rather than measuring the price against a previous value of
-            // zero. Taking the whole price as the momentum put an outlier the size of the price itself
-            // into both rolling sums, and the longer of the two carried it for fifty-nine bars.
-            var mom = i >= length1 ? close[i] - close[i - length1] : 0;
-            momSum.Add(mom);
-            momAbsSum.Add(Math.Abs(mom));
-
-            var tdiDirection = momSum.Sum(length1);
-            var momAbsSum1 = momAbsSum.Sum(length1);
-            var momAbsSum2 = momAbsSum.Sum(length2);
-
-            output[i] = Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
+            var value = window.Next(close[i], true); output[i] = direction ? value.Direction : value.Line;
         }
     }
 
@@ -9790,46 +6119,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void UberTrendIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var advSum = new RollingSum();
-        var decSum = new RollingSum();
-        var advVolSum = new RollingSum();
-        var decVolSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue = i >= 1 ? close[i - 1] : 0;
-            var currentVolume = volume[i];
-
-            var adv = i >= 1 && currentValue > prevValue ? currentValue - prevValue : 0.0;
-            advSum.Add(adv);
-
-            var dec = i >= 1 && currentValue < prevValue ? prevValue - currentValue : 0.0;
-            decSum.Add(dec);
-
-            var advSumVal = advSum.Sum(length);
-            var decSumVal = decSum.Sum(length);
-
-            var advVol = i >= 1 && currentValue > prevValue && advSumVal != 0 ? currentVolume / advSumVal : 0.0;
-            advVolSum.Add(advVol);
-
-            var decVol = i >= 1 && currentValue < prevValue && decSumVal != 0 ? currentVolume / decSumVal : 0.0;
-            decVolSum.Add(decVol);
-
-            var advVolSumVal = advVolSum.Sum(length);
-            var decVolSumVal = decVolSum.Sum(length);
-            var top = decSumVal != 0 ? advSumVal / decSumVal : 0;
-            var bot = decVolSumVal != 0 ? advVolSumVal / decVolSumVal : 0;
-            var ut = bot != 0 ? top / bot : 0;
-
-            output[i] = ut + 1 != 0 ? (ut - 1) / (ut + 1) : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < close.Length) throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        for (var i = 0; i < close.Length; i++) { Streaming.StreamingInputValidation.Finite(close[i], nameof(close)); Streaming.StreamingInputValidation.Finite(volume[i], nameof(volume)); }
+        var window = new UberTrendWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true).Value;
     }
 
     /// <summary>
@@ -9868,29 +6162,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void LiquidRelativeStrengthIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var k = 1.0 / length;
-        double numEma = 0, denEma = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var prevValue = i >= 1 ? close[i - 1] : 0;
-            var prevVolume = i >= 1 ? volume[i - 1] : 0;
-            var a = close[i] - prevValue;
-            var b = volume[i] - prevVolume;
-            var num = Math.Max(a, 0) * Math.Max(b, 0);
-            var den = Math.Abs(a) * Math.Abs(b);
-
-            numEma = (num * k) + (numEma * (1 - k));
-            denEma = (den * k) + (denEma * (1 - k));
-
-            output[i] = denEma != 0 ? Math.Min(Math.Max(100 * numEma / denEma, 0), 100) : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < close.Length) throw new ArgumentException("Volume span must be at least price length.", nameof(volume));
+        for (var i = 0; i < close.Length; i++) { StreamingInputValidation.Finite(close[i], nameof(close)); StreamingInputValidation.Finite(volume[i], nameof(volume)); }
+        var window = new LiquidRsiWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true);
     }
 
     /// <summary>
@@ -9903,31 +6179,9 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        length = Math.Max(1, length);
-        var upCountSum = new RollingSum();
-        double upSum = 0, downSum = 0;
+        using var window = new AsymmetricGainLossWindow(length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            var prevValue = i >= 1 ? close[i - 1] : 0;
-            var roc = prevValue != 0 ? (close[i] - prevValue) / prevValue * 100 : 0;
-
-            var upFlag = roc >= 0 ? 1.0 : 0.0;
-            upCountSum.Add(upFlag);
-            var upCount = upCountSum.Sum(length);
-            var upAlpha = upCount != 0 ? 1 / upCount : 0;
-            var posRoc = roc > 0 ? roc : 0;
-            var negRoc = roc < 0 ? Math.Abs(roc) : 0;
-
-            upSum = (upAlpha * posRoc) + ((1 - upAlpha) * upSum);
-
-            var downCount = length - upCount;
-            var downAlpha = downCount != 0 ? 1 / downCount : 0;
-            downSum = (downAlpha * negRoc) + ((1 - downAlpha) * downSum);
-
-            var ars = downSum != 0 ? upSum / downSum : 0;
-            output[i] = downSum == 0 ? 100 : upSum == 0 ? 0 : Math.Min(Math.Max(100 - (100 / (1 + ars)), 0), 100);
-        }
     }
 
     /// <summary>
@@ -9935,35 +6189,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AverageAbsoluteErrorNormalization(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var eAbsSum = new RollingSum();
-        var eSum = new RollingSum();
-        double prevY = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i == 0)
-            {
-                prevY = close[i];
-            }
-
-            var e = close[i] - prevY;
-            eSum.Add(e);
-            eAbsSum.Add(Math.Abs(e));
-
-            var eAbsSma = eAbsSum.Average(length);
-            var eSma = eSum.Average(length);
-
-            var a = eAbsSma != 0 ? Math.Min(Math.Max(eSma / eAbsSma, -1), 1) : 0;
-            output[i] = a;
-
-            prevY = close[i] + (a * eAbsSma);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.");
+        var window=new AbsoluteErrorWindow(length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -10007,27 +6234,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ShinoharaIntensityRatioA(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var highSum = new RollingSum();
-        var lowSum = new RollingSum();
-        var openSum = new RollingSum();
-
-        for (var i = 0; i < high.Length; i++)
-        {
-            highSum.Add(high[i]);
-            lowSum.Add(low[i]);
-            openSum.Add(open[i]);
-
-            var bullA = highSum.Sum(length) - openSum.Sum(length);
-            var bearA = openSum.Sum(length) - lowSum.Sum(length);
-
-            output[i] = bearA != 0 ? bullA / bearA * 100 : 0;
-        }
+        if (high.Length != open.Length || low.Length != open.Length || output.Length < open.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new ShinoharaWindow(length);
+        for (var i = 0; i < open.Length; i++) output[i] = window.Next(open[i], high[i], low[i], 0, true).A;
     }
 
     /// <summary>
@@ -10035,28 +6245,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ShinoharaIntensityRatioB(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var highSum = new RollingSum();
-        var lowSum = new RollingSum();
-        var prevCloseSum = new RollingSum();
-
-        for (var i = 0; i < high.Length; i++)
-        {
-            highSum.Add(high[i]);
-            lowSum.Add(low[i]);
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-            prevCloseSum.Add(prevClose);
-
-            var bullB = highSum.Sum(length) - prevCloseSum.Sum(length);
-            var bearB = prevCloseSum.Sum(length) - lowSum.Sum(length);
-
-            output[i] = bearB != 0 ? bullB / bearB * 100 : 0;
-        }
+        if (high.Length != close.Length || low.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new ShinoharaWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(0, high[i], low[i], close[i], true).B;
     }
 
     /// <summary>
@@ -10064,36 +6256,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RangeActionVerificationIndex(ReadOnlySpan<double> close, Span<double> output, int fastLength = 7, int slowLength = 65)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        fastLength = Math.Max(1, fastLength);
-        slowLength = Math.Max(1, slowLength);
-
-        var pool = ArrayPool<double>.Shared;
-        var fastSmaArray = pool.Rent(close.Length);
-        var slowSmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastSma = fastSmaArray.AsSpan(0, close.Length);
-            var slowSma = slowSmaArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.SimpleMovingAverage(close, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(close, slowSma, slowLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = slowSma[i] != 0 ? (fastSma[i] - slowSma[i]) / slowSma[i] * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(fastSmaArray);
-            pool.Return(slowSmaArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new AverageGapWindow(MovingAvgType.SimpleMovingAverage,fastLength,slowLength,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -10101,40 +6266,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void WilliamsAccumulationDistribution(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        // The first bar has no previous close, so it contributes nothing. Treating the missing previous close
-        // as zero made every close look like an advance and seeded the running total with the whole first
-        // close price. Each later bar is measured against the true range high and low - the previous close
-        // pulled up to this bar's high, or down to its low - not against the previous bar's own high and low,
-        // and an unchanged close contributes nothing rather than resetting the total.
-        output[0] = 0;
-        double wad = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var trueRangeHigh = Math.Max(high[i], close[i - 1]);
-            var trueRangeLow = Math.Min(low[i], close[i - 1]);
-
-            if (close[i] > close[i - 1])
-            {
-                wad += close[i] - trueRangeLow;
-            }
-            else if (close[i] < close[i - 1])
-            {
-                wad += close[i] - trueRangeHigh;
-            }
-
-            output[i] = wad;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilliamsAccumulationWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Publish();
     }
 
     /// <summary>
@@ -10420,9 +6554,7 @@ internal static class OscillatorCore
 
             var highest = highWindow.Max;
             var lowest = lowWindow.Min;
-            var range = highest - lowest;
-
-            output[i] = range != 0 ? (close[i] - lowest) / range * 100 : 0;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 
@@ -10436,44 +6568,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var smoothArray = pool.Rent(close.Length);
-        var cycleArray = pool.Rent(close.Length);
-
-        try
-        {
-            var smooth = smoothArray.AsSpan(0, close.Length);
-            var cycle_ = cycleArray.AsSpan(0, close.Length);
-
-            var alphaFactor = 1 - (0.5 * alpha);
-            var alphaFactorSq = alphaFactor * alphaFactor;
-            var oneMinusAlpha = 1 - alpha;
-            var oneMinusAlphaSq = oneMinusAlpha * oneMinusAlpha;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue1 = i >= 1 ? close[i - 1] : 0;
-                var prevValue2 = i >= 2 ? close[i - 2] : 0;
-                var prevValue3 = i >= 3 ? close[i - 3] : 0;
-                var prevSmooth1 = i >= 1 ? smooth[i - 1] : 0;
-                var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
-                var prevCycle1 = i >= 1 ? cycle_[i - 1] : 0;
-                var prevCycle2 = i >= 2 ? cycle_[i - 2] : 0;
-
-                smooth[i] = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-
-                cycle_[i] = (alphaFactorSq * (smooth[i] - (2 * prevSmooth1) + prevSmooth2)) +
-                           (2 * oneMinusAlpha * prevCycle1) - (oneMinusAlphaSq * prevCycle2);
-
-                output[i] = i < 7 ? (currentValue - (2 * prevValue1) + prevValue2) / 4 : cycle_[i];
-            }
-        }
-        finally
-        {
-            pool.Return(smoothArray);
-            pool.Return(cycleArray);
-        }
+        var window = new SimpleCycleIndicatorWindow(alpha);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -10501,7 +6597,7 @@ internal static class OscillatorCore
                 minMax.Add(close[i]);
                 var maxH = minMax.Max;
                 var minL = minMax.Min;
-                var ratio = maxH - minL != 0 ? (close[i] - minL) / (maxH - minL) : 0;
+                var ratio = FisherArithmetic.Position(close[i], minL, maxH);
                 var prevNValue = i >= 1 ? nValue[i - 1] : 0;
                 var prevFisher = i >= 1 ? output[i - 1] : 0;
 
@@ -10509,7 +6605,7 @@ internal static class OscillatorCore
                 var nVal = (0.33 * 2 * (ratio - 0.5)) + (0.67 * prevNValue);
                 nValue[i] = Math.Max(-0.999, Math.Min(0.999, nVal));
 
-                output[i] = (0.5 * Math.Log((1 + nValue[i]) / (1 - nValue[i]))) + (0.5 * prevFisher);
+                output[i] = FisherArithmetic.Transform(nValue[i]) + (0.5 * prevFisher);
             }
         }
         finally
@@ -10521,54 +6617,11 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Ehlers Voss Predictive Filter.
     /// </summary>
-    internal static void EhlersVossPredictiveFilter(ReadOnlySpan<double> close, Span<double> output, int length = 20, double predict = 3, double bw = 0.25)
+    internal static void EhlersVossPredictiveFilter(ReadOnlySpan<double> close, Span<double> output, int length = 20, double predict = 3, double bw = 0.25, bool filterOutput = false)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var order = (int)Math.Max(1, Math.Min(Math.Ceiling(3 * predict), int.MaxValue));
-        var f1 = Math.Cos(2 * Math.PI / length);
-        var g1 = Math.Cos(bw * 2 * Math.PI / length);
-        var s1 = g1 != 0 ? (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1) : 0;
-
-        var pool = ArrayPool<double>.Shared;
-        var filtArray = pool.Rent(close.Length);
-        var vossArray = pool.Rent(close.Length);
-
-        try
-        {
-            var filt = filtArray.AsSpan(0, close.Length);
-            var voss = vossArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevFilt1 = i >= 1 ? filt[i - 1] : 0;
-                var prevFilt2 = i >= 2 ? filt[i - 2] : 0;
-                var prevValue = i >= 2 ? close[i - 2] : 0;
-
-                filt[i] = i <= 5 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (f1 * (1 + s1) * prevFilt1) - (s1 * prevFilt2);
-
-                double sumC = 0;
-                for (var j = 0; j <= order - 1; j++)
-                {
-                    var idx = i - (order - j);
-                    var prevVoss = idx >= 0 ? voss[idx] : 0;
-                    sumC += (double)(j + 1) / order * prevVoss;
-                }
-
-                voss[i] = ((double)(3 + order) / 2 * filt[i]) - sumC;
-                output[i] = voss[i];
-            }
-        }
-        finally
-        {
-            pool.Return(filtArray);
-            pool.Return(vossArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new VossPredictiveWindow(length, predict, bw);
+        for (var i = 0; i < close.Length; i++) { var point = window.Next(close[i], true); output[i] = filterOutput ? point.Filter : point.Voss; }
     }
 
     /// <summary>
@@ -10577,50 +6630,18 @@ internal static class OscillatorCore
     internal static void EhlersSpearmanRankIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
         length = Math.Max(1, length);
-
+        var prices = new double[length];
+        var positions = new double[length];
         for (var i = 0; i < close.Length; i++)
         {
-            var priceArray = new double[length + 1];
-            var rankArray = new double[length + 1];
-
-            for (var j = 1; j <= length; j++)
+            for (var j = 0; j < length; j++)
             {
-                var idx = i - (j - 1);
-                priceArray[j] = idx >= 0 ? close[idx] : 0;
-                rankArray[j] = j;
+                var index = i - length + 1 + j;
+                prices[j] = index < 0 ? 0 : close[index];
             }
-
-            // Bubble sort to rank prices
-            for (var j = 1; j <= length; j++)
-            {
-                var count = length + 1 - j;
-                for (var k = 1; k <= length - count; k++)
-                {
-                    if (priceArray[k + 1] < priceArray[k])
-                    {
-                        var tempPrice = priceArray[k];
-                        var tempRank = rankArray[k];
-                        priceArray[k] = priceArray[k + 1];
-                        rankArray[k] = rankArray[k + 1];
-                        priceArray[k + 1] = tempPrice;
-                        rankArray[k + 1] = tempRank;
-                    }
-                }
-            }
-
-            double sum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                sum += Math.Pow(j - rankArray[j], 2);
-            }
-
-            var denom = length * (Math.Pow(length, 2) - 1);
-            output[i] = denom != 0 ? 2 * (0.5 - (1 - (6 * sum / denom))) : 0;
+            output[i] = ChronologicalSpearman.Compute(prices, positions);
         }
     }
 
@@ -10630,43 +6651,12 @@ internal static class OscillatorCore
     internal static void EhlersCorrelationCycleIndicator(ReadOnlySpan<double> close, Span<double> realOutput, Span<double> imagOutput, int length = 20)
     {
         if (realOutput.Length < close.Length || imagOutput.Length < close.Length)
-        {
             throw new ArgumentException("Output spans must be at least input length.");
-        }
-
-        length = Math.Max(1, length);
-
+        using var correlation = new EhlersCorrelationWindow(length, false);
         for (var i = 0; i < close.Length; i++)
         {
-            double sx = 0, sy = 0, nsy = 0, sxx = 0, syy = 0, nsyy = 0, sxy = 0, nsxy = 0;
-
-            for (var j = 1; j <= length; j++)
-            {
-                var idx = i - (j - 1);
-                var x = idx >= 0 ? close[idx] : 0;
-                var v = Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * ((double)(j - 1) / length)));
-                var y = Math.Cos(v);
-                var ny = -Math.Sin(v);
-                sx += x;
-                sy += y;
-                nsy += ny;
-                sxx += x * x;
-                syy += y * y;
-                nsyy += ny * ny;
-                sxy += x * y;
-                nsxy += x * ny;
-            }
-
-            var realDenom1 = (length * sxx) - (sx * sx);
-            var realDenom2 = (length * syy) - (sy * sy);
-            realOutput[i] = realDenom1 > 0 && realDenom2 > 0
-                ? ((length * sxy) - (sx * sy)) / Math.Sqrt(realDenom1 * realDenom2)
-                : 0;
-
-            var imagDenom2 = (length * nsyy) - (nsy * nsy);
-            imagOutput[i] = realDenom1 > 0 && imagDenom2 > 0
-                ? ((length * nsxy) - (sx * nsy)) / Math.Sqrt(realDenom1 * imagDenom2)
-                : 0;
+            var value = correlation.Next(close[i], true);
+            realOutput[i] = value.Real; imagOutput[i] = value.Imag;
         }
     }
 
@@ -10696,8 +6686,7 @@ internal static class OscillatorCore
             for (var i = 0; i < close.Length; i++)
             {
                 var prevAngle = i >= 1 ? output[i - 1] : 0;
-                var angle = imag[i] != 0 ? 90 + (Math.Atan(real[i] / imag[i]) * 180 / Math.PI) : 90;
-                angle = imag[i] > 0 ? angle - 180 : angle;
+                var angle = EhlersCorrelationPhase.Angle(real[i], imag[i]);
                 angle = prevAngle - angle < 270 && angle < prevAngle ? prevAngle : angle;
                 output[i] = angle;
             }
@@ -10714,33 +6703,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersTruncatedBandPassFilter(ReadOnlySpan<double> close, Span<double> output, int length1 = 20, int length2 = 10, double bw = 0.1)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var l1 = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length1)));
-        var g1 = Math.Cos(bw * 2 * Math.PI / length1);
-        var s1 = (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var trunArray = new double[length2 + 3];
-
-            for (var j = length2; j > 0; j--)
-            {
-                var idx1 = i - (j - 1);
-                var idx2 = i - (j + 1);
-                var prevValue1 = idx1 >= 0 ? close[idx1] : 0;
-                var prevValue2 = idx2 >= 0 ? close[idx2] : 0;
-                trunArray[j] = (0.5 * (1 - s1) * (prevValue1 - prevValue2)) + (l1 * (1 + s1) * trunArray[j + 1]) - (s1 * trunArray[j + 2]);
-            }
-
-            output[i] = trunArray[1];
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TruncatedBandPassWindow(length1, length2, bw);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -10748,30 +6713,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersSimpleDecycler(ReadOnlySpan<double> close, Span<double> output, int length = 125)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-            MovingAverageCore.EhlersHighPassFilterV1(close, hp, length, 1);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = close[i] - hp[i];
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new SimpleDecyclerWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Middle;
     }
 
     /// <summary>
@@ -10779,55 +6723,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersEvenBetterSineWaveIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 40, int length2 = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var piHp = Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length1));
-        var a1 = (1 - Math.Sin(piHp)) / Math.Cos(piHp);
-        var a2 = Math.Exp(Math.Max(-0.99, Math.Min(-0.01, -1.414 * Math.PI / length2)));
-        var b = 2 * a2 * Math.Cos(Math.Max(0.01, Math.Min(0.99, 1.414 * Math.PI / length2)));
-        var c2 = b;
-        var c3 = -a2 * a2;
-        var c1 = 1 - c2 - c3;
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-        var filtArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-            var filt = filtArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevHp = i >= 1 ? hp[i - 1] : 0;
-                var prevFilt1 = i >= 1 ? filt[i - 1] : 0;
-                var prevFilt2 = i >= 2 ? filt[i - 2] : 0;
-
-                var diff = currentValue - prevValue;
-                var minPastDiff = i >= 1 ? diff : 0;
-                hp[i] = ((0.5 * (1 + a1)) * minPastDiff) + (a1 * prevHp);
-
-                filt[i] = (c1 * ((hp[i] + prevHp) / 2)) + (c2 * prevFilt1) + (c3 * prevFilt2);
-
-                var wave = (filt[i] + prevFilt1 + prevFilt2) / 3;
-                var pwr = (filt[i] * filt[i] + prevFilt1 * prevFilt1 + prevFilt2 * prevFilt2) / 3;
-                output[i] = pwr > 0 ? wave / Math.Sqrt(pwr) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-            pool.Return(filtArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var kernel = new Streaming.EvenBetterSineWaveKernel(length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = kernel.Next(close[i], true);
     }
 
     /// <summary>
@@ -10855,19 +6753,7 @@ internal static class OscillatorCore
                 var currentAngle = angle[i];
                 var prevAngle = i >= 1 ? angle[i - 1] : 0;
 
-                double state;
-                if (Math.Abs(currentAngle - prevAngle) < 9 && currentAngle < 0)
-                {
-                    state = -1;
-                }
-                else if (Math.Abs(currentAngle - prevAngle) < 9 && currentAngle >= 0)
-                {
-                    state = 1;
-                }
-                else
-                {
-                    state = 0;
-                }
+                var state = EhlersCorrelationPhase.MarketState(currentAngle, prevAngle);
                 output[i] = state;
             }
         }
@@ -10882,142 +6768,28 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersInstantaneousTrendlineV2(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.07)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue1 = i >= 1 ? close[i - 1] : 0;
-            var prevValue2 = i >= 2 ? close[i - 2] : 0;
-            var prevIt1 = i >= 1 ? output[i - 1] : 0;
-            var prevIt2 = i >= 2 ? output[i - 2] : 0;
-
-            var it = i < 7
-                ? (currentValue + (2 * prevValue1) + prevValue2) / 4
-                : (((alpha - ((alpha * alpha) / 4)) * currentValue) + ((0.5 * alpha * alpha) * prevValue1) -
-                   (((alpha - ((3 * alpha * alpha) / 4)) * prevValue2)) + ((2 * (1 - alpha)) * prevIt1) -
-                   (((1 - alpha) * (1 - alpha)) * prevIt2));
-
-            output[i] = it;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new InstantaneousTrendWindow(alpha); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
 
     /// <summary>
     /// Computes Ehlers CyberCycle.
     /// </summary>
-    internal static void EhlersCyberCycleOscillator(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.07)
+    internal static void EhlersCyberCycleOscillator(ReadOnlySpan<double> close, Span<double> output, double alpha = .07)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smoothArray = pool.Rent(close.Length);
-        var cycleArray = pool.Rent(close.Length);
-
-        try
-        {
-            var smooth = smoothArray.AsSpan(0, close.Length);
-            var cycle = cycleArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue1 = i >= 1 ? close[i - 1] : 0;
-                var prevValue2 = i >= 2 ? close[i - 2] : 0;
-                var prevValue3 = i >= 3 ? close[i - 3] : 0;
-                var prevSmooth1 = i >= 1 ? smooth[i - 1] : 0;
-                var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
-                var prevCycle1 = i >= 1 ? cycle[i - 1] : 0;
-                var prevCycle2 = i >= 2 ? cycle[i - 2] : 0;
-
-                smooth[i] = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-
-                var cycleVal = i < 7
-                    ? (currentValue - (2 * prevValue1) + prevValue2) / 4
-                    : ((1 - (0.5 * alpha)) * (1 - (0.5 * alpha)) * (smooth[i] - (2 * prevSmooth1) + prevSmooth2)) +
-                      (2 * (1 - alpha) * prevCycle1) - ((1 - alpha) * (1 - alpha) * prevCycle2);
-
-                cycle[i] = cycleVal;
-                output[i] = cycleVal;
-            }
-        }
-        finally
-        {
-            pool.Return(smoothArray);
-            pool.Return(cycleArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new CyberCycleWindow(alpha);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
+
 
     /// <summary>
     /// Computes Ehlers Band Pass Filter V1.
     /// </summary>
     internal static void EhlersBandPassFilterV1(ReadOnlySpan<double> close, Span<double> output, int length = 20, double bw = 0.3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var twoPiPrd1 = Math.Max(0.01, Math.Min(0.99, 0.25 * bw * 2 * Math.PI / length));
-        var twoPiPrd2 = Math.Max(0.01, Math.Min(0.99, 1.5 * bw * 2 * Math.PI / length));
-        var beta = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length)));
-        var gamma = 1 / Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * bw / length)));
-        var alpha1 = gamma - Math.Sqrt((gamma * gamma) - 1);
-        var alpha2 = (Math.Cos(twoPiPrd1) + Math.Sin(twoPiPrd1) - 1) / Math.Cos(twoPiPrd1);
-        var alpha3 = (Math.Cos(twoPiPrd2) + Math.Sin(twoPiPrd2) - 1) / Math.Cos(twoPiPrd2);
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-        var bpArray = pool.Rent(close.Length);
-        var peakArray = pool.Rent(close.Length);
-        var signalArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-            var bp = bpArray.AsSpan(0, close.Length);
-            var peak = peakArray.AsSpan(0, close.Length);
-            var signal = signalArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevHp1 = i >= 1 ? hp[i - 1] : 0;
-                var prevHp2 = i >= 2 ? hp[i - 2] : 0;
-                var prevBp1 = i >= 1 ? bp[i - 1] : 0;
-                var prevBp2 = i >= 2 ? bp[i - 2] : 0;
-
-                var diff = currentValue - prevValue;
-                var minPastDiff = i >= 1 ? diff : 0;
-                hp[i] = ((1 + (alpha2 / 2)) * minPastDiff) + ((1 - alpha2) * prevHp1);
-
-                bp[i] = i > 2 ? (0.5 * (1 - alpha1) * (hp[i] - prevHp2)) + (beta * (1 + alpha1) * prevBp1) - (alpha1 * prevBp2) : 0;
-
-                var prevPeak = i >= 1 ? peak[i - 1] : 0;
-                peak[i] = Math.Max(0.991 * prevPeak, Math.Abs(bp[i]));
-
-                var prevSig = i >= 1 ? signal[i - 1] : 0;
-                signal[i] = peak[i] != 0 ? bp[i] / peak[i] : 0;
-
-                var prevTrigger = i >= 1 ? output[i - 1] : 0;
-                output[i] = ((1 + (alpha3 / 2)) * (signal[i] - prevSig)) + ((1 - alpha3) * prevTrigger);
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-            pool.Return(bpArray);
-            pool.Return(peakArray);
-            pool.Return(signalArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ClampedBandPassWindow(length, bw, 0); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>
@@ -11025,26 +6797,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersBandPassFilterV2(ReadOnlySpan<double> close, Span<double> output, int length = 20, double bw = 0.3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var l1 = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length)));
-        var g1 = Math.Cos(Math.Max(0.01, Math.Min(0.99, bw * 2 * Math.PI / length)));
-        var s1 = (1 / g1) - Math.Sqrt(1 / (g1 * g1) - 1);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue = i >= 2 ? close[i - 2] : 0;
-            var prevBp1 = i >= 1 ? output[i - 1] : 0;
-            var prevBp2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ClampedBandPassWindow(length, bw, 1); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>
@@ -11052,28 +6806,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersCycleBandPassFilter(ReadOnlySpan<double> close, Span<double> output, int length = 20, double delta = 0.1)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var beta = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length)));
-        var gamma = 1 / Math.Cos(Math.Max(0.01, Math.Min(0.99, 4 * Math.PI * delta / length)));
-        var alpha = gamma - Math.Sqrt((gamma * gamma) - 1);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue = i >= 2 ? close[i - 2] : 0;
-            var prevBp1 = i >= 1 ? output[i - 1] : 0;
-            var prevBp2 = i >= 2 ? output[i - 2] : 0;
-
-            var diff = currentValue - prevValue;
-            var minPastDiff = i >= 2 ? diff : 0;
-            output[i] = (0.5 * (1 - alpha) * minPastDiff) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ClampedBandPassWindow(length, delta, 2); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>
@@ -11081,39 +6815,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersCycleAmplitude(ReadOnlySpan<double> close, Span<double> output, int length = 20, double delta = 0.1)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var lbLength = (int)Math.Ceiling((double)length / 4);
-
-        var pool = ArrayPool<double>.Shared;
-        var bpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var bp = bpArray.AsSpan(0, close.Length);
-            EhlersCycleBandPassFilter(close, bp, length, delta);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                double power = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var prevBp1 = i >= j ? bp[i - j] : 0;
-                    var prevBp2 = i >= j + lbLength ? bp[i - (j + lbLength)] : 0;
-                    power += (prevBp1 * prevBp1) + (prevBp2 * prevBp2);
-                }
-
-                output[i] = 2 * 1.414 * Math.Sqrt(power / length);
-            }
-        }
-        finally
-        {
-            pool.Return(bpArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new CycleAmplitudeWindow(length, delta, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -11127,45 +6831,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var sqrt2 = Math.Sqrt(2);
-        var a1 = Math.Exp(-sqrt2 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(sqrt2 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-                var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-                var prevHp = i >= 1 ? hp[i - 1] : 0;
-
-                var diff = currentValue - prevValue;
-                var minPastDiff = i >= 1 ? diff : 0;
-                hp[i] = ((1 - (alpha1 / 2)) * minPastDiff) + ((1 - alpha1) * prevHp);
-
-                output[i] = (c1 * ((hp[i] + prevHp) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-        }
+        var window = new HpLpRoofingWindow(length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Roof;
     }
 
     /// <summary>
@@ -11174,49 +6841,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersEarlyOnsetTrendIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 30, int length2 = 100, double k = 0.85)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-        var ssfArray = pool.Rent(close.Length);
-        var peakArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-            var ssf = ssfArray.AsSpan(0, close.Length);
-            var peak = peakArray.AsSpan(0, close.Length);
-
-            // Apply high-pass filter
-            MovingAverageCore.EhlersHighPassFilterV1(close, hp, length2, 1);
-
-            // Apply super smoother to HP output
-            MovingAverageCore.Ehlers2PoleSuperSmootherFilterV2(hp, ssf, length1);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var filter = ssf[i];
-
-                var prevPeak = i >= 1 ? peak[i - 1] : 0;
-                peak[i] = Math.Abs(filter) > 0.991 * prevPeak ? Math.Abs(filter) : 0.991 * prevPeak;
-
-                var ratio = peak[i] != 0 ? filter / peak[i] : 0;
-                output[i] = (k * ratio) + 1 != 0 ? (ratio + k) / ((k * ratio) + 1) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-            pool.Return(ssfArray);
-            pool.Return(peakArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EarlyOnsetWindow(length1, length2, k);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
+
 
     /// <summary>
     /// Computes Ehlers Detrended Leading Indicator using high and low prices.
@@ -11344,36 +6973,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.");
         }
 
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-
-        var pool = ArrayPool<double>.Shared;
-        var rfArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rf = rfArray.AsSpan(0, close.Length);
-
-            // Apply HP-LP roofing filter first
-            EhlersHpLpRoofingFilter(close, rf, length1, length2);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentRf = rf[i];
-                var prevRf = i >= 1 ? rf[i - 1] : 0;
-                var prevZmr1 = i >= 1 ? output[i - 1] : 0;
-
-                output[i] = ((1 - (alpha1 / 2)) * (currentRf - prevRf)) + ((1 - alpha1) * prevZmr1);
-            }
-        }
-        finally
-        {
-            pool.Return(rfArray);
-        }
+        var window = new HpLpRoofingWindow(length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Zero;
     }
 
     /// <summary>
@@ -11381,86 +6982,22 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersSuperPassbandFilter(ReadOnlySpan<double> close, Span<double> output, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.");
-        }
-
-        fastLength = Math.Max(1, fastLength);
-        slowLength = Math.Max(1, slowLength);
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var a1 = Math.Max(0.01, Math.Min(0.99, (double)length1 / fastLength));
-        var a2 = Math.Max(0.01, Math.Min(0.99, (double)length1 / slowLength));
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue1 = i >= 1 ? close[i - 1] : 0;
-            var prevEspf1 = i >= 1 ? output[i - 1] : 0;
-            var prevEspf2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = ((a1 - a2) * currentValue) + (((a2 * (1 - a1)) - (a1 * (1 - a2))) * prevValue1) +
-                        ((1 - a1 + (1 - a2)) * prevEspf1) - ((1 - a1) * (1 - a2) * prevEspf2);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        var window = new SuperPassbandWindow(fastLength, slowLength, length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
+
 
     /// <summary>
     /// Calculates Ehlers Roofing Filter V2.
     /// </summary>
     internal static void EhlersRoofingFilterV2(ReadOnlySpan<double> close, Span<double> output, int upperLength = 80, int lowerLength = 40)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.");
-        }
-
-        upperLength = Math.Max(1, upperLength);
-        lowerLength = Math.Max(1, lowerLength);
-
-        var sqrt2 = Math.Sqrt(2);
-        var alphaArg = Math.Min(sqrt2 * Math.PI / upperLength, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a1 = Math.Exp(-sqrt2 * Math.PI / lowerLength);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(sqrt2 * Math.PI / lowerLength, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue1 = i >= 1 ? close[i - 1] : 0;
-                var prevValue2 = i >= 2 ? close[i - 2] : 0;
-                var prevHp1 = i >= 1 ? hp[i - 1] : 0;
-                var prevHp2 = i >= 2 ? hp[i - 2] : 0;
-                var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-                var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-                var test1 = Math.Pow((1 - alpha1) / 2, 2);
-                var test2 = currentValue - (2 * prevValue1) + prevValue2;
-                var v1 = test1 * test2;
-                var v2 = 2 * (1 - alpha1) * prevHp1;
-                var v3 = Math.Pow(1 - alpha1, 2) * prevHp2;
-
-                hp[i] = v1 + v2 - v3;
-                output[i] = (c1 * ((hp[i] + prevHp1) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        var filter = new EhlersRoofingFilterV2Kernel(upperLength, lowerLength);
+        for (var i = 0; i < close.Length; i++) output[i] = filter.Next(close[i], true);
     }
+
 
     /// <summary>
     /// Calculates Ehlers Impulse Reaction.
@@ -11472,35 +7009,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.");
         }
 
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var c2 = 2 * q * Math.Cos(2 * Math.PI / length2);
-        var c3 = -q * q;
-        var c1 = (1 + c3) / 2;
-
-        var pool = ArrayPool<double>.Shared;
-        var reactionArray = pool.Rent(close.Length);
-
-        try
-        {
-            var reaction = reactionArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var priorValue = i >= length1 ? close[i - length1] : 0;
-                var prevReaction1 = i >= 1 ? reaction[i - 1] : 0;
-                var prevReaction2 = i >= 2 ? reaction[i - 2] : 0;
-
-                reaction[i] = (c1 * (currentValue - priorValue)) + (c2 * prevReaction1) + (c3 * prevReaction2);
-                output[i] = currentValue != 0 ? 100 * reaction[i] / currentValue : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(reactionArray);
-        }
+        var window = new ImpulseReactionWindow(length1, length2, q);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -11513,80 +7023,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.");
         }
 
-        alpha = Math.Max(0.01, Math.Min(0.99, alpha));
-        var cc = 1 - alpha;
-
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(close.Length);
-        var re1Array = pool.Rent(close.Length);
-        var re2Array = pool.Rent(close.Length);
-        var re3Array = pool.Rent(close.Length);
-        var re4Array = pool.Rent(close.Length);
-        var re5Array = pool.Rent(close.Length);
-        var re6Array = pool.Rent(close.Length);
-        var re7Array = pool.Rent(close.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, close.Length);
-            var re1 = re1Array.AsSpan(0, close.Length);
-            var re2 = re2Array.AsSpan(0, close.Length);
-            var re3 = re3Array.AsSpan(0, close.Length);
-            var re4 = re4Array.AsSpan(0, close.Length);
-            var re5 = re5Array.AsSpan(0, close.Length);
-            var re6 = re6Array.AsSpan(0, close.Length);
-            var re7 = re7Array.AsSpan(0, close.Length);
-
-            var cc2 = cc * cc;
-            var cc4 = cc2 * cc2;
-            var cc8 = cc4 * cc4;
-            var cc16 = cc8 * cc8;
-            var cc32 = cc16 * cc16;
-            var cc64 = cc32 * cc32;
-            var cc128 = cc64 * cc64;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevEma = i >= 1 ? ema[i - 1] : 0;
-                ema[i] = (alpha * currentValue) + (cc * prevEma);
-
-                var prevRe1 = i >= 1 ? re1[i - 1] : 0;
-                re1[i] = (cc * ema[i]) + prevEma;
-
-                var prevRe2 = i >= 1 ? re2[i - 1] : 0;
-                re2[i] = (cc2 * re1[i]) + prevRe1;
-
-                var prevRe3 = i >= 1 ? re3[i - 1] : 0;
-                re3[i] = (cc4 * re2[i]) + prevRe2;
-
-                var prevRe4 = i >= 1 ? re4[i - 1] : 0;
-                re4[i] = (cc8 * re3[i]) + prevRe3;
-
-                var prevRe5 = i >= 1 ? re5[i - 1] : 0;
-                re5[i] = (cc16 * re4[i]) + prevRe4;
-
-                var prevRe6 = i >= 1 ? re6[i - 1] : 0;
-                re6[i] = (cc32 * re5[i]) + prevRe5;
-
-                var prevRe7 = i >= 1 ? re7[i - 1] : 0;
-                re7[i] = (cc64 * re6[i]) + prevRe6;
-
-                var re8 = (cc128 * re7[i]) + prevRe7;
-                output[i] = ema[i] - (alpha * re8);
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(re1Array);
-            pool.Return(re2Array);
-            pool.Return(re3Array);
-            pool.Return(re4Array);
-            pool.Return(re5Array);
-            pool.Return(re6Array);
-            pool.Return(re7Array);
-        }
+        var window = new ReverseEmaWindow(alpha);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -11722,92 +7160,21 @@ internal static class OscillatorCore
     /// <summary>
     /// Calculates Ehlers Stochastic Cyber Cycle.
     /// </summary>
-    internal static void EhlersStochasticCyberCycle(ReadOnlySpan<double> close, Span<double> output, int length = 14, double alpha = 0.7)
+    internal static void EhlersStochasticCyberCycle(ReadOnlySpan<double> close, Span<double> output, int length = 14, double alpha = .7)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.");
-        }
-
-        length = Math.Max(1, length);
-        alpha = Math.Max(0.01, Math.Min(0.99, alpha));
-
-        var pool = ArrayPool<double>.Shared;
-        var cyberCycleArray = pool.Rent(close.Length);
-        var stochArray = pool.Rent(close.Length);
-
-        try
-        {
-            var cyberCycle = cyberCycleArray.AsSpan(0, close.Length);
-            var stoch = stochArray.AsSpan(0, close.Length);
-
-            // First compute Ehlers CyberCycle
-            MovingAverageCore.EhlersCyberCycle(close, cyberCycle, alpha);
-
-            // Compute stochastic of cyber cycle
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Rolling max/min over length period
-                var maxCycle = double.MinValue;
-                var minCycle = double.MaxValue;
-                var lookback = Math.Min(i + 1, length);
-
-                for (var j = 0; j < lookback; j++)
-                {
-                    var idx = i - j;
-                    var val = cyberCycle[idx];
-                    if (val > maxCycle) maxCycle = val;
-                    if (val < minCycle) minCycle = val;
-                }
-
-                var range = maxCycle - minCycle;
-                var rawStoch = range != 0 ? (cyberCycle[i] - minCycle) / range : 0;
-                stoch[i] = Math.Max(0, Math.Min(1, rawStoch));
-            }
-
-            // Apply weighted smoothing and scale to -1 to 1
-            for (var i = 0; i < close.Length; i++)
-            {
-                var prevStoch1 = i >= 1 ? stoch[i - 1] : 0;
-                var prevStoch2 = i >= 2 ? stoch[i - 2] : 0;
-                var prevStoch3 = i >= 3 ? stoch[i - 3] : 0;
-
-                var smoothed = ((4 * stoch[i]) + (3 * prevStoch1) + (2 * prevStoch2) + prevStoch3) / 10;
-                var stochCC = 2 * (smoothed - 0.5);
-                output[i] = Math.Max(-1, Math.Min(1, stochCC));
-            }
-        }
-        finally
-        {
-            pool.Return(cyberCycleArray);
-            pool.Return(stochArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new StochasticCyberWindow(length, alpha);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
+
 
     /// <summary>
     /// Calculates Ehlers Center of Gravity Oscillator.
     /// </summary>
     internal static void EhlersCenterofGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            double num = 0, denom = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = i >= j ? close[i - j] : 0;
-                num += (1 + j) * prevValue;
-                denom += prevValue;
-            }
-
-            output[i] = denom != 0 ? (-num / denom) + ((double)(length + 1) / 2) : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new CenterGravityWindow(length,close.Length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -11815,58 +7182,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersReflexIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var pool = ArrayPool<double>.Shared;
-        var filterArray = pool.Rent(close.Length);
-        var msArray = pool.Rent(close.Length);
-
-        try
-        {
-            var filter = filterArray.AsSpan(0, close.Length);
-            var ms = msArray.AsSpan(0, close.Length);
-
-            var period = 0.5 * length;
-            var a1 = Math.Exp(-MathHelper.Sqrt2 * Math.PI / period);
-            var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
-            var c2 = b1;
-            var c3 = -a1 * a1;
-            var c1 = 1 - c2 - c3;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevFilter1 = i >= 1 ? filter[i - 1] : 0;
-                var prevFilter2 = i >= 2 ? filter[i - 2] : 0;
-                var priorFilter = i >= length ? filter[i - length] : 0;
-                var prevMs = i >= 1 ? ms[i - 1] : 0;
-
-                filter[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-
-                var slope = length != 0 ? (priorFilter - filter[i]) / length : 0;
-                double sum = 0;
-                for (var j = 1; j <= length; j++)
-                {
-                    var prevFilterCount = i >= j ? filter[i - j] : 0;
-                    sum += filter[i] + (j * slope) - prevFilterCount;
-                }
-                sum /= length;
-
-                ms[i] = (0.04 * sum * sum) + (0.96 * prevMs);
-                output[i] = ms[i] > 0 ? sum / Math.Sqrt(ms[i]) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(filterArray);
-            pool.Return(msArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TrendflexWindow(length, reflex: true); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -11874,56 +7191,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersTrendflexIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var pool = ArrayPool<double>.Shared;
-        var filterArray = pool.Rent(close.Length);
-        var msArray = pool.Rent(close.Length);
-
-        try
-        {
-            var filter = filterArray.AsSpan(0, close.Length);
-            var ms = msArray.AsSpan(0, close.Length);
-
-            var period = 0.5 * length;
-            var a1 = Math.Exp(-MathHelper.Sqrt2 * Math.PI / period);
-            var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
-            var c2 = b1;
-            var c3 = -a1 * a1;
-            var c1 = 1 - c2 - c3;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevFilter1 = i >= 1 ? filter[i - 1] : 0;
-                var prevFilter2 = i >= 2 ? filter[i - 2] : 0;
-                var prevMs = i >= 1 ? ms[i - 1] : 0;
-
-                filter[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-
-                double sum = 0;
-                for (var j = 1; j <= length; j++)
-                {
-                    var prevFilterCount = i >= j ? filter[i - j] : 0;
-                    sum += filter[i] - prevFilterCount;
-                }
-                sum /= length;
-
-                ms[i] = (0.04 * sum * sum) + (0.96 * prevMs);
-                output[i] = ms[i] > 0 ? sum / Math.Sqrt(ms[i]) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(filterArray);
-            pool.Return(msArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TrendflexWindow(length); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -11932,131 +7201,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void JmaRsxClone(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var pool = ArrayPool<double>.Shared;
-        var f8Array = pool.Rent(close.Length);
-        var f28Array = pool.Rent(close.Length);
-        var f30Array = pool.Rent(close.Length);
-        var f38Array = pool.Rent(close.Length);
-        var f40Array = pool.Rent(close.Length);
-        var f48Array = pool.Rent(close.Length);
-        var f50Array = pool.Rent(close.Length);
-        var f58Array = pool.Rent(close.Length);
-        var f60Array = pool.Rent(close.Length);
-        var f68Array = pool.Rent(close.Length);
-        var f70Array = pool.Rent(close.Length);
-        var f78Array = pool.Rent(close.Length);
-        var f80Array = pool.Rent(close.Length);
-        var f88Array = pool.Rent(close.Length);
-        var f90Array = pool.Rent(close.Length);
-
-        try
-        {
-            var f8 = f8Array.AsSpan(0, close.Length);
-            var f28 = f28Array.AsSpan(0, close.Length);
-            var f30 = f30Array.AsSpan(0, close.Length);
-            var f38 = f38Array.AsSpan(0, close.Length);
-            var f40 = f40Array.AsSpan(0, close.Length);
-            var f48 = f48Array.AsSpan(0, close.Length);
-            var f50 = f50Array.AsSpan(0, close.Length);
-            var f58 = f58Array.AsSpan(0, close.Length);
-            var f60 = f60Array.AsSpan(0, close.Length);
-            var f68 = f68Array.AsSpan(0, close.Length);
-            var f70 = f70Array.AsSpan(0, close.Length);
-            var f78 = f78Array.AsSpan(0, close.Length);
-            var f80 = f80Array.AsSpan(0, close.Length);
-            var f88 = f88Array.AsSpan(0, close.Length);
-            var f90 = f90Array.AsSpan(0, close.Length);
-
-            var f18 = (double)3 / (length + 2);
-            var f20 = 1 - f18;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevF8 = i >= 1 ? f8[i - 1] : 0;
-                f8[i] = 100 * currentValue;
-
-                var f10 = prevF8;
-                var v8 = f8[i] - f10;
-
-                var prevF28 = i >= 1 ? f28[i - 1] : 0;
-                f28[i] = (f20 * prevF28) + (f18 * v8);
-
-                var prevF30 = i >= 1 ? f30[i - 1] : 0;
-                f30[i] = (f18 * f28[i]) + (f20 * prevF30);
-
-                var vC = (f28[i] * 1.5) - (f30[i] * 0.5);
-                var prevF38 = i >= 1 ? f38[i - 1] : 0;
-                f38[i] = (f20 * prevF38) + (f18 * vC);
-
-                var prevF40 = i >= 1 ? f40[i - 1] : 0;
-                f40[i] = (f18 * f38[i]) + (f20 * prevF40);
-
-                var v10 = (f38[i] * 1.5) - (f40[i] * 0.5);
-                var prevF48 = i >= 1 ? f48[i - 1] : 0;
-                f48[i] = (f20 * prevF48) + (f18 * v10);
-
-                var prevF50 = i >= 1 ? f50[i - 1] : 0;
-                f50[i] = (f18 * f48[i]) + (f20 * prevF50);
-
-                var v14 = (f48[i] * 1.5) - (f50[i] * 0.5);
-                var prevF58 = i >= 1 ? f58[i - 1] : 0;
-                f58[i] = (f20 * prevF58) + (f18 * Math.Abs(v8));
-
-                var prevF60 = i >= 1 ? f60[i - 1] : 0;
-                f60[i] = (f18 * f58[i]) + (f20 * prevF60);
-
-                var v18 = (f58[i] * 1.5) - (f60[i] * 0.5);
-                var prevF68 = i >= 1 ? f68[i - 1] : 0;
-                f68[i] = (f20 * prevF68) + (f18 * v18);
-
-                var prevF70 = i >= 1 ? f70[i - 1] : 0;
-                f70[i] = (f18 * f68[i]) + (f20 * prevF70);
-
-                var v1C = (f68[i] * 1.5) - (f70[i] * 0.5);
-                var prevF78 = i >= 1 ? f78[i - 1] : 0;
-                f78[i] = (f20 * prevF78) + (f18 * v1C);
-
-                var prevF80 = i >= 1 ? f80[i - 1] : 0;
-                f80[i] = (f18 * f78[i]) + (f20 * prevF80);
-
-                var v20 = (f78[i] * 1.5) - (f80[i] * 0.5);
-                var prevF88 = i >= 1 ? f88[i - 1] : 0;
-                var prevF90 = i >= 1 ? f90[i - 1] : 0;
-                f90[i] = prevF90 == 0 ? 1 : prevF88 <= prevF90 ? prevF88 + 1 : prevF90 + 1;
-
-                f88[i] = prevF90 == 0 && length - 1 >= 5 ? length - 1 : 5;
-                double f0 = f88[i] >= f90[i] && f8[i] != f10 ? 1 : 0;
-                var f90Val = f88[i] == f90[i] && f0 == 0 ? 0 : f90[i];
-                var v4 = f88[i] < f90Val && v20 > 0 ? Math.Max(0, Math.Min(100, ((v14 / v20) + 1) * 50)) : 50;
-                output[i] = Math.Max(0, Math.Min(100, v4));
-            }
-        }
-        finally
-        {
-            pool.Return(f8Array);
-            pool.Return(f28Array);
-            pool.Return(f30Array);
-            pool.Return(f38Array);
-            pool.Return(f40Array);
-            pool.Return(f48Array);
-            pool.Return(f50Array);
-            pool.Return(f58Array);
-            pool.Return(f60Array);
-            pool.Return(f68Array);
-            pool.Return(f70Array);
-            pool.Return(f78Array);
-            pool.Return(f80Array);
-            pool.Return(f88Array);
-            pool.Return(f90Array);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new RsxWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     #endregion
@@ -12144,23 +7291,9 @@ internal static class OscillatorCore
 
         if (input.Length == 0) return;
 
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            RelativeStrengthIndex(input, rsi, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Fold RSI at 50 - values above 50 stay, values below 50 are mirrored
-                output[i] = rsi[i] >= 50 ? rsi[i] : 100 - rsi[i];
-            }
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-        }
+        using var rsi = new PriceRsiWindow(MovingAvgType.ExponentialMovingAverage, length, input.Length);
+        using var sum = new FoldedRsiSum(length);
+        for (var i = 0; i < input.Length; i++) output[i] = sum.Next(rsi.Next(input[i], true), true);
     }
 
     /// <summary>
@@ -12194,105 +7327,8 @@ internal static class OscillatorCore
     /// Computes Connors RSI - combination of RSI, up/down streak, and percent rank.
     /// </summary>
     internal static void ConnorsRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output,
-        int rsiLength = 3, int streakLength = 2, int rankLength = 100)
-    {
-        // This ranks the rate of change over a growing window against a growing denominator.
-        // CalculateConnorsRelativeStrengthIndex ranks it over a fixed length3 window against a fixed length3
-        // denominator, and seeds the streak from a zero previous value rather than from no streak at all, so
-        // the two do not agree. IndicatorCompute.ComputeConnorsRsiFast is the batch-faithful one; prefer it.
-
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (input.Length == 0) return;
-
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-        var streakArray = pool.Rent(input.Length);
-        var streakRsiArray = pool.Rent(input.Length);
-        var percentRankArray = pool.Rent(input.Length);
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            var streak = streakArray.AsSpan(0, input.Length);
-            var streakRsi = streakRsiArray.AsSpan(0, input.Length);
-            var percentRank = percentRankArray.AsSpan(0, input.Length);
-
-            // Calculate standard RSI
-            RelativeStrengthIndex(input, rsi, rsiLength);
-
-            // Calculate streak (consecutive up/down days)
-            double currentStreak = 0;
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i == 0)
-                {
-                    currentStreak = 0;
-                }
-                else
-                {
-                    var change = input[i] - input[i - 1];
-                    if (change > 0)
-                    {
-                        currentStreak = currentStreak > 0 ? currentStreak + 1 : 1;
-                    }
-                    else if (change < 0)
-                    {
-                        currentStreak = currentStreak < 0 ? currentStreak - 1 : -1;
-                    }
-                    else
-                    {
-                        currentStreak = 0;
-                    }
-                }
-                streak[i] = currentStreak;
-            }
-
-            // Calculate RSI of streak
-            RelativeStrengthIndex(streak, streakRsi, streakLength);
-
-            // Calculate percent rank of ROC
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i == 0)
-                {
-                    percentRank[i] = 0;
-                    continue;
-                }
-
-                var currentRoc = input[i - 1] != 0 ? (input[i] - input[i - 1]) / input[i - 1] * 100 : 0;
-                var count = 0;
-                var lookback = Math.Min(i, rankLength);
-
-                for (var j = 1; j <= lookback; j++)
-                {
-                    // The bounds test has to come first: && evaluates left to right, so reading the element
-                    // before checking that it exists threw on every bar inside the rank window.
-                    var prevRoc = i - j > 0 && input[i - j - 1] != 0
-                        ? (input[i - j] - input[i - j - 1]) / input[i - j - 1] * 100
-                        : 0;
-                    if (prevRoc < currentRoc) count++;
-                }
-
-                percentRank[i] = lookback > 0 ? (double)count / lookback * 100 : 0;
-            }
-
-            // Connors RSI = (RSI + StreakRSI + PercentRank) / 3
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (rsi[i] + streakRsi[i] + percentRank[i]) / 3;
-            }
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-            pool.Return(streakArray);
-            pool.Return(streakRsiArray);
-            pool.Return(percentRankArray);
-        }
-    }
+        int rsiLength = 3, int streakLength = 2, int rankLength = 100) =>
+        ConnorsRsi(input, output, rsiLength, streakLength, rankLength);
 
     /// <summary>
     /// Computes Stochastic RSI - Stochastic oscillator applied to RSI values.
@@ -12357,73 +7393,9 @@ internal static class OscillatorCore
     internal static void StochasticMomentumIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
         ReadOnlySpan<double> close, Span<double> output, int length = 13, int smoothLength1 = 25, int smoothLength2 = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0) return;
-
-        var pool = ArrayPool<double>.Shared;
-        var hlDiffArray = pool.Rent(close.Length);
-        var midRangeArray = pool.Rent(close.Length);
-        var emaHlArray = pool.Rent(close.Length);
-        var emaMidArray = pool.Rent(close.Length);
-        var emaHl2Array = pool.Rent(close.Length);
-        var emaMid2Array = pool.Rent(close.Length);
-        try
-        {
-            var hlDiff = hlDiffArray.AsSpan(0, close.Length);
-            var midRange = midRangeArray.AsSpan(0, close.Length);
-            var emaHl = emaHlArray.AsSpan(0, close.Length);
-            var emaMid = emaMidArray.AsSpan(0, close.Length);
-            var emaHl2 = emaHl2Array.AsSpan(0, close.Length);
-            var emaMid2 = emaMid2Array.AsSpan(0, close.Length);
-
-            // Calculate highest high and lowest low
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    hlDiff[i] = 0;
-                    midRange[i] = 0;
-                    continue;
-                }
-
-                double hh = double.MinValue;
-                double ll = double.MaxValue;
-                for (var j = 0; j < length; j++)
-                {
-                    if (high[i - j] > hh) hh = high[i - j];
-                    if (low[i - j] < ll) ll = low[i - j];
-                }
-
-                hlDiff[i] = hh - ll;
-                midRange[i] = close[i] - ((hh + ll) / 2);
-            }
-
-            // Double EMA smoothing
-            MovingAverageCore.ExponentialMovingAverage(hlDiff, emaHl, smoothLength1);
-            MovingAverageCore.ExponentialMovingAverage(midRange, emaMid, smoothLength1);
-            MovingAverageCore.ExponentialMovingAverage(emaHl, emaHl2, smoothLength2);
-            MovingAverageCore.ExponentialMovingAverage(emaMid, emaMid2, smoothLength2);
-
-            // SMI = 100 * emaMid2 / (emaHl2 / 2)
-            for (var i = 0; i < close.Length; i++)
-            {
-                var halfRange = emaHl2[i] / 2;
-                output[i] = halfRange != 0 ? 100 * emaMid2[i] / halfRange : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(hlDiffArray);
-            pool.Return(midRangeArray);
-            pool.Return(emaHlArray);
-            pool.Return(emaMidArray);
-            pool.Return(emaHl2Array);
-            pool.Return(emaMid2Array);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new StochasticMomentumWindow(MovingAvgType.ExponentialMovingAverage, length, smoothLength1, smoothLength2, 1);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true).Line;
     }
 
     #endregion
@@ -12439,35 +7411,9 @@ internal static class OscillatorCore
     /// <param name="output">Output span for thermometer values.</param>
     internal static void ElderMarketThermometer(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (high.Length == 0) return;
-
-        output[0] = 0;
-        for (var i = 1; i < high.Length; i++)
-        {
-            var currentHigh = high[i];
-            var currentLow = low[i];
-            var prevHigh = high[i - 1];
-            var prevLow = low[i - 1];
-
-            // EMT = 0 if inside bar, else max of |high - prevHigh| or |prevLow - low|
-            if (currentHigh < prevHigh && currentLow > prevLow)
-            {
-                output[i] = 0;
-            }
-            else if (currentHigh - prevHigh > prevLow - currentLow)
-            {
-                output[i] = Math.Abs(currentHigh - prevHigh);
-            }
-            else
-            {
-                output[i] = Math.Abs(prevLow - currentLow);
-            }
-        }
+        if (low.Length != high.Length || output.Length < high.Length) throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        for (var i = 0; i < high.Length; i++)
+            output[i] = ElderThermometerWindow.Publish(ElderThermometerWindow.Expansion(high[i], low[i], i == 0 ? 0 : high[i - 1], i == 0 ? 0 : low[i - 1]));
     }
 
     /// <summary>
@@ -12622,23 +7568,8 @@ internal static class OscillatorCore
     internal static void EhlersRelativeVigorIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high,
         ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0) return;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentClose = close[i];
-            var currentOpen = open[i];
-            var currentHigh = high[i];
-            var currentLow = low[i];
-
-            var range = currentHigh - currentLow;
-            output[i] = range != 0 ? (currentClose - currentOpen) / range : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) output[i] = EhlersVigorWindow.TrueValue(close[i], open[i], high[i], low[i]).Publish();
     }
 
     /// <summary>
@@ -13083,143 +8014,12 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Ehlers Spectrum Derived Filter Bank - finds dominant cycle using spectral analysis.
     /// </summary>
-    internal static void EhlersSpectrumDerivedFilterBank(ReadOnlySpan<double> close, Span<double> output, int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
+    internal static void EhlersSpectrumDerivedFilterBank(ReadOnlySpan<double> close, Span<double> output,
+        int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
     {
         if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        minLength = Math.Max(1, minLength);
-        maxLength = Math.Max(minLength, maxLength);
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-        var smoothHpArray = pool.Rent(close.Length);
-        var realArray = pool.Rent(close.Length);
-        var imagArray = pool.Rent(close.Length);
-        var q1Array = pool.Rent(close.Length);
-        var dcArray = pool.Rent(close.Length);
-        var medianArray = pool.Rent(length2);
-        var sortArray = pool.Rent(length2);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-            var smoothHp = smoothHpArray.AsSpan(0, close.Length);
-            var real = realArray.AsSpan(0, close.Length);
-            var imag = imagArray.AsSpan(0, close.Length);
-            var q1 = q1Array.AsSpan(0, close.Length);
-            var dc = dcArray.AsSpan(0, close.Length);
-            var medianBuf = medianArray.AsSpan(0, length2);
-            var sortBuf = sortArray.AsSpan(0, length2);
-            medianBuf.Clear();
-            int medianIdx = 0;
-            int medianCount = 0;
-
-            var twoPiPer = Math.Min(0.99, Math.Max(0.01, 2 * Math.PI / length1));
-            var alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
-
-            for (int i = 0; i < close.Length; i++)
-            {
-                double currentValue = close[i];
-                double prevValue = i >= 1 ? close[i - 1] : 0;
-                double delta = Math.Max((-0.015 * i) + 0.5, 0.15);
-
-                double prevHp1 = i >= 1 ? hp[i - 1] : 0;
-                double prevHp2 = i >= 2 ? hp[i - 2] : 0;
-                double prevHp3 = i >= 3 ? hp[i - 3] : 0;
-                double prevHp4 = i >= 4 ? hp[i - 4] : 0;
-                double prevHp5 = i >= 5 ? hp[i - 5] : 0;
-
-                hp[i] = i < 7 ? currentValue : (0.5 * (1 + alpha1) * (currentValue - prevValue)) + (alpha1 * prevHp1);
-
-                double prevSmoothHp = i >= 1 ? smoothHp[i - 1] : 0;
-                smoothHp[i] = i < 7 ? currentValue - prevValue : (hp[i] + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
-
-                double num = 0, denom = 0, dcVal = 0, realVal = 0, imagVal = 0, q1Val = 0, maxAmpl = 0;
-
-                for (int j = minLength; j <= maxLength; j++)
-                {
-                    double beta = Math.Cos(Math.Min(0.99, Math.Max(0.01, 2 * Math.PI / j)));
-                    double gamma = 1 / Math.Cos(Math.Min(0.99, Math.Max(0.01, 4 * Math.PI * delta / j)));
-                    double alpha = gamma - Math.Sqrt((gamma * gamma) - 1);
-
-                    double priorSmoothHp = i >= j ? smoothHp[i - j] : 0;
-                    double prevReal = i >= j ? real[i - j] : 0;
-                    double priorReal = i >= j * 2 ? real[i - (j * 2)] : 0;
-                    double prevImag = i >= j ? imag[i - j] : 0;
-                    double priorImag = i >= j * 2 ? imag[i - (j * 2)] : 0;
-                    double prevQ1 = i >= j ? q1[i - j] : 0;
-
-                    q1Val = j / Math.PI * 2 * (smoothHp[i] - prevSmoothHp);
-                    realVal = (0.5 * (1 - alpha) * (smoothHp[i] - priorSmoothHp)) + (beta * (1 + alpha) * prevReal) - (alpha * priorReal);
-                    imagVal = (0.5 * (1 - alpha) * (q1Val - prevQ1)) + (beta * (1 + alpha) * prevImag) - (alpha * priorImag);
-
-                    double ampl = (realVal * realVal) + (imagVal * imagVal);
-                    maxAmpl = Math.Max(ampl, maxAmpl);
-
-                    double dbRatio = maxAmpl > 0 ? ampl / maxAmpl : 0;
-                    double dbVal = dbRatio > 0 ? -length2 * Math.Log(0.01 / (1 - (0.99 * dbRatio))) / Math.Log(length2) : 0;
-                    dbVal = Math.Min(dbVal, maxLength);
-
-                    if (dbVal <= 3)
-                    {
-                        num += j * (maxLength - dbVal);
-                        denom += maxLength - dbVal;
-                    }
-                    dcVal = denom > 0 ? num / denom : 0;
-                }
-
-                q1[i] = q1Val;
-                real[i] = realVal;
-                imag[i] = imagVal;
-                dc[i] = dcVal;
-
-                // Rolling median
-                medianBuf[medianIdx] = dcVal;
-                medianIdx = (medianIdx + 1) % length2;
-                medianCount = Math.Min(medianCount + 1, length2);
-
-                // Compute median using insertion sort (efficient for small length2)
-                double median;
-                if (medianCount == 1)
-                {
-                    median = medianBuf[0];
-                }
-                else
-                {
-                    // Copy to sort buffer for sorting
-                    for (int k = 0; k < medianCount; k++)
-                    {
-                        sortBuf[k] = medianBuf[k];
-                    }
-                    // Insertion sort (O(n^2) but very fast for small n like 10)
-                    for (int k = 1; k < medianCount; k++)
-                    {
-                        double key = sortBuf[k];
-                        int j = k - 1;
-                        while (j >= 0 && sortBuf[j] > key)
-                        {
-                            sortBuf[j + 1] = sortBuf[j];
-                            j--;
-                        }
-                        sortBuf[j + 1] = key;
-                    }
-                    median = medianCount % 2 == 1 ? sortBuf[medianCount / 2] : (sortBuf[(medianCount / 2) - 1] + sortBuf[medianCount / 2]) / 2;
-                }
-                output[i] = median;
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-            pool.Return(smoothHpArray);
-            pool.Return(realArray);
-            pool.Return(imagArray);
-            pool.Return(q1Array);
-            pool.Return(dcArray);
-            pool.Return(medianArray);
-            pool.Return(sortArray);
-        }
+        using var bank = new EhlersSpectrumDerivedFilterBankEngine(minLength, maxLength, length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = bank.Next(close[i], true);
     }
 
     /// <summary>
@@ -13240,9 +8040,8 @@ internal static class OscillatorCore
             for (int i = 0; i < close.Length; i++)
             {
                 double cycle = domCyc[i];
-                double twoPiOverCyc = cycle > 0 ? 2 * Math.PI / cycle : 0;
-                twoPiOverCyc = Math.Min(0.99, Math.Max(0.01, twoPiOverCyc));
-                output[i] = volume[i] * twoPiOverCyc * twoPiOverCyc;
+                double twoPiOverCyc = 2 * Math.PI / cycle;
+                output[i] = volume[i] * (twoPiOverCyc * twoPiOverCyc);
             }
         }
         finally
@@ -13260,69 +8059,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PeakValleyEstimation(ReadOnlySpan<double> close, Span<double> output, int length = 500, int smoothLength = 100)
     {
-        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        length = Math.Max(1, length);
-        smoothLength = Math.Max(1, smoothLength);
-
-        var pool = ArrayPool<double>.Shared;
-        var maArray = pool.Rent(close.Length);
-        var absOsArray = pool.Rent(close.Length);
-        var linRegArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ma = maArray.AsSpan(0, close.Length);
-            var absOs = absOsArray.AsSpan(0, close.Length);
-            var linReg = linRegArray.AsSpan(0, close.Length);
-
-            // Step 1: Compute SMA
-            MovingAverageCore.SimpleMovingAverage(close, ma, length);
-
-            // Step 2: Compute os = close - MA, absOs = abs(os)
-            for (int i = 0; i < close.Length; i++)
-            {
-                double os = close[i] - ma[i];
-                absOs[i] = Math.Abs(os);
-            }
-
-            // Step 3: Compute Linear Regression of absOs
-            MovingAverageCore.LinearRegression(absOs, linReg, smoothLength);
-
-            // Step 4: Find rolling highest of linReg
-            double prevH = 0;
-            for (int i = 0; i < close.Length; i++)
-            {
-                // Find highest in window
-                double highest = 0;
-                int start = Math.Max(0, i - length + 1);
-                for (int j = start; j <= i; j++)
-                {
-                    highest = Math.Max(highest, linReg[j]);
-                }
-
-                double h = highest > 0 ? linReg[i] / highest : 0;
-                double os = close[i] - ma[i];
-
-                // mod1: h just reached 1 (transition from <1 to 1)
-                double mod1 = h == 1 && prevH < 1 ? 1 : 0;
-
-                // sign1: signal based on mod1 and os direction
-                double sign1 = 0;
-                if (mod1 == 1)
-                {
-                    sign1 = os < 0 ? 1 : (os > 0 ? -1 : 0);
-                }
-
-                prevH = h;
-                output[i] = sign1;
-            }
-        }
-        finally
-        {
-            pool.Return(maArray);
-            pool.Return(absOsArray);
-            pool.Return(linRegArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) StreamingInputValidation.Finite(close[i], nameof(close));
+        using var window = new PeakValleyWindow(MovingAvgType.SimpleMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Sign1;
     }
 
     #endregion
@@ -13335,58 +8075,7 @@ internal static class OscillatorCore
     internal static void EhlersAutoCorrelationIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10)
     {
         if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var pool = ArrayPool<double>.Shared;
-        var rfArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rf = rfArray.AsSpan(0, close.Length);
-            EhlersRoofingFilterV2(close, rf, length1, length2);
-
-            // Rolling sums for correlation
-            double xSum = 0, ySum = 0, xxSum = 0, yySum = 0, xySum = 0;
-
-            for (int i = 0; i < close.Length; i++)
-            {
-                double x = rf[i];
-                double y = i >= length1 ? rf[i - length1] : 0;
-                double xx = x * x;
-                double yy = y * y;
-                double xy = x * y;
-
-                // Add new values
-                xSum += x;
-                ySum += y;
-                xxSum += xx;
-                yySum += yy;
-                xySum += xy;
-
-                // Remove old values when window is full
-                if (i >= length1)
-                {
-                    int removeIdx = i - length1;
-                    double oldX = rf[removeIdx];
-                    double oldY = removeIdx >= length1 ? rf[removeIdx - length1] : 0;
-                    xSum -= oldX;
-                    ySum -= oldY;
-                    xxSum -= oldX * oldX;
-                    yySum -= oldY * oldY;
-                    xySum -= oldX * oldY;
-                }
-
-                int count = Math.Min(i + 1, length1);
-                double denom = ((count * xxSum) - (xSum * xSum)) * ((count * yySum) - (ySum * ySum));
-                double corr = denom > 0 ? 0.5 * ((((count * xySum) - (xSum * ySum)) / Math.Sqrt(denom)) + 1) : 0;
-                output[i] = corr;
-            }
-        }
-        finally
-        {
-            pool.Return(rfArray);
-        }
+        var window = new RoofAutocorrelationWindow(length1, length2); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>
@@ -13395,62 +8084,7 @@ internal static class OscillatorCore
     internal static void EhlersAutoCorrelationPeriodogram(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10, int length3 = 3)
     {
         if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-        length3 = Math.Max(0, length3);
-
-        var pool = ArrayPool<double>.Shared;
-        var corrArray = pool.Rent(close.Length);
-        var rArray = pool.Rent(length1 + 1);
-
-        try
-        {
-            var corr = corrArray.AsSpan(0, close.Length);
-            var r = rArray.AsSpan(0, length1 + 1);
-            r.Clear();
-
-            EhlersAutoCorrelationIndicator(close, corr, length1, length2);
-
-            for (int i = 0; i < close.Length; i++)
-            {
-                double maxPwr = 0;
-
-                for (int j = length2; j <= length1; j++)
-                {
-                    double cosPart = 0, sinPart = 0;
-                    for (int k = length3; k <= length1; k++)
-                    {
-                        double prevCorr = i >= k ? corr[i - k] : 0;
-                        double angle = 2 * Math.PI * ((double)k / j);
-                        cosPart += prevCorr * Math.Cos(angle);
-                        sinPart += prevCorr * Math.Sin(angle);
-                    }
-
-                    double sqSum = (cosPart * cosPart) + (sinPart * sinPart);
-                    double newR = (0.2 * sqSum * sqSum) + (0.8 * r[j]);
-                    r[j] = newR;
-                    maxPwr = Math.Max(newR, maxPwr);
-                }
-
-                double spx = 0, sp = 0;
-                for (int j = length2; j <= length1; j++)
-                {
-                    double pwr = maxPwr > 0 ? r[j] / maxPwr : 0;
-                    if (pwr >= 0.5)
-                    {
-                        spx += j * pwr;
-                        sp += pwr;
-                    }
-                }
-
-                output[i] = sp > 0 ? spx / sp : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(corrArray);
-            pool.Return(rArray);
-        }
+        var window = new AutocorrelationSpectrumWindow(length1, length2, length3); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>
@@ -13671,12 +8305,19 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes the Confluence Indicator using multiple timeframe MAs.
     /// </summary>
-    internal static void ConfluenceIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> ftp, Span<double> output, int length = 10, IMovingAverageCore maCore = null!)
+    internal delegate void ConfluenceAverage(ReadOnlySpan<double> values, Span<double> output, int period);
+
+    internal static void ConfluenceIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> ftp, Span<double> output, int length = 10, IMovingAverageCore maCore = null!, ConfluenceAverage? average = null)
     {
         if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        length = Math.Max(2, length);
+        length = Math.Max(1, length);
         maCore ??= new SmaCore();
 
+        void ComputeAverage(ReadOnlySpan<double> values, Span<double> destination, int period)
+        {
+            if (average is null) maCore.Compute(values, destination, Math.Max(1, period));
+            else average(values, destination, Math.Max(1, period));
+        }
         int count = close.Length;
         var pool = ArrayPool<double>.Shared;
 
@@ -13687,10 +8328,10 @@ internal static class OscillatorCore
         int hoff = (int)Math.Ceiling((double)length / 2 - 0.5);
         int soff = (int)Math.Ceiling((double)stl / 2 - 0.5);
         int ioff = (int)Math.Ceiling((double)itl / 2 - 0.5);
-        int hLength = Math.Max(1, length - 1);
-        int sLength = Math.Max(1, stl - 1);
-        int iLength = Math.Max(1, itl - 1);
-        int lLength = Math.Max(1, ltl - 1);
+        int hLength = Math.Max(2, Math.Min(530, length - 1));
+        int sLength = stl - 1;
+        int iLength = itl - 1;
+        int lLength = ltl - 1;
 
         // Rent buffers for all MAs
         var hAvgArray = pool.Rent(count);
@@ -13730,15 +8371,15 @@ internal static class OscillatorCore
             var mom = momArray.AsSpan(0, count);
 
             // Compute all moving averages
-            maCore.Compute(close, hAvg, length);
-            maCore.Compute(close, sAvg, stl);
-            maCore.Compute(close, iAvg, itl);
-            maCore.Compute(close, lAvg, ltl);
-            maCore.Compute(close, h2Avg, hLength);
-            maCore.Compute(close, s2Avg, sLength);
-            maCore.Compute(close, i2Avg, iLength);
-            maCore.Compute(close, l2Avg, lLength);
-            maCore.Compute(ftp, ftpAvg, lLength);
+            ComputeAverage(close, hAvg, length);
+            ComputeAverage(close, sAvg, stl);
+            ComputeAverage(close, iAvg, itl);
+            ComputeAverage(close, lAvg, ltl);
+            ComputeAverage(close, h2Avg, hLength);
+            ComputeAverage(close, s2Avg, sLength);
+            ComputeAverage(close, i2Avg, iLength);
+            ComputeAverage(close, l2Avg, lLength);
+            ComputeAverage(ftp, ftpAvg, lLength);
 
             // Main computation loop
             double errSumSum = 0, value70Sum = 0;
@@ -13766,34 +8407,10 @@ internal static class OscillatorCore
                 double derivI = (iAvg[i] * 2) - prevIAvg;
                 double derivL = (lAvg[i] * 2) - prevLAvg;
 
-                // Sum derivatives
-                double sumDH = length * derivH;
-                double sumDS = stl * derivS;
-                double sumDI = itl * derivI;
-                double sumDL = ltl * derivL;
-
-                // N1 values
-                double n1h = h2Avg[i] * hLength;
-                double n1s = s2Avg[i] * sLength;
-                double n1i = i2Avg[i] * iLength;
-                double n1l = l2Avg[i] * lLength;
-
-                // DR values
-                double drh = sumDH - n1h;
-                double drs = sumDS - n1s;
-                double dri = sumDI - n1i;
-                double drl = sumDL - n1l;
-
-                // Sum values
-                double hSum = h2Avg[i] * (length - 1);
-                double sSum = s2Avg[i] * (stl - 1);
-                double iSum = i2Avg[i] * (itl - 1);
-                double lSum = ftpAvg[i] * (ltl - 1);
-
-                value5[i] = (hSum + drh) / length;
-                value6[i] = (sSum + drs) / stl;
-                value7[i] = (iSum + dri) / itl;
-                double value13 = (lSum + drl) / ltl;
+                value5[i] = derivH + (length - 1d - hLength) / length * h2Avg[i];
+                value6[i] = derivS;
+                value7[i] = derivI;
+                double value13 = derivL + (ltl - 1d) / ltl * (ftpAvg[i] - l2Avg[i]);
 
                 double priorValue5 = i >= hoff ? value5[i - hoff] : 0;
                 double priorValue6 = i >= soff ? value6[i - soff] : 0;
@@ -13818,7 +8435,7 @@ internal static class OscillatorCore
 
                 double priorSum = i >= soff ? sumBuf[i - soff] : 0;
                 double priorHAvg2 = i >= soff ? hAvg[i - soff] : 0;
-                double cond2 = (sumBuf[i] > priorSum && hAvg[i] < priorHAvg2) || (sumBuf[i] < priorSum && hAvg[i] > priorHAvg2) ? 1 : 0;
+                double cond2 = ConfluenceVotes.Compare(sumBuf[i], priorSum) * ConfluenceVotes.Compare(hAvg[i], priorHAvg2) < 0 ? 1 : 0;
                 double phase = cond2 == 1 ? -1 : 1;
 
                 errSum[i] = (sumBuf[i] - err) * phase;
@@ -13848,40 +8465,17 @@ internal static class OscillatorCore
                 double prevValue70 = i >= 1 ? value70[i - 1] : 0;
 
                 // Error number
-                double errNum = errSum[i] > 0 && errSum[i] < prevErrSum && errSum[i] < errSig ? 1 :
-                    errSum[i] > 0 && errSum[i] < prevErrSum && errSum[i] > errSig ? 2 :
-                    errSum[i] > 0 && errSum[i] > prevErrSum && errSum[i] < errSig ? 2 :
-                    errSum[i] > 0 && errSum[i] > prevErrSum && errSum[i] > errSig ? 3 :
-                    errSum[i] < 0 && errSum[i] > prevErrSum && errSum[i] > errSig ? -1 :
-                    errSum[i] < 0 && errSum[i] < prevErrSum && errSum[i] > errSig ? -2 :
-                    errSum[i] < 0 && errSum[i] > prevErrSum && errSum[i] < errSig ? -2 :
-                    errSum[i] < 0 && errSum[i] < prevErrSum && errSum[i] < errSig ? -3 : 0;
+                double errNum = ConfluenceVotes.Score(errSum[i], prevErrSum, errSig);
 
                 // Momentum number
-                double momNum = mom[i] > 0 && mom[i] < prevMom && mom[i] < momSig ? 1 :
-                    mom[i] > 0 && mom[i] < prevMom && mom[i] > momSig ? 2 :
-                    mom[i] > 0 && mom[i] > prevMom && mom[i] < momSig ? 2 :
-                    mom[i] > 0 && mom[i] > prevMom && mom[i] > momSig ? 3 :
-                    mom[i] < 0 && mom[i] > prevMom && mom[i] > momSig ? -1 :
-                    mom[i] < 0 && mom[i] < prevMom && mom[i] > momSig ? -2 :
-                    mom[i] < 0 && mom[i] > prevMom && mom[i] < momSig ? -2 :
-                    mom[i] < 0 && mom[i] < prevMom && mom[i] < momSig ? -3 : 0;
+                double momNum = ConfluenceVotes.Score(mom[i], prevMom, momSig);
 
                 // TC number
-                double tcNum = value70[i] > 0 && value70[i] < prevValue70 && value70[i] < value71 ? 1 :
-                    value70[i] > 0 && value70[i] < prevValue70 && value70[i] > value71 ? 2 :
-                    value70[i] > 0 && value70[i] > prevValue70 && value70[i] < value71 ? 2 :
-                    value70[i] > 0 && value70[i] > prevValue70 && value70[i] > value71 ? 3 :
-                    value70[i] < 0 && value70[i] > prevValue70 && value70[i] > value71 ? -1 :
-                    value70[i] < 0 && value70[i] < prevValue70 && value70[i] > value71 ? -2 :
-                    value70[i] < 0 && value70[i] > prevValue70 && value70[i] < value71 ? -2 :
-                    value70[i] < 0 && value70[i] < prevValue70 && value70[i] < value71 ? -3 : 0;
+                double tcNum = ConfluenceVotes.Score(value70[i], prevValue70, value71);
 
                 double value42 = errNum + momNum + tcNum;
 
-                output[i] = value42 > 0 && value70[i] > 0 ? value42 :
-                    value42 < 0 && value70[i] < 0 ? value42 :
-                    (value42 > 0 && value70[i] < 0) || (value42 < 0 && value70[i] > 0) ? value42 / 10 : 0;
+                output[i] = ConfluenceVotes.Publish(value42, value70[i]);
             }
         }
         finally

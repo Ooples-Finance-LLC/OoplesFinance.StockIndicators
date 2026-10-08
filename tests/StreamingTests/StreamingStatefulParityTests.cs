@@ -509,7 +509,7 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                 new StatefulIndicatorSpec("AverageTrueRangeChannel.Sma",
                     () => new AverageTrueRangeChannelState(MovingAvgType.SimpleMovingAverage, 14, 2.5),
                     data => data.CalculateAverageTrueRangeChannel(MovingAvgType.SimpleMovingAverage, 14, 2.5)
-                        .OutputValues["Sma"])
+                        .OutputValues["Sma"], "Sma")
             };
             yield return new object[]
             {
@@ -1827,7 +1827,7 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             {
                 new StatefulIndicatorSpec("EhlersDecyclerOscillatorV1.SlowEdo",
                     () => new EhlersDecyclerOscillatorV1State(),
-                    data => data.CalculateEhlersDecyclerOscillatorV1().OutputValues["SlowEdo"])
+                    data => data.CalculateEhlersDecyclerOscillatorV1().OutputValues["SlowEdo"], "SlowEdo")
             };
             yield return new object[]
             {
@@ -4555,6 +4555,14 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                     data => data.CalculateZeroLowLagMovingAverage().CustomValuesList)
             };
         }
+    }
+
+    [Fact]
+    public void AverageTrueRangeChannelComparesItsNamedAverage()
+    {
+        var spec = StatefulIndicators.Select(row => (StatefulIndicatorSpec)row[0])
+            .Single(spec => spec.Name == "AverageTrueRangeChannel.Sma");
+        StatefulStreamingMatchesBatchOutputs(spec);
     }
 
     [Theory]

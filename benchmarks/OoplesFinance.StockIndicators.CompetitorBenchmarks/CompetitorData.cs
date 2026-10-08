@@ -34,6 +34,11 @@ internal sealed class CompetitorData
         Closes = closes;
         Volumes = volumes;
         Dates = dates;
+        IndicatorBars = Enumerable.Range(0, closes.Length).Select(i =>
+            new OoplesFinance.StockIndicators.Indicators.Bar(dates[i], opens[i], highs[i], lows[i], closes[i], volumes[i])).ToArray();
+
+        CloseBars = Enumerable.Range(0, closes.Length).Select(i =>
+            new OoplesFinance.StockIndicators.Indicators.Bar(dates[i], closes[i], closes[i], closes[i], closes[i], volumes[i])).ToArray();
 
         StockData = new StockData(
             [.. opens], [.. highs], [.. lows], [.. closes], [.. volumes], [.. dates]);
@@ -80,6 +85,25 @@ internal sealed class CompetitorData
 
     public int Count => Closes.Length;
 
+    internal OoplesFinance.StockIndicators.Indicators.Bar[] CloseBars { get; private set; } = [];
+
+    internal OoplesFinance.StockIndicators.Indicators.Bar[] IndicatorBars { get; private set; } = [];
+
+    internal static CompetitorData FromOhlcv(double[] opens, double[] highs, double[] lows, double[] closes, double[] volumes) => new(
+        opens, highs, lows, closes, volumes,
+        Enumerable.Range(0, closes.Length).Select(i => DateTime.UnixEpoch.AddDays(i)).ToArray());
+
+    internal static CompetitorData FromOhlc(double[] opens, double[] highs, double[] lows, double[] closes) => new(
+        opens, highs, lows, closes, Enumerable.Repeat(100d, closes.Length).ToArray(),
+        Enumerable.Range(0, closes.Length).Select(i => new DateTime(2020, 1, 1).AddDays(i)).ToArray());
+
+    internal static CompetitorData FromBodies(double[] opens, double[] closes)
+    {
+        return new CompetitorData(opens, opens.Zip(closes, Math.Max).ToArray(),
+            opens.Zip(closes, Math.Min).ToArray(), closes, Enumerable.Repeat(100d, closes.Length).ToArray(),
+            Enumerable.Range(0, closes.Length).Select(i => new DateTime(2020, 1, 1).AddDays(i)).ToArray());
+    }
+
     /// <summary>This library's batch input.</summary>
     public StockData StockData { get; }
 
@@ -107,6 +131,15 @@ internal sealed class CompetitorData
     /// <summary>The same series truncated to <paramref name="bars"/> bars, for warm-then-append measurements.</summary>
     public CompetitorData Take(int bars) => new(
         Opens[..bars], Highs[..bars], Lows[..bars], Closes[..bars], Volumes[..bars], Dates[..bars]);
+
+    internal static CompetitorData FromCloses(double[] closes)
+    {
+        var dates = Enumerable.Range(0, closes.Length).Select(index =>
+            new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(index)).ToArray();
+        return new((double[])closes.Clone(), closes.Select(value => value + 1).ToArray(),
+            closes.Select(value => value - 1).ToArray(), (double[])closes.Clone(),
+            Enumerable.Repeat(1000d, closes.Length).ToArray(), dates);
+    }
 
     public static CompetitorData Create(int count, int seed = 42)
     {

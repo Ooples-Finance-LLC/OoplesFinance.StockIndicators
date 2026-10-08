@@ -89,16 +89,15 @@ public class BatchBenchmarks
     public int SmaTrady() => _data.Candles.Sma(SmaLength).Count;
 
     [BenchmarkCategory("Sma"), Benchmark(Description = "QuanTAlib")]
-    public double SmaQuanTAlib()
+    public double[] SmaQuanTAlib()
     {
         var sma = new QuanTAlib.Sma(SmaLength);
-        var last = 0d;
-        foreach (var close in _data.Closes)
+        for (var i = 0; i < _data.Count; i++)
         {
-            last = sma.Calc(new QuanTAlib.TValue(close, true, false)).Value;
+            _output[i] = sma.Calc(new QuanTAlib.TValue(_data.Closes[i], true, false)).Value;
         }
 
-        return last;
+        return _output;
     }
 
     // ------------------------------------------------------------------ EMA(20)
@@ -129,16 +128,15 @@ public class BatchBenchmarks
     public int EmaTrady() => _data.Candles.Ema(EmaLength).Count;
 
     [BenchmarkCategory("Ema"), Benchmark(Description = "QuanTAlib")]
-    public double EmaQuanTAlib()
+    public double[] EmaQuanTAlib()
     {
         var ema = new QuanTAlib.Ema(EmaLength, true);
-        var last = 0d;
-        foreach (var close in _data.Closes)
+        for (var i = 0; i < _data.Count; i++)
         {
-            last = ema.Calc(new QuanTAlib.TValue(close, true, false)).Value;
+            _output[i] = ema.Calc(new QuanTAlib.TValue(_data.Closes[i], true, false)).Value;
         }
 
-        return last;
+        return _output;
     }
 
     // ------------------------------------------------------------------ RSI(14)
@@ -196,16 +194,15 @@ public class BatchBenchmarks
     public int AtrTrady() => _data.Candles.Atr(AtrLength).Count;
 
     [BenchmarkCategory("Atr"), Benchmark(Description = "QuanTAlib")]
-    public double AtrQuanTAlib()
+    public double[] AtrQuanTAlib()
     {
         var atr = new QuanTAlib.Atr(AtrLength);
-        var last = 0d;
-        foreach (var bar in _data.Bars)
+        for (var i = 0; i < _data.Count; i++)
         {
-            last = atr.Calc(bar).Value;
+            _output[i] = atr.Calc(_data.Bars[i]).Value;
         }
 
-        return last;
+        return _output;
     }
 
     // ------------------------------------------------------------------ Bollinger Bands(20, 2)

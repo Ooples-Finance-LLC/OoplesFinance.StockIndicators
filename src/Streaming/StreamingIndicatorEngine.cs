@@ -280,6 +280,7 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
             return;
         }
 
+        StreamingInputValidation.Validate(trade);
         if (_aggregatorsBySymbol.TryGetValue(trade.Symbol, out var list))
         {
             for (var i = 0; i < list.Count; i++)
@@ -296,6 +297,7 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
             return;
         }
 
+        StreamingInputValidation.Validate(quote);
         if (_aggregatorsBySymbol.TryGetValue(quote.Symbol, out var list))
         {
             for (var i = 0; i < list.Count; i++)
@@ -318,6 +320,7 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
 
     private void HandleBar(AggregatorKey key, OhlcvBar bar)
     {
+        StreamingInputValidation.Validate(bar);
         if (_subscriptions.TryGetValue(key, out var subs))
         {
             for (var i = 0; i < subs.Count; i++)
@@ -630,7 +633,7 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
             _onUpdate = onUpdate;
             _options = options ?? new IndicatorSubscriptionOptions();
             _alignmentPolicy = _options.SeriesAlignmentPolicy;
-            _context = new MultiSeriesContext(_store);
+            _context = new MultiSeriesContext(_store, _alignmentPolicy, _options.MaximumBenchmarkAge);
         }
 
         public void HandleBar(SeriesKey seriesKey, OhlcvBar bar)
@@ -640,6 +643,23 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
                 return;
             }
 
+            PairedSeriesAlignment.ValidateObservation(bar);
+            // Alignment is a precondition to calculation, not just a filter on publication.
+            // Otherwise a missing/future benchmark can contaminate state even when output is hidden.
+            if (seriesKey.Equals(_primarySeries))
+            {
+                foreach (var dependency in _series)
+                {
+                    if (dependency.Equals(_primarySeries)) continue;
+                    if (!_store.TryGetLatestFinal(dependency, out var benchmark)) return;
+                    if (benchmark.EndTime.Kind != bar.EndTime.Kind)
+                        throw new ArgumentException("Paired observations must use the same timestamp kind.", nameof(bar));
+                    if (benchmark.EndTime > bar.EndTime)
+                        throw new ArgumentException("A future benchmark cannot be used for an earlier primary bar.", nameof(bar));
+                    if (_alignmentPolicy == SeriesAlignmentPolicy.Strict && benchmark.EndTime != bar.EndTime) return;
+                    if (_context.MaximumBenchmarkAge.HasValue && bar.EndTime - benchmark.EndTime > _context.MaximumBenchmarkAge.Value) return;
+                }
+            }
             _store.Update(seriesKey, bar);
 
             var result = _indicator.Update(_context, seriesKey, bar, bar.IsFinal, _options.IncludeOutputValues);
@@ -648,64 +668,13 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
                 return;
             }
 
-            if (!ShouldEmit(seriesKey, bar.EndTime))
+            if (!seriesKey.Equals(_primarySeries))
             {
                 return;
             }
 
             _onUpdate(new MultiSeriesIndicatorStateUpdate(_primarySeries, seriesKey, bar.IsFinal, _indicator.Name,
                 result.Value, result.Outputs));
-        }
-
-        private bool ShouldEmit(SeriesKey seriesKey, DateTime endTime)
-        {
-            if (!seriesKey.Equals(_primarySeries))
-            {
-                return false;
-            }
-
-            if (_alignmentPolicy == SeriesAlignmentPolicy.LastKnown)
-            {
-                return HasAllSeries(useFinal: !_options.IncludeUpdates);
-            }
-
-            return AreAligned(endTime, useFinal: !_options.IncludeUpdates);
-        }
-
-        private bool HasAllSeries(bool useFinal)
-        {
-            for (var i = 0; i < _series.Count; i++)
-            {
-                if (!TryGetSeriesBar(_series[i], useFinal, out _))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private bool AreAligned(DateTime endTime, bool useFinal)
-        {
-            for (var i = 0; i < _series.Count; i++)
-            {
-                if (!TryGetSeriesBar(_series[i], useFinal, out var bar))
-                {
-                    return false;
-                }
-
-                if (bar.EndTime != endTime)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private bool TryGetSeriesBar(SeriesKey key, bool useFinal, out OhlcvBar bar)
-        {
-            return useFinal ? _store.TryGetLatestFinal(key, out bar) : _store.TryGetLatest(key, out bar);
         }
 
         public void Dispose()
@@ -739,6 +708,8 @@ public sealed class IndicatorSubscriptionOptions
     public bool IncludeUpdates { get; set; } = true;
     public bool IncludeOutputValues { get; set; } = true;
     public SeriesAlignmentPolicy SeriesAlignmentPolicy { get; set; } = SeriesAlignmentPolicy.LastKnown;
+    /// <summary>Optional age limit for committed benchmark observations in LastKnown mode.</summary>
+    public TimeSpan? MaximumBenchmarkAge { get; set; }
     public IndicatorOptions? Options { get; set; }
 }
 

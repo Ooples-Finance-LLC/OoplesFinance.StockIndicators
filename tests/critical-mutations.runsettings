@@ -1,0 +1,6 @@
+<RunSettings>
+  <xUnit>
+    <!-- Select methods before expanding theory data. Every selected theory still runs all its cases. -->
+    <PreEnumerateTheories>false</PreEnumerateTheories>
+  </xUnit>
+</RunSettings>

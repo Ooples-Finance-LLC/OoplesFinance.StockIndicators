@@ -74,7 +74,8 @@ public sealed class IndicatorRouteParityTests
                 }
 
                 builtIn = instance;
-                spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions());
+                var key = builtIn.BatchOutputKey ?? GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName)[0];
+                spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions(), key);
             }
             catch (Exception ex)
             {
@@ -120,7 +121,7 @@ public sealed class IndicatorRouteParityTests
                 // whatever was requested, so a named output reads as its sibling - VortexNegative reported
                 // ViPlus under the ViMinus key, which looked like a defect in the library rather than in
                 // the question being asked of it.
-                viaState = BatchCompute.ComputeAll(Walk(), state, builtIn.BatchOutputKey);
+                viaState = BatchCompute.ComputeAll(Walk(), state, spec.OutputKey);
             }
             catch (Exception ex)
             {

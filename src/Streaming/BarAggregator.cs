@@ -71,6 +71,7 @@ public sealed class BarAggregator
             return;
         }
 
+        StreamingInputValidation.Validate(trade);
         AddSample(new BarSample(trade.Symbol, trade.Timestamp, trade.Price, trade.Size));
     }
 
@@ -81,8 +82,9 @@ public sealed class BarAggregator
             return;
         }
 
+        StreamingInputValidation.Validate(quote);
         var price = GetQuotePrice(quote);
-        var size = (quote.BidSize + quote.AskSize) / 2d;
+        var size = StreamingInputValidation.Midpoint(quote.BidSize, quote.AskSize);
         AddSample(new BarSample(quote.Symbol, quote.Timestamp, price, size));
     }
 
@@ -108,6 +110,8 @@ public sealed class BarAggregator
 
     private void AddSample(BarSample sample)
     {
+        StreamingInputValidation.Finite(sample.Price, nameof(sample.Price));
+        StreamingInputValidation.Finite(sample.Volume, nameof(sample.Volume));
         if (_isTick)
         {
             EmitTick(sample);
@@ -217,7 +221,7 @@ public sealed class BarAggregator
         {
             QuotePriceMode.Bid => quote.BidPrice,
             QuotePriceMode.Ask => quote.AskPrice,
-            _ => (quote.BidPrice + quote.AskPrice) / 2d
+            _ => StreamingInputValidation.Midpoint(quote.BidPrice, quote.AskPrice)
         };
     }
 

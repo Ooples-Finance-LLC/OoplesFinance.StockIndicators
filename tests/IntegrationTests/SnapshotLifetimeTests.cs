@@ -75,6 +75,28 @@ public sealed class SnapshotLifetimeTests : GlobalTestData
         snapshot.GetSeries(deferred).ToArray().Should().Equal(expected);
     }
 
+    [Fact]
+    public void DeferredNamedSourceSurvivesRuntimeDisposal()
+    {
+        var prices = new[] { 11d, 23, 17, 29 };
+        var dates = Enumerable.Range(0, prices.Length).Select(i => DateTime.UnixEpoch.AddDays(i));
+        var market = new StockData(prices, prices, prices, prices, Enumerable.Repeat(1d, prices.Length), dates);
+        var builder = new StockIndicatorBuilder(IndicatorDataSource.FromBatch(new StockData(StockTestData.Take(prices.Length))));
+        builder.AddDataSource("market", IndicatorDataSource.FromBatch(market));
+        SeriesHandle active = default, deferred = default;
+        builder.ConfigureIndicators(catalog => { active = catalog.Sma(2); deferred = catalog.Price("market"); });
+        builder.ConfigureSignals(signals => signals.When(active).CrossesAbove(0).Emit("active"));
+        IndicatorSnapshot snapshot;
+        using (var runtime = builder.Build())
+        {
+            runtime.Start();
+            snapshot = runtime.Latest!;
+        }
+        snapshot.TryGetSeries(deferred, out var actual).Should().BeTrue();
+        actual.ToArray().Should().Equal(prices, "deferred evaluation must retain the named source map");
+        snapshot.GetSeries(deferred).ToArray().Should().Equal(prices);
+    }
+
     private sealed class ReusingPool : ArrayPool<double>
     {
         private readonly Stack<double[]> _available = new();

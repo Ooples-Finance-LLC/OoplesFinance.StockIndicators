@@ -20,6 +20,12 @@ public sealed class GeneratedIndicatorTests
             .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
             .Where(t => t.Namespace == "OoplesFinance.StockIndicators.Indicators")
             .Where(typeof(IIndicator).IsAssignableFrom)
+            // Options metadata is the generator's input. Handwritten comparison indicators
+            // share this namespace but do not have batch specs. Do not filter on IBuiltInIndicator:
+            // the test below must still detect a generated type missing that interface.
+            .Where(t => typeof(IIndicatorSpecOptions).Assembly.GetType(
+                "OoplesFinance.StockIndicators.Builder.Specs." + t.Name + "SpecOptions") is { } options
+                && typeof(IIndicatorSpecOptions).IsAssignableFrom(options))
             .OrderBy(t => t.Name, StringComparer.Ordinal)];
 
     [Fact]
@@ -269,6 +275,33 @@ public sealed class GeneratedIndicatorTests
 
         maType.Should().Be(MovingAvgType.ExponentialMovingAverage,
             "a built-in average is one the batch calculation already knows how to run");
+    }
+
+    [Fact]
+    public void WilderAliasIsAPriceAverageAndSelectsTheWilderEnum()
+    {
+        IMovingAverage average = new Wwma(7);
+        ((IBuiltInMovingAverage)average).AvgType.Should().Be(MovingAvgType.WildersSmoothingMethod);
+        var composed = new Tma(3, average);
+        ((IBuiltInIndicator)composed).CreateOptions().GetType().GetProperty("MaType")!
+            .GetValue(((IBuiltInIndicator)composed).CreateOptions()).Should().Be(MovingAvgType.WildersSmoothingMethod);
+        composed.Components.Should().Contain(average);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    [InlineData(14)]
+    [InlineData(65)]
+    [InlineData(int.MaxValue)]
+    public void WilderAliasesDeclareSaturatingSettlingHorizon(int length)
+    {
+        var expected = (int)Math.Min(int.MaxValue, 18L * length);
+        foreach (var average in new IMovingAverage[] { new Wwma(length), new Smma(length), new ModifiedMa(length) })
+        {
+            ((IBuiltInMovingAverage)average).AvgType.Should().Be(MovingAvgType.WildersSmoothingMethod);
+            average.WarmupBars.Should().Be(expected);
+        }
     }
 
     [Fact]

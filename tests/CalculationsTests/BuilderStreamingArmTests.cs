@@ -43,6 +43,7 @@ public sealed class BuilderStreamingArmTests : GlobalTestData
                     break;
                 }
 
+                var outputKey = target.OutputKey ?? OoplesFinance.StockIndicators.Indicators.GeneratedExpandedPrimary.KeyFor(type);
                 var spec = new IndicatorSpec(target.Name, options);
                 IStreamingIndicatorState state;
                 try
@@ -62,7 +63,7 @@ public sealed class BuilderStreamingArmTests : GlobalTestData
                     var streamed = bars.Select(bar =>
                     {
                         var result = state.Update(bar, isFinal: true, includeOutputs: true);
-                        return target.OutputKey is { } key
+                        return outputKey is { } key
                             ? result.Outputs is { } outputs && outputs.TryGetValue(key, out var value) ? value : double.NaN
                             : result.Value;
                     }).ToList();

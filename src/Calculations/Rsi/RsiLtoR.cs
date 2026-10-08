@@ -17,6 +17,27 @@ public static partial class Calculations
     public static StockData CalculateRelativeStrengthIndex(this StockData stockData, MovingAvgType movingAvgType = MovingAvgType.WildersSmoothingMethod,
         int length = 14, int signalLength = 3)
     {
+        if (StrengthWindow.Supports(movingAvgType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var signal = new List<double>(stockData.Count); var histogram = new List<double>(stockData.Count);
+            var events = CreateSignalsList(stockData);
+            using var window = new PriceRsiWindow(movingAvgType, length, stockData.Count);
+            using var signalWindow = new StrengthAverage(movingAvgType, signalLength, stockData.Count);
+            double previous = 0, previousHistogram = 0;
+            foreach (var price in prices)
+            {
+                var value = window.Next(price, true); var mean = signalWindow.Next(new StrengthValue(value), true).Mantissa;
+                var difference = value - mean;
+                line.Add(value); signal.Add(mean); histogram.Add(difference);
+                events?.Add(GetRsiSignal(difference, previousHistogram, value, previous, 70, 30));
+                previous = value; previousHistogram = difference;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rsi", line }, { "Signal", signal }, { "Histogram", histogram } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RelativeStrengthIndex;
+            return stockData;
+        }
+
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var count = inputList.Count;
         List<double> rsiList;
@@ -49,6 +70,9 @@ public static partial class Calculations
                 var avgGain = avgGainBuffer.Span[i];
                 var avgLoss = avgLossBuffer.Span[i];
                 var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
+
+                if (i > 0 && length > 1 && inputList[i] == inputList[i - 1]) // NOSONAR: S1244 - Only identical consecutive prices select the unchanged-price recurrence.
+                { rsiSpan[i] = rsiSpan[i - 1]; continue; }
 
                 rsiSpan[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
             }
@@ -86,6 +110,8 @@ public static partial class Calculations
                 var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
                 var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+                if (movingAvgType == MovingAvgType.ExponentialMovingAverage && length > 1 && i > 0 && inputList[i] == inputList[i - 1]) // NOSONAR: S1244 - Only identical consecutive prices select the unchanged-price recurrence.
+                    rsi = rsiList[i - 1];
                 rsiList.Add(rsi);
             }
 
@@ -131,40 +157,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateLiquidRelativeStrengthIndex(this StockData stockData, int length = 14)
     {
-        List<double> numEmaList = new(stockData.Count);
-        List<double> denEmaList = new(stockData.Count);
         List<double> cList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var k = (double)1 / length;
-
+        var window = new LiquidRsiWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentVolume = volumeList[i];
-            var prevVolume = i >= 1 ? volumeList[i - 1] : 0;
-            var a = MinPastValues(i, 1, currentValue - prevValue);
-            var b = MinPastValues(i, 1, currentVolume - prevVolume);
-            var prevC1 = i >= 1 ? cList[i - 1] : 0;
-            var prevC2 = i >= 2 ? cList[i - 2] : 0;
-            var num = Math.Max(a, 0) * Math.Max(b, 0);
-            var den = Math.Abs(a) * Math.Abs(b);
-
-            var prevNumEma = GetLastOrDefault(numEmaList);
-            var numEma = (num * k) + (prevNumEma * (1 - k));
-            numEmaList.Add(numEma);
-
-            var prevDenEma = GetLastOrDefault(denEmaList);
-            var denEma = (den * k) + (prevDenEma * (1 - k));
-            denEmaList.Add(denEma);
-
-            var c = denEma != 0 ? MinOrMax(100 * numEma / denEma, 100, 0) : 0;
-            cList.Add(c);
-
-            var signal = GetRsiSignal(c - prevC1, prevC1 - prevC2, c, prevC1, 80, 20);
-            signalsList?.Add(signal);
+            var value = window.Next(inputList[i], volumeList[i], true);
+            var previous = i == 0 ? 0 : cList[i - 1]; var beforePrevious = i < 2 ? 0 : cList[i - 2];
+            signalsList?.Add(GetRsiSignal(value - previous, previous - beforePrevious, value, previous, 80, 20)); cList.Add(value);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -189,37 +190,14 @@ public static partial class Calculations
     public static StockData CalculateRapidRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        List<double> upChgList = new(stockData.Count);
-        List<double> downChgList = new(stockData.Count);
         List<double> rapidRsiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum upChgSumWindow = new();
-        RollingSum downChgSumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new RapidGainLossWindow(length, stockData.Count);
+        foreach (var price in inputList) rapidRsiList.Add(window.Next(price, true));
 
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var chg = MinPastValues(i, 1, currentValue - prevValue);
-
-            var upChg = i >= 1 && chg > 0 ? chg : 0;
-            upChgList.Add(upChg);
-            upChgSumWindow.Add(upChg);
-
-            var downChg = i >= 1 && chg < 0 ? Math.Abs(chg) : 0;
-            downChgList.Add(downChg);
-            downChgSumWindow.Add(downChg);
-
-            var upChgSum = upChgSumWindow.Sum(length);
-            var downChgSum = downChgSumWindow.Sum(length);
-            var rs = downChgSum != 0 ? upChgSum / downChgSum : 0;
-
-            var rapidRsi = downChgSum == 0 ? 100 : upChgSum == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-            rapidRsiList.Add(rapidRsi);
-        }
-
-        var rrsiEmaList = GetMovingAverageList(stockData, maType, length, rapidRsiList);
+        var rrsiEmaList = StrengthWindow.Supports(maType) ? StrengthWindow.Smooth(rapidRsiList, maType, length)
+            : GetMovingAverageList(stockData, maType, length, rapidRsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var rapidRsi = rrsiEmaList[i];
@@ -253,73 +231,10 @@ public static partial class Calculations
     public static StockData CalculateRecursiveRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14)
     {
-        List<double> chgList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> avgRsiList = new(stockData.Count);
-        List<double> avgList = new(stockData.Count);
-        List<double> gainList = new(stockData.Count);
-        List<double> lossList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum avgRsiSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-
-            var chg = MinPastValues(i, length, currentValue - prevValue);
-            chgList.Add(chg);
-        }
-
-        var srcList = GetMovingAverageList(stockData, maType, length, chgList);
-        stockData.SetCustomValues(srcList);
-        var rsiList = CalculateRelativeStrengthIndex(stockData, length: length).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var rsi = rsiList[i];
-            var src = srcList[i];
-            var prevB1 = i >= 1 ? bList[i - 1] : 0;
-            var prevB2 = i >= 2 ? bList[i - 2] : 0;
-
-            double b = 0, avg = 0, gain = 0, loss = 0, avgRsi = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevB = i >= j ? bList[i - j] : src;
-                var prevAvg = i >= j ? avgList[i - j] : 0;
-                var prevGain = i >= j ? gainList[i - j] : 0;
-                var prevLoss = i >= j ? lossList[i - j] : 0;
-                var k = (double)j / length;
-                var a = rsi * ((double)length / j);
-                avg = (a + prevB) / 2;
-                var avgChg = avg - prevAvg;
-                gain = avgChg > 0 ? avgChg : 0;
-                loss = avgChg < 0 ? Math.Abs(avgChg) : 0;
-                var avgGain = (gain * k) + (prevGain * (1 - k));
-                var avgLoss = (loss * k) + (prevLoss * (1 - k));
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-                avgRsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 1, 0);
-                b = avgRsiList.Count >= length ? avgRsiSum.Average(length) : avgRsi;
-            }
-            bList.Add(b);
-            avgList.Add(avg);
-            gainList.Add(gain);
-            lossList.Add(loss);
-            avgRsiList.Add(avgRsi);
-            avgRsiSum.Add(avgRsi);
-
-            var signal = GetRsiSignal(b - prevB1, prevB1 - prevB2, b, prevB1, 0.8, 0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rrsi", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bList);
-        stockData.IndicatorName = IndicatorName.RecursiveRelativeStrengthIndex;
-
-        return stockData;
+        var result = RecursiveRsiWindow.Calculate(stockData, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rrsi", result.Values.ToList() } });
+        stockData.SetSignals(CreateSignalsList(stockData) is null ? null : result.Trades.ToList());
+        stockData.SetCustomValues(result.Values.ToList()); stockData.IndicatorName = IndicatorName.RecursiveRelativeStrengthIndex; return stockData;
     }
 
 
@@ -335,12 +250,30 @@ public static partial class Calculations
     public static StockData CalculateMomentaRelativeStrengthIndex(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 14)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var signal = new List<double>(stockData.Count);
+            var events = CreateSignalsList(stockData);
+            using var window = new RangeGainLossWindow(maType, Math.Max(1, length1), new[] { length2 }, length2, stockData.Count);
+            double previous = 0, previousSignal = 0;
+            foreach (var price in prices)
+            {
+                var next = window.Next(price, true); line.Add(next.Value); signal.Add(next.Signal);
+                events?.Add(GetRsiSignal(next.Value - next.Signal, previous - previousSignal, next.Value, previous, 80, 20));
+                previous = next.Value; previousSignal = next.Signal;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mrsi", line }, { "Signal", signal } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.MomentaRelativeStrengthIndex;
+            return stockData;
+        }
+
         List<double> rsiList = new(stockData.Count);
         List<double> srcLcList = new(stockData.Count);
         List<double> hcSrcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length1);
+        var (highestList, lowestList) = length1 <= 1 ? (inputList, inputList) : GetMaxAndMinValuesList(inputList, length1);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -361,9 +294,7 @@ public static partial class Calculations
         {
             var top = topList[i];
             var bot = botList[i];
-            var rs = bot != 0 ? MinOrMax(top / bot, 1, 0) : 0;
-
-            var rsi = bot == 0 ? 100 : top == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+            var rsi = bot == 0 ? 100 : top == 0 ? 0 : MinOrMax(100 * top / (top + bot), 100, 0);
             rsiList.Add(rsi);
         }
 

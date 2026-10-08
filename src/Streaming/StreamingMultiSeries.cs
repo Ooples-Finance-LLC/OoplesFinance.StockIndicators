@@ -75,10 +75,18 @@ public sealed class MultiSeriesContext
 {
     private readonly SeriesStore _store;
 
-    internal MultiSeriesContext(SeriesStore store)
+    internal MultiSeriesContext(SeriesStore store, SeriesAlignmentPolicy alignmentPolicy = SeriesAlignmentPolicy.Strict,
+        TimeSpan? maximumBenchmarkAge = null)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
+        if (!Enum.IsDefined(typeof(SeriesAlignmentPolicy), alignmentPolicy)) throw new ArgumentOutOfRangeException(nameof(alignmentPolicy));
+        if (maximumBenchmarkAge < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(maximumBenchmarkAge));
+        AlignmentPolicy = alignmentPolicy; MaximumBenchmarkAge = maximumBenchmarkAge;
     }
+
+    public SeriesAlignmentPolicy AlignmentPolicy { get; }
+    /// <summary>Maximum age of a committed benchmark in LastKnown mode; null permits any past observation.</summary>
+    public TimeSpan? MaximumBenchmarkAge { get; }
 
     public bool TryGetLatest(SeriesKey key, out OhlcvBar bar)
     {
@@ -118,6 +126,10 @@ internal sealed class SeriesStore
 
     public void Update(SeriesKey key, OhlcvBar bar)
     {
+        PairedSeriesAlignment.ValidateObservation(bar);
+        if (_series.TryGetValue(key, out var previous) && previous.LatestFinal is { } final
+            && (bar.EndTime <= final.EndTime || bar.EndTime.Kind != final.EndTime.Kind))
+            throw new ArgumentException("Duplicate or out-of-order observations require reset and replay.", nameof(bar));
         if (!_series.TryGetValue(key, out var snapshot))
         {
             snapshot = new SeriesSnapshot();

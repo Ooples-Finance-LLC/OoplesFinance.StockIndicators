@@ -1,4 +1,4 @@
-//     Ooples Finance Stock Indicator Library
+﻿//     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
 //     Copyright © Franklin Moormann, 2020-2022
@@ -86,28 +86,26 @@ internal sealed class CustomIndicatorEngine
 
         if (state is null && indicator is IBuiltInIndicator && _createBuiltInState is not null)
             (state, _) = _createBuiltInState(indicator);
-
         if (state is not IIndicatorState && state is not IStreamingIndicatorState)
-            throw new NotSupportedException(indicator.GetType().Name + " has no scalar average state.");
+            throw new NotSupportedException(indicator.GetType().Name + " cannot supply a scalar average state.");
 
         var values = new double[series.Count];
         try
         {
             for (var i = 0; i < series.Count && i < _bars.Count; i++)
             {
-                var input = WithClose(_bars[i], series[i]);
-                values[i] = state is IIndicatorState simple
-                    ? simple.Update(input)
-                    : ((IStreamingIndicatorState)state).Update(ToOhlcv(input),
-                        isFinal: true, includeOutputs: false).Value;
+                var bar = WithClose(_bars[i], series[i]);
+                Validation.IndicatorInputDomain.For(indicator).Validate(bar);
+                values[i] = state is IIndicatorState simple ? simple.Update(bar)
+                    : ((IStreamingIndicatorState)state).Update(ToOhlcv(bar), isFinal: true, includeOutputs: false).Value;
+                Validation.IndicatorOutputPolicy.Validate(indicator, 0, i, values[i]);
             }
+            return values;
         }
         finally
         {
             (state as IDisposable)?.Dispose();
         }
-
-        return values;
     }
 
     internal CustomIndicatorEngine(IReadOnlyList<Bar> bars, Func<IIndicator, double[][]?> resolveBuiltIn,
@@ -145,11 +143,26 @@ internal sealed class CustomIndicatorEngine
 
         // A built-in was computed by the evaluator, which is the whole point of routing them there: the
         // custom engine never re-implements a calculation the library already has.
+        if (indicator.Source is null)
+            foreach (var bar in _bars) Validation.IndicatorInputDomain.For(indicator).Validate(bar);
         var builtIn = _resolveBuiltIn(indicator);
         if (builtIn is not null)
         {
-            _computed[indicator] = builtIn;
-            return builtIn;
+            return Remember(indicator, builtIn);
+        }
+
+        // ZigZag redraws prior legs and therefore requires the complete selected
+        // series. A streaming state cannot represent its published path.
+        if (indicator is IBuiltInIndicator wholeSeries && wholeSeries.BatchName == IndicatorName.ZigZag
+            && wholeSeries.CreateOptions() is Builder.Specs.ZigZagSpecOptions zigZagOptions)
+        {
+            var data = new StockData(_bars.Select(b => b.Open), _bars.Select(b => b.High),
+                _bars.Select(b => b.Low), _bars.Select(b => b.Close), _bars.Select(b => b.Volume), _bars.Select(b => b.Time));
+            if (indicator.Source is not null)
+                data.SetCustomValues(Compute(indicator.Source)[IndicatorContract.PrimaryOutput(indicator.Source).Slot].ToList());
+            using var context = new Builder.Compute.ComputeContext();
+            using var path = Builder.Compute.IndicatorCompute.ComputeZigZagFast(data, context, zigZagOptions.Deviation);
+            return Remember(indicator, new[] { path.Span.ToArray() });
         }
 
         // The indicator's own arithmetic first, even for a built-in. A built-in that was handed a
@@ -187,8 +200,7 @@ internal sealed class CustomIndicatorEngine
                 var (substituted, requests) = _computeWithAverage(indicator, factories);
                 if (substituted is not null)
                 {
-                    _computed[indicator] = substituted;
-                    return substituted;
+                    return Remember(indicator, substituted);
                 }
 
                 throw new NotSupportedException(
@@ -209,13 +221,14 @@ internal sealed class CustomIndicatorEngine
 
         // Depth first, so a component is ready before the indicator that reads it. Recursion terminates
         // because _visiting refuses a graph that comes back to something already on the stack.
+        using var stateLifetime = state as IDisposable;
         var components = new double[indicator.Components.Count][];
         for (var i = 0; i < indicator.Components.Count; i++)
         {
-            components[i] = Compute(indicator.Components[i])[0];
+            components[i] = Compute(indicator.Components[i])[IndicatorContract.PrimaryOutput(indicator.Components[i]).Slot];
         }
 
-        var chained = indicator.Source is null ? null : Compute(indicator.Source)[0];
+        var chained = indicator.Source is null ? null : Compute(indicator.Source)[IndicatorContract.PrimaryOutput(indicator.Source).Slot];
 
         var outputCount = indicator.Outputs.Count;
         var results = new double[outputCount][];
@@ -231,7 +244,9 @@ internal sealed class CustomIndicatorEngine
         {
             // A chained indicator reads the series it was given rather than the close, which is what Of()
             // means. The rest of the bar is left alone: an indicator reading highs and lows still gets them.
+            if (chained is not null && state is ICustomInputConsumer consumer) consumer.ReadCloseAsInput();
             var input = chained is null ? _bars[bar] : WithClose(_bars[bar], chained[bar]);
+            Validation.IndicatorInputDomain.For(indicator).Validate(input);
 
             for (var i = 0; i < components.Length; i++)
             {
@@ -245,7 +260,7 @@ internal sealed class CustomIndicatorEngine
                 case IStreamingIndicatorState streaming:
                     {
                         var streamed = streaming.Update(ToOhlcv(input), isFinal: true, includeOutputs: true);
-                        results[0][bar] = streamed.Value;
+                        results[0][bar] = IndicatorContract.NativePrimary(indicator, streamed);
 
                         if (outputCount > 1 && streamed.Outputs is not null && streamingKeys is not null)
                         {
@@ -295,8 +310,7 @@ internal sealed class CustomIndicatorEngine
             }
         }
 
-        _computed[indicator] = results;
-        return results;
+        return Remember(indicator, results);
         }
         finally
         {
@@ -306,4 +320,13 @@ internal sealed class CustomIndicatorEngine
 
     private static Bar WithClose(in Bar bar, double close) =>
         new(bar.Time, bar.Open, bar.High, bar.Low, close, bar.Volume);
+
+    private double[][] Remember(IIndicator indicator, double[][] values)
+    {
+        for (var slot = 0; slot < values.Length; slot++)
+            for (var i = 0; i < values[slot].Length; i++)
+                Validation.IndicatorOutputPolicy.Validate(indicator, slot, i, values[slot][i]);
+        _computed[indicator] = values;
+        return values;
+    }
 }

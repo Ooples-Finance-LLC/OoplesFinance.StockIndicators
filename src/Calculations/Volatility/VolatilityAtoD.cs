@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -24,16 +24,11 @@ public static partial class Calculations
         List<double> adrList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        double sum = 0;
+        var values = SpanCompat.CreateOutputBuffer(count);
+        VolatilityCore.AverageDayRange(SpanCompat.AsReadOnlySpan(highList), SpanCompat.AsReadOnlySpan(lowList), values.Span, length);
         for (var i = 0; i < count; i++)
         {
-            sum += highList[i] - lowList[i];
-            if (i >= length)
-            {
-                sum -= highList[i - length] - lowList[i - length];
-            }
-
-            var adr = i >= length - 1 ? sum / length : 0;
+            var adr = values.Span[i];
             adrList.Add(adr);
 
             var prevAdr1 = i >= 1 ? adrList[i - 1] : 0;
@@ -72,28 +67,10 @@ public static partial class Calculations
         List<double> cvList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactCoefficientWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double cv = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
-
-                var mean = sum / length;
-                double variance = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = inputList[j] - mean;
-                    variance += diff * diff;
-                }
-
-                var stdDev = Sqrt(variance / length);
-                cv = mean != 0 ? stdDev / mean * 100 : 0;
-            }
+            var cv = window.Next(inputList[i], true);
 
             cvList.Add(cv);
 
@@ -135,27 +112,10 @@ public static partial class Calculations
         List<double> ddList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactDownsideWindow(length, targetReturn);
         for (var i = 0; i < count; i++)
         {
-            double downsideDeviation = 0;
-            if (i >= length)
-            {
-                double sumSquaredDownside = 0;
-                var shortfalls = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var prevValue = inputList[j - 1];
-                    var ret = prevValue > 0 ? (inputList[j] - prevValue) / prevValue : 0;
-                    if (ret < targetReturn)
-                    {
-                        var shortfall = ret - targetReturn;
-                        sumSquaredDownside += shortfall * shortfall;
-                        shortfalls++;
-                    }
-                }
-
-                downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
-            }
+            var downsideDeviation = window.Next(inputList[i], true);
 
             ddList.Add(downsideDeviation);
 
@@ -201,7 +161,7 @@ public static partial class Calculations
         for (var i = 1; i < count; i++)
         {
             var prevValue = inputList[i - 1];
-            returns[i] = prevValue != 0 ? Log(inputList[i] / prevValue) : 0;
+            returns[i] = prevValue != 0 ? StableLogRatio.OfSameSign(inputList[i], prevValue) : 0;
         }
 
         for (var i = 0; i < count; i++)
@@ -260,36 +220,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAtrChannelWidth(this StockData stockData, int length = 14, double multiplier = 2)
     {
-        length = Math.Max(length, 1);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-        List<double> widthList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-
-        var trList = GetTrueRangeList(stockData);
-        var trSpan = SpanCompat.AsReadOnlySpan(trList);
-        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
-        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
-
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        using var window = new AtrDerivedWindow(length, Math.Max(1, input.Count));
+        List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var width = 2 * multiplier * atrBuffer.Span[i];
-            widthList.Add(width);
-
-            var prevWidth1 = i >= 1 ? widthList[i - 1] : 0;
-            var prevWidth2 = i >= 2 ? widthList[i - 2] : 0;
-            var signal = GetCompareSignal(width - prevWidth1, prevWidth1 - prevWidth2);
-            signalsList?.Add(signal);
+            var atr = window.Next(high[i], low[i], input[i], true); var value = AtrDerivedWindow.Width(atr, multiplier);
+            signals?.Add(GetCompareSignal(value - (i > 0 ? values[i - 1] : 0), (i > 0 ? values[i - 1] : 0) - (i > 1 ? values[i - 2] : 0))); values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Acw", widthList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(widthList);
-        stockData.IndicatorName = IndicatorName.AtrChannelWidth;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Acw", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AtrChannelWidth; return stockData;
     }
 
     /// <summary>
@@ -303,48 +242,15 @@ public static partial class Calculations
     public static StockData CalculateChoppinessIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        List<double> ciList = new(stockData.Count);
-        List<double> trList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum trSumWindow = new();
-
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestHighList, lowestLowList) = GetMaxAndMinValuesList(highList, lowList, length);
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(2, length); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var emaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        var window = new ChoppinessWindow(length); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentEma = emaList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-            var highestHigh = highestHighList[i];
-            var lowestLow = lowestLowList[i];
-            var range = highestHigh - lowestLow;
-
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-            trList.Add(tr);
-            trSumWindow.Add(tr);
-
-            var trSum = trSumWindow.Sum(length);
-            var ci = range > 0 ? 100 * Math.Log10(trSum / range) / Math.Log10(length) : 0;
-            ciList.Add(ci);
-
-            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, ci, 38.2);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], true);
+            signals?.Add(GetVolatilitySignal(input[i] - emaList[i], (i > 0 ? input[i - 1] : input[i]) - (i > 0 ? emaList[i - 1] : 0), value, 38.2)); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ci", ciList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ciList);
-        stockData.IndicatorName = IndicatorName.ChoppinessIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ci", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ChoppinessIndex; return stockData;
     }
 
 
@@ -359,51 +265,14 @@ public static partial class Calculations
     public static StockData CalculateClosedFormDistanceVolatility(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        List<double> tempHighList = new(stockData.Count);
-        List<double> tempLowList = new(stockData.Count);
-        List<double> hvList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum highSumWindow = new();
-        RollingSum lowSumWindow = new();
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        ClosedFormDistanceWindow.ValidateRanges(stockData.HighPrices, stockData.LowPrices); ClosedFormDistanceWindow.ValidateRanges(high, low);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToArray() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length), input).ToArray() : null;
+        using var window = new ClosedFormDistanceWindow(maType, length, external); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, means?[i]); line.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cfdv", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ClosedFormDistanceVolatility; return stockData;
 
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var ema = emaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var currentHigh = highList[i];
-            tempHighList.Add(currentHigh);
-            highSumWindow.Add(currentHigh);
-
-            var currentLow = lowList[i];
-            tempLowList.Add(currentLow);
-            lowSumWindow.Add(currentLow);
-
-            var a = highSumWindow.Sum(length);
-            var b = lowSumWindow.Sum(length);
-            var abAvg = (a + b) / 2;
-
-            var prevHv = GetLastOrDefault(hvList);
-            var hv = abAvg != 0 && a != b ? Sqrt(1 - (Pow(a, 0.25) * Pow(b, 0.25) / Pow(abAvg, 0.5))) : 0;
-            hvList.Add(hv);
-
-            var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, hv, prevHv);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cfdv", hvList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(hvList);
-        stockData.IndicatorName = IndicatorName.ClosedFormDistanceVolatility;
-
-        return stockData;
     }
 
 
@@ -419,45 +288,16 @@ public static partial class Calculations
     public static StockData CalculateDonchianChannelWidth(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
         int smoothLength = 22)
     {
-        List<double> donchianWidthList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var upper = highestList[i];
-            var lower = lowestList[i];
-
-            var donchianWidth = upper - lower;
-            donchianWidthList.Add(donchianWidth);
-        }
-
-        var donchianWidthSmaList = GetMovingAverageList(stockData, maType, smoothLength, donchianWidthList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentSma = smaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-            var donchianWidth = donchianWidthList[i];
-            var donchianWidthSma = donchianWidthSmaList[i];
-
-            var signal = GetVolatilitySignal(currentValue - currentSma, prevValue - prevSma, donchianWidth, donchianWidthSma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dcw", donchianWidthList },
-            { "Signal", donchianWidthSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(donchianWidthList);
-        stockData.IndicatorName = IndicatorName.DonchianChannelWidth;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? centerOverride = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : null;
+        using var window = new DonchianWidthWindow(maType, length, smoothLength, external, Math.Max(1, input.Count));
+        List<double> width = new(input.Count), signal = new(input.Count), center = new(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); width.Add(point.Width); signal.Add(point.Signal); center.Add(point.Center); }
+        if (external) { center = centerOverride!; signal = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(width), Math.Max(1, smoothLength))?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, width); }
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetVolatilitySignal(input[i] - center[i], i > 0 ? input[i - 1] - center[i - 1] : 0, width[i], signal[i]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dcw", width }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(width); stockData.IndicatorName = IndicatorName.DonchianChannelWidth; return stockData;
     }
 
 }

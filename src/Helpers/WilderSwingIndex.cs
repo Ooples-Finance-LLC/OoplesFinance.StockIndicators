@@ -24,18 +24,21 @@ internal static class WilderSwingIndex
     public static double Compute(double open, double high, double low, double close, double prevOpen, double prevClose,
         double limitMove)
     {
-        var highMove = Math.Abs(high - prevClose);
-        var lowMove = Math.Abs(low - prevClose);
-        var range = high - low;
-        var prevBody = Math.Abs(prevClose - prevOpen);
-
-        var r = highMove >= lowMove && highMove >= range ? highMove - (0.5 * lowMove) + (0.25 * prevBody)
-            : lowMove >= highMove && lowMove >= range ? lowMove - (0.5 * highMove) + (0.25 * prevBody)
-            : range + (0.25 * prevBody);
-        var k = Math.Max(highMove, lowMove);
-        var t = limitMove > 0 ? limitMove : range;
-        var n = (close - prevClose) + (0.5 * (close - open)) + (0.25 * (prevClose - prevOpen));
-
-        return r != 0 && t != 0 ? 50 * (n / r) * (k / t) : 0;
+        return ComputeExtended(open, high, low, close, prevOpen, prevClose, limitMove).Publish();
+    }
+    internal static RocBankValue ComputeExtended(double open, double high, double low, double close, double prevOpen, double prevClose, double limitMove)
+    {
+        var o = ExactVarianceWindow.Units(open); var h = ExactVarianceWindow.Units(high); var l = ExactVarianceWindow.Units(low);
+        var c = ExactVarianceWindow.Units(close); var po = ExactVarianceWindow.Units(prevOpen); var pc = ExactVarianceWindow.Units(prevClose);
+        var highMove = System.Numerics.BigInteger.Abs(h - pc); var lowMove = System.Numerics.BigInteger.Abs(l - pc);
+        var range = h - l; var body = System.Numerics.BigInteger.Abs(pc - po);
+        var divisor = highMove >= lowMove && highMove >= range ? 4 * highMove - 2 * lowMove + body
+            : lowMove >= highMove && lowMove >= range ? 4 * lowMove - 2 * highMove + body : 4 * range + body;
+        var scale = limitMove > 0 ? ExactVarianceWindow.Units(limitMove) : range;
+        var denominator = divisor * scale;
+        if (denominator.IsZero) return default;
+        var numerator = 50 * (4 * (c - pc) + 2 * (c - o) + pc - po) * System.Numerics.BigInteger.Max(highMove, lowMove);
+        var units = RocBankValue.RoundUnits((numerator * denominator.Sign) << 1074, System.Numerics.BigInteger.Abs(denominator));
+        var sum = new ExactMeanAccumulator(); sum.Add(double.Epsilon, units); return RocBankValue.Round(sum);
     }
 }

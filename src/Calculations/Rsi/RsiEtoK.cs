@@ -19,7 +19,7 @@ public static partial class Calculations
         List<double> absRsiList = new(stockData.Count);
         List<double> frsiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum absRsiSum = new();
+        using var absRsiSum = new FoldedRsiSum(length);
 
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).ChainedValues;
 
@@ -29,13 +29,17 @@ public static partial class Calculations
 
             var absRsi = 2 * Math.Abs(rsi - 50);
             absRsiList.Add(absRsi);
-            absRsiSum.Add(absRsi);
-
-            var frsi = absRsiSum.Sum(length);
+            var frsi = absRsiSum.Next(rsi, true);
             frsiList.Add(frsi);
         }
 
-        var frsiMaList = GetMovingAverageList(stockData, maType, length, frsiList);
+        List<double> frsiMaList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var signalWindow = new StrengthAverage(maType, length, stockData.Count);
+            frsiMaList = frsiList.Select(v => signalWindow.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else frsiMaList = GetMovingAverageList(stockData, maType, length, frsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var frsi = frsiList[i];

@@ -16,6 +16,21 @@ public static partial class Calculations
     public static StockData CalculateAverageTrueRange(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 14)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (input, high, low, _, _) = GetInputValuesList(stockData);
+            using var window = new KeltnerWindow(maType, length, length, maType, Math.Max(1, input.Count));
+            using var signalAverage = new RocBankAverage(maType, length, Math.Max(1, input.Count));
+            List<double> values = new(input.Count); var signals = CreateSignalsList(stockData); double previousMiddle = 0;
+            for (var i = 0; i < input.Count; i++)
+            {
+                var point = window.Next(high[i], low[i], input[i], true); var atr = point.Atr.Publish(); var middle = point.Middle.Publish();
+                var signal = signalAverage.Next(point.Atr, true).Publish();
+                signals?.Add(GetVolatilitySignal(input[i] - middle, (i > 0 ? input[i - 1] : 0) - previousMiddle, atr, signal));
+                values.Add(atr); previousMiddle = middle;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Atr", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AverageTrueRange; return stockData;
+        }
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var count = inputList.Count;
         List<double> maList;
@@ -47,6 +62,11 @@ public static partial class Calculations
             atrMaList = GetMovingAverageList(stockData, maType, length, atrList);
         }
 
+        if (Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(trList), Math.Max(1, length)) is { } supplied)
+        {
+            atrList = supplied.ToList();
+            atrMaList = GetMovingAverageList(stockData, maType, length, atrList);
+        }
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
         for (var i = 0; i < count; i++)
         {
@@ -82,6 +102,20 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAverageDirectionalIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14)
     {
+        if (!Builder.Compute.ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var (prices, highs, lows, _, _) = GetInputValuesList(stockData);
+            using var window = new DirectionalIndexWindow(maType, Math.Max(1, length), Math.Max(1, prices.Count));
+            List<double> plus = new(prices.Count), minus = new(prices.Count), values = new(prices.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < prices.Count; i++)
+            {
+                var point = window.Next(highs[i], lows[i], prices[i], true);
+                signals?.Add(GetCompareSignal(point.Plus - point.Minus, i == 0 ? 0 : plus[i - 1] - minus[i - 1]));
+                plus.Add(point.Plus); minus.Add(point.Minus); values.Add(point.Adx);
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "DiPlus", plus }, { "DiMinus", minus }, { "Adx", values } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AverageDirectionalIndex; return stockData;
+        }
         List<double> dmPlusList = new(stockData.Count);
         List<double> dmMinusList = new(stockData.Count);
         List<double> diPlusList = new(stockData.Count);
@@ -95,8 +129,8 @@ public static partial class Calculations
         {
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
+            var prevHigh = i >= 1 ? highList[i - 1] : currentHigh;
+            var prevLow = i >= 1 ? lowList[i - 1] : currentLow;
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
             var highDiff = currentHigh - prevHigh;
@@ -112,9 +146,9 @@ public static partial class Calculations
             trList.Add(tr);
         }
 
-        var dmPlus14List = GetMovingAverageList(stockData, maType, length, dmPlusList);
-        var dmMinus14List = GetMovingAverageList(stockData, maType, length, dmMinusList);
-        var tr14List = GetMovingAverageList(stockData, maType, length, trList);
+        var dmPlus14List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(dmPlusList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, dmPlusList);
+        var dmMinus14List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(dmMinusList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, dmMinusList);
+        var tr14List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(trList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, trList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var dmPlus14 = dmPlus14List[i];
@@ -134,7 +168,7 @@ public static partial class Calculations
             diList.Add(di);
         }
 
-        var adxList = GetMovingAverageList(stockData, maType, length, diList);
+        var adxList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(diList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, diList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var diPlus = diPlusList[i];
