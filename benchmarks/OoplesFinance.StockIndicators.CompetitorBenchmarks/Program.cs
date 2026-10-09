@@ -1,6 +1,12 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+if (args.Length == 4 && args[0] == "--profile-cost-boundary")
+{
+    PilotCostBoundaryProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
+    return;
+}
+
 if (args.Length == 1 && args[0] == "--probe-gpu-scheduling")
 {
     await PilotGpuSchedulingProbe.Run();

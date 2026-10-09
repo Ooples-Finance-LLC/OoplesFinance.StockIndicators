@@ -50,6 +50,10 @@ public class PilotCostBoundaryBenchmarks
         AsinFeasibilityBenchmarks.RequireSame(theirs, latestPayload.Values);
         if (!latestPayload.Latest.Equals(_bars[^1]) || (Case == "Asin" && latestPayload.Presence!.Any(x => x != 1)))
             throw new InvalidOperationException("Latest payload mismatch.");
+        var inPlace = TalibInPlaceLatestOnlyPayload();
+        AsinFeasibilityBenchmarks.RequireSame(theirs, inPlace.Values);
+        if (!inPlace.Latest.Equals(_bars[^1]) || (Case == "Asin" && inPlace.Presence!.Any(x => x != 1)))
+            throw new InvalidOperationException("In-place payload mismatch.");
         Console.WriteLine($"LAYOUT barBytes={System.Runtime.CompilerServices.Unsafe.SizeOf<Bar>()} count={Count}");
     }
 
@@ -102,15 +106,44 @@ public class PilotCostBoundaryBenchmarks
         return new(latest, Values(close, true), presence);
     }
 
+    // TALib reads each expiring SMA input before writing compact output, so exact
+    // input/output aliasing is safe. Align the compact result only after calculation.
+    [Benchmark]
+    public LatestPayload TalibInPlaceLatestOnlyPayload()
+    {
+        var values = GC.AllocateUninitializedArray<double>(Count);
+        double[]? presence = Case == "Asin" ? GC.AllocateUninitializedArray<double>(Count) : null;
+        Bar latest = default;
+        for (int i = 0; i < Count; i++)
+        {
+            var bar = _bars[i];
+            latest = bar;
+            if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
+                || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
+                IndicatorInputDomain.Finite.Validate(in bar);
+            bool defined = presence is null || bar.Close is >= -1 and <= 1;
+            values[i] = defined ? bar.Close : 0;
+            if (presence is not null) presence[i] = defined ? 1 : 0;
+        }
+        if (Case == "Asin") Functions.Asin<double>(values, System.Range.All, values, out _);
+        else
+        {
+            Functions.Sma<double>(values, System.Range.All, values, out _, 20);
+            values.AsSpan(0, Count - 19).CopyTo(values.AsSpan(19));
+            values.AsSpan(0, 19).Clear();
+        }
+        return new(latest, values, presence);
+    }
+
     [Benchmark(Baseline = true)] public double[] TalibValues() => Values(_close, true);
     [Benchmark] public double[] OoplesValues() => Values(_close, false);
     [Benchmark] public OwnedPayload TalibOwnedPayload() => Payload(true);
     [Benchmark] public OwnedPayload OoplesOwnedPayload() => Payload(false);
-    [Benchmark] public int OoplesLatestOnlyBuilder()
+    [Benchmark] public IIndicatorRun OoplesLatestOnlyBuilder()
     {
         IIndicator indicator = Case == "Asin" ? new PriceCircularTransform(PriceCircularOperation.ArcSine) : new Sma(20);
         return new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult().BarCount;
+            .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
     }
     [Benchmark] public int OoplesBuilder()
     {

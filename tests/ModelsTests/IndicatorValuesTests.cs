@@ -204,6 +204,18 @@ public sealed class IndicatorValuesTests
         Assert.Equal(full.Latest[sma], latest.Latest[sma]);
     }
 
+    [Fact]
+    public async Task UncertifiedSmaPreservesExactFallbackForOverflowingSums()
+    {
+        var bars = Enumerable.Repeat(new Bar(default, 0, 0, 0, double.MaxValue, 1), 7).ToArray();
+        var sma = new Sma(2);
+        using var full = await Builder(bars, sma).BuildAsync();
+        using var latest = await Builder(bars, sma).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+        Bits(full[sma].ToArray(), latest[sma].ToArray());
+        Assert.All(latest[sma].ToArray(), value => Assert.True(double.IsFinite(value)));
+        Assert.Equal(double.MaxValue, latest.Latest[sma]);
+    }
+
     private static void Bits(double[] expected, double[] actual) => Assert.Equal(
         expected.Select(BitConverter.DoubleToInt64Bits), actual.Select(BitConverter.DoubleToInt64Bits));
 

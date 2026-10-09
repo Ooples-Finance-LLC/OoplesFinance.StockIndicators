@@ -382,3 +382,17 @@ bit tests at period/exponent limits and rejection tests outside the proof bounds
 Release net10/net8/net461 builds passed (nine existing Framework dependency warnings).
 
 [Reports, raw statistics and test evidence](../benchmarks/results/eight-cpu-pilots/latest-only-builder/)
+
+
+### Updated source/profile comparison
+
+The [current PerfView/source review](builder-ab-profile.md#current-buildasync-perfviewsource-comparison-2026-10-09)
+supersedes the earlier matching-payload adapter: TALib can reuse its input array,
+and both benchmark sides now return owned results. Certified SMA now uses compact
+in-place output without a ring; proven finite SMA output avoids the redundant
+validation pass. Guarded arithmetic and raw validation remain unchanged. The final
+100k-bar builder measurements are 1.633 ms Asin, 0.800 ms grid SMA and 0.927 ms
+decimal SMA, versus 1.494/0.631/0.701 ms for the optimized matching TALib adapter.
+Allocation is within about 3-4 KB on equivalent payloads. Raw TALib remains faster;
+performance acceptance and global rollout are still open. Timing drift across runs
+is retained in the evidence; these are not controlled percentage speedup claims.

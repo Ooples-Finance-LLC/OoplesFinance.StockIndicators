@@ -51,14 +51,15 @@ internal static class ValuesBarExecution
             {
                 cancellation.ThrowIfCancellationRequested();
                 node.Failure?.Throw();
+                bool finiteByConstruction = node.Indicator is PriceCircularTransform;
                 if (node.Indicator is Sma sma)
-                    ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
+                    finiteByConstruction = ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
                 for (int slot = 0; slot < node.Values.Length; slot++)
                 {
-                    // Every qualified node has finite startup/output policy. Asin
-                    // produces finite values/flags by construction; other outputs
-                    // need only take the general diagnostic path on a failure.
-                    if (node.Indicator is not PriceCircularTransform)
+                    cancellation.ThrowIfCancellationRequested();
+                    // Asin and proven SMA ranges produce finite outputs by construction.
+                    // Unproven guarded SMA and other states still validate every output.
+                    if (!finiteByConstruction)
                     for (int i = 0; i < source.Length; i++)
                     {
                         cancellation.ThrowIfCancellationRequested();
@@ -117,7 +118,7 @@ internal static class ValuesBarExecution
         return latest;
     }
 
-    private static void ComputeSma(double[] close, double[] output, int period,
+    private static bool ComputeSma(double[] close, double[] output, int period,
         Core.SmaCpuKernel.GridSummary summary, CancellationToken cancellation, bool inPlace, bool boundedPositive)
     {
         var proof = new Core.SmaCpuKernel.Certificate(period);
@@ -134,7 +135,7 @@ internal static class ValuesBarExecution
         if (inPlace)
         {
             Core.SmaCpuKernel.ProcessInPlace(output, period, certified, cancellation, boundedPositive);
-            return;
+            return certified || boundedPositive;
         }
         var reader = new Core.SmaCpuKernel.DoubleReader();
         var consumer = new Core.SmaCpuKernel.Identity();
@@ -142,6 +143,7 @@ internal static class ValuesBarExecution
             close, output, period, ref reader, ref consumer, cancellation);
         else Core.SmaCpuKernel.ProcessGuarded<double, Core.SmaCpuKernel.DoubleReader, Core.SmaCpuKernel.Identity>(
             close, output, period, ref reader, ref consumer, cancellation);
+        return certified;
     }
 
     private sealed class Node : IDisposable

@@ -111,23 +111,32 @@ internal static class SmaCpuKernel
         cancellation.ThrowIfCancellationRequested();
         if (length == 1) return;
         if (length > values.Length) { Array.Clear(values); return; }
-        var pending = new double[length];
         if (certified)
         {
+            // Compact results overwrite only closes already evicted from the sum.
+            // This needs no ring; restore public warmup alignment after all reads.
+            int warmup = length - 1;
             double sum = 0;
-            int slot = 0;
-            for (int i = 0; i < values.Length; i++)
+            for (int i = 0; i < warmup; i++)
             {
                 cancellation.ThrowIfCancellationRequested();
-                double input = values[i];
-                pending[slot] = input;
-                sum += input;
-                values[i] = i >= length - 1 ? sum / length : 0;
-                if (++slot == length) slot = 0;
-                if (i >= length - 1) sum -= pending[slot];
+                sum += values[i];
             }
+            for (int i = warmup; i < values.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                sum += values[i];
+                double mean = sum / length;
+                int expired = i - warmup;
+                sum -= values[expired];
+                values[expired] = mean;
+            }
+            values.AsSpan(0, values.Length - warmup).CopyTo(values.AsSpan(warmup));
+            values.AsSpan(0, warmup).Clear();
+            cancellation.ThrowIfCancellationRequested();
             return;
         }
+        var pending = new double[length];
         var reader = new DoubleReader();
         var consumer = new DelayedStore(values, pending);
         if (boundedPositive) ProcessBoundedPositive(values, length, ref consumer, cancellation);

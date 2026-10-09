@@ -642,3 +642,84 @@ No production contract was changed in this diagnostic batch. Short timings remai
 exploratory and cannot establish portable competitor wins.
 
 [Matched reports, checks, PerfView exports and trace hashes](../benchmarks/results/eight-cpu-pilots/cost-boundaries/)
+
+
+## Current BuildAsync PerfView/source comparison (2026-10-09)
+
+Rechecked TALib.NETCore 0.5.0 at its NuGet-pinned commit
+`0bc2086a6cafc5b4c17fd398e0c16895e4daf92c`, not repository HEAD:
+[Asin loop](https://github.com/hmG3/TA-Lib.NETCore/blob/0bc2086a6cafc5b4c17fd398e0c16895e4daf92c/src/TALib.NETCore/Functions/TA_Asin.cs#L92)
+and [SMA helper](https://github.com/hmG3/TA-Lib.NETCore/blob/0bc2086a6cafc5b4c17fd398e0c16895e4daf92c/src/TALib.NETCore/Functions/FunctionHelpers.cs#L269).
+Asin calls generic scalar T.Asin (double uses the same scalar math), without a
+special SIMD/JIT/GPU pipeline. SMA seeds a sum then adds the current value,
+captures the total, evicts the oldest input and divides. It never periodically
+rebases or tests cancellation/roundoff. Both accept caller-provided output storage.
+
+Two benchmark fairness issues were corrected. TALib can operate in-place: the old
+matching-payload adapter's separate output array was unnecessary. The new adapter
+validates the same Bar[] fields, owns the same value/presence payload and latest
+bar, and shifts compact SMA output to preserve the same warmup alignment. Setup
+verifies aliasing results bit-for-bit against TALib's separate-buffer outputs.
+The builder benchmark now returns its owned IIndicatorRun instead of BarCount,
+matching the lifetime of returned competitor arrays/payloads. Previous adapter
+allocation advantages and timings must not be cited as the best TALib comparison.
+The adapter still is not a complete builder API; decimal SMA semantics still differ.
+
+PerfView exported fresh EventPipe sampled-thread-time stacks and GCStats for all
+three cases, using builder, raw TALib and in-place payload arms. Three builder
+traces were repeated after the result-lifetime correction, and both SMA builder
+traces were repeated after the source-aligned kernel change (14 traces total).
+This shell was not elevated: these are not ETW CPU samples. GCStats CPU totals
+are unsupported (zero/NaN), not evidence of zero GC CPU. Managed safe-point and
+inlining bias strongly favor allocation/helper frames; leaf stack percentages
+cannot establish that allocation consumes most CPU time.
+
+Separate unprofiled measured intervals, after three seconds of warmup, put builder
+stop-the-world GC pauses at 5.33% (Asin), 3.04% (grid SMA), and 2.56% (decimal SMA).
+These are actual GC.GetTotalPauseDuration deltas, not sampled percentages. They
+exclude allocation work and concurrent/background GC CPU. Therefore pauses alone
+do not explain the SMA throughput gap. The source comparison exposes extra input
+certification, guarded/rebased arithmetic and validation work; the traces do not
+reliably assign exclusive CPU percentages to each one.
+
+The scoped production fix removes a period-sized ring from certified in-place
+SMA. Compact output overwrites only inputs already evicted; a final overlap-safe
+shift restores warmup alignment. Original guarded/bounded arithmetic remains for
+unqualified inputs. The planner also omits its extra full-output validation scan
+only when the existing certificate or positive-range proof guarantees finite
+outputs. Raw OHLCV validation, cancellation and guarded fallback remain intact.
+
+Final unprofiled BenchmarkDotNet results, 100k bars, 6 warmups/10 iterations:
+
+| Case | LatestOnly BuildAsync | TALib in-place matching payload | TALib raw close arrays |
+|---|---:|---:|---:|
+| Asin | 1.633 ms / 1568.46 KB | 1.494 ms / 1564.66 KB | 1.024 ms / 783.09 KB |
+| SMA grid | 0.800 ms / 786.09 KB | 0.631 ms / 782.59 KB | 0.229 ms / 783.18 KB |
+| SMA decimal | 0.927 ms / 786.31 KB | 0.701 ms / 782.80 KB | 0.254 ms / 783.13 KB |
+
+Equivalent payload allocation is now essentially matched: one full value array
+for SMA; value and presence arrays for Asin; about 3-4 KB additional facade
+allocation. Throughput still trails the optimized adapter by approximately 9%,
+27%, and 32%, respectively. Raw TALib remains a faster, smaller-work boundary.
+Absolute times drifted substantially between campaigns; initial and intermediate
+reports are retained. Do not attribute cross-run timing differences solely to the
+patch or claim a raw competitor win. Final SMA traces recorded approximately
+0.788/0.964 ms per build and 2.52%/2.25% GC pause fractions while profiling.
+
+147 affected tests passed without skips, including certified/guarded bit parity,
+period boundaries, overflow fallback, ownership, cancellation and pilot outputs.
+Release net10 benchmark/library and net8 library builds passed. Framework code
+was not changed in this batch. All nine final benchmark cases have valid statistics.
+
+Reproduce with the Release benchmark executable:
+
+```text
+--profile-cost-boundary <Asin|SmaGrid|SmaDecimal> <Builder|Talib|InPlace> 8
+dotnet-trace collect --profile dotnet-sampled-thread-time,gc-verbose --show-child-io --output <trace.nettrace> -- dotnet <benchmark.dll> --profile-cost-boundary <case> <arm> 8
+PerfView.exe /AcceptEula /NoGui UserCommand NetperfToSpeedScope <trace.nettrace>
+PerfView.exe /AcceptEula /NoGui UserCommand GCStats <trace.nettrace>
+```
+
+[Reports, stack exports, GC CSVs, counters, hashes and test evidence](../benchmarks/results/eight-cpu-pilots/latest-only-perfview/).
+Raw traces remain at `C:/Users/cheat/temp/si-latest-perfview`. Full ETW/native CPU
+attribution would require an elevated collection; it was not obtained here.
