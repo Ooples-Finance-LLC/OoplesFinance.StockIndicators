@@ -241,29 +241,37 @@ alongside the evidence. Performance acceptance remains open for both pilots; glo
 application is gated on full builder wins and broader device/data qualification.
 
 
-## Values-only facade execution
+## Configured history through the BuildAsync facade
 
-`BuildValuesAsync()` uses the existing source and indicator configuration and
-returns `IIndicatorValues`. Callers choose whether they need completed series or
-snapshot/history replay; input fields, buffer counts, state and kernels remain
-internal decisions. Every declared output remains accessible by its typed name.
+`BuildAsync()` is the single asynchronous endpoint and returns `IIndicatorRun`.
+`ConfigureHistory(IndicatorHistoryMode.LatestOnly)` requests completed indicator
+series and the latest snapshot without finite bar replay. The default `Full` mode
+preserves complete snapshot replay. Live feeds enumerate new snapshots in either
+mode. Input fields, buffer counts, state and kernels remain internal decisions.
+Every declared output remains accessible by its typed name.
 
 ```csharp
 var sma = new Sma(20);
-var values = await new StockIndicatorBuilder()
+using var run = await new StockIndicatorBuilder()
     .ConfigureSource(Bars.From(bars))
     .ConfigureIndicators(sma)
-    .BuildValuesAsync();
-var latest = values[sma][values.BarCount - 1]; // for a nonempty source
+    .ConfigureHistory(IndicatorHistoryMode.LatestOnly)
+    .BuildAsync();
+var latest = run.Latest[sma]; // for a nonempty source
 ```
 
-The result owns its output arrays and requires no disposal. It exposes no bar
-snapshots, replay or live-feed lifecycle. Existing BuildAsync behavior is unchanged.
+Results own their output arrays and latest bar. Finite enumeration in LatestOnly
+throws with instructions to configure Full; it does not silently replay a partial
+history. Disposal, rebuilding and caller source mutation do not invalidate results.
+The former public `BuildValuesAsync` and `IIndicatorValues` have been removed.
 
 The modern CPU planner qualifies independent array-backed nodes for all eight
 pilots. It validates each full input bar and consumes a local copy; seven pilot
 families use bounded state without a full history copy. SMA shares one temporary
-owned close column across periods to preserve its guarded batch numerical behavior.
+owned close column across multiple periods to preserve its guarded batch numerical
+behavior. A single SMA now ingests closes into its unpublished output buffer and
+uses a period-sized buffer to preserve window reads while replacing closes with
+means. Its guarded arithmetic remains unchanged.
 Retrospective fractals use the existing delayed kernel and write confirmed values
 at their original center positions, preserving absent tails and presence flags.
 
@@ -285,7 +293,10 @@ There is no public buffer-layout configuration, input borrowing contract, implic
 precision change, or caller obligation to know which fields an indicator uses.
 
 
-### Values-only verification and measurements
+### Historical values-only verification and measurements
+
+The following reports measured the former endpoint before the single-endpoint
+correction and in-place SMA change; they are baseline evidence, not current results.
 
 All eight pilot outputs matched snapshot builds bit-for-bit across grid, decimal
 and late certificate rejection cases, with separate fresh builders to exercise the
@@ -324,3 +335,50 @@ TALib were 1.075/1.220/0.265 ms (grid SMA), 2.967/3.144/0.270 ms (decimal SMA), 
 have broad uncertainty. No eight-competitor-win claim is supported.
 
 [Raw reports, allocation data, test logs and source hashes](../benchmarks/results/eight-cpu-pilots/values-builder/)
+
+
+### BuildAsync correction and SMA storage/arithmetic results
+
+The public facade now has one asynchronous build endpoint. ConfigureHistory selects
+Full (default) or LatestOnly; every completed series and Latest remain available.
+Live enumeration is unchanged. The former second endpoint/result interface is gone.
+
+Single-SMA LatestOnly execution reuses its eventual output as owned input and delays
+writes with a period-sized buffer. For positive prices within a factor of two,
+2^-256 through 2^256, and periods 2 through 4096, a conservative bound eliminates
+per-bar guard bookkeeping. The additions, eviction order and periodic rebuilds
+remain exactly the guarded algorithm's operations. All other ranges retain the
+original certified/guarded selection. This specialization is limited to this pilot
+path; it is not a global numerical-contract change.
+
+The confirmed 100k-bar campaign used BuildAsync, six warmups and ten measurement
+iterations. Time in ms / managed allocation in KB:
+
+| Case | LatestOnly BuildAsync | TALib raw values | TALib matching payload adapter |
+|---|---:|---:|---:|
+| Asin, values and flags | 1.437 / 1568.67 | 1.050 / 783.25 | 1.717 / 2347.16 |
+| SMA grid | 1.007 / 786.21 | 0.271 / 783.09 | 0.691 / 1565.16 |
+| SMA decimal | 1.101 / 786.24 | 0.254 / 782.97 | 0.691 / 1565.54 |
+
+The same run measured existing raw Ooples decimal-SMA arithmetic at 2.141 ms,
+so the specialized builder now outperforms that arithmetic alone. The previous
+values path allocated about 1568 KB for SMA; this path is near TALib's one-array
+allocation. Asin still publishes two full arrays. Both pilots still lose to raw
+TALib; numerical differences on decimal SMA remain disclosed by setup validation.
+The matching payload adapter consumes the same Bar[] and validates all fields,
+retaining owned values, presence flags and the latest bar. It is one adapter, not
+a claim about the fastest possible TALib integration or an identical builder API.
+
+Evidence includes the allocation-only candidate, the specialized short run with
+large baseline drift, and the longer confirmed run. Absolute timing varied across
+runs, so the noisy short run is not used to claim a regression or victory. The
+confirmed run produced valid statistics for all 12 cases; no raw competitor win
+or global rollout acceptance is claimed.
+
+Verification: initial 154 focused checks passed with no skips, covering history,
+ownership, live feeds and actual required-GPU execution. After the guarded-loop
+specialization, 146 affected checks passed with no skips, including differential
+bit tests at period/exponent limits and rejection tests outside the proof bounds.
+Release net10/net8/net461 builds passed (nine existing Framework dependency warnings).
+
+[Reports, raw statistics and test evidence](../benchmarks/results/eight-cpu-pilots/latest-only-builder/)

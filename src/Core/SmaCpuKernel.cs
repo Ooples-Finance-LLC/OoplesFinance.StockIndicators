@@ -102,6 +102,115 @@ internal static class SmaCpuKernel
     }
 
 #if !NETFRAMEWORK
+    // The unpublished output initially owns the validated closes. Delay each guarded
+    // result by one window so every rebuild/exact-mean read still sees original input.
+    // Memory is O(period), with no mutable source rereads or duplicate full column.
+    internal static void ProcessInPlace(double[] values, int length, bool certified,
+        CancellationToken cancellation, bool boundedPositive = false)
+    {
+        cancellation.ThrowIfCancellationRequested();
+        if (length == 1) return;
+        if (length > values.Length) { Array.Clear(values); return; }
+        var pending = new double[length];
+        if (certified)
+        {
+            double sum = 0;
+            int slot = 0;
+            for (int i = 0; i < values.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                double input = values[i];
+                pending[slot] = input;
+                sum += input;
+                values[i] = i >= length - 1 ? sum / length : 0;
+                if (++slot == length) slot = 0;
+                if (i >= length - 1) sum -= pending[slot];
+            }
+            return;
+        }
+        var reader = new DoubleReader();
+        var consumer = new DelayedStore(values, pending);
+        if (boundedPositive) ProcessBoundedPositive(values, length, ref consumer, cancellation);
+        else ProcessGuarded<double, DoubleReader, DelayedStore>(values, Span<double>.Empty,
+            length, ref reader, ref consumer, cancellation);
+        consumer.Flush(cancellation);
+    }
+
+    internal struct PositiveRangeSummary
+    {
+        private long _minimum = long.MaxValue, _maximum = long.MinValue;
+        public PositiveRangeSummary() { }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void Include(double value)
+        {
+            long bits = BitConverter.DoubleToInt64Bits(value);
+            _minimum = Math.Min(_minimum, bits);
+            _maximum = Math.Max(_maximum, bits);
+        }
+        // 2^-256 <= min <= max <= 2^256, max/min <= 2, and 2 <= period <= 4096.
+        // Positive IEEE encodings separated by one exponent step differ by 2^52.
+        internal readonly bool Certifies(int period) => period is >= 2 and <= 4096
+            && _minimum >= 0x2ff0000000000000L && _maximum <= 0x4ff0000000000000L
+            && _maximum >= _minimum && _maximum - _minimum <= (1L << 52);
+    }
+
+    // Preserve the guarded loop's floating-point operations and rebuild cadence.
+    // This proof ONLY removes guard bookkeeping; it is not the grid certificate.
+    // Between rebuilds at most 3L additions/subtractions affect error. With M<=2m,
+    // L<=4096 and u=2^-53, accumulated error is < Lm/2, so each full sum is >=Lm/2
+    // and <=2(L+1)M. Outward bound increments are conservatively <=(L+1)M*2^-50;
+    // hence bound/abs(sum) <=12(L+1)*2^-50 < 4.37e-11, below RequiresExact's 1e-10.
+    // Positive additions cannot cancel, and eviction retains >1/6 of its largest
+    // operand: neither 1e-4 cancellation/rebuild trigger can fire. Exponent bounds
+    // exclude overflow, subnormal means and outward-bound underflow. Unqualified
+    // input always uses the original guarded path.
+    private static void ProcessBoundedPositive(double[] values, int length, ref DelayedStore consumer,
+        CancellationToken cancellation)
+    {
+        double sum = 0;
+        int untilRebuild = length;
+        for (int i = 0; i < values.Length; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            double input = values[i];
+            sum += input;
+            if (i >= length) sum -= values[i - length];
+            consumer.Consume(input, i >= length - 1 ? sum / length : 0, i);
+            if (--untilRebuild == 0)
+            {
+                sum = 0;
+                for (int j = i - length + 1; j <= i; j++)
+                {
+                    if ((j & 1023) == 0) cancellation.ThrowIfCancellationRequested();
+                    sum += values[j];
+                }
+                untilRebuild = length;
+            }
+        }
+    }
+
+    private struct DelayedStore(double[] values, double[] pending) : IConsumer
+    {
+        private int _slot;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double Consume(double input, double mean, int index)
+        {
+            if (index >= pending.Length) values[index - pending.Length] = pending[_slot];
+            pending[_slot] = mean;
+            if (++_slot == pending.Length) _slot = 0;
+            return mean;
+        }
+        internal void Flush(CancellationToken cancellation)
+        {
+            for (int i = values.Length - pending.Length; i < values.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                values[i] = pending[_slot];
+                if (++_slot == pending.Length) _slot = 0;
+            }
+        }
+    }
+
     internal struct GridSummary
     {
         private int _lowest = 2047, _highest;

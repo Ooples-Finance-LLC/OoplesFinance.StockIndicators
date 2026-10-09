@@ -17,7 +17,8 @@ namespace OoplesFinance.StockIndicators.Indicators;
 /// </summary>
 /// <remarks>
 /// <para>
-/// One type whether the source was finite or live, because batch is the case where the bars run out. There is
+/// Finite snapshot replay requires Full history configuration; LatestOnly retains completed series and
+/// the latest snapshot. Live sources enumerate new snapshots in either mode. There is
 /// no string indexer, deliberately: a series is addressed by the indicator object the caller configured, or by
 /// one of its typed output members.
 /// </para>
@@ -60,7 +61,7 @@ internal sealed class IndicatorRun : IIndicatorRun
     internal bool HasLegacyRuntime => _runtime is not null;
     // Series already own their arrays. Transferring their dictionary retains neither
     // this run nor its runtime/history, and does not copy the output payload again.
-    internal IIndicatorValues AsValues() => new IndicatorValues(_series, BarCount);
+    internal IIndicatorRun AsLatestOnly() => new LatestOnlyIndicatorRun(_series, BarCount, BarCount == 0 ? null : Latest);
     private readonly IReadOnlyList<Bar> _bars;
     private readonly int _warmupBarsSeen, _warmupRequired;
 

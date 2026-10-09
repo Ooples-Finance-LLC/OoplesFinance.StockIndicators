@@ -49,16 +49,25 @@ public sealed class StockIndicatorBuilder
         return this;
     }
 
-    /// <summary>Computes the configured series without returning bar snapshots or history replay.</summary>
-    /// <remarks>Uses the same indicator configuration and numerical contracts as BuildAsync.
-    /// Input requirements and working storage are selected internally. Algorithms requiring
-    /// history may still use temporary history during execution. The source must be finite.</remarks>
-    public async Task<Indicators.IIndicatorValues> BuildValuesAsync(CancellationToken cancellationToken = default)
+    private IndicatorHistoryMode _historyMode;
+
+    /// <summary>Selects retained bar history. Completed indicator series are available in both modes.</summary>
+    /// <remarks>Full is the default and supports finite snapshot replay. LatestOnly retains
+    /// only the latest finite snapshot. Live feeds continue to enumerate new snapshots in either mode.</remarks>
+    public StockIndicatorBuilder ConfigureHistory(IndicatorHistoryMode mode)
+    {
+        if (!Enum.IsDefined(typeof(IndicatorHistoryMode), mode))
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        _historyMode = mode;
+        return this;
+    }
+
+    private async Task<Indicators.IIndicatorRun> BuildLatestOnlyAsync(CancellationToken cancellationToken = default)
     {
         LastExecution = null;
         cancellationToken.ThrowIfCancellationRequested();
-        var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildValuesAsync.");
-        if (!source.IsFinite) throw new NotSupportedException("Completed values require a finite source. Use BuildAsync for a live feed.");
+        var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
+        if (!source.IsFinite) return await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
 #if !NETFRAMEWORK
         if (_executionBackend != IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
             && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } direct
@@ -74,8 +83,8 @@ public sealed class StockIndicatorBuilder
         var previousSource = _configuredSource;
         try
         {
-            using var run = await BuildAsync(cancellationToken).ConfigureAwait(false);
-            return ((Indicators.IndicatorRun)run).AsValues();
+            using var run = await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
+            return ((Indicators.IndicatorRun)run).AsLatestOnly();
         }
         catch { LastExecution = null; throw; }
         finally { _configuredSource = previousSource; }
@@ -226,7 +235,11 @@ public sealed class StockIndicatorBuilder
     /// </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown when no source was configured.</exception>
-    public async Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default)
+    public Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default) =>
+        _historyMode == IndicatorHistoryMode.LatestOnly
+            ? BuildLatestOnlyAsync(cancellationToken) : BuildWithHistoryAsync(cancellationToken);
+
+    private async Task<Indicators.IIndicatorRun> BuildWithHistoryAsync(CancellationToken cancellationToken)
     {
         LastExecution = null;
         var execution = new IndicatorExecutionInfo(IndicatorExecutionBackend.Cpu, null, "Ordinary CPU graph execution.");

@@ -78,6 +78,71 @@ public sealed class SmaCpuKernelTests
         Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), consumer.Values.Select(BitConverter.DoubleToInt64Bits));
     }
 
+    public static IEnumerable<object[]> InPlaceCases =>
+        new[] { 1, 2, 3, 20, 64, 129, 130, int.MaxValue }
+            .SelectMany(period => Enumerable.Range(0, 4).Select(mode => new object[] { period, mode }));
+
+    [Theory, MemberData(nameof(InPlaceCases))]
+    public void InPlacePreservesGuardedAndCertifiedResultsAcrossWindowBoundaries(int period, int mode)
+    {
+        var input = Enumerable.Range(0, 129).Select(i => mode == 0
+            ? (i % 17 - 8) / 4d : 100 + i % 19 / 100d).ToArray();
+        input[0] = -0d;
+        if (mode == 2) { input[21] = 1e100; input[22] = -1e100; input[^1] = double.Epsilon; }
+        if (mode == 3) { input[19] = double.MaxValue; input[20] = -double.MaxValue; }
+        var expected = new double[input.Length];
+        MovingAverageCore.SimpleMovingAverage(input, expected, period);
+        var actual = (double[])input.Clone();
+        SmaCpuKernel.ProcessInPlace(actual, period, mode == 0, default);
+        Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), actual.Select(BitConverter.DoubleToInt64Bits));
+    }
+
+    [Fact]
+    public void InPlaceCancellationDoesNotPublishOrMutateInput()
+    {
+        var input = new[] { 1d, 2d, 3d };
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        Assert.ThrowsAny<OperationCanceledException>(() => SmaCpuKernel.ProcessInPlace(input, 2, true, cancellation.Token));
+        Assert.Equal(new[] { 1d, 2d, 3d }, input);
+    }
+
+    public static IEnumerable<object[]> PositiveCases => new[] { 2, 3, 20, 127, 4096 }
+        .SelectMany(period => new[] { -256, -1, 0, 255 }.Select(exponent => new object[] { period, exponent }));
+
+    [Theory, MemberData(nameof(PositiveCases))]
+    public void PositiveRangeProofPreservesEveryGuardedBit(int period, int exponent)
+    {
+        var random = new Random(173);
+        var scale = Math.Pow(2, exponent);
+        var input = Enumerable.Range(0, period * 3 + 17).Select(i =>
+            scale * (i % 7 == 0 ? 1 : i % 7 == 1 ? 2 : 1 + random.NextDouble())).ToArray();
+        var proof = new SmaCpuKernel.PositiveRangeSummary();
+        foreach (var value in input) proof.Include(value);
+        Assert.True(proof.Certifies(period));
+        var expected = new double[input.Length];
+        var reader = new SmaCpuKernel.DoubleReader();
+        var identity = new SmaCpuKernel.Identity();
+        SmaCpuKernel.ProcessGuarded<double, SmaCpuKernel.DoubleReader, SmaCpuKernel.Identity>(
+            input, expected, period, ref reader, ref identity);
+        var actual = (double[])input.Clone();
+        SmaCpuKernel.ProcessInPlace(actual, period, false, default, boundedPositive: true);
+        Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), actual.Select(BitConverter.DoubleToInt64Bits));
+    }
+
+    [Theory]
+    [InlineData(-1, 1, 20)] [InlineData(0, 1, 20)]
+    [InlineData(1, 2.0000000000000004, 20)] [InlineData(1e-100, 1e-100, 20)]
+    [InlineData(1e100, 1e100, 20)] [InlineData(1, 2, 4097)]
+    [InlineData(1, 2, 1)] [InlineData(double.NaN, 1, 20)]
+    [InlineData(1, double.PositiveInfinity, 20)]
+    public void PositiveRangeProofRejectsInputsOutsideItsBound(double first, double last, int period)
+    {
+        var proof = new SmaCpuKernel.PositiveRangeSummary();
+        proof.Include(first); proof.Include(last);
+        Assert.False(proof.Certifies(period));
+    }
+
     private struct CapturedMean(int count) : SmaCpuKernel.IConsumer
     {
         internal readonly double[] Values = new double[count];

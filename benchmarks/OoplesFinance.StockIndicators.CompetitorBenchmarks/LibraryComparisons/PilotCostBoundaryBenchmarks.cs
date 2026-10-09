@@ -26,7 +26,7 @@ public class PilotCostBoundaryBenchmarks
         var theirs = TalibValues();
         IIndicator indicator = Case == "Asin" ? new PriceCircularTransform(PriceCircularOperation.ArcSine) : new Sma(20);
         var built = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .BuildValuesAsync().GetAwaiter().GetResult();
+            .ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
         AsinFeasibilityBenchmarks.RequireSame(ours, built[indicator].ToArray());
         // Decimal arithmetic contracts differ: expose the discrepancy instead of
         // claiming bit equivalence or relaxing the library's numerical contract.
@@ -46,6 +46,10 @@ public class PilotCostBoundaryBenchmarks
             if (!payload.Bars.SequenceEqual(_bars)) throw new InvalidOperationException("History mismatch.");
             if (Case == "Asin" && payload.Presence!.Any(x => x != 1)) throw new InvalidOperationException("Presence mismatch.");
         }
+        var latestPayload = TalibLatestOnlyPayload();
+        AsinFeasibilityBenchmarks.RequireSame(theirs, latestPayload.Values);
+        if (!latestPayload.Latest.Equals(_bars[^1]) || (Case == "Asin" && latestPayload.Presence!.Any(x => x != 1)))
+            throw new InvalidOperationException("Latest payload mismatch.");
         Console.WriteLine($"LAYOUT barBytes={System.Runtime.CompilerServices.Unsafe.SizeOf<Bar>()} count={Count}");
     }
 
@@ -77,15 +81,36 @@ public class PilotCostBoundaryBenchmarks
         return new(owned, Values(close, competitor), presence);
     }
 
+    // Same Bar[] input, full-field validation, owned values/presence and latest bar
+    // as LatestOnly. This wrapper is a payload boundary, not a TALib builder API.
+    [Benchmark]
+    public LatestPayload TalibLatestOnlyPayload()
+    {
+        var close = new double[Count];
+        double[]? presence = Case == "Asin" ? new double[Count] : null;
+        Bar latest = default;
+        for (int i = 0; i < Count; i++)
+        {
+            var bar = _bars[i];
+            latest = bar;
+            if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
+                || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
+                IndicatorInputDomain.Finite.Validate(in bar);
+            close[i] = bar.Close;
+            if (presence is not null) presence[i] = close[i] is >= -1 and <= 1 ? 1 : 0;
+        }
+        return new(latest, Values(close, true), presence);
+    }
+
     [Benchmark(Baseline = true)] public double[] TalibValues() => Values(_close, true);
     [Benchmark] public double[] OoplesValues() => Values(_close, false);
     [Benchmark] public OwnedPayload TalibOwnedPayload() => Payload(true);
     [Benchmark] public OwnedPayload OoplesOwnedPayload() => Payload(false);
-    [Benchmark] public int OoplesValuesBuilder()
+    [Benchmark] public int OoplesLatestOnlyBuilder()
     {
         IIndicator indicator = Case == "Asin" ? new PriceCircularTransform(PriceCircularOperation.ArcSine) : new Sma(20);
         return new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildValuesAsync().GetAwaiter().GetResult().BarCount;
+            .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult().BarCount;
     }
     [Benchmark] public int OoplesBuilder()
     {
@@ -95,5 +120,6 @@ public class PilotCostBoundaryBenchmarks
         return run.BarCount;
     }
 
+    public sealed record LatestPayload(Bar Latest, double[] Values, double[]? Presence);
     public sealed record OwnedPayload(Bar[] Bars, double[] Values, double[]? Presence);
 }

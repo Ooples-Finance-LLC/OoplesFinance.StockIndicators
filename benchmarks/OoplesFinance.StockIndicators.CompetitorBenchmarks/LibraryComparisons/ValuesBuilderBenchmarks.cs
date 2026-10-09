@@ -18,7 +18,7 @@ public class ValuesBuilderBenchmarks
         CpuBuilderWorkload.Verify(_work);
         var indicator = CpuBuilderWorkload.Create(PairId);
         using var expected = CpuBuilderWorkload.Build(_work, indicator).GetAwaiter().GetResult();
-        var actual = Builder(indicator).BuildValuesAsync().GetAwaiter().GetResult();
+        var actual = Builder(indicator).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
         foreach (var output in indicator.Outputs)
             AsinFeasibilityBenchmarks.RequireSame(expected[output].ToArray(), actual[output].ToArray());
     }
@@ -30,5 +30,5 @@ public class ValuesBuilderBenchmarks
         return run.BarCount;
     }
     [Benchmark] public int ValuesOnly() => Builder(CpuBuilderWorkload.Create(PairId))
-        .BuildValuesAsync().GetAwaiter().GetResult().BarCount;
+        .ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult().BarCount;
 }
