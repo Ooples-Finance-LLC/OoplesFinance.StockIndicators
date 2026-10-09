@@ -239,3 +239,88 @@ SMA values matched bitwise, and Release net10/net8/net461 builds passed (existin
 Framework dependency warnings). The complete final affected verification is retained
 alongside the evidence. Performance acceptance remains open for both pilots; global
 application is gated on full builder wins and broader device/data qualification.
+
+
+## Values-only facade execution
+
+`BuildValuesAsync()` uses the existing source and indicator configuration and
+returns `IIndicatorValues`. Callers choose whether they need completed series or
+snapshot/history replay; input fields, buffer counts, state and kernels remain
+internal decisions. Every declared output remains accessible by its typed name.
+
+```csharp
+var sma = new Sma(20);
+var values = await new StockIndicatorBuilder()
+    .ConfigureSource(Bars.From(bars))
+    .ConfigureIndicators(sma)
+    .BuildValuesAsync();
+var latest = values[sma][values.BarCount - 1]; // for a nonempty source
+```
+
+The result owns its output arrays and requires no disposal. It exposes no bar
+snapshots, replay or live-feed lifecycle. Existing BuildAsync behavior is unchanged.
+
+The modern CPU planner qualifies independent array-backed nodes for all eight
+pilots. It validates each full input bar and consumes a local copy; seven pilot
+families use bounded state without a full history copy. SMA shares one temporary
+owned close column across periods to preserve its guarded batch numerical behavior.
+Retrospective fractals use the existing delayed kernel and write confirmed values
+at their original center positions, preserving absent tails and presence flags.
+
+The planner only accepts sealed known nodes; arbitrary customer callbacks and
+unsupported graphs never enter a guessed storage policy. Warmup, projected or
+asynchronous sources, composed/custom graphs, Framework and required GPU execution
+use established execution automatically. These compatibility paths may allocate
+temporary history; the returned values do not retain it. Results transfer their
+already-owned series without an extra payload copy, and the values build does not
+replace the builder's prior legacy source with a temporary history capture.
+
+CPU Asin remains bit-identical, SMA keeps certified/guarded arithmetic, all named
+outputs preserve presence/startup conventions, and required GPU cannot silently
+use the new CPU planner. Raw input validation precedes publication and deferred
+arithmetic errors. Cancelled/failed builds clear LastExecution and publish nothing.
+
+This is the first qualified storage planner, not an all-graph no-history promise.
+There is no public buffer-layout configuration, input borrowing contract, implicit
+precision change, or caller obligation to know which fields an indicator uses.
+
+
+### Values-only verification and measurements
+
+All eight pilot outputs matched snapshot builds bit-for-bit across grid, decimal
+and late certificate rejection cases, with separate fresh builders to exercise the
+new route. Tests cover mixed nodes, empty/short windows, hidden dependencies,
+ownership after mutation/rebuild/disposal, cancellation, invalid unused fields,
+input-before-overflow validation, warmup fallback and actual required GPU execution.
+The initial focused suite passed 182 checks; 96 affected checks passed after the
+hot-loop correction, and the final 36 values-specific checks passed with zero skips.
+Release net10/net8/net461 builds passed; net8 was rebuilt after the final loop change.
+
+At 10k bars, corrected snapshot / values-only managed allocation in KB:
+
+| Indicator | With snapshots | Values only |
+|---|---:|---:|
+| SMA | 549.71 | 158.85 |
+| Asin (including flags) | 628.10 | 158.97 |
+| Scaled true range | 553.96 | 80.77 |
+| Jurik | 557.56 | 82.65 |
+| Fractals (including flags) | 1804.00 | 317.08 |
+| Pivots (including flags) | 1889.24 | 1414.12 |
+| Rickshaw | 554.37 | 81.07 |
+| Short body | 556.19 | 82.88 |
+
+The corrected 34-case campaign had lower timing means for seven pilot families.
+Rickshaw initially remained slower; a final scalar dispatch specialization reduced
+its measured values-only time to 727.6 us versus 688.4 us for snapshots (overlapping
+uncertainty, not a proven speed win). This final refinement has a separate 2-case
+report. Initial regressing results are retained and explicitly superseded.
+
+At 100k bars in the corrected campaign, SMA values builds allocated about 1568 KB
+versus 5474 KB for snapshots; Asin allocated 1568 versus 6255 KB. TALib direct values
+still allocate about 783 KB: SMA's temporary close column and Asin's presence output
+explain the remaining payload difference. Corrected means for values-only/snapshot/
+TALib were 1.075/1.220/0.265 ms (grid SMA), 2.967/3.144/0.270 ms (decimal SMA), and
+1.503/2.222/1.003 ms (Asin). Decimal numerical contracts differ; snapshot timings
+have broad uncertainty. No eight-competitor-win claim is supported.
+
+[Raw reports, allocation data, test logs and source hashes](../benchmarks/results/eight-cpu-pilots/values-builder/)

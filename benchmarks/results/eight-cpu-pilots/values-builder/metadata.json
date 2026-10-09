@@ -1,0 +1,37 @@
+{
+  "base_commit": "3d03fd4e",
+  "valid_benchmark_counts": {
+    "corrected-PilotCostBoundaryBenchmarks": 18,
+    "corrected-ValuesBuilderBenchmarks": 16,
+    "rickshaw-specialized-ValuesBuilderBenchmarks": 2
+  },
+  "checks": {
+    "initial_focused": 182,
+    "after_dispatch_correction": 96,
+    "after_scalar_specialization": 36,
+    "skipped": 0,
+    "final_fresh_builder_route_checks": 36,
+    "frameworks": [
+      "net10.0",
+      "net8.0",
+      "net461"
+    ]
+  },
+  "source_sha256": {
+    "src/Builder/StockIndicatorBuilder.cs": "3b9e3e2b73357716756c0fbe0f316b332a17f70d1dbf5cc5aaf886f85ee6ad95",
+    "src/Indicators/IndicatorValues.cs": "ff8531ae6a6f102cf265f8b7361b4f3c23c4b57ace28aafd42491ac64fdd8a8a",
+    "src/Indicators/ValuesBarExecution.cs": "94293d93ac7ed82d65d109d5eb10593418fdf693ed25f7995aed3e6632056319",
+    "src/Indicators/IndicatorRun.cs": "38ca71e842925147c635ba44e105c2a629de5928b83cd399ac6ee2836c1280e8",
+    "tests/ModelsTests/IndicatorValuesTests.cs": "088e05f35679561d72d1e6b9fa1118613ad6f268b0f02f9c042afbd8edf445fe"
+  },
+  "net10_library_sha256": "0e4dd53e27e21f7af680dbe58dab49e0d8f87b008facda9bafb5fb446dbfaed1",
+  "limitations": [
+    "Initial timing campaign superseded after dispatch/policy overhead regressions; retained explicitly.",
+    "Corrected34-case campaign precedes final scalar dispatch specialization. Rickshaw2-case followup measures the final specialized loop.",
+    "Both builder arms own every declared output. Values-only intentionally excludes snapshot/history replay.",
+    "TALib values own one output, without full OHLCV validation or presence flags. Decimal SMA arithmetic differs as logged by setup.",
+    "Timings are short local measurements with wide uncertainty on some rows. Allocation savings do not prove competitor wins.",
+    "Lower-allocation execution is qualified for independent array-backed eight-pilot nodes on modern CPU targets. Other graphs use existing execution with temporary history.",
+    "No automatic GPU selection, output narrowing, public buffer-layout controls, or live values result."
+  ]
+}

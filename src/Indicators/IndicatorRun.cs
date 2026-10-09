@@ -58,6 +58,9 @@ internal sealed class IndicatorRun : IIndicatorRun
     private readonly Dictionary<IIndicatorOutput, double[]> _series;
     private readonly IndicatorRuntime? _runtime;
     internal bool HasLegacyRuntime => _runtime is not null;
+    // Series already own their arrays. Transferring their dictionary retains neither
+    // this run nor its runtime/history, and does not copy the output payload again.
+    internal IIndicatorValues AsValues() => new IndicatorValues(_series, BarCount);
     private readonly IReadOnlyList<Bar> _bars;
     private readonly int _warmupBarsSeen, _warmupRequired;
 

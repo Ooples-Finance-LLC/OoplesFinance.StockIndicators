@@ -37,7 +37,7 @@ public sealed class StockIndicatorBuilder
     private bool _requiresRuntime;
     private IndicatorExecutionBackend _executionBackend;
 
-    /// <summary>Describes the last successful BuildAsync execution; null after a failed build.</summary>
+    /// <summary>Describes the last successful asynchronous build; null after a failed build.</summary>
     public IndicatorExecutionInfo? LastExecution { get; private set; }
 
     /// <summary>Selects CPU, automatic, or required GPU execution for finite typed runs.</summary>
@@ -47,6 +47,38 @@ public sealed class StockIndicatorBuilder
             throw new ArgumentOutOfRangeException(nameof(backend));
         _executionBackend = backend;
         return this;
+    }
+
+    /// <summary>Computes the configured series without returning bar snapshots or history replay.</summary>
+    /// <remarks>Uses the same indicator configuration and numerical contracts as BuildAsync.
+    /// Input requirements and working storage are selected internally. Algorithms requiring
+    /// history may still use temporary history during execution. The source must be finite.</remarks>
+    public async Task<Indicators.IIndicatorValues> BuildValuesAsync(CancellationToken cancellationToken = default)
+    {
+        LastExecution = null;
+        cancellationToken.ThrowIfCancellationRequested();
+        var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildValuesAsync.");
+        if (!source.IsFinite) throw new NotSupportedException("Completed values require a finite source. Use BuildAsync for a live feed.");
+#if !NETFRAMEWORK
+        if (_executionBackend != IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
+            && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } direct
+            && Indicators.ValuesBarExecution.Supports(_configuredIndicators))
+        {
+            var values = Indicators.ValuesBarExecution.Execute(direct, _configuredIndicators, cancellationToken);
+            LastExecution = new(IndicatorExecutionBackend.Cpu, null, "CPU values execution without retained bar history.");
+            return values;
+        }
+#endif
+        // Preserve the established route for arbitrary graphs, sources, warmup and
+        // required GPU execution. Do not keep its temporary history in this builder.
+        var previousSource = _configuredSource;
+        try
+        {
+            using var run = await BuildAsync(cancellationToken).ConfigureAwait(false);
+            return ((Indicators.IndicatorRun)run).AsValues();
+        }
+        catch { LastExecution = null; throw; }
+        finally { _configuredSource = previousSource; }
     }
     private int _nextId;
 
