@@ -481,3 +481,96 @@ final standard builder comparisons. The next work remains optimization of these
 two fused kernels and their execution plan under the same public-builder gate,
 before extending fusion to other indicators. These results do not establish a
 limit on what a further optimized fused implementation can achieve.
+
+
+## Shared SMA CPU kernel and dependency fusion (2026-10-09)
+
+`Core/SmaCpuKernel.cs` now owns the shared arithmetic and certification. Its
+struct input/output operators fuse owned ingestion, validation, rolling SMA,
+and downstream consumption. The contiguous SMA core uses the same arithmetic
+without allocating a ring. The pilot accepts `Asin.Of(Sma)`; when SMA is not
+explicitly configured, no intermediate SMA array is allocated or written on
+the certified path. Failed certification rebuilds SMA and dependent Asin before
+publication. The exact public streaming kernel and guarded core fallback retain
+their contracts. This implementation is scalar loop fusion, not SIMD.
+
+Adversarial checks cover exact rational windows, block boundaries, late rejection,
+intermediate elision, period 1, oversized periods, output visibility and dependency
+warmup. All 127 selected unit tests and 119 competitor tests passed; Release
+builds passed on net10.0/net8.0/net461 (existing Framework package warnings).
+Final Tier1 assembly inlines input, SMA and consumer operations; Math.Asin remains
+a normal math call.
+
+Final fresh-builder means at 10,000 bars:
+
+| Workload | Fused builder | Comparator |
+|---|---:|---:|
+| SMA | 117.850 us | TA-Lib 25.868 us |
+| Asin | 269.63 us | TA-Lib 133.05 us |
+| SMA -> Asin | 226.03 us | Ordinary builder 662.46 us |
+
+The composed builder allocates 628.34 KB versus 869.09 KB for ordinary execution.
+Both individual pilots also lose at 1,000 bars. Composition improves within its
+same-process comparison, but the native acceptance gate still fails. No global
+rollout is justified. Host timings vary substantially; retain confidence intervals
+and do not compare different campaigns as controlled before/after measurements.
+
+[Reports, raw measurements, JIT output and hashes](../benchmarks/results/eight-cpu-pilots/shared-sma-kernel/)
+
+
+## AiDotNet.Tensors FP64 GPU pilot (2026-10-09)
+
+The published 0.134.4 package supplies OpenCL device discovery, double buffers,
+program compilation, kernel dispatch and readback. StockIndicators generates
+the financial kernel, including warmup, exact certified SMA recurrence and Asin
+domain/presence handling. SMA -> Asin runs in one device kernel without an
+intermediate SMA array when only the dependent outputs are requested.
+
+```csharp
+var sma = new Sma(20);
+var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+asin.Of(sma);
+var builder = new StockIndicatorBuilder()
+    .ConfigureSource(Bars.From(bars))
+    .ConfigureIndicators(asin)
+    .ConfigureExecution(IndicatorExecutionBackend.Gpu);
+using var run = await builder.BuildAsync(cancellationToken);
+// Required GPU mode throws for unsupported devices, inputs or configurations.
+Console.WriteLine(builder.LastExecution!.DeviceName);
+```
+
+This pilot is opt-in. Auto stays CPU-backed. The net461 target retains CPU
+execution and does not reference Tensors. Only plain array-backed typed SMA/Asin
+graphs are eligible; callbacks, projected/live sources and other indicators keep
+their ordinary CPU route in Auto mode and reject required GPU mode.
+
+Adversarial review covered exact-grid certification before upload, block-start
+recurrence, signed zero, domain masks, output ownership, concurrent argument
+binding, bounded compiled-program retention, cancellation and error diagnostics.
+All 140 focused tests passed with no skips, including actual execution on a
+Radeon RX 5500 XT (OpenCL name `gfx1012:xnack-`). SMA windows were compared bitwise
+with an independent rational reference; Asin retained its 4e-15 relative budget.
+Release builds passed on net10.0, net8.0 and net461; existing Framework dependency
+warnings remain. Other devices/drivers have not been qualified by this run.
+
+Exploratory BenchmarkDotNet run: 36 valid cases, five measurement iterations,
+three warmups, sizes 1k/10k/100k/1m, required GPU execution checked in every run.
+An unrelated Tensors testhost was active, so these are not isolated performance
+acceptance results. First GPU setup took 1426.735 ms including initialization,
+JIT and program preparation; driver disk caches were not cleared. Warm timings
+include fresh ownership, validation, upload, device outputs and readback.
+
+| One million bars | CPU builder | GPU builder | TA-Lib native |
+|---|---:|---:|---:|
+| Asin | 40.931 ms | 41.432 ms | 13.444 ms |
+| SMA | 34.782 ms | 42.736 ms | 3.300 ms |
+| SMA -> Asin | 35.856 ms | 47.444 ms | 15.850 ms |
+
+No measured size establishes a GPU win. GPU managed allocation at 1m bars is
+about 68.7 MiB for Asin/composition versus native Asin's 7.6 MiB; builder history
+ownership and fresh buffer/transfer costs remain candidates for optimization.
+These measurements do not isolate the cost of device arithmetic. A persistent
+device graph or reusable execution session would change the API/ownership scope
+and is not silently included in this batch.
+
+[Raw measurements, intervals, host details, logs and source hashes](../benchmarks/results/eight-cpu-pilots/tensors-gpu/)

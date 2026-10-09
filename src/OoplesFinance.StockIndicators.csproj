@@ -82,6 +82,14 @@
     <InternalsVisibleTo Include="OoplesFinance.StockIndicators.Tests.Unit" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+    <PackageReference Include="AiDotNet.Tensors" Version="0.134.4" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <!-- Exclude OpenCL source strings: inactive C# regions still parse their #if directives. -->
+    <Compile Remove="Indicators/TensorsGpuExecution.cs" />
+  </ItemGroup>
+
   <!-- Source Generator: Build the generator project first -->
   <ItemGroup>
     <ProjectReference Include="SourceGeneration\OoplesFinance.StockIndicators.SourceGeneration.csproj"

@@ -1,0 +1,44 @@
+{
+  "baseCommit": "741d6cf9e642878d9a0b81325a09fa32545e6114",
+  "scope": "Reusable internal scalar SMA CPU kernel, shared contiguous core, direct pilots and Asin.Of(Sma). No global graph fusion rollout.",
+  "acceptance": "FAIL: individual SMA and Asin builders remain slower than TA-Lib at both sizes. Composed graph improves over ordinary builder; this is not a native win.",
+  "reports": [
+    {
+      "name": "sma",
+      "measurements": 4,
+      "rawReportSha256": "34d29ca0d492c392ad4666ff2fd39b9c96ec2b231a4ea66b9c5ef92bb61b11c8"
+    },
+    {
+      "name": "asin",
+      "measurements": 4,
+      "rawReportSha256": "bb28061440a923e5edf9020a0cf4df01186f1ffcda8fa1f504e85ade3d364adc"
+    },
+    {
+      "name": "composed",
+      "measurements": 4,
+      "rawReportSha256": "c1a1d4e9f373f45a997bc70ce645496f90ea204b317a9fd1097b98aec242d379"
+    }
+  ],
+  "protocol": "Release net10.0, 15 measured iterations, 8 warmups, 250ms iteration target. Both standard builder reports passed verify-cpu-kernel-performance.py --suite builder. All composed reports have nonzero statistics and at least 10 retained measurements. Variable host timings; no cross-campaign speedup claim.",
+  "tests": {
+    "unit": 127,
+    "competitor": 119,
+    "failed": 0,
+    "releaseBuilds": [
+      "net10.0",
+      "net8.0",
+      "net461"
+    ]
+  },
+  "jit": "Final composed Tier1 kernel inlines reader, state update and consumer. Normal arithmetic loop calls Math.Asin, no interface/kernel helper calls. Separate cold validation/exception helpers remain.",
+  "sourceSha256": {
+    "src/Core/SmaCpuKernel.cs": "47e3c1ee79dc9c9da8747fd1cdd145a0cd7d1388daf51caa6ca3f9ba62606c58",
+    "src/Core/MovingAverageCore.cs": "a8567a779eebd4fcdaa6ae3e5bb921f07a964f19e256dd4e53b78f96983779df",
+    "src/Indicators/FusedBarExecution.cs": "c664cc0cbcb1c717b861032b2a993476c1fbef7141d1253d98617fed59ac9fac",
+    "src/Builder/StockIndicatorBuilder.cs": "1f59606d07a9fb4708ebf85f0ce545cc6e18d5a335823ce1355ab9022f04b9a4",
+    "tests/ModelsTests/FusedBarExecutionTests.cs": "6237b434df1341d65d4bddc4db19d5011bdbc7647557325df346b85a602c7671",
+    "tests/ValidationTests/SmaCpuKernelTests.cs": "0d74b5f6d9465a4c1f4a8107c3442a158ee11a05611be5b3dd773b22f633e737",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SmaFusionBenchmarks.cs": "ed23aa8d37fab7d362c135371c94fd9e9ad0044396e4168e79087c2555d4a18e"
+  },
+  "librarySha256": "c24b2f5d5b5c63b55fa085b7a69240e7ae4c2e01245bdc517db911cdd2ffd821"
+}

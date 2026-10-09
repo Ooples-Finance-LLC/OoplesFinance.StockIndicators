@@ -84,33 +84,8 @@ internal static class MovingAverageCore
     // every guard and fallback above; this does not introduce an approximate mode.
     internal static bool TryExactGridSimpleMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
     {
-        if (length < 2 || output.Length < input.Length || input.Overlaps(output)) return false;
-        var grid = int.MaxValue;
-        var largest = int.MinValue;
-        var windowBits = System.Numerics.BitOperations.Log2((uint)length) + 1;
-        foreach (var value in input)
-        {
-            var bits = (ulong)(BitConverter.DoubleToInt64Bits(value) & long.MaxValue);
-            if (bits == 0) continue;
-            var exponent = (int)(bits >> 52);
-            if (exponent is 0 or 2047) return false;
-            var significand = (bits & 0xfffffffffffffUL) | (1UL << 52);
-            grid = Math.Min(grid, exponent - 1075 + System.Numerics.BitOperations.TrailingZeroCount(significand));
-            largest = Math.Max(largest, exponent - 1023);
-            // Keep division and partial sums comfortably within the normal range.
-            if (grid < -512 || largest > 500 || largest - grid + windowBits > 52) return false;
-        }
-        var warmup = Math.Min(length - 1, input.Length);
-        output.Slice(0, warmup).Clear();
-        double sum = 0;
-        for (var i = 0; i < warmup; i++) sum += input[i];
-        for (var i = warmup; i < input.Length; i++)
-        {
-            sum += input[i];
-            output[i] = sum / length;
-            sum -= input[i - warmup];
-        }
-        return true;
+        var consumer = new SmaCpuKernel.Identity();
+        return SmaCpuKernel.TryProcess(input, output, length, ref consumer);
     }
 #endif
 

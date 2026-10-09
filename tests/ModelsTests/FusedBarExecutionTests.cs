@@ -8,6 +8,61 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class FusedBarExecutionTests
 {
+    [Theory]
+    [InlineData(20, false)]
+    [InlineData(20, true)]
+    [InlineData(1, false)]
+    [InlineData(int.MaxValue, false)]
+    public async Task SmaDependencyFeedsAsinInTheFusedLoopAndReplaysAfterRejection(int period, bool rejectCertificate)
+    {
+        var values = Enumerable.Range(0, 2051).Select(i => (i % 13 - 6) / 8d).ToArray();
+        if (rejectCertificate) values[2048] = double.Epsilon;
+        var sma = new Sma(period);
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        asin.Of(sma);
+        var bars = BarsFor(values);
+        var plan = FusedBarExecution.TryCreate(new IIndicator[] { asin, sma }, bars.Length)!;
+        Assert.NotNull(plan);
+        plan.Execute(bars, new OwnedBarHistory(), default);
+        Assert.Equal(rejectCertificate, plan.UsedSmaFallback);
+        var expected = new double[values.Length];
+        MovingAverageCore.SimpleMovingAverage(values, expected, period);
+        AssertBits(expected, plan.SmaValues!);
+        AssertBits(expected.Select(Math.Asin).ToArray(), plan.AsinValues![0]);
+        using var fused = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(asin, sma).BuildAsync();
+        using var ordinary = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, bar => bar))
+            .ConfigureIndicators(asin, sma).BuildAsync();
+        Assert.False(((IndicatorRun)fused).HasLegacyRuntime);
+        AssertBits(ordinary[asin.Value].ToArray(), fused[asin.Value].ToArray());
+        AssertBits(ordinary[asin.IsDefined].ToArray(), fused[asin.IsDefined].ToArray());
+        var dependencyPlan = FusedBarExecution.TryCreate(new[] { asin }, bars.Length)!;
+        Assert.Null(dependencyPlan.SmaValues);
+        dependencyPlan.Execute(bars, new OwnedBarHistory(), default);
+        AssertBits(plan.AsinValues[0], dependencyPlan.AsinValues![0]);
+        using var dependencyOnly = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(asin).BuildAsync();
+        using var ordinaryDependencyOnly = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, bar => bar))
+            .ConfigureIndicators(asin).BuildAsync();
+        Assert.Throws<KeyNotFoundException>(() => dependencyOnly[sma].ToArray());
+        Assert.Throws<KeyNotFoundException>(() => ordinaryDependencyOnly[sma].ToArray());
+        AssertBits(fused[asin.Value].ToArray(), dependencyOnly[asin.Value].ToArray());
+        var fusedWarmup = new List<bool>();
+        var ordinaryWarmup = new List<bool>();
+        await foreach (var snapshot in dependencyOnly) fusedWarmup.Add(snapshot.IsWarmedUp);
+        await foreach (var snapshot in ordinaryDependencyOnly) ordinaryWarmup.Add(snapshot.IsWarmedUp);
+        Assert.Equal(ordinaryWarmup, fusedWarmup);
+    }
+
+    [Fact]
+    public void DifferentAsinSourcesKeepOrdinaryGraphExecution()
+    {
+        var direct = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        var composed = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        composed.Of(new Sma(20));
+        Assert.Null(FusedBarExecution.TryCreate(new IIndicator[] { direct, composed }, 100));
+    }
+
     private static Bar[] BarsFor(double[] values) => values.Select((v, i) =>
         new Bar(DateTime.UnixEpoch.AddMinutes(i), double.MaxValue, double.Epsilon, -double.MaxValue, v, -0d)).ToArray();
 

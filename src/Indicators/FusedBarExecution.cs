@@ -2,20 +2,22 @@ using System.Runtime.CompilerServices;
 
 namespace OoplesFinance.StockIndicators.Indicators;
 
-// A per-build plan for the two pilot formulas. Only sealed, direct-close nodes
-// participate: customer state, domains, projections and graph dependencies keep
+// A per-build plan for the two pilot formulas, including Asin(SMA(close)).
+// Only sealed nodes participate: customer state, domains, projections and other dependencies keep
 // their normal execution and error ordering. No caller buffers are retained.
 internal sealed class FusedBarExecution
 {
+    private readonly bool _asinOfSma;
     internal int SmaLength { get; }
     internal double[]? SmaValues { get; }
     internal double[][]? AsinValues { get; }
     internal bool UsedSmaFallback { get; private set; }
 
-    private FusedBarExecution(int count, int smaLength, bool asin)
+    private FusedBarExecution(int count, int smaLength, bool asin, bool asinOfSma, bool publishSma)
     {
         SmaLength = smaLength;
-        if (smaLength > 0) SmaValues = new double[count];
+        _asinOfSma = asinOfSma;
+        if (publishSma) SmaValues = new double[count];
         if (asin) AsinValues = new[] { new double[count], new double[count] };
     }
 
@@ -26,38 +28,105 @@ internal sealed class FusedBarExecution
         return null;
 #else
         var length = 0;
-        var asin = false;
+        var publishSma = false;
+        bool? asinOfSma = null;
         foreach (var indicator in indicators)
         {
-            if (indicator is not (Sma or PriceCircularTransform)) return null;
-            if (indicator.Source is not null || indicator.Components.Count != 0) return null;
-            if (indicator is Sma sma)
+            if (indicator.Components.Count != 0) return null;
+            Sma? average;
+            if (indicator is Sma sma) { average = sma; publishSma = true; }
+            else if (indicator is PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
             {
-                var normalized = Math.Max(1, sma.Length);
-                if (length != 0 && length != normalized) return null;
-                length = normalized;
+                if (indicator.Source is not (null or Sma)) return null;
+                var composed = indicator.Source is Sma;
+                // Different Asin inputs need separate outputs/plans.
+                if (asinOfSma.HasValue && asinOfSma.Value != composed) return null;
+                asinOfSma = composed;
+                average = indicator.Source as Sma;
             }
-            else if (indicator is PriceCircularTransform { Operation: PriceCircularOperation.ArcSine }) asin = true;
             else return null;
+            if (average is null) continue;
+            if (average.Source is not null || average.Components.Count != 0) return null;
+            var normalized = Math.Max(1, average.Length);
+            if (length != 0 && length != normalized) return null;
+            length = normalized;
         }
-        return length != 0 || asin ? new FusedBarExecution(count, length, asin) : null;
+        return length != 0 || asinOfSma.HasValue
+            ? new FusedBarExecution(count, length, asinOfSma.HasValue, asinOfSma == true, publishSma) : null;
 #endif
     }
 
     internal double[][] Values(IIndicator indicator) => indicator is Sma
         ? new[] { SmaValues! } : AsinValues!;
 
+    internal Builder.IndicatorExecutionInfo Execute(Bar[] source, OwnedBarHistory history,
+        CancellationToken cancellation, Builder.IndicatorExecutionBackend backend)
+    {
+        cancellation.ThrowIfCancellationRequested();
+#if !NETFRAMEWORK
+        // Automatic GPU selection stays disabled until end-to-end evidence supports it.
+        if (backend == Builder.IndicatorExecutionBackend.Gpu)
+        {
+            if (source.Length == 0)
+                throw new NotSupportedException("An empty run has no device work to execute.");
+            if (SmaLength > 4096 && SmaLength <= source.Length)
+                throw new NotSupportedException("The GPU pilot supports SMA windows up to 4096 bars.");
+            if (!TensorsGpuExecution.TryGet(out var gpu, out var reason))
+                throw new NotSupportedException(reason);
+            var close = OwnCloses(source, history, cancellation, out bool certified);
+            if (!certified)
+                throw new NotSupportedException("SMA inputs do not satisfy the exact GPU rolling-sum certificate.");
+            gpu!.Execute(close, SmaLength, _asinOfSma, SmaValues, AsinValues, cancellation);
+            return new(Builder.IndicatorExecutionBackend.Gpu, gpu.DeviceName,
+                "Fused FP64 kernel executed through AiDotNet.Tensors OpenCL.");
+        }
+#endif
+        if (backend == Builder.IndicatorExecutionBackend.Gpu)
+            throw new NotSupportedException("GPU execution requires a modern .NET target.");
+        Execute(source, history, cancellation);
+        return new(Builder.IndicatorExecutionBackend.Cpu, null,
+            backend == Builder.IndicatorExecutionBackend.Cpu ? "CPU execution requested." : "Automatic execution uses CPU pending a validated GPU crossover.");
+    }
+
+#if !NETFRAMEWORK
+    private double[] OwnCloses(Bar[] source, OwnedBarHistory history,
+        CancellationToken cancellation, out bool certified)
+    {
+        var close = new double[source.Length];
+        var proof = new Core.SmaCpuKernel.Certificate(Math.Max(1, SmaLength));
+        certified = true;
+        for (var offset = 0; offset < source.Length;)
+        {
+            var size = Math.Min(1024, source.Length - offset);
+            var owned = GC.AllocateUninitializedArray<Bar>(size);
+            source.AsSpan(offset, size).CopyTo(owned);
+            for (var i = 0; i < size; i++)
+            {
+                var reader = new CloseReader(cancellation);
+                var value = reader.Read(in owned[i]);
+                close[offset + i] = value;
+                if (SmaLength > 1 && SmaLength <= source.Length)
+                    certified &= proof.Include(value);
+            }
+            history.AppendOwnedChunk(owned);
+            offset += size;
+        }
+        return close;
+    }
+
+#endif
+
     internal void Execute(Bar[] source, OwnedBarHistory history, CancellationToken cancellation)
     {
 #if NETFRAMEWORK
         throw new NotSupportedException("Fused pilot execution requires a modern runtime.");
 #else
-        if (SmaValues is not null)
+        if (SmaLength > 0)
         {
-            var sma = new SmaKernel(SmaLength, SmaValues);
+            var sma = new SmaKernel(SmaLength, source.Length, SmaValues);
             if (AsinValues is not null)
             {
-                var combined = new CombinedKernel(sma, new AsinKernel(AsinValues));
+                var combined = new CombinedKernel(sma, new AsinKernel(AsinValues), _asinOfSma);
                 Drain(source, history, ref combined, cancellation);
                 sma = combined.Sma;
             }
@@ -73,7 +142,13 @@ internal sealed class FusedBarExecution
                     for (var i = 0; i < bars.Length; i++) close[offset + i] = bars[i].Close;
                     offset += bars.Length;
                 }
-                Core.MovingAverageCore.SimpleMovingAverage(close, SmaValues, SmaLength);
+                var means = SmaValues ?? new double[source.Length];
+                Core.MovingAverageCore.SimpleMovingAverage(close, means, SmaLength);
+                if (_asinOfSma)
+                {
+                    var consumer = new AsinKernel(AsinValues!);
+                    for (var i = 0; i < means.Length; i++) consumer.Append(means[i], i);
+                }
             }
         }
         else
@@ -135,146 +210,87 @@ internal sealed class FusedBarExecution
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(in Bar bar, int index)
+        public void Append(double close, int index)
         {
-            var close = bar.Close;
             var defined = close is >= -1 and <= 1;
             output[0][index] = defined ? Math.Asin(close) : 0;
             output[1][index] = defined ? 1 : 0;
         }
     }
 
-    private struct CombinedKernel(SmaKernel sma, AsinKernel asin) : IKernel
+    private struct CombinedKernel(SmaKernel sma, AsinKernel asin, bool fromMean) : IKernel
     {
         internal SmaKernel Sma = sma;
         public void AppendBlock(ReadOnlySpan<Bar> source, Span<Bar> owned, int offset, CancellationToken cancellation)
         {
-            for (var i = 0; i < source.Length; i++)
-            {
-                ref readonly var bar = ref OwnAndValidate(source, owned, i, cancellation);
-                Sma.Append(in bar, offset + i);
-                asin.Append(in bar, offset + i);
-            }
+            Sma.AppendCombined(source, owned, offset, cancellation, asin, fromMean);
         }
     }
 
     private struct SmaKernel : IKernel
     {
-        private readonly int _length, _windowBits;
-        private readonly double[] _output, _window;
-        private int _lowestExponent, _highestExponent, _slot;
-        private ulong _significands;
-        private double _sum;
-        internal bool Certified
+        private Core.SmaCpuKernel.State _state;
+        private readonly double[]? _output;
+        internal bool Certified => _state.Certified;
+
+        internal SmaKernel(int length, int count, double[]? output)
         {
-            get
-            {
-                if (_significands == 0) return true;
-                if (_lowestExponent == 0) return false;
-                // min(exponent) + min(trailing zeros) is a conservative common
-                // quantum even when the two minima came from different values.
-                var grid = _lowestExponent - 1075 + System.Numerics.BitOperations.TrailingZeroCount(_significands);
-                var largest = _highestExponent - 1023;
-                return grid >= -512 && largest <= 500 && largest - grid + _windowBits <= 52;
-            }
+            _state = new Core.SmaCpuKernel.State(length, count);
+            _output = output;
         }
 
-        internal SmaKernel(int length, double[] output)
-        {
-            _length = length;
-            _output = output;
-            _window = length > 1 && length <= output.Length ? new double[length] : Array.Empty<double>();
-            _windowBits = System.Numerics.BitOperations.Log2((uint)length) + 1;
-            _lowestExponent = 2047;
-            _highestExponent = 0;
-            _significands = 0;
-            _slot = 0;
-            _sum = 0;
-        }
+        private readonly Span<double> OutputBlock(int offset, int count) =>
+            _output is null ? Span<double>.Empty : _output.AsSpan(offset, count);
 
         public void AppendBlock(ReadOnlySpan<Bar> source, Span<Bar> owned, int offset, CancellationToken cancellation)
         {
-            var length = _length;
-            var output = _output;
-            var window = _window;
-            var lowest = _lowestExponent;
-            var highest = _highestExponent;
-            var significands = _significands;
-            var slot = _slot;
-            var sum = _sum;
-            // Indices are bounded by the original array length. The exponent
-            // arithmetic is bounded by binary64's 11-bit exponent field.
-            unchecked
-            {
-            for (var i = 0; i < source.Length; i++)
-            {
-                var value = OwnAndValidate(source, owned, i, cancellation).Close;
-                var index = offset + i;
-                if (length == 1) { output[index] = value; continue; }
-                if (length > output.Length) continue;
-                AccumulateCertificate(value, ref lowest, ref highest, ref significands);
-                sum += value;
-                if (index >= length) sum -= window[slot];
-                window[slot] = value;
-                if (++slot == length) slot = 0;
-                if (index >= length - 1) output[index] = sum / length;
-            }
-            }
-            _lowestExponent = lowest;
-            _highestExponent = highest;
-            _significands = significands;
-            _slot = slot;
-            _sum = sum;
+            // The shared CPU loop owns the traversal, including the input and
+            // output operators. No intermediate close or average series.
+            var reader = new CloseReader(cancellation);
+            var consumer = new Core.SmaCpuKernel.Identity();
+            Core.SmaCpuKernel.Process(source, owned, OutputBlock(offset, source.Length),
+                ref _state, ref reader, ref consumer);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void AccumulateCertificate(double value, ref int lowest, ref int highest, ref ulong significands)
+        internal void AppendCombined(ReadOnlySpan<Bar> source, Span<Bar> owned, int offset,
+            CancellationToken cancellation, AsinKernel asin, bool fromMean)
         {
-            var bits = (ulong)(BitConverter.DoubleToInt64Bits(value) & long.MaxValue);
-            if (bits == 0) return;
-            var exponent = (int)(bits >> 52);
-            lowest = Math.Min(lowest, exponent);
-            highest = Math.Max(highest, exponent);
-            // Exponent bits above bit 52 do not affect the trailing-zero count.
-            significands |= bits | (1UL << 52);
+            var reader = new CloseReader(cancellation);
+            var consumer = new AsinConsumer(asin, offset, fromMean);
+            Core.SmaCpuKernel.Process(source, owned, OutputBlock(offset, source.Length),
+                ref _state, ref reader, ref consumer);
         }
 
         internal bool CertifyHistory(OwnedBarHistory history)
         {
-            var grid = int.MaxValue;
-            var largest = int.MinValue;
+            var certificate = new Core.SmaCpuKernel.Certificate(_state.Length);
             for (var chunk = 0; chunk < history.ChunkCount; chunk++)
                 foreach (ref readonly var bar in history.Chunk(chunk))
-                    if (!Certify(bar.Close, _windowBits, ref grid, ref largest)) return false;
+                    if (!certificate.Include(bar.Close)) return false;
             return true;
         }
+    }
 
+    private readonly struct CloseReader(CancellationToken cancellation) : Core.SmaCpuKernel.IReader<Bar>
+    {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool Certify(double value, int windowBits, ref int grid, ref int largest)
+        public double Read(in Bar bar)
         {
-            var bits = (ulong)(BitConverter.DoubleToInt64Bits(value) & long.MaxValue);
-            if (bits == 0) return true;
-            var exponent = (int)(bits >> 52);
-            if (exponent is 0 or 2047) return false;
-            var significand = (bits & 0xfffffffffffffUL) | (1UL << 52);
-            grid = Math.Min(grid, exponent - 1075 + System.Numerics.BitOperations.TrailingZeroCount(significand));
-            largest = Math.Max(largest, exponent - 1023);
-            // Also bounds the length+1 intermediate before eviction.
-            return grid >= -512 && largest <= 500 && largest - grid + windowBits <= 52;
+            cancellation.ThrowIfCancellationRequested();
+            if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High)
+                || !double.IsFinite(bar.Low) || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
+                Validation.IndicatorInputDomain.Finite.Validate(in bar);
+            return bar.Close;
         }
+    }
 
+    private readonly struct AsinConsumer(AsinKernel asin, int offset, bool fromMean) : Core.SmaCpuKernel.IConsumer
+    {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(in Bar bar, int index)
+        public double Consume(double input, double mean, int index)
         {
-            if (_length == 1) { _output[index] = bar.Close; return; }
-            if (_length > _output.Length) return;
-            var value = bar.Close;
-            AccumulateCertificate(value, ref _lowestExponent, ref _highestExponent, ref _significands);
-            _sum += value;
-            if (index >= _length) _sum -= _window[_slot];
-            _window[_slot] = value;
-            if (++_slot == _length) _slot = 0;
-            if (index >= _length - 1) _output[index] = _sum / _length;
+            asin.Append(fromMean ? mean : input, offset + index);
+            return mean;
         }
     }
 #endif

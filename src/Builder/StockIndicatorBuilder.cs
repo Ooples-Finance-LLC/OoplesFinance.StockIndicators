@@ -35,6 +35,19 @@ public sealed class StockIndicatorBuilder
     private SeriesKey? _defaultSeriesKey;
     private bool _defaultsApplied;
     private bool _requiresRuntime;
+    private IndicatorExecutionBackend _executionBackend;
+
+    /// <summary>Describes the last successful BuildAsync execution; null after a failed build.</summary>
+    public IndicatorExecutionInfo? LastExecution { get; private set; }
+
+    /// <summary>Selects CPU, automatic, or required GPU execution for finite typed runs.</summary>
+    public StockIndicatorBuilder ConfigureExecution(IndicatorExecutionBackend backend)
+    {
+        if (!Enum.IsDefined(typeof(IndicatorExecutionBackend), backend))
+            throw new ArgumentOutOfRangeException(nameof(backend));
+        _executionBackend = backend;
+        return this;
+    }
     private int _nextId;
 
     // Legacy execution can invoke customer callbacks which change the typed
@@ -183,6 +196,8 @@ public sealed class StockIndicatorBuilder
     /// <exception cref="InvalidOperationException">Thrown when no source was configured.</exception>
     public async Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default)
     {
+        LastExecution = null;
+        var execution = new IndicatorExecutionInfo(IndicatorExecutionBackend.Cpu, null, "Ordinary CPU graph execution.");
         var source = _barSource ?? throw new InvalidOperationException(
             "No bar source. Call ConfigureSource before BuildAsync.");
 
@@ -190,7 +205,11 @@ public sealed class StockIndicatorBuilder
         // forever. That is exactly what it did.
         if (!source.IsFinite)
         {
-            return await BuildLiveAsync(source, cancellationToken).ConfigureAwait(false);
+            if (_executionBackend == IndicatorExecutionBackend.Gpu)
+                throw new NotSupportedException("GPU execution currently requires a finite array-backed source.");
+            var live = await BuildLiveAsync(source, cancellationToken).ConfigureAwait(false);
+            LastExecution = execution;
+            return live;
         }
 
         var bars = new Indicators.OwnedBarHistory();
@@ -209,7 +228,11 @@ public sealed class StockIndicatorBuilder
             ? Indicators.FusedBarExecution.TryCreate(_configuredIndicators, direct.Length) : null;
         if (fused is not null)
         {
-            fused.Execute(direct!, bars, cancellationToken);
+            execution = fused.Execute(direct!, bars, cancellationToken, _executionBackend);
+        }
+        else if (_executionBackend == IndicatorExecutionBackend.Gpu)
+        {
+            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin and Asin.Of(Sma) runs without warmup sources or legacy callbacks.");
         }
         else if (source is Indicators.ISynchronousBarSource synchronous)
         {
@@ -241,8 +264,9 @@ public sealed class StockIndicatorBuilder
             {
                 var values = fused.Values(indicator);
                 for (var slot = 0; slot < indicator.Outputs.Count; slot++) outputs[indicator.Outputs[slot]] = values[slot];
-                warmup = Math.Max(warmup, indicator.WarmupBars);
+                warmup = Math.Max(warmup, Math.Max(indicator.WarmupBars, indicator.Source?.WarmupBars ?? 0));
             }
+            LastExecution = execution;
             return new Indicators.IndicatorRun(null, outputs, bars, 0, warmup);
         }
 
@@ -396,6 +420,7 @@ public sealed class StockIndicatorBuilder
             }
         }
 
+        LastExecution = execution;
         return new Indicators.IndicatorRun(
             runtime, series2, bars.AfterWarmup(warmupCount), warmupCount,
             reachable.Count == 0 ? 0 : reachable.Max(indicator => indicator.WarmupBars));
@@ -701,7 +726,15 @@ public sealed class StockIndicatorBuilder
     /// <summary>
     /// Builds the indicator runtime.
     /// </summary>
-    public IndicatorRuntime Build() => Build(System.Buffers.ArrayPool<double>.Shared);
+    public IndicatorRuntime Build()
+    {
+        if (_executionBackend == IndicatorExecutionBackend.Gpu)
+        {
+            LastExecution = null;
+            throw new NotSupportedException("Required GPU execution is available through BuildAsync only.");
+        }
+        return Build(System.Buffers.ArrayPool<double>.Shared);
+    }
 
     internal IndicatorRuntime Build(System.Buffers.ArrayPool<double> computePool)
     {

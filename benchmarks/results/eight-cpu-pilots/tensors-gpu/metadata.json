@@ -1,0 +1,37 @@
+{
+  "package": "AiDotNet.Tensors 0.134.4",
+  "device": "Radeon RX 5500 XT / gfx1012:xnack-",
+  "date": "2026-10-09",
+  "benchmarks": 36,
+  "focused_tests": {
+    "passed": 140,
+    "failed": 0,
+    "skipped": 0
+  },
+  "frameworks": [
+    "net10.0",
+    "net8.0",
+    "net461"
+  ],
+  "binary_sha256": "97854682d449306cbd9ec37aee1d3af480b0ce0464c45aca127e028e1336a6a7",
+  "source_sha256": {
+    "src\\Indicators\\TensorsGpuExecution.cs": "fd021834f8ff92254d2b02b9d9d4b0aae5f0d8c48af94c821760ce3553d646b9",
+    "src\\Indicators\\FusedBarExecution.cs": "b72a20c0fb615c14e170153320389b876301897cbb1c8a549214fc9af3ac2d57",
+    "src\\Core\\SmaCpuKernel.cs": "47e3c1ee79dc9c9da8747fd1cdd145a0cd7d1388daf51caa6ca3f9ba62606c58",
+    "src\\Builder\\StockIndicatorBuilder.cs": "656fd5bbff9c55796e2b8107104abc0039671fe079187837da6f073735b01451",
+    "src\\OoplesFinance.StockIndicators.csproj": "a6c6f17d7cc100bf686fa6cca80ee2e3df2f0c10c5d9c5850878c1a3fe34cab5",
+    "benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\LibraryComparisons\\TensorsGpuBenchmarks.cs": "11717816897227ec70f50dcf9d625cb0dbf83c4817eb8f3963f8821345553a89"
+  },
+  "limitations": [
+    "Exploratory run: unrelated AiDotNet.Tensors pr1099 testhost was active; not an isolated performance gate.",
+    "Cached execution timing includes fresh builder, owned bar history, finite validation, certification, upload, allocation, readback and disposal.",
+    "TA-Lib native owns output arrays but does not preserve bar history or publish presence flags.",
+    "Periodic binary grid inputs favor exact SMA certification. Arbitrary uncertified SMA data is unsupported in required GPU mode.",
+    "Only this AMD OpenCL device/driver was tested. No automatic crossover or global rollout is enabled."
+  ],
+  "first_gpu_call_ms": 1426.735,
+  "first_call_note": "First GPU setup in benchmark process includes runtime initialization, JIT and program preparation; existing driver disk caches were not cleared. Other setup timings are not cold-start measurements.",
+  "test_command": "dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj -c Release -f net10.0 -p:GeneratePackageOnBuild=false --filter \"FullyQualifiedName~TensorsGpuExecutionTests|FullyQualifiedName~FusedBarExecutionTests|FullyQualifiedName~SmaCpuKernelTests|FullyQualifiedName~CertifiedSmaBatchTests|FullyQualifiedName~SmaExtremeRangeTests|FullyQualifiedName~OwnedHistoryBatchTests|FullyQualifiedName~BuilderStorageTests|FullyQualifiedName~CloseOnlyBuilderTests\"",
+  "build_command": "dotnet build src/OoplesFinance.StockIndicators.csproj -c Release --no-restore -p:GeneratePackageOnBuild=false",
+  "benchmark_command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter \"*TensorsGpuBenchmarks*\" --exporters json --artifacts <output>"
+}

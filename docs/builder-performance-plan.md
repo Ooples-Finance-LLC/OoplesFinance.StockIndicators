@@ -2,11 +2,13 @@
 
 ## Current focus: fused Asin/SMA pilot
 
-The active implementation is `FusedBarExecution`: a per-build plan fusing input
-ownership, validation, numerical certification, arithmetic and final output
-writes. Plain typed-only runs publish directly from that plan. The pilot is
-limited to direct Asin and SMA nodes over array sources on modern runtimes;
-legacy configuration, custom sources and other graphs retain existing execution.
+The active implementation uses `Core/SmaCpuKernel.cs`: a reusable CPU loop with
+value-type input and output operators. `FusedBarExecution` connects it to owned
+bar ingestion and supports direct SMA/Asin plus `Asin.Of(Sma)`. The composed
+path consumes each mean immediately and omits the intermediate SMA array when
+SMA was not explicitly requested. The contiguous SMA core shares the arithmetic
+and certificate; its existing guarded fallback is retained. This is scalar
+loop fusion, not a SIMD implementation or a completed native-performance win.
 
 The acceptance gate remains complete fresh-builder performance against TA-Lib
 at 1,000 and 10,000 bars, with the existing numerical and ownership contracts.
@@ -64,7 +66,7 @@ Use `Native` for the paired competitor. Read the process ID from the profile log
 1. **Input storage and finite-source traversal.** Retain one owned bar history for snapshots; materialize OHLCV columns only when the selected evaluator actually needs them. Avoid geometric growth where a safe count is available, and avoid copying already-owned columns into another container. Investigate a synchronous internal path for the library's own enumerable sources while keeping the public builder lifecycle and arbitrary asynchronous sources supported. Do not enumerate a caller's source twice or borrow mutable caller buffers silently.
 2. **Validation work.** Consolidate only checks proven redundant for the same unchanged input. Preserve eager finite validation, indicator-specific domains, chained-close validation, output-slot/bar diagnostics and failure ordering. A configurable domain getter is customer code: caching or suppressing its calls is not automatically semantics-preserving. Optimize the common finite-domain check without weakening the domain contract.
 3. **Pilot routing and arithmetic.** Rickshaw's builder currently constructs `RickshawManCandle.State`, whereas the modern kernel uses `RickshawGridState`. Reuse the proven fast state only with preserved fallback, preview and reset behavior. It eagerly allocates arrays by period, so direct substitution would regress large-period/short-input behavior; retain a lazy/general route or bound internal fast-path eligibility without changing accepted public periods. SMA's builder uses `MovingAverageCore.SimpleMovingAverage`, whose cancellation certificates, periodic rebuilding and exact fallback cost more than an ordinary running sum. Optimize these under the current contract; do not substitute TA-Lib's arithmetic or assume the separate SMA kernel is bitwise equivalent. Keep Asin's two outputs and undefined-value policy intact when considering a batch loop.
-4. **Remeasure before designing more infrastructure.** Run the complete builder gates against all eligible competitors on the same runner per family. If dependency resolution or dispatch remains material, introduce a per-build execution plan then. Do not start with a global compiled-plan cache, framework rewrite, new public reuse API or GPU work on the evidence from single-indicator batch profiles.
+4. **Remeasure before designing more infrastructure.** Run the complete builder gates against all eligible competitors on the same runner per family. If dependency resolution or dispatch remains material, introduce a per-build execution plan then. Do not start with a global compiled-plan cache or framework rewrite on single-indicator profiles. The explicitly requested GPU pilot is bounded to SMA/Asin and must establish correctness and end-to-end benefit before rollout.
 
 ## Adversarial review of the earlier proposal
 
@@ -117,3 +119,32 @@ Default finite checks are skipped only for unchanged raw bars with the builder's
 Adversarial review added checks for publication, delayed legacy use, mutable exposed columns, invalid named sources, customer domain-getter calls, invalid chained values, and untrusted direct engine use. The final review found an explicit unknown-subscription edge case; its normal evaluator error is now covered and preserved. Verification passed 107 focused unit checks, 131 competitor-facing checks, and a final 32-check affected subset after that guard. All three library frameworks built successfully after the final change.
 
 The new eight-route allocation probe completed with successful setup checks. Approximate bytes/call: SMA 1,292,569; Asin 647,396; Rickshaw 567,829; scaled true range 566,872; Jurik 570,699; pivots 1,934,385; fractals 1,846,888; short body 569,333. The custom-only allocation regression now requires less than 800 KB for 10,000 bars. These are allocation diagnostics, not throughput wins. Source logs: `C:/Users/cheat/temp/si-perfview/builder-second-fix-allocations.log`.
+
+
+## FP64 GPU pilot using AiDotNet.Tensors
+
+The modern targets reference published AiDotNet.Tensors 0.134.4. The pilot reuses
+its public OpenCL context, typed double buffers, compiler, kernel arguments, queue
+and readback APIs. It does not depend on the unreleased CPU codegen PR or the
+Float32-only high-level fused executor. Framework remains CPU-only.
+
+`ConfigureExecution(IndicatorExecutionBackend.Gpu)` requires actual GPU work for
+plain finite array-backed SMA, Asin, and Asin.Of(Sma) builder graphs. Unsupported
+graphs, sources, devices or uncertified rolling sums throw. `LastExecution` reports
+the actual device/backend on success and is cleared on failed BuildAsync calls.
+Legacy Build does not support required GPU execution. Auto currently selects CPU;
+a universal size threshold cannot be inferred from one device.
+
+The GPU compiler specializes a single kernel per period/output graph, caching at
+most 32 programs. SMA work items own 64-bar blocks and feed Asin directly in device
+registers; an unrequested SMA series has no device or host output allocation.
+Input ownership and finite validation precede upload; arithmetic stays binary64.
+The exact-grid certificate bounds rolling sums, including temporary add-before-
+evict sums. Windows above 4096 are rejected unless all bars are still warming up.
+Kernel argument binding through readback is serialized to protect the shared
+queue. Host cancellation is checked before launch and after blocking readback;
+an already launched device kernel is not preempted. Context lifetime is process-wide.
+
+This is a bounded OpenCL implementation, not all-device/all-indicator support.
+No float narrowing, generic tensor graph migration, or global indicator rollout is
+included. Hardware tests skip explicitly when a suitable FP64 device is absent.
