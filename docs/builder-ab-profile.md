@@ -574,3 +574,37 @@ device graph or reusable execution session would change the API/ownership scope
 and is not silently included in this batch.
 
 [Raw measurements, intervals, host details, logs and source hashes](../benchmarks/results/eight-cpu-pilots/tensors-gpu/)
+
+
+### Allocation and transfer follow-up
+
+GPU execution now reuses a bounded internal workspace (at most 40 MiB of host
+scratch plus device buffers). Size changes dispose the old workspace; oversized
+runs use transient storage. Failures discard cached buffers. No published arrays
+or retained history are pooled. Direct Asin presence flags are written during
+input validation; composed flags skip device allocation/readback when finite
+input bounds prove all means are in-domain. Other composed runs retain the
+device mask. Output arrays skip redundant zeroing and are fully initialized
+before publication. Large fused CPU/GPU histories use one owned array rather
+than hundreds of separately allocated chunks, preserving existing chunk views.
+
+All 145 focused tests passed with no skips. New regressions cover alternating
+sizes, graph shapes and domains, stale-buffer exposure, post-disposal snapshots,
+contiguous-history indexing, chunk views and warmup slices. Release builds passed
+on all three target frameworks. All 36 benchmark cases completed. An unrelated
+Tensors parity testhost started during measurement; timings remain exploratory
+and are not a controlled before/after speedup claim.
+
+| One million bars | CPU builder | GPU builder | TA-Lib native |
+|---|---:|---:|---:|
+| Asin | 25.872 ms | 36.717 ms | 10.232 ms |
+| SMA | 18.006 ms | 37.371 ms | 2.710 ms |
+| SMA -> Asin | 21.299 ms | 22.481 ms | 12.033 ms |
+
+GPU managed allocation for Asin/composition is now about 61.0 MiB per fresh
+1m-bar run; the former temporary 7.6 MiB close array is retained internally
+instead of reallocated each call. Composition needs one output-value readback
+on this in-domain workload, with no presence-mask readback. The native
+performance gate still fails, so automatic GPU selection remains disabled.
+
+[Follow-up reports, raw measurements, logs and hashes](../benchmarks/results/eight-cpu-pilots/tensors-gpu-reuse/)

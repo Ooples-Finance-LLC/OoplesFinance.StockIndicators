@@ -17,8 +17,18 @@ internal sealed class FusedBarExecution
     {
         SmaLength = smaLength;
         _asinOfSma = asinOfSma;
-        if (publishSma) SmaValues = new double[count];
-        if (asin) AsinValues = new[] { new double[count], new double[count] };
+        if (publishSma) SmaValues = AllocateOutput(count);
+        if (asin) AsinValues = new[] { AllocateOutput(count), AllocateOutput(count) };
+    }
+
+    private static double[] AllocateOutput(int count)
+    {
+#if NETFRAMEWORK
+        return new double[count];
+#else
+        // Every slot is initialized before publication, including warmup/domain zeros.
+        return GC.AllocateUninitializedArray<double>(count);
+#endif
     }
 
     internal static FusedBarExecution? TryCreate(IReadOnlyList<IIndicator> indicators, int count)
@@ -73,10 +83,7 @@ internal sealed class FusedBarExecution
                 throw new NotSupportedException("The GPU pilot supports SMA windows up to 4096 bars.");
             if (!TensorsGpuExecution.TryGet(out var gpu, out var reason))
                 throw new NotSupportedException(reason);
-            var close = OwnCloses(source, history, cancellation, out bool certified);
-            if (!certified)
-                throw new NotSupportedException("SMA inputs do not satisfy the exact GPU rolling-sum certificate.");
-            gpu!.Execute(close, SmaLength, _asinOfSma, SmaValues, AsinValues, cancellation);
+            gpu!.Execute(this, source, history, _asinOfSma, cancellation);
             return new(Builder.IndicatorExecutionBackend.Gpu, gpu.DeviceName,
                 "Fused FP64 kernel executed through AiDotNet.Tensors OpenCL.");
         }
@@ -89,29 +96,47 @@ internal sealed class FusedBarExecution
     }
 
 #if !NETFRAMEWORK
-    private double[] OwnCloses(Bar[] source, OwnedBarHistory history,
-        CancellationToken cancellation, out bool certified)
+    internal bool OwnCloses(Bar[] source, OwnedBarHistory history, double[] close,
+        CancellationToken cancellation)
     {
-        var close = new double[source.Length];
         var proof = new Core.SmaCpuKernel.Certificate(Math.Max(1, SmaLength));
-        certified = true;
+        bool certified = true, allInDomain = true;
+        var reader = new CloseReader(cancellation);
+        // A single uninitialized allocation avoids promoting hundreds of small
+        // history chunks during large fresh-builder runs. Ownership is unchanged.
+        var contiguous = source.Length >= 16_384 ? GC.AllocateUninitializedArray<Bar>(source.Length) : null;
         for (var offset = 0; offset < source.Length;)
         {
             var size = Math.Min(1024, source.Length - offset);
-            var owned = GC.AllocateUninitializedArray<Bar>(size);
+            var chunk = contiguous is null ? GC.AllocateUninitializedArray<Bar>(size) : null;
+            var owned = contiguous is null ? chunk.AsSpan() : contiguous.AsSpan(offset, size);
             source.AsSpan(offset, size).CopyTo(owned);
             for (var i = 0; i < size; i++)
             {
-                var reader = new CloseReader(cancellation);
                 var value = reader.Read(in owned[i]);
                 close[offset + i] = value;
                 if (SmaLength > 1 && SmaLength <= source.Length)
                     certified &= proof.Include(value);
+                if (AsinValues is not null)
+                {
+                    var defined = value is >= -1 and <= 1;
+                    allInDomain &= defined;
+                    if (!_asinOfSma) AsinValues[1][offset + i] = defined ? 1 : 0;
+                }
             }
-            history.AppendOwnedChunk(owned);
+            if (chunk is not null) history.AppendOwnedChunk(chunk);
             offset += size;
         }
-        return close;
+        if (contiguous is not null) history.TakeOwnedArray(contiguous);
+        if (!certified)
+            throw new NotSupportedException("SMA inputs do not satisfy the exact GPU rolling-sum certificate.");
+        // An average of in-domain inputs (and warmup zero) is in-domain too.
+        // Direct Asin flags were already produced during the required validation pass.
+        bool devicePresence = AsinValues is not null && _asinOfSma && !allInDomain
+            && SmaLength <= source.Length;
+        if (AsinValues is not null && _asinOfSma && !devicePresence)
+            Array.Fill(AsinValues[1], 1d);
+        return devicePresence;
     }
 
 #endif
@@ -170,6 +195,14 @@ internal sealed class FusedBarExecution
     private static void Drain<TKernel>(Bar[] source, OwnedBarHistory history,
         ref TKernel kernel, CancellationToken cancellation) where TKernel : struct, IKernel
     {
+        if (source.Length >= 16_384)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
+            kernel.AppendBlock(source, owned, 0, cancellation);
+            history.TakeOwnedArray(owned);
+            return;
+        }
         for (var offset = 0; offset < source.Length;)
         {
             cancellation.ThrowIfCancellationRequested();

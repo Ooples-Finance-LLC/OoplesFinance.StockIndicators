@@ -1,0 +1,44 @@
+{
+  "package": "AiDotNet.Tensors 0.134.4",
+  "device": "Radeon RX 5500 XT / gfx1012:xnack-",
+  "date": "2026-10-09",
+  "benchmarks": 36,
+  "focused_tests": {
+    "passed": 145,
+    "failed": 0,
+    "skipped": 0
+  },
+  "frameworks": [
+    "net10.0",
+    "net8.0",
+    "net461"
+  ],
+  "binary_sha256": "ac2ce56a0a7afca9180aff83faa6bb2f9c5e1d90f4ceb9515620951e7d6adb3e",
+  "source_sha256": {
+    "src\\Indicators\\TensorsGpuExecution.cs": "adf788f6ecf9f6a97afb80e7ee90fea06a3f81f5a153228bdb9bd238ede5e8fb",
+    "src\\Indicators\\FusedBarExecution.cs": "4e68e73df66100bd7f86b600b521fc5e032017ff7e695df048e15fe0424fb7e5",
+    "src\\Core\\SmaCpuKernel.cs": "47e3c1ee79dc9c9da8747fd1cdd145a0cd7d1388daf51caa6ca3f9ba62606c58",
+    "src\\Builder\\StockIndicatorBuilder.cs": "656fd5bbff9c55796e2b8107104abc0039671fe079187837da6f073735b01451",
+    "src\\OoplesFinance.StockIndicators.csproj": "a6c6f17d7cc100bf686fa6cca80ee2e3df2f0c10c5d9c5850878c1a3fe34cab5",
+    "benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\LibraryComparisons\\TensorsGpuBenchmarks.cs": "11717816897227ec70f50dcf9d625cb0dbf83c4817eb8f3963f8821345553a89",
+    "src/Indicators/OwnedBarHistory.cs": "809b15795583b1a78c03286d0dbcb72d90c8dd3e3029f852f4cba79f7c72137b"
+  },
+  "limitations": [
+    "Unrelated AiDotNet.Tensors parity testhost began running during measurement. Timings are exploratory, not a controlled speedup versus the earlier run.",
+    "Warm GPU calls reuse internal scratch/device storage; every call still owns fresh outputs/history and includes validation, upload, kernel execution and readback.",
+    "TA-Lib native owns output arrays but does not preserve bar history or publish presence flags.",
+    "Periodic binary grid inputs favor exact SMA certification. Arbitrary uncertified SMA data is unsupported in required GPU mode.",
+    "Only this AMD OpenCL device/driver was tested. No automatic crossover or global rollout is enabled."
+  ],
+  "first_call_note": "Setup calls and initialization durations are retained in the compressed log. Process and driver caches can already be warm.",
+  "test_command": "dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj -c Release -f net10.0 -p:GeneratePackageOnBuild=false --filter \"FullyQualifiedName~TensorsGpuExecutionTests|FullyQualifiedName~FusedBarExecutionTests|FullyQualifiedName~SmaCpuKernelTests|FullyQualifiedName~CertifiedSmaBatchTests|FullyQualifiedName~SmaExtremeRangeTests|FullyQualifiedName~OwnedHistoryBatchTests|FullyQualifiedName~BuilderStorageTests|FullyQualifiedName~CloseOnlyBuilderTests\"",
+  "build_command": "dotnet build src/OoplesFinance.StockIndicators.csproj -c Release --no-restore -p:GeneratePackageOnBuild=false",
+  "benchmark_command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter \"*TensorsGpuBenchmarks*\" --exporters json --artifacts <output>",
+  "retained_workspace_bound_bytes": 41943040,
+  "changes": [
+    "Bounded internal host scratch/device buffer reuse, never pooling public results/history.",
+    "Direct Asin flags derived during validation; composed flags proven from domain bounds when possible; otherwise read from device.",
+    "Uninitialized output arrays, fully written before publication.",
+    "Large fused histories use one owned contiguous array while retaining chunk views for existing consumers."
+  ]
+}

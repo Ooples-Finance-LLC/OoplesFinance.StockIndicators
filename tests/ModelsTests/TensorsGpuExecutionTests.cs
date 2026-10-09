@@ -161,6 +161,48 @@ public sealed class TensorsGpuExecutionTests
         Assert.Null(builder.LastExecution);
     }
 
+    [SkippableFact]
+    public async Task ReusedWorkspaceHandlesChangingDomainsShapesSizesAndOwnedSnapshots()
+    {
+        RequireGpu();
+        // Same-size runs alternate between host-proven and device-computed flags.
+        // Size changes replace the workspace; earlier runs remain readable after disposal.
+        foreach (var count in new[] { 32769, 32769, 2051, 32769 })
+        foreach (var mode in new[] { 0, 1, 2, 3 })
+        {
+            var values = Enumerable.Range(0, count).Select(i =>
+                mode == 0 ? .5d : (i % 31 - 15) / 4d).ToArray();
+            var bars = BarsFor(values);
+            var sma = new Sma(3);
+            var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            if (mode != 2) asin.Of(sma);
+            IIndicator[] configured = mode == 3 ? new IIndicator[] { sma } : new IIndicator[] { sma, asin };
+            var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(configured).ConfigureExecution(IndicatorExecutionBackend.Gpu);
+            using var gpu = await builder.BuildAsync();
+            Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+            using var cpu = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(configured).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync();
+            Assert.Equal(cpu[sma].ToArray(), gpu[sma].ToArray());
+            if (mode != 3)
+            {
+                Assert.Equal(cpu[asin.IsDefined].ToArray(), gpu[asin.IsDefined].ToArray());
+                for (var i = 0; i < count; i++) AssertAsin(cpu[asin.Value][i], gpu[asin.Value][i]);
+            }
+            var saved = gpu[sma].ToArray();
+            var expectedBars = bars.ToArray();
+            Array.Clear(bars);
+            gpu.Dispose();
+            using var overwrite = await new StockIndicatorBuilder()
+                .ConfigureSource(Bars.From(BarsFor(Enumerable.Repeat(.25d, count))))
+                .ConfigureIndicators(new Sma(1)).ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync();
+            Assert.Equal(saved, gpu[sma].ToArray());
+            var snapshots = new List<Bar>();
+            await foreach (var snapshot in gpu) snapshots.Add(snapshot.Bar);
+            Assert.Equal(expectedBars, snapshots);
+        }
+    }
+
     private static void AssertAsin(double expected, double actual)
     {
         Assert.True(double.IsFinite(actual));

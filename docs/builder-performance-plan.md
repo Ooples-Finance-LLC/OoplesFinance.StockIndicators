@@ -142,7 +142,12 @@ Input ownership and finite validation precede upload; arithmetic stays binary64.
 The exact-grid certificate bounds rolling sums, including temporary add-before-
 evict sums. Windows above 4096 are rejected unless all bars are still warming up.
 Kernel argument binding through readback is serialized to protect the shared
-queue. Host cancellation is checked before launch and after blocking readback;
+queue. One exact-size internal workspace retains at most 40 MiB of host scratch
+and device buffers; larger runs use transient storage. Published outputs and
+bar histories are never pooled. Direct Asin flags are derived during validation;
+composed flags avoid device transfer when the input bounds prove every mean
+is in-domain. Large fused histories use one independently owned array with
+compatible chunk views. Host cancellation is checked before launch and after blocking readback;
 an already launched device kernel is not preempted. Context lifetime is process-wide.
 
 This is a bounded OpenCL implementation, not all-device/all-indicator support.

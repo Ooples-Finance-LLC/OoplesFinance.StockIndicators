@@ -10,7 +10,11 @@ internal sealed class TensorsGpuExecution
     private static readonly Lazy<(TensorsGpuExecution? Engine, string Reason)> Shared = new(Create);
     private readonly OpenClContext _context;
     private readonly object _gate = new();
-    private readonly Dictionary<(int Period, bool Sma, bool Asin, bool FromMean), CompiledKernel> _kernels = new();
+    private readonly Dictionary<(int Period, bool Sma, bool Asin, bool FromMean, bool Presence), CompiledKernel> _kernels = new();
+    // One reusable workspace, bounded to 40 MiB (host input + up to four FP64 buffers).
+    // Published host arrays are never cached or pooled.
+    private const int MaxRetainedCount = 1_048_576;
+    private Workspace? _workspace;
     internal string DeviceName => _context.DeviceName;
 
     private TensorsGpuExecution(OpenClContext context) => _context = context;
@@ -46,52 +50,90 @@ internal sealed class TensorsGpuExecution
         }
     }
 
-    internal void Execute(double[] input, int period, bool fromMean, double[]? sma,
-        double[][]? asin, CancellationToken cancellation)
+    internal void Execute(FusedBarExecution plan, Bar[] source, OwnedBarHistory history,
+        bool fromMean, CancellationToken cancellation)
     {
-        // The package exposes mutable kernel argument slots and an in-order
-        // queue. Serialize binding through readback; executions own all buffers.
+        // Binding, reusable scratch and readback share the package's in-order queue.
         lock (_gate)
         {
             cancellation.ThrowIfCancellationRequested();
-            var key = (period, sma is not null, asin is not null, fromMean);
-            if (!_kernels.TryGetValue(key, out var compiled))
+            bool retain = source.Length <= MaxRetainedCount;
+            Workspace work;
+            if (retain)
             {
-                // Bound retained driver programs when users vary periods.
-                if (_kernels.Count >= 32)
+                if (_workspace is not null && _workspace.Count != source.Length)
                 {
-                    foreach (var entry in _kernels.Values) entry.Dispose();
-                    _kernels.Clear();
+                    _workspace.Dispose();
+                    _workspace = null;
                 }
-                compiled = Compile(period, sma is not null, asin is not null, fromMean);
-                _kernels.Add(key, compiled);
+                work = _workspace ??= new Workspace(_context, source.Length);
             }
-            using var deviceInput = new OpenClBuffer<double>(_context, input);
-            using var deviceSma = sma is null ? null : new OpenClBuffer<double>(_context, input.Length);
-            using var deviceAsin = asin is null ? null : new OpenClBuffer<double>(_context, input.Length);
-            using var devicePresence = asin is null ? null : new OpenClBuffer<double>(_context, input.Length);
-            var kernel = compiled.Kernel;
-            kernel.SetArg(0, deviceInput.Handle);
-            // Unused output arguments bind a valid buffer but are never accessed.
-            kernel.SetArg(1, deviceSma?.Handle ?? deviceInput.Handle);
-            kernel.SetArg(2, deviceAsin?.Handle ?? deviceInput.Handle);
-            kernel.SetArg(3, devicePresence?.Handle ?? deviceInput.Handle);
-            kernel.SetArg(4, input.Length);
-            cancellation.ThrowIfCancellationRequested();
-            int blockSize = period > 0 ? 64 : 1;
-            ulong workItems = ((ulong)input.Length + (ulong)blockSize - 1) / (ulong)blockSize;
-            kernel.Enqueue(new[] { workItems });
-            if (sma is not null) deviceSma!.CopyToHost(sma);
-            if (asin is not null)
+            else work = new Workspace(_context, source.Length);
+            try
             {
-                deviceAsin!.CopyToHost(asin[0]);
-                devicePresence!.CopyToHost(asin[1]);
+                bool devicePresence = plan.OwnCloses(source, history, work.Input, cancellation);
+                var sma = plan.SmaValues;
+                var asin = plan.AsinValues;
+                var key = (plan.SmaLength, sma is not null, asin is not null, fromMean, devicePresence);
+                if (!_kernels.TryGetValue(key, out var compiled))
+                {
+                    if (_kernels.Count >= 32)
+                    {
+                        foreach (var entry in _kernels.Values) entry.Dispose();
+                        _kernels.Clear();
+                    }
+                    compiled = Compile(plan.SmaLength, sma is not null, asin is not null, fromMean, devicePresence);
+                    _kernels.Add(key, compiled);
+                }
+                var deviceInput = work.DeviceInput;
+                var deviceSma = sma is null ? null : work.Sma;
+                var deviceAsin = asin is null ? null : work.Asin;
+                var deviceFlags = devicePresence ? work.Presence : null;
+                cancellation.ThrowIfCancellationRequested();
+                deviceInput.CopyFromHost(work.Input);
+                var kernel = compiled.Kernel;
+                kernel.SetArg(0, deviceInput.Handle);
+                kernel.SetArg(1, deviceSma?.Handle ?? deviceInput.Handle);
+                kernel.SetArg(2, deviceAsin?.Handle ?? deviceInput.Handle);
+                kernel.SetArg(3, deviceFlags?.Handle ?? deviceInput.Handle);
+                kernel.SetArg(4, source.Length);
+                cancellation.ThrowIfCancellationRequested();
+                int blockSize = plan.SmaLength > 0 ? 64 : 1;
+                ulong workItems = ((ulong)source.Length + (ulong)blockSize - 1) / (ulong)blockSize;
+                kernel.Enqueue(new[] { workItems });
+                if (sma is not null) deviceSma!.CopyToHost(sma);
+                if (asin is not null) deviceAsin!.CopyToHost(asin[0]);
+                if (devicePresence) deviceFlags!.CopyToHost(asin![1]);
+                cancellation.ThrowIfCancellationRequested();
             }
-            cancellation.ThrowIfCancellationRequested();
+            catch
+            {
+                // Do not reuse potentially failed buffers/queue work after a driver error
+                // or cancellation. OpenCL retains pending command references on release.
+                if (retain) _workspace = null;
+                work.Dispose();
+                throw;
+            }
+            finally { if (!retain) work.Dispose(); }
         }
     }
 
-    private CompiledKernel Compile(int period, bool publishSma, bool publishAsin, bool fromMean)
+    private sealed class Workspace(OpenClContext context, int count) : IDisposable
+    {
+        internal int Count => count;
+        internal double[] Input { get; } = GC.AllocateUninitializedArray<double>(count);
+        private OpenClBuffer<double>? _input, _sma, _asin, _presence;
+        internal OpenClBuffer<double> DeviceInput => _input ??= new(context, count);
+        internal OpenClBuffer<double> Sma => _sma ??= new(context, count);
+        internal OpenClBuffer<double> Asin => _asin ??= new(context, count);
+        internal OpenClBuffer<double> Presence => _presence ??= new(context, count);
+        public void Dispose()
+        {
+            _input?.Dispose(); _sma?.Dispose(); _asin?.Dispose(); _presence?.Dispose();
+        }
+    }
+
+    private CompiledKernel Compile(int period, bool publishSma, bool publishAsin, bool fromMean, bool devicePresence)
     {
         // One work item owns a short sequential block. This avoids a global
         // prefix array and its cancellation error. Each starting window and
@@ -126,7 +168,7 @@ internal sealed class TensorsGpuExecution
                     }
                     #endif
                     {{(publishSma ? "sma[i] = mean;" : "")}}
-                    {{(publishAsin ? $"double x = {(fromMean ? "mean" : "close[i]")}; int defined = x >= -1.0 && x <= 1.0; value[i] = defined ? asin(x) : 0.0; present[i] = defined ? 1.0 : 0.0;" : "")}}
+                    {{(publishAsin ? $"double x = {(fromMean ? "mean" : "close[i]")}; int defined = x >= -1.0 && x <= 1.0; value[i] = defined ? asin(x) : 0.0; {(devicePresence ? "present[i] = defined ? 1.0 : 0.0;" : "")}" : "")}}
                 }
             }
             """;

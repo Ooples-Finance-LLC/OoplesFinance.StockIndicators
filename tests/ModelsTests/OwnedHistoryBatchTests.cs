@@ -5,6 +5,23 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class OwnedHistoryBatchTests
 {
+    [Fact]
+    public void ContiguousHistoryPreservesChunkViewsSlicesAndEnumeration()
+    {
+        var expected = Enumerable.Range(0, 32769).Select(i => new Bar(default, i, i, i, i, i)).ToArray();
+        var history = new OwnedBarHistory();
+        history.TakeOwnedArray(expected);
+        Assert.Equal(expected, history.ToArray());
+        Assert.Equal(expected.Skip(1023), history.AfterWarmup(1023));
+        var flattened = new List<Bar>();
+        for (var i = 0; i < history.ChunkCount; i++) flattened.AddRange(history.Chunk(i).ToArray());
+        Assert.Equal(expected, flattened);
+        for (var i = 0; i < expected.Length; i++) Assert.Equal(expected[i], history[i]);
+        Assert.Throws<ArgumentOutOfRangeException>(() => history[-1]);
+        Assert.Throws<ArgumentOutOfRangeException>(() => history[history.Count]);
+        Assert.Throws<InvalidOperationException>(() => history.Add(default));
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
@@ -32,6 +49,9 @@ public sealed class OwnedHistoryBatchTests
     [InlineData(1024)]
     [InlineData(1025)]
     [InlineData(2051)]
+    [InlineData(16383)]
+    [InlineData(16384)]
+    [InlineData(32769)]
     public async Task ArrayAndProjectedBuildersHaveIdenticalOutputsAndOwnedSnapshots(int count)
     {
         var bars = Enumerable.Range(0, count).Select(i =>
