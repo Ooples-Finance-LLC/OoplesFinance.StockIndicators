@@ -1,0 +1,271 @@
+PerfView logging started at 10/9/2026 6:09:24 PM
+[EXECUTING: PerfView /AcceptEula /NoGui /NoNGenRundown /CircularMB:256 /BufferSizeMB:128 /SessionName:SiCurrentPilots /LogFile:C:/Users/cheat/temp/si-elevated-current/SmaGrid-Builder.log /DataFile:C:/Users/cheat/temp/si-elevated-current/SmaGrid-Builder.etl run C:/Program Files/dotnet/dotnet.exe C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary SmaGrid Builder 10]
+[Kernel Log: C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.kernel.etl]
+Kernel keywords enabled: Default
+[User mode Log: C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl]
+Enabling Provider:PerfViewLogger Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:a8a71ac1-040f-54a2-07ca-00a89b5ab761
+Turning on more CLR GC, JScript and ASP.NET Events.
+Enabling Provider:DotNet Level:Verbose Keywords:0xffffffffffffffff Stacks:1 Values: Guid:319dc449-ada5-50f7-428e-957db6791668
+Enabling Provider:Microsoft-Windows-Kernel-EventTracing Level:Verbose Keywords:0x70 Stacks:1 Values: Guid:b675ec37-bdb6-4648-bc92-f3fdc74d3ca2
+Enabling Provider:Microsoft-Windows-Kernel-File Level:Verbose Keywords:0x80 Stacks:1 Values: Guid:edd08927-9cc4-4e65-b970-c2560fb5c289
+Enabling Provider:Microsoft-Windows-Kernel-Process Level:Informational Keywords:0x10 Stacks:1 Values: Guid:22fb2cd6-0e7b-422b-a0c7-2fad1fd0e716
+Enabling Provider:ASP.NET Level:Verbose Keywords:0xfffffffffffffffd Stacks:0 Values: Guid:aff081fe-0247-4275-9c4e-021f3dc1da35
+File C:\WINDOWS\System32\inetsrv\iiscore.dll does not exist, ASP.NET is not enabled on the machine
+Enabling Provider:*Microsoft-Windows-ASPNET Level:Informational Keywords:0xffffffffffffffff Stacks:1 Values: Guid:ee799f41-cfa5-550b-bf2c-344747c1c668
+Enabling Provider:Microsoft-Windows-IIS Level:Critical Keywords:0x0 Stacks:0 Values: Guid:de4649c9-15e8-4fea-9d85-1cdda520c334
+Enabling Provider:Microsoft-PerfTrack-IEFRAME Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:b2a40f1f-a05a-4dfd-886a-4c4f18c4334c
+Enabling Provider:Microsoft-PerfTrack-MSHTML Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:ffdb9886-80f3-4540-aa8b-b85192217ddf
+Enabling Provider:Microsoft-Windows-WinINet Level:Verbose Keywords:0x2 Stacks:0 Values: Guid:43d1a55c-76d6-4f7e-995c-64c711e5cafe
+Enabling Provider:Microsoft-Windows-Application Server-Applications Level:Informational Keywords:0xffffffffffffffff Stacks:0 Values: Guid:c651f5f6-1c0d-492e-8ae1-b4efd7c9d503
+Enabling Provider:Microsoft-IE Level:Informational Keywords:0x1300 Stacks:0 Values: Guid:9e3b3947-ca5d-4614-91a2-7b624e0e7244
+Enabling Provider:Microsoft-Windows-DNS-Client Level:Informational Keywords:0xffffffffffffffff Stacks:0 Values: Guid:1c95126e-7eea-49a9-a3fe-a378b03ddb4d
+Enabling Provider:Microsoft-Windows-DirectComposition Level:Verbose Keywords:0x4 Stacks:0 Values: Guid:c44219d0-f344-11df-a5e2-b307dfd72085
+Enabling Provider:Microsoft-Windows-Immersive-Shell Level:Informational Keywords:0xffffffffffffffff Stacks:0 Values: Guid:315a8872-923e-4ea2-9889-33cd4754bf64
+Enabling Provider:Microsoft-Windows-XAML Level:Informational Keywords:0xffffffffffffffff Stacks:0 Values: Guid:531a35ab-63ce-4bcf-aa98-f88c7a89e455
+Enabling Provider:Microsoft-JScript Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:57277741-3638-4a4b-bdba-0ac6e45da56c
+Enabling Provider:ClrPrivateNative Level:Informational Keywords:0x4002000b Stacks:0 Values: Guid:1095638c-8748-4c7a-b39e-baea27b9c589
+Enabling Provider:CLRPrivate Level:Informational Keywords:0x4002000b Stacks:0 Values: Guid:763fd754-7086-4dfe-95eb-c01a46faf4ca
+Enabling Provider:.NETFramework Level:Verbose Keywords:0x16 Stacks:1 Values: Guid:8e9f5090-2d75-4d03-8a81-e5afbf85daf1
+Enabling Provider:Microsoft.Tasks.Nuget Level:Informational Keywords:0x80 Stacks:0 Values: Guid:b734069e-103c-5376-2080-4f009207881a
+Enabling Provider:Microsoft-AdoNet-SystemData Level:Informational Keywords:0x1 Stacks:1 Values: Guid:6a4dfe53-eb50-5332-8473-7b7e10a94fd1
+Enabling Provider:ETWCLrProfiler Diagnostics Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:6652970f-1756-5d8d-0805-e9aad152aa79
+Enabling Provider:Microsoft-Diagnostics-DiagnosticSource Level:Informational Keywords:0xfffffffffffff7ff Stacks:1 Values:FilterAndPayloadSpecs=HttpHandlerDiagnosticListener/System.Net.Http.Request@Activity2Start:Request.RequestUri
+HttpHandlerDiagnosticListener/System.Net.Http.Response@Activity2Stop:Response.StatusCode Guid:adb401e1-5296-51f8-c125-5fda75826144
+Enabling Provider:Microsoft-AspNetCore-Hosting Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:9e620d2a-55d4-5ade-deb7-c26046d245a8
+Enabling Provider:Microsoft-ApplicationInsights-Core Level:Verbose Keywords:0xffffffffffffffff Stacks:1 Values: Guid:74af9f20-af6a-5582-9382-f21f674fb271
+Enabling Provider:Microsoft-Windows-Kernel-Power Level:Informational Keywords:0xffb Stacks:0 Values: Guid:331c3b3a-2005-44c2-ac5e-77220c37d6b4
+Enabling Provider:Microsoft-Windows-Kernel-Processor-Power Level:Informational Keywords:0xe5d Stacks:0 Values: Guid:0f67e49f-fe51-4e9f-b490-6f2948cc6027
+Enabling Provider:Microsoft-Windows-PowerCpl Level:Informational Keywords:0xffffffffffffffff Stacks:0 Values: Guid:b1f90b27-4551-49d6-b2bd-dfc6453762a6
+Enabling Provider:Microsoft-Windows-PowerCfg Level:Informational Keywords:0xffffffffffffffff Stacks:0 Values: Guid:9f0c4ea8-ec01-4200-a00d-b9701cbea5d8
+Turning on VS CodeMarkers and MeasurementBlock Providers.
+Enabling Provider:MeasurementBlock Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:143a31db-0372-40b6-b8f1-b4b16adb5f54
+Enabling Provider:CodeMarkers Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:641d7f6c-481c-42e8-ab7e-d18dc5e5cb9e
+Enabling CLR Events: GC, Binder, Security, AppDomainResourceManagement, Contention, Exception, Threading, JITSymbols, Type, GCHeapSurvivalAndMovement, GCHeapAndTypeNames, Stack, ThreadTransfer, Codesymbols, Compilation
+Enabling Provider:ClrNative Level:Verbose Keywords:0x14c14fcc9d Stacks:1 Values: Guid:47c3ba0c-77f1-4eb0-8d4d-aef447f16a85
+Enabling Provider:CLR Level:Verbose Keywords:0x14c14fcc9d Stacks:0 Values: Guid:e13c0d23-ccbc-4e12-931b-d9cc2eee27e4
+Enabling Providers specified by the user.
+Starting at 10/9/2026 6:09:25 PM
+Current Directory C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-indicators
+Executing: "C:/Program Files/dotnet/dotnet.exe" C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary SmaGrid Builder 10 {
+CONTRACT case=SmaGrid bitDifferences=0 maxAbsoluteDifference=0
+LAYOUT barBytes=48 count=100000
+PROFILE START case=SmaGrid arm=Builder pid=14828
+PROFILE END iterations=10793 seconds=10.0005 nsPerCall=926571 bytesPerCall=804055 cpuSeconds=10.4062 gcPauseSeconds=0.3303 gen0=1355 gen1=1349 gen2=1349
+
+
+} Stopping at 10/9/2026 6:09:38 PM = 13.370 sec
+Stopping tracing for sessions 'SiCurrentPilotsKernel' and 'SiCurrentPilots'.
+No Heap events were active for this trace.
+[Sending rundown command to CLR providers...]
+Enabling Provider:PerfViewLogger Level:Verbose Keywords:0xffffffffffffffff Stacks:0 Values: Guid:a8a71ac1-040f-54a2-07ca-00a89b5ab761
+Enabling Provider:CLRRundown Level:Verbose Keywords:0x108 Stacks:0 Values: Guid:a669021c-c450-4609-a035-5af59af4df18
+Enabling Provider:CLRRundown Level:Verbose Keywords:0x1080060111 Stacks:0 Values: Guid:a669021c-c450-4609-a035-5af59af4df18
+Waiting up to 120 sec for rundown events.  Use /RundownTimeout to change.
+If you know your process has exited, use /noRundown qualifer to skip this step.
+Rundown File Length: 78.4MB delta: 78.4MB
+Rundown File Length: 78.4MB delta: 0.0MB
+Rundown file has stopped growing, assuming rundown complete.
+CLR Rundown took 2.630 sec.
+Done stopping sessions.
+Ensuring .NET Allocation profiler not installed.
+Detected 64 bit system, removing 32 bit keys.
+[Merging data files to SmaGrid-Builder.etl.  Can take 10s of seconds... (can skip if data analyzed on same machine with PerfView)]
+WARNING NO _NT_SYMBOL_PATH set ...
+Symbol reader _NT_SYMBOL_PATH= {
+    C:\Users\cheat\temp\si-elevated-current;
+    }
+This can be set using the File -> Set Symbol Path dialog on the Stack Viewer.
+Created SymbolReader with SymbolPath C:\Users\cheat\temp\si-elevated-current
+Setting SymbolReaderOptions forces clearing Pdb lookup cache
+Starting Merging of C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl
+Starting Merging of C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl
+Starting Generating NGEN pdbs for C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Roslyn\bincore\Microsoft.CodeAnalysis.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Roslyn\bincore\Microsoft.CodeAnalysis.dll took 0.01 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.CoreLib.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.CoreLib.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Roslyn\bincore\VBCSCompiler.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Roslyn\bincore\VBCSCompiler.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Net.Http.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Net.Http.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Reflection.Metadata.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Reflection.Metadata.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Data.Common.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Data.Common.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Private.CoreLib.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Private.CoreLib.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Linq.Expressions.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Linq.Expressions.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Management.Automation.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Management.Automation.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\Microsoft.PowerShell.Commands.Management.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\Microsoft.PowerShell.Commands.Management.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\Microsoft.PowerShell.Commands.Utility.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\Microsoft.PowerShell.Commands.Utility.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Text.RegularExpressions.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Text.RegularExpressions.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Collections.Concurrent.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Collections.Concurrent.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\System.Collections.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\System.Collections.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\PowerShell\7\Microsoft.PowerShell.ConsoleHost.dll, Giving up
+NGEN PDB creation for C:\Program Files\PowerShell\7\Microsoft.PowerShell.ConsoleHost.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.Json.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.Json.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\dotnet.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\dotnet.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.ApplicationInsights.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.ApplicationInsights.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Reflection.Metadata.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Reflection.Metadata.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Threading.Tasks.Dataflow.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Threading.Tasks.Dataflow.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\MSBuild.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\MSBuild.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Collections.Concurrent.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Collections.Concurrent.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.Process.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.Process.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\System.CommandLine.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\System.CommandLine.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.Utils.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.Utils.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.NET.StringTools.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.NET.StringTools.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Newtonsoft.Json.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Newtonsoft.Json.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.Xml.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.Xml.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.DataContractSerialization.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.DataContractSerialization.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.CrossPlatEngine.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.CrossPlatEngine.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\vstest.console.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\vstest.console.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.CommunicationUtilities.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.CommunicationUtilities.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.ComponentModel.TypeConverter.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.ComponentModel.TypeConverter.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.VisualStudio.TestPlatform.Common.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.VisualStudio.TestPlatform.Common.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.VisualStudio.TestPlatform.Client.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.VisualStudio.TestPlatform.Client.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Extensions\Microsoft.TestPlatform.TestHostRuntimeProvider.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Extensions\Microsoft.TestPlatform.TestHostRuntimeProvider.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.ObjectModel.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.ObjectModel.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.PlatformAbstractions.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.PlatformAbstractions.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.CoreUtilities.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.CoreUtilities.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.ComponentModel.Primitives.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.ComponentModel.Primitives.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Linq.Expressions.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Linq.Expressions.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.DiagnosticSource.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.DiagnosticSource.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Linq.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Linq.dll took 0.00 Sec
+Found NGEN pdb C:\Users\cheat\AppData\Local\Temp\SymbolCache\System.ni.pdb\4c3f76440960cd4a016a723cfd9955311\System.ni.pdb
+NGEN PDB creation for C:\Windows\assembly\NativeImages_v4.0.30319_64\System\4c3f76440960cd4a016a723cfd995531\System.ni.dll took 0.00 Sec
+Found NGEN pdb C:\Users\cheat\AppData\Local\Temp\SymbolCache\mscorlib.ni.pdb\d58223d72654fb5882ec14154690476f1\mscorlib.ni.pdb
+NGEN PDB creation for C:\Windows\assembly\NativeImages_v4.0.30319_64\mscorlib\d58223d72654fb5882ec14154690476f\mscorlib.ni.dll took 0.00 Sec
+Found NGEN pdb C:\Users\cheat\AppData\Local\Temp\SymbolCache\PresentationCore.ni.pdb\5803e9d76fbd2d263ebe8b600077e69e1\PresentationCore.ni.pdb
+NGEN PDB creation for C:\Windows\assembly\NativeImages_v4.0.30319_64\PresentationCore\5803e9d76fbd2d263ebe8b600077e69e\PresentationCore.ni.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Console.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Console.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.Encodings.Web.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.Encodings.Web.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.StackTrace.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.StackTrace.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.Encoding.CodePages.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.Encoding.CodePages.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Collections.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Collections.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.Definitions.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.Definitions.dll took 0.02 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.CoreUtils.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.CoreUtils.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Configurer.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Configurer.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.InternalAbstractions.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.InternalAbstractions.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.CommandLine.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.Cli.CommandLine.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\NuGet.CommandLine.XPlat.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\NuGet.CommandLine.XPlat.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.ProjectTools.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.ProjectTools.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.NativeWrapper.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.NativeWrapper.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Collections.Immutable.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Collections.Immutable.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.Uri.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.Uri.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Security.Cryptography.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Security.Cryptography.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.IO.MemoryMappedFiles.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.IO.MemoryMappedFiles.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.Xml.Linq.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Private.Xml.Linq.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.Framework.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.Framework.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.TemplateLocator.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.DotNet.TemplateLocator.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\Microsoft.Win32.Registry.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\Microsoft.Win32.Registry.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.RegularExpressions.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Text.RegularExpressions.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.NetworkInformation.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.NetworkInformation.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.NameResolution.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.NameResolution.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.IO.Compression.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.IO.Compression.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\NuGet.Credentials.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\NuGet.Credentials.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\runtimes\win\lib\net10.0\System.ServiceProcess.ServiceController.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\runtimes\win\lib\net10.0\System.ServiceProcess.ServiceController.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Security.Principal.Windows.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Security.Principal.Windows.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Threading.Tasks.Parallel.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Threading.Tasks.Parallel.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.NuGetSdkResolver.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.NuGetSdkResolver.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.NET.Sdk.WorkloadManifestReader.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.NET.Sdk.WorkloadManifestReader.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\NuGet.Frameworks.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\NuGet.Frameworks.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.Tasks.Core.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.Build.Tasks.Core.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.Build.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.Build.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.TraceSource.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.TraceSource.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.Utilities.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\sdk\10.0.401\Microsoft.TestPlatform.Utilities.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.Sockets.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.Sockets.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.Primitives.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Net.Primitives.dll took 0.00 Sec
+Could not find CLR directory for NGEN image C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.FileVersionInfo.dll, Giving up
+NGEN PDB creation for C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.12\System.Diagnostics.FileVersionInfo.dll took 0.00 Sec
+Generating NGEN Pdbs took 3.8 sec
+Merging took 20.7 sec
+Moving C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl.new to C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl
+Deleting temp file
+Merge and NGEN PDB Generation took 20.785 sec.
+Merge output file C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl
+[Zipping ETL file C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl]
+[Writing 3 PDBS to Zip file]
+ZIP generation took 4.722 sec
+ZIP output file C:\Users\cheat\temp\si-elevated-current\SmaGrid-Builder.etl.zip
+Time: 10/9/2026 6:10:07 PM
+Stop Completed at 10/9/2026 6:10:07 PM
+[DONE 18:10:07 SUCCESS: PerfView /AcceptEula /NoGui /NoNGenRundown /CircularMB:256 /BufferSizeMB:128 /SessionName:SiCurrentPilots /LogFile:C:/Users/cheat/temp/si-elevated-current/SmaGrid-Builder.log /DataFile:C:/Users/cheat/temp/si-elevated-current/SmaGrid-Builder.etl run C:/Program Files/dotnet/dotnet.exe C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary SmaGrid Builder 10]

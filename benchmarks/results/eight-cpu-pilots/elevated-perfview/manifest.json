@@ -1,0 +1,51 @@
+{
+  "profiledCommit": "f945ae64",
+  "productionDllSha256": "78529C5C7AA5C6823F4F0245E0DC53048A28B1CF2640E52CF250019B11D9D1A6",
+  "captures": [
+    {
+      "case": "Asin-Builder",
+      "pid": 10268,
+      "rawTraceFile": "Asin-Builder.etl.zip",
+      "rawTraceSha256": "70c243bdfee8bd702e677e2039faad525e3c78b984423cf558e811f1edfd8490",
+      "exportScope": "Exact workload PID only; stack/frame IDs retained from full export"
+    },
+    {
+      "case": "Asin-InPlace",
+      "pid": 22884,
+      "rawTraceFile": "Asin-InPlace.etl.zip",
+      "rawTraceSha256": "da62bbd551b49ff0eabfd4b24845f42bdaeacef8d26921c58eca87eda23c295a",
+      "exportScope": "Exact workload PID only; stack/frame IDs retained from full export"
+    },
+    {
+      "case": "SmaDecimal-Builder",
+      "pid": 15476,
+      "rawTraceFile": "SmaDecimal-Builder.etl.zip",
+      "rawTraceSha256": "066adffb919237dd526c1fe0295d0bd24316cd47eefed430a388e8232f09a356",
+      "exportScope": "Exact workload PID only; stack/frame IDs retained from full export"
+    },
+    {
+      "case": "SmaDecimal-InPlace",
+      "pid": 9448,
+      "rawTraceFile": "SmaDecimal-InPlace.etl.zip",
+      "rawTraceSha256": "91a0a1493b6d37f9603da08bb5a6a91be67feaa5f30f06ebc4bb0be4bbe0627f",
+      "exportScope": "Exact workload PID only; stack/frame IDs retained from full export"
+    },
+    {
+      "case": "SmaGrid-Builder",
+      "pid": 14828,
+      "rawTraceFile": "SmaGrid-Builder.etl.zip",
+      "rawTraceSha256": "6dda80fcc08d07ce88b666dd6cc448f032f72ae3217339066edc70139018605e",
+      "exportScope": "Exact workload PID only; stack/frame IDs retained from full export"
+    },
+    {
+      "case": "SmaGrid-InPlace",
+      "pid": 16068,
+      "rawTraceFile": "SmaGrid-InPlace.etl.zip",
+      "rawTraceSha256": "39e93dca919dc58345788b0966e9cc14c5e37c04b70adcf9a136c6f9c6bcd91c",
+      "exportScope": "Exact workload PID only; stack/frame IDs retained from full export"
+    }
+  ],
+  "finalProductionDllSha256": "bdfd631b9cfbdc6d2f182182148573d8528d36609d251bf5e4432bd49a3d7103",
+  "finalSourceSha256": "94d7e11d3356141d6a343e418981a5667c5885c6ce08a3ec47fb6f222463588b",
+  "validation": "147 affected net10.0 tests passed, 0 skipped; Release benchmark build passed; all 9 final BenchmarkDotNet cases have valid statistics"
+}

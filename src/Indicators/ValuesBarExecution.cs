@@ -86,14 +86,15 @@ internal static class ValuesBarExecution
         for (int i = 0; i < source.Length; i++)
         {
             cancellation.ThrowIfCancellationRequested();
-            var bar = source[i];
-            latest = bar;
-            if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
-                || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
-                IndicatorInputDomain.Finite.Validate(in bar);
-            close[i] = bar.Close;
-            summary.Include(bar.Close);
-            positiveRange.Include(bar.Close);
+            // Use the same owned local for validation and the final snapshot. A
+            // separate bar local forces a second 48-byte copy in the Tier1 loop.
+            latest = source[i];
+            if (!double.IsFinite(latest.Open) || !double.IsFinite(latest.High) || !double.IsFinite(latest.Low)
+                || !double.IsFinite(latest.Close) || !double.IsFinite(latest.Volume))
+                IndicatorInputDomain.Finite.Validate(in latest);
+            close[i] = latest.Close;
+            summary.Include(latest.Close);
+            positiveRange.Include(latest.Close);
         }
         return latest;
     }

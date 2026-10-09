@@ -723,3 +723,49 @@ PerfView.exe /AcceptEula /NoGui UserCommand GCStats <trace.nettrace>
 [Reports, stack exports, GC CSVs, counters, hashes and test evidence](../benchmarks/results/eight-cpu-pilots/latest-only-perfview/).
 Raw traces remain at `C:/Users/cheat/temp/si-latest-perfview`. Full ETW/native CPU
 attribution would require an elevated collection; it was not obtained here.
+
+## Elevated ETW follow-up (2026-10-09)
+
+Elevated PerfView captured all six builder/in-place-adapter workloads at
+`f945ae64`. Native symbols now resolve all but 0.4-0.6% of foreground leaf samples.
+This supersedes the preceding limitation about unavailable elevated CPU/GC
+attribution. Exact workload PIDs were selected: selecting only the name `dotnet`
+can export an unrelated MSBuild process.
+
+SMA ingestion and certification account for 67.5% of grid and 56.4% of decimal
+foreground CPU; calculation accounts for 22.5% and 37.1%, respectively. Asin
+spends about 69% in native asin functions. GC CPU is measurable now: whole-process
+builder percentages are 13.6% (Asin), 8.1% (grid), and 6.8% (decimal), including
+setup/warmup. These percentages use different denominators from foreground CPU.
+Allocation parity alone therefore does not imply throughput parity.
+
+The retained change removes a duplicate 48-byte bar copy in single-SMA ingestion
+by using one owned local for validation, close extraction and the final snapshot.
+Tier1 code falls from 918 to 872 bytes, and stack storage from 136 to 88 bytes.
+It retains the original certification fields, arithmetic, input validation,
+cancellation, and snapshot ownership. A candidate that promoted summaries and
+branched on the final row was rejected after register spills and inconclusive
+benchmark results. No Asin or GPU production code changes in this batch.
+
+Final 100k-bar measurements (6 warmups, 10 iterations; time / allocation):
+
+| Case | LatestOnly BuildAsync | TALib matching in-place payload | Raw TALib |
+|---|---:|---:|---:|
+| Asin | 1.344 ms / 1568.10 KB | 1.495 ms / 1564.80 KB | 0.954 ms / 783.11 KB |
+| SMA grid | 1.115 ms / 785.50 KB | 0.861 ms / 782.89 KB | 0.284 ms / 783.00 KB |
+| SMA decimal | 0.875 ms / 786.22 KB | 0.597 ms / 782.95 KB | 0.235 ms / 783.13 KB |
+
+All nine cases have valid statistics. Asin is ahead of the matching adapter in
+this run, but its implementation did not change and earlier runs reversed the
+ordering. Grid timings shifted materially for both implementations. These are
+observations on a shared machine, not a controlled before/after speedup or a
+stable two-indicator win. SMA remains behind the adapter (about 30% grid, 47%
+decimal). Decimal numerical contracts still differ; raw TALib does less work.
+The final patch has a demonstrated generated-code reduction, not a demonstrated
+end-to-end speedup. Broader rollout remains unqualified.
+
+Validation: all 147 affected net10.0 tests passed, no skips; Release benchmark
+build passed. Existing ownership, bitwise arithmetic, fallback, cancellation and
+GPU tests were retained. No additional framework matrix was run for this local
+modern-CPU change. [CPU/GC summaries, filtered stacks, JIT listings, both candidate
+reports and final test evidence](../benchmarks/results/eight-cpu-pilots/elevated-perfview/).

@@ -396,3 +396,6 @@ decimal SMA, versus 1.494/0.631/0.701 ms for the optimized matching TALib adapte
 Allocation is within about 3-4 KB on equivalent payloads. Raw TALib remains faster;
 performance acceptance and global rollout are still open. Timing drift across runs
 is retained in the evidence; these are not controlled percentage speedup claims.
+
+
+Elevated ETW follow-up: six native-symbol-resolved CPU/GC captures identify SMA ingestion/certification as the primary hotspot. The retained local change removes a duplicate bar copy; 147 affected tests pass. Final results still do not establish stable SMA/Asin competitor wins or qualify global rollout. See [current evidence](../benchmarks/results/eight-cpu-pilots/elevated-perfview/) and the elevated follow-up in builder-ab-profile.md.

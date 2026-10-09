@@ -1,0 +1,1538 @@
+[
+  {
+    "case": "Asin-Builder",
+    "pid": 10268,
+    "wholeProcessCpuSampleMs": 14497.0,
+    "steadyForegroundCpuSampleMs": 9602.0,
+    "approximateSteadyWindowMs": [
+      3491.988,
+      13719.262
+    ],
+    "scope": "Exact logged PID; foreground Run stacks excluding Setup; first 3 seconds removed approximately. Inlining attribution remains inclusive in caller. Whole-process CPU includes warmup/setup/GC threads.",
+    "topExclusive": [
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!asin_fma",
+        "ms": 6452.0,
+        "percent": 67.194334513643
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillAsin(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],value class System.Threading.CancellationToken)",
+        "ms": 1893.0,
+        "percent": 19.714642782753593
+      },
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!asin",
+        "ms": 175.0,
+        "percent": 1.8225369714642785
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::enter_spin_lock_msl_helper",
+        "ms": 75.0,
+        "percent": 0.7810872734846908
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiInitializePfn",
+        "ms": 55.0,
+        "percent": 0.5727973338887732
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiPageFault",
+        "ms": 47.0,
+        "percent": 0.4894813580504062
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiConvertLargeActivePageToChain",
+        "ms": 45.0,
+        "percent": 0.4686523640908144
+      },
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!_set_statfp",
+        "ms": 44.0,
+        "percent": 0.45823786711101855
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlLookupFunctionEntry",
+        "ms": 31.0,
+        "percent": 0.32284940637367215
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpUnwindPrologue",
+        "ms": 25.0,
+        "percent": 0.2603624244948969
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxVirtualUnwind",
+        "ms": 23.0,
+        "percent": 0.23953343053530513
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiCompletePrivateZeroFault",
+        "ms": 22.0,
+        "percent": 0.22911893355550927
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!ExpInterlockedPopEntrySListFault",
+        "ms": 19.0,
+        "percent": 0.1978754426161216
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiGetPerfectColorHeadPage",
+        "ms": 18.0,
+        "percent": 0.18746094563632576
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiIpiInterruptSubDispatch",
+        "ms": 17.0,
+        "percent": 0.17704644865652988
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxLookupFunctionTable",
+        "ms": 16.0,
+        "percent": 0.166631951676734
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CallDescrWorkerInternal",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\hostpolicy!?",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\kernel32!BaseThreadInitThunk",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!coreclr_execute_assembly",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (10268) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary Asin Builder 10",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>(class System.String[])",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile.Run(class System.String,class System.String,int32)",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&)",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMain",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program+<<Main>$>d__0.MoveNext()",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlUserThreadStart",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\host\\fxr\\10.0.12\\hostfxr!?",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!MethodDescCallSite::CallTargetWorker",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\dotnet!?",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMainInternal",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Assembly::ExecuteMainMethod",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (31796) CPU=12367ms (Startup Thread)",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>$(class System.String[])",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CorHost2::ExecuteAssembly",
+        "ms": 9602.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile+<>c__DisplayClass0_0.<Run>b__0()",
+        "ms": 9599.0,
+        "percent": 99.96875650906061
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.OoplesLatestOnlyBuilder()",
+        "ms": 9598.0,
+        "percent": 99.95834201208082
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildLatestOnlyAsync>d__32.MoveNext()",
+        "ms": 9561.0,
+        "percent": 99.57300562382837
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken)",
+        "ms": 9550.0,
+        "percent": 99.45844615705062
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillAsin(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],value class System.Threading.CancellationToken)",
+        "ms": 9076.0,
+        "percent": 94.52197458862737
+      },
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!asin_fma",
+        "ms": 6598.0,
+        "percent": 68.71485107269318
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node..ctor(class OoplesFinance.StockIndicators.Indicators.IIndicator,int32)",
+        "ms": 430.0,
+        "percent": 4.478233701312226
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!GCInterface_AllocateNewArray",
+        "ms": 425.0,
+        "percent": 4.426161216413247
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+        "ms": 425.0,
+        "percent": 4.426161216413247
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!AllocateSzArray",
+        "ms": 423.0,
+        "percent": 4.405332222453655
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_more_space",
+        "ms": 422.0,
+        "percent": 4.39491772547386
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::try_allocate_more_space",
+        "ms": 422.0,
+        "percent": 4.39491772547386
+      }
+    ],
+    "unresolvedLeafPercent": 0.5311393459695897
+  },
+  {
+    "case": "Asin-InPlace",
+    "pid": 22884,
+    "wholeProcessCpuSampleMs": 13833.0,
+    "steadyForegroundCpuSampleMs": 9416.0,
+    "approximateSteadyWindowMs": [
+      3474.48,
+      13682.721
+    ],
+    "scope": "Exact logged PID; foreground Run stacks excluding Setup; first 3 seconds removed approximately. Inlining attribution remains inclusive in caller. Whole-process CPU includes warmup/setup/GC threads.",
+    "topExclusive": [
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!asin_fma",
+        "ms": 4092.0,
+        "percent": 43.45794392523364
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.TalibInPlaceLatestOnlyPayload()",
+        "ms": 3867.0,
+        "percent": 41.06839422259983
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Double.Asin(float64)",
+        "ms": 520.0,
+        "percent": 5.52251486830926
+      },
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!asin",
+        "ms": 163.0,
+        "percent": 1.7310960067969414
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiInitializePfn",
+        "ms": 51.0,
+        "percent": 0.5416312659303314
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiConvertLargeActivePageToChain",
+        "ms": 46.0,
+        "percent": 0.4885301614273577
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiPageFault",
+        "ms": 41.0,
+        "percent": 0.43542905692438405
+      },
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!_set_statfp",
+        "ms": 41.0,
+        "percent": 0.43542905692438405
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlLookupFunctionEntry",
+        "ms": 24.0,
+        "percent": 0.2548853016142736
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxVirtualUnwind",
+        "ms": 22.0,
+        "percent": 0.23364485981308408
+      },
+      {
+        "frame": "c:\\windows\\system32\\driverstore\\filerepository\\u0196283.inf_amd64_3979d16563294d92\\b025522\\amdkmdag.sys!?",
+        "ms": 20.0,
+        "percent": 0.21240441801189466
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpUnwindPrologue",
+        "ms": 17.0,
+        "percent": 0.18054375531011044
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!ExpInterlockedPopEntrySListFault",
+        "ms": 16.0,
+        "percent": 0.16992353440951571
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiGetPerfectColorHeadPage",
+        "ms": 16.0,
+        "percent": 0.16992353440951571
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::enter_spin_lock_msl_helper",
+        "ms": 15.0,
+        "percent": 0.159303313508921
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiIpiInterruptSubDispatch",
+        "ms": 14.0,
+        "percent": 0.14868309260832627
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CallDescrWorkerInternal",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\hostpolicy!?",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\kernel32!BaseThreadInitThunk",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!coreclr_execute_assembly",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (14544) CPU=12438ms (Startup Thread)",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>(class System.String[])",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile.Run(class System.String,class System.String,int32)",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (22884) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary Asin InPlace 10",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&)",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMain",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program+<<Main>$>d__0.MoveNext()",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlUserThreadStart",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!MethodDescCallSite::CallTargetWorker",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\dotnet!?",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMainInternal",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Assembly::ExecuteMainMethod",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>$(class System.String[])",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CorHost2::ExecuteAssembly",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\host\\fxr\\10.0.12\\hostfxr!?",
+        "ms": 9416.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile+<>c__DisplayClass0_0.<Run>b__2()",
+        "ms": 9407.0,
+        "percent": 99.90441801189465
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.TalibInPlaceLatestOnlyPayload()",
+        "ms": 9407.0,
+        "percent": 99.90441801189465
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Double.Asin(float64)",
+        "ms": 4889.0,
+        "percent": 51.92225998300765
+      },
+      {
+        "frame": "c:\\windows\\system32\\ucrtbase!asin_fma",
+        "ms": 4200.0,
+        "percent": 44.604927782497874
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!GCInterface_AllocateNewArray",
+        "ms": 293.0,
+        "percent": 3.1117247238742562
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+        "ms": 293.0,
+        "percent": 3.1117247238742562
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_more_space",
+        "ms": 292.0,
+        "percent": 3.1011045029736617
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::try_allocate_more_space",
+        "ms": 292.0,
+        "percent": 3.1011045029736617
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::GCHeap::Alloc",
+        "ms": 292.0,
+        "percent": 3.1011045029736617
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!AllocateSzArray",
+        "ms": 291.0,
+        "percent": 3.090484282073067
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Alloc",
+        "ms": 287.0,
+        "percent": 3.048003398470688
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_uoh_object",
+        "ms": 286.0,
+        "percent": 3.0373831775700935
+      }
+    ],
+    "unresolvedLeafPercent": 0.41418861512319455
+  },
+  {
+    "case": "SmaDecimal-Builder",
+    "pid": 15476,
+    "wholeProcessCpuSampleMs": 14136.0,
+    "steadyForegroundCpuSampleMs": 10004.0,
+    "approximateSteadyWindowMs": [
+      3459.601,
+      13693.954
+    ],
+    "scope": "Exact logged PID; foreground Run stacks excluding Setup; first 3 seconds removed approximately. Inlining attribution remains inclusive in caller. Whole-process CPU includes warmup/setup/GC threads.",
+    "topExclusive": [
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillSma(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],value class GridSummary&,value class PositiveRangeSummary&,value class System.Threading.CancellationToken)",
+        "ms": 5640.0,
+        "percent": 56.37744902039184
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Core.SmaCpuKernel.ProcessBoundedPositive(float64[],int32,value class DelayedStore&,value class System.Threading.CancellationToken)",
+        "ms": 3716.0,
+        "percent": 37.14514194322271
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiPageFault",
+        "ms": 28.0,
+        "percent": 0.2798880447820872
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxVirtualUnwind",
+        "ms": 27.0,
+        "percent": 0.2698920431827269
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiConvertLargeActivePageToChain",
+        "ms": 26.0,
+        "percent": 0.25989604158336665
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxLookupFunctionTable",
+        "ms": 25.0,
+        "percent": 0.24990003998400642
+      },
+      {
+        "frame": "c:\\windows\\system32\\driverstore\\filerepository\\u0196283.inf_amd64_3979d16563294d92\\b025522\\amdkmdag.sys!?",
+        "ms": 24.0,
+        "percent": 0.23990403838464613
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlLookupFunctionEntry",
+        "ms": 22.0,
+        "percent": 0.21991203518592564
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiInitializePfn",
+        "ms": 18.0,
+        "percent": 0.1799280287884846
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpUnwindPrologue",
+        "ms": 18.0,
+        "percent": 0.1799280287884846
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiIpiInterruptSubDispatch",
+        "ms": 16.0,
+        "percent": 0.1599360255897641
+      },
+      {
+        "frame": "?!?",
+        "ms": 11.0,
+        "percent": 0.10995601759296282
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiUserFault",
+        "ms": 9.0,
+        "percent": 0.0899640143942423
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlVirtualUnwind",
+        "ms": 9.0,
+        "percent": 0.0899640143942423
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiUnlinkFreeOrZeroedPage",
+        "ms": 8.0,
+        "percent": 0.07996801279488205
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiAddWorkingSetEntries",
+        "ms": 8.0,
+        "percent": 0.07996801279488205
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CallDescrWorkerInternal",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\hostpolicy!?",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\kernel32!BaseThreadInitThunk",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (15476) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary SmaDecimal Builder 10",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!coreclr_execute_assembly",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>(class System.String[])",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile.Run(class System.String,class System.String,int32)",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (1968) CPU=13041ms (Startup Thread)",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&)",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMain",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program+<<Main>$>d__0.MoveNext()",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlUserThreadStart",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!MethodDescCallSite::CallTargetWorker",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\dotnet!?",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMainInternal",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Assembly::ExecuteMainMethod",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>$(class System.String[])",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CorHost2::ExecuteAssembly",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\host\\fxr\\10.0.12\\hostfxr!?",
+        "ms": 10004.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.OoplesLatestOnlyBuilder()",
+        "ms": 9984.0,
+        "percent": 99.8000799680128
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildLatestOnlyAsync>d__32.MoveNext()",
+        "ms": 9950.0,
+        "percent": 99.46021591363454
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken)",
+        "ms": 9948.0,
+        "percent": 99.44022391043582
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile+<>c__DisplayClass0_0.<Run>b__0()",
+        "ms": 9543.0,
+        "percent": 95.39184326269492
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillSma(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],value class GridSummary&,value class PositiveRangeSummary&,value class System.Threading.CancellationToken)",
+        "ms": 5890.0,
+        "percent": 58.8764494202319
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.ComputeSma(float64[],float64[],int32,value class GridSummary,value class System.Threading.CancellationToken,bool,bool)",
+        "ms": 3763.0,
+        "percent": 37.614954018392645
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Core.SmaCpuKernel.ProcessInPlace(float64[],int32,bool,value class System.Threading.CancellationToken,bool)",
+        "ms": 3763.0,
+        "percent": 37.614954018392645
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Core.SmaCpuKernel.ProcessBoundedPositive(float64[],int32,value class DelayedStore&,value class System.Threading.CancellationToken)",
+        "ms": 3758.0,
+        "percent": 37.564974010395844
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::GCHeap::Alloc",
+        "ms": 267.0,
+        "percent": 2.6689324270291883
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_more_space",
+        "ms": 266.0,
+        "percent": 2.658936425429828
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node..ctor(class OoplesFinance.StockIndicators.Indicators.IIndicator,int32)",
+        "ms": 266.0,
+        "percent": 2.658936425429828
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::try_allocate_more_space",
+        "ms": 264.0,
+        "percent": 2.638944422231108
+      }
+    ],
+    "unresolvedLeafPercent": 0.4898040783686526
+  },
+  {
+    "case": "SmaDecimal-InPlace",
+    "pid": 9448,
+    "wholeProcessCpuSampleMs": 14350.0,
+    "steadyForegroundCpuSampleMs": 9879.0,
+    "approximateSteadyWindowMs": [
+      3495.761,
+      13727.645
+    ],
+    "scope": "Exact logged PID; foreground Run stacks excluding Setup; first 3 seconds removed approximately. Inlining attribution remains inclusive in caller. Whole-process CPU includes warmup/setup/GC threads.",
+    "topExclusive": [
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.TalibInPlaceLatestOnlyPayload()",
+        "ms": 6118.0,
+        "percent": 61.92934507541249
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\talib.netcore!TALib.FunctionHelpers.CalcSimpleMA(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "ms": 2549.0,
+        "percent": 25.802206701083108
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!memcpy",
+        "ms": 333.0,
+        "percent": 3.3707865168539324
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiInitializePfn",
+        "ms": 38.0,
+        "percent": 0.3846543172385869
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlLookupFunctionEntry",
+        "ms": 36.0,
+        "percent": 0.3644093531733981
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiPageFault",
+        "ms": 35.0,
+        "percent": 0.3542868711408037
+      },
+      {
+        "frame": "c:\\windows\\system32\\driverstore\\filerepository\\u0196283.inf_amd64_3979d16563294d92\\b025522\\amdkmdag.sys!?",
+        "ms": 35.0,
+        "percent": 0.3542868711408037
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiConvertLargeActivePageToChain",
+        "ms": 32.0,
+        "percent": 0.32391942504302057
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxVirtualUnwind",
+        "ms": 30.0,
+        "percent": 0.3036744609778318
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiInterruptSubDispatchNoLockNoEtw",
+        "ms": 17.0,
+        "percent": 0.17208219455410467
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpUnwindPrologue",
+        "ms": 15.0,
+        "percent": 0.1518372304889159
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiIpiInterruptSubDispatch",
+        "ms": 15.0,
+        "percent": 0.1518372304889159
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiCompletePrivateZeroFault",
+        "ms": 14.0,
+        "percent": 0.1417147484563215
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiAddWorkingSetEntries",
+        "ms": 13.0,
+        "percent": 0.1315922664237271
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxLookupFunctionTable",
+        "ms": 13.0,
+        "percent": 0.1315922664237271
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!ExpInterlockedPopEntrySListFault",
+        "ms": 12.0,
+        "percent": 0.12146978439113272
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CallDescrWorkerInternal",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\hostpolicy!?",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\kernel32!BaseThreadInitThunk",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!coreclr_execute_assembly",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>(class System.String[])",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile.Run(class System.String,class System.String,int32)",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&)",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMain",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program+<<Main>$>d__0.MoveNext()",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlUserThreadStart",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (9448) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary SmaDecimal InPlace 10",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!MethodDescCallSite::CallTargetWorker",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\dotnet!?",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMainInternal",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Assembly::ExecuteMainMethod",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>$(class System.String[])",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CorHost2::ExecuteAssembly",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (18284) CPU=12819ms (Startup Thread)",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\host\\fxr\\10.0.12\\hostfxr!?",
+        "ms": 9879.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.TalibInPlaceLatestOnlyPayload()",
+        "ms": 9855.0,
+        "percent": 99.75706043121774
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile+<>c__DisplayClass0_0.<Run>b__2()",
+        "ms": 7747.0,
+        "percent": 78.41886830650876
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\talib.netcore!TALib.FunctionHelpers.CalcSimpleMA(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "ms": 2608.0,
+        "percent": 26.399433141006174
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+        "ms": 384.0,
+        "percent": 3.887033100516247
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!GCInterface_AllocateNewArray",
+        "ms": 383.0,
+        "percent": 3.876910618483652
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!AllocateSzArray",
+        "ms": 381.0,
+        "percent": 3.8566656544184634
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_more_space",
+        "ms": 374.0,
+        "percent": 3.7858082801903024
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Alloc",
+        "ms": 374.0,
+        "percent": 3.7858082801903024
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::GCHeap::Alloc",
+        "ms": 374.0,
+        "percent": 3.7858082801903024
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::try_allocate_more_space",
+        "ms": 373.0,
+        "percent": 3.775685798157708
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_uoh_object",
+        "ms": 370.0,
+        "percent": 3.7453183520599254
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Buffer.MemmoveInternal(unsigned int8&,unsigned int8&,unsigned int)",
+        "ms": 337.0,
+        "percent": 3.4112764449843103
+      }
+    ],
+    "unresolvedLeafPercent": 0.6377163680534468
+  },
+  {
+    "case": "SmaGrid-Builder",
+    "pid": 14828,
+    "wholeProcessCpuSampleMs": 14226.0,
+    "steadyForegroundCpuSampleMs": 9892.0,
+    "approximateSteadyWindowMs": [
+      3517.324,
+      13737.928
+    ],
+    "scope": "Exact logged PID; foreground Run stacks excluding Setup; first 3 seconds removed approximately. Inlining attribution remains inclusive in caller. Whole-process CPU includes warmup/setup/GC threads.",
+    "topExclusive": [
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillSma(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],value class GridSummary&,value class PositiveRangeSummary&,value class System.Threading.CancellationToken)",
+        "ms": 6678.0,
+        "percent": 67.50909826122118
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Core.SmaCpuKernel.ProcessInPlace(float64[],int32,bool,value class System.Threading.CancellationToken,bool)",
+        "ms": 2222.0,
+        "percent": 22.46259603720178
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!memcpy",
+        "ms": 221.0,
+        "percent": 2.2341285887585927
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiInitializePfn",
+        "ms": 34.0,
+        "percent": 0.34371209057824503
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlLookupFunctionEntry",
+        "ms": 32.0,
+        "percent": 0.3234937323089365
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxVirtualUnwind",
+        "ms": 31.0,
+        "percent": 0.31338455317428227
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiPageFault",
+        "ms": 30.0,
+        "percent": 0.303275374039628
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!ExpInterlockedPopEntrySListFault",
+        "ms": 26.0,
+        "percent": 0.26283865750101093
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiZeroPhysicalPage",
+        "ms": 23.0,
+        "percent": 0.2325111200970481
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiConvertLargeActivePageToChain",
+        "ms": 22.0,
+        "percent": 0.22240194096239382
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxLookupFunctionTable",
+        "ms": 20.0,
+        "percent": 0.20218358269308534
+      },
+      {
+        "frame": "c:\\windows\\system32\\driverstore\\filerepository\\u0196283.inf_amd64_3979d16563294d92\\b025522\\amdkmdag.sys!?",
+        "ms": 18.0,
+        "percent": 0.1819652244237768
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpUnwindPrologue",
+        "ms": 16.0,
+        "percent": 0.16174686615446826
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiIpiInterruptSubDispatch",
+        "ms": 14.0,
+        "percent": 0.14152850788515972
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KeZeroPages",
+        "ms": 13.0,
+        "percent": 0.13141932875050547
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!EEJitManager::JitCodeToMethodInfo",
+        "ms": 13.0,
+        "percent": 0.13141932875050547
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CallDescrWorkerInternal",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\hostpolicy!?",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\kernel32!BaseThreadInitThunk",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!coreclr_execute_assembly",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>(class System.String[])",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile.Run(class System.String,class System.String,int32)",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&)",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMain",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program+<<Main>$>d__0.MoveNext()",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlUserThreadStart",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!MethodDescCallSite::CallTargetWorker",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (14828) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary SmaGrid Builder 10",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\dotnet!?",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMainInternal",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Assembly::ExecuteMainMethod",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>$(class System.String[])",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CorHost2::ExecuteAssembly",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (664) CPU=12909ms (Startup Thread)",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\host\\fxr\\10.0.12\\hostfxr!?",
+        "ms": 9892.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.OoplesLatestOnlyBuilder()",
+        "ms": 9877.0,
+        "percent": 99.84836231298019
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildLatestOnlyAsync>d__32.MoveNext()",
+        "ms": 9825.0,
+        "percent": 99.32268499797816
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken)",
+        "ms": 9823.0,
+        "percent": 99.30246663970885
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile+<>c__DisplayClass0_0.<Run>b__0()",
+        "ms": 8544.0,
+        "percent": 86.37282652648605
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillSma(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],value class GridSummary&,value class PositiveRangeSummary&,value class System.Threading.CancellationToken)",
+        "ms": 7029.0,
+        "percent": 71.05742013748484
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.ComputeSma(float64[],float64[],int32,value class GridSummary,value class System.Threading.CancellationToken,bool,bool)",
+        "ms": 2470.0,
+        "percent": 24.969672462596037
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Core.SmaCpuKernel.ProcessInPlace(float64[],int32,bool,value class System.Threading.CancellationToken,bool)",
+        "ms": 2469.0,
+        "percent": 24.959563283461385
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_more_space",
+        "ms": 296.0,
+        "percent": 2.9923170238576624
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::try_allocate_more_space",
+        "ms": 296.0,
+        "percent": 2.9923170238576624
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::GCHeap::Alloc",
+        "ms": 296.0,
+        "percent": 2.9923170238576624
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node..ctor(class OoplesFinance.StockIndicators.Indicators.IIndicator,int32)",
+        "ms": 294.0,
+        "percent": 2.972098665588354
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!AllocateSzArray",
+        "ms": 289.0,
+        "percent": 2.921552769915083
+      }
+    ],
+    "unresolvedLeafPercent": 0.4043671653861707
+  },
+  {
+    "case": "SmaGrid-InPlace",
+    "pid": 16068,
+    "wholeProcessCpuSampleMs": 14429.0,
+    "steadyForegroundCpuSampleMs": 9855.0,
+    "approximateSteadyWindowMs": [
+      3494.859,
+      13706.618
+    ],
+    "scope": "Exact logged PID; foreground Run stacks excluding Setup; first 3 seconds removed approximately. Inlining attribution remains inclusive in caller. Whole-process CPU includes warmup/setup/GC threads.",
+    "topExclusive": [
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.TalibInPlaceLatestOnlyPayload()",
+        "ms": 5983.0,
+        "percent": 60.71029934043632
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\talib.netcore!TALib.FunctionHelpers.CalcSimpleMA(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "ms": 2710.0,
+        "percent": 27.498731608320647
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!memcpy",
+        "ms": 315.0,
+        "percent": 3.1963470319634704
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiConvertLargeActivePageToChain",
+        "ms": 47.0,
+        "percent": 0.47691527143581935
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxVirtualUnwind",
+        "ms": 43.0,
+        "percent": 0.4363267376966007
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlLookupFunctionEntry",
+        "ms": 32.0,
+        "percent": 0.32470826991374935
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiInitializePfn",
+        "ms": 31.0,
+        "percent": 0.3145611364789447
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiPageFault",
+        "ms": 31.0,
+        "percent": 0.3145611364789447
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpUnwindPrologue",
+        "ms": 28.0,
+        "percent": 0.2841197361745307
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlpxLookupFunctionTable",
+        "ms": 23.0,
+        "percent": 0.23338406900050737
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!KiIpiInterruptSubDispatch",
+        "ms": 23.0,
+        "percent": 0.23338406900050737
+      },
+      {
+        "frame": "c:\\windows\\system32\\driverstore\\filerepository\\u0196283.inf_amd64_3979d16563294d92\\b025522\\amdkmdag.sys!?",
+        "ms": 23.0,
+        "percent": 0.23338406900050737
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiUserFault",
+        "ms": 11.0,
+        "percent": 0.11161846778285135
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!EtwpWriteUserEvent",
+        "ms": 11.0,
+        "percent": 0.11161846778285135
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntoskrnl!MiResolvePrivateZeroFault",
+        "ms": 11.0,
+        "percent": 0.11161846778285135
+      },
+      {
+        "frame": "?!?",
+        "ms": 10.0,
+        "percent": 0.10147133434804667
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "Process64 dotnet (16068) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-cost-boundary SmaGrid InPlace 10",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CallDescrWorkerInternal",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\hostpolicy!?",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\kernel32!BaseThreadInitThunk",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!coreclr_execute_assembly",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>(class System.String[])",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile.Run(class System.String,class System.String,int32)",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&)",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMain",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (30564) CPU=12865ms (Startup Thread)",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program+<<Main>$>d__0.MoveNext()",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\windows\\system32\\ntdll!RtlUserThreadStart",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!MethodDescCallSite::CallTargetWorker",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\dotnet!?",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!RunMainInternal",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Assembly::ExecuteMainMethod",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!Program.<Main>$(class System.String[])",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!CorHost2::ExecuteAssembly",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\host\\fxr\\10.0.12\\hostfxr!?",
+        "ms": 9855.0,
+        "percent": 100.0
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryBenchmarks.TalibInPlaceLatestOnlyPayload()",
+        "ms": 9836.0,
+        "percent": 99.8072044647387
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\ooplesfinance.stockindicators.competitorbenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotCostBoundaryProfile+<>c__DisplayClass0_0.<Run>b__2()",
+        "ms": 6551.0,
+        "percent": 66.47387113140539
+      },
+      {
+        "frame": "c:\\users\\cheat\\source\\repos\\ooples-finance-llc\\si-indicators\\benchmarks\\ooplesfinance.stockindicators.competitorbenchmarks\\bin\\release\\net10.0\\talib.netcore!TALib.FunctionHelpers.CalcSimpleMA(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "ms": 2747.0,
+        "percent": 27.87417554540842
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+        "ms": 395.0,
+        "percent": 4.008117706747844
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_more_space",
+        "ms": 394.0,
+        "percent": 3.9979705733130393
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::try_allocate_more_space",
+        "ms": 394.0,
+        "percent": 3.9979705733130393
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::GCHeap::Alloc",
+        "ms": 394.0,
+        "percent": 3.9979705733130393
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!GCInterface_AllocateNewArray",
+        "ms": 393.0,
+        "percent": 3.9878234398782344
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!AllocateSzArray",
+        "ms": 392.0,
+        "percent": 3.97767630644343
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!Alloc",
+        "ms": 388.0,
+        "percent": 3.9370877727042113
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\coreclr!WKS::gc_heap::allocate_uoh_object",
+        "ms": 386.0,
+        "percent": 3.9167935058346015
+      },
+      {
+        "frame": "c:\\program files\\dotnet\\shared\\microsoft.netcore.app\\10.0.12\\system.private.corelib!System.Buffer.MemmoveInternal(unsigned int8&,unsigned int8&,unsigned int)",
+        "ms": 318.0,
+        "percent": 3.2267884322678846
+      }
+    ],
+    "unresolvedLeafPercent": 0.47691527143581935
+  }
+]
