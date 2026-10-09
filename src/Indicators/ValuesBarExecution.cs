@@ -1,5 +1,7 @@
 #if !NETFRAMEWORK
 using System.Runtime.ExceptionServices;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
 using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -30,7 +32,12 @@ internal static class ValuesBarExecution
             var positiveRange = new Core.SmaCpuKernel.PositiveRangeSummary();
             Bar latest = default;
             if (singleSma)
-                latest = FillSma(source, close!, ref summary, ref positiveRange, cancellation);
+            {
+                latest = FillSma(source, close!, cancellation);
+                int period = Math.Max(1, ((Sma)nodes[0].Indicator).Length);
+                if (period > 1 && period <= close!.Length)
+                    Core.SmaCpuKernel.Summarize(close, out summary, out positiveRange, cancellation);
+            }
             else if (nodes.Count == 1 && nodes[0].Indicator is PriceCircularTransform)
                 latest = FillAsin(source, nodes[0].Values, cancellation);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
@@ -79,8 +86,7 @@ internal static class ValuesBarExecution
         finally { foreach (var node in nodes) node.Dispose(); }
     }
 
-    private static Bar FillSma(Bar[] source, double[] close, ref Core.SmaCpuKernel.GridSummary summary,
-        ref Core.SmaCpuKernel.PositiveRangeSummary positiveRange, CancellationToken cancellation)
+    private static Bar FillSma(Bar[] source, double[] close, CancellationToken cancellation)
     {
         Bar latest = default;
         for (int i = 0; i < source.Length; i++)
@@ -89,12 +95,9 @@ internal static class ValuesBarExecution
             // Use the same owned local for validation and the final snapshot. A
             // separate bar local forces a second 48-byte copy in the Tier1 loop.
             latest = source[i];
-            if (!double.IsFinite(latest.Open) || !double.IsFinite(latest.High) || !double.IsFinite(latest.Low)
-                || !double.IsFinite(latest.Close) || !double.IsFinite(latest.Volume))
+            if (!AllFieldsFinite(in latest))
                 IndicatorInputDomain.Finite.Validate(in latest);
             close[i] = latest.Close;
-            summary.Include(latest.Close);
-            positiveRange.Include(latest.Close);
         }
         return latest;
     }
@@ -107,16 +110,27 @@ internal static class ValuesBarExecution
         for (int i = 0; i < source.Length; i++)
         {
             cancellation.ThrowIfCancellationRequested();
-            var bar = source[i];
-            latest = bar;
-            if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
-                || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
-                IndicatorInputDomain.Finite.Validate(in bar);
-            bool defined = bar.Close is >= -1 and <= 1;
-            values[i] = defined ? Math.Asin(bar.Close) : 0;
+            latest = source[i];
+            if (!AllFieldsFinite(in latest))
+                IndicatorInputDomain.Finite.Validate(in latest);
+            bool defined = latest.Close is >= -1 and <= 1;
+            values[i] = defined ? Math.Asin(latest.Close) : 0;
             flags[i] = defined ? 1 : 0;
         }
         return latest;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AllFieldsFinite(in Bar bar)
+    {
+        if (Vector256.IsHardwareAccelerated)
+        {
+            var prices = Vector256.Create(bar.Open, bar.High, bar.Low, bar.Close).AsInt64();
+            var exponentMask = Vector256.Create(0x7ff0000000000000L);
+            return !Vector256.EqualsAny(prices & exponentMask, exponentMask) && double.IsFinite(bar.Volume);
+        }
+        return double.IsFinite(bar.Open) && double.IsFinite(bar.High) && double.IsFinite(bar.Low)
+            && double.IsFinite(bar.Close) && double.IsFinite(bar.Volume);
     }
 
     private static bool ComputeSma(double[] close, double[] output, int period,

@@ -129,6 +129,30 @@ public sealed class IndicatorValuesTests
     }
 
     [Theory]
+    [InlineData(0, 0)] [InlineData(0, 1)] [InlineData(0, 2)] [InlineData(0, 3)] [InlineData(0, 4)]
+    [InlineData(1, 0)] [InlineData(1, 1)] [InlineData(1, 2)] [InlineData(1, 3)] [InlineData(1, 4)]
+    public async Task PilotVectorValidationPreservesEveryFieldAndError(int kind, int field)
+    {
+        foreach (double invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        foreach (int position in new[] { 0, 4, 8 })
+        {
+            var bars = Data(9);
+            var fields = new[] { .25, .5, 0d, .25, 1d };
+            fields[field] = invalid;
+            bars[position] = new Bar(default, fields[0], fields[1], fields[2], fields[3], fields[4]);
+            var indicator = Indicator(kind);
+            var builder = Builder(bars, indicator).ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+            var expected = await Record.ExceptionAsync(() => Builder(bars, indicator).BuildAsync());
+            var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.Equal(expected.GetType(), actual.GetType());
+            Assert.Equal(expected.Message, actual.Message);
+            Assert.Null(builder.LastExecution);
+        }
+    }
+
+    [Theory]
     [InlineData(false)] [InlineData(true)]
     public void PilotAllocationsExcludeFullBarHistory(bool sma)
     {

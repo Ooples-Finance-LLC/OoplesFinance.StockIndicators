@@ -399,3 +399,6 @@ is retained in the evidence; these are not controlled percentage speedup claims.
 
 
 Elevated ETW follow-up: six native-symbol-resolved CPU/GC captures identify SMA ingestion/certification as the primary hotspot. The retained local change removes a duplicate bar copy; 147 affected tests pass. Final results still do not establish stable SMA/Asin competitor wins or qualify global rollout. See [current evidence](../benchmarks/results/eight-cpu-pilots/elevated-perfview/) and the elevated follow-up in builder-ab-profile.md.
+
+
+SIMD certification follow-up: owned-close proof reduction, compact bounded-positive SMA, and vector price-field validation reduce final 100k-bar builder measurements to 0.544 ms (grid SMA), 0.569 ms (decimal SMA), and 1.186 ms (Asin). Decimal SMA is effectively tied with the matched TALib payload; raw TALib still does less work and remains faster. 163 affected tests and 86 hardware-disabled tests pass. Global rollout remains unqualified. See [current evidence](../benchmarks/results/eight-cpu-pilots/simd-certification/).

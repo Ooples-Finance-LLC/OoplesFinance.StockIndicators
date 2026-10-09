@@ -102,9 +102,60 @@ internal static class SmaCpuKernel
     }
 
 #if !NETFRAMEWORK
-    // The unpublished output initially owns the validated closes. Delay each guarded
-    // result by one window so every rebuild/exact-mean read still sees original input.
-    // Memory is O(period), with no mutable source rereads or duplicate full column.
+    // Certify the already-owned close column in SIMD batches. Floating-point
+    // arithmetic is unchanged: these reductions operate only on IEEE encodings.
+    internal static void Summarize(ReadOnlySpan<double> values, out GridSummary grid,
+        out PositiveRangeSummary positive, CancellationToken cancellation)
+    {
+        cancellation.ThrowIfCancellationRequested();
+        grid = new GridSummary();
+        positive = new PositiveRangeSummary();
+        int i = 0;
+        if (Vector.IsHardwareAccelerated && values.Length >= Vector<long>.Count)
+        {
+            var mask = new Vector<long>(long.MaxValue);
+            var minimum = mask;
+            var nonzeroMinimum = mask;
+            var maximum = Vector<long>.Zero;
+            var combined = Vector<long>.Zero;
+            int width = Vector<long>.Count;
+            for (; i <= values.Length - width; i += width)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                var bits = Vector.AsVectorInt64(new Vector<double>(values.Slice(i, width)));
+                var magnitude = bits & mask;
+                minimum = Vector.Min(minimum, bits);
+                maximum = Vector.Max(maximum, magnitude);
+                nonzeroMinimum = Vector.Min(nonzeroMinimum,
+                    Vector.ConditionalSelect(Vector.Equals(magnitude, Vector<long>.Zero), mask, magnitude));
+                combined |= magnitude;
+            }
+            long min = long.MaxValue, nonzeroMin = long.MaxValue, max = 0, all = 0;
+            for (int lane = 0; lane < width; lane++)
+            {
+                min = Math.Min(min, minimum[lane]);
+                nonzeroMin = Math.Min(nonzeroMin, nonzeroMinimum[lane]);
+                max = Math.Max(max, maximum[lane]);
+                all |= combined[lane];
+            }
+            grid = GridSummary.FromMagnitudes(nonzeroMin, max, all);
+            // A negative signed minimum (including -0) rejects the positive
+            // proof. Otherwise magnitude extrema are exactly the signed extrema.
+            positive.Include(BitConverter.Int64BitsToDouble(min));
+            positive.Include(BitConverter.Int64BitsToDouble(max));
+        }
+        for (; i < values.Length; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            grid.Include(values[i]);
+            positive.Include(values[i]);
+        }
+    }
+
+    // The unpublished output initially owns the validated closes. Proven inputs
+    // compact into expired slots; unproven inputs delay results in an O(period)
+    // ring so rebuild/exact-mean reads still see original input. Neither path
+    // rereads mutable source bars or allocates a duplicate full column.
     internal static void ProcessInPlace(double[] values, int length, bool certified,
         CancellationToken cancellation, bool boundedPositive = false)
     {
@@ -136,11 +187,15 @@ internal static class SmaCpuKernel
             cancellation.ThrowIfCancellationRequested();
             return;
         }
+        if (boundedPositive)
+        {
+            ProcessBoundedPositive(values, length, cancellation);
+            return;
+        }
         var pending = new double[length];
         var reader = new DoubleReader();
         var consumer = new DelayedStore(values, pending);
-        if (boundedPositive) ProcessBoundedPositive(values, length, ref consumer, cancellation);
-        else ProcessGuarded<double, DoubleReader, DelayedStore>(values, Span<double>.Empty,
+        ProcessGuarded<double, DoubleReader, DelayedStore>(values, Span<double>.Empty,
             length, ref reader, ref consumer, cancellation);
         consumer.Flush(cancellation);
     }
@@ -173,18 +228,27 @@ internal static class SmaCpuKernel
     // operand: neither 1e-4 cancellation/rebuild trigger can fire. Exponent bounds
     // exclude overflow, subnormal means and outward-bound underflow. Unqualified
     // input always uses the original guarded path.
-    private static void ProcessBoundedPositive(double[] values, int length, ref DelayedStore consumer,
-        CancellationToken cancellation)
+    private static void ProcessBoundedPositive(double[] values, int length, CancellationToken cancellation)
     {
         double sum = 0;
-        int untilRebuild = length;
-        for (int i = 0; i < values.Length; i++)
+        for (int i = 0; i < length; i++)
         {
             cancellation.ThrowIfCancellationRequested();
-            double input = values[i];
-            sum += input;
-            if (i >= length) sum -= values[i - length];
-            consumer.Consume(input, i >= length - 1 ? sum / length : 0, i);
+            sum += values[i];
+        }
+        double firstMean = sum / length;
+        // The first scheduled rebuild repeats precisely the additions above.
+        // Retain that sum; all later rebuilds keep the original cadence/order.
+        int untilRebuild = length;
+        for (int i = length; i < values.Length; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            sum += values[i];
+            int expired = i - length;
+            sum -= values[expired];
+            // Only the expired close is overwritten. Rebuilds start one slot
+            // later, so they continue to read original input without a ring.
+            values[expired] = sum / length;
             if (--untilRebuild == 0)
             {
                 sum = 0;
@@ -196,6 +260,10 @@ internal static class SmaCpuKernel
                 untilRebuild = length;
             }
         }
+        values.AsSpan(0, values.Length - length).CopyTo(values.AsSpan(length));
+        values.AsSpan(0, length - 1).Clear();
+        values[length - 1] = firstMean;
+        cancellation.ThrowIfCancellationRequested();
     }
 
     private struct DelayedStore(double[] values, double[] pending) : IConsumer
@@ -225,6 +293,12 @@ internal static class SmaCpuKernel
         private int _lowest = 2047, _highest;
         private ulong _significands;
         public GridSummary() { }
+        internal static GridSummary FromMagnitudes(long nonzeroMinimum, long maximum, long combined) => new()
+        {
+            _lowest = nonzeroMinimum == long.MaxValue ? 2047 : (int)(nonzeroMinimum >> 52),
+            _highest = (int)(maximum >> 52),
+            _significands = (ulong)combined | (maximum == 0 ? 0 : 1UL << 52)
+        };
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Include(double value)
         {

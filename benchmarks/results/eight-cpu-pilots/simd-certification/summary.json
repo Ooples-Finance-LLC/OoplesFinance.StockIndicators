@@ -1,0 +1,218 @@
+[
+  {
+    "run": "baseline-before",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=Asin",
+    "meanNs": 1262341.2109375,
+    "standardDeviationNs": 17032.352559689578,
+    "bytesPerOperation": 1606072
+  },
+  {
+    "run": "baseline-before",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 835792.3611111111,
+    "standardDeviationNs": 2327.5070546889297,
+    "bytesPerOperation": 804917
+  },
+  {
+    "run": "baseline-before",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 700223.9366319445,
+    "standardDeviationNs": 1276.893403293118,
+    "bytesPerOperation": 804938
+  },
+  {
+    "run": "candidate-matched",
+    "method": "TalibInPlaceLatestOnlyPayload",
+    "parameters": "Case=Asin",
+    "meanNs": 1417563.75,
+    "standardDeviationNs": 14131.237307417268,
+    "bytesPerOperation": 1602215
+  },
+  {
+    "run": "candidate-matched",
+    "method": "TalibValues",
+    "parameters": "Case=Asin",
+    "meanNs": 965572.03125,
+    "standardDeviationNs": 29492.20472037763,
+    "bytesPerOperation": 801923
+  },
+  {
+    "run": "candidate-matched",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=Asin",
+    "meanNs": 1177285.15625,
+    "standardDeviationNs": 12971.213694615148,
+    "bytesPerOperation": 1606299
+  },
+  {
+    "run": "candidate-matched",
+    "method": "TalibInPlaceLatestOnlyPayload",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 575074.609375,
+    "standardDeviationNs": 6762.5655419633895,
+    "bytesPerOperation": 801533
+  },
+  {
+    "run": "candidate-matched",
+    "method": "TalibValues",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 243690.46875,
+    "standardDeviationNs": 17031.670134652555,
+    "bytesPerOperation": 802020
+  },
+  {
+    "run": "candidate-matched",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 616230.15625,
+    "standardDeviationNs": 28504.466874782844,
+    "bytesPerOperation": 804669
+  },
+  {
+    "run": "candidate-matched",
+    "method": "TalibInPlaceLatestOnlyPayload",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 536038.3984375,
+    "standardDeviationNs": 2088.825305530147,
+    "bytesPerOperation": 801658
+  },
+  {
+    "run": "candidate-matched",
+    "method": "TalibValues",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 260925.625,
+    "standardDeviationNs": 15426.61589113813,
+    "bytesPerOperation": 801893
+  },
+  {
+    "run": "candidate-matched",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 556660.5078125,
+    "standardDeviationNs": 2113.9571056924437,
+    "bytesPerOperation": 804958
+  },
+  {
+    "run": "candidate-repeat",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=Asin",
+    "meanNs": 1256479.6875,
+    "standardDeviationNs": 26702.87745540157,
+    "bytesPerOperation": 1606227
+  },
+  {
+    "run": "candidate-repeat",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 594975.3515625,
+    "standardDeviationNs": 14999.492784133188,
+    "bytesPerOperation": 804909
+  },
+  {
+    "run": "candidate-repeat",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 565670.0390625,
+    "standardDeviationNs": 2139.208405160191,
+    "bytesPerOperation": 804892
+  },
+  {
+    "run": "baseline-after",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=Asin",
+    "meanNs": 1249157.4652777778,
+    "standardDeviationNs": 14492.32373962616,
+    "bytesPerOperation": 1605781
+  },
+  {
+    "run": "baseline-after",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 834469.21875,
+    "standardDeviationNs": 2834.2334995841347,
+    "bytesPerOperation": 805002
+  },
+  {
+    "run": "baseline-after",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 729511.40625,
+    "standardDeviationNs": 29725.533369130964,
+    "bytesPerOperation": 804892
+  },
+  {
+    "run": "final-matched",
+    "method": "TalibInPlaceLatestOnlyPayload",
+    "parameters": "Case=Asin",
+    "meanNs": 1364646.0403492923,
+    "standardDeviationNs": 8109.866300556048,
+    "bytesPerOperation": 1602213
+  },
+  {
+    "run": "final-matched",
+    "method": "TalibValues",
+    "parameters": "Case=Asin",
+    "meanNs": 920654.736598891,
+    "standardDeviationNs": 2170.117975187827,
+    "bytesPerOperation": 802126
+  },
+  {
+    "run": "final-matched",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=Asin",
+    "meanNs": 1185749.6385542168,
+    "standardDeviationNs": 11330.131143596733,
+    "bytesPerOperation": 1606549
+  },
+  {
+    "run": "final-matched",
+    "method": "TalibInPlaceLatestOnlyPayload",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 574282.9781836631,
+    "standardDeviationNs": 10472.651025619261,
+    "bytesPerOperation": 801592
+  },
+  {
+    "run": "final-matched",
+    "method": "TalibValues",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 236491.60499537463,
+    "standardDeviationNs": 5797.399925893406,
+    "bytesPerOperation": 801975
+  },
+  {
+    "run": "final-matched",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaDecimal",
+    "meanNs": 569281.1503416857,
+    "standardDeviationNs": 4904.443236115316,
+    "bytesPerOperation": 805034
+  },
+  {
+    "run": "final-matched",
+    "method": "TalibInPlaceLatestOnlyPayload",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 564543.8476562499,
+    "standardDeviationNs": 1390.688096448002,
+    "bytesPerOperation": 801655
+  },
+  {
+    "run": "final-matched",
+    "method": "TalibValues",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 250573.0780093769,
+    "standardDeviationNs": 3058.8586437153353,
+    "bytesPerOperation": 801923
+  },
+  {
+    "run": "final-matched",
+    "method": "OoplesLatestOnlyBuilder",
+    "parameters": "Case=SmaGrid",
+    "meanNs": 543534.5513513514,
+    "standardDeviationNs": 4017.585385248909,
+    "bytesPerOperation": 804957
+  }
+]

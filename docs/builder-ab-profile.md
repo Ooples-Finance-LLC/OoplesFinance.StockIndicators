@@ -769,3 +769,54 @@ build passed. Existing ownership, bitwise arithmetic, fallback, cancellation and
 GPU tests were retained. No additional framework matrix was run for this local
 modern-CPU change. [CPU/GC summaries, filtered stacks, JIT listings, both candidate
 reports and final test evidence](../benchmarks/results/eight-cpu-pilots/elevated-perfview/).
+
+## SIMD certification and compact decimal SMA (2026-10-09)
+
+The elevated profile's ingestion/certification hotspot led to the following
+bounded modern-CPU changes, reached through the existing LatestOnly BuildAsync:
+
+- Validate/extract bars first, then reduce grid and positive-range certificates
+  together with SIMD over owned closes. This adds a contiguous read pass but
+  removes scalar certificate branches and reference writes from each bar.
+  Certificate decisions and floating-point arithmetic remain unchanged.
+- Compact bounded-positive decimal SMA results into expired input slots. Preserve
+  add/subtract order and periodic rebuilds, keep the first mean in a scalar, then
+  restore warmup alignment. The period-sized pending ring is no longer needed for
+  this proven path; unproven input retains the guarded ring/fallback.
+- Validate four price fields together with an exponent-mask SIMD check, check
+  volume separately, and retain the scalar fallback and original error reporting.
+  Asin also uses a single bar local, removing its duplicate copy.
+
+Adversarial verification covers certificate equivalence across SIMD lanes/tails,
+signed zeros, subnormals, exponent/period boundaries and nonfinite encodings;
+first-window and rebuild boundaries against guarded arithmetic bit for bit; all
+five invalid bar fields and exact validation errors; ownership and cancellation.
+All 163 affected tests passed without skips. With hardware intrinsics disabled,
+all 86 kernel/field-validation tests passed. Release net8 library and net10
+benchmark builds passed. JIT listings show real SIMD certificate reductions and
+price-field comparisons. GPU implementation and routing are unchanged.
+
+The saved production binary from 9637893a brackets the first candidate runs.
+Baseline builder times before/after were 0.700/0.730 ms (grid SMA), 0.836/0.834 ms
+(decimal SMA), and 1.262/1.249 ms (Asin). The first candidate measured
+0.557/0.566 ms, 0.616/0.595 ms, and 1.177/1.257 ms, respectively. This supports a
+real SMA improvement while exposing the smaller Asin change to run variability.
+
+The final candidate adds vector field validation. Final BenchmarkDotNet results
+use 100,000 bars, six warmups, ten iterations targeting 500 ms each:
+
+| Case | LatestOnly BuildAsync | Matched TALib payload | Raw TALib arrays |
+|---|---:|---:|---:|
+| Asin | 1.186 ms / 1568.90 KB | 1.365 ms / 1564.66 KB | 0.921 ms / 783.33 KB |
+| SMA grid | 0.544 ms / 786.09 KB | 0.565 ms / 782.87 KB | 0.251 ms / 783.13 KB |
+| SMA decimal | 0.569 ms / 786.17 KB | 0.574 ms / 782.80 KB | 0.236 ms / 783.18 KB |
+
+Grid SMA and Asin lead the matching payload in this campaign; decimal SMA is
+effectively tied (overlapping confidence intervals). Observed final SMA times are
+about 22-26% lower for grid and 32% lower for decimal than the saved baseline runs.
+Those baseline jobs used shorter iterations, and runs are sequential on a shared
+machine; do not extrapolate exact percentages to all machines or workloads.
+Raw TALib remains faster at its smaller-work boundary. Decimal numerical contracts
+still differ. No stable all-workload/global-rollout acceptance is claimed.
+
+[Reports, baseline/candidate binary hashes, test logs and JIT evidence](../benchmarks/results/eight-cpu-pilots/simd-certification/)
