@@ -61,6 +61,30 @@ public sealed class SmaCpuKernelTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GuardedConsumerRunsOncePerBarWithoutIntermediateMeanArray(bool extreme)
+    {
+        var input = Enumerable.Range(0, 2051).Select(i => .1 + i % 19 / 100d).ToArray();
+        if (extreme) { input[1024] = 1e100; input[1025] = -1e100; input[^1] = double.Epsilon; }
+        var expected = new double[input.Length];
+        MovingAverageCore.SimpleMovingAverage(input, expected, 20);
+        var consumer = new CapturedMean(input.Length);
+        var reader = new DoubleReader();
+        SmaCpuKernel.ProcessGuarded<double, DoubleReader, CapturedMean>(input, Span<double>.Empty,
+            20, ref reader, ref consumer);
+        Assert.Equal(input.Length, consumer.Calls);
+        Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), consumer.Values.Select(BitConverter.DoubleToInt64Bits));
+    }
+
+    private struct CapturedMean(int count) : SmaCpuKernel.IConsumer
+    {
+        internal readonly double[] Values = new double[count];
+        internal int Calls;
+        public double Consume(double input, double mean, int index) { Calls++; Values[index] = mean; return mean; }
+    }
+
     [Fact]
     public void RejectedBatchCannotInvokeConsumerOrModifyOutput()
     {

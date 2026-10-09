@@ -1,0 +1,40 @@
+{
+  "valid_case_counts": {
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotRepresentativeBenchmarks-report-full-compressed.jsonbaseline": 28,
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotAsinQualificationBenchmarks-report-full-compressed.jsonqualified": 6,
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotGpuQualificationBenchmarks-report-full-compressed.jsonqualified": 20,
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.PilotRepresentativeBenchmarks-report-full-compressed.jsonqualified": 28
+  },
+  "baseline_commit": "f1f683968109ac5480390dca372bca748c42a3a0",
+  "baseline_binary_sha256": "0006238530d6f1e3efa0a1743450c9285ac8b1f73a50e9fe26eb981e0ff46dcf",
+  "qualification_gpu": "Old blocked production kernel; tiled candidate restricted to period20 and /64 grid in [-1,1]. GPU workspace changes excluded from these timings.",
+  "tests": {
+    "passed": 148,
+    "skipped": 0,
+    "baseline_bitwise_values": 51320
+  },
+  "limitations": [
+    "Shared host with unrelated test processes; exploratory timings, no controlled speedup claim.",
+    "Competitor owns value arrays but not builder history/presence semantics.",
+    "Tiled/resident measurements are value-only, not full builder acceptance."
+  ],
+  "source_sha256": {
+    "src/Core/SmaCpuKernel.cs": "69ae69af95caf05a3b2aae74f75dfd88c44a3f24e35504bce213847526661bc4",
+    "src/Core/MovingAverageCore.cs": "fb07bba06c400a405156ce62592f4b3eef7611387f701e81dbadd9b135d68d16",
+    "src/Indicators/FusedBarExecution.cs": "3439319e27c70eda8bf8c0dcec0267aaf781a933e9c746aa8f87c86153f11287",
+    "src/Indicators/TensorsGpuExecution.cs": "1ebf67ece4bc9fd4bf56cc1260c1abb47d97276923a6b29ca474937b35c55837"
+  },
+  "candidate_decisions": {
+    "cpu": "Integrate reduced allocations and guarded consumer fusion; no competitor win claimed.",
+    "vector_asin": "Reject: scalar lane implementation lacks measured advantage.",
+    "gpu_pool": "Reject: sequential changing-size regression despite concurrent improvement. Patch retained for reproduction.",
+    "gpu_tile": "Benchmark only: restricted numerical proof and value-only throughput do not qualify full builder dispatch.",
+    "residency": "Model retained separately; no public API or fresh-builder win claimed."
+  },
+  "final_tests": {
+    "passed": 148,
+    "failed": 0,
+    "skipped": 0
+  },
+  "final_net10_library_sha256": "ee67778a7f3c6c91a7bb3d30cbd0fcb909c2a207260f18b6745b2925009ea41e"
+}

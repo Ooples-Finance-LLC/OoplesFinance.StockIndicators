@@ -153,3 +153,89 @@ an already launched device kernel is not preempted. Context lifetime is process-
 This is a bounded OpenCL implementation, not all-device/all-indicator support.
 No float narrowing, generic tensor graph migration, or global indicator rollout is
 included. Hardware tests skip explicitly when a suitable FP64 device is absent.
+
+
+## Approved adversarial-review execution plan
+
+Scope: complete the SMA/Asin pilot plan before global rollout. Preserve the
+fresh-builder benchmark, CPU Math.Asin bit identity, GPU Asin 4e-15 relative
+budget with exact signed zero/domain flags, SMA reference guarantees, input
+validation order, cancellation, owned snapshots and explicitly published outputs.
+
+1. Representative measurements: certifiable grid, ordinary decimal prices, late
+   rejection, composed graphs, mixed periods, and direct Asin. Keep cold/warm,
+   fresh/reused data and CPU/GPU results distinct. Stage-only diagnostics describe
+   an implementation, not an unavoidable cost floor.
+2. Remove redundant builder work: share certification with ingestion, avoid
+   speculative downstream replay, specialize finite SMA batches, and retain
+   fallback guarantees. Integrate only after focused regressions, adversarial
+   diff review and paired end-to-end measurements.
+3. Qualify CPU arithmetic and GPU scheduling: reject candidates that weaken
+   numerical contracts; evaluate synchronization, shape/cache churn and GPU
+   memory layout. Preserve cancellation and exclusive buffer ownership.
+4. Evaluate an owned validated dataset and device residency as an additional
+   workload, charging preparation and reporting amortization. Reuse must not
+   silently trust mutable source arrays or substitute for a fresh-builder win.
+
+Complete and push verified batches independently. Benchmark-only rejected
+candidates remain clearly separated from production dispatch. No universal GPU
+threshold, global rollout, or eight-win claim without corresponding evidence.
+
+
+## Representative qualification outcome (2026-10-09)
+
+Evidence: `benchmarks/results/eight-cpu-pilots/representative-qualification`.
+All 28 baseline and 54 qualification cases have valid statistics. The shared host
+had unrelated test processes; timing differences are exploratory, not controlled
+speedup claims. The fastest comparator here is managed TALib.NETCore 0.5.0.
+Its direct API owns values but does not reproduce builder history/presence costs.
+
+Integrated CPU changes: finite SMA ingestion evicts from owned bars without a
+ring; guarded fallback reads owned bars without extracting another close array.
+Composed consumers run once after proof selection, without speculative Asin replay
+or a fallback intermediate SMA array. Multiple periods/direct and composed Asin
+share one validated owned history across separate sealed pilot regions. Framework,
+custom graphs, source validation and explicit output visibility retain their contracts.
+Required GPU still supports only one region and rejects uncertified rolling sums.
+
+At 100k bars, decimal SMA allocation fell from about 6257 to 5475 KB, composed
+decimal from 7821 to 6257 KB, and multiple periods from 8611 to 6258 KB. The 10k
+grid SMA mean was 113.65 us before and 107.51 us after (overlapping uncertainty).
+The 10k late-rejection mean worsened from 803.87 to 871.30 us with wide uncertainty;
+it remains expensive and is not called a win. All fresh-builder cases still lose
+to the direct comparator. There is no eight-win or global-rollout claim.
+
+CPU Math.Asin remains scalar and bit-identical. The published Tensors Vector256
+operator uses scalar lane arithmetic; its 10k arithmetic-only mean was 162.47 us
+versus scalar 146.73 us. It is not integrated. Existing .NET generic struct kernel
+specialization uses the JIT; introducing another compilation layer is not supported
+by these measurements.
+
+The cooperative GPU tile is benchmark-only: period 20, /64 values within [-1,1],
+with at most 147 exact prefix terms. At 1m values it reduced fresh value-only SMA
+from 7.66 to 5.15 ms and composition from 7.13 to 4.47 ms; these include upload and
+readback but not the builder history/presence contract. Production certification
+bounds rolling windows, not these longer prefix sums. General dispatch is therefore
+not justified by the prototype's numerical proof or its throughput evidence.
+
+The capacity-pool/concurrent-preparation candidate passed 53 affected checks,
+including actual GPU work, but is rejected from production. In two run orders,
+8-build sequential changing-size median latency changed 4.45->5.73 ms and
+4.87->5.40 ms, while concurrent medians improved 5.18->4.34 ms and5.23->4.33 ms.
+The candidate patch and logs are retained; production keeps the prior workspace
+and queue policy. This is a measured tradeoff, not an assumed optimization.
+
+`residency-amortization.json` charges measured preparation and models reuse 1, 2, 4, 8.
+With context/programs already available, conservatively charging host ownership,
+validation and upload requires about 5-17 calls to repay against the already-prepared
+fresh tiled value-only operation, depending on size/graph. The deliberately
+conservative cold accounting includes both qualification programs (about 626-662 ms)
+and needs hundreds/thousands of calls. These are modeled bounds for this prototype,
+not measured break-even points for a production single-program session API.
+No public residency API or automatic GPU threshold is introduced.
+
+Before final handoff: 148 focused checks passed with no skips, 51,320 saved-binary
+SMA values matched bitwise, and Release net10/net8/net461 builds passed (existing
+Framework dependency warnings). The complete final affected verification is retained
+alongside the evidence. Performance acceptance remains open for both pilots; global
+application is gated on full builder wins and broader device/data qualification.

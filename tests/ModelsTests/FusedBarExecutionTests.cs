@@ -54,13 +54,31 @@ public sealed class FusedBarExecutionTests
         Assert.Equal(ordinaryWarmup, fusedWarmup);
     }
 
-    [Fact]
-    public void DifferentAsinSourcesKeepOrdinaryGraphExecution()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task MultiplePilotRegionsShareOwnedInputAndPreserveDistinctOutputs(bool reject)
     {
         var direct = new PriceCircularTransform(PriceCircularOperation.ArcSine);
         var composed = new PriceCircularTransform(PriceCircularOperation.ArcSine);
-        composed.Of(new Sma(20));
-        Assert.Null(FusedBarExecution.TryCreate(new IIndicator[] { direct, composed }, 100));
+        var sma = new Sma(20);
+        var second = new Sma(50);
+        composed.Of(sma);
+        var values = Enumerable.Range(0, 2051).Select(i => (i % 19 - 9) / 16d).ToArray();
+        if (reject) values[^1] = double.Epsilon;
+        var bars = BarsFor(values);
+        IIndicator[] indicators = [direct, composed, second];
+        using var fused = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(indicators).BuildAsync();
+        using var ordinary = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, bar => bar))
+            .ConfigureIndicators(indicators).BuildAsync();
+        Assert.False(((IndicatorRun)fused).HasLegacyRuntime);
+        foreach (var indicator in indicators)
+            foreach (var output in indicator.Outputs) AssertBits(ordinary[output].ToArray(), fused[output].ToArray());
+        Assert.Throws<KeyNotFoundException>(() => fused[sma].ToArray());
+        var saved = fused[second].ToArray();
+        Array.Clear(bars);
+        AssertBits(saved, fused[second].ToArray());
     }
 
     private static Bar[] BarsFor(double[] values) => values.Select((v, i) =>
@@ -260,7 +278,6 @@ public sealed class FusedBarExecutionTests
         var chained = new Sma(3);
         chained.Of(new Sma(2));
         Assert.Null(FusedBarExecution.TryCreate(new IIndicator[] { chained }, 20));
-        Assert.Null(FusedBarExecution.TryCreate(new IIndicator[] { new Sma(3), new Sma(5) }, 20));
         Assert.Null(FusedBarExecution.TryCreate(new IIndicator[] { new Ema(3) }, 20));
         Assert.Null(FusedBarExecution.TryCreate(new IIndicator[] { new PriceCircularTransform(PriceCircularOperation.Cosine) }, 20));
     }

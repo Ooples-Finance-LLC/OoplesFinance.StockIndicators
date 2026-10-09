@@ -111,10 +111,12 @@ public sealed class TensorsGpuExecutionTests
         var results = await Task.WhenAll(Enumerable.Range(2, 5).Select(period => Task.Run(async () =>
         {
             var sma = new Sma(period);
-            var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(BarsFor(Enumerable.Repeat((double)period, 1031))))
+            int count = 1023 + period;
+            var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(BarsFor(Enumerable.Repeat((double)period, count))))
                 .ConfigureIndicators(sma).ConfigureExecution(IndicatorExecutionBackend.Gpu);
             using var run = await builder.BuildAsync();
             Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+            Assert.Equal(count, run[sma].ToArray().Length);
             return (Period: period, Output: run[sma].ToArray());
         })));
         foreach (var result in results)
@@ -166,8 +168,9 @@ public sealed class TensorsGpuExecutionTests
     {
         RequireGpu();
         // Same-size runs alternate between host-proven and device-computed flags.
-        // Size changes replace the workspace; earlier runs remain readable after disposal.
-        foreach (var count in new[] { 32769, 32769, 2051, 32769 })
+        // Cross capacity boundaries, then reuse only a prefix of a larger rental.
+        // Earlier runs remain readable after disposal and subsequent reuse.
+        foreach (var count in new[] { 32767, 32768, 32769, 32770, 2051, 32769 })
         foreach (var mode in new[] { 0, 1, 2, 3 })
         {
             var values = Enumerable.Range(0, count).Select(i =>

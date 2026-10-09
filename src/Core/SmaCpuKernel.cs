@@ -1,6 +1,6 @@
-#if !NETFRAMEWORK
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Core;
 
@@ -19,22 +19,224 @@ internal static class SmaCpuKernel
         public double Consume(double input, double mean, int index) => mean;
     }
 
-    internal struct Certificate(int length)
+    internal readonly struct DoubleReader : IReader<double>
     {
-        private readonly int _windowBits = BitOperations.Log2((uint)length) + 1;
-        private int _grid = int.MaxValue, _largest = int.MinValue;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool Include(double value)
+        public double Read(in double value) => value;
+    }
+
+    // Same guarded arithmetic for array callers and fused consumers; rejection
+    // decisions are made before entering this loop, not by replaying its outputs.
+    internal static void ProcessGuarded<T, TReader, TConsumer>(ReadOnlySpan<T> input,
+        Span<double> output, int length, ref TReader reader, ref TConsumer consumer,
+        CancellationToken cancellation = default)
+        where TReader : struct, IReader<T>
+        where TConsumer : struct, IConsumer
+    {
+        double sum = 0;
+        var exactRequired = false;
+        double roundoff = 0;
+        for (var i = 0; i < input.Length; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var value = reader.Read(in input[i]);
+            var previousSum = sum;
+            sum += value;
+            roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+            exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, value, sum);
+            if (i >= length)
+            {
+                previousSum = sum;
+                var expired = reader.Read(in input[i - length]);
+                sum -= expired;
+                roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+                exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, -expired, sum);
+                // If eviction cancels a much larger accumulator, its low-order values were
+                // already rounded away. Rebuild before publishing, not on a later periodic bar.
+                if (Math.Abs(sum) <= 1e-4 * Math.Max(Math.Abs(expired), Math.Abs(value)))
+                {
+                    sum = 0;
+                    roundoff = 0;
+                    for (var j = i - length + 1; j <= i; j++)
+                    {
+                        if ((j & 1023) == 0) cancellation.ThrowIfCancellationRequested();
+                        sum += reader.Read(in input[j]);
+                        roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+                    }
+                }
+            }
+
+            var mean = i >= length - 1 ? sum / length : 0;
+            if (i >= length - 1 && (exactRequired || MeanRoundoff.RequiresExact(sum, length, roundoff)))
+            {
+                var exact = new ExactMeanAccumulator();
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if ((j & 1023) == 0) cancellation.ThrowIfCancellationRequested();
+                    exact.Add(reader.Read(in input[j]));
+                }
+                mean = exact.Mean(length);
+            }
+
+            var result = consumer.Consume(value, mean, i);
+            if (!output.IsEmpty) output[i] = result;
+
+            // Rebuilt from its window every length bars, once the bar's value is taken. A running sum otherwise
+            // keeps the rounding error of every value it has ever held: after prices near 100,000 it was still
+            // off by 1e-9 at prices near 10, which a deviation from the mean of a tenth turns into 1e-8.
+            if (length > 0 && (i + 1) % length == 0)
+            {
+                sum = 0;
+                exactRequired = false;
+                roundoff = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if ((j & 1023) == 0) cancellation.ThrowIfCancellationRequested();
+                    previousSum = sum;
+                    sum += reader.Read(in input[j]);
+                    roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+                    exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, reader.Read(in input[j]), sum);
+                }
+            }
+        }
+    }
+
+#if !NETFRAMEWORK
+    internal struct GridSummary
+    {
+        private int _lowest = 2047, _highest;
+        private ulong _significands;
+        public GridSummary() { }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void Include(double value)
         {
             var bits = (ulong)(BitConverter.DoubleToInt64Bits(value) & long.MaxValue);
-            if (bits == 0) return true;
+            if (bits == 0) return;
             var exponent = (int)(bits >> 52);
-            if (exponent is 0 or 2047) return false;
+            _lowest = Math.Min(_lowest, exponent);
+            _highest = Math.Max(_highest, exponent);
+            _significands |= bits | (1UL << 52);
+        }
+        internal readonly bool CanRefine => _lowest > 0 && _highest < 2047
+            && _lowest - 1023 >= -512 && _highest - 1023 <= 500;
+        internal readonly bool Certifies(int length) => _significands == 0 || (CanRefine
+            && _lowest - 1075 + BitOperations.TrailingZeroCount(_significands) >= -512
+            && _highest - _lowest + 52 - BitOperations.TrailingZeroCount(_significands)
+                + BitOperations.Log2((uint)length) + 1 <= 52);
+    }
+
+    // Single-output finite SMA can speculate cheap arithmetic while owning its
+    // input, then replace rejected results with the guarded loop. Eviction reads
+    // owned history; no separate ring buffer or mutable caller reread is needed.
+    internal static GridSummary ProcessOwned<T, TValidator, TReader>(ReadOnlySpan<T> source,
+        Span<T> owned, Span<double> output, int length, ref TValidator validator, ref TReader reader)
+        where TValidator : struct, IReader<T> where TReader : struct, IReader<T>
+    {
+        var summary = new GridSummary();
+        if (length == 1 || length > source.Length)
+        {
+            for (var i = 0; i < source.Length; i++)
+            {
+                owned[i] = source[i];
+                var value = validator.Read(in owned[i]);
+                output[i] = length == 1 ? value : 0;
+            }
+            return summary;
+        }
+        double sum = 0;
+        var warmup = length - 1;
+        for (var i = 0; i < warmup; i++)
+        {
+            owned[i] = source[i];
+            var value = validator.Read(in owned[i]);
+            summary.Include(value);
+            sum += value;
+            output[i] = 0;
+        }
+        for (var i = warmup; i < source.Length; i++)
+        {
+            owned[i] = source[i];
+            var value = validator.Read(in owned[i]);
+            summary.Include(value);
+            sum += value;
+            output[i] = sum / length;
+            sum -= reader.Read(in owned[i - warmup]);
+        }
+        return summary;
+    }
+
+    internal struct GridFacts
+    {
+        private int _grid = int.MaxValue, _largest = int.MinValue;
+        private bool _rejected;
+        public GridFacts() { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void Include(double value)
+        {
+            if (_rejected) return;
+            var bits = (ulong)(BitConverter.DoubleToInt64Bits(value) & long.MaxValue);
+            if (bits == 0) return;
+            var exponent = (int)(bits >> 52);
+            if (exponent is 0 or 2047) { _rejected = true; return; }
             var significand = (bits & 0xfffffffffffffUL) | (1UL << 52);
             _grid = Math.Min(_grid, exponent - 1075 + BitOperations.TrailingZeroCount(significand));
             _largest = Math.Max(_largest, exponent - 1023);
-            return _grid >= -512 && _largest <= 500 && _largest - _grid + _windowBits <= 52;
+            if (_grid < -512 || _largest > 500) _rejected = true;
+        }
+
+        internal readonly bool Certifies(int length) => !_rejected && (_grid == int.MaxValue
+            || _largest - _grid + BitOperations.Log2((uint)length) + 1 <= 52);
+    }
+
+    internal struct Certificate(int length)
+    {
+        private GridFacts _facts = new();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool Include(double value)
+        {
+            _facts.Include(value);
+            return _facts.Certifies(length);
+        }
+    }
+
+    // Requires an owned input whose grid was certified for this period (unless
+    // period 1 or all-warmup). No ring, recertification or intermediate output.
+    internal static void ProcessCertified<T, TReader, TConsumer>(ReadOnlySpan<T> input,
+        Span<double> output, int length, ref TReader reader, ref TConsumer consumer,
+        CancellationToken cancellation)
+        where TReader : struct, IReader<T>
+        where TConsumer : struct, IConsumer
+    {
+        var warmup = length > input.Length ? input.Length : length - 1;
+        double sum = 0;
+        for (var i = 0; i < warmup; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var value = reader.Read(in input[i]);
+            if (length <= input.Length) sum += value;
+            var result = consumer.Consume(value, 0, i);
+            if (!output.IsEmpty) output[i] = result;
+        }
+        if (length == 1)
+        {
+            for (var i = 0; i < input.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                var value = reader.Read(in input[i]);
+                var result = consumer.Consume(value, value, i);
+                if (!output.IsEmpty) output[i] = result;
+            }
+            return;
+        }
+        for (var i = warmup; i < input.Length; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var value = reader.Read(in input[i]);
+            sum += value;
+            var result = consumer.Consume(value, sum / length, i);
+            if (!output.IsEmpty) output[i] = result;
+            sum -= reader.Read(in input[i - warmup]);
         }
     }
 
@@ -144,5 +346,5 @@ internal static class SmaCpuKernel
         }
         return true;
     }
-}
 #endif
+}

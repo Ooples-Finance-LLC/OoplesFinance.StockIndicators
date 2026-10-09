@@ -8,13 +8,17 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal sealed class FusedBarExecution
 {
     private readonly bool _asinOfSma;
+    private readonly Dictionary<IIndicator, FusedBarExecution>? _regions;
+    private readonly FusedBarExecution[]? _regionPlans;
     internal int SmaLength { get; }
     internal double[]? SmaValues { get; }
     internal double[][]? AsinValues { get; }
     internal bool UsedSmaFallback { get; private set; }
 
-    private FusedBarExecution(int count, int smaLength, bool asin, bool asinOfSma, bool publishSma)
+    private FusedBarExecution(int count, int smaLength, bool asin, bool asinOfSma, bool publishSma, Dictionary<IIndicator, FusedBarExecution>? regions = null)
     {
+        _regions = regions;
+        _regionPlans = regions?.Values.Distinct().ToArray();
         SmaLength = smaLength;
         _asinOfSma = asinOfSma;
         if (publishSma) SmaValues = AllocateOutput(count);
@@ -32,6 +36,34 @@ internal sealed class FusedBarExecution
     }
 
     internal static FusedBarExecution? TryCreate(IReadOnlyList<IIndicator> indicators, int count)
+    {
+        var single = TryCreateSingle(indicators, count);
+        if (single is not null) return single;
+#if NETFRAMEWORK
+        return null;
+#else
+        var groups = new Dictionary<int, List<IIndicator>>();
+        foreach (var indicator in indicators)
+        {
+            // Validate the same sealed-node boundary without allocating full outputs.
+            if (TryCreateSingle(new[] { indicator }, 0) is null) return null;
+            var average = indicator as Sma ?? indicator.Source as Sma;
+            var period = average is null ? 0 : Math.Max(1, average.Length);
+            if (!groups.TryGetValue(period, out var group)) groups.Add(period, group = new());
+            group.Add(indicator);
+        }
+        if (groups.Count == 0) return null;
+        var regions = new Dictionary<IIndicator, FusedBarExecution>(IndicatorIdentity.Comparer);
+        foreach (var group in groups.Values)
+        {
+            var plan = TryCreateSingle(group, count)!;
+            foreach (var indicator in group) regions[indicator] = plan;
+        }
+        return new FusedBarExecution(count, 0, false, false, false, regions);
+#endif
+    }
+
+    private static FusedBarExecution? TryCreateSingle(IReadOnlyList<IIndicator> indicators, int count)
     {
 #if NETFRAMEWORK
         // The modern certificate is not the Framework SMA arithmetic contract.
@@ -66,8 +98,8 @@ internal sealed class FusedBarExecution
 #endif
     }
 
-    internal double[][] Values(IIndicator indicator) => indicator is Sma
-        ? new[] { SmaValues! } : AsinValues!;
+    internal double[][] Values(IIndicator indicator) => _regions is not null ? _regions[indicator].Values(indicator)
+        : indicator is Sma ? new[] { SmaValues! } : AsinValues!;
 
     internal Builder.IndicatorExecutionInfo Execute(Bar[] source, OwnedBarHistory history,
         CancellationToken cancellation, Builder.IndicatorExecutionBackend backend)
@@ -77,6 +109,8 @@ internal sealed class FusedBarExecution
         // Automatic GPU selection stays disabled until end-to-end evidence supports it.
         if (backend == Builder.IndicatorExecutionBackend.Gpu)
         {
+            if (_regions is not null)
+                throw new NotSupportedException("Required GPU execution currently supports one fused region per build.");
             if (source.Length == 0)
                 throw new NotSupportedException("An empty run has no device work to execute.");
             if (SmaLength > 4096 && SmaLength <= source.Length)
@@ -146,35 +180,52 @@ internal sealed class FusedBarExecution
 #if NETFRAMEWORK
         throw new NotSupportedException("Fused pilot execution requires a modern runtime.");
 #else
+        if (_regionPlans is not null)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
+            source.AsSpan().CopyTo(owned);
+            var summary = new Core.SmaCpuKernel.GridSummary();
+            var validator = new CloseReader(cancellation);
+            foreach (ref readonly var bar in owned.AsSpan()) summary.Include(validator.Read(in bar));
+            history.TakeOwnedArray(owned);
+            UsedSmaFallback = false;
+            foreach (var region in _regionPlans)
+            {
+                region.ExecutePrepared(owned, summary, cancellation);
+                UsedSmaFallback |= region.UsedSmaFallback;
+            }
+            return;
+        }
         if (SmaLength > 0)
         {
-            var sma = new SmaKernel(SmaLength, source.Length, SmaValues);
-            if (AsinValues is not null)
+            cancellation.ThrowIfCancellationRequested();
+            var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
+            var summary = new Core.SmaCpuKernel.GridSummary();
+            var validator = new CloseReader(cancellation);
+            bool needProof = SmaLength > 1 && SmaLength <= source.Length;
+            if (AsinValues is null)
             {
-                var combined = new CombinedKernel(sma, new AsinKernel(AsinValues), _asinOfSma);
-                Drain(source, history, ref combined, cancellation);
-                sma = combined.Sma;
+                var reader = new OwnedCloseReader();
+                summary = Core.SmaCpuKernel.ProcessOwned<Bar, CloseReader, OwnedCloseReader>(
+                    source, owned, SmaValues!, SmaLength, ref validator, ref reader);
             }
-            else Drain(source, history, ref sma, cancellation);
-            if (!sma.Certified && !sma.CertifyHistory(history))
+            else
             {
-                UsedSmaFallback = true;
-                var close = new double[source.Length];
-                var offset = 0;
-                for (var chunk = 0; chunk < history.ChunkCount; chunk++)
+                source.AsSpan().CopyTo(owned);
+                foreach (ref readonly var bar in owned.AsSpan())
                 {
-                    var bars = history.Chunk(chunk);
-                    for (var i = 0; i < bars.Length; i++) close[offset + i] = bars[i].Close;
-                    offset += bars.Length;
-                }
-                var means = SmaValues ?? new double[source.Length];
-                Core.MovingAverageCore.SimpleMovingAverage(close, means, SmaLength);
-                if (_asinOfSma)
-                {
-                    var consumer = new AsinKernel(AsinValues!);
-                    for (var i = 0; i < means.Length; i++) consumer.Append(means[i], i);
+                    var close = validator.Read(in bar);
+                    if (needProof) summary.Include(close);
                 }
             }
+            history.TakeOwnedArray(owned);
+            if (AsinValues is null && (!needProof || summary.Certifies(SmaLength)))
+            {
+                UsedSmaFallback = false;
+                return;
+            }
+            ExecutePrepared(owned, summary, cancellation);
         }
         else
         {
@@ -251,57 +302,60 @@ internal sealed class FusedBarExecution
         }
     }
 
-    private struct CombinedKernel(SmaKernel sma, AsinKernel asin, bool fromMean) : IKernel
+    private void ExecutePrepared(Bar[] owned, Core.SmaCpuKernel.GridSummary summary,
+        CancellationToken cancellation)
     {
-        internal SmaKernel Sma = sma;
-        public void AppendBlock(ReadOnlySpan<Bar> source, Span<Bar> owned, int offset, CancellationToken cancellation)
+        if (SmaLength == 0)
         {
-            Sma.AppendCombined(source, owned, offset, cancellation, asin, fromMean);
+            var asin = new AsinKernel(AsinValues!);
+            for (var i = 0; i < owned.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                asin.Append(owned[i].Close, i);
+            }
+            return;
+        }
+        bool needProof = SmaLength > 1 && SmaLength <= owned.Length;
+        bool certified = !needProof || summary.Certifies(SmaLength);
+        if (!certified && summary.CanRefine)
+        {
+            var certificate = new Core.SmaCpuKernel.Certificate(SmaLength);
+            certified = true;
+            foreach (ref readonly var bar in owned.AsSpan())
+            {
+                cancellation.ThrowIfCancellationRequested();
+                if (!certificate.Include(bar.Close)) { certified = false; break; }
+            }
+        }
+        UsedSmaFallback = !certified;
+
+        if (AsinValues is not null)
+        {
+            var consumer = new AsinConsumer(new AsinKernel(AsinValues), 0, _asinOfSma);
+            ComputeOwnedMean(owned, ref consumer, cancellation);
+        }
+        else
+        {
+            var consumer = new Core.SmaCpuKernel.Identity();
+            ComputeOwnedMean(owned, ref consumer, cancellation);
         }
     }
 
-    private struct SmaKernel : IKernel
+    private readonly struct OwnedCloseReader : Core.SmaCpuKernel.IReader<Bar>
     {
-        private Core.SmaCpuKernel.State _state;
-        private readonly double[]? _output;
-        internal bool Certified => _state.Certified;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double Read(in Bar bar) => bar.Close;
+    }
 
-        internal SmaKernel(int length, int count, double[]? output)
-        {
-            _state = new Core.SmaCpuKernel.State(length, count);
-            _output = output;
-        }
-
-        private readonly Span<double> OutputBlock(int offset, int count) =>
-            _output is null ? Span<double>.Empty : _output.AsSpan(offset, count);
-
-        public void AppendBlock(ReadOnlySpan<Bar> source, Span<Bar> owned, int offset, CancellationToken cancellation)
-        {
-            // The shared CPU loop owns the traversal, including the input and
-            // output operators. No intermediate close or average series.
-            var reader = new CloseReader(cancellation);
-            var consumer = new Core.SmaCpuKernel.Identity();
-            Core.SmaCpuKernel.Process(source, owned, OutputBlock(offset, source.Length),
-                ref _state, ref reader, ref consumer);
-        }
-
-        internal void AppendCombined(ReadOnlySpan<Bar> source, Span<Bar> owned, int offset,
-            CancellationToken cancellation, AsinKernel asin, bool fromMean)
-        {
-            var reader = new CloseReader(cancellation);
-            var consumer = new AsinConsumer(asin, offset, fromMean);
-            Core.SmaCpuKernel.Process(source, owned, OutputBlock(offset, source.Length),
-                ref _state, ref reader, ref consumer);
-        }
-
-        internal bool CertifyHistory(OwnedBarHistory history)
-        {
-            var certificate = new Core.SmaCpuKernel.Certificate(_state.Length);
-            for (var chunk = 0; chunk < history.ChunkCount; chunk++)
-                foreach (ref readonly var bar in history.Chunk(chunk))
-                    if (!certificate.Include(bar.Close)) return false;
-            return true;
-        }
+    private void ComputeOwnedMean<TConsumer>(ReadOnlySpan<Bar> bars, ref TConsumer consumer,
+        CancellationToken cancellation) where TConsumer : struct, Core.SmaCpuKernel.IConsumer
+    {
+        var reader = new OwnedCloseReader();
+        Span<double> output = SmaValues is null ? Span<double>.Empty : SmaValues;
+        if (UsedSmaFallback)
+            Core.SmaCpuKernel.ProcessGuarded(bars, output, SmaLength, ref reader, ref consumer, cancellation);
+        else
+            Core.SmaCpuKernel.ProcessCertified(bars, output, SmaLength, ref reader, ref consumer, cancellation);
     }
 
     private readonly struct CloseReader(CancellationToken cancellation) : Core.SmaCpuKernel.IReader<Bar>

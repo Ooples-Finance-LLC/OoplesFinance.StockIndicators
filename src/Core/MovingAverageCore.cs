@@ -20,60 +20,10 @@ internal static class MovingAverageCore
         if (TryExactGridSimpleMovingAverage(input, output, length)) return;
 #endif
 
-        double sum = 0;
-        var exactRequired = false;
-        double roundoff = 0;
-        for (var i = 0; i < input.Length; i++)
-        {
-            var previousSum = sum;
-            sum += input[i];
-            roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
-            exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, input[i], sum);
-            if (i >= length)
-            {
-                previousSum = sum;
-                sum -= input[i - length];
-                roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
-                exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, -input[i - length], sum);
-                // If eviction cancels a much larger accumulator, its low-order values were
-                // already rounded away. Rebuild before publishing, not on a later periodic bar.
-                if (Math.Abs(sum) <= 1e-4 * Math.Max(Math.Abs(input[i - length]), Math.Abs(input[i])))
-                {
-                    sum = 0;
-                    roundoff = 0;
-                    for (var j = i - length + 1; j <= i; j++)
-                    {
-                        sum += input[j];
-                        roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
-                    }
-                }
-            }
+        var reader = new SmaCpuKernel.DoubleReader();
+        var consumer = new SmaCpuKernel.Identity();
+        SmaCpuKernel.ProcessGuarded(input, output, length, ref reader, ref consumer);
 
-            output[i] = i >= length - 1 ? sum / length : 0;
-            if (i >= length - 1 && (exactRequired || MeanRoundoff.RequiresExact(sum, length, roundoff)))
-            {
-                var exact = new ExactMeanAccumulator();
-                for (var j = i - length + 1; j <= i; j++) exact.Add(input[j]);
-                output[i] = exact.Mean(length);
-            }
-
-            // Rebuilt from its window every length bars, once the bar's value is taken. A running sum otherwise
-            // keeps the rounding error of every value it has ever held: after prices near 100,000 it was still
-            // off by 1e-9 at prices near 10, which a deviation from the mean of a tenth turns into 1e-8.
-            if (length > 0 && (i + 1) % length == 0)
-            {
-                sum = 0;
-                exactRequired = false;
-                roundoff = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    previousSum = sum;
-                    sum += input[j];
-                    roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
-                    exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, input[j], sum);
-                }
-            }
-        }
     }
 
 #if !NETFRAMEWORK

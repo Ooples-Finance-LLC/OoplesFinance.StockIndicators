@@ -1,6 +1,18 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+if (args.Length == 1 && args[0] == "--probe-gpu-scheduling")
+{
+    await PilotGpuSchedulingProbe.Run();
+    return;
+}
+
+if (args.Length == 2 && args[0] == "--verify-sma-baseline")
+{
+    PilotCoreReplay.Verify(args[1]);
+    return;
+}
+
 if (args.Length == 3 && args[0] == "--verify-cpu-native")
 {
     var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
