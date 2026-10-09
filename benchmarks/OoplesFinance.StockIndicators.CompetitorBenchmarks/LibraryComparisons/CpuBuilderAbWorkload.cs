@@ -43,13 +43,13 @@ internal sealed class CpuBuilderAbWorkload
             _engine = Expression.Lambda<Func<IReadOnlyList<Bar>, IIndicator, double[][]>>(call, bars, indicator).Compile();
             arguments[^1] = Expression.Constant(true);
             call = Expression.Call(Expression.New(ctor, arguments),
-                type.GetMethod("Compute", BindingFlags.Instance | BindingFlags.NonPublic)!, indicator);
+                type.GetMethod("Compute", BindingFlags.Instance | BindingFlags.NonPublic)!, indicator); // NOSONAR: S3011 - fixed library type/member, bound only in diagnostic setup.
             _preparedEngine = Expression.Lambda<Func<IReadOnlyList<Bar>, IIndicator, double[][]>>(call, bars, indicator).Compile();
             var historyType = assembly.GetType("OoplesFinance.StockIndicators.Indicators.OwnedBarHistory", true)!;
             _preparedBars = (IReadOnlyList<Bar>)Activator.CreateInstance(historyType, nonPublic: true)!;
-            historyType.GetMethod("ExpectAdditional", BindingFlags.Instance | BindingFlags.NonPublic)!
+            historyType.GetMethod("ExpectAdditional", BindingFlags.Instance | BindingFlags.NonPublic)! // NOSONAR: S3011 - fixed owned-history setup, no untrusted member selection.
                 .Invoke(_preparedBars, [count]);
-            var add = historyType.GetMethod("Add", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var add = historyType.GetMethod("Add", BindingFlags.Instance | BindingFlags.NonPublic)!; // NOSONAR: S3011 - writes only this diagnostic fixture's private history.
             foreach (var bar in _work.Data.IndicatorBars) add.Invoke(_preparedBars, [bar]);
         }
         // Verify every materialized engine output, including presence flags and warmup.
@@ -60,18 +60,23 @@ internal sealed class CpuBuilderAbWorkload
         // engine route and still allocates fresh state and every output per call.
         var prepared = PreparedOwned();
         var direct = ComputeOwned();
+        VerifyOutputs(spec, run, direct, prepared);
+        var kernelId = id == "TaLib.Functions.Sma" ? "Trady.Indicator.SimpleMovingAverage" : id;
+        var kernel = CpuKernelPilots.Create(kernelId);
+        CpuKernelPilots.Verify(kernelId, _work.Data, kernel, new double[count * kernel.OutputCount]);
+    }
+
+    private static void VerifyOutputs(IIndicator spec, IIndicatorRun run, double[][] direct, double[][] prepared)
+    {
         if (direct.Length != spec.Outputs.Count) throw new InvalidOperationException("A/B slot mismatch.");
         for (var slot = 0; slot < direct.Length; slot++)
         {
             var expected = run[spec.Outputs[slot]];
             if (direct[slot].Length != expected.Length) throw new InvalidOperationException("A/B length mismatch.");
             for (var i = 0; i < expected.Length; i++)
-                if (!direct[slot][i].Equals(expected[i]) || !prepared[slot][i].Equals(expected[i]))
+                if (!direct[slot][i].Equals(expected[i]) || !prepared[slot][i].Equals(expected[i])) // NOSONAR: S1244 - identical public outputs are required; a tolerance would weaken the A/B check.
                     throw new InvalidOperationException($"A/B output mismatch at {slot}/{i}.");
         }
-        var kernelId = id == "TaLib.Functions.Sma" ? "Trady.Indicator.SimpleMovingAverage" : id;
-        var kernel = CpuKernelPilots.Create(kernelId);
-        CpuKernelPilots.Verify(kernelId, _work.Data, kernel, new double[count * kernel.OutputCount]);
     }
 
     internal double[][] ComputeOwned()

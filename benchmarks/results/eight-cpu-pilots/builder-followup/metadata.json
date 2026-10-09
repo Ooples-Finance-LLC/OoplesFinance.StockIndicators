@@ -1,0 +1,20 @@
+{
+  "platform": "Windows-11-10.0.26220-SP0",
+  "binary": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-indicators\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorBenchmarks.dll",
+  "binary_sha256": "80c9cf3e3ae3f908899f57989484bedf201c6235b91a0d71b75ef6962b448906",
+  "seconds": 2,
+  "repeats": 3,
+  "note": "Separate warmed processes, alternating arm order; exploratory timings without confidence intervals.",
+  "source_head": "04c583fad20a1846d7125cb239780ada8416ae09",
+  "production_sha256": "557843d2b93f16d718d908f8dfb0d62be647d4eb4d9a3eb79f3e17b6346e4053",
+  "ci_run": 37861716471,
+  "verification": {
+    "focused_unit_passed": 125,
+    "competitor_passed": 111,
+    "frameworks": [
+      "net10.0",
+      "net8.0",
+      "net461"
+    ]
+  }
+}

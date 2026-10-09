@@ -210,3 +210,49 @@ Rickshaw fallback, graph composition and legacy builder reuse. Adversarial revie
 also covered partial last chunks, source count hints, disposal, and the unchanged
 general validation routes. Checked-conversion issues exposed by the initial run
 were corrected before the successful rerun.
+
+### Completed follow-up measurements
+
+[Campaign 37861716471](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/37861716471)
+completed all 56 measurements at implementation commit `04c583fa`. At 10,000 bars,
+against the fastest measured eligible native route in each family:
+
+| Family | Ooples builder ms | Native ms |
+|---|---:|---:|
+| Jurik / QuanTAlib | 0.9820 | 1.7046 |
+| Scaled true range / QuanTAlib (not conventional ATR) | 0.2009 | 0.3917 |
+| Rolling pivots / Skender | 4.2089 | 6.4007 |
+| Fractals / Skender | 1.0761 | 6.3894 |
+| Rickshaw / TA-Lib | 0.6640 | 0.6939 |
+| Asin / TA-Lib | 0.2981 | 0.1294 |
+| Bullish short body / Trady tuple | 0.9834 | 53358.9739 |
+| SMA / TA-Lib | 0.4612 | 0.0219 |
+
+All eight paired confidence intervals are separated at this size. Six favor the
+builder, including a narrow Rickshaw win; Asin and SMA remain losses at about
+2.30x and 21.07x slower. Trady short-body remains pathological; its ratio is not
+a general performance claim. Different campaigns use different hosts, so the
+changes between campaign means are not controlled before/after speedups.
+
+All 45 local A/B invocations passed their setup/output checks. The nine measured
+builder intervals had zero generation-2 collections, compared with collections
+in every baseline builder interval. Median bytes/call remain approximately
+647 KB / 1,292 KB / 568 KB for Asin / SMA / Rickshaw: history is still owned, but
+its allocation shape changed. Local median Builder / Prepared / Native timings
+were 0.513 / 0.191 / 0.139 ms for Asin, 0.580 / 0.077 / 0.026 ms for SMA, and
+0.840 / 0.679 / 1.321 ms for Rickshaw. Retain the full ranges in the raw data;
+these exploratory runs are not substitutes for the CI confidence intervals.
+
+Two follow-up elevated PerfView captures completed, for Asin Builder and Prepared.
+The builder's whole-process GC report records one `AllocLarge` collection and
+479.1 ms of pauses, versus 1,285 and 1,304.9 ms in the earlier capture; repetition
+counts differ. The remaining collection stopped before SMA started because C:
+ran out of space. Regenerable cache files were removed only after verifying the
+compressed originals' hashes; the elevation retry was canceled. No post-fix SMA
+or Rickshaw ETW capture is claimed.
+
+[Follow-up evidence](../benchmarks/results/eight-cpu-pilots/builder-followup/)
+contains all 56 CI records with confidence intervals and host metadata, all 45
+local runs, and both completed CPU/GC summaries. The later diagnostic-only Sonar
+cleanup retains exact output equality and extracts verification from the harness
+constructor; its Release build and all three Prepared setup/output replays passed.
