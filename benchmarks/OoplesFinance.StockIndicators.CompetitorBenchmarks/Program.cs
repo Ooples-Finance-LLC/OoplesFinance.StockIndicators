@@ -93,7 +93,13 @@ if (args.Length > 0 && args[0].Equals("--alloc", StringComparison.OrdinalIgnoreC
 
 // Discover only this suite: other suites interpret COMPARISON_PAIR against the
 // library manifest, which intentionally does not duplicate tuple API routes.
-if (args.Contains("*CpuBuilderBenchmarks*", StringComparer.Ordinal))
+if (args.Contains("*SmaFeasibilityBenchmarks*", StringComparer.Ordinal))
+    BenchmarkSwitcher.FromTypes([typeof(SmaFeasibilityBenchmarks)]).Run(args);
+else if (args.Any(arg => arg.Contains("AsinOwnershipFeasibilityBenchmarks", StringComparison.Ordinal)))
+    BenchmarkSwitcher.FromTypes([typeof(AsinOwnershipFeasibilityBenchmarks)]).Run(args);
+else if (args.Contains("*FeasibilityBenchmarks*", StringComparer.Ordinal))
+    BenchmarkSwitcher.FromTypes([typeof(AsinFeasibilityBenchmarks), typeof(SmaFeasibilityBenchmarks), typeof(AsinOwnershipFeasibilityBenchmarks)]).Run(args);
+else if (args.Contains("*CpuBuilderBenchmarks*", StringComparer.Ordinal))
     BenchmarkSwitcher.FromTypes([typeof(CpuBuilderBenchmarks)]).Run(args);
 else
     BenchmarkSwitcher.FromAssembly(typeof(BatchBenchmarks).Assembly).Run(args);

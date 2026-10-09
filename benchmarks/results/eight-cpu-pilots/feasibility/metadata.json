@@ -1,0 +1,109 @@
+{
+  "note": "Same local machine, sequential BDN campaigns; comparisons are within campaigns. First SMA campaign is excluded: Grid=False did not guarantee noncertified data. Corrected campaign asserts eligibility. 10 measured iterations, 5 warmups, in-process toolchain, at least 100 ms per iteration. No profiler active during timing. Production library unchanged. Candidate algorithms remain benchmark-only.",
+  "reports": [
+    {
+      "campaign": "arithmetic",
+      "source": "C:\\Users\\cheat\\temp\\si-feasibility-results\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.AsinFeasibilityBenchmarks-report-full-compressed.json",
+      "sha256": "55dd4a590ca10cc2b6b8022ab03e7604f7fbbe44ab307ddf5442ebc09f8ec468",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Windows 11 (10.0.26220.9587)",
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 16,
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 10000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "campaign": "sma-corrected",
+      "source": "C:\\Users\\cheat\\temp\\si-feasibility-sma-corrected\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SmaFeasibilityBenchmarks-report-full-compressed.json",
+      "sha256": "083b2d4a3fcf1ffe2d71d62986e5420acf4c1c22b8e258f44c7ebce86bf44685",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Windows 11 (10.0.26220.9587)",
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 16,
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 10000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "campaign": "ownership",
+      "source": "C:\\Users\\cheat\\temp\\si-feasibility-ownership\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.AsinOwnershipFeasibilityBenchmarks-report-full-compressed.json",
+      "sha256": "4dc4645f43d651d2a44177d23273971e106db5ca340dcee78ee32f60949d241f",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Windows 11 (10.0.26220.9587)",
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 16,
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 10000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    },
+    {
+      "campaign": "ownership-direct",
+      "source": "C:\\Users\\cheat\\temp\\si-feasibility-direct\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.AsinOwnershipFeasibilityBenchmarks-report-full-compressed.json",
+      "sha256": "93affa33bea778c1669afac64a5981fcf33b71c82fdcb08927f1bc5311187c27",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Windows 11 (10.0.26220.9587)",
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 16,
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 10000000
+        },
+        "HardwareTimerKind": "Unknown"
+      }
+    }
+  ],
+  "production_commit": "c4370935fff42170b5390c9fbed494c42cff0340",
+  "verification": {
+    "focused_checks_passed": 84,
+    "prototype_regressions_included": 21,
+    "benchmark_project_release_build": "passed",
+    "production_changed": false
+  },
+  "decision": "Neither exact prototype provides sufficient end-to-end headroom; no production integration."
+}

@@ -313,3 +313,82 @@ C:/Users/cheat/temp/si-builder-close-profile; committed hashes identify them.
 contains all 45 local measurements, 28 targeted CI measurements with confidence
 intervals and host metadata, and the four trace summaries. Both losses remain;
 this batch does not establish eight wins.
+
+
+## Feasibility gate: exact CPU prototypes
+
+**Decision: neither candidate passes the full-builder feasibility gate. No
+prototype was integrated into production.** The acceptance benchmark is unchanged.
+The benchmark project contains the experiments and regression checks so this is
+an executable negative result, not a forecast about a future architecture.
+
+All figures below are microseconds for 10,000 inputs, compared within the same
+local BenchmarkDotNet campaign. Arrays for reusable kernels are allocated in
+setup on both sides. Owning pipelines allocate inside timing. The ownership
+prototype retains all bars, validates every OHLCV numeric field and emits value
+and presence arrays, but excludes builder graph/publication overhead.
+
+| Experiment | Candidate | TA-Lib comparable arm | Finding |
+|---|---:|---:|---|
+| Asin unrolled, reusable | 91.03 | 100.29 | Small kernel lead |
+| Asin four-worker, reusable | 33.86 | 100.29 | Kernel lead; scheduling allocates |
+| Asin initial owned parallel pipeline | 208.98 | 109.16 | Loses before builder overhead |
+| Asin optimized owned parallel pipeline | 165.14 | 112.37 | Still loses before builder overhead |
+| SMA certified SIMD, reusable grid | 34.71 | 17.19 | Loses despite improving our 49.86-us core |
+| SMA SIMD wrapper, reusable non-grid | 176.67 | 17.07 | Correct fallback, no meaningful gain |
+
+The final Asin pipeline's 99.9% interval is 153.20–177.07 us versus native
+109.66–115.08 us. Its optimized ingestion alone costs 61.27 us (54.24–68.29).
+At 1,000 and 100,000 inputs the owning parallel pipeline also loses. The
+four-worker math-only crossover therefore does not establish a builder crossover.
+It consumes multiple CPU workers, unlike the scalar native arm; scheduler costs
+and allocations remain timed. No zero-allocation claim is made for parallel work.
+
+The SMA prototype proves all vector prefix intermediates fit exact binary sums,
+using a stricter window-plus-eight-term certificate, then performs vector
+addition/subtraction/division. Rejected data uses the unchanged production core.
+Non-grid fixtures add deterministic fractional variation and assert certificate
+rejection in setup. The original unrounded fixture happened to be certifiable;
+its first purported non-grid results were discarded and that campaign is not
+used for SMA conclusions. Reproducing the experiment must retain this assertion.
+
+For ownership, the first prototype copies chunks and calls the existing finite
+validator. The follow-up uses uninitialized reference-free Bar arrays, fully
+copies each chunk before reading it, and inlines finite checks with the original
+validator for errors. It validates the owned copy, avoiding a check/copy race.
+This experiment applies only to plain arrays, not custom enumerators/projections.
+The reported ingestion-only builder is today's implementation, not a theoretical
+lower bound; timings from separate arms are not an additive performance model.
+
+Validation covers independent integer window sums, vector tails, precision and
+exponent boundaries, untouched buffers on certificate rejection, exact fallback,
+Asin endpoints/signed zero/undefined values, parallel partitions, owned history,
+field diagnostics, cancellation and parity with actual builder outputs. The pinned
+TA-Lib rejects singleton input ranges, so that case checks the Math.Asin contract
+instead; all timed sizes use supported native ranges.
+
+[69 valid measurements and host metadata](../benchmarks/results/eight-cpu-pilots/feasibility/)
+include the initial Asin arithmetic campaign, corrected SMA campaign, and both
+ownership campaigns. Each uses five warmups and ten measured iterations with a
+100-ms minimum iteration time. Profiling was off. Raw reports are retained at the
+paths and hashes in metadata; no comparison across separate campaigns is claimed
+as a controlled speedup. Production library code is unchanged by this experiment.
+
+Reproduce from the Release competitor benchmark executable with:
+
+```text
+--filter '*FeasibilityBenchmarks*' --exporters json --artifacts feasibility
+```
+
+The broad filter now includes all three classes, including both ownership variants.
+For just the optimized ownership candidate and its baseline:
+
+```text
+--filter '*AsinOwnershipFeasibilityBenchmarks*Direct*' '*AsinOwnershipFeasibilityBenchmarks.NativeOwned*' --exporters json --artifacts ownership
+```
+
+Release benchmark builds and 84 focused checks passed, including 21 prototype
+regressions. The existing CI performance build now includes CpuFeasibilityTests in its
+correctness gate. Infrastructure cleanup may still be valuable, but these results
+do not justify claiming it will produce wins over TA-Lib. Further numerical or
+ownership experiments must pass this gate before driving a shared-engine rewrite.
