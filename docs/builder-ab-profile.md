@@ -256,3 +256,60 @@ contains all 56 CI records with confidence intervals and host metadata, all 45
 local runs, and both completed CPU/GC summaries. The later diagnostic-only Sonar
 cleanup retains exact output equality and extracts verification from the harness
 constructor; its Release build and all three Prepared setup/output replays passed.
+
+
+## Close-only builder follow-up (c4370935)
+
+The pinned competitor source above led to two additional changes. Direct-close
+SMA/base graphs read one close column from the validated owned history instead
+of materializing and validating six legacy columns. Registration, CSE, publication
+and deferred lookup remain in the runtime. Mixed graphs, named sources, unknown
+handles and already-exposed mutable columns retain the ordinary evaluator.
+The sealed Asin batch path no longer rescans its output: it writes Math.Asin only
+for [-1,1], zero for absent results, and a 0/1 presence column. Other states,
+chained inputs and customer startup callbacks retain output validation.
+
+SMA arithmetic is unchanged. TA-Lib's scalar rolling recurrence omits our
+roundoff/cancellation safeguards; copying it unconditionally would change the
+numerical contract. Both Asin implementations still use the same math primitive.
+
+Validation: 94 focused unit tests and 115 competitor checks passed. New regressions
+cover empty/short/chunked inputs, CSE, publication, snapshot disposal, deferred EMA
+lookup, mixed graphs, mutable columns, builder reuse and an allocation ceiling.
+Existing extreme-SMA and startup/output-contract tests also passed. Release builds
+passed for net10.0, net8.0 and net461.
+
+[CI campaign 37873758742](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/37873758742)
+measures production commit c4370935. Completed targeted results at 10,000 bars:
+
+| Family | Public builder ms | Fastest native ms | Result |
+|---|---:|---:|---|
+| Asin / TA-Lib | 0.28705 | 0.13181 | Builder loses, 2.18x |
+| SMA / TA-Lib | 0.22850 | 0.02297 | Builder loses, 9.95x |
+
+These are complete fresh-builder lifecycles, with ownership and validation inside
+timing. SMA was measured against all six eligible competitor routes. Different
+campaign hosts prevent treating changes from the earlier campaign as controlled
+before/after speedups. The full campaign's remaining families are separate from
+these completed targeted results.
+
+All 45 local alternating-order A/B runs completed. Median Builder / Prepared /
+Native times were 0.2515 / 0.1216 / 0.1111 ms for Asin and 0.2304 / 0.0534 /
+0.0263 ms for SMA. SMA builder allocation is 729,448 bytes/call versus 1,292,440
+in the previous diagnostic, a 43.6% reduction; Asin is 647,097 bytes/call. No
+measured builder interval collected Gen2. Local timings varied and are exploratory.
+
+Four follow-up EventPipe captures (Asin/SMA, Builder/Prepared) were converted by
+PerfView using NetperfToSpeedScope. The committed summary weights exported event
+intervals beneath CpuBuilderProfile.Run, excludes fixture setup/construction, and
+includes warmup. Synthetic time leaves are stripped for method attribution.
+Many samples land in runtime hash-code, GC polling and monitor helpers; safe-point
+bias and inlining prevent treating these percentages as exact function CPU costs
+or GC pause percentages. These are sampled thread-time traces, not elevated ETW
+CPU/GC captures. Original traces and PerfView exports are retained locally at
+C:/Users/cheat/temp/si-builder-close-profile; committed hashes identify them.
+
+[Machine-readable evidence](../benchmarks/results/eight-cpu-pilots/close-only-followup/)
+contains all 45 local measurements, 28 targeted CI measurements with confidence
+intervals and host metadata, and the four trace summaries. Both losses remain;
+this batch does not establish eight wins.

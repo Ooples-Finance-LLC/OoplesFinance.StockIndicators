@@ -1,0 +1,21 @@
+{
+  "platform": "Windows-11-10.0.26220-SP0",
+  "binary": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-indicators\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorBenchmarks.dll",
+  "binary_sha256": "afbdd911cc61a89521f5c17811dea60dab550f718b4e4133ad5093e01cf274bd",
+  "seconds": 2,
+  "repeats": 3,
+  "note": "Separate warmed processes, alternating arm order; exploratory timings without confidence intervals.",
+  "production_commit": "c4370935fff42170b5390c9fbed494c42cff0340",
+  "library_sha256": "3bda636ccd49456cdaecac69068f3722d95bc56c6c23ecdb2ab8935c9801c5b2",
+  "ci_run": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/37873758742",
+  "ci_scope": "28 completed measurements from Asin and all six SMA routes; remaining families not included in this targeted file",
+  "verification": {
+    "unit_tests_passed": 94,
+    "competitor_tests_passed": 115,
+    "release_framework_builds": [
+      "net10.0",
+      "net8.0",
+      "net461"
+    ]
+  }
+}
