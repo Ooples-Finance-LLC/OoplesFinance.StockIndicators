@@ -12,6 +12,13 @@ internal sealed class OwnedBarHistory : IReadOnlyList<Bar>
     private int _expectedCount;
     public int Count { get; private set; }
     internal int ChunkCount => _chunks.Count;
+
+    // Only the fused drain transfers newly allocated, fully initialized chunks.
+    internal void AppendOwnedChunk(Bar[] chunk)
+    {
+        _chunks.Add(chunk);
+        Count += chunk.Length;
+    }
     public Bar this[int index] => unchecked((uint)index) < (uint)Count
         ? _chunks[index >> ChunkShift][index & (ChunkSize - 1)]
         : throw new ArgumentOutOfRangeException(nameof(index));
@@ -39,6 +46,47 @@ internal sealed class OwnedBarHistory : IReadOnlyList<Bar>
 
     internal ReadOnlySpan<Bar> Chunk(int index) => _chunks[index].AsSpan(0,
         Math.Min(ChunkSize, Count - (index << ChunkShift)));
+
+    internal void AppendValidated(ReadOnlySpan<Bar> source, CancellationToken cancellationToken)
+    {
+        ExpectAdditional(source.Length);
+        var offset = 0;
+        // Complete a partially filled chunk before transferring whole chunks.
+        while (offset < source.Length && (Count & (ChunkSize - 1)) != 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var bar = source[offset++];
+            Validation.IndicatorInputDomain.Finite.Validate(in bar);
+            Add(in bar);
+        }
+        while (offset < source.Length)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var length = Math.Min(ChunkSize, source.Length - offset);
+#if NETFRAMEWORK
+            var owned = new Bar[length];
+#else
+            var owned = GC.AllocateUninitializedArray<Bar>(length);
+#endif
+            source.Slice(offset, length).CopyTo(owned);
+            // The caller can mutate its array: certify the owned copy, never
+            // validate caller memory and then copy possibly different values.
+            for (var i = 0; i < owned.Length; i++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ref readonly var bar = ref owned[i];
+                if (!Helpers.FrameworkCompatibility.IsFinite(bar.Open)
+                    || !Helpers.FrameworkCompatibility.IsFinite(bar.High)
+                    || !Helpers.FrameworkCompatibility.IsFinite(bar.Low)
+                    || !Helpers.FrameworkCompatibility.IsFinite(bar.Close)
+                    || !Helpers.FrameworkCompatibility.IsFinite(bar.Volume))
+                    Validation.IndicatorInputDomain.Finite.Validate(in bar);
+            }
+            _chunks.Add(owned);
+            Count += length;
+            offset += length;
+        }
+    }
 
     internal IReadOnlyList<Bar> AfterWarmup(int count) => count == 0 ? this : new HistorySlice(this, count);
 

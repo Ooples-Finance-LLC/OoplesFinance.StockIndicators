@@ -7,6 +7,95 @@ public sealed class OwnedHistoryBatchTests
 {
     [Theory]
     [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(17)]
+    [InlineData(1023)]
+    [InlineData(1024)]
+    [InlineData(1025)]
+    public void BulkAppendOwnsCopiesAndSupportsPartialChunksAndLaterAppends(int prefix)
+    {
+        var expected = Enumerable.Range(0, prefix + 2051).Select(i => new Bar(default, i, i, i, i, i)).ToArray();
+        var history = new OwnedBarHistory();
+        foreach (var bar in expected.Take(prefix)) history.Add(bar);
+        var source = expected.Skip(prefix).ToArray();
+        history.AppendValidated(source, default);
+        Array.Clear(source);
+        history.Add(new Bar(default, -1, -1, -1, -1, -1));
+        Assert.Equal(expected.Append(new Bar(default, -1, -1, -1, -1, -1)), history.ToArray());
+        for (var i = 0; i < expected.Length; i++) Assert.Equal(expected[i], history[i]);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(1023)]
+    [InlineData(1024)]
+    [InlineData(1025)]
+    [InlineData(2051)]
+    public async Task ArrayAndProjectedBuildersHaveIdenticalOutputsAndOwnedSnapshots(int count)
+    {
+        var bars = Enumerable.Range(0, count).Select(i =>
+        {
+            var close = i % 13 == 0 ? -0d : (i % 11 - 5) / 4d;
+            return new Bar(DateTime.UnixEpoch.AddMinutes(i), double.MaxValue, double.Epsilon, -double.MaxValue, close, -0d);
+        }).ToArray();
+        var sma = new Sma(20);
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        var projected = 0;
+        using var bulk = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(sma, asin).BuildAsync();
+        using var scalar = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, bar => { projected++; return bar; }))
+            .ConfigureIndicators(sma, asin).BuildAsync();
+        Assert.Equal(count, projected);
+        foreach (var output in new[] { sma.Outputs[0], asin.Value, asin.IsDefined })
+            Assert.Equal(scalar[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                bulk[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+        var expected = bars.ToArray();
+        Array.Clear(bars);
+        var snapshots = new List<Bar>();
+        await foreach (var snapshot in bulk) snapshots.Add(snapshot.Bar);
+        Assert.Equal(expected, snapshots);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public async Task BulkValidationPreservesFirstInvalidFieldAndBar(int field)
+    {
+        foreach (var invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        foreach (var index in new[] { 0, 1023, 1024, 2050 })
+        {
+            var fields = new[] { 1d, 1d, 1d, 1d, 1d };
+            fields[field] = invalid;
+            var bars = Enumerable.Repeat(new Bar(default, 1, 1, 1, 1, 1), 2052).ToArray();
+            bars[index] = new Bar(default, fields[0], fields[1], fields[2], fields[3], fields[4]);
+            bars[index + 1] = new Bar(default, double.NaN, 1, 1, 1, 1);
+            var expected = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+                new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, bar => bar)).BuildAsync());
+            var actual = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+                new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).BuildAsync());
+            Assert.Equal(expected.Message, actual.Message);
+        }
+    }
+
+    [Fact]
+    public async Task CancelledArrayBuildDoesNotPreventReusingTheSource()
+    {
+        var source = Bars.From(new[] { new Bar(default, 1, 1, 1, 1, 1) });
+        var builder = new StockIndicatorBuilder().ConfigureSource(source).ConfigureIndicators(new Sma(1));
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancellation.Token));
+        using var run = await builder.BuildAsync();
+        Assert.Equal(1, run.BarCount);
+        Assert.Equal(1d, run.Latest.Bar.Close);
+    }
+
+    [Theory]
+    [InlineData(0)]
     [InlineData(17)]
     [InlineData(1023)]
     [InlineData(1024)]

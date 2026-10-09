@@ -390,5 +390,94 @@ For just the optimized ownership candidate and its baseline:
 Release benchmark builds and 84 focused checks passed, including 21 prototype
 regressions. The existing CI performance build now includes CpuFeasibilityTests in its
 correctness gate. Infrastructure cleanup may still be valuable, but these results
-do not justify claiming it will produce wins over TA-Lib. Further numerical or
-ownership experiments must pass this gate before driving a shared-engine rewrite.
+do not justify claiming it will produce wins over TA-Lib. These experiments did
+not integrate all stages of a fused execution plan, so their losses do not rule
+out that design. The fused pilot is evaluated through the complete builder before
+any global rollout.
+
+## Shared array ingestion follow-up (October 9)
+
+`Bars.From(Bar[])` now copies chunks directly into owned history and validates
+the owned copy. This removes per-bar enumeration, projection and history-append
+dispatch for plain arrays. Projected, custom and asynchronous sources retain
+their existing paths. Cancellation, field diagnostics, snapshot ownership and
+later appends remain covered. Indicator arithmetic is unchanged.
+
+`ArrayBuilderBenchmarks` compares the complete array builder, the retained
+identity-projection builder and native owned TA-Lib outputs in the same process.
+The longer repeat used eight warmups and twenty measurements targeting 500 ms
+per iteration. Means in microseconds:
+
+| Family | Bars | Array builder | Projected builder | TA-Lib |
+|---|---:|---:|---:|---:|
+| Asin | 1,000 | 32.502 | 38.356 | 17.848 |
+| Asin | 10,000 | 315.217 | 334.523 | 163.471 |
+| SMA | 1,000 | 27.229 | 34.749 | 2.797 |
+| SMA | 10,000 | 289.123 | 308.389 | 26.807 |
+
+Array/projected confidence intervals separate at 1,000 bars and overlap at
+10,000 bars. Both remain slower than TA-Lib. Unrelated host workloads affected
+the initial run; the repeat also varies substantially. These measurements do
+not establish a stable 10,000-bar improvement or constrain what a future shared
+engine can achieve. Allocation remains essentially unchanged.
+
+[Both runs and source hashes](../benchmarks/results/eight-cpu-pilots/array-ingestion/)
+are retained. Verification passed 91 focused unit tests, 98 competitor-facing
+checks covering the eight pilots, and Release builds for net10.0, net8.0 and
+net461. The latter retains existing package-support warnings.
+
+Reproduce with the Release benchmark executable:
+
+```text
+--filter '*ArrayBuilderBenchmarks*' --exporters json --iterationCount 20 --warmupCount 8 --iterationTime 500 --artifacts array-ingestion
+```
+
+## Fused execution pilot (October 9)
+
+`FusedBarExecution` owns and validates each input while computing final Asin/SMA
+outputs in the same traversal. Kernel dispatch occurs per chunk; the scalar hot
+loop keeps arithmetic state and output references local. SMA accumulates a
+conservative exactness certificate during ingestion, refines it against owned
+history when necessary, and replaces all speculative results with the existing
+numerical core if certification fails. No speculative value is published.
+
+Plain typed-only runs publish directly from the plan without constructing a
+legacy evaluator/runtime or copying the result arrays. Owned history remains
+available for snapshots and later legacy builds. The pilot supports direct
+Asin, one normalized SMA period, or both together, over array sources on modern
+runtimes. Other sources/graphs and legacy-configured runs retain existing
+execution; net461 retains its established arithmetic path.
+
+Adversarial review covered cancellation, first-invalid-field diagnostics,
+caller mutation, chunk boundaries, signed zero, undefined Asin values, exact
+SMA rounding, late certificate rejection, overflowed speculation, huge periods,
+duplicate outputs, disposal, deferred reads, and exposed mutable columns. It
+also identified synchronous legacy callbacks which can change an indicator's
+source or add indicators before typed results are read. Excluding legacy
+configuration from pilot planning preserves those semantics; a regression uses
+a local callback adapter and compares complete outputs with the unfused path.
+
+Final verification: **134 focused unit tests and 119 competitor-facing checks
+passed**, plus Release builds for net10.0, net8.0 and net461. The standard public
+builder suite produced all eight required measurements and passed the report
+validity checker. These are fresh complete builders, not kernel-only timings.
+
+| Family | Bars | Fused public builder (us) | TA-Lib (us) | Verdict |
+|---|---:|---:|---:|---|
+| Asin | 1,000 | 26.675 | 15.755 | Loses |
+| Asin | 10,000 | 251.265 | 142.379 | Loses |
+| SMA | 1,000 | 12.230 | 2.620 | Loses |
+| SMA | 10,000 | 100.596 | 24.211 | Loses |
+
+**The performance acceptance gate has not passed; no global rollout is justified.**
+The controlled array-versus-projection diagnostic preceding the final callback
+guard measured lower fused means at 10,000 bars: Asin 223.923 versus 333.004 us,
+SMA 111.612 versus 281.700 us. Those gains do not erase the native losses. Local
+host variation also prevents treating different campaigns as controlled speedups.
+
+[Raw reports, confidence intervals, allocations and source/binary hashes](../benchmarks/results/eight-cpu-pilots/fused-builder/)
+retain the initial fused implementation, the block-kernel diagnostic and the
+final standard builder comparisons. The next work remains optimization of these
+two fused kernels and their execution plan under the same public-builder gate,
+before extending fusion to other indicators. These results do not establish a
+limit on what a further optimized fused implementation can achieve.

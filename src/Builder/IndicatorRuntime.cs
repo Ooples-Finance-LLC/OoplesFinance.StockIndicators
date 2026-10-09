@@ -376,6 +376,8 @@ public sealed class IndicatorRuntime : IDisposable
             if (!IsCloseOnlyNode(handle)) return false;
         }
 
+        if (TryPublishFusedCloseOnly(history)) return true;
+
         var close = new double[history.Count];
         var offset = 0;
         for (var chunk = 0; chunk < history.ChunkCount; chunk++)
@@ -406,6 +408,46 @@ public sealed class IndicatorRuntime : IDisposable
         Publish(new IndicatorSnapshot(series, _keys, handle =>
         {
             if (!nodes.ContainsKey(handle)) return null;
+            using var context = new ComputeContext();
+            return new SeriesEvaluator(batchSources, source.BatchData!, nodes, context).Evaluate(handle).ToArray();
+        }));
+        return true;
+    }
+
+    private bool TryPublishFusedCloseOnly(Indicators.OwnedBarHistory history)
+    {
+        if (_source.FusedExecution is not { SmaValues: { } values } fused) return false;
+        foreach (var handle in _activeSeries)
+        {
+            var node = _nodes[handle];
+            if (node.Kind != SeriesNodeKind.Base
+                && ((Specs.SmaSpecOptions)node.Spec!.Options).Length != fused.SmaLength) return false;
+        }
+        var series = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>();
+        foreach (var handle in _activeSeries)
+            if (_nodes[handle].Kind != SeriesNodeKind.Base) series[handle] = values;
+
+        // Base price is a dependency, not a mandatory intermediate buffer. Keep
+        // it readable on demand, including from notifications and after disposal.
+        var close = new Lazy<double[]>(() =>
+        {
+            var result = new double[history.Count];
+            var offset = 0;
+            for (var chunk = 0; chunk < history.ChunkCount; chunk++)
+            {
+                var bars = history.Chunk(chunk);
+                for (var i = 0; i < bars.Length; i++) result[offset + i] = bars[i].Close;
+                offset += bars.Length;
+            }
+            return result;
+        });
+        var nodes = _nodes;
+        var source = _source;
+        var batchSources = _batchSources;
+        Publish(new IndicatorSnapshot(series, _keys, handle =>
+        {
+            if (!nodes.TryGetValue(handle, out var node)) return null;
+            if (node.Kind == SeriesNodeKind.Base) return close.Value;
             using var context = new ComputeContext();
             return new SeriesEvaluator(batchSources, source.BatchData!, nodes, context).Evaluate(handle).ToArray();
         }));

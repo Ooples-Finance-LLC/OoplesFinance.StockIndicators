@@ -47,6 +47,7 @@ public interface IBarSource
 // synchronous; arbitrary IBarSource implementations continue through ReadAsync.
 internal interface ISynchronousBarSource
 {
+    Bar[]? DirectBars { get; }
     void AppendValidated(OwnedBarHistory destination, CancellationToken cancellationToken);
 }
 
@@ -73,7 +74,11 @@ public static class Bars
 
     /// <summary>A finite source over bars the caller already has.</summary>
     /// <exception cref="ArgumentNullException">Thrown when bars is null.</exception>
-    public static IBarSource From(IEnumerable<Bar> bars) => From(bars, bar => bar);
+    public static IBarSource From(IEnumerable<Bar> bars)
+    {
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
+        return new EnumerableBarSource<Bar>(bars, bar => bar, bars as Bar[]);
+    }
 
     /// <summary>
     /// The same finite source, primed with earlier bars the caller does not want reported.
@@ -133,17 +138,26 @@ public static class Bars
     {
         private readonly IEnumerable<T> _items;
         private readonly Func<T, Bar> _project;
+        private readonly Bar[]? _directBars;
 
-        internal EnumerableBarSource(IEnumerable<T> items, Func<T, Bar> project)
+        internal EnumerableBarSource(IEnumerable<T> items, Func<T, Bar> project, Bar[]? directBars = null)
         {
             _items = items;
             _project = project;
+            _directBars = directBars;
         }
 
         public bool IsFinite => true;
 
+        public Bar[]? DirectBars => _directBars;
+
         public void AppendValidated(OwnedBarHistory destination, CancellationToken cancellationToken)
         {
+            if (_directBars is not null)
+            {
+                destination.AppendValidated(_directBars, cancellationToken);
+                return;
+            }
             // Only inspect storage types whose count is side-effect free. Never count by
             // enumerating, or trust arbitrary user collection getters during source setup.
             var count = _items is T[] array ? array.Length

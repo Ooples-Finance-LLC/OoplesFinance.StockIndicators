@@ -1,5 +1,23 @@
 # Builder performance: profile-led implementation plan
 
+## Current focus: fused Asin/SMA pilot
+
+The active implementation is `FusedBarExecution`: a per-build plan fusing input
+ownership, validation, numerical certification, arithmetic and final output
+writes. Plain typed-only runs publish directly from that plan. The pilot is
+limited to direct Asin and SMA nodes over array sources on modern runtimes;
+legacy configuration, custom sources and other graphs retain existing execution.
+
+The acceptance gate remains complete fresh-builder performance against TA-Lib
+at 1,000 and 10,000 bars, with the existing numerical and ownership contracts.
+Correctness or kernel-only wins do not authorize global rollout. Separate
+arithmetic/ownership prototype losses do not rule out fused execution. Continue
+work on the fused kernels and plan until this gate passes for both pilots before
+extending the mechanism across the library. See the latest evidence in
+[builder-ab-profile.md](builder-ab-profile.md).
+
+## Earlier profiling and implementation sequence
+
 This plan follows the corrected [complete builder comparisons](../benchmarks/results/eight-cpu-pilots/builder-comparisons.md). The goal remains to beat the fastest eligible native competitor for each of the eight pilot formulas through the normal public builder. These profiles diagnose costs; they do not establish new benchmark wins.
 
 ## Capture and limitations

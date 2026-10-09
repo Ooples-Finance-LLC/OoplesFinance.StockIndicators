@@ -34,7 +34,14 @@ public sealed class StockIndicatorBuilder
     private BarTimeframe? _resolvedTimeframe;
     private SeriesKey? _defaultSeriesKey;
     private bool _defaultsApplied;
+    private bool _requiresRuntime;
     private int _nextId;
+
+    // Legacy execution can invoke customer callbacks which change the typed
+    // configuration. Pilot fusion is restricted to runs without that boundary.
+    private bool CanUseDirectFusedExecution => !_requiresRuntime && _nodes.Count == 0 && _keys.Count == 0
+        && _namedSources.Count == 0 && _indicatorOptions is null && _signalOptions is null
+        && _symbolOptions is null && _dataOptions is null && _backtestOptions is null && _benchmarkOptions is null;
 
     /// <summary>
     /// Creates a new stock indicator builder.
@@ -197,7 +204,14 @@ public sealed class StockIndicatorBuilder
             warmupCount++;
         }
 
-        if (source is Indicators.ISynchronousBarSource synchronous)
+        var direct = (source as Indicators.ISynchronousBarSource)?.DirectBars;
+        var fused = warmupCount == 0 && direct is not null && CanUseDirectFusedExecution
+            ? Indicators.FusedBarExecution.TryCreate(_configuredIndicators, direct.Length) : null;
+        if (fused is not null)
+        {
+            fused.Execute(direct!, bars, cancellationToken);
+        }
+        else if (source is Indicators.ISynchronousBarSource synchronous)
         {
             synchronous.AppendValidated(bars, cancellationToken);
         }
@@ -213,7 +227,24 @@ public sealed class StockIndicatorBuilder
         // Custom states read owned bars directly. Defer the legacy column bridge
         // until a built-in evaluator or component-average calculation requests it.
         var batch = new Lazy<StockData>(() => CreateOwnedBatch(bars));
-        _configuredSource = IndicatorDataSource.FromValidatedHistory(batch, bars);
+        _configuredSource = IndicatorDataSource.FromValidatedHistory(batch, bars, fused);
+
+        // The typed-only pilot plan already owns its validated history and final
+        // outputs. No legacy graph, callback or option can observe a runtime here.
+        // Retain the source for a later legacy Build(), rather than building that
+        // second graph and runtime speculatively on every typed run.
+        if (fused is not null)
+        {
+            var outputs = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+            var warmup = 0;
+            foreach (var indicator in _configuredIndicators)
+            {
+                var values = fused.Values(indicator);
+                for (var slot = 0; slot < indicator.Outputs.Count; slot++) outputs[indicator.Outputs[slot]] = values[slot];
+                warmup = Math.Max(warmup, indicator.WarmupBars);
+            }
+            return new Indicators.IndicatorRun(null, outputs, bars, 0, warmup);
+        }
 
         // Everything reachable, not just what was configured: an indicator used as a component or chained
         // onto still has to be computed, and a built-in one still belongs in the evaluator rather than being
@@ -278,7 +309,8 @@ public sealed class StockIndicatorBuilder
         {
         runtime.Start();
 
-        var engine = new Indicators.CustomIndicatorEngine(bars, resolveBuiltIn: indicator =>
+        Indicators.CustomIndicatorEngine? engine = null;
+        Indicators.CustomIndicatorEngine CreateEngine() => new(bars, resolveBuiltIn: indicator =>
         {
             if (!handles.TryGetValue(indicator, out var slots))
             {
@@ -354,7 +386,7 @@ public sealed class StockIndicatorBuilder
         var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
         foreach (var indicator in _configuredIndicators)
         {
-            var values = engine.Compute(indicator);
+            var values = (engine ??= CreateEngine()).Compute(indicator);
             for (var slot = 0; slot < indicator.Outputs.Count; slot++)
             {
                 // The warm-up primed the states; it is not part of the answer.
@@ -623,6 +655,7 @@ public sealed class StockIndicatorBuilder
     /// </summary>
     public StockIndicatorBuilder ConfigureNotifications(Action<NotificationCatalog>? configure = null)
     {
+        _requiresRuntime = true;
         configure?.Invoke(_notifications);
         return this;
     }
@@ -632,6 +665,7 @@ public sealed class StockIndicatorBuilder
     /// </summary>
     public StockIndicatorBuilder ConfigureAutoTrading(Action<AutoTradingCatalog>? configure = null)
     {
+        _requiresRuntime = true;
         configure?.Invoke(_autoTrading);
         return this;
     }
@@ -659,6 +693,7 @@ public sealed class StockIndicatorBuilder
     /// </summary>
     public StockIndicatorBuilder ConfigureBehavior(Action<BehaviorOptions> configure)
     {
+        _requiresRuntime = true;
         configure?.Invoke(_behavior);
         return this;
     }
