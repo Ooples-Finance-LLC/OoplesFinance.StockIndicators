@@ -1,0 +1,22 @@
+{
+  "commit_under_test": "32aed0d577af093b2e802f349d6762025916925a",
+  "cases": 15,
+  "count": 100000,
+  "bar_bytes": 48,
+  "trace_sha256": {
+    "Asin.nettrace": "112b5fbd6e757564aef7b2036db82364bfcda2af1763e2aa6a9524d9c4d6a974",
+    "Sma.nettrace": "3080713a39fef86f4b8ee02bdf49af0c91b031fc82e301c316af96b1dd433c63"
+  },
+  "benchmark_source_sha256": "b9047b76472568d4971b90231e0472271cea1e265c9d69b9572095ab64efbfb1",
+  "contracts": [
+    "Values arms allocate equal length outputs and align SMA warmup identically. Asin and grid SMA bitwise agreement checked.",
+    "Decimal SMA differs on94178 values, maximum absolute difference8.526512829121202e-14. This is not numerical equivalence.",
+    "Both payload wrappers own identical history, validate OHLCV, extract closes and own values/presence. They do not implement the public builder API.",
+    "The real fused builder avoids the wrappers extra close array.",
+    "Ooples Asin values arm is a scalar Math.Asin loop, not the complete indicator API.",
+    "Short local timings have noise; no universal winner claimed."
+  ],
+  "profile_command": "dotnet-trace collect --profile dotnet-sampled-thread-time --output <trace> -- dotnet <benchmark.dll> --profile-builder TaLib.Functions.<Asin|Sma> Builder 5",
+  "export_command": "PerfView.exe /AcceptEula /NoGui UserCommand NetperfToSpeedScope <trace>",
+  "profile_limits": "Current grid builder only,10k bars. Non-elevated EventPipe sampled thread time, not ETW CPU or GC pauses. Summary strips *_TIME leaves and filters Invoke stacks including warmup; safe-point bias/inlining affect attribution."
+}

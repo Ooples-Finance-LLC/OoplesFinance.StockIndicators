@@ -608,3 +608,37 @@ on this in-domain workload, with no presence-mask readback. The native
 performance gate still fails, so automatic GPU selection remains disabled.
 
 [Follow-up reports, raw measurements, logs and hashes](../benchmarks/results/eight-cpu-pilots/tensors-gpu-reuse/)
+
+
+## Current matched cost boundaries (2026-10-09, 32aed0d5)
+
+The previous fresh-builder/direct-TALib comparison measures different obligations.
+New `PilotCostBoundaryBenchmarks` separates equal value arrays, equal owned payloads,
+and the real builder. All 15 cases completed setup verification and valid statistics.
+At 100k bars, values-only allocations are about 782 KB on both sides. Scalar Math.Asin
+versus TALib measured 0.888 vs 1.659 ms, grid SMA core 0.643 vs 0.255 ms, and decimal
+SMA core 2.073 vs 0.252 ms. The scalar Asin arm is arithmetic, not a full indicator.
+Grid SMA and Asin agree bitwise. Decimal SMA differs on 94,178 values with maximum
+absolute difference 8.53e-14, so that timing does not establish equivalent numerics.
+
+Bar is 48 bytes. Owned history therefore contributes 4.8 MB per 100k bars; values add
+0.8 MB and Asin presence adds0.8 MB. This accounts for nearly all current builder
+allocation (5.6 MB SMA / 6.4 MB Asin), versus 0.8 MB for the competitor value array.
+Both matched payload wrappers include ownership, finite validation, close extraction
+and the same output/presence arrays, so both allocate about 6.4 MB SMA / 7.2 MB Asin.
+The real fused builder avoids their extra 0.8 MB close extraction. These wrappers
+isolate common obligations; they are not full competing builder implementations.
+
+Fresh Asin/SMA grid builder EventPipe traces were exported using PerfView. Asin
+samples heavily include allocation and GC-poll helpers; SMA includes fused ingestion,
+allocation and runtime helpers. These are sampled thread-time traces with safe-point
+bias, not reliable CPU percentages or GC-pause accounting. Earlier elevated ETW
+profiles remain historical evidence, not current attribution.
+
+Conclusion: history retention is the dominant allocation gap; SMA also has a
+measured arithmetic gap even with equal allocations. Removing history requires an
+explicit output/ownership contract decision, not quietly weakening existing runs.
+No production contract was changed in this diagnostic batch. Short timings remain
+exploratory and cannot establish portable competitor wins.
+
+[Matched reports, checks, PerfView exports and trace hashes](../benchmarks/results/eight-cpu-pilots/cost-boundaries/)
