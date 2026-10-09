@@ -256,7 +256,17 @@ internal sealed class CustomIndicatorEngine
 
         if (rawFinite && chained is null && _bars is OwnedBarHistory owned
             && state is IOwnedHistoryBatchState batchState && batchState.TryComputeBatch(owned, results))
+        {
+            // This sealed indicator has no startup callback. Its batch loop writes
+            // asin only for [-1,1], and otherwise leaves zero; presence is 0 or 1.
+            // Both columns are therefore finite by construction.
+            if (indicator is PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
+            {
+                _computed[indicator] = results;
+                return results;
+            }
             return Remember(indicator, results);
+        }
 
         var componentValues = new double[components.Length];
         var outputValues = new double[outputCount];

@@ -213,7 +213,7 @@ public sealed class StockIndicatorBuilder
         // Custom states read owned bars directly. Defer the legacy column bridge
         // until a built-in evaluator or component-average calculation requests it.
         var batch = new Lazy<StockData>(() => CreateOwnedBatch(bars));
-        _configuredSource = IndicatorDataSource.FromValidatedHistory(batch);
+        _configuredSource = IndicatorDataSource.FromValidatedHistory(batch, bars);
 
         // Everything reachable, not just what was configured: an indicator used as a component or chained
         // onto still has to be computed, and a built-in one still belongs in the evaluator rather than being

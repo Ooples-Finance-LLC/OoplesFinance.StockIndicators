@@ -343,6 +343,7 @@ public sealed class IndicatorRuntime : IDisposable
             Publish(new IndicatorSnapshot(new Dictionary<SeriesHandle, ReadOnlyMemory<double>>(), _keys));
             return;
         }
+        if (TryStartCloseOnlyBatch()) return;
         var data = _source.BatchData ?? throw new InvalidOperationException("Batch source missing data.");
         // Validate once per source before any graph evaluation or snapshot publication.
         foreach (var source in _batchSources.Values.Concat(new[] { data }).Distinct())
@@ -361,6 +362,65 @@ public sealed class IndicatorRuntime : IDisposable
         }
 
         Publish(CreateBatchSnapshot(data, _batchSources, _nodes, _keys, series));
+    }
+
+    private bool TryStartCloseOnlyBatch()
+    {
+        if (!_source.HasUnmaterializedValidatedHistory || _batchSources.Count != 0
+            || _source.ValidatedHistory is not { } history) return false;
+
+        // Keep registration, CSE and publication unchanged. Only direct-close SMA
+        // and base nodes can avoid the mutable six-column StockData bridge.
+        foreach (var handle in _activeSeries)
+        {
+            if (!IsCloseOnlyNode(handle)) return false;
+        }
+
+        var close = new double[history.Count];
+        var offset = 0;
+        for (var chunk = 0; chunk < history.ChunkCount; chunk++)
+        {
+            var bars = history.Chunk(chunk);
+            for (var i = 0; i < bars.Length; i++) close[offset + i] = bars[i].Close;
+            offset += bars.Length;
+        }
+        var series = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>();
+        foreach (var handle in _activeSeries)
+        {
+            var node = _nodes[handle];
+            if (node.Kind == SeriesNodeKind.Base) series[handle] = close;
+            else
+            {
+                var values = new double[close.Length];
+                var options = (Specs.SmaSpecOptions)node.Spec!.Options;
+                Core.MovingAverageCore.SimpleMovingAverage(close, values, options.Length);
+                series[handle] = values;
+            }
+        }
+
+        // A deferred non-SMA lookup still uses the ordinary evaluator. Capture
+        // the source, not this disposable runtime, and materialize only on demand.
+        var source = _source;
+        var nodes = _nodes;
+        var batchSources = _batchSources;
+        Publish(new IndicatorSnapshot(series, _keys, handle =>
+        {
+            if (!nodes.ContainsKey(handle)) return null;
+            using var context = new ComputeContext();
+            return new SeriesEvaluator(batchSources, source.BatchData!, nodes, context).Evaluate(handle).ToArray();
+        }));
+        return true;
+    }
+
+    private bool IsCloseOnlyNode(SeriesHandle handle)
+    {
+        if (!_nodes.TryGetValue(handle, out var node)) return false;
+        if (node.Kind == SeriesNodeKind.Base) return true;
+        return node.Kind == SeriesNodeKind.Indicator
+            && node.Spec is { Name: Enums.IndicatorName.SimpleMovingAverage, OutputKey: null,
+                Options: Specs.SmaSpecOptions }
+            && node.Input is { } input && _nodes.TryGetValue(input, out var parent)
+            && parent.Kind == SeriesNodeKind.Base && parent.SeriesKey.Equals(node.SeriesKey);
     }
 
     private static IndicatorSnapshot CreateBatchSnapshot(StockData data,

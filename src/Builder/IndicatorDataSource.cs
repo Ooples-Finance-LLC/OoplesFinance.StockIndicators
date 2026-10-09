@@ -62,8 +62,10 @@ public sealed class IndicatorDataSource
     public StockData? BatchData => _batchData ?? _validatedHistoryBatch?.Value;
 
     // Only the typed builder uses this factory, after validating and owning every bar.
-    internal static IndicatorDataSource FromValidatedHistory(Lazy<StockData> batch) =>
-        new(IndicatorSourceKind.Batch, null, null, null, null, null, batch);
+    internal static IndicatorDataSource FromValidatedHistory(Lazy<StockData> batch, Indicators.OwnedBarHistory? history = null) =>
+        new(IndicatorSourceKind.Batch, null, null, null, null, null, batch) { ValidatedHistory = history };
+
+    internal Indicators.OwnedBarHistory? ValidatedHistory { get; private init; }
 
     // Once columns have been exposed, ordinary mutable StockData validation applies again.
     internal bool HasUnmaterializedValidatedHistory => _validatedHistoryBatch is { IsValueCreated: false };
