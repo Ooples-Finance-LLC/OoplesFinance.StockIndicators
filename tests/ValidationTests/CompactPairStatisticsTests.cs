@@ -17,7 +17,7 @@ public sealed class CompactPairStatisticsTests
         yield return (adjacent, adjacent.Select(v => -v).ToArray());
         yield return (new double[19], Enumerable.Repeat(1d, 19).ToArray());
         double bound = (1L << 30) / 7;
-        yield return ([0, 1, bound - 1, bound, -bound, bound + 1, 0, double.Epsilon, 2, 3, 4, 5, 6, 7, 8],
+        yield return ([0, 1, bound - 1, bound, -bound, -bound + 1, 0, bound, bound + 1, double.Epsilon, 2, 3, 4, 5, 6],
             [1, 0, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7]);
         yield return (Enumerable.Range(0, 27).Select(i => Math.ScaleB((i % 7 - 3) * 1.23456789012345, i * 73 - 1000)).ToArray(),
             Enumerable.Range(0, 27).Select(i => Math.ScaleB((i % 5 - 2) * 1.125, 900 - i * 70)).ToArray());

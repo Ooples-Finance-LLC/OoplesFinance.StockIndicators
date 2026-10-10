@@ -170,7 +170,7 @@ internal struct ExactPopulationDeviation
         if (shift is < 0 or >= 128 || (UInt128)numerator > (UInt128.MaxValue >> shift)) return false;
         // midpoint < 2^55 and denominator <= 2^12, hence the product fits 122 bits.
         var left = (UInt128)numerator << shift;
-        var right = (UInt128)midpoint * midpoint * denominator;
+        var right = unchecked((UInt128)midpoint * midpoint * denominator);
         comparison = left.CompareTo(right);
         return true;
     }
@@ -195,9 +195,9 @@ internal struct ExactPopulationDeviation
 
         // midpoint < 2^55, so its square times a 64-bit denominator is < 2^174.
         // The upper partial product plus carry therefore cannot overflow UInt128.
-        var square = (UInt128)midpoint * midpoint;
-        var lowerProduct = (UInt128)unchecked((ulong)square) * denominator;
-        var upperProduct = (square >> 64) * denominator + (lowerProduct >> 64);
+        var square = unchecked((UInt128)midpoint * midpoint);
+        var lowerProduct = unchecked((UInt128)(ulong)square * denominator);
+        var upperProduct = unchecked((square >> 64) * denominator + (lowerProduct >> 64));
         comparison = high.CompareTo((ulong)(upperProduct >> 64));
         if (comparison == 0) comparison = middle.CompareTo(unchecked((ulong)upperProduct));
         if (comparison == 0) comparison = low.CompareTo(unchecked((ulong)lowerProduct));

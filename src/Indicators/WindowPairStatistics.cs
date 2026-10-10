@@ -206,6 +206,7 @@ internal sealed class PairStatisticsWindow(int period)
     private int _grid;
     private bool _hasGrid;
     private bool _wide;
+    private readonly long _smallBound = (1L << 30) / period;
     private long _smallX, _smallY, _smallXX, _smallYY, _smallXY, _smallA, _smallB, _smallC, _maximum;
     private BigInteger _x,
         _y,
@@ -250,6 +251,20 @@ internal sealed class PairStatisticsWindow(int period)
     // The bound is conservative across evictions and is reset only by Reset.
     private bool TryAccumulateSmall((long Integer, int Exponent) left, (long Integer, int Exponent) right, int sign)
     {
+        if (sign < 0)
+        {
+            // Every expired sample was admitted by the same monotone grid and
+            // magnitude certificate. Rechecking it cannot strengthen the proof.
+            var expiredX = left.Integer << (left.Exponent - _grid);
+            var expiredY = right.Integer << (right.Exponent - _grid);
+            unchecked
+            {
+                _smallX -= expiredX; _smallY -= expiredY;
+                _smallXX -= expiredX * expiredX; _smallYY -= expiredY * expiredY;
+                _smallXY -= expiredX * expiredY;
+            }
+            return true;
+        }
         var hasValue = left.Integer != 0 || right.Integer != 0;
         var grid = _grid;
         if (hasValue)
@@ -258,10 +273,9 @@ internal sealed class PairStatisticsWindow(int period)
             grid = _hasGrid ? Math.Min(_grid, next) : next;
         }
         var shift = _hasGrid ? _grid - grid : 0;
-        var bound = (1L << 30) / period;
-        if (!TryNormalize(_maximum, shift, bound, out var maximum)
-            || !TryNormalize(left.Integer, left.Exponent - grid, bound, out var x)
-            || !TryNormalize(right.Integer, right.Exponent - grid, bound, out var y)) return false;
+        if (!TryNormalize(_maximum, shift, _smallBound, out var maximum)
+            || !TryNormalize(left.Integer, left.Exponent - grid, _smallBound, out var x)
+            || !TryNormalize(right.Integer, right.Exponent - grid, _smallBound, out var y)) return false;
         if (shift > 0)
         {
             _smallX <<= shift; _smallY <<= shift;
@@ -270,8 +284,12 @@ internal sealed class PairStatisticsWindow(int period)
         _grid = grid;
         _hasGrid |= hasValue;
         _maximum = Math.Max(maximum, Math.Max(Math.Abs(x), Math.Abs(y)));
-        _smallX += sign * x; _smallY += sign * y;
-        _smallXX += sign * x * x; _smallYY += sign * y * y; _smallXY += sign * x * y;
+        // The preceding certificate proves these operations cannot overflow.
+        unchecked
+        {
+            _smallX += x; _smallY += y;
+            _smallXX += x * x; _smallYY += y * y; _smallXY += x * y;
+        }
         return true;
     }
 
@@ -339,9 +357,13 @@ internal sealed class PairStatisticsWindow(int period)
         else
         {
             long n = _history.Count;
-            _smallA = n * _smallXX - _smallX * _smallX;
-            _smallB = n * _smallYY - _smallY * _smallY;
-            _smallC = n * _smallXY - _smallX * _smallY;
+            // Each product fits 60 bits; the signed difference fits 61 bits.
+            unchecked
+            {
+                _smallA = n * _smallXX - _smallX * _smallX;
+                _smallB = n * _smallYY - _smallY * _smallY;
+                _smallC = n * _smallXY - _smallX * _smallY;
+            }
         }
     }
 
