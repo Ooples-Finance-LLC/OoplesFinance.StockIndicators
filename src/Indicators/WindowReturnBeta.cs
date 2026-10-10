@@ -223,9 +223,9 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 PairStatisticsWindow.Select(bar, market),
                 PairStatisticsWindow.Select(bar, evaluation)
             );
-            output[5] = ExactMeanAccumulator.UnitRatio(_window.EvaluationReturn, 1);
+            output[5] = _window.EvaluationReturnValue;
             output[12] = 1;
-            output[6] = ExactMeanAccumulator.UnitRatio(_window.MarketReturn, 1);
+            output[6] = _window.MarketReturnValue;
             output[13] = 1;
             for (var i = 0; i < 3; i++)
             {
@@ -263,13 +263,18 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
 
 internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection)
 {
-    private readonly Queue<(BigInteger X, BigInteger Y)> _history = new();
+    private readonly Queue<(RocBankValue X, RocBankValue Y)> _history = new();
     private readonly Moments[] _moments = [new(), new(), new()];
     private bool _started;
     private double _previousMarket,
         _previousEvaluation;
-    internal BigInteger MarketReturn { get; private set; }
-    internal BigInteger EvaluationReturn { get; private set; }
+    private RocBankValue _marketReturn, _evaluationReturn;
+    // Retain rounded returns at binary64 precision with an extended upper
+    // exponent. Only callers explicitly requesting minimum units expand them.
+    internal BigInteger MarketReturn => ExactVarianceWindow.Units(_marketReturn.Mantissa) << _marketReturn.UpperShift;
+    internal BigInteger EvaluationReturn => ExactVarianceWindow.Units(_evaluationReturn.Mantissa) << _evaluationReturn.UpperShift;
+    internal double MarketReturnValue => _marketReturn.UpperShift == 0 ? _marketReturn.Mantissa : _marketReturn.Publish();
+    internal double EvaluationReturnValue => _evaluationReturn.UpperShift == 0 ? _evaluationReturn.Mantissa : _evaluationReturn.Publish();
 
     internal void Reset()
     {
@@ -278,13 +283,13 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
             m.Reset();
         _started = false;
         _previousMarket = _previousEvaluation = 0;
-        MarketReturn = EvaluationReturn = 0;
+        _marketReturn = _evaluationReturn = default;
     }
 
     internal void Add(double market, double evaluation)
     {
-        MarketReturn = Return(market, _previousMarket);
-        EvaluationReturn = Return(evaluation, _previousEvaluation);
+        _marketReturn = Return(market, _previousMarket);
+        _evaluationReturn = Return(evaluation, _previousEvaluation);
         _previousMarket = market;
         _previousEvaluation = evaluation;
         if (!_started)
@@ -297,42 +302,39 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
             var old = _history.Dequeue();
             Accumulate(old.X, old.Y, -1);
         }
-        _history.Enqueue((MarketReturn, EvaluationReturn));
-        Accumulate(MarketReturn, EvaluationReturn, 1);
+        _history.Enqueue((_marketReturn, _evaluationReturn));
+        Accumulate(_marketReturn, _evaluationReturn, 1);
     }
 
-    private static BigInteger Return(double current, double previous)
+    private static RocBankValue Return(double current, double previous)
     {
         if (previous == 0)
-            return 0;
-        var denominator = ExactVarianceWindow.Units(previous);
-        var numerator = (ExactVarianceWindow.Units(current) - denominator) << 1074;
-        if (denominator.Sign < 0)
-        {
-            numerator = -numerator;
-            denominator = -denominator;
-        }
-        return RocBankValue.RoundUnits(numerator, denominator);
+            return default;
+        var numerator = new ExactMeanAccumulator();
+        numerator.Add(current);
+        numerator.Add(previous, -1);
+        var rounded = RocBankValue.Round(numerator, previous);
+        // The minimum-unit contract discards the sign of a rounded zero.
+        return rounded.Mantissa == 0 ? default : rounded;
     }
 
     private bool Included(int slot) =>
         selection == ReturnBetaSelection.All || (int)selection == slot;
 
-    private void Accumulate(BigInteger x, BigInteger y, int sign)
+    private void Accumulate(RocBankValue x, RocBankValue y, int sign)
     {
-        static (BigInteger Value, int Grid) Compact(BigInteger value)
+        static (BigInteger Value, int Grid) Compact(RocBankValue value)
         {
-            if (value.IsZero) return (BigInteger.Zero, 0);
-            var grid = ExactMeanAccumulator.TrailingBinaryZeros(value);
-            return (value >> grid, grid);
+            var (integer, power) = ExactMeanAccumulator.DecomposeFinite(value.Mantissa);
+            return (new BigInteger(integer), power + value.UpperShift + 1074);
         }
         var left = Compact(x);
         var right = Compact(y);
         if (Included(0))
             _moments[0].Add(left, right, sign);
-        if (x.Sign > 0 && Included(1))
+        if (x.Mantissa > 0 && Included(1))
             _moments[1].Add(left, right, sign);
-        if (x.Sign < 0 && Included(2))
+        if (x.Mantissa < 0 && Included(2))
             _moments[2].Add(left, right, sign);
     }
 

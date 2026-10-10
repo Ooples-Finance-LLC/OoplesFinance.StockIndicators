@@ -96,6 +96,36 @@ public sealed class CompactPairStatisticsTests
     }
 
     [Fact]
+    public void CompactReturnsMatchIndependentRoundingAcrossSignsAndFullExponentRange()
+    {
+        var random = new Random(81143);
+        var window = new ReturnBetaWindow(2, ReturnBetaSelection.All);
+        var unit = new ReferenceFraction(BigInteger.One << 1074);
+        double[] boundaries = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,
+            1, -1, Math.BitIncrement(1d), Math.BitDecrement(1d), Math.ScaleB(1, -1022)];
+        var pairs = from previous in boundaries from current in boundaries select (previous, current);
+        pairs = pairs.Concat(Enumerable.Range(0, 300).Select(i =>
+        {
+            double previous = Math.ScaleB((random.NextDouble() + 1) * (i % 2 == 0 ? 1 : -1), random.Next(-1074, 1024));
+            double current = i % 3 == 0 ? Math.BitIncrement(previous)
+                : Math.ScaleB((random.NextDouble() + 1) * (i % 5 == 0 ? -1 : 1), random.Next(-1074, 1024));
+            return (previous, current);
+        }));
+        foreach (var (previous, current) in pairs)
+        {
+            window.Reset();
+            window.Add(previous, current);
+            window.Add(current, previous);
+            var market = Return(current, previous);
+            var evaluation = Return(previous, current);
+            Assert.Equal(0, market.CompareTo(new ReferenceFraction(window.MarketReturn) / unit));
+            Assert.Equal(0, evaluation.CompareTo(new ReferenceFraction(window.EvaluationReturn) / unit));
+            Bits(market.ToDouble(), window.MarketReturnValue);
+            Bits(evaluation.ToDouble(), window.EvaluationReturnValue);
+        }
+    }
+
+    [Fact]
     public void WideTrailingZeroNormalizationPreservesBothSigns()
     {
         foreach (var shift in new[] { 0, 1, 31, 63, 64, 1074, 2148, 4096 })
