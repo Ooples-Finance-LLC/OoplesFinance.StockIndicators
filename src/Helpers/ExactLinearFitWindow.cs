@@ -176,7 +176,8 @@ internal sealed class ExactLinearFitWindow : IDisposable
         if (exponent != 0) integer |= 1L << 52;
         if (integer == 0) return (0, 0);
         var grid = exponent == 0 ? 0 : exponent - 1;
-        while ((integer & 1) == 0) { integer >>= 1; grid++; }
+        var zeros = ExactMeanAccumulator.TrailingBinaryZeros(integer);
+        integer >>= zeros; grid += zeros;
         return (bits < 0 ? -integer : integer, grid);
     }
 

@@ -30,8 +30,10 @@ internal struct ExactMeanAccumulator
         var magnitude = (long)(bits & 0xfffffffffffffUL);
         if (exponent != 0) magnitude += 1L << 52;
         if (magnitude == 0 || weight == 0) return;
+        var zeros = TrailingBinaryZeros(magnitude);
+        magnitude >>= zeros;
         var signed = (bits >> 63) == 0 ? magnitude : -magnitude;
-        var scale = Math.Max(0, exponent - 1);
+        var scale = Math.Max(0, exponent - 1) + zeros;
         var absoluteWeight = Math.Abs((long)weight);
         if (magnitude <= long.MaxValue / absoluteWeight)
             AddSmall(signed * weight, scale);
@@ -90,8 +92,10 @@ internal struct ExactMeanAccumulator
         if (a.Mantissa == 0 || b.Mantissa == 0 || weight == 0) return;
         // Removing powers of two is exact and lets ordinary prices times integral
         // volume stay in the allocation-free signed-integer representation.
-        while ((a.Mantissa & 1) == 0) { a.Mantissa >>= 1; a.Scale++; }
-        while ((b.Mantissa & 1) == 0) { b.Mantissa >>= 1; b.Scale++; }
+        var zeros = TrailingBinaryZeros(a.Mantissa);
+        a.Mantissa >>= zeros; a.Scale += zeros;
+        zeros = TrailingBinaryZeros(b.Mantissa);
+        b.Mantissa >>= zeros; b.Scale += zeros;
         var scale = a.Scale + b.Scale - 1074;
         if (Math.Abs(a.Mantissa) <= long.MaxValue / Math.Abs(b.Mantissa))
         {
@@ -103,6 +107,19 @@ internal struct ExactMeanAccumulator
             }
         }
         AddLarge(new BigInteger(a.Mantissa) * b.Mantissa * weight, scale);
+    }
+
+    // Callers have already excluded zero. Signed two's-complement integers have
+    // the same trailing-zero count as their magnitude, including negatives.
+    internal static int TrailingBinaryZeros(long value)
+    {
+#if NETFRAMEWORK
+        var count = 0;
+        while ((value & 1) == 0) { value >>= 1; count++; }
+        return count;
+#else
+        return BitOperations.TrailingZeroCount(unchecked((ulong)value));
+#endif
     }
 
     // Same binary64 quantization as Mean, with an exact (possibly wide) divisor.

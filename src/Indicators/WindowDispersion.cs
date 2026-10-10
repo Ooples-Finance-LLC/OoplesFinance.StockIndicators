@@ -202,7 +202,8 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
             if (exponent != 0) integer |= 1L << 52;
             if (integer == 0) return (0, 0);
             var power = exponent == 0 ? -1074 : exponent - 1075;
-            while ((integer & 1) == 0) { integer >>= 1; power++; }
+            var zeros = ExactMeanAccumulator.TrailingBinaryZeros(integer);
+            integer >>= zeros; power += zeros;
             return (bits < 0 ? -integer : integer, power);
         }
     }

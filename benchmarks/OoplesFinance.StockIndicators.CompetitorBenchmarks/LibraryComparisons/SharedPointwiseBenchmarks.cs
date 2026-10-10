@@ -38,7 +38,8 @@ public class SharedPointwiseBenchmarks
             var indicator = Create();
             using var result = Build(indicator, history);
             AsinFeasibilityBenchmarks.RequireSame(expected, result[indicator.Outputs[0]].ToArray());
-            if (result[indicator.Outputs[1]].ToArray().Any(v => v != 1))
+            // Presence is an exact binary flag, not an approximate computed value.
+            if (result[indicator.Outputs[1]].ToArray().Any(v => !v.Equals(1d)))
                 throw new InvalidOperationException("Lost pointwise presence.");
         }
     }
