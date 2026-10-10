@@ -26,20 +26,23 @@ public class PilotRepresentativeBenchmarks
         if (Case == "LateReject") _close[^1] = double.Epsilon;
         _bars = _close.Select(x => new Bar(default, x, x, x, x, 1)).ToArray();
         var indicators = Indicators();
-        using var run = Build(indicators);
-        foreach (var indicator in indicators)
+        foreach (var history in new[] { IndicatorHistoryMode.Full, IndicatorHistoryMode.LatestOnly })
         {
-            var expected = new double[Count];
-            if (indicator is Sma sma)
-                CpuFeasibilityPrototypes.CurrentSma(_close, expected, sma.Length);
-            else
+            using var run = Build(indicators, history);
+            foreach (var indicator in indicators)
             {
-                if (Case.StartsWith("Composed", StringComparison.Ordinal))
-                    CpuFeasibilityPrototypes.CurrentSma(_close, expected, 20);
-                else _close.CopyTo(expected, 0);
-                for (var i = 0; i < expected.Length; i++) expected[i] = Math.Asin(expected[i]);
+                var expected = new double[Count];
+                if (indicator is Sma sma)
+                    CpuFeasibilityPrototypes.CurrentSma(_close, expected, sma.Length);
+                else
+                {
+                    if (Case.StartsWith("Composed", StringComparison.Ordinal))
+                        CpuFeasibilityPrototypes.CurrentSma(_close, expected, 20);
+                    else _close.CopyTo(expected, 0);
+                    for (var i = 0; i < expected.Length; i++) expected[i] = Math.Asin(expected[i]);
+                }
+                AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
             }
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
         }
     }
 
@@ -55,19 +58,16 @@ public class PilotRepresentativeBenchmarks
         return Case == "Asin" ? [new PriceCircularTransform(PriceCircularOperation.ArcSine)] : [new Sma(20)];
     }
 
-    private IIndicatorRun Build(IIndicator[] indicators) => new StockIndicatorBuilder()
+    private IIndicatorRun Build(IIndicator[] indicators, IndicatorHistoryMode history) => new StockIndicatorBuilder()
         .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+        .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(history).BuildAsync().GetAwaiter().GetResult();
 
-    [Benchmark] public int CpuBuilder()
-    {
-        using var run = Build(Indicators());
-        return run.BarCount;
-    }
+    [Benchmark] public IIndicatorRun CpuBuilder() => Build(Indicators(), IndicatorHistoryMode.Full);
+    [Benchmark] public IIndicatorRun CpuLatestOnlyBuilder() => Build(Indicators(), IndicatorHistoryMode.LatestOnly);
 
     // Direct public competitor calls, including output allocation. These do not
     // provide the builder's history/validation/presence contract. Keep that visible.
-    [Benchmark(Baseline = true)] public double[] Competitor()
+    [Benchmark(Baseline = true)] public object Competitor()
     {
         var output = new double[Count];
         if (Case == "Asin") Functions.Asin<double>(_close, System.Range.All, output, out _);
@@ -78,8 +78,7 @@ public class PilotRepresentativeBenchmarks
             {
                 var second = new double[Count];
                 Functions.Sma<double>(_close, System.Range.All, second, out _, 50);
-                GC.KeepAlive(output);
-                return second;
+                return new[] { output, second };
             }
             if (Case.StartsWith("Composed", StringComparison.Ordinal))
             {

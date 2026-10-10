@@ -23,7 +23,7 @@
         "CompetitorStreaming"
       ],
       "Input": "prepared native input shapes; common 1/1024 price grid for decimal-native competitors",
-      "UnsupportedReusableReason": "No verified matching caller-buffer fresh-batch API; QuanTAlib JMA reset does not clear all histories.",
+      "UnsupportedReusableReason": "QuanTAlib.Atr has no verified matching caller-buffer fresh-batch API.",
       "UnsupportedStreamingReason": null
     },
     {
@@ -33,7 +33,7 @@
         "CompetitorOwnedBatch"
       ],
       "Input": "prepared native input shapes; common 1/1024 price grid for decimal-native competitors",
-      "UnsupportedReusableReason": "No verified matching caller-buffer fresh-batch API; QuanTAlib JMA reset does not clear all histories.",
+      "UnsupportedReusableReason": "Skender.GetRollingPivots has no verified matching caller-buffer fresh-batch API.",
       "UnsupportedStreamingReason": "No matching incremental pilot API; batch calls are not substituted."
     },
     {
@@ -43,7 +43,7 @@
         "CompetitorOwnedBatch"
       ],
       "Input": "prepared native input shapes; common 1/1024 price grid for decimal-native competitors",
-      "UnsupportedReusableReason": "No verified matching caller-buffer fresh-batch API; QuanTAlib JMA reset does not clear all histories.",
+      "UnsupportedReusableReason": "Skender.GetFractal has no verified matching caller-buffer fresh-batch API.",
       "UnsupportedStreamingReason": "No matching incremental pilot API; batch calls are not substituted."
     },
     {
@@ -77,7 +77,7 @@
         "CompetitorOwnedBatch"
       ],
       "Input": "prepared native input shapes; common 1/1024 price grid for decimal-native competitors",
-      "UnsupportedReusableReason": "No verified matching caller-buffer fresh-batch API; QuanTAlib JMA reset does not clear all histories.",
+      "UnsupportedReusableReason": "Trady.Candlestick.BullishShortDay has no verified matching caller-buffer fresh-batch API.",
       "UnsupportedStreamingReason": "No matching incremental pilot API; batch calls are not substituted."
     },
     {
@@ -87,7 +87,7 @@
         "CompetitorOwnedBatch"
       ],
       "Input": "prepared native input shapes; common 1/1024 price grid for decimal-native competitors",
-      "UnsupportedReusableReason": "No verified matching caller-buffer fresh-batch API; QuanTAlib JMA reset does not clear all histories.",
+      "UnsupportedReusableReason": "Trady.Indicator.SimpleMovingAverage has no verified matching caller-buffer fresh-batch API.",
       "UnsupportedStreamingReason": "No matching incremental pilot API; batch calls are not substituted."
     }
   ],

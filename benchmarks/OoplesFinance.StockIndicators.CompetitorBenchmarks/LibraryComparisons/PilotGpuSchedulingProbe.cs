@@ -19,7 +19,7 @@ internal static class PilotGpuSchedulingProbe
                 .ConfigureIndicators(sma).ConfigureExecution(IndicatorExecutionBackend.Gpu);
             using var run = await builder.BuildAsync();
             if (builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu ||
-                run[sma][0] != 0 || run[sma][sizes[index] - 1] != .5)
+                !run[sma][0].Equals(0d) || !run[sma][sizes[index] - 1].Equals(.5))
                 throw new InvalidOperationException("GPU scheduling probe failed.");
         }
         for (int i = 0; i < sizes.Length; i++) await Execute(i);

@@ -22,7 +22,9 @@ internal static class PilotCoreReplay
                 Enumerable.Repeat(.25, 2050).Append(double.Epsilon).ToArray(),
                 new[] { -0d, 0d, double.MaxValue, double.MaxValue, -double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon, 1d }
             };
+#pragma warning disable S2245 // Replay the same numerical fixture against both binaries; no secrets are generated.
             var random = new Random(541);
+#pragma warning restore S2245
             cases.Add(Enumerable.Range(0, 2051).Select(_ => Math.ScaleB(random.NextDouble() * 2 - 1, random.Next(-500, 501))).ToArray());
             long checkedValues = 0;
             foreach (var input in cases)

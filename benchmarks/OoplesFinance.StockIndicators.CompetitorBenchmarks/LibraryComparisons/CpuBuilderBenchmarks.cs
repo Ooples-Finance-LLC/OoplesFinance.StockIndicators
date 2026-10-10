@@ -25,6 +25,7 @@ public class CpuBuilderBenchmarks
         _work = new CpuNativeWorkload(PairId, Bars, commonGrid: true);
         // Verify the actual complete builder output before measuring it.
         CpuBuilderWorkload.Verify(_work);
+        CpuBuilderWorkload.Verify(_work, IndicatorHistoryMode.LatestOnly);
         if (PairId is "Skender.GetSma" or "Skender.GetSma.Tuple" or "TaLib.Functions.Sma" or "QuanTAlib.Sma")
         {
             var pair = ComparisonPairs.Get(CpuNativeWorkload.CanonicalPair(PairId));
@@ -32,13 +33,10 @@ public class CpuBuilderBenchmarks
                 PairId + " complete native output", pair.ErrorBudget);
         }
     }
-    [Benchmark] public async Task<int> OoplesBuilderBatch()
-    {
-        using var run = await CpuBuilderWorkload.Build(_work);
-        // BuildAsync materializes every output. Do not add a second copy solely
-        // for the benchmark: the run already owns the complete result arrays.
-        return run.BarCount;
-    }
+    // Both builders and competitors return their owned outputs to the harness.
+    [Benchmark] public Task<IIndicatorRun> OoplesBuilderBatch() => CpuBuilderWorkload.Build(_work);
+    [Benchmark] public Task<IIndicatorRun> OoplesLatestOnlyBuilderBatch() =>
+        CpuBuilderWorkload.Build(_work, CpuBuilderWorkload.Create(_work.PairId), IndicatorHistoryMode.LatestOnly);
     [Benchmark] public object CompetitorNativeBatch() => _work.NativeOwned();
 }
 
@@ -83,14 +81,15 @@ internal static class CpuBuilderWorkload
         _ => throw new ArgumentOutOfRangeException(nameof(pair))
     };
     internal static Task<IIndicatorRun> Build(CpuNativeWorkload work) => Build(work, Create(work.PairId));
-    internal static Task<IIndicatorRun> Build(CpuNativeWorkload work, IIndicator indicator) =>
+    internal static Task<IIndicatorRun> Build(CpuNativeWorkload work, IIndicator indicator,
+        IndicatorHistoryMode history = IndicatorHistoryMode.Full) =>
         new StockIndicatorBuilder().ConfigureSource(Bars.From(work.Data.IndicatorBars))
-            .ConfigureIndicators(indicator).BuildAsync();
+            .ConfigureIndicators(indicator).ConfigureHistory(history).BuildAsync();
 
-    internal static void Verify(CpuNativeWorkload work)
+    internal static void Verify(CpuNativeWorkload work, IndicatorHistoryMode history = IndicatorHistoryMode.Full)
     {
         var indicator = Create(work.PairId);
-        using var run = Build(work, indicator).GetAwaiter().GetResult();
+        using var run = Build(work, indicator, history).GetAwaiter().GetResult();
         var pair = ComparisonPairs.Get(CpuNativeWorkload.CanonicalPair(work.PairId));
         var expected = pair.Ooples(work.Data, 20);
         var names = pair.OutputNames ?? ["Value"];

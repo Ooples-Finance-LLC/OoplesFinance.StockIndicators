@@ -12,7 +12,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: cpu-kernels-${{ github.ref }}
+  group: cpu-kernels-${{ github.ref }}-${{ github.event.label.name || 'dispatch' }}
   cancel-in-progress: true
 jobs:
   build:

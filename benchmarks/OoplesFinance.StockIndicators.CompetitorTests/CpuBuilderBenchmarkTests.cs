@@ -17,6 +17,12 @@ public sealed class CpuBuilderBenchmarkTests
         IndicatorValidation.ValidateAndThrowAsync(testCase, new() { RequireFormulaReference = true });
 
     public static IEnumerable<object[]> Cases => CpuBuilderWorkload.PairIds.Select(id => new object[] { id });
+    [Theory]
+    [InlineData("SmaGrid")] [InlineData("SmaDecimal")] [InlineData("ComposedGrid")]
+    [InlineData("ComposedDecimal")] [InlineData("LateReject")] [InlineData("MultiPeriod")] [InlineData("Asin")]
+    public void RepresentativeQualificationChecksBothHistoryModes(string scenario) =>
+        new PilotRepresentativeBenchmarks { Count = 129, Case = scenario }.Setup();
+
     [Fact]
     public void FamilyPartitionIncludesEveryMatchingSmaCompetitorOnOneRunner()
     {
@@ -33,6 +39,7 @@ public sealed class CpuBuilderBenchmarkTests
         var work = new CpuNativeWorkload(id, 160, commonGrid: true);
         CpuBuilderWorkload.Verify(work);
         CpuBuilderWorkload.Verify(work); // No state retained between fresh builder runs.
+        CpuBuilderWorkload.Verify(work, IndicatorHistoryMode.LatestOnly);
         var pair = ComparisonPairs.Get(CpuNativeWorkload.CanonicalPair(id));
         ComparisonVerifier.Check(pair, work.Data, 20, verifyIsolation: false);
         var expected = pair.Competitor(work.Data, 20);

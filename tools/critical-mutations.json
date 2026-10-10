@@ -35,8 +35,8 @@
   {
     "id": "wrong-divisor",
     "module": "sma",
-    "file": "src/Core/MovingAverageCore.cs",
-    "scope": "internal static void SimpleMovingAverage(",
+    "file": "src/Core/SmaCpuKernel.cs",
+    "scope": "internal static void ProcessGuarded<",
     "before": "sum / length : 0",
     "after": "sum / (length + 1d) : 0",
     "filter": "FullyQualifiedName~ArithmeticMatchesExactBinaryInputReference"
@@ -44,19 +44,19 @@
   {
     "id": "lost-evicted-window",
     "module": "sma",
-    "file": "src/Core/MovingAverageCore.cs",
-    "scope": "internal static void SimpleMovingAverage(",
-    "before": "for (var j = i - length + 1; j <= i; j++) exact.Add(input[j]);",
-    "after": "for (var j = i; j <= i; j++) exact.Add(input[j]);",
+    "file": "src/Core/SmaCpuKernel.cs",
+    "scope": "internal static void ProcessGuarded<",
+    "before": "exact.Add(reader.Read(in input[j]));",
+    "after": "if (j == i) exact.Add(reader.Read(in input[j]));",
     "filter": "FullyQualifiedName~ArithmeticMatchesExactBinaryInputReference"
   },
   {
     "id": "wrong-window-lag",
     "module": "sma",
-    "file": "src/Core/MovingAverageCore.cs",
-    "scope": "internal static void SimpleMovingAverage(",
-    "before": "sum -= input[i - length];",
-    "after": "sum -= input[i - length + 1];",
+    "file": "src/Core/SmaCpuKernel.cs",
+    "scope": "internal static void ProcessGuarded<",
+    "before": "var expired = reader.Read(in input[i - length]);",
+    "after": "var expired = reader.Read(in input[i - length + 1]);",
     "filter": "FullyQualifiedName~ArithmeticMatchesExactBinaryInputReference"
   },
   {
@@ -243,9 +243,10 @@
   {
     "id": "sma-overflow-fallback-bypass",
     "module": "sma",
-    "file": "src/Core/MovingAverageCore.cs",
-    "before": "output[i] = exact.Mean(length);",
-    "after": "output[i] = sum / length;",
+    "file": "src/Core/SmaCpuKernel.cs",
+    "scope": "internal static void ProcessGuarded<",
+    "before": "mean = exact.Mean(length);",
+    "after": "mean = sum / length;",
     "filter": "FullyQualifiedName~SmaExtremeRangeTests"
   },
   {

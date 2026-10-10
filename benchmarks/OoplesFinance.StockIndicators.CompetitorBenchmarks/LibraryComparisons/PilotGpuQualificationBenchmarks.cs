@@ -38,7 +38,7 @@ public class PilotGpuQualificationBenchmarks
         {
             IndicatorInputDomain.Finite.Validate(in _owned[i]);
             var value = _owned[i].Close;
-            if (Math.Abs(value) > 1 || value * 64 != Math.Truncate(value * 64))
+            if (Math.Abs(value) > 1 || !double.IsInteger(value * 64))
                 throw new InvalidOperationException("Candidate input violates the exact tile proof.");
             _input[i] = value;
         }

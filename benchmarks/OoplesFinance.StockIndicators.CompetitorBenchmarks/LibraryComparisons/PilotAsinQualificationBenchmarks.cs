@@ -14,7 +14,9 @@ public class PilotAsinQualificationBenchmarks
     [GlobalSetup]
     public void Setup()
     {
+#pragma warning disable S2245 // Seeded numerical fixture, not security-sensitive randomness.
         var random = new Random(971);
+#pragma warning restore S2245
         _input = Enumerable.Range(0, Count).Select(_ => random.NextDouble() * 2 - 1).ToArray();
         new[] { -0d, 0d, -1d, 1d, double.Epsilon, -double.Epsilon, Math.BitDecrement(1d), Math.BitIncrement(-1d) }.CopyTo(_input, 0);
         AsinFeasibilityBenchmarks.RequireSame(Scalar(), TensorsVector());

@@ -44,15 +44,16 @@ public class PilotCostBoundaryBenchmarks
             var payload = Payload(competitor);
             AsinFeasibilityBenchmarks.RequireSame(competitor ? theirs : ours, payload.Values);
             if (!payload.Bars.SequenceEqual(_bars)) throw new InvalidOperationException("History mismatch.");
-            if (Case == "Asin" && payload.Presence!.Any(x => x != 1)) throw new InvalidOperationException("Presence mismatch.");
+            // Presence is an exact discrete flag; an approximate comparison would hide a broken contract.
+            if (Case == "Asin" && payload.Presence!.Any(x => !x.Equals(1d))) throw new InvalidOperationException("Presence mismatch.");
         }
         var latestPayload = TalibLatestOnlyPayload();
         AsinFeasibilityBenchmarks.RequireSame(theirs, latestPayload.Values);
-        if (!latestPayload.Latest.Equals(_bars[^1]) || (Case == "Asin" && latestPayload.Presence!.Any(x => x != 1)))
+        if (!latestPayload.Latest.Equals(_bars[^1]) || (Case == "Asin" && latestPayload.Presence!.Any(x => !x.Equals(1d))))
             throw new InvalidOperationException("Latest payload mismatch.");
         var inPlace = TalibInPlaceLatestOnlyPayload();
         AsinFeasibilityBenchmarks.RequireSame(theirs, inPlace.Values);
-        if (!inPlace.Latest.Equals(_bars[^1]) || (Case == "Asin" && inPlace.Presence!.Any(x => x != 1)))
+        if (!inPlace.Latest.Equals(_bars[^1]) || (Case == "Asin" && inPlace.Presence!.Any(x => !x.Equals(1d))))
             throw new InvalidOperationException("In-place payload mismatch.");
         Console.WriteLine($"LAYOUT barBytes={System.Runtime.CompilerServices.Unsafe.SizeOf<Bar>()} count={Count}");
     }

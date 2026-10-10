@@ -21,7 +21,7 @@ def supported_methods(pair):
 
 
 def verify(directory, pair, methods=None, suite="kernel"):
-    methods = (["OoplesBuilderBatch", "CompetitorNativeBatch"] if suite == "builder"
+    methods = (["OoplesBuilderBatch", "OoplesLatestOnlyBuilderBatch", "CompetitorNativeBatch"] if suite == "builder"
                else supported_methods(pair)) if methods is None else methods
     expected = {(method, bars) for method in methods for bars in (1000, 10000)}
     seen = set()
