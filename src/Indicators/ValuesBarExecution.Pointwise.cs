@@ -6,11 +6,12 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     internal static bool IsPointwise(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
-        && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform;
+        && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform or CandleArithmetic;
 
     private static Bar FillPointwise(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, Bar[]? owned) => indicator switch
     {
+        CandleArithmetic arithmetic => FillArithmetic(source, output, arithmetic, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcSine } => FillAsin(source, output, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.Sine } => FillPointwise<Sine, AllReal>(source, output, indicator, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.Cosine } => FillPointwise<Cosine, AllReal>(source, output, indicator, cancellation, owned),
@@ -63,15 +64,39 @@ internal static partial class ValuesBarExecution
         internal bool HasUndefined;
     }
 
+    private interface IPointwiseKernel
+    {
+        double Invoke(in Bar bar, out bool defined);
+        bool AlwaysDefined { get; }
+        bool CanOverflow { get; }
+    }
+
+    private readonly struct UnaryKernel<TMath, TDomain> : IPointwiseKernel
+        where TMath : struct, IPointwiseMath where TDomain : struct, IPointwiseDomain
+    {
+        public double Invoke(in Bar bar, out bool defined)
+        {
+            defined = default(TDomain).Contains(bar.Close);
+            return defined ? default(TMath).Invoke(bar.Close) : 0;
+        }
+        public bool AlwaysDefined => default(TDomain).AlwaysDefined;
+        public bool CanOverflow => default(TMath).CanOverflow;
+    }
+
     private static Bar FillPointwise<TMath, TDomain>(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, Bar[]? owned, int parallelMinimum = 8192)
         where TMath : struct, IPointwiseMath where TDomain : struct, IPointwiseDomain
+        => FillPointwiseKernel(source, output, indicator, new UnaryKernel<TMath, TDomain>(), cancellation, owned, parallelMinimum);
+
+    private static Bar FillPointwiseKernel<TKernel>(Bar[] source, double[][] output, IIndicator indicator,
+        TKernel kernel, CancellationToken cancellation, Bar[]? owned, int parallelMinimum = 8192)
+        where TKernel : struct, IPointwiseKernel
     {
         cancellation.ThrowIfCancellationRequested();
         ulong[]? missing = null;
         try
         {
-            if (!default(TDomain).AlwaysDefined && source.Length > 0)
+            if (!kernel.AlwaysDefined && source.Length > 0)
             {
                 int words = (int)(((long)source.Length + 63) / 64);
                 missing = System.Buffers.ArrayPool<ulong>.Shared.Rent(words);
@@ -79,8 +104,8 @@ internal static partial class ValuesBarExecution
             }
             if (!CanParallelize(source.Length, parallelMinimum) || !Monitor.TryEnter(ParallelBarGate))
             {
-                var region = ComputePointwiseRegion<TMath, TDomain>(source, output[0], missing,
-                    owned is null ? Span<Bar>.Empty : owned.AsSpan(), 0, cancellation);
+                var region = ComputePointwiseRegion(source, output[0], missing,
+                    owned is null ? Span<Bar>.Empty : owned.AsSpan(), 0, kernel, cancellation);
                 cancellation.ThrowIfCancellationRequested();
                 ValidatePointwiseInput(in region);
                 ValidatePointwiseOutput(indicator, in region);
@@ -97,9 +122,9 @@ internal static partial class ValuesBarExecution
                     // boundary word is needed, even for counts not divisible by 64.
                     int start = (int)((long)source.Length * chunk / chunks / 64) * 64;
                     int end = chunk == chunks - 1 ? source.Length : (int)((long)source.Length * (chunk + 1) / chunks / 64) * 64;
-                    regions[chunk] = ComputePointwiseRegion<TMath, TDomain>(source.AsSpan(start, end - start),
+                    regions[chunk] = ComputePointwiseRegion(source.AsSpan(start, end - start),
                         output[0].AsSpan(start, end - start), missing,
-                        owned is null ? Span<Bar>.Empty : owned.AsSpan(start, end - start), start, cancellation);
+                        owned is null ? Span<Bar>.Empty : owned.AsSpan(start, end - start), start, kernel, cancellation);
                 });
                 cancellation.ThrowIfCancellationRequested();
                 // Raw input validation precedes every arithmetic failure, even when
@@ -114,30 +139,27 @@ internal static partial class ValuesBarExecution
         finally { if (missing is not null) System.Buffers.ArrayPool<ulong>.Shared.Return(missing); }
     }
 
-    private static PointwiseRegion ComputePointwiseRegion<TMath, TDomain>(ReadOnlySpan<Bar> source,
-        Span<double> values, ulong[]? missing, Span<Bar> owned, int offset, CancellationToken cancellation)
-        where TMath : struct, IPointwiseMath where TDomain : struct, IPointwiseDomain
+    private static PointwiseRegion ComputePointwiseRegion<TKernel>(ReadOnlySpan<Bar> source,
+        Span<double> values, ulong[]? missing, Span<Bar> owned, int offset, TKernel kernel, CancellationToken cancellation)
+        where TKernel : struct, IPointwiseKernel
     {
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };
-        var operation = default(TMath);
-        var domain = default(TDomain);
         Bar latest = default;
         for (int i = 0; i < source.Length; i++)
         {
             if (cancellation.IsCancellationRequested) break;
             latest = source[i];
             if (!AllFieldsFinite(in latest)) { region.InvalidInput = true; break; }
-            bool defined = domain.Contains(latest.Close);
-            double value = defined ? operation.Invoke(latest.Close) : 0;
+            double value = kernel.Invoke(in latest, out bool defined);
             values[i] = value;
-            if (!domain.AlwaysDefined && !defined)
+            if (!kernel.AlwaysDefined && !defined)
             {
                 int index = offset + i;
                 missing![index >> 6] |= 1UL << (index & 63);
                 region.HasUndefined = true;
             }
             if (!owned.IsEmpty) owned[i] = latest;
-            if (operation.CanOverflow && !double.IsFinite(value) && region.InvalidOutputIndex < 0)
+            if (kernel.CanOverflow && !double.IsFinite(value) && region.InvalidOutputIndex < 0)
             {
                 region.InvalidOutputIndex = offset + i;
                 region.InvalidOutputValue = value;

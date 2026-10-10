@@ -36,7 +36,8 @@ internal static partial class ValuesBarExecution
             if (history is not null && !SupportsOwned(indicators))
                 throw new InvalidOperationException("Unqualified owned values execution plan.");
             var owned = history is null ? null : GC.AllocateUninitializedArray<Bar>(source.Length);
-            foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer)) nodes.Add(new Node(indicator, source.Length));
+            foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
+                nodes.Add(new Node(indicator, source.Length, indicators.Count == 1));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
             bool singleSma = nodes.Count == 1 && nodes[0].Indicator is Sma;
@@ -76,7 +77,7 @@ internal static partial class ValuesBarExecution
             {
                 cancellation.ThrowIfCancellationRequested();
                 node.Failure?.Throw();
-                bool finiteByConstruction = IsPointwise(node.Indicator);
+                bool finiteByConstruction = nodes.Count == 1 && IsPointwise(node.Indicator);
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
                         : ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
@@ -496,18 +497,19 @@ internal static partial class ValuesBarExecution
         private readonly object? _state;
         private readonly double[] _scratch;
         internal bool HasScalarState => _state is IIndicatorState;
-        internal Node(IIndicator indicator, int count)
+        internal Node(IIndicator indicator, int count, bool singleRoot)
         {
             Indicator = indicator;
+            bool pointwise = singleRoot && IsPointwise(indicator);
             Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
-                slot == 1 && IsPointwise(indicator) && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine }
+                slot == 1 && pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine }
                     ? Array.Empty<double>()
-                    : indicator is Sma || IsPointwise(indicator) ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
+                    : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
             _scratch = new double[indicator.Outputs.Count];
             _state = indicator switch
             {
                 Sma => null,
-                _ when IsPointwise(indicator) => null,
+                _ when pointwise => null,
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),
