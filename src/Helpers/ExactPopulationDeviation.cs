@@ -62,6 +62,30 @@ internal struct ExactPopulationDeviation
         return ExactMeanAccumulator.Encode((ulong)significand, shift, false);
     }
 
+    // Correctly round sqrt(numerator / denominator * 2^binaryExponent).
+    // Shift only to the final rounding grid, not to the subnormal grid first.
+    internal static double ScaledRootRatio(BigInteger numerator, BigInteger denominator, int binaryExponent)
+    {
+        if (numerator.Sign < 0 || denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(numerator));
+        if (numerator.IsZero) return 0;
+        var exponent = BitLength(numerator) - BitLength(denominator);
+        if (exponent >= 0 ? numerator < (denominator << exponent) : (numerator << -exponent) < denominator) exponent--;
+        exponent += binaryExponent;
+        var rootExponent = exponent >= 0 ? exponent / 2 : (exponent - 1) / 2;
+        var grid = Math.Max(-1074, rootExponent - 52);
+        // Normalize before taking the integer root: at most 106 quotient bits,
+        // even when the original moments occupy thousands of binary places.
+        var shift = binaryExponent - 2 * grid;
+        if (shift >= 0) numerator <<= shift;
+        else denominator <<= -shift;
+        var quotient = numerator / denominator;
+        var significand = quotient.IsZero ? BigInteger.Zero : IntegerRoot(quotient);
+        var midpoint = 2 * significand + 1;
+        var comparison = (4 * numerator).CompareTo(denominator * midpoint * midpoint);
+        if (comparison > 0 || comparison == 0 && !significand.IsEven) significand++;
+        return ExactMeanAccumulator.Encode((ulong)significand, grid + 1074, false);
+    }
+
     internal static BigInteger IntegerRoot(BigInteger value)
     {
         var current = BigInteger.One << ((BitLength(value) + 1) / 2);

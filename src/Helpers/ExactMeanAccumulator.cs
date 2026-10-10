@@ -136,9 +136,14 @@ internal struct ExactMeanAccumulator
     }
 
     internal static double UnitRatio(BigInteger numerator, BigInteger denominator)
+        => ScaledRatio(numerator, denominator, -1074);
+
+    // Keep powers of two separate so ordinary prices do not require thousand-bit
+    // numerators merely to represent their position on the binary64 grid.
+    internal static double ScaledRatio(BigInteger numerator, BigInteger denominator, int binaryExponent)
     {
         if (denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
-        var top = new ExactMeanAccumulator(); top.AddLarge(numerator, 0);
+        var top = new ExactMeanAccumulator(); top.AddLarge(numerator, binaryExponent + 1074);
         var bottom = new ExactMeanAccumulator(); bottom.AddLarge(denominator, 1074);
         return top.Ratio(bottom);
     }
