@@ -1,0 +1,33 @@
+{
+  "baseCommit": "24694f83abe5053afc29fc90781d50fce7304d92",
+  "note": "Local complete-builder comparisons. Unrelated tests and benchmarks were active on the host during the initial run; the longer repeat also has substantial timing variation. Retain both campaigns. At 10000 bars the repeat array/projected confidence intervals overlap. Neither indicator beats native TA-Lib. No claim about a limit on future shared-engine optimization.",
+  "reports": [
+    {
+      "campaign": "initial",
+      "sha256": "fd867e5093c55c569d518e962ed51c3111e70b597ecdde9079f21d72e652b552",
+      "measurements": 12
+    },
+    {
+      "campaign": "repeat",
+      "sha256": "eab5e9b96948f6db97c6199615bc3c68e91e6fa778b5b41b9d2b192a1d209546",
+      "measurements": 12
+    }
+  ],
+  "sourceSha256": {
+    "src/Indicators/BarSource.cs": "39914f879efe302e51eba3704b235b6c267ea5fd88da28e8a3818a1cbcfe168f",
+    "src/Indicators/OwnedBarHistory.cs": "e6694ae2a75fc39a6b4c1195a694820ed4e75a615000ef59b9abfbb50c57e544",
+    "tests/ModelsTests/OwnedHistoryBatchTests.cs": "a5988d29c84661ad2f61e4652c647e7f4f63c29a530333f7dea7411c9dd0866c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ArrayBuilderBenchmarks.cs": "a7309aab76da2680b18668bf436d28f6455029dedd9480aa6ad250ffe8eae478"
+  },
+  "librarySha256": "822a1c13ecf0bcdc72aa36dfa8209613fda2b7cafa3a92f5d346e8822b5cb081",
+  "verification": {
+    "focusedUnitTests": 91,
+    "competitorTests": 98,
+    "releaseBuilds": [
+      "net10.0",
+      "net8.0",
+      "net461"
+    ],
+    "trxDirectory": "C:/Users/cheat/temp/si-array-ingestion-results"
+  }
+}

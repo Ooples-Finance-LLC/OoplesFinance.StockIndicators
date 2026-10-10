@@ -1,0 +1,58 @@
+{
+  "baseCommit": "24694f83abe5053afc29fc90781d50fce7304d92",
+  "scope": "Plain typed-only array-backed Asin/SMA on modern runtimes. Existing execution for legacy configuration and unsupported graphs. No global rollout.",
+  "acceptance": "FAIL: both reviewed public-builder comparisons remain slower than TA-Lib at both sizes. Report completeness/validity verification passed.",
+  "reports": [
+    {
+      "name": "scalar-fused",
+      "measurementCount": 12,
+      "rawReportSha256": "383d645a09aa687d89ca932badd4a09e8bfea77d8387165acec48d12db4f79a5"
+    },
+    {
+      "name": "block-fused-diagnostic",
+      "measurementCount": 12,
+      "rawReportSha256": "d6740ed168b5f5f0fecedc14bab62f13740dd7673fcd38c5b03377b104487607"
+    },
+    {
+      "name": "reviewed-asin",
+      "measurementCount": 4,
+      "rawReportSha256": "ff0e351a350b62bae0291079cbb24b0b85d9a95a581fe67d72007574cf64d2c1"
+    },
+    {
+      "name": "reviewed-sma",
+      "measurementCount": 4,
+      "rawReportSha256": "1e674cd3020e34d2434c1bbbdbbc1c6540fd5c0ac1959042bb49db6532d86202"
+    }
+  ],
+  "provenance": {
+    "scalar-fused": "First implementation, before block-local state, aggregate certification and direct typed publication. Local source archive C:/Users/cheat/temp/si-fused-stage1-source.zip.",
+    "block-fused-diagnostic": "Same fused kernels as final; before excluding legacy-configured runs to preserve callback mutation semantics. Library SHA256 C8690E97A482A0846910C94FA184E90E7EFFA46D82851A4C182430BC5B3E361C.",
+    "reviewed": "Final production code; standard CpuBuilderBenchmarks suite, both pairs passed scripts/verify-cpu-kernel-performance.py --suite builder. 15 measured iterations, 8 warmups, 250ms iteration target. Local measurements; do not compare campaigns as controlled before/after results."
+  },
+  "sourceSha256": {
+    "src/Indicators/FusedBarExecution.cs": "422e1d1a24fdbd666676456b109210c7660c815483bfb5fed88fa109c8c32e25",
+    "src/Indicators/BarSource.cs": "720ca5c362dc1815cc23ca1301df9af7e04cd41315bc9a36e0e9b944d644b53d",
+    "src/Indicators/OwnedBarHistory.cs": "e930a58d4cb583272edbbb1cda394a693e18628b704bcc283c9c1551a7551f7a",
+    "src/Indicators/IndicatorRun.cs": "e8505d6f534170b070a73dd6bfba17a0be1e72a662e7d80caf6924246a61b2b2",
+    "src/Builder/StockIndicatorBuilder.cs": "a868269faef39b54bb1b7c783d6f15d63805663fac5bc8e5e6b95a9a26774146",
+    "src/Builder/IndicatorRuntime.cs": "9dd848e33cb26c2cea9c5adf35485fad81bea7c458753d787df3112ae79ea3e2",
+    "src/Builder/IndicatorDataSource.cs": "c08139840cac62c555d28550c5a7c899ac6e48978baa0cb2a057acf599d8e252",
+    "tests/ModelsTests/FusedBarExecutionTests.cs": "457ce040249215c6cb849070cbedb3c26d0e938862b364f85b64c1fb338a7e35",
+    "tests/ModelsTests/OwnedHistoryBatchTests.cs": "a5988d29c84661ad2f61e4652c647e7f4f63c29a530333f7dea7411c9dd0866c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ArrayBuilderBenchmarks.cs": "a7309aab76da2680b18668bf436d28f6455029dedd9480aa6ad250ffe8eae478"
+  },
+  "librarySha256": "30fa80e8d486fbcf094ae800523a82acf3d0c1f245f047a8bfcd3e7586c7b784",
+  "verification": {
+    "unitTests": 134,
+    "competitorTests": 119,
+    "releaseBuilds": [
+      "net10.0",
+      "net8.0",
+      "net461"
+    ],
+    "trxDirectory": "C:/Users/cheat/temp/si-fused-pilots-results",
+    "unitTrx": "fused-pilots-reviewed.trx",
+    "competitorTrx": "fused-pilots-reviewed-competitors.trx",
+    "note": "Existing net461 package-support warnings remain."
+  }
+}

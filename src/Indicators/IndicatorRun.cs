@@ -17,7 +17,8 @@ namespace OoplesFinance.StockIndicators.Indicators;
 /// </summary>
 /// <remarks>
 /// <para>
-/// One type whether the source was finite or live, because batch is the case where the bars run out. There is
+/// Finite snapshot replay requires Full history configuration; LatestOnly retains completed series and
+/// the latest snapshot. Live sources enumerate new snapshots in either mode. There is
 /// no string indexer, deliberately: a series is addressed by the indicator object the caller configured, or by
 /// one of its typed output members.
 /// </para>
@@ -49,19 +50,22 @@ public interface IIndicatorRun : IAsyncEnumerable<IBarSnapshot>, IDisposable
 /// A run over a finite source, computed in full before it is handed back.
 /// </summary>
 /// <remarks>
-/// Backed by the existing evaluator rather than a second engine. Every value here comes from the same arms
-/// and the same batch calculations the v1 surface uses, which is the only way the two can be held to agreeing
-/// bar for bar - and a new API that returns different numbers is not a new API, it is a regression with
-/// better syntax.
+/// Owns completed series and retained history. Eligible fused pilot plans produce these directly;
+/// other runs retain the evaluator runtime. Both routes preserve the existing numerical contracts
+/// and keep published snapshots alive after disposal without exposing pooled buffers.
 /// </remarks>
 internal sealed class IndicatorRun : IIndicatorRun
 {
     private readonly Dictionary<IIndicatorOutput, double[]> _series;
-    private readonly IndicatorRuntime _runtime;
+    private readonly IndicatorRuntime? _runtime;
+    internal bool HasLegacyRuntime => _runtime is not null;
+    // Series already own their arrays. Transferring their dictionary retains neither
+    // this run nor its runtime/history, and does not copy the output payload again.
+    internal IIndicatorRun AsLatestOnly() => new LatestOnlyIndicatorRun(_series, BarCount, BarCount == 0 ? null : Latest);
     private readonly IReadOnlyList<Bar> _bars;
     private readonly int _warmupBarsSeen, _warmupRequired;
 
-    internal IndicatorRun(IndicatorRuntime runtime, Dictionary<IIndicatorOutput, double[]> series,
+    internal IndicatorRun(IndicatorRuntime? runtime, Dictionary<IIndicatorOutput, double[]> series,
         IReadOnlyList<Bar> bars, int warmupBarsSeen, int warmupRequired)
     {
         _runtime = runtime;
@@ -135,7 +139,7 @@ internal sealed class IndicatorRun : IIndicatorRun
     }
 
     /// <inheritdoc/>
-    public void Dispose() => _runtime.Dispose();
+    public void Dispose() => _runtime?.Dispose();
 
     private bool IsWarmedUp(int index) => _warmupBarsSeen + index + 1 >= _warmupRequired
         && _series.Values.All(values => !double.IsNaN(values[index]));

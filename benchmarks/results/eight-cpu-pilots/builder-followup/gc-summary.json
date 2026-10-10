@@ -1,0 +1,26 @@
+[
+  {
+    "case": "TaLib.Functions.Asin-Builder",
+    "pid": 10892,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 1473,
+    "pauseMilliseconds": 479.11,
+    "generation2Collections": 1,
+    "reasons": {
+      "AllocSmall": 1472,
+      "AllocLarge": 1
+    }
+  },
+  {
+    "case": "TaLib.Functions.Asin-Prepared",
+    "pid": 14036,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 881,
+    "pauseMilliseconds": 221.043,
+    "generation2Collections": 3,
+    "reasons": {
+      "AllocSmall": 879,
+      "AllocLarge": 2
+    }
+  }
+]

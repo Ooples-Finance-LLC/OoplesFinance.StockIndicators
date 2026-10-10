@@ -29,7 +29,16 @@ public sealed class RickshawManCandle : IndicatorBase, IIndicatorValidationContr
     public override int WarmupBars => Math.Max(DojiPeriod, NearPeriod);
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(DojiPeriod, NearPeriod);
+    protected internal override object CreateState()
+    {
+#if !NETFRAMEWORK
+        // The grid state reserves its windows. Bound only fast-path eligibility,
+        // not the public period contract: huge periods retain lazy general storage.
+        if (DojiPeriod <= 4096 && NearPeriod <= 4096)
+            return new RickshawGridState(DojiPeriod, NearPeriod);
+#endif
+        return new State(DojiPeriod, NearPeriod);
+    }
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -70,12 +79,12 @@ public sealed class RickshawManCandle : IndicatorBase, IIndicatorValidationContr
 
     private static ReferenceFraction R(double v) => ReferenceFraction.FromDouble(v);
 
-    private sealed class State(int dojiPeriod, int nearPeriod) : IIndicatorState
+    internal sealed class State(int dojiPeriod, int nearPeriod, bool reserve = false) : IPreviewIndicatorState
     {
-        private readonly Queue<Bar> _dojiHistory = new(),
-            _nearHistory = new();
-        private readonly BigInteger _dojiDen = new BigInteger(dojiPeriod) * 10,
-            _nearDen = new BigInteger(nearPeriod) * 5;
+        private readonly Queue<ExactMeanAccumulator> _dojiHistory = new(reserve ? dojiPeriod : 0),
+            _nearHistory = new(reserve ? nearPeriod : 0);
+        private readonly long _dojiDen = (long)dojiPeriod * 10,
+            _nearDen = (long)nearPeriod * 5;
         private readonly int _warmup = Math.Max(dojiPeriod, nearPeriod);
         private ExactMeanAccumulator _doji,
             _near;
@@ -89,26 +98,49 @@ public sealed class RickshawManCandle : IndicatorBase, IIndicatorValidationContr
             _seen = 0;
         }
 
-        public double Update(in Bar b)
+        public double Update(in Bar b) => Update(b, true);
+
+        public double Update(in Bar b, bool commit)
         {
             var value = _seen >= _warmup && Matches(b) ? 100d : 0;
-            if (_dojiHistory.Count == dojiPeriod)
-                Add(ref _doji, _dojiHistory.Dequeue(), -1);
-            _dojiHistory.Enqueue(b);
-            Add(ref _doji, b, 1);
-            if (_nearHistory.Count == nearPeriod)
-                Add(ref _near, _nearHistory.Dequeue(), -1);
-            _nearHistory.Enqueue(b);
-            Add(ref _near, b, 1);
+            if (!commit) return value;
+            var range = new ExactMeanAccumulator(); range.Add(b.High); range.Add(b.Low, -1);
+            if (_dojiHistory.Count == dojiPeriod) _doji.Subtract(_dojiHistory.Dequeue());
+            _dojiHistory.Enqueue(range); _doji.AddExact(range);
+            if (_nearHistory.Count == nearPeriod) _near.Subtract(_nearHistory.Dequeue());
+            _nearHistory.Enqueue(range); _near.AddExact(range);
             if (_seen < _warmup)
                 _seen++;
             return value;
         }
 
-        private static void Add(ref ExactMeanAccumulator sum, in Bar b, int sign)
+#if !NETFRAMEWORK
+        internal void Seed(long[] doji, int dojiCount, int dojiPosition,
+            long[] near, int nearCount, int nearPosition, int exponent, int seen)
         {
-            sum.Add(b.High, sign);
-            sum.Add(b.Low, -sign);
+            Reset();
+            SeedWindow(doji, dojiCount, dojiPosition, exponent, _dojiHistory, ref _doji);
+            SeedWindow(near, nearCount, nearPosition, exponent, _nearHistory, ref _near);
+            _seen = seen;
+        }
+        private static void SeedWindow(long[] values, int count, int position, int exponent,
+            Queue<ExactMeanAccumulator> history, ref ExactMeanAccumulator sum)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var value = values[(count == values.Length ? position + i : i) % values.Length];
+                var range = new ExactMeanAccumulator();
+                range.Add(value >> 32); range.ScaleByPowerOfTwo(32);
+                range.Add((uint)(value & uint.MaxValue)); range.ScaleByPowerOfTwo(exponent);
+                history.Enqueue(range); sum.AddExact(range);
+            }
+        }
+#endif
+
+        private static void AddWeighted(ref ExactMeanAccumulator sum, double value, long weight)
+        {
+            if (weight >= int.MinValue && weight <= int.MaxValue) sum.Add(value, (int)weight);
+            else sum.Add(value, new BigInteger(weight));
         }
 
         private bool Matches(in Bar b)
@@ -116,8 +148,8 @@ public sealed class RickshawManCandle : IndicatorBase, IIndicatorValidationContr
             var top = Math.Max(b.Open, b.Close);
             var bottom = Math.Min(b.Open, b.Close);
             var doji = _doji;
-            doji.Add(top, -_dojiDen);
-            doji.Add(bottom, _dojiDen);
+            AddWeighted(ref doji, top, -_dojiDen);
+            AddWeighted(ref doji, bottom, _dojiDen);
             if (doji.Sign < 0)
                 return false;
             var upper = new ExactMeanAccumulator();
@@ -134,14 +166,14 @@ public sealed class RickshawManCandle : IndicatorBase, IIndicatorValidationContr
                 return false;
             var above = _near;
             above.ScaleByPowerOfTwo(1);
-            above.Add(b.High, _nearDen);
-            above.Add(b.Low, _nearDen);
-            above.Add(bottom, -2 * _nearDen);
+            AddWeighted(ref above, b.High, _nearDen);
+            AddWeighted(ref above, b.Low, _nearDen);
+            AddWeighted(ref above, bottom, -2 * _nearDen);
             var below = _near;
             below.ScaleByPowerOfTwo(1);
-            below.Add(top, 2 * _nearDen);
-            below.Add(b.High, -_nearDen);
-            below.Add(b.Low, -_nearDen);
+            AddWeighted(ref below, top, 2 * _nearDen);
+            AddWeighted(ref below, b.High, -_nearDen);
+            AddWeighted(ref below, b.Low, -_nearDen);
             return above.Sign >= 0 && below.Sign >= 0;
         }
     }

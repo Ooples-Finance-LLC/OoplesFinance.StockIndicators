@@ -1,0 +1,2150 @@
+[
+  {
+    "case": "TaLib.Candles.RickshawMan-Builder",
+    "pid": 36368,
+    "processCpuSamples": 12103.0,
+    "selectedCpuSamples": 9235.0,
+    "unresolvedLeafPercent": 13.405522468868435,
+    "topExclusive": [
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 35.38711423930698
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Convert(float64,int32,int64&)",
+        "percent": 15.538711423930698
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Append(int64[],int32&,int32&,value class System.Int128&,int64)",
+        "percent": 12.1061180292366
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildAsync>d__34.MoveNext()",
+        "percent": 9.810503519220358
+      },
+      {
+        "frame": "System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+        "percent": 8.337845154304278
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 7.146724417975094
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 3.042772062804548
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 2.165674066053059
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 1.8949648077964267
+      },
+      {
+        "frame": "System.UInt128.BigMul(value class System.UInt128,value class System.UInt128,value class System.UInt128&)",
+        "percent": 0.7038440714672441
+      },
+      {
+        "frame": "System.UInt128.op_Addition(value class System.UInt128,value class System.UInt128)",
+        "percent": 0.4547915538711424
+      },
+      {
+        "frame": "System.Int128.op_Subtraction(value class System.Int128,value class System.Int128)",
+        "percent": 0.32485110990795885
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "Process64 dotnet (36368) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Candles.RickshawMan Builder 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (40460) CPU=9724ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.7184623714131
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks+<OoplesBuilderBatch>d__12.MoveNext()",
+        "percent": 99.69680563075258
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildAsync>d__34.MoveNext()",
+        "percent": 99.30698429886301
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 79.52355170546832
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Convert(float64,int32,int64&)",
+        "percent": 15.820249052517596
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Append(int64[],int32&,int32&,value class System.Int128&,int64)",
+        "percent": 12.26854358419058
+      },
+      {
+        "frame": "System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+        "percent": 10.709258256632376
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "percent": 4.58040064970222
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Build(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload)",
+        "percent": 4.569572279371955
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder.BuildAsync(value class System.Threading.CancellationToken)",
+        "percent": 4.569572279371955
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Build(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload,class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 4.569572279371955
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&)",
+        "percent": 4.569572279371955
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Int32].Start(!!0&)",
+        "percent": 4.537087168381158
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks.OoplesBuilderBatch()",
+        "percent": 4.537087168381158
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 3.226854358419058
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Matches(int64,int64,int64,int64)",
+        "percent": 2.8695181375203034
+      },
+      {
+        "frame": "System.Int128.BigMul(value class System.Int128,value class System.Int128,value class System.Int128&)",
+        "percent": 2.165674066053059
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 2.154845695722794
+      },
+      {
+        "frame": "System.UInt128.BigMul(value class System.UInt128,value class System.UInt128,value class System.UInt128&)",
+        "percent": 1.3318895506226314
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.5955603681645912
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Candles.RickshawMan-Compute",
+    "pid": 20084,
+    "processCpuSamples": 9521.0,
+    "selectedCpuSamples": 8566.0,
+    "unresolvedLeafPercent": 7.261265468129816,
+    "topExclusive": [
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 25.437777258930655
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Matches(int64,int64,int64,int64)",
+        "percent": 18.60845201961242
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Convert(float64,int32,int64&)",
+        "percent": 14.7910343217371
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Append(int64[],int32&,int32&,value class System.Int128&,int64)",
+        "percent": 12.222741069343918
+      },
+      {
+        "frame": "System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+        "percent": 8.078449684800374
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 5.288349287882325
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 2.521597011440579
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 2.4865748307261266
+      },
+      {
+        "frame": "System.SZArrayHelper.get_Item(int32)",
+        "percent": 1.9845902404856408
+      },
+      {
+        "frame": "?!?",
+        "percent": 1.8561755778659819
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.097361662386178
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 1.0506654214335747
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "Thread (1608) CPU=9372ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (20084) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Candles.RickshawMan Compute 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.4046229278543
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 99.2645342049965
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Matches(int64,int64,int64,int64)",
+        "percent": 30.224141956572495
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Convert(float64,int32,int64&)",
+        "percent": 14.896100863880458
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Append(int64[],int32&,int32&,value class System.Int128&,int64)",
+        "percent": 12.327807611487275
+      },
+      {
+        "frame": "System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+        "percent": 9.8529068409993
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 5.35839364931123
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.ComputeOwned()",
+        "percent": 3.548914312397852
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 2.685033854774691
+      },
+      {
+        "frame": "System.SZArrayHelper.get_Item(int32)",
+        "percent": 2.0196124212000934
+      },
+      {
+        "frame": "?!?",
+        "percent": 1.9962643007237917
+      },
+      {
+        "frame": "System.Int128.BigMul(value class System.Int128,value class System.Int128,value class System.Int128&)",
+        "percent": 1.424235349054401
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.2374503852439878
+      },
+      {
+        "frame": "System.Int128.op_Addition(value class System.Int128,value class System.Int128)",
+        "percent": 0.8989026383376139
+      },
+      {
+        "frame": "System.Int128.op_Subtraction(value class System.Int128,value class System.Int128)",
+        "percent": 0.7938360961942563
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.548680831193089
+      },
+      {
+        "frame": "System.UInt128.BigMul(value class System.UInt128,value class System.UInt128,value class System.UInt128&)",
+        "percent": 0.5370067709549381
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.3618958673826757
+      },
+      {
+        "frame": "System.Int128.op_OnesComplement(value class System.Int128)",
+        "percent": 0.29185150595377074
+      },
+      {
+        "frame": "System.SZArrayHelper.get_Count()",
+        "percent": 0.29185150595377074
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Candles.RickshawMan-Kernel",
+    "pid": 41152,
+    "processCpuSamples": 8876.0,
+    "selectedCpuSamples": 8277.0,
+    "unresolvedLeafPercent": 3.8057267125770204,
+    "topExclusive": [
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,bool)",
+        "percent": 46.236559139784944
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Convert(float64,int32,int64&)",
+        "percent": 19.49981877491845
+      },
+      {
+        "frame": "System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+        "percent": 10.402319681043856
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 7.188594901534373
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.KernelOwned()",
+        "percent": 3.5640932705086383
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+ScalarKernel.get_OutputCount()",
+        "percent": 3.3949498610607707
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+ScalarKernel.Evaluate(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>,bool)",
+        "percent": 2.5129877975111756
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 1.7760057992026097
+      },
+      {
+        "frame": "System.Int128.op_Addition(value class System.Int128,value class System.Int128)",
+        "percent": 1.0390238008940438
+      },
+      {
+        "frame": "System.Int128.op_Subtraction(value class System.Int128,value class System.Int128)",
+        "percent": 0.8940437356530144
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 0.7369819983085659
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.6886553098948894
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (41152) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Candles.RickshawMan Kernel 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (21440) CPU=8822ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.63754983689742
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.KernelOwned()",
+        "percent": 99.6133864926906
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+ScalarKernel.Evaluate(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>,bool)",
+        "percent": 82.33659538480126
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,bool)",
+        "percent": 79.82360758729008
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Convert(float64,int32,int64&)",
+        "percent": 19.584390479642384
+      },
+      {
+        "frame": "System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+        "percent": 11.610486891385769
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 7.538963392533526
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+ScalarKernel.get_OutputCount()",
+        "percent": 3.419113205267609
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Process(value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Span`1<float64>)",
+        "percent": 2.223027667029117
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.OoplesFinance.StockIndicators.Indicators.IPreviewIndicatorState.Update(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,bool)",
+        "percent": 1.389392291893198
+      },
+      {
+        "frame": "System.Int128.op_Addition(value class System.Int128,value class System.Int128)",
+        "percent": 1.051105472997463
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Matches(int64,int64,int64,int64)",
+        "percent": 1.0390238008940438
+      },
+      {
+        "frame": "System.Int128.op_Subtraction(value class System.Int128,value class System.Int128)",
+        "percent": 0.8940437356530144
+      },
+      {
+        "frame": "System.Int128.BigMul(value class System.Int128,value class System.Int128,value class System.Int128&)",
+        "percent": 0.8094720309290806
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.7611453425154041
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.4107768515162499
+      },
+      {
+        "frame": "System.UInt128.BigMul(value class System.UInt128,value class System.UInt128,value class System.UInt128&)",
+        "percent": 0.3020418025854778
+      },
+      {
+        "frame": "System.Int128.op_OnesComplement(value class System.Int128)",
+        "percent": 0.3020418025854778
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.RickshawGridState.Append(int64[],int32&,int32&,value class System.Int128&,int64)",
+        "percent": 0.2778784583786396
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+        "percent": 0.1812250815512867
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Candles.RickshawMan-Native",
+    "pid": 34072,
+    "processCpuSamples": 9605.0,
+    "selectedCpuSamples": 9068.0,
+    "unresolvedLeafPercent": 3.9589766210851347,
+    "topExclusive": [
+      {
+        "frame": "TALib.CandleHelpers.CandleRange(value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class CandleSettingType,int32)",
+        "percent": 56.892368769298635
+      },
+      {
+        "frame": "TALib.Candles.RickshawManImpl(value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<int32>,value class System.Range&)",
+        "percent": 33.87737097485664
+      },
+      {
+        "frame": "System.Collections.Generic.Dictionary`2[TALib.Core+CandleSettingType,TALib.Core+CandleSetting].FindValue(!0)",
+        "percent": 4.741949713277459
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 1.5438906043228937
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.9704455227172475
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 0.6175562417291575
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.17644464049404499
+      },
+      {
+        "frame": "TALib.CandleHelpers.CandleAverage(value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class CandleSettingType,!!0,int32)",
+        "percent": 0.15438906043228937
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.13233348037053375
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.12130569033965594
+      },
+      {
+        "frame": "dxgmms2.sys!?",
+        "percent": 0.08822232024702249
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.08822232024702249
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (41748) CPU=9535ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (34072) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Candles.RickshawMan Native 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.66916629907367
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload.NativeOwned()",
+        "percent": 99.58094397882664
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload.Rickshaw(int32[])",
+        "percent": 97.76135862373181
+      },
+      {
+        "frame": "TALib.Candles.RickshawManImpl(value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<int32>,value class System.Range&)",
+        "percent": 97.75033083370093
+      },
+      {
+        "frame": "TALib.CandleHelpers.CandleRange(value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class CandleSettingType,int32)",
+        "percent": 58.09439788266432
+      },
+      {
+        "frame": "System.Collections.Generic.Dictionary`2[TALib.Core+CandleSettingType,TALib.Core+CandleSetting].FindValue(!0)",
+        "percent": 5.205116894574327
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks.CompetitorNativeBatch()",
+        "percent": 2.1393912659902954
+      },
+      {
+        "frame": "TALib.Candles.RickshawMan(value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<int32>,value class System.Range&)",
+        "percent": 2.11733568592854
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.3012792236435817
+      },
+      {
+        "frame": "TALib.Core+CandleSettings.Get(value class CandleSettingType)",
+        "percent": 0.7388619320688135
+      },
+      {
+        "frame": "System.Collections.Generic.Dictionary`2[TALib.Core+CandleSettingType,TALib.Core+CandleSetting].get_Item(!0)",
+        "percent": 0.6726951918835465
+      },
+      {
+        "frame": "TALib.CandleHelpers.CandleAverage(value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class System.ReadOnlySpan`1<!!0>,value class CandleSettingType,!!0,int32)",
+        "percent": 0.4962505513895015
+      },
+      {
+        "frame": "dxgkrnl.sys!?",
+        "percent": 0.3639170710189678
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.35288928098808997
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.35288928098808997
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.31980591089545657
+      },
+      {
+        "frame": "TALib.CandleHelpers.CandleAveragePeriod(value class CandleSettingType)",
+        "percent": 0.15438906043228937
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.15438906043228937
+      },
+      {
+        "frame": "dxgmms2.sys!?",
+        "percent": 0.13233348037053375
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.0992501102779003
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Asin-Builder",
+    "pid": 30392,
+    "processCpuSamples": 13212.0,
+    "selectedCpuSamples": 9030.0,
+    "unresolvedLeafPercent": 53.64341085271318,
+    "topExclusive": [
+      {
+        "frame": "ucrtbase!?",
+        "percent": 29.302325581395348
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 15.592469545957918
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildAsync>d__34.MoveNext()",
+        "percent": 15.149501661129568
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 14.097452934662236
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.PriceCircularTransform+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>)",
+        "percent": 6.190476190476191
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 5.802879291251385
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 4.352159468438538
+      },
+      {
+        "frame": "System.SpanHelpers.ClearWithoutReferences(unsigned int8&,unsigned int)",
+        "percent": 3.388704318936877
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 2.990033222591362
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.Bars+EnumerableBarSource`1[OoplesFinance.StockIndicators.Indicators.Bar].AppendValidated(class System.Collections.Generic.List`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken)",
+        "percent": 0.6866002214839424
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.35437430786268
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.26578073089701
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (30392) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Asin Builder 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (33324) CPU=9555ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.57918050941306
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks+<OoplesBuilderBatch>d__12.MoveNext()",
+        "percent": 99.56810631229236
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildAsync>d__34.MoveNext()",
+        "percent": 98.63787375415282
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 66.97674418604652
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.PriceCircularTransform+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>)",
+        "percent": 37.63012181616833
+      },
+      {
+        "frame": "ucrtbase!?",
+        "percent": 29.80066445182724
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 6.312292358803987
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Build(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload)",
+        "percent": 5.4485049833887045
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "percent": 5.4485049833887045
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Build(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload,class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 5.415282392026578
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks.OoplesBuilderBatch()",
+        "percent": 5.393133997785161
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Int32].Start(!!0&)",
+        "percent": 5.382059800664452
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder.BuildAsync(value class System.Threading.CancellationToken)",
+        "percent": 5.348837209302325
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&)",
+        "percent": 5.348837209302325
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 4.640088593576966
+      },
+      {
+        "frame": "System.SpanHelpers.ClearWithoutReferences(unsigned int8&,unsigned int)",
+        "percent": 3.433001107419712
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.Bars+EnumerableBarSource`1[OoplesFinance.StockIndicators.Indicators.Bar].AppendValidated(class System.Collections.Generic.List`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken)",
+        "percent": 2.070874861572536
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 1.2403100775193798
+      },
+      {
+        "frame": "System.Collections.Generic.List`1[OoplesFinance.StockIndicators.Indicators.Bar].set_Capacity(int32)",
+        "percent": 0.7641196013289037
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Create(class System.String)",
+        "percent": 0.5758582502768549
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Asin-Compute",
+    "pid": 39104,
+    "processCpuSamples": 10411.0,
+    "selectedCpuSamples": 9753.0,
+    "unresolvedLeafPercent": 43.1354455039475,
+    "topExclusive": [
+      {
+        "frame": "ucrtbase!?",
+        "percent": 33.784476571311394
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 27.919614477596635
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 9.330462421818927
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.PriceCircularTransform+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>)",
+        "percent": 6.459550907413104
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 5.977647903209269
+      },
+      {
+        "frame": "System.SpanHelpers.ClearWithoutReferences(unsigned int8&,unsigned int)",
+        "percent": 4.265354249974367
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 3.5783861375986876
+      },
+      {
+        "frame": "?!?",
+        "percent": 2.8606582589972316
+      },
+      {
+        "frame": "System.SZArrayHelper.get_Item(int32)",
+        "percent": 2.0301445709012613
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 1.261150415256844
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.0048190300420383
+      },
+      {
+        "frame": "System.SZArrayHelper.get_Count()",
+        "percent": 0.5331692812467959
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (39104) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Asin Compute 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (40376) CPU=10309ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.58986978365631
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Compute(class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 99.38480467548446
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.PriceCircularTransform+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>)",
+        "percent": 42.581769711883524
+      },
+      {
+        "frame": "ucrtbase!?",
+        "percent": 34.02030144570901
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 9.47400799753922
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 6.12119347892956
+      },
+      {
+        "frame": "System.SpanHelpers.ClearWithoutReferences(unsigned int8&,unsigned int)",
+        "percent": 4.296114016200144
+      },
+      {
+        "frame": "?!?",
+        "percent": 2.9119245360401926
+      },
+      {
+        "frame": "System.SZArrayHelper.get_Item(int32)",
+        "percent": 2.0403978263098534
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.ComputeOwned()",
+        "percent": 2.0096380600840766
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.1791243719881062
+      },
+      {
+        "frame": "System.SZArrayHelper.get_Count()",
+        "percent": 0.5536757920639803
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.3178509176663591
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.24607812980621346
+      },
+      {
+        "frame": "dxgkrnl.sys!?",
+        "percent": 0.20506510817184456
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.19481185276325233
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Create(class System.String)",
+        "percent": 0.1845585973546601
+      },
+      {
+        "frame": "System.RuntimeType.IsEnumDefined(class System.Object)",
+        "percent": 0.1435455757202912
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.1435455757202912
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+        "percent": 0.11278580949451451
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Asin-Kernel",
+    "pid": 6184,
+    "processCpuSamples": 10575.0,
+    "selectedCpuSamples": 10014.0,
+    "unresolvedLeafPercent": 64.6494907130018,
+    "topExclusive": [
+      {
+        "frame": "ucrtbase!?",
+        "percent": 56.061513880567205
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 19.163171559816256
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+AsinKernel.get_OutputCount()",
+        "percent": 6.331136409027362
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+AsinKernel.Evaluate(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>,bool)",
+        "percent": 5.442380667066107
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 5.052925903734772
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.KernelOwned()",
+        "percent": 3.804673457159976
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 1.3680846814459757
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.9886159376872379
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.5891751547833034
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+        "percent": 0.11983223487118035
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.10984621529858199
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.Bar.get_Close()",
+        "percent": 0.09986019572598362
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (21316) CPU=10544ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (6184) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Asin Kernel 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.60055921709606
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.KernelOwned()",
+        "percent": 99.56061513880567
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+AsinKernel.Evaluate(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>,bool)",
+        "percent": 63.36129418813661
+      },
+      {
+        "frame": "ucrtbase!?",
+        "percent": 56.46095466347114
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 20.401437986818454
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+AsinKernel.get_OutputCount()",
+        "percent": 6.351108448172559
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Process(value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Span`1<float64>)",
+        "percent": 1.5478330337527462
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.2482524465747953
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.7589374875174756
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+        "percent": 0.7189934092270821
+      },
+      {
+        "frame": "dxgkrnl.sys!?",
+        "percent": 0.2097064110245656
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.19972039145196724
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.16976233273417216
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.1298182544437787
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.1298182544437787
+      },
+      {
+        "frame": "rt640x64.sys!?",
+        "percent": 0.10984621529858199
+      },
+      {
+        "frame": "ndis.sys!?",
+        "percent": 0.10984621529858199
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.Bar.get_Close()",
+        "percent": 0.09986019572598362
+      },
+      {
+        "frame": "dxgmms2.sys!?",
+        "percent": 0.09986019572598362
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.09986019572598362
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Asin-Native",
+    "pid": 33348,
+    "processCpuSamples": 10540.0,
+    "selectedCpuSamples": 10012.0,
+    "unresolvedLeafPercent": 88.48381941669996,
+    "topExclusive": [
+      {
+        "frame": "ucrtbase!?",
+        "percent": 77.49700359568517
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 6.671993607670795
+      },
+      {
+        "frame": "System.Double.Asin(float64)",
+        "percent": 6.102676787854574
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload.NativeOwned()",
+        "percent": 5.2237315221733915
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 2.377147423092289
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.1885737115461446
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.1697962445065921
+      },
+      {
+        "frame": "TALib.Functions.AsinImpl(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&)",
+        "percent": 0.12984418697562924
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.11985617259288853
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.0998801438274071
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.07990411506192568
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.07990411506192568
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "Process64 dotnet (33348) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Asin Native 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (31824) CPU=10476ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.57051538154215
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload.NativeOwned()",
+        "percent": 99.49061126648023
+      },
+      {
+        "frame": "System.Double.Asin(float64)",
+        "percent": 82.74071114662405
+      },
+      {
+        "frame": "ucrtbase!?",
+        "percent": 78.0163803435877
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks.CompetitorNativeBatch()",
+        "percent": 2.2672792648821414
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload.Asin(float64[])",
+        "percent": 2.0375549340791053
+      },
+      {
+        "frame": "TALib.Functions.Asin(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&)",
+        "percent": 2.0375549340791053
+      },
+      {
+        "frame": "TALib.Functions.AsinImpl(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&)",
+        "percent": 2.0175789053136235
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 1.8577706751897722
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 1.3783459848182182
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.20974830203755493
+      },
+      {
+        "frame": "dxgkrnl.sys!?",
+        "percent": 0.20974830203755493
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.1997602876548142
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.1797842588893328
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.11985617259288853
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.10986815821014782
+      },
+      {
+        "frame": "dxgmms2.sys!?",
+        "percent": 0.0998801438274071
+      },
+      {
+        "frame": "system.console!?",
+        "percent": 0.02996404314822213
+      },
+      {
+        "frame": "tcpip.sys!?",
+        "percent": 0.02996404314822213
+      },
+      {
+        "frame": "rt640x64.sys!?",
+        "percent": 0.02996404314822213
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Sma-Builder",
+    "pid": 26196,
+    "processCpuSamples": 12931.0,
+    "selectedCpuSamples": 9446.0,
+    "unresolvedLeafPercent": 32.62756722422189,
+    "topExclusive": [
+      {
+        "frame": "OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(value class System.ReadOnlySpan`1<float64>,value class System.Span`1<float64>,int32)",
+        "percent": 26.857929282235865
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 21.797586279906838
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildAsync>d__34.MoveNext()",
+        "percent": 10.829980944315054
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder.CreateOwnedBatch(class System.Collections.Generic.IReadOnlyList`1<value class OoplesFinance.StockIndicators.Indicators.Bar>)",
+        "percent": 10.40652127884819
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Validation.BatchInputValidation.Validate(class OoplesFinance.StockIndicators.Models.StockData)",
+        "percent": 8.066906627143764
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 5.547321617615922
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Validation.BatchInputValidation.<Validate>g__Check|0_0(class System.Collections.Generic.IReadOnlyList`1<float64>,class System.String,value class <>c__DisplayClass0_0&)",
+        "percent": 5.303832309972475
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 3.440609781918272
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.CustomIndicatorEngine.Remember(class OoplesFinance.StockIndicators.Indicators.IIndicator,float64[][])",
+        "percent": 1.7891170865975017
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.Bars+EnumerableBarSource`1[OoplesFinance.StockIndicators.Indicators.Bar].AppendValidated(class System.Collections.Generic.List`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken)",
+        "percent": 1.048062672030489
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.Compute.IndicatorCompute.ComputeArm(class OoplesFinance.StockIndicators.Models.StockData,class OoplesFinance.StockIndicators.Builder.Specs.IndicatorSpec,class OoplesFinance.StockIndicators.Builder.Compute.ComputeContext)",
+        "percent": 0.7622273978403558
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.5504975651069236
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "Process64 dotnet (26196) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Sma Builder 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (35764) CPU=10075ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.71416472580987
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks+<OoplesBuilderBatch>d__12.MoveNext()",
+        "percent": 99.7035782341732
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildAsync>d__34.MoveNext()",
+        "percent": 98.96252381960618
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.IndicatorRuntime.StartBatch()",
+        "percent": 72.90916790175736
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.SeriesEvaluator.Evaluate(class System.Collections.Generic.IReadOnlyCollection`1<value class OoplesFinance.StockIndicators.Builder.SeriesHandle>)",
+        "percent": 30.859623120897734
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.SeriesEvaluator.Resolve(value class OoplesFinance.StockIndicators.Builder.SeriesHandle)",
+        "percent": 30.70082574634766
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.SeriesEvaluator.ResolveIndicator(class OoplesFinance.StockIndicators.Builder.SeriesNode)",
+        "percent": 28.731738301926743
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.Compute.IndicatorCompute.ComputeArm(class OoplesFinance.StockIndicators.Models.StockData,class OoplesFinance.StockIndicators.Builder.Specs.IndicatorSpec,class OoplesFinance.StockIndicators.Builder.Compute.ComputeContext)",
+        "percent": 28.625873385560027
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.Compute.IndicatorCompute.ComputeSmaFast(class OoplesFinance.StockIndicators.Models.StockData,class OoplesFinance.StockIndicators.Builder.Compute.ComputeContext,int32)",
+        "percent": 27.757781071352955
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(value class System.ReadOnlySpan`1<float64>,value class System.Span`1<float64>,int32)",
+        "percent": 27.683675629896253
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder.CreateOwnedBatch(class System.Collections.Generic.IReadOnlyList`1<value class OoplesFinance.StockIndicators.Indicators.Bar>)",
+        "percent": 21.93521067118357
+      },
+      {
+        "frame": "System.Lazy`1[System.__Canon].CreateValue()",
+        "percent": 20.400169383866185
+      },
+      {
+        "frame": "System.Lazy`1[System.__Canon].ViaFactory(value class System.Threading.LazyThreadSafetyMode)",
+        "percent": 20.36840990895617
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Validation.BatchInputValidation.Validate(class OoplesFinance.StockIndicators.Models.StockData)",
+        "percent": 14.75756934152022
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&)",
+        "percent": 10.47004022866822
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Build(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload)",
+        "percent": 10.438280753758205
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderWorkload.Build(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload,class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "percent": 10.427694262121532
+      },
+      {
+        "frame": "System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Int32].Start(!!0&)",
+        "percent": 10.417107770484861
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder.BuildAsync(value class System.Threading.CancellationToken)",
+        "percent": 10.417107770484861
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks.OoplesBuilderBatch()",
+        "percent": 10.417107770484861
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Sma-Compute",
+    "pid": 20700,
+    "processCpuSamples": 10712.0,
+    "selectedCpuSamples": 10013.0,
+    "unresolvedLeafPercent": 7.400379506641366,
+    "topExclusive": [
+      {
+        "frame": "OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(value class System.ReadOnlySpan`1<float64>,value class System.Span`1<float64>,int32)",
+        "percent": 92.45980225706582
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 4.294417257565165
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 1.5679616498551883
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.8788574852691501
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.17976630380505343
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.11984420253670229
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.06990911814640967
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.MeanRoundoff.AfterAddition(float64,float64)",
+        "percent": 0.059922101268351145
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.059922101268351145
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.SevereCancellation(float64,float64,float64)",
+        "percent": 0.03994806751223409
+      },
+      {
+        "frame": "ucrtbase!?",
+        "percent": 0.03994806751223409
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 0.03994806751223409
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (41880) CPU=10664ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (20700) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Sma Compute 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.6404673923899
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(value class System.ReadOnlySpan`1<float64>,value class System.Span`1<float64>,int32)",
+        "percent": 93.21881553979826
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.ComputeOwned()",
+        "percent": 1.6878058523918906
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.9887146709277939
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.26964945570758014
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.1997403375611705
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.MeanRoundoff.AfterAddition(float64,float64)",
+        "percent": 0.13981823629281934
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.13981823629281934
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.1298312194147608
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.10985718565864376
+      },
+      {
+        "frame": "ndis.sys!?",
+        "percent": 0.09987016878058524
+      },
+      {
+        "frame": "rt640x64.sys!?",
+        "percent": 0.08988315190252671
+      },
+      {
+        "frame": "tcpip.sys!?",
+        "percent": 0.07989613502446818
+      },
+      {
+        "frame": "ucrtbase!?",
+        "percent": 0.06990911814640967
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.MeanRoundoff.Up(float64)",
+        "percent": 0.04993508439029262
+      },
+      {
+        "frame": "netio.sys!?",
+        "percent": 0.04993508439029262
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.SevereCancellation(float64,float64,float64)",
+        "percent": 0.03994806751223409
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.029961050634175573
+      },
+      {
+        "frame": "dxgkrnl.sys!?",
+        "percent": 0.029961050634175573
+      },
+      {
+        "frame": "system.console!?",
+        "percent": 0.019974033756117046
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Sma-Kernel",
+    "pid": 21668,
+    "processCpuSamples": 10709.0,
+    "selectedCpuSamples": 10017.0,
+    "unresolvedLeafPercent": 4.552261156034741,
+    "topExclusive": [
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+SmaKernel.Evaluate(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>,bool)",
+        "percent": 81.6511929719477
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 7.6370170709793355
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 2.685434760906459
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+SmaKernel.get_OutputCount()",
+        "percent": 2.6455026455026456
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.KernelOwned()",
+        "percent": 2.6255365878007386
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 0.6988120195667366
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.49915144254766897
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.2695417789757412
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.TrySmallMean(unsigned int64,float64&)",
+        "percent": 0.21962663472097435
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.BitLength(unsigned int64)",
+        "percent": 0.12977937506239393
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.0998302885095338
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.0998302885095338
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (21668) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Sma Kernel 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (36284) CPU=10658ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.62064490366377
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderAbWorkload.KernelOwned()",
+        "percent": 99.62064490366377
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+SmaKernel.Evaluate(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>,bool)",
+        "percent": 83.77757811720076
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Validate(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "percent": 8.196066686632724
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernels+SmaKernel.get_OutputCount()",
+        "percent": 2.6455026455026456
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.IndicatorKernel.Process(value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Span`1<float64>)",
+        "percent": 1.7570130777677948
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 0.6089647599081561
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.42927024059099533
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.Mean(int64)",
+        "percent": 0.40930418288908854
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.TrySmallMean(unsigned int64,float64&)",
+        "percent": 0.369372067485275
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+        "percent": 0.3494060097833683
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.Add(float64,int32)",
+        "percent": 0.22960966357192772
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.18967754816811422
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.BitLength(unsigned int64)",
+        "percent": 0.13976240391334732
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.AddSmall(int64,int32)",
+        "percent": 0.12977937506239393
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.11979634621144056
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.0998302885095338
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.08984725965858041
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.ShiftFits(int64,int32,int64&)",
+        "percent": 0.07986423080762703
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.Indicators.Bar.get_High()",
+        "percent": 0.06988120195667366
+      }
+    ]
+  },
+  {
+    "case": "TaLib.Functions.Sma-Native",
+    "pid": 17696,
+    "processCpuSamples": 10644.0,
+    "selectedCpuSamples": 9929.0,
+    "unresolvedLeafPercent": 46.86272534998489,
+    "topExclusive": [
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload.NativeOwned()",
+        "percent": 51.74740658676604
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 31.040386745895862
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 10.001007150770471
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 4.008460066471951
+      },
+      {
+        "frame": "TALib.FunctionHelpers.CalcSimpleMA(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "percent": 1.148151878336187
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.5438614160539833
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.38271729277872896
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 0.2014301540940679
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.1611441232752543
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.12085809245644073
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.10071507704703395
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.10071507704703395
+      }
+    ],
+    "topInclusive": [
+      {
+        "frame": "hostpolicy!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "dotnet!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "hostfxr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "ntdll!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Thread (33312) CPU=10602ms (Startup Thread)",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.Run(class System.String,class System.String,int32)",
+        "percent": 100.0
+      },
+      {
+        "frame": "Program.<Main>$(class System.String[])",
+        "percent": 100.0
+      },
+      {
+        "frame": "coreclr!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "kernel32!?",
+        "percent": 100.0
+      },
+      {
+        "frame": "Process64 dotnet (17696) Args:  C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-indicators/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-builder TaLib.Functions.Sma Native 8",
+        "percent": 100.0
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderProfile.<Run>g__Invoke|0_0(value class <>c__DisplayClass0_0&)",
+        "percent": 99.33528049148957
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuNativeWorkload.NativeOwned()",
+        "percent": 99.13385033739551
+      },
+      {
+        "frame": "ntoskrnl!?",
+        "percent": 4.230033235975426
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators.CompetitorBenchmarks.CpuBuilderBenchmarks.CompetitorNativeBatch()",
+        "percent": 2.4171618491288145
+      },
+      {
+        "frame": "TALib.Functions.SmaImpl(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "percent": 1.681941786685467
+      },
+      {
+        "frame": "TALib.Functions.Sma(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "percent": 1.681941786685467
+      },
+      {
+        "frame": "TALib.FunctionHelpers.CalcSimpleMA(value class System.ReadOnlySpan`1<!!0>,value class System.Range,value class System.Span`1<!!0>,value class System.Range&,int32)",
+        "percent": 1.681941786685467
+      },
+      {
+        "frame": "?!?",
+        "percent": 0.6042904622822036
+      },
+      {
+        "frame": "kernelbase!?",
+        "percent": 0.5942189545775003
+      },
+      {
+        "frame": "system.private.corelib!?",
+        "percent": 0.5337899083492799
+      },
+      {
+        "frame": "ucrtbase!?",
+        "percent": 0.28200221573169504
+      },
+      {
+        "frame": "clrjit!?",
+        "percent": 0.21150166179877128
+      },
+      {
+        "frame": "amdkmdag.sys!?",
+        "percent": 0.21150166179877128
+      },
+      {
+        "frame": "dxgkrnl.sys!?",
+        "percent": 0.21150166179877128
+      },
+      {
+        "frame": "icu!?",
+        "percent": 0.14100110786584752
+      },
+      {
+        "frame": "dxgmms2.sys!?",
+        "percent": 0.07050055393292376
+      },
+      {
+        "frame": "TALib.FunctionHelpers.ValidateInputRange(value class System.Range,int32[])",
+        "percent": 0.05035753852351697
+      },
+      {
+        "frame": "ndis.sys!?",
+        "percent": 0.04028603081881357
+      },
+      {
+        "frame": "rt640x64.sys!?",
+        "percent": 0.04028603081881357
+      },
+      {
+        "frame": "system.console!?",
+        "percent": 0.030214523114110183
+      }
+    ]
+  }
+]

@@ -126,3 +126,10 @@ public interface IComposedMultiOutputState
     /// <summary>Takes the next bar and its components' values, and fills one value per declared output.</summary>
     void Update(in Bar bar, ReadOnlySpan<double> components, Span<double> outputs);
 }
+
+// Internal bridge for the reusable CPU route. Preview evaluates the next bar
+// without consuming it; the established IIndicatorState contract remains intact.
+internal interface IPreviewIndicatorState : IIndicatorState
+{
+    double Update(in Bar bar, bool commit);
+}

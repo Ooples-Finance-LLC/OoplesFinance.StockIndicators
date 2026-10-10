@@ -79,6 +79,11 @@ public sealed class IndicatorInputDomain
             ? PositiveClose : Finite;
     }
 
+    // A customer's domain getter may depend on state or have observable calls. Never
+    // cache it or infer that its next result will equal its current result.
+    internal static IndicatorInputDomain? StableFor(IIndicator indicator) =>
+        indicator is IIndicatorInputDomainContract ? null : For(indicator);
+
     public string? Violation(in Bar bar)
     {
         var hasRanges = _ranges.Count != 0;
@@ -100,6 +105,14 @@ public sealed class IndicatorInputDomain
 
     public void Validate(in Bar bar)
     {
+        // The ubiquitous finite-only domain needs no field-mask/range loop.
+        // Failed checks still use Violation to preserve field ordering and diagnostics.
+        if (ReferenceEquals(this, Finite)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Open)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.High)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Low)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Close)
+            && Helpers.FrameworkCompatibility.IsFinite(bar.Volume)) return;
         var violation = Violation(bar);
         if (violation is not null) throw new ArgumentOutOfRangeException(nameof(bar), violation);
     }

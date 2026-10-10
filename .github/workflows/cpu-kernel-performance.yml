@@ -1,0 +1,92 @@
+name: CPU kernel pilot performance
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Public builder comparisons, diagnostic kernels, or both
+        type: choice
+        options: [builder, kernel, all]
+        default: builder
+permissions:
+  contents: read
+concurrency:
+  group: cpu-kernels-${{ github.ref }}-${{ github.event.label.name || 'dispatch' }}
+  cancel-in-progress: true
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'run-builder-benchmarks'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: python -m unittest discover -s scripts -p test_verify_cpu_kernel_performance.py
+      - run: dotnet build benchmarks/OoplesFinance.StockIndicators.CompetitorTests -c Release -p:GeneratePackageOnBuild=false
+      - run: dotnet test benchmarks/OoplesFinance.StockIndicators.CompetitorTests -c Release --no-build --filter "FullyQualifiedName~CpuKernelTests|FullyQualifiedName~CpuNativeBenchmarkTests|FullyQualifiedName~CpuBuilderBenchmarkTests|FullyQualifiedName~AsinSpanTests|FullyQualifiedName~CpuFeasibilityTests"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cpu-pilot-binaries
+          path: benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/
+          retention-days: 7
+  performance:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite != 'builder'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        pair: [QuanTAlib.Jma, QuanTAlib.Atr, Skender.GetRollingPivots, Skender.GetFractal, TaLib.Candles.RickshawMan, TaLib.Functions.Asin, Trady.Candlestick.BullishShortDay, Trady.Indicator.SimpleMovingAverage]
+    env:
+      COMPARISON_PAIR: ${{ matrix.pair }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cpu-pilot-binaries
+          path: binaries
+      - run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter '*CpuKernelBenchmarks*' --exporters json --artifacts performance
+      - run: python scripts/verify-cpu-kernel-performance.py performance "$COMPARISON_PAIR" > performance/verified.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cpu-pilot-${{ matrix.pair }}
+          path: performance/
+          retention-days: 14
+  builder-performance:
+    if: inputs.suite != 'kernel'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        pair: [QuanTAlib.Jma, QuanTAlib.Atr, Skender.GetRollingPivots, Skender.GetFractal, TaLib.Candles.RickshawMan, TaLib.Functions.Asin, Trady.Candlestick.BullishShortDay, Trady.Indicator.SimpleMovingAverage]
+    env:
+      COMPARISON_FAMILY: ${{ matrix.pair }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cpu-pilot-binaries
+          path: binaries
+      - run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter '*CpuBuilderBenchmarks*' --exporters json --artifacts performance
+      - run: python scripts/verify-cpu-kernel-performance.py performance "$COMPARISON_FAMILY" --suite builder --family > performance/verified.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cpu-builder-${{ matrix.pair }}
+          path: performance/
+          retention-days: 14

@@ -1,0 +1,18 @@
+{
+  "source_head": "cf49cfe5a16312e60b70c06884de0550d93c4bbf",
+  "harness": "working-tree A/B diagnostic addition; no production changes",
+  "platform": "Windows-11-10.0.26220-SP0",
+  "cpu": "AMD Ryzen 9 3950X 16-Core Processor",
+  "runtime": ".NET 10.0.12",
+  "ta_lib_source_commit": "0bc2086a6cafc5b4c17fd398e0c16895e4daf92c",
+  "sha256": {
+    "benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "6c12212c94d3b7203cbf308f69f7c0af7217e66b079d6d5c2eb5caa15324b9ff",
+    "benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e21fa387e9448140b8213bde6b0662dfd5df8fb4f83367fa94944e58d93719e9",
+    "TA_Asin.cs": "9493a37a37a07b19ccf93ad2ec2f9b1b061f782e4bdd12f9f55a2d3b6047d43b",
+    "TA_RickshawMan.cs": "453a28c50075fb06f4f82bf18638dd6e36e2da6afb3e98af08e0b3ca081ed6fd",
+    "TA_Sma.cs": "769253dc20c59b8f7b03d0c4c244bd6f63da44adb4eaf2ce1b5e9ae387695394",
+    "FunctionHelpers.cs": "15a1953655b3dbe2386a2830af18c25334dc77bf32fb4d889d4c8f9db8e882af",
+    "benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\LibraryComparisons\\CpuBuilderProfile.cs": "d97199ea8a2353f135aa1464f5deeacf80fb80a6cef573b8bd544e816c605189",
+    "benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\LibraryComparisons\\CpuBuilderAbWorkload.cs": "81ef7a10ccc405e30e5dd860b904825b57d3d247c5914d5346875881b1ccd65a"
+  }
+}

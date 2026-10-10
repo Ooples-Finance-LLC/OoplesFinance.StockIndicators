@@ -14,7 +14,9 @@ internal static class CustomerStateValidation
         {
             var current = pending.Pop();
             if (!visited.Add(current)) continue;
-            if (current is not IBuiltInIndicator) return true;
+            // Complete-history indicators have no streaming state to reset.
+            // Their dependencies still participate in lifecycle validation.
+            if (current is not (IBuiltInIndicator or IHistoricalIndicator)) return true;
             foreach (var component in current.Components) pending.Push(component);
             if (current.Source is not null) pending.Push(current.Source);
         }
@@ -43,7 +45,7 @@ internal static class CustomerStateValidation
             if (RequiresCheck(dependency))
                 await CheckResetAsync(dependency, bars, dependency.Outputs.Select(output =>
                     (IReadOnlyList<double>)dependencyRun![output].ToArray()).ToArray(), cancellationToken, visited).ConfigureAwait(false);
-        if (indicator is IBuiltInIndicator) return;
+        if (indicator is IBuiltInIndicator or IHistoricalIndicator) return;
         var components = indicator.Components.Select(component => dependencyRun![component].ToArray()).ToArray();
         var source = indicator.Source is null ? null : dependencyRun![indicator.Source].ToArray();
         var inputs = new double[components.Length];

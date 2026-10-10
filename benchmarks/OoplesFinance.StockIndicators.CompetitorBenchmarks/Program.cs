@@ -1,6 +1,44 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+if (args.Length == 4 && args[0] == "--profile-cost-boundary")
+{
+    PilotCostBoundaryProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--probe-gpu-scheduling")
+{
+    await PilotGpuSchedulingProbe.Run();
+    return;
+}
+
+if (args.Length == 2 && args[0] == "--verify-sma-baseline")
+{
+    PilotCoreReplay.Verify(args[1]);
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--verify-cpu-native")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    new CpuNativeWorkload(args[1], count).Verify();
+    Console.WriteLine($"Verified direct native and Ooples outputs: {args[1]}, {count} bars.");
+    return;
+}
+
+if (args.Length == 4 && args[0] == "--profile-builder")
+{
+    CpuBuilderProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
+    return;
+}
+
+if (args.Length == 4 && args[0] == "--profile-cpu-pilot")
+{
+    CpuPilotProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
+    return;
+}
+
 if (args.Length == 2 && args[0] == "--comparison-manifest")
 {
     File.WriteAllText(args[1], System.Text.Json.JsonSerializer.Serialize(ComparisonManifest.Create(),
@@ -71,4 +109,15 @@ if (args.Length > 0 && args[0].Equals("--alloc", StringComparison.OrdinalIgnoreC
     return;
 }
 
-BenchmarkSwitcher.FromAssembly(typeof(BatchBenchmarks).Assembly).Run(args);
+// Discover only this suite: other suites interpret COMPARISON_PAIR against the
+// library manifest, which intentionally does not duplicate tuple API routes.
+if (args.Contains("*SmaFeasibilityBenchmarks*", StringComparer.Ordinal))
+    BenchmarkSwitcher.FromTypes([typeof(SmaFeasibilityBenchmarks)]).Run(args);
+else if (args.Any(arg => arg.Contains("AsinOwnershipFeasibilityBenchmarks", StringComparison.Ordinal)))
+    BenchmarkSwitcher.FromTypes([typeof(AsinOwnershipFeasibilityBenchmarks)]).Run(args);
+else if (args.Contains("*FeasibilityBenchmarks*", StringComparer.Ordinal))
+    BenchmarkSwitcher.FromTypes([typeof(AsinFeasibilityBenchmarks), typeof(SmaFeasibilityBenchmarks), typeof(AsinOwnershipFeasibilityBenchmarks)]).Run(args);
+else if (args.Contains("*CpuBuilderBenchmarks*", StringComparer.Ordinal))
+    BenchmarkSwitcher.FromTypes([typeof(CpuBuilderBenchmarks)]).Run(args);
+else
+    BenchmarkSwitcher.FromAssembly(typeof(BatchBenchmarks).Assembly).Run(args);

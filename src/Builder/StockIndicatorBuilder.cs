@@ -34,7 +34,68 @@ public sealed class StockIndicatorBuilder
     private BarTimeframe? _resolvedTimeframe;
     private SeriesKey? _defaultSeriesKey;
     private bool _defaultsApplied;
+    private bool _requiresRuntime;
+    private IndicatorExecutionBackend _executionBackend;
+
+    /// <summary>Describes the last successful asynchronous build; null after a failed build.</summary>
+    public IndicatorExecutionInfo? LastExecution { get; private set; }
+
+    /// <summary>Selects CPU, automatic, or required GPU execution for finite typed runs.</summary>
+    public StockIndicatorBuilder ConfigureExecution(IndicatorExecutionBackend backend)
+    {
+        if (!Enum.IsDefined(typeof(IndicatorExecutionBackend), backend))
+            throw new ArgumentOutOfRangeException(nameof(backend));
+        _executionBackend = backend;
+        return this;
+    }
+
+    private IndicatorHistoryMode _historyMode;
+
+    /// <summary>Selects retained bar history. Completed indicator series are available in both modes.</summary>
+    /// <remarks>Full is the default and supports finite snapshot replay. LatestOnly retains
+    /// only the latest finite snapshot. Live feeds continue to enumerate new snapshots in either mode.</remarks>
+    public StockIndicatorBuilder ConfigureHistory(IndicatorHistoryMode mode)
+    {
+        if (!Enum.IsDefined(typeof(IndicatorHistoryMode), mode))
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        _historyMode = mode;
+        return this;
+    }
+
+    private async Task<Indicators.IIndicatorRun> BuildLatestOnlyAsync(CancellationToken cancellationToken = default)
+    {
+        LastExecution = null;
+        cancellationToken.ThrowIfCancellationRequested();
+        var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
+        if (!source.IsFinite) return await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
+#if !NETFRAMEWORK
+        if (_executionBackend != IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
+            && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } direct
+            && Indicators.ValuesBarExecution.Supports(_configuredIndicators))
+        {
+            var values = Indicators.ValuesBarExecution.Execute(direct, _configuredIndicators, cancellationToken);
+            LastExecution = new(IndicatorExecutionBackend.Cpu, null, "CPU values execution without retained bar history.");
+            return values;
+        }
+#endif
+        // Preserve the established route for arbitrary graphs, sources, warmup and
+        // required GPU execution. Do not keep its temporary history in this builder.
+        var previousSource = _configuredSource;
+        try
+        {
+            using var run = await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
+            return ((Indicators.IndicatorRun)run).AsLatestOnly();
+        }
+        catch { LastExecution = null; throw; }
+        finally { _configuredSource = previousSource; }
+    }
     private int _nextId;
+
+    // Legacy execution can invoke customer callbacks which change the typed
+    // configuration. Pilot fusion is restricted to runs without that boundary.
+    private bool CanUseDirectFusedExecution => !_requiresRuntime && _nodes.Count == 0 && _keys.Count == 0
+        && _namedSources.Count == 0 && _indicatorOptions is null && _signalOptions is null
+        && _symbolOptions is null && _dataOptions is null && _backtestOptions is null && _benchmarkOptions is null;
 
     /// <summary>
     /// Creates a new stock indicator builder.
@@ -174,8 +235,14 @@ public sealed class StockIndicatorBuilder
     /// </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown when no source was configured.</exception>
-    public async Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default)
+    public Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default) =>
+        _historyMode == IndicatorHistoryMode.LatestOnly
+            ? BuildLatestOnlyAsync(cancellationToken) : BuildWithHistoryAsync(cancellationToken);
+
+    private async Task<Indicators.IIndicatorRun> BuildWithHistoryAsync(CancellationToken cancellationToken)
     {
+        LastExecution = null;
+        var execution = new IndicatorExecutionInfo(IndicatorExecutionBackend.Cpu, null, "Ordinary CPU graph execution.");
         var source = _barSource ?? throw new InvalidOperationException(
             "No bar source. Call ConfigureSource before BuildAsync.");
 
@@ -183,48 +250,70 @@ public sealed class StockIndicatorBuilder
         // forever. That is exactly what it did.
         if (!source.IsFinite)
         {
-            return await BuildLiveAsync(source, cancellationToken).ConfigureAwait(false);
+            if (_executionBackend == IndicatorExecutionBackend.Gpu)
+                throw new NotSupportedException("GPU execution currently requires a finite array-backed source.");
+            var live = await BuildLiveAsync(source, cancellationToken).ConfigureAwait(false);
+            LastExecution = execution;
+            return live;
         }
 
-        var opens = new List<double>();
-        var highs = new List<double>();
-        var lows = new List<double>();
-        var closes = new List<double>();
-        var volumes = new List<double>();
-        var dates = new List<DateTime>();
-        var bars = new List<Indicators.Bar>();
+        var bars = new Indicators.OwnedBarHistory();
 
-        // Warm-up first, and counted, so the indicators see it but the caller does not. A finite source that
-        // carries warm-up would otherwise either publish it as real bars or not be warmed at all.
+        // Warm-up is consumed first and contributes to state, but not published history.
         var warmupCount = 0;
         await foreach (var bar in source.ReadWarmupAsync(cancellationToken).ConfigureAwait(false))
         {
             Validation.IndicatorInputDomain.Finite.Validate(bar);
-            opens.Add(bar.Open);
-            highs.Add(bar.High);
-            lows.Add(bar.Low);
-            closes.Add(bar.Close);
-            volumes.Add(bar.Volume);
-            dates.Add(bar.Time);
             bars.Add(bar);
             warmupCount++;
         }
 
-        await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
+        var direct = (source as Indicators.ISynchronousBarSource)?.DirectBars;
+        var fused = warmupCount == 0 && direct is not null && CanUseDirectFusedExecution
+            ? Indicators.FusedBarExecution.TryCreate(_configuredIndicators, direct.Length) : null;
+        if (fused is not null)
         {
-            Validation.IndicatorInputDomain.Finite.Validate(bar);
-            opens.Add(bar.Open);
-            highs.Add(bar.High);
-            lows.Add(bar.Low);
-            closes.Add(bar.Close);
-            volumes.Add(bar.Volume);
-            dates.Add(bar.Time);
-            bars.Add(bar);
+            execution = fused.Execute(direct!, bars, cancellationToken, _executionBackend);
+        }
+        else if (_executionBackend == IndicatorExecutionBackend.Gpu)
+        {
+            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin and Asin.Of(Sma) runs without warmup sources or legacy callbacks.");
+        }
+        else if (source is Indicators.ISynchronousBarSource synchronous)
+        {
+            synchronous.AppendValidated(bars, cancellationToken);
+        }
+        else
+        {
+            await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                Validation.IndicatorInputDomain.Finite.Validate(bar);
+                bars.Add(bar);
+            }
         }
 
+        // Custom states read owned bars directly. Defer the legacy column bridge
+        // until a built-in evaluator or component-average calculation requests it.
+        var batch = new Lazy<StockData>(() => CreateOwnedBatch(bars));
+        _configuredSource = IndicatorDataSource.FromValidatedHistory(batch, bars, fused);
 
-        var batch = new StockData(opens, highs, lows, closes, volumes, dates);
-        _configuredSource = IndicatorDataSource.FromBatch(batch);
+        // The typed-only pilot plan already owns its validated history and final
+        // outputs. No legacy graph, callback or option can observe a runtime here.
+        // Retain the source for a later legacy Build(), rather than building that
+        // second graph and runtime speculatively on every typed run.
+        if (fused is not null)
+        {
+            var outputs = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+            var warmup = 0;
+            foreach (var indicator in _configuredIndicators)
+            {
+                var values = fused.Values(indicator);
+                for (var slot = 0; slot < indicator.Outputs.Count; slot++) outputs[indicator.Outputs[slot]] = values[slot];
+                warmup = Math.Max(warmup, Math.Max(indicator.WarmupBars, indicator.Source?.WarmupBars ?? 0));
+            }
+            LastExecution = execution;
+            return new Indicators.IndicatorRun(null, outputs, bars, 0, warmup);
+        }
 
         // Everything reachable, not just what was configured: an indicator used as a component or chained
         // onto still has to be computed, and a built-in one still belongs in the evaluator rather than being
@@ -238,8 +327,13 @@ public sealed class StockIndicatorBuilder
 
         var handles = new Dictionary<Indicators.IIndicator, SeriesHandle[]>(Indicators.IndicatorIdentity.Comparer);
         foreach (var indicator in reachable)
-            if (indicator.Source is null)
-                foreach (var bar in bars) Validation.IndicatorInputDomain.For(indicator).Validate(bar);
+        {
+            if (indicator.Source is not null) continue;
+            var domain = Validation.IndicatorInputDomain.StableFor(indicator);
+            if (ReferenceEquals(domain, Validation.IndicatorInputDomain.Finite)) continue;
+            foreach (var bar in bars)
+                (domain ?? Validation.IndicatorInputDomain.For(indicator)).Validate(bar);
+        }
         foreach (var indicator in reachable)
         {
             Indicators.IndicatorContract.RequireComputable(indicator);
@@ -284,7 +378,8 @@ public sealed class StockIndicatorBuilder
         {
         runtime.Start();
 
-        var engine = new Indicators.CustomIndicatorEngine(bars, resolveBuiltIn: indicator =>
+        Indicators.CustomIndicatorEngine? engine = null;
+        Indicators.CustomIndicatorEngine CreateEngine() => new(bars, resolveBuiltIn: indicator =>
         {
             if (!handles.TryGetValue(indicator, out var slots))
             {
@@ -335,7 +430,7 @@ public sealed class StockIndicatorBuilder
                 // so the first average receives the first component for every published output.
                 using (ComponentAverage.Arm(averages))
                 {
-                    var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
+                    var buffer = IndicatorCompute.TryComputeFast(batch.Value, spec, context);
                     if (buffer is null) return (null, 0);
                     using (buffer.Value)
                     {
@@ -355,12 +450,12 @@ public sealed class StockIndicatorBuilder
                 }
             }
             return requestedAverage ? (outputs, LastAverageRequests) : (null, 0);
-        });
+        }, finiteInputValidated: true);
 
         var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
         foreach (var indicator in _configuredIndicators)
         {
-            var values = engine.Compute(indicator);
+            var values = (engine ??= CreateEngine()).Compute(indicator);
             for (var slot = 0; slot < indicator.Outputs.Count; slot++)
             {
                 // The warm-up primed the states; it is not part of the answer.
@@ -370,8 +465,9 @@ public sealed class StockIndicatorBuilder
             }
         }
 
+        LastExecution = execution;
         return new Indicators.IndicatorRun(
-            runtime, series2, warmupCount == 0 ? bars : bars.Skip(warmupCount).ToList(), warmupCount,
+            runtime, series2, bars.AfterWarmup(warmupCount), warmupCount,
             reachable.Count == 0 ? 0 : reachable.Max(indicator => indicator.WarmupBars));
         }
         catch
@@ -379,6 +475,26 @@ public sealed class StockIndicatorBuilder
             runtime.Dispose();
             throw;
         }
+    }
+
+    private static StockData CreateOwnedBatch(IReadOnlyList<Indicators.Bar> bars)
+    {
+        var opens = new List<double>(bars.Count);
+        var highs = new List<double>(bars.Count);
+        var lows = new List<double>(bars.Count);
+        var closes = new List<double>(bars.Count);
+        var volumes = new List<double>(bars.Count);
+        var dates = new List<DateTime>(bars.Count);
+        foreach (var bar in bars)
+        {
+            opens.Add(bar.Open);
+            highs.Add(bar.High);
+            lows.Add(bar.Low);
+            closes.Add(bar.Close);
+            volumes.Add(bar.Volume);
+            dates.Add(bar.Time);
+        }
+        return StockData.FromOwnedColumns(opens, highs, lows, closes, volumes, dates);
     }
 
     /// <summary>
@@ -609,6 +725,7 @@ public sealed class StockIndicatorBuilder
     /// </summary>
     public StockIndicatorBuilder ConfigureNotifications(Action<NotificationCatalog>? configure = null)
     {
+        _requiresRuntime = true;
         configure?.Invoke(_notifications);
         return this;
     }
@@ -618,6 +735,7 @@ public sealed class StockIndicatorBuilder
     /// </summary>
     public StockIndicatorBuilder ConfigureAutoTrading(Action<AutoTradingCatalog>? configure = null)
     {
+        _requiresRuntime = true;
         configure?.Invoke(_autoTrading);
         return this;
     }
@@ -645,6 +763,7 @@ public sealed class StockIndicatorBuilder
     /// </summary>
     public StockIndicatorBuilder ConfigureBehavior(Action<BehaviorOptions> configure)
     {
+        _requiresRuntime = true;
         configure?.Invoke(_behavior);
         return this;
     }
@@ -652,7 +771,15 @@ public sealed class StockIndicatorBuilder
     /// <summary>
     /// Builds the indicator runtime.
     /// </summary>
-    public IndicatorRuntime Build() => Build(System.Buffers.ArrayPool<double>.Shared);
+    public IndicatorRuntime Build()
+    {
+        if (_executionBackend == IndicatorExecutionBackend.Gpu)
+        {
+            LastExecution = null;
+            throw new NotSupportedException("Required GPU execution is available through BuildAsync only.");
+        }
+        return Build(System.Buffers.ArrayPool<double>.Shared);
+    }
 
     internal IndicatorRuntime Build(System.Buffers.ArrayPool<double> computePool)
     {

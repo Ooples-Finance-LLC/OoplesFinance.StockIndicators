@@ -1,0 +1,80 @@
+[
+  {
+    "case": "Asin-Builder",
+    "pid": 10268,
+    "scope": "whole profiled process including setup and warmup",
+    "metrics": {
+      "Total CPU Time": 14497.0,
+      "Total GC CPU Time": 1965.0,
+      "Total GC Pause": 1454.1,
+      "% Time paused for Garbage Collection": 11.0,
+      "% CPU Time spent Garbage Collecting": 13.6,
+      "Total Allocs": 11827.037
+    }
+  },
+  {
+    "case": "Asin-InPlace",
+    "pid": 22884,
+    "scope": "whole profiled process including setup and warmup",
+    "metrics": {
+      "Total CPU Time": 13833.0,
+      "Total GC CPU Time": 1360.0,
+      "Total GC Pause": 973.1,
+      "% Time paused for Garbage Collection": 7.4,
+      "% CPU Time spent Garbage Collecting": 9.8,
+      "Total Allocs": 11696.754
+    }
+  },
+  {
+    "case": "SmaDecimal-Builder",
+    "pid": 15476,
+    "scope": "whole profiled process including setup and warmup",
+    "metrics": {
+      "Total CPU Time": 14136.0,
+      "Total GC CPU Time": 956.0,
+      "Total GC Pause": 503.8,
+      "% Time paused for Garbage Collection": 3.8,
+      "% CPU Time spent Garbage Collecting": 6.8,
+      "Total Allocs": 10976.193
+    }
+  },
+  {
+    "case": "SmaDecimal-InPlace",
+    "pid": 9448,
+    "scope": "whole profiled process including setup and warmup",
+    "metrics": {
+      "Total CPU Time": 14350.0,
+      "Total GC CPU Time": 1459.0,
+      "Total GC Pause": 766.7,
+      "% Time paused for Garbage Collection": 5.8,
+      "% CPU Time spent Garbage Collecting": 10.2,
+      "Total Allocs": 13331.27
+    }
+  },
+  {
+    "case": "SmaGrid-Builder",
+    "pid": 14828,
+    "scope": "whole profiled process including setup and warmup",
+    "metrics": {
+      "Total CPU Time": 14226.0,
+      "Total GC CPU Time": 1146.0,
+      "Total GC Pause": 612.8,
+      "% Time paused for Garbage Collection": 4.6,
+      "% CPU Time spent Garbage Collecting": 8.1,
+      "Total Allocs": 11402.696
+    }
+  },
+  {
+    "case": "SmaGrid-InPlace",
+    "pid": 16068,
+    "scope": "whole profiled process including setup and warmup",
+    "metrics": {
+      "Total CPU Time": 14429.0,
+      "Total GC CPU Time": 1545.0,
+      "Total GC Pause": 778.8,
+      "% Time paused for Garbage Collection": 5.9,
+      "% CPU Time spent Garbage Collecting": 10.7,
+      "Total Allocs": 15857.936
+    }
+  }
+]

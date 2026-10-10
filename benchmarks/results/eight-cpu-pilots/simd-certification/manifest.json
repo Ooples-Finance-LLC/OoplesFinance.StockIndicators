@@ -1,0 +1,8 @@
+{
+  "baselineCommit": "9637893a",
+  "baselineSha256": "bdfd631b9cfbdc6d2f182182148573d8528d36609d251bf5e4432bd49a3d7103",
+  "initialCandidateSha256": "7fffb7f3bb5e4e38e5be805e900e2772ec250eccf0582a169e7cc61697ed3dfb",
+  "finalProductionSha256": "20da156892681e81feafacb6dee7f76ae89cb41f9293f91ef15572e881b379a4",
+  "validation": "163 affected tests; 86 kernel/full-field tests with DOTNET_EnableHWIntrinsic=0; net8 Release build; net10 Release benchmark build; 27 benchmark statistics validated",
+  "notes": "Only the ProcessInPlace comment changed after final build. Initial candidate excludes SIMD bar validation; final candidate includes it. Final iterations target 500 ms; initial/bracketing runs use 100 ms minimum."
+}

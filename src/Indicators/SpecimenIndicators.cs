@@ -63,7 +63,7 @@ internal static class IndicatorContract
     {
         if (indicator is null) throw new ArgumentNullException(nameof(indicator));
 
-        if (indicator is IBuiltInIndicator)
+        if (indicator is IBuiltInIndicator or IHistoricalIndicator)
         {
             return;
         }

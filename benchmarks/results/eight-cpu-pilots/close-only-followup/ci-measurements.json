@@ -1,0 +1,2203 @@
+[
+  {
+    "bars": 1000,
+    "pair": "QuanTAlib.Sma",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        97291.806640625,
+        93863.783203125,
+        93765.455078125,
+        61184.484375
+      ],
+      "N": 4,
+      "Min": 61184.484375,
+      "LowerFence": 71969.34741210938,
+      "Q1": 85620.21240234375,
+      "Median": 93814.619140625,
+      "Mean": 86526.38232421875,
+      "Q3": 94720.7890625,
+      "UpperFence": 108371.65405273438,
+      "Max": 97291.806640625,
+      "InterquartileRange": 9100.57666015625,
+      "LowerOutliers": [
+        61184.484375
+      ],
+      "UpperOutliers": [],
+      "AllOutliers": [
+        61184.484375
+      ],
+      "StandardError": 8486.9889555278,
+      "Variance": 288115926.1250035,
+      "StandardDeviation": 16973.9779110556,
+      "Skewness": -0.7286017147662527,
+      "Kurtosis": 1.2995665174216664,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 86526.38232421875,
+        "StandardError": 8486.9889555278,
+        "Level": 12,
+        "Margin": 109685.66413319147,
+        "Lower": -23159.281808972723,
+        "Upper": 196212.0464574102
+      },
+      "Percentiles": {
+        "P0": 61184.484375,
+        "P25": 85620.21240234375,
+        "P50": 93814.619140625,
+        "P67": 93898.06343750001,
+        "P80": 95234.992578125,
+        "P85": 95749.19609375001,
+        "P90": 96263.399609375,
+        "P95": 96777.60312500001,
+        "P100": 97291.806640625
+      }
+    },
+    "memory": {
+      "Gen0Collections": 2,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 79984
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "QuanTAlib.Sma",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        51062.404296875,
+        49854.314453125,
+        49292.126953125,
+        49708.8671875
+      ],
+      "N": 4,
+      "Min": 49292.126953125,
+      "LowerFence": 48777.199951171875,
+      "Q1": 49604.68212890625,
+      "Median": 49781.5908203125,
+      "Mean": 49979.42822265625,
+      "Q3": 50156.3369140625,
+      "UpperFence": 50983.819091796875,
+      "Max": 51062.404296875,
+      "InterquartileRange": 551.65478515625,
+      "LowerOutliers": [],
+      "UpperOutliers": [
+        51062.404296875
+      ],
+      "AllOutliers": [
+        51062.404296875
+      ],
+      "StandardError": 380.1399897297336,
+      "Variance": 578025.6471668879,
+      "StandardDeviation": 760.2799794594672,
+      "Skewness": 0.5254846495428342,
+      "Kurtosis": 1.2004122939703745,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 49979.42822265625,
+        "StandardError": 380.1399897297336,
+        "Level": 12,
+        "Margin": 4912.921114376232,
+        "Lower": 45066.50710828002,
+        "Upper": 54892.34933703248
+      },
+      "Percentiles": {
+        "P0": 49292.126953125,
+        "P25": 49604.68212890625,
+        "P50": 49781.5908203125,
+        "P67": 49866.395351562496,
+        "P80": 50337.550390625,
+        "P85": 50518.7638671875,
+        "P90": 50699.97734375,
+        "P95": 50881.1908203125,
+        "P100": 51062.404296875
+      }
+    },
+    "memory": {
+      "Gen0Collections": 6,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 219808
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Skender.GetSma",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        24453.7060546875,
+        23967.0078125,
+        23027.755615234375,
+        23334.09521484375,
+        23195.9423828125
+      ],
+      "N": 5,
+      "Min": 23027.755615234375,
+      "LowerFence": 22039.34423828125,
+      "Q1": 23195.9423828125,
+      "Median": 23334.09521484375,
+      "Mean": 23595.701416015625,
+      "Q3": 23967.0078125,
+      "UpperFence": 25123.60595703125,
+      "Max": 24453.7060546875,
+      "InterquartileRange": 771.0654296875,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 266.91271249200537,
+      "Variance": 356211.9804491997,
+      "StandardDeviation": 596.8349691909814,
+      "Skewness": 0.39308063086537365,
+      "Kurtosis": 1.0958185197358308,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 23595.701416015625,
+        "StandardError": 266.91271249200537,
+        "Level": 12,
+        "Margin": 2298.198945419598,
+        "Lower": 21297.502470596028,
+        "Upper": 25893.900361435222
+      },
+      "Percentiles": {
+        "P0": 23027.755615234375,
+        "P25": 23195.9423828125,
+        "P50": 23334.09521484375,
+        "P67": 23764.475781250003,
+        "P80": 24064.3474609375,
+        "P85": 24161.687109375,
+        "P90": 24259.0267578125,
+        "P95": 24356.36640625,
+        "P100": 24453.7060546875
+      }
+    },
+    "memory": {
+      "Gen0Collections": 19,
+      "Gen1Collections": 3,
+      "Gen2Collections": 0,
+      "TotalOperations": 4096,
+      "BytesAllocatedPerOperation": 79986
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Skender.GetSma",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        47878.672607421875,
+        47926.73388671875,
+        48358.9375,
+        47877.865234375
+      ],
+      "N": 4,
+      "Min": 47877.865234375,
+      "LowerFence": 47643.9997253418,
+      "Q1": 47878.470764160156,
+      "Median": 47902.70324707031,
+      "Mean": 48010.552307128906,
+      "Q3": 48034.78479003906,
+      "UpperFence": 48269.25582885742,
+      "Max": 48358.9375,
+      "InterquartileRange": 156.31402587890625,
+      "LowerOutliers": [],
+      "UpperOutliers": [
+        48358.9375
+      ],
+      "AllOutliers": [
+        48358.9375
+      ],
+      "StandardError": 116.68900429585615,
+      "Variance": 54465.294894233346,
+      "StandardDeviation": 233.3780085917123,
+      "Skewness": 0.7290075957083175,
+      "Kurtosis": 1.2972526866085334,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 48010.552307128906,
+        "StandardError": 116.68900429585615,
+        "Level": 12,
+        "Margin": 1508.0862011603556,
+        "Lower": 46502.46610596855,
+        "Upper": 49518.63850828926
+      },
+      "Percentiles": {
+        "P0": 47877.865234375,
+        "P25": 47878.470764160156,
+        "P50": 47902.70324707031,
+        "P67": 47931.05592285156,
+        "P80": 48099.61533203125,
+        "P85": 48164.44587402344,
+        "P90": 48229.27641601562,
+        "P95": 48294.10695800781,
+        "P100": 48358.9375
+      }
+    },
+    "memory": {
+      "Gen0Collections": 20,
+      "Gen1Collections": 1,
+      "Gen2Collections": 0,
+      "TotalOperations": 4096,
+      "BytesAllocatedPerOperation": 84546
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Skender.GetSma.Tuple",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        24252.7705078125,
+        24707.5068359375,
+        24881.8603515625,
+        24831.347900390625,
+        24610.789306640625
+      ],
+      "N": 5,
+      "Min": 24252.7705078125,
+      "LowerFence": 24279.951416015625,
+      "Q1": 24610.789306640625,
+      "Median": 24707.5068359375,
+      "Mean": 24656.85498046875,
+      "Q3": 24831.347900390625,
+      "UpperFence": 25162.185791015625,
+      "Max": 24881.8603515625,
+      "InterquartileRange": 220.55859375,
+      "LowerOutliers": [
+        24252.7705078125
+      ],
+      "UpperOutliers": [],
+      "AllOutliers": [
+        24252.7705078125
+      ],
+      "StandardError": 111.5901236520159,
+      "Variance": 62261.778483361006,
+      "StandardDeviation": 249.52310210351467,
+      "Skewness": -0.6339451363036064,
+      "Kurtosis": 1.5561878929275648,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 24656.85498046875,
+        "StandardError": 111.5901236520159,
+        "Level": 12,
+        "Margin": 960.8246160399233,
+        "Lower": 23696.030364428825,
+        "Upper": 25617.679596508675
+      },
+      "Percentiles": {
+        "P0": 24252.7705078125,
+        "P25": 24610.789306640625,
+        "P50": 24707.5068359375,
+        "P67": 24791.718759765627,
+        "P80": 24841.450390625,
+        "P85": 24851.552880859374,
+        "P90": 24861.65537109375,
+        "P95": 24871.757861328126,
+        "P100": 24881.8603515625
+      }
+    },
+    "memory": {
+      "Gen0Collections": 19,
+      "Gen1Collections": 3,
+      "Gen2Collections": 0,
+      "TotalOperations": 4096,
+      "BytesAllocatedPerOperation": 80042
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Skender.GetSma.Tuple",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        50307.80322265625,
+        50129.9443359375,
+        50160.76416015625,
+        50289.22314453125,
+        50493.2197265625
+      ],
+      "N": 5,
+      "Min": 50129.9443359375,
+      "LowerFence": 49940.20556640625,
+      "Q1": 50160.76416015625,
+      "Median": 50289.22314453125,
+      "Mean": 50276.19091796875,
+      "Q3": 50307.80322265625,
+      "UpperFence": 50528.36181640625,
+      "Max": 50493.2197265625,
+      "InterquartileRange": 147.0390625,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 64.41353882196773,
+      "Variance": 20745.519917845726,
+      "StandardDeviation": 144.0330514772416,
+      "Skewness": 0.37418417338169285,
+      "Kurtosis": 1.3265310993481874,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 50276.19091796875,
+        "StandardError": 64.41353882196773,
+        "Level": 12,
+        "Margin": 554.6199939645983,
+        "Lower": 49721.570924004154,
+        "Upper": 50830.810911933346
+      },
+      "Percentiles": {
+        "P0": 50129.9443359375,
+        "P25": 50160.76416015625,
+        "P50": 50289.22314453125,
+        "P67": 50301.85759765625,
+        "P80": 50344.8865234375,
+        "P85": 50381.96982421875,
+        "P90": 50419.053125,
+        "P95": 50456.13642578125,
+        "P100": 50493.2197265625
+      }
+    },
+    "memory": {
+      "Gen0Collections": 11,
+      "Gen1Collections": 1,
+      "Gen2Collections": 0,
+      "TotalOperations": 2048,
+      "BytesAllocatedPerOperation": 92404
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "TaLib.Functions.Sma",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        22881.76318359375,
+        23493.611328125,
+        23651.204833984375,
+        23507.255004882812,
+        23355.492919921875
+      ],
+      "N": 5,
+      "Min": 22881.76318359375,
+      "LowerFence": 23127.84979248047,
+      "Q1": 23355.492919921875,
+      "Median": 23493.611328125,
+      "Mean": 23377.865454101564,
+      "Q3": 23507.255004882812,
+      "UpperFence": 23734.89813232422,
+      "Max": 23651.204833984375,
+      "InterquartileRange": 151.7620849609375,
+      "LowerOutliers": [
+        22881.76318359375
+      ],
+      "UpperOutliers": [],
+      "AllOutliers": [
+        22881.76318359375
+      ],
+      "StandardError": 132.56529954859448,
+      "Variance": 87867.7932220429,
+      "StandardDeviation": 296.42502124827945,
+      "Skewness": -0.7522889004368999,
+      "Kurtosis": 1.7256373665507188,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 23377.865454101564,
+        "StandardError": 132.56529954859448,
+        "Level": 12,
+        "Margin": 1141.4272058358338,
+        "Lower": 22236.43824826573,
+        "Upper": 24519.292659937397
+      },
+      "Percentiles": {
+        "P0": 22881.76318359375,
+        "P25": 23355.492919921875,
+        "P50": 23493.611328125,
+        "P67": 23502.88902832031,
+        "P80": 23536.044970703126,
+        "P85": 23564.83493652344,
+        "P90": 23593.62490234375,
+        "P95": 23622.41486816406,
+        "P100": 23651.204833984375
+      }
+    },
+    "memory": {
+      "Gen0Collections": 39,
+      "Gen1Collections": 7,
+      "Gen2Collections": 0,
+      "TotalOperations": 8192,
+      "BytesAllocatedPerOperation": 79985
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "TaLib.Functions.Sma",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        2432.6897201538086,
+        2387.2983322143555,
+        2415.104331970215,
+        2372.6877365112305,
+        2371.3110885620117
+      ],
+      "N": 5,
+      "Min": 2371.3110885620117,
+      "LowerFence": 2309.062843322754,
+      "Q1": 2372.6877365112305,
+      "Median": 2387.2983322143555,
+      "Mean": 2395.8182418823244,
+      "Q3": 2415.104331970215,
+      "UpperFence": 2478.7292251586914,
+      "Max": 2432.6897201538086,
+      "InterquartileRange": 42.416595458984375,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 12.123672884362694,
+      "Variance": 734.9172210351563,
+      "StandardDeviation": 27.109356706405933,
+      "Skewness": 0.2970192157796879,
+      "Kurtosis": 0.9771620825561605,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 2395.8182418823244,
+        "StandardError": 12.123672884362694,
+        "Level": 12,
+        "Margin": 104.38847957940207,
+        "Lower": 2291.4297623029224,
+        "Upper": 2500.2067214617264
+      },
+      "Percentiles": {
+        "P0": 2371.3110885620117,
+        "P25": 2372.6877365112305,
+        "P50": 2387.2983322143555,
+        "P67": 2406.2064120483396,
+        "P80": 2418.6214096069334,
+        "P85": 2422.1384872436524,
+        "P90": 2425.6555648803715,
+        "P95": 2429.17264251709,
+        "P100": 2432.6897201538086
+      }
+    },
+    "memory": {
+      "Gen0Collections": 31,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 65536,
+      "BytesAllocatedPerOperation": 8056
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Trady.Indicator.SimpleMovingAverage",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        23123.708984375,
+        23169.10595703125,
+        23080.242431640625,
+        23163.44580078125,
+        23125.34423828125
+      ],
+      "N": 5,
+      "Min": 23080.242431640625,
+      "LowerFence": 23064.103759765625,
+      "Q1": 23123.708984375,
+      "Median": 23125.34423828125,
+      "Mean": 23132.369482421876,
+      "Q3": 23163.44580078125,
+      "UpperFence": 23223.051025390625,
+      "Max": 23169.10595703125,
+      "InterquartileRange": 39.73681640625,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 16.057543140693735,
+      "Variance": 1289.2234585762023,
+      "StandardDeviation": 35.90575801422666,
+      "Skewness": -0.2723990150019359,
+      "Kurtosis": 1.2207928636243892,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 23132.369482421876,
+        "StandardError": 16.057543140693735,
+        "Level": 12,
+        "Margin": 138.26028879414045,
+        "Lower": 22994.109193627737,
+        "Upper": 23270.629771216016
+      },
+      "Percentiles": {
+        "P0": 23080.242431640625,
+        "P25": 23123.708984375,
+        "P50": 23125.34423828125,
+        "P67": 23151.25330078125,
+        "P80": 23164.577832031253,
+        "P85": 23165.70986328125,
+        "P90": 23166.84189453125,
+        "P95": 23167.973925781247,
+        "P100": 23169.10595703125
+      }
+    },
+    "memory": {
+      "Gen0Collections": 19,
+      "Gen1Collections": 3,
+      "Gen2Collections": 0,
+      "TotalOperations": 4096,
+      "BytesAllocatedPerOperation": 79986
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Trady.Indicator.SimpleMovingAverage",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        828073.875,
+        839393.59375,
+        821432.34375,
+        820674.46875
+      ],
+      "N": 4,
+      "Min": 820674.46875,
+      "LowerFence": 806751.48046875,
+      "Q1": 821242.875,
+      "Median": 824753.109375,
+      "Mean": 827393.5703125,
+      "Q3": 830903.8046875,
+      "UpperFence": 845395.19921875,
+      "Max": 839393.59375,
+      "InterquartileRange": 9660.9296875,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 4331.530954380038,
+      "Variance": 75048641.63500977,
+      "StandardDeviation": 8663.061908760075,
+      "Skewness": 0.4664849807378294,
+      "Kurtosis": 1.066944052237106,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 827393.5703125,
+        "StandardError": 4331.530954380038,
+        "Level": 12,
+        "Margin": 55980.61361152137,
+        "Lower": 771412.9567009787,
+        "Upper": 883374.1839240213
+      },
+      "Percentiles": {
+        "P0": 820674.46875,
+        "P25": 821242.875,
+        "P50": 824753.109375,
+        "P67": 828187.0721875001,
+        "P80": 832601.7625,
+        "P85": 834299.7203124999,
+        "P90": 835997.678125,
+        "P95": 837695.6359374999,
+        "P100": 839393.59375
+      }
+    },
+    "memory": {
+      "Gen0Collections": 1,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 32,
+      "BytesAllocatedPerOperation": 772940
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        23230.3193359375,
+        23250.56982421875,
+        23258.19384765625,
+        23207.207275390625
+      ],
+      "N": 4,
+      "Min": 23207.207275390625,
+      "LowerFence": 23182.639556884766,
+      "Q1": 23224.54132080078,
+      "Median": 23240.444580078125,
+      "Mean": 23236.57257080078,
+      "Q3": 23252.475830078125,
+      "UpperFence": 23294.37759399414,
+      "Max": 23258.19384765625,
+      "InterquartileRange": 27.93450927734375,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 11.4193776716333,
+      "Variance": 521.6087456295887,
+      "StandardDeviation": 22.8387553432666,
+      "Skewness": -0.26687315218255064,
+      "Kurtosis": 0.9207445990106492,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 23236.57257080078,
+        "StandardError": 11.4193776716333,
+        "Level": 12,
+        "Margin": 147.58379331753724,
+        "Lower": 23088.988777483242,
+        "Upper": 23384.15636411832
+      },
+      "Percentiles": {
+        "P0": 23207.207275390625,
+        "P25": 23224.54132080078,
+        "P50": 23240.444580078125,
+        "P67": 23250.646064453125,
+        "P80": 23253.61943359375,
+        "P85": 23254.763037109376,
+        "P90": 23255.906640625,
+        "P95": 23257.050244140628,
+        "P100": 23258.19384765625
+      }
+    },
+    "memory": {
+      "Gen0Collections": 19,
+      "Gen1Collections": 3,
+      "Gen2Collections": 0,
+      "TotalOperations": 4096,
+      "BytesAllocatedPerOperation": 80082
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        451989.92578125,
+        451771.1953125,
+        452754.95703125,
+        450093.62890625
+      ],
+      "N": 4,
+      "Min": 450093.62890625,
+      "LowerFence": 450107.73388671875,
+      "Q1": 451351.8037109375,
+      "Median": 451880.560546875,
+      "Mean": 451652.4267578125,
+      "Q3": 452181.18359375,
+      "UpperFence": 453425.25341796875,
+      "Max": 452754.95703125,
+      "InterquartileRange": 829.3798828125,
+      "LowerOutliers": [
+        450093.62890625
+      ],
+      "UpperOutliers": [],
+      "AllOutliers": [
+        450093.62890625
+      ],
+      "StandardError": 560.7610384027123,
+      "Variance": 1257811.7687619526,
+      "StandardDeviation": 1121.5220768054246,
+      "Skewness": -0.42662928180414417,
+      "Kurtosis": 1.1685434670703894,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 451652.4267578125,
+        "StandardError": 560.7610384027123,
+        "Level": 12,
+        "Margin": 7247.263692638384,
+        "Lower": 444405.1630651741,
+        "Upper": 458899.6904504509
+      },
+      "Percentiles": {
+        "P0": 450093.62890625,
+        "P25": 451351.8037109375,
+        "P50": 451880.560546875,
+        "P67": 451997.57609375,
+        "P80": 452295.93828125,
+        "P85": 452410.69296875,
+        "P90": 452525.44765625003,
+        "P95": 452640.20234375,
+        "P100": 452754.95703125
+      }
+    },
+    "memory": {
+      "Gen0Collections": 7,
+      "Gen1Collections": 2,
+      "Gen2Collections": 0,
+      "TotalOperations": 256,
+      "BytesAllocatedPerOperation": 493701
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "QuanTAlib.Sma",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        223808.16015625,
+        220401.701171875,
+        223863.263671875,
+        220816.73828125,
+        220639.255859375
+      ],
+      "N": 5,
+      "Min": 220401.701171875,
+      "LowerFence": 215885.8994140625,
+      "Q1": 220639.255859375,
+      "Median": 220816.73828125,
+      "Mean": 221905.823828125,
+      "Q3": 223808.16015625,
+      "UpperFence": 228561.5166015625,
+      "Max": 223863.263671875,
+      "InterquartileRange": 3168.904296875,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 790.6687346836286,
+      "Variance": 3125785.2400310514,
+      "StandardDeviation": 1767.9890384363393,
+      "Skewness": 0.2771412992452691,
+      "Kurtosis": 0.7548396152143622,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 221905.823828125,
+        "StandardError": 790.6687346836286,
+        "Level": 12,
+        "Margin": 6807.8962416621125,
+        "Lower": 215097.92758646287,
+        "Upper": 228713.72006978712
+      },
+      "Percentiles": {
+        "P0": 220401.701171875,
+        "P25": 220639.255859375,
+        "P50": 220816.73828125,
+        "P67": 222850.90515625,
+        "P80": 223819.180859375,
+        "P85": 223830.20156249998,
+        "P90": 223841.22226562502,
+        "P95": 223852.24296875,
+        "P100": 223863.263671875
+      }
+    },
+    "memory": {
+      "Gen0Collections": 22,
+      "Gen1Collections": 7,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 728458
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "QuanTAlib.Sma",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        529911.00390625,
+        524728.609375,
+        516992.16406250006,
+        506263.453125,
+        512690.60546875006
+      ],
+      "N": 5,
+      "Min": 506263.453125,
+      "LowerFence": 494633.5996093751,
+      "Q1": 512690.60546875006,
+      "Median": 516992.16406250006,
+      "Mean": 518117.1671875,
+      "Q3": 524728.609375,
+      "UpperFence": 542785.6152343749,
+      "Max": 529911.00390625,
+      "InterquartileRange": 12038.003906249942,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 4207.312048929593,
+      "Variance": 88507373.38534069,
+      "StandardDeviation": 9407.835743960493,
+      "Skewness": 0.02465776951030783,
+      "Kurtosis": 1.0689895259354443,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 518117.1671875,
+        "StandardError": 4207.312048929593,
+        "Level": 12,
+        "Margin": 36226.22550880103,
+        "Lower": 481890.941678699,
+        "Upper": 554343.392696301
+      },
+      "Percentiles": {
+        "P0": 506263.453125,
+        "P25": 512690.60546875006,
+        "P50": 516992.16406250006,
+        "P67": 522252.946875,
+        "P80": 525765.08828125,
+        "P85": 526801.5671875,
+        "P90": 527838.04609375,
+        "P95": 528874.525,
+        "P100": 529911.00390625
+      }
+    },
+    "memory": {
+      "Gen0Collections": 34,
+      "Gen1Collections": 6,
+      "Gen2Collections": 0,
+      "TotalOperations": 256,
+      "BytesAllocatedPerOperation": 2225029
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Skender.GetSma",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        218031.119140625,
+        217698.447265625,
+        220013.318359375,
+        220635.759765625,
+        222739.943359375
+      ],
+      "N": 5,
+      "Min": 217698.447265625,
+      "LowerFence": 214124.158203125,
+      "Q1": 218031.119140625,
+      "Median": 220013.318359375,
+      "Mean": 219823.717578125,
+      "Q3": 220635.759765625,
+      "UpperFence": 224542.720703125,
+      "Max": 222739.943359375,
+      "InterquartileRange": 2604.640625,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 920.0520864896415,
+      "Variance": 4232479.209269715,
+      "StandardDeviation": 2057.2990082313545,
+      "Skewness": 0.2293027504024627,
+      "Kurtosis": 1.1553914328748522,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 219823.717578125,
+        "StandardError": 920.0520864896415,
+        "Level": 12,
+        "Margin": 7921.9259178782195,
+        "Lower": 211901.7916602468,
+        "Upper": 227745.64349600323
+      },
+      "Percentiles": {
+        "P0": 217698.447265625,
+        "P25": 218031.119140625,
+        "P50": 220013.318359375,
+        "P67": 220436.578515625,
+        "P80": 221056.59648437498,
+        "P85": 221477.43320312502,
+        "P90": 221898.269921875,
+        "P95": 222319.106640625,
+        "P100": 222739.943359375
+      }
+    },
+    "memory": {
+      "Gen0Collections": 22,
+      "Gen1Collections": 7,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 728458
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Skender.GetSma",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        664185.015625,
+        646369.51171875,
+        645766.1953125,
+        637995.5390625,
+        656153.3828125
+      ],
+      "N": 5,
+      "Min": 637995.5390625,
+      "LowerFence": 630185.4140625,
+      "Q1": 645766.1953125,
+      "Median": 646369.51171875,
+      "Mean": 650093.92890625,
+      "Q3": 656153.3828125,
+      "UpperFence": 671734.1640625,
+      "Max": 664185.015625,
+      "InterquartileRange": 10387.1875,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 4551.083963264531,
+      "Variance": 103561826.20341797,
+      "StandardDeviation": 10176.533113168647,
+      "Skewness": 0.2119406124633267,
+      "Kurtosis": 1.1699968196886132,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 650093.92890625,
+        "StandardError": 4551.083963264531,
+        "Level": 12,
+        "Margin": 39186.20535994092,
+        "Lower": 610907.7235463092,
+        "Upper": 689280.1342661909
+      },
+      "Percentiles": {
+        "P0": 637995.5390625,
+        "P25": 645766.1953125,
+        "P50": 646369.51171875,
+        "P67": 653022.5440625,
+        "P80": 657759.7093750001,
+        "P85": 659366.0359375,
+        "P90": 660972.3625,
+        "P95": 662578.6890624999,
+        "P100": 664185.015625
+      }
+    },
+    "memory": {
+      "Gen0Collections": 16,
+      "Gen1Collections": 9,
+      "Gen2Collections": 6,
+      "TotalOperations": 256,
+      "BytesAllocatedPerOperation": 840822
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Skender.GetSma.Tuple",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        209862.13671875,
+        214897.3984375,
+        212447.69921875,
+        217373.73046875
+      ],
+      "N": 4,
+      "Min": 209862.13671875,
+      "LowerFence": 206228.54931640625,
+      "Q1": 211801.30859375,
+      "Median": 213672.548828125,
+      "Mean": 213645.2412109375,
+      "Q3": 215516.4814453125,
+      "UpperFence": 221089.24072265625,
+      "Max": 217373.73046875,
+      "InterquartileRange": 3715.1728515625,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 1612.8524495315112,
+      "Variance": 10405172.095839182,
+      "StandardDeviation": 3225.7048990630224,
+      "Skewness": -0.015384025022191728,
+      "Kurtosis": 0.9296414994253828,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 213645.2412109375,
+        "StandardError": 1612.8524495315112,
+        "Level": 12,
+        "Margin": 20844.470636489328,
+        "Lower": 192800.77057444816,
+        "Upper": 234489.71184742684
+      },
+      "Percentiles": {
+        "P0": 209862.13671875,
+        "P25": 211801.30859375,
+        "P50": 213672.548828125,
+        "P67": 214922.16175781252,
+        "P80": 215887.93125,
+        "P85": 216259.3810546875,
+        "P90": 216630.83085937498,
+        "P95": 217002.28066406248,
+        "P100": 217373.73046875
+      }
+    },
+    "memory": {
+      "Gen0Collections": 22,
+      "Gen1Collections": 7,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 728514
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Skender.GetSma.Tuple",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        717489.99609375,
+        757373.25390625,
+        702335.703125,
+        757474.65234375,
+        747183.7578125
+      ],
+      "N": 5,
+      "Min": 702335.703125,
+      "LowerFence": 657665.109375,
+      "Q1": 717489.99609375,
+      "Median": 747183.7578125,
+      "Mean": 736371.47265625,
+      "Q3": 757373.25390625,
+      "UpperFence": 817198.140625,
+      "Max": 757474.65234375,
+      "InterquartileRange": 39883.2578125,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 11221.114658670123,
+      "Variance": 629567070.9151077,
+      "StandardDeviation": 25091.175160105748,
+      "Skewness": -0.3321487350956218,
+      "Kurtosis": 0.9464317047925515,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 736371.47265625,
+        "StandardError": 11221.114658670123,
+        "Level": 12,
+        "Margin": 96617.18107847894,
+        "Lower": 639754.2915777711,
+        "Upper": 832988.6537347289
+      },
+      "Percentiles": {
+        "P0": 702335.703125,
+        "P25": 717489.99609375,
+        "P50": 747183.7578125,
+        "P67": 754112.6151562501,
+        "P80": 757393.5335937501,
+        "P85": 757413.81328125,
+        "P90": 757434.09296875,
+        "P95": 757454.3726562499,
+        "P100": 757474.65234375
+      }
+    },
+    "memory": {
+      "Gen0Collections": 22,
+      "Gen1Collections": 16,
+      "Gen2Collections": 13,
+      "TotalOperations": 256,
+      "BytesAllocatedPerOperation": 921004
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "TaLib.Functions.Sma",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        227993.431640625,
+        226122.533203125,
+        230774.0859375,
+        226715.93359375,
+        230879.63671875
+      ],
+      "N": 5,
+      "Min": 226122.533203125,
+      "LowerFence": 220628.705078125,
+      "Q1": 226715.93359375,
+      "Median": 227993.431640625,
+      "Mean": 228497.12421875,
+      "Q3": 230774.0859375,
+      "UpperFence": 236861.314453125,
+      "Max": 230879.63671875,
+      "InterquartileRange": 4058.15234375,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 998.1470139373827,
+      "Variance": 4981487.307160568,
+      "StandardDeviation": 2231.924574702418,
+      "Skewness": 0.11081930526161249,
+      "Kurtosis": 0.8142221185811949,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 228497.12421875,
+        "StandardError": 998.1470139373827,
+        "Level": 12,
+        "Margin": 8594.346793704412,
+        "Lower": 219902.77742504558,
+        "Upper": 237091.4710124544
+      },
+      "Percentiles": {
+        "P0": 226122.533203125,
+        "P25": 226715.93359375,
+        "P50": 227993.431640625,
+        "P67": 229884.2765625,
+        "P80": 230795.19609375,
+        "P85": 230816.30625,
+        "P90": 230837.41640625,
+        "P95": 230858.5265625,
+        "P100": 230879.63671875
+      }
+    },
+    "memory": {
+      "Gen0Collections": 22,
+      "Gen1Collections": 7,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 728458
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "TaLib.Functions.Sma",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        23120.50439453125,
+        23094.872802734375,
+        22777.599853515625,
+        22834.685913085938,
+        23009.057006835938
+      ],
+      "N": 5,
+      "Min": 22777.599853515625,
+      "LowerFence": 22444.40557861328,
+      "Q1": 22834.685913085938,
+      "Median": 23009.057006835938,
+      "Mean": 22967.343994140625,
+      "Q3": 23094.872802734375,
+      "UpperFence": 23485.15313720703,
+      "Max": 23120.50439453125,
+      "InterquartileRange": 260.1868896484375,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 68.9429786373888,
+      "Variance": 23765.67151697725,
+      "StandardDeviation": 154.1611868045172,
+      "Skewness": -0.1870412661405759,
+      "Kurtosis": 0.8582451014300736,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 22967.343994140625,
+        "StandardError": 68.9429786373888,
+        "Level": 12,
+        "Margin": 593.6198366845439,
+        "Lower": 22373.72415745608,
+        "Upper": 23560.96383082517
+      },
+      "Percentiles": {
+        "P0": 22777.599853515625,
+        "P25": 22834.685913085938,
+        "P50": 23009.057006835938,
+        "P67": 23067.411748046874,
+        "P80": 23099.99912109375,
+        "P85": 23105.125439453128,
+        "P90": 23110.251757812497,
+        "P95": 23115.378076171874,
+        "P100": 23120.50439453125
+      }
+    },
+    "memory": {
+      "Gen0Collections": 39,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 8192,
+      "BytesAllocatedPerOperation": 80057
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Trady.Indicator.SimpleMovingAverage",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        224781.47265625,
+        220196.123046875,
+        217830.72265625,
+        225949.33203125,
+        221611.515625
+      ],
+      "N": 5,
+      "Min": 217830.72265625,
+      "LowerFence": 213318.0986328125,
+      "Q1": 220196.123046875,
+      "Median": 221611.515625,
+      "Mean": 222073.833203125,
+      "Q3": 224781.47265625,
+      "UpperFence": 231659.4970703125,
+      "Max": 225949.33203125,
+      "InterquartileRange": 4585.349609375,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 1484.8286544555724,
+      "Variance": 11023580.66546173,
+      "StandardDeviation": 3320.177806302206,
+      "Skewness": -0.027614980683654256,
+      "Kurtosis": 1.0137542850313876,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 222073.833203125,
+        "StandardError": 1484.8286544555724,
+        "Level": 12,
+        "Margin": 12784.822483495638,
+        "Lower": 209289.01071962935,
+        "Upper": 234858.65568662062
+      },
+      "Percentiles": {
+        "P0": 217830.72265625,
+        "P25": 220196.123046875,
+        "P50": 221611.515625,
+        "P67": 223767.08640625002,
+        "P80": 225015.04453125,
+        "P85": 225248.61640625,
+        "P90": 225482.18828124998,
+        "P95": 225715.76015624998,
+        "P100": 225949.33203125
+      }
+    },
+    "memory": {
+      "Gen0Collections": 22,
+      "Gen1Collections": 7,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 728458
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Trady.Indicator.SimpleMovingAverage",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        9098468.25,
+        8766602.25,
+        8717915,
+        8911950.416666666,
+        8851624.583333334
+      ],
+      "N": 5,
+      "Min": 8717915,
+      "LowerFence": 8548580,
+      "Q1": 8766602.25,
+      "Median": 8851624.583333334,
+      "Mean": 8869312.1,
+      "Q3": 8911950.416666666,
+      "UpperFence": 9129972.666666664,
+      "Max": 9098468.25,
+      "InterquartileRange": 145348.16666666605,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 66375.37591315602,
+      "Variance": 22028452638.063866,
+      "StandardDeviation": 148419.85257391905,
+      "Skewness": 0.4619633089341585,
+      "Kurtosis": 1.4003565111691993,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 8869312.1,
+        "StandardError": 66375.37591315602,
+        "Level": 12,
+        "Margin": 571512.0029362168,
+        "Lower": 8297800.097063783,
+        "Upper": 9440824.102936216
+      },
+      "Percentiles": {
+        "P0": 8717915,
+        "P25": 8766602.25,
+        "P50": 8851624.583333334,
+        "P67": 8892646.149999999,
+        "P80": 8949253.983333332,
+        "P85": 8986557.549999999,
+        "P90": 9023861.116666667,
+        "P95": 9061164.683333334,
+        "P100": 9098468.25
+      }
+    },
+    "memory": {
+      "Gen0Collections": 5,
+      "Gen1Collections": 3,
+      "Gen2Collections": 1,
+      "TotalOperations": 12,
+      "BytesAllocatedPerOperation": 7637946
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        231326.0205078125,
+        228530.7119140625,
+        227540.8642578125,
+        230318.1318359375,
+        225055.3173828125
+      ],
+      "N": 5,
+      "Min": 225055.3173828125,
+      "LowerFence": 223374.962890625,
+      "Q1": 227540.8642578125,
+      "Median": 228530.7119140625,
+      "Mean": 228554.2091796875,
+      "Q3": 230318.1318359375,
+      "UpperFence": 234484.033203125,
+      "Max": 231326.0205078125,
+      "InterquartileRange": 2777.267578125,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 1096.9053066325962,
+      "Variance": 6016006.25859375,
+      "StandardDeviation": 2452.754830510736,
+      "Skewness": -0.2316501955052437,
+      "Kurtosis": 1.2137128192578883,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 228554.2091796875,
+        "StandardError": 1096.9053066325962,
+        "Level": 12,
+        "Margin": 9444.685475607312,
+        "Lower": 219109.52370408017,
+        "Upper": 237998.8946552948
+      },
+      "Percentiles": {
+        "P0": 225055.3173828125,
+        "P25": 227540.8642578125,
+        "P50": 228530.7119140625,
+        "P67": 229746.1574609375,
+        "P80": 230519.70957031252,
+        "P85": 230721.28730468752,
+        "P90": 230922.8650390625,
+        "P95": 231124.4427734375,
+        "P100": 231326.0205078125
+      }
+    },
+    "memory": {
+      "Gen0Collections": 22,
+      "Gen1Collections": 7,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 728554
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        5480379.453125,
+        5321039.921875,
+        5486950.640625,
+        5274306.171875,
+        5127946.234375
+      ],
+      "N": 5,
+      "Min": 5127946.234375,
+      "LowerFence": 4965196.25,
+      "Q1": 5274306.171875,
+      "Median": 5321039.921875,
+      "Mean": 5338124.484375,
+      "Q3": 5480379.453125,
+      "UpperFence": 5789489.375,
+      "Max": 5486950.640625,
+      "InterquartileRange": 206073.28125,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 67425.980518432,
+      "Variance": 22731314244.359863,
+      "StandardDeviation": 150769.07588879048,
+      "Skewness": -0.1969190069988249,
+      "Kurtosis": 1.1101711377627048,
+      "ConfidenceInterval": {
+        "N": 5,
+        "Mean": 5338124.484375,
+        "StandardError": 67425.980518432,
+        "Level": 12,
+        "Margin": 580558.0254105886,
+        "Lower": 4757566.458964411,
+        "Upper": 5918682.509785589
+      },
+      "Percentiles": {
+        "P0": 5127946.234375,
+        "P25": 5274306.171875,
+        "P50": 5321039.921875,
+        "P67": 5429390.803125,
+        "P80": 5481693.690625,
+        "P85": 5483007.928125,
+        "P90": 5484322.165625,
+        "P95": 5485636.403125,
+        "P100": 5486950.640625
+      }
+    },
+    "memory": {
+      "Gen0Collections": 14,
+      "Gen1Collections": 8,
+      "Gen2Collections": 8,
+      "TotalOperations": 32,
+      "BytesAllocatedPerOperation": 4840004
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "TaLib.Functions.Asin",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        46699.892578125,
+        46874.005859375,
+        46780.8046875,
+        46518.380859375
+      ],
+      "N": 4,
+      "Min": 46518.380859375,
+      "LowerFence": 46430.129150390625,
+      "Q1": 46654.5146484375,
+      "Median": 46740.3486328125,
+      "Mean": 46718.27099609375,
+      "Q3": 46804.10498046875,
+      "UpperFence": 47028.490478515625,
+      "Max": 46874.005859375,
+      "InterquartileRange": 149.59033203125,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 75.53015027490477,
+      "Variance": 22819.21440219879,
+      "StandardDeviation": 151.06030054980954,
+      "Skewness": -0.28802688288425055,
+      "Kurtosis": 1.0562934686782852,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 46718.27099609375,
+        "StandardError": 75.53015027490477,
+        "Level": 12,
+        "Margin": 976.1500501996908,
+        "Lower": 45742.12094589406,
+        "Upper": 47694.42104629344
+      },
+      "Percentiles": {
+        "P0": 46518.380859375,
+        "P25": 46654.5146484375,
+        "P50": 46740.3486328125,
+        "P67": 46781.736699218745,
+        "P80": 46818.08515625,
+        "P85": 46832.06533203125,
+        "P90": 46846.045507812494,
+        "P95": 46860.02568359375,
+        "P100": 46874.005859375
+      }
+    },
+    "memory": {
+      "Gen0Collections": 2,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 69690
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 1000,
+    "pair": "TaLib.Functions.Asin",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        13490.117797851562,
+        13277.307006835938,
+        13268.107666015625,
+        13289.55029296875
+      ],
+      "N": 4,
+      "Min": 13268.107666015625,
+      "LowerFence": 13177.979675292969,
+      "Q1": 13275.00717163086,
+      "Median": 13283.428649902344,
+      "Mean": 13331.270690917969,
+      "Q3": 13339.692169189453,
+      "UpperFence": 13436.719665527344,
+      "Max": 13490.117797851562,
+      "InterquartileRange": 64.68499755859375,
+      "LowerOutliers": [],
+      "UpperOutliers": [
+        13490.117797851562
+      ],
+      "AllOutliers": [
+        13490.117797851562
+      ],
+      "StandardError": 53.13084626712709,
+      "Variance": 11291.54730024437,
+      "StandardDeviation": 106.26169253425418,
+      "Skewness": 0.7347397965061448,
+      "Kurtosis": 1.3021680262914532,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 13331.270690917969,
+        "StandardError": 53.13084626712709,
+        "Level": 12,
+        "Margin": 686.6619232457705,
+        "Lower": 12644.608767672198,
+        "Upper": 14017.93261416374
+      },
+      "Percentiles": {
+        "P0": 13268.107666015625,
+        "P25": 13275.00717163086,
+        "P50": 13283.428649902344,
+        "P67": 13291.55596801758,
+        "P80": 13369.777294921874,
+        "P85": 13399.862420654295,
+        "P90": 13429.947546386718,
+        "P95": 13460.03267211914,
+        "P100": 13490.117797851562
+      }
+    },
+    "memory": {
+      "Gen0Collections": 3,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 8192,
+      "BytesAllocatedPerOperation": 8057
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "TaLib.Functions.Asin",
+    "method": "OoplesBuilderBatch",
+    "statistics": {
+      "OriginalValues": [
+        288716.931640625,
+        282882.712890625,
+        284779.478515625,
+        291821.3203125
+      ],
+      "N": 4,
+      "Min": 282882.712890625,
+      "LowerFence": 276523.6745605469,
+      "Q1": 284305.287109375,
+      "Median": 286748.205078125,
+      "Mean": 287050.11083984375,
+      "Q3": 289493.02880859375,
+      "UpperFence": 297274.6413574219,
+      "Max": 291821.3203125,
+      "InterquartileRange": 5187.74169921875,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 2001.3684533509704,
+      "Variance": 16021902.74427382,
+      "StandardDeviation": 4002.736906701941,
+      "Skewness": 0.11368019144032579,
+      "Kurtosis": 0.8318425043799083,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 287050.11083984375,
+        "StandardError": 2001.3684533509704,
+        "Level": 12,
+        "Margin": 25865.643178201535,
+        "Lower": 261184.4676616422,
+        "Upper": 312915.75401804526
+      },
+      "Percentiles": {
+        "P0": 282882.712890625,
+        "P25": 284305.287109375,
+        "P50": 286748.205078125,
+        "P67": 288747.97552734375,
+        "P80": 289958.687109375,
+        "P85": 290424.34541015624,
+        "P90": 290890.0037109375,
+        "P95": 291355.6620117187,
+        "P100": 291821.3203125
+      }
+    },
+    "memory": {
+      "Gen0Collections": 19,
+      "Gen1Collections": 6,
+      "Gen2Collections": 0,
+      "TotalOperations": 512,
+      "BytesAllocatedPerOperation": 646080
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  },
+  {
+    "bars": 10000,
+    "pair": "TaLib.Functions.Asin",
+    "method": "CompetitorNativeBatch",
+    "statistics": {
+      "OriginalValues": [
+        132188.9755859375,
+        132379.8095703125,
+        131023.1455078125,
+        131656.2294921875
+      ],
+      "N": 4,
+      "Min": 131023.1455078125,
+      "LowerFence": 130389.8701171875,
+      "Q1": 131497.95849609375,
+      "Median": 131922.6025390625,
+      "Mean": 131812.0400390625,
+      "Q3": 132236.68408203125,
+      "UpperFence": 133344.7724609375,
+      "Max": 132379.8095703125,
+      "InterquartileRange": 738.7255859375,
+      "LowerOutliers": [],
+      "UpperOutliers": [],
+      "AllOutliers": [],
+      "StandardError": 304.2852492683255,
+      "Variance": 370358.05168914795,
+      "StandardDeviation": 608.570498536651,
+      "Skewness": -0.2863628340016339,
+      "Kurtosis": 0.9332164319820938,
+      "ConfidenceInterval": {
+        "N": 4,
+        "Mean": 131812.0400390625,
+        "StandardError": 304.2852492683255,
+        "Level": 12,
+        "Margin": 3932.5760675335277,
+        "Lower": 127879.46397152897,
+        "Upper": 135744.61610659602
+      },
+      "Percentiles": {
+        "P0": 131023.1455078125,
+        "P25": 131497.95849609375,
+        "P50": 131922.6025390625,
+        "P67": 132190.88392578127,
+        "P80": 132265.3091796875,
+        "P85": 132293.93427734374,
+        "P90": 132322.559375,
+        "P95": 132351.18447265626,
+        "P100": 132379.8095703125
+      }
+    },
+    "memory": {
+      "Gen0Collections": 4,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "TotalOperations": 1024,
+      "BytesAllocatedPerOperation": 80063
+    },
+    "host": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+      "ProcessorName": "AMD EPYC 7763",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 2,
+      "LogicalCoreCount": 4,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "X64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    }
+  }
+]

@@ -1,0 +1,146 @@
+[
+  {
+    "case": "TaLib.Candles.RickshawMan-Builder",
+    "pid": 36368,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 1138,
+    "pauseMilliseconds": 822.151,
+    "generation2Collections": 1039,
+    "reasons": {
+      "AllocSmall": 116,
+      "AllocLarge": 1022
+    }
+  },
+  {
+    "case": "TaLib.Candles.RickshawMan-Compute",
+    "pid": 20084,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 82,
+    "pauseMilliseconds": 50.872,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 81,
+      "AllocLarge": 1
+    }
+  },
+  {
+    "case": "TaLib.Candles.RickshawMan-Kernel",
+    "pid": 41152,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 104,
+    "pauseMilliseconds": 33.18,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 103,
+      "AllocLarge": 1
+    }
+  },
+  {
+    "case": "TaLib.Candles.RickshawMan-Native",
+    "pid": 34072,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 43,
+    "pauseMilliseconds": 18.062,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 42,
+      "AllocLarge": 1
+    }
+  },
+  {
+    "case": "TaLib.Functions.Asin-Builder",
+    "pid": 30392,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 1557,
+    "pauseMilliseconds": 1304.912,
+    "generation2Collections": 1299,
+    "reasons": {
+      "AllocSmall": 272,
+      "AllocLarge": 1285
+    }
+  },
+  {
+    "case": "TaLib.Functions.Asin-Compute",
+    "pid": 39104,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 296,
+    "pauseMilliseconds": 85.24,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 294,
+      "AllocLarge": 2
+    }
+  },
+  {
+    "case": "TaLib.Functions.Asin-Kernel",
+    "pid": 6184,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 345,
+    "pauseMilliseconds": 82.756,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 343,
+      "AllocLarge": 2
+    }
+  },
+  {
+    "case": "TaLib.Functions.Asin-Native",
+    "pid": 33348,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 614,
+    "pauseMilliseconds": 140.546,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 612,
+      "AllocLarge": 2
+    }
+  },
+  {
+    "case": "TaLib.Functions.Sma-Builder",
+    "pid": 26196,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 1990,
+    "pauseMilliseconds": 992.625,
+    "generation2Collections": 977,
+    "reasons": {
+      "AllocSmall": 1334,
+      "AllocLarge": 656
+    }
+  },
+  {
+    "case": "TaLib.Functions.Sma-Compute",
+    "pid": 20700,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 371,
+    "pauseMilliseconds": 91.696,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 370,
+      "AllocLarge": 1
+    }
+  },
+  {
+    "case": "TaLib.Functions.Sma-Kernel",
+    "pid": 21668,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 139,
+    "pauseMilliseconds": 41.366,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 138,
+      "AllocLarge": 1
+    }
+  },
+  {
+    "case": "TaLib.Functions.Sma-Native",
+    "pid": 17696,
+    "scope": "whole process, including setup, verification and warmup; not the timed loop alone",
+    "collections": 2698,
+    "pauseMilliseconds": 668.671,
+    "generation2Collections": 2,
+    "reasons": {
+      "AllocSmall": 2697,
+      "AllocLarge": 1
+    }
+  }
+]

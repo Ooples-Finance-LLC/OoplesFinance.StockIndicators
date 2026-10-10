@@ -1,0 +1,149 @@
+{
+  "method": "Arithmetic model from measured setup medians and BDN operation means, not a measured session API. Fresh baseline already has validated owned input/context/programs; warm resident is conservatively charged host preparation plus upload; cold includes BOTH qualification programs and context setup. Driver caches may already be warm. All outputs value-only; no builder win inferred.",
+  "rows": [
+    {
+      "count": 10000,
+      "composed": "False",
+      "fresh_tiled_ms": 0.2725203125,
+      "resident_tiled_ms": 0.1595802978515625,
+      "warm_host_and_upload_ms": 1.0518,
+      "cold_two_program_setup_ms": 639.4656,
+      "warm_break_even_calls": 10,
+      "cold_break_even_calls": 5662,
+      "modeled_totals_ms": [
+        {
+          "reuse": 1,
+          "fresh_tiled_excluding_shared_setup": 0.2725203125,
+          "warm_resident": 1.2113802978515626,
+          "cold_two_program_resident": 639.6251802978516
+        },
+        {
+          "reuse": 2,
+          "fresh_tiled_excluding_shared_setup": 0.545040625,
+          "warm_resident": 1.370960595703125,
+          "cold_two_program_resident": 639.7847605957031
+        },
+        {
+          "reuse": 4,
+          "fresh_tiled_excluding_shared_setup": 1.09008125,
+          "warm_resident": 1.69012119140625,
+          "cold_two_program_resident": 640.1039211914062
+        },
+        {
+          "reuse": 8,
+          "fresh_tiled_excluding_shared_setup": 2.1801625,
+          "warm_resident": 2.3284423828125,
+          "cold_two_program_resident": 640.7422423828125
+        }
+      ]
+    },
+    {
+      "count": 10000,
+      "composed": "True",
+      "fresh_tiled_ms": 0.2771464453125,
+      "resident_tiled_ms": 0.1752945068359375,
+      "warm_host_and_upload_ms": 0.45499999999999996,
+      "cold_two_program_setup_ms": 662.4319,
+      "warm_break_even_calls": 5,
+      "cold_break_even_calls": 6504,
+      "modeled_totals_ms": [
+        {
+          "reuse": 1,
+          "fresh_tiled_excluding_shared_setup": 0.2771464453125,
+          "warm_resident": 0.6302945068359375,
+          "cold_two_program_resident": 662.607194506836
+        },
+        {
+          "reuse": 2,
+          "fresh_tiled_excluding_shared_setup": 0.554292890625,
+          "warm_resident": 0.805589013671875,
+          "cold_two_program_resident": 662.7824890136719
+        },
+        {
+          "reuse": 4,
+          "fresh_tiled_excluding_shared_setup": 1.10858578125,
+          "warm_resident": 1.15617802734375,
+          "cold_two_program_resident": 663.1330780273438
+        },
+        {
+          "reuse": 8,
+          "fresh_tiled_excluding_shared_setup": 2.2171715625,
+          "warm_resident": 1.8573560546875,
+          "cold_two_program_resident": 663.8342560546876
+        }
+      ]
+    },
+    {
+      "count": 1000000,
+      "composed": "False",
+      "fresh_tiled_ms": 5.14549125,
+      "resident_tiled_ms": 3.2386171875,
+      "warm_host_and_upload_ms": 22.448999999999998,
+      "cold_two_program_setup_ms": 641.6256,
+      "warm_break_even_calls": 12,
+      "cold_break_even_calls": 337,
+      "modeled_totals_ms": [
+        {
+          "reuse": 1,
+          "fresh_tiled_excluding_shared_setup": 5.14549125,
+          "warm_resident": 25.6876171875,
+          "cold_two_program_resident": 644.8642171875
+        },
+        {
+          "reuse": 2,
+          "fresh_tiled_excluding_shared_setup": 10.2909825,
+          "warm_resident": 28.926234375,
+          "cold_two_program_resident": 648.1028343749999
+        },
+        {
+          "reuse": 4,
+          "fresh_tiled_excluding_shared_setup": 20.581965,
+          "warm_resident": 35.40346875,
+          "cold_two_program_resident": 654.58006875
+        },
+        {
+          "reuse": 8,
+          "fresh_tiled_excluding_shared_setup": 41.16393,
+          "warm_resident": 48.3579375,
+          "cold_two_program_resident": 667.5345374999999
+        }
+      ]
+    },
+    {
+      "count": 1000000,
+      "composed": "True",
+      "fresh_tiled_ms": 4.471260625,
+      "resident_tiled_ms": 3.21647734375,
+      "warm_host_and_upload_ms": 21.299599999999998,
+      "cold_two_program_setup_ms": 625.7142,
+      "warm_break_even_calls": 17,
+      "cold_break_even_calls": 499,
+      "modeled_totals_ms": [
+        {
+          "reuse": 1,
+          "fresh_tiled_excluding_shared_setup": 4.471260625,
+          "warm_resident": 24.51607734375,
+          "cold_two_program_resident": 628.93067734375
+        },
+        {
+          "reuse": 2,
+          "fresh_tiled_excluding_shared_setup": 8.94252125,
+          "warm_resident": 27.7325546875,
+          "cold_two_program_resident": 632.1471546875
+        },
+        {
+          "reuse": 4,
+          "fresh_tiled_excluding_shared_setup": 17.8850425,
+          "warm_resident": 34.165509375,
+          "cold_two_program_resident": 638.580109375
+        },
+        {
+          "reuse": 8,
+          "fresh_tiled_excluding_shared_setup": 35.770085,
+          "warm_resident": 47.03141875,
+          "cold_two_program_resident": 651.44601875
+        }
+      ]
+    }
+  ]
+}

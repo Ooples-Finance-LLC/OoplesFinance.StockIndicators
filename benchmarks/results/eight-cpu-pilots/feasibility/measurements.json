@@ -1,0 +1,1244 @@
+[
+  {
+    "campaign": "arithmetic",
+    "method": "NativeReusable",
+    "parameters": "Count=1000",
+    "meanNs": 10208.336181640625,
+    "medianNs": 10215.6005859375,
+    "standardDeviationNs": 62.42980948246256,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 10208.336181640625,
+      "StandardError": 19.74203918549594,
+      "Level": 12,
+      "Margin": 94.38496358794694,
+      "Lower": 10113.951218052678,
+      "Upper": 10302.721145228572
+    },
+    "bytesAllocated": 32
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "NativeOwned",
+    "parameters": "Count=1000",
+    "meanNs": 11302.621799045139,
+    "medianNs": 11264.19677734375,
+    "standardDeviationNs": 94.73720338926076,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 11302.621799045139,
+      "StandardError": 31.57906779642025,
+      "Level": 12,
+      "Margin": 159.19972597633938,
+      "Lower": 11143.4220730688,
+      "Upper": 11461.821525021478
+    },
+    "bytesAllocated": 8056
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "UnrolledReusable",
+    "parameters": "Count=1000",
+    "meanNs": 9204.793972439236,
+    "medianNs": 9177.7587890625,
+    "standardDeviationNs": 78.06634131989769,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 9204.793972439236,
+      "StandardError": 26.02211377329923,
+      "Level": 12,
+      "Margin": 131.18542348181586,
+      "Lower": 9073.60854895742,
+      "Upper": 9335.979395921053
+    },
+    "bytesAllocated": 0
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "ParallelReusable",
+    "parameters": "Count=1000",
+    "meanNs": 7979.2620849609375,
+    "medianNs": 7964.0289306640625,
+    "standardDeviationNs": 125.47734573847721,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 7979.2620849609375,
+      "StandardError": 39.679420728601045,
+      "Level": 12,
+      "Margin": 189.70384191169637,
+      "Lower": 7789.558243049241,
+      "Upper": 8168.965926872634
+    },
+    "bytesAllocated": 2311
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "DefinedReusable",
+    "parameters": "Count=1000",
+    "meanNs": 9799.94384765625,
+    "medianNs": 9803.558349609375,
+    "standardDeviationNs": 105.90045439233485,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 9799.94384765625,
+      "StandardError": 33.48866411265608,
+      "Level": 12,
+      "Margin": 160.1063756982218,
+      "Lower": 9639.837471958028,
+      "Upper": 9960.050223354472
+    },
+    "bytesAllocated": 0
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "Builder",
+    "parameters": "Count=1000",
+    "meanNs": 35794.951171875,
+    "medianNs": 37175.0244140625,
+    "standardDeviationNs": 6480.81517083457,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 35794.951171875,
+      "StandardError": 2049.413703441048,
+      "Level": 12,
+      "Margin": 9798.06776586861,
+      "Lower": 25996.88340600639,
+      "Upper": 45593.01893774361
+    },
+    "bytesAllocated": 70615
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "IngestionOnly",
+    "parameters": "Count=1000",
+    "meanNs": 15678.143310546875,
+    "medianNs": 15443.218994140625,
+    "standardDeviationNs": 933.070020370903,
+    "confidenceIntervalNs": {
+      "N": 8,
+      "Mean": 15678.143310546875,
+      "StandardError": 329.89006936306777,
+      "Level": 12,
+      "Margin": 1784.0067389451697,
+      "Lower": 13894.136571601706,
+      "Upper": 17462.150049492044
+    },
+    "bytesAllocated": 53593
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "NativeReusable",
+    "parameters": "Count=10000",
+    "meanNs": 100290.65755208333,
+    "medianNs": 100302.44140625,
+    "standardDeviationNs": 90.8994006280894,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 100290.65755208333,
+      "StandardError": 30.29980020936313,
+      "Level": 12,
+      "Margin": 152.75054734247885,
+      "Lower": 100137.90700474085,
+      "Upper": 100443.40809942581
+    },
+    "bytesAllocated": 39
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "NativeOwned",
+    "parameters": "Count=10000",
+    "meanNs": 117759.18511284722,
+    "medianNs": 117790.966796875,
+    "standardDeviationNs": 968.4744241267811,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 117759.18511284722,
+      "StandardError": 322.8248080422604,
+      "Level": 12,
+      "Margin": 1627.4584579256677,
+      "Lower": 116131.72665492156,
+      "Upper": 119386.64357077288
+    },
+    "bytesAllocated": 80063
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "UnrolledReusable",
+    "parameters": "Count=10000",
+    "meanNs": 91028.30403645833,
+    "medianNs": 90960.83984375,
+    "standardDeviationNs": 449.93914417867785,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 91028.30403645833,
+      "StandardError": 149.97971472622595,
+      "Level": 12,
+      "Margin": 756.093550333723,
+      "Lower": 90272.2104861246,
+      "Upper": 91784.39758679205
+    },
+    "bytesAllocated": 4
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "ParallelReusable",
+    "parameters": "Count=10000",
+    "meanNs": 33863.43994140625,
+    "medianNs": 33317.138671875,
+    "standardDeviationNs": 1500.6288389272197,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 33863.43994140625,
+      "StandardError": 474.540505354396,
+      "Level": 12,
+      "Margin": 2268.736673959522,
+      "Lower": 31594.703267446726,
+      "Upper": 36132.17661536577
+    },
+    "bytesAllocated": 2402
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "DefinedReusable",
+    "parameters": "Count=10000",
+    "meanNs": 100173.54736328125,
+    "medianNs": 100190.869140625,
+    "standardDeviationNs": 452.8422662142498,
+    "confidenceIntervalNs": {
+      "N": 8,
+      "Mean": 100173.54736328125,
+      "StandardError": 160.1039186239899,
+      "Level": 12,
+      "Margin": 865.823182577753,
+      "Lower": 99307.7241807035,
+      "Upper": 101039.370545859
+    },
+    "bytesAllocated": 5
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "Builder",
+    "parameters": "Count=10000",
+    "meanNs": 259081.0546875,
+    "medianNs": 259008.59375,
+    "standardDeviationNs": 5758.5233150044505,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 259081.0546875,
+      "StandardError": 1821.0049634597333,
+      "Level": 12,
+      "Margin": 8706.065546455346,
+      "Lower": 250374.98914104464,
+      "Upper": 267787.1202339553
+    },
+    "bytesAllocated": 647111
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "IngestionOnly",
+    "parameters": "Count=10000",
+    "meanNs": 139077.3046875,
+    "medianNs": 138784.27734375,
+    "standardDeviationNs": 3421.585997386028,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 139077.3046875,
+      "StandardError": 1082.0004961878778,
+      "Level": 12,
+      "Margin": 5172.949788786872,
+      "Lower": 133904.35489871312,
+      "Upper": 144250.25447628688
+    },
+    "bytesAllocated": 486055
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "NativeReusable",
+    "parameters": "Count=100000",
+    "meanNs": 1298282.265625,
+    "medianNs": 1182754.296875,
+    "standardDeviationNs": 288502.91291652265,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 1298282.265625,
+      "StandardError": 91232.63164094229,
+      "Level": 12,
+      "Margin": 436175.2367399425,
+      "Lower": 862107.0288850574,
+      "Upper": 1734457.5023649426
+    },
+    "bytesAllocated": 87
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "NativeOwned",
+    "parameters": "Count=100000",
+    "meanNs": 1131961.892361111,
+    "medianNs": 1134630.46875,
+    "standardDeviationNs": 12736.526423765972,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 1131961.892361111,
+      "StandardError": 4245.50880792199,
+      "Level": 12,
+      "Margin": 21402.90660916638,
+      "Lower": 1110558.9857519446,
+      "Upper": 1153364.7989702774
+    },
+    "bytesAllocated": 800474
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "UnrolledReusable",
+    "parameters": "Count=100000",
+    "meanNs": 900493.75,
+    "medianNs": 896016.796875,
+    "standardDeviationNs": 7973.897481329424,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 900493.75,
+      "StandardError": 2521.5677869680944,
+      "Level": 12,
+      "Margin": 12055.395165681553,
+      "Lower": 888438.3548343184,
+      "Upper": 912549.1451656816
+    },
+    "bytesAllocated": 55
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "ParallelReusable",
+    "parameters": "Count=100000",
+    "meanNs": 265824.7395833333,
+    "medianNs": 263387.890625,
+    "standardDeviationNs": 11493.423728190955,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 265824.7395833333,
+      "StandardError": 3831.1412427303185,
+      "Level": 12,
+      "Margin": 19313.953152488502,
+      "Lower": 246510.7864308448,
+      "Upper": 285138.6927358218
+    },
+    "bytesAllocated": 2474
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "DefinedReusable",
+    "parameters": "Count=100000",
+    "meanNs": 983100.6076388889,
+    "medianNs": 983099.2187499999,
+    "standardDeviationNs": 3162.616996628156,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 983100.6076388889,
+      "StandardError": 1054.2056655427186,
+      "Level": 12,
+      "Margin": 5314.572746701856,
+      "Lower": 977786.034892187,
+      "Upper": 988415.1803855908
+    },
+    "bytesAllocated": 57
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "Builder",
+    "parameters": "Count=100000",
+    "meanNs": 4040802.96875,
+    "medianNs": 3787935.9375,
+    "standardDeviationNs": 817764.9542135386,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 4040802.96875,
+      "StandardError": 258599.98459780903,
+      "Level": 12,
+      "Margin": 1236343.9207455253,
+      "Lower": 2804459.0480044745,
+      "Upper": 5277146.8894955255
+    },
+    "bytesAllocated": 6411854
+  },
+  {
+    "campaign": "arithmetic",
+    "method": "IngestionOnly",
+    "parameters": "Count=100000",
+    "meanNs": 1655121.0069444445,
+    "medianNs": 1654553.125,
+    "standardDeviationNs": 22220.61153186481,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 1655121.0069444445,
+      "StandardError": 7406.870510621604,
+      "Level": 12,
+      "Margin": 37340.29652917295,
+      "Lower": 1617780.7104152716,
+      "Upper": 1692461.3034736174
+    },
+    "bytesAllocated": 4810092
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeReusable",
+    "parameters": "Count=1000&Grid=False",
+    "meanNs": 1708.609178331163,
+    "medianNs": 1707.5698852539062,
+    "standardDeviationNs": 2.6164924224842725,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 1708.609178331163,
+      "StandardError": 0.8721641408280908,
+      "Level": 12,
+      "Margin": 4.396845819557762,
+      "Lower": 1704.2123325116054,
+      "Upper": 1713.0060241507208
+    },
+    "bytesAllocated": 32
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeOwned",
+    "parameters": "Count=1000&Grid=False",
+    "meanNs": 2482.375250922309,
+    "medianNs": 2475.9674072265625,
+    "standardDeviationNs": 43.28624111001102,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 2482.375250922309,
+      "StandardError": 14.42874703667034,
+      "Level": 12,
+      "Margin": 72.73972079315865,
+      "Lower": 2409.6355301291505,
+      "Upper": 2555.1149717154676
+    },
+    "bytesAllocated": 8056
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "CurrentReusable",
+    "parameters": "Count=1000&Grid=False",
+    "meanNs": 17521.495225694445,
+    "medianNs": 17514.7705078125,
+    "standardDeviationNs": 14.78014222802263,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 17521.495225694445,
+      "StandardError": 4.926714076007543,
+      "Level": 12,
+      "Margin": 24.837070426540123,
+      "Lower": 17496.658155267905,
+      "Upper": 17546.332296120985
+    },
+    "bytesAllocated": 1
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "VectorReusable",
+    "parameters": "Count=1000&Grid=False",
+    "meanNs": 17695.4052734375,
+    "medianNs": 17550.152587890625,
+    "standardDeviationNs": 233.1324534464727,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 17695.4052734375,
+      "StandardError": 73.72295493940253,
+      "Level": 12,
+      "Margin": 352.4630030449694,
+      "Lower": 17342.94227039253,
+      "Upper": 18047.86827648247
+    },
+    "bytesAllocated": 1
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "Builder",
+    "parameters": "Count=1000&Grid=False",
+    "meanNs": 40279.453125,
+    "medianNs": 40048.73046875,
+    "standardDeviationNs": 726.3710292162839,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 40279.453125,
+      "StandardError": 229.69868786841676,
+      "Level": 12,
+      "Margin": 1098.1693475002126,
+      "Lower": 39181.28377749979,
+      "Upper": 41377.62247250021
+    },
+    "bytesAllocated": 80999
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "IngestionOnly",
+    "parameters": "Count=1000&Grid=False",
+    "meanNs": 16480.313720703125,
+    "medianNs": 15763.51318359375,
+    "standardDeviationNs": 2547.1197647881627,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 16480.313720703125,
+      "StandardError": 805.4699929962943,
+      "Level": 12,
+      "Margin": 3850.881626047654,
+      "Lower": 12629.43209465547,
+      "Upper": 20331.195346750777
+    },
+    "bytesAllocated": 53593
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeReusable",
+    "parameters": "Count=1000&Grid=True",
+    "meanNs": 1840.6204223632812,
+    "medianNs": 1776.8577575683594,
+    "standardDeviationNs": 132.71310752468693,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 1840.6204223632812,
+      "StandardError": 41.967569513684154,
+      "Level": 12,
+      "Margin": 200.64328123377717,
+      "Lower": 1639.9771411295042,
+      "Upper": 2041.2637035970583
+    },
+    "bytesAllocated": 32
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeOwned",
+    "parameters": "Count=1000&Grid=True",
+    "meanNs": 2634.7966512044272,
+    "medianNs": 2652.0217895507812,
+    "standardDeviationNs": 34.71467271340996,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 2634.7966512044272,
+      "StandardError": 11.571557571136653,
+      "Level": 12,
+      "Margin": 58.33575602422368,
+      "Lower": 2576.4608951802034,
+      "Upper": 2693.132407228651
+    },
+    "bytesAllocated": 8056
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "CurrentReusable",
+    "parameters": "Count=1000&Grid=True",
+    "meanNs": 4979.557037353516,
+    "medianNs": 4981.517028808594,
+    "standardDeviationNs": 21.291097913035617,
+    "confidenceIntervalNs": {
+      "N": 8,
+      "Mean": 4979.557037353516,
+      "StandardError": 7.527539856607117,
+      "Level": 12,
+      "Margin": 40.70805119351947,
+      "Lower": 4938.8489861599965,
+      "Upper": 5020.265088547035
+    },
+    "bytesAllocated": 0
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "VectorReusable",
+    "parameters": "Count=1000&Grid=True",
+    "meanNs": 3495.806884765625,
+    "medianNs": 3466.6336059570312,
+    "standardDeviationNs": 87.08929665371714,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 3495.806884765625,
+      "StandardError": 27.54005372478265,
+      "Level": 12,
+      "Margin": 131.66658943385204,
+      "Lower": 3364.140295331773,
+      "Upper": 3627.473474199477
+    },
+    "bytesAllocated": 0
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "Builder",
+    "parameters": "Count=1000&Grid=True",
+    "meanNs": 25355.498046875,
+    "medianNs": 25391.68701171875,
+    "standardDeviationNs": 644.1516574593155,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 25355.498046875,
+      "StandardError": 203.69863961440277,
+      "Level": 12,
+      "Margin": 973.865389601938,
+      "Lower": 24381.63265727306,
+      "Upper": 26329.36343647694
+    },
+    "bytesAllocated": 80994
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "IngestionOnly",
+    "parameters": "Count=1000&Grid=True",
+    "meanNs": 14933.505859375,
+    "medianNs": 14880.09033203125,
+    "standardDeviationNs": 302.04071209027364,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 14933.505859375,
+      "StandardError": 95.51365963044216,
+      "Level": 12,
+      "Margin": 456.6424573300417,
+      "Lower": 14476.863402044959,
+      "Upper": 15390.148316705041
+    },
+    "bytesAllocated": 53593
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeReusable",
+    "parameters": "Count=10000&Grid=False",
+    "meanNs": 17073.85009765625,
+    "medianNs": 17067.303466796875,
+    "standardDeviationNs": 56.811046298706906,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 17073.85009765625,
+      "StandardError": 17.965230256119234,
+      "Level": 12,
+      "Margin": 85.89019541702932,
+      "Lower": 16987.95990223922,
+      "Upper": 17159.74029307328
+    },
+    "bytesAllocated": 33
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeOwned",
+    "parameters": "Count=10000&Grid=False",
+    "meanNs": 24336.845703125,
+    "medianNs": 24232.666015625,
+    "standardDeviationNs": 636.2398558274076,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 24336.845703125,
+      "StandardError": 201.19670825917615,
+      "Level": 12,
+      "Margin": 961.9038744998863,
+      "Lower": 23374.941828625113,
+      "Upper": 25298.749577624887
+    },
+    "bytesAllocated": 80058
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "CurrentReusable",
+    "parameters": "Count=10000&Grid=False",
+    "meanNs": 177657.6171875,
+    "medianNs": 176876.806640625,
+    "standardDeviationNs": 1384.5028007154178,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 177657.6171875,
+      "StandardError": 437.81822771429194,
+      "Level": 12,
+      "Margin": 2093.170674654135,
+      "Lower": 175564.44651284587,
+      "Upper": 179750.78786215413
+    },
+    "bytesAllocated": 7
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "VectorReusable",
+    "parameters": "Count=10000&Grid=False",
+    "meanNs": 176674.70703125,
+    "medianNs": 176607.91015625,
+    "standardDeviationNs": 406.36136509278236,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 176674.70703125,
+      "StandardError": 135.4537883642608,
+      "Level": 12,
+      "Margin": 682.8639188802105,
+      "Lower": 175991.8431123698,
+      "Upper": 177357.5709501302
+    },
+    "bytesAllocated": 7
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "Builder",
+    "parameters": "Count=10000&Grid=False",
+    "meanNs": 367502.77777777775,
+    "medianNs": 367866.796875,
+    "standardDeviationNs": 4320.681376959506,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 367502.77777777775,
+      "StandardError": 1440.2271256531687,
+      "Level": 12,
+      "Margin": 7260.624829896549,
+      "Lower": 360242.1529478812,
+      "Upper": 374763.4026076743
+    },
+    "bytesAllocated": 729462
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "IngestionOnly",
+    "parameters": "Count=10000&Grid=False",
+    "meanNs": 132109.6484375,
+    "medianNs": 132576.416015625,
+    "standardDeviationNs": 3693.9066403979,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 132109.6484375,
+      "StandardError": 1168.115844767791,
+      "Level": 12,
+      "Margin": 5584.659742541291,
+      "Lower": 126524.98869495871,
+      "Upper": 137694.3081800413
+    },
+    "bytesAllocated": 486055
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeReusable",
+    "parameters": "Count=10000&Grid=True",
+    "meanNs": 17186.273871527777,
+    "medianNs": 17193.51806640625,
+    "standardDeviationNs": 71.46350214807686,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 17186.273871527777,
+      "StandardError": 23.821167382692284,
+      "Level": 12,
+      "Margin": 120.08978049032267,
+      "Lower": 17066.184091037456,
+      "Upper": 17306.3636520181
+    },
+    "bytesAllocated": 33
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "NativeOwned",
+    "parameters": "Count=10000&Grid=True",
+    "meanNs": 24088.98681640625,
+    "medianNs": 24082.373046875,
+    "standardDeviationNs": 202.79291155994537,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 24088.98681640625,
+      "StandardError": 64.1287493866517,
+      "Level": 12,
+      "Margin": 306.5939449784171,
+      "Lower": 23782.392871427834,
+      "Upper": 24395.580761384666
+    },
+    "bytesAllocated": 80057
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "CurrentReusable",
+    "parameters": "Count=10000&Grid=True",
+    "meanNs": 49864.462890625,
+    "medianNs": 49963.4765625,
+    "standardDeviationNs": 616.1287740375668,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 49864.462890625,
+      "StandardError": 194.83702579259287,
+      "Level": 12,
+      "Margin": 931.4987885612278,
+      "Lower": 48932.96410206377,
+      "Upper": 50795.96167918623
+    },
+    "bytesAllocated": 4
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "VectorReusable",
+    "parameters": "Count=10000&Grid=True",
+    "meanNs": 34707.12646484375,
+    "medianNs": 34976.69677734375,
+    "standardDeviationNs": 497.98222984691455,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 34707.12646484375,
+      "StandardError": 157.47580806057329,
+      "Level": 12,
+      "Margin": 752.8780725295854,
+      "Lower": 33954.24839231416,
+      "Upper": 35460.00453737334
+    },
+    "bytesAllocated": 2
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "Builder",
+    "parameters": "Count=10000&Grid=True",
+    "meanNs": 229884.20138888888,
+    "medianNs": 229684.9609375,
+    "standardDeviationNs": 1623.2260967712677,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 229884.20138888888,
+      "StandardError": 541.0753655904226,
+      "Level": 12,
+      "Margin": 2727.7261789313334,
+      "Lower": 227156.47520995754,
+      "Upper": 232611.9275678202
+    },
+    "bytesAllocated": 729458
+  },
+  {
+    "campaign": "sma-corrected",
+    "method": "IngestionOnly",
+    "parameters": "Count=10000&Grid=True",
+    "meanNs": 135121.89453125,
+    "medianNs": 134353.61328125,
+    "standardDeviationNs": 3373.5646226277404,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 135121.89453125,
+      "StandardError": 1066.8148041270072,
+      "Level": 12,
+      "Margin": 5100.348322506931,
+      "Lower": 130021.54620874306,
+      "Upper": 140222.24285375694
+    },
+    "bytesAllocated": 486053
+  },
+  {
+    "campaign": "ownership",
+    "method": "NativeOwned",
+    "parameters": "Count=1000",
+    "meanNs": 15087.198486328125,
+    "medianNs": 15086.492919921875,
+    "standardDeviationNs": 321.2857552164588,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 15087.198486328125,
+      "StandardError": 101.5994766251334,
+      "Level": 12,
+      "Margin": 485.7382163876394,
+      "Lower": 14601.460269940486,
+      "Upper": 15572.936702715764
+    },
+    "bytesAllocated": 8056
+  },
+  {
+    "campaign": "ownership",
+    "method": "ArrayIngestion",
+    "parameters": "Count=1000",
+    "meanNs": 15509.8583984375,
+    "medianNs": 15718.115234375,
+    "standardDeviationNs": 1339.2514070619743,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 15509.8583984375,
+      "StandardError": 423.50848059011497,
+      "Level": 12,
+      "Margin": 2024.757024545465,
+      "Lower": 13485.101373892036,
+      "Upper": 17534.615422982966
+    },
+    "bytesAllocated": 48060
+  },
+  {
+    "campaign": "ownership",
+    "method": "SequentialOwned",
+    "parameters": "Count=1000",
+    "meanNs": 24951.3720703125,
+    "medianNs": 21569.95849609375,
+    "standardDeviationNs": 5575.185768121499,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 24951.3720703125,
+      "StandardError": 1763.02854058193,
+      "Level": 12,
+      "Margin": 8428.885336707757,
+      "Lower": 16522.486733604743,
+      "Upper": 33380.25740702025
+    },
+    "bytesAllocated": 64106
+  },
+  {
+    "campaign": "ownership",
+    "method": "ParallelOwned",
+    "parameters": "Count=1000",
+    "meanNs": 25040.455457899305,
+    "medianNs": 24987.12158203125,
+    "standardDeviationNs": 544.5589252963258,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 25040.455457899305,
+      "StandardError": 181.51964176544195,
+      "Level": 12,
+      "Margin": 915.0959557982095,
+      "Lower": 24125.359502101095,
+      "Upper": 25955.551413697514
+    },
+    "bytesAllocated": 66046
+  },
+  {
+    "campaign": "ownership",
+    "method": "NativeOwned",
+    "parameters": "Count=10000",
+    "meanNs": 109160.94292534722,
+    "medianNs": 109035.107421875,
+    "standardDeviationNs": 586.3122745760132,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 109160.94292534722,
+      "StandardError": 195.43742485867108,
+      "Level": 12,
+      "Margin": 985.2597512884417,
+      "Lower": 108175.68317405878,
+      "Upper": 110146.20267663566
+    },
+    "bytesAllocated": 80063
+  },
+  {
+    "campaign": "ownership",
+    "method": "ArrayIngestion",
+    "parameters": "Count=10000",
+    "meanNs": 95945.01953125,
+    "medianNs": 95760.107421875,
+    "standardDeviationNs": 1183.7403649566083,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 95945.01953125,
+      "StandardError": 374.33157115418464,
+      "Level": 12,
+      "Margin": 1789.6465193506367,
+      "Lower": 94155.37301189937,
+      "Upper": 97734.66605060063
+    },
+    "bytesAllocated": 480349
+  },
+  {
+    "campaign": "ownership",
+    "method": "SequentialOwned",
+    "parameters": "Count=10000",
+    "meanNs": 220116.6015625,
+    "medianNs": 219305.2734375,
+    "standardDeviationNs": 2489.85543991902,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 220116.6015625,
+      "StandardError": 829.9518133063399,
+      "Level": 12,
+      "Margin": 4184.04058358281,
+      "Lower": 215932.5609789172,
+      "Upper": 224300.6421460828
+    },
+    "bytesAllocated": 640404
+  },
+  {
+    "campaign": "ownership",
+    "method": "ParallelOwned",
+    "parameters": "Count=10000",
+    "meanNs": 208979.5703125,
+    "medianNs": 209385.546875,
+    "standardDeviationNs": 3940.803077513312,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 208979.5703125,
+      "StandardError": 1246.1913535143144,
+      "Level": 12,
+      "Margin": 5957.931924857949,
+      "Lower": 203021.63838764204,
+      "Upper": 214937.50223735796
+    },
+    "bytesAllocated": 642824
+  },
+  {
+    "campaign": "ownership",
+    "method": "NativeOwned",
+    "parameters": "Count=100000",
+    "meanNs": 1110421.19140625,
+    "medianNs": 1109188.671875,
+    "standardDeviationNs": 8762.15574289101,
+    "confidenceIntervalNs": {
+      "N": 8,
+      "Mean": 1110421.19140625,
+      "StandardError": 3097.8898718054415,
+      "Level": 12,
+      "Margin": 16753.024480189528,
+      "Lower": 1093668.1669260606,
+      "Upper": 1127174.2158864394
+    },
+    "bytesAllocated": 800732
+  },
+  {
+    "campaign": "ownership",
+    "method": "ArrayIngestion",
+    "parameters": "Count=100000",
+    "meanNs": 1319397.96875,
+    "medianNs": 1332136.71875,
+    "standardDeviationNs": 35100.20471777029,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 1319397.96875,
+      "StandardError": 11099.659324634174,
+      "Level": 12,
+      "Margin": 53066.50095010915,
+      "Lower": 1266331.4677998908,
+      "Upper": 1372464.4697001092
+    },
+    "bytesAllocated": 4803260
+  },
+  {
+    "campaign": "ownership",
+    "method": "SequentialOwned",
+    "parameters": "Count=100000",
+    "meanNs": 3114497.03125,
+    "medianNs": 3109112.5,
+    "standardDeviationNs": 54751.381932206314,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 3114497.03125,
+      "StandardError": 17313.907194756266,
+      "Level": 12,
+      "Margin": 82776.27679630759,
+      "Lower": 3031720.7544536926,
+      "Upper": 3197273.3080463074
+    },
+    "bytesAllocated": 6404278
+  },
+  {
+    "campaign": "ownership",
+    "method": "ParallelOwned",
+    "parameters": "Count=100000",
+    "meanNs": 2737083.90625,
+    "medianNs": 2729023.4375,
+    "standardDeviationNs": 41271.88041622726,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 2737083.90625,
+      "StandardError": 13051.314543337628,
+      "Level": 12,
+      "Margin": 62397.193946042666,
+      "Lower": 2674686.7123039574,
+      "Upper": 2799481.1001960426
+    },
+    "bytesAllocated": 6410318
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "NativeOwned",
+    "parameters": "Count=1000",
+    "meanNs": 11166.548665364584,
+    "medianNs": 11158.2763671875,
+    "standardDeviationNs": 108.55704019830928,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 11166.548665364584,
+      "StandardError": 36.185680066103096,
+      "Level": 12,
+      "Margin": 182.4230654283002,
+      "Lower": 10984.125599936284,
+      "Upper": 11348.971730792884
+    },
+    "bytesAllocated": 8056
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "ArrayIngestionDirect",
+    "parameters": "Count=1000",
+    "meanNs": 6466.398111979167,
+    "medianNs": 6740.4754638671875,
+    "standardDeviationNs": 653.2871119565779,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 6466.398111979167,
+      "StandardError": 217.76237065219263,
+      "Level": 12,
+      "Margin": 1097.8066217558514,
+      "Lower": 5368.591490223315,
+      "Upper": 7564.204733735019
+    },
+    "bytesAllocated": 48056
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "SequentialOwnedDirect",
+    "parameters": "Count=1000",
+    "meanNs": 26310.61767578125,
+    "medianNs": 26531.2255859375,
+    "standardDeviationNs": 3694.142075877262,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 26310.61767578125,
+      "StandardError": 1168.1902960034706,
+      "Level": 12,
+      "Margin": 5585.015687390892,
+      "Lower": 20725.601988390357,
+      "Upper": 31895.633363172143
+    },
+    "bytesAllocated": 64105
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "ParallelOwnedDirect",
+    "parameters": "Count=1000",
+    "meanNs": 21572.21408420139,
+    "medianNs": 21604.13818359375,
+    "standardDeviationNs": 383.28985253457574,
+    "confidenceIntervalNs": {
+      "N": 9,
+      "Mean": 21572.21408420139,
+      "StandardError": 127.76328417819191,
+      "Level": 12,
+      "Margin": 644.0937383626955,
+      "Lower": 20928.120345838695,
+      "Upper": 22216.307822564086
+    },
+    "bytesAllocated": 66048
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "NativeOwned",
+    "parameters": "Count=10000",
+    "meanNs": 112367.822265625,
+    "medianNs": 111560.44921875,
+    "standardDeviationNs": 1791.3497202374158,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 112367.822265625,
+      "StandardError": 566.4745201855656,
+      "Level": 12,
+      "Margin": 2708.265162420261,
+      "Lower": 109659.55710320474,
+      "Upper": 115076.08742804526
+    },
+    "bytesAllocated": 80063
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "ArrayIngestionDirect",
+    "parameters": "Count=10000",
+    "meanNs": 61266.4208984375,
+    "medianNs": 61001.5869140625,
+    "standardDeviationNs": 4646.965215819567,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 61266.4208984375,
+      "StandardError": 1469.4994289565745,
+      "Level": 12,
+      "Margin": 7025.548312986537,
+      "Lower": 54240.87258545096,
+      "Upper": 68291.96921142403
+    },
+    "bytesAllocated": 480348
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "SequentialOwnedDirect",
+    "parameters": "Count=10000",
+    "meanNs": 190311.337890625,
+    "medianNs": 190802.734375,
+    "standardDeviationNs": 1807.9397481954313,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 190311.337890625,
+      "StandardError": 571.7207476648857,
+      "Level": 12,
+      "Margin": 2733.3469173979083,
+      "Lower": 187577.9909732271,
+      "Upper": 193044.6848080229
+    },
+    "bytesAllocated": 640399
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "ParallelOwnedDirect",
+    "parameters": "Count=10000",
+    "meanNs": 165135.224609375,
+    "medianNs": 164878.7109375,
+    "standardDeviationNs": 7893.3551051993,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 165135.224609375,
+      "StandardError": 2496.098051294777,
+      "Level": 12,
+      "Margin": 11933.626585874112,
+      "Lower": 153201.59802350088,
+      "Upper": 177068.85119524912
+    },
+    "bytesAllocated": 642820
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "NativeOwned",
+    "parameters": "Count=100000",
+    "meanNs": 1114415,
+    "medianNs": 1111399.609375,
+    "standardDeviationNs": 12942.402069230217,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 1114415,
+      "StandardError": 4092.7468932443717,
+      "Level": 12,
+      "Margin": 19567.06512756569,
+      "Lower": 1094847.9348724342,
+      "Upper": 1133982.0651275658
+    },
+    "bytesAllocated": 800734
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "ArrayIngestionDirect",
+    "parameters": "Count=100000",
+    "meanNs": 1113261.875,
+    "medianNs": 1072242.96875,
+    "standardDeviationNs": 120913.23280430271,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 1113261.875,
+      "StandardError": 38236.12149157849,
+      "Level": 12,
+      "Margin": 182803.55442604655,
+      "Lower": 930458.3205739534,
+      "Upper": 1296065.4294260466
+    },
+    "bytesAllocated": 4803218
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "SequentialOwnedDirect",
+    "parameters": "Count=100000",
+    "meanNs": 5404358.4375,
+    "medianNs": 5399960.9375,
+    "standardDeviationNs": 537159.1357904978,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 5404358.4375,
+      "StandardError": 169864.6335065644,
+      "Level": 12,
+      "Margin": 812107.9640129524,
+      "Lower": 4592250.4734870475,
+      "Upper": 6216466.4015129525
+    },
+    "bytesAllocated": 6404153
+  },
+  {
+    "campaign": "ownership-direct",
+    "method": "ParallelOwnedDirect",
+    "parameters": "Count=100000",
+    "meanNs": 2549776.875,
+    "medianNs": 2540264.84375,
+    "standardDeviationNs": 155884.15383091892,
+    "confidenceIntervalNs": {
+      "N": 10,
+      "Mean": 2549776.875,
+      "StandardError": 49294.8977233766,
+      "Level": 12,
+      "Margin": 235674.5968831177,
+      "Lower": 2314102.2781168823,
+      "Upper": 2785451.4718831177
+    },
+    "bytesAllocated": 6411903
+  }
+]

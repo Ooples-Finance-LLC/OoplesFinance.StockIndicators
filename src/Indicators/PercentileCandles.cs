@@ -231,14 +231,15 @@ public sealed class LowerShadowBelowPercentileCandle : IndicatorBase, IIndicator
 
 internal enum CandleLengthKind { Body, Upper, Lower }
 
-internal sealed class PercentileCandleState : IIndicatorState
+internal sealed class PercentileCandleState : IPreviewIndicatorState
 {
     private readonly int _period, _rank, _direction;
     private readonly CandleLengthKind _kind;
     private readonly bool _above;
-    private readonly Queue<ExactMeanAccumulator> _window = new();
-    internal PercentileCandleState(int period, decimal percentile, CandleLengthKind kind, bool above, int direction)
+    private readonly Queue<ExactMeanAccumulator> _window;
+    internal PercentileCandleState(int period, decimal percentile, CandleLengthKind kind, bool above, int direction, bool reserve = false)
     {
+        _window = new(reserve ? period : 0);
         _period = period; _kind = kind; _above = above; _direction = direction;
         var bits = decimal.GetBits(percentile);
         var numerator = new BigInteger(unchecked((uint)bits[0])) + (new BigInteger(unchecked((uint)bits[1])) << 32) +
@@ -247,26 +248,37 @@ internal sealed class PercentileCandleState : IIndicatorState
         _rank = (int)((numerator * (period - 1) + denominator - 1) / denominator);
     }
     public void Reset() => _window.Clear();
-    public double Update(in Bar bar)
+    public double Update(in Bar bar) => Update(bar, true);
+    public double Update(in Bar bar, bool commit)
     {
         var current = new ExactMeanAccumulator();
         var top = Math.Max(bar.Open, bar.Close); var bottom = Math.Min(bar.Open, bar.Close);
         current.Add(_kind == CandleLengthKind.Upper ? bar.High : _kind == CandleLengthKind.Lower ? bottom : top);
         current.Add(_kind == CandleLengthKind.Upper ? top : _kind == CandleLengthKind.Lower ? bar.Low : bottom, -1);
-        // Drop before enqueue so even the largest valid period cannot overflow Count.
-        if (_window.Count == _period) _window.Dequeue();
-        _window.Enqueue(current);
-        if (_window.Count < _period || _direction > 0 && bar.Close <= bar.Open || _direction < 0 && bar.Close >= bar.Open) return 0;
-        var atMost = 0;
-        foreach (var previous in _window)
+        var ready = _window.Count >= _period - 1;
+        var direction = !(_direction > 0 && bar.Close <= bar.Open || _direction < 0 && bar.Close >= bar.Open);
+        var atMost = 1; // The prospective current observation always equals itself.
+        if (ready && direction)
         {
-            var difference = current; difference.Subtract(previous);
-            if (difference.Sign >= 0) atMost++;
+            var skip = _window.Count == _period;
+            foreach (var previous in _window)
+            {
+                if (skip) { skip = false; continue; }
+                var difference = current; difference.Subtract(previous);
+                if (difference.Sign >= 0) atMost++;
+                // Once the rank is exceeded, no remaining comparison can undo it.
+                if (atMost > _rank) break;
+            }
         }
-        // Current is a member of the sorted window. It reaches an interpolated
-        // quantile iff it reaches the upper interpolation endpoint; ties count fully.
-        return (atMost > _rank) == _above ? 1 : 0;
+        var result = ready && direction && (atMost > _rank) == _above ? 1d : 0d;
+        if (commit)
+        {
+            if (_window.Count == _period) _window.Dequeue();
+            _window.Enqueue(current);
+        }
+        return result;
     }
+
 }
 
 internal static class PercentileCandleReference

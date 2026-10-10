@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -73,23 +72,23 @@ public static class PivotLevelSnapshots
         if (offset < 0)
             throw new ArgumentOutOfRangeException(nameof(offset));
         var result = new PivotLevelValue[bars.Count];
+        var capacity = Math.Min(period, bars.Count);
+        var highs = new ExtremeDeque(capacity, true);
+        var lows = new ExtremeDeque(capacity, false);
         for (var i = 0; i < bars.Count; i++)
         {
+            var end = i - offset - 1;
+            if (end >= 0)
+            {
+                highs.Add(end, bars[end].High, (long)end - period + 1);
+                lows.Add(end, bars[end].Low, (long)end - period + 1);
+            }
             if (i < (long)period + offset)
             {
                 result[i] = Empty();
                 continue;
             }
-            var start = i - period - offset;
-            var end = i - offset - 1;
-            var high = bars[start].High;
-            var low = bars[start].Low;
-            for (var j = start + 1; j <= end; j++)
-            {
-                high = Math.Max(high, bars[j].High);
-                low = Math.Min(low, bars[j].Low);
-            }
-            result[i] = Levels(bars[i].Open, high, low, bars[end].Close, style);
+            result[i] = Levels(bars[i].Open, highs.Value, lows.Value, bars[end].Close, style);
         }
         return result;
     }
@@ -179,79 +178,69 @@ public static class PivotLevelSnapshots
         PivotLevelStyle style
     )
     {
-        var o = ExactVarianceWindow.Units(open);
-        var h = ExactVarianceWindow.Units(high);
-        var l = ExactVarianceWindow.Units(low);
-        var c = ExactVarianceWindow.Units(close);
-        var range = h - l;
-        var values = new double?[9];
-        double Q(BigInteger n, BigInteger d)
+        Span<double> values = stackalloc double[9];
+        FillLevels(open, high, low, close, style, values);
+        static double? Optional(double value) => double.IsNaN(value) ? null : value;
+        return new(Optional(values[0]), Optional(values[1]), Optional(values[2]),
+            Optional(values[3]), Optional(values[4]), Optional(values[5]),
+            Optional(values[6]), Optional(values[7]), Optional(values[8]));
+    }
+
+    internal static void FillLevels(double open, double high, double low, double close,
+        PivotLevelStyle style, Span<double> values, bool rejectOverflow = true)
+    {
+        values.Fill(double.NaN);
+        double Q(int ow, int hw, int lw, int cw, int denominator)
         {
-            var value = ExactMeanAccumulator.UnitRatio(n, d);
-            return FrameworkCompatibility.IsFinite(value)
-                ? value
-                : throw new OverflowException("Pivot level is not representable.");
+            var sum = new ExactMeanAccumulator();
+            sum.Add(open, ow); sum.Add(high, hw); sum.Add(low, lw); sum.Add(close, cw);
+            var value = sum.Mean(denominator);
+            return !rejectOverflow || FrameworkCompatibility.IsFinite(value)
+                ? value : throw new OverflowException("Pivot level is not representable.");
         }
         if (style == PivotLevelStyle.Camarilla)
         {
             values[0] = close;
-            var divisors = new[] { 120, 60, 40, 20 };
             for (var i = 0; i < 4; i++)
             {
-                values[i + 1] = Q(c * divisors[i] - 11 * range, divisors[i]);
-                values[i + 5] = Q(c * divisors[i] + 11 * range, divisors[i]);
+                var d = i == 0 ? 120 : i == 1 ? 60 : i == 2 ? 40 : 20;
+                values[i + 1] = Q(0, -11, 11, d, d);
+                values[i + 5] = Q(0, 11, -11, d, d);
             }
         }
         else if (style == PivotLevelStyle.Demark)
         {
-            var x =
-                c < o ? h + 2 * l + c
-                : c > o ? 2 * h + l + c
-                : h + l + 2 * c;
-            values[0] = Q(x, 4);
-            values[1] = Q(x - 2 * h, 2);
-            values[5] = Q(x - 2 * l, 2);
+            var hw = close > open ? 2 : 1;
+            var lw = close < open ? 2 : 1;
+            var cw = close == open ? 2 : 1; // NOSONAR: DeMark selects exact price ties.
+            values[0] = Q(0, hw, lw, cw, 4);
+            values[1] = Q(0, hw - 2, lw, cw, 2);
+            values[5] = Q(0, hw, lw - 2, cw, 2);
         }
         else
         {
-            var numerator = style == PivotLevelStyle.Woodie ? h + l + 2 * o : h + l + c;
-            var denominator = style == PivotLevelStyle.Woodie ? 4 : 3;
-            values[0] = Q(numerator, denominator);
+            var ow = style == PivotLevelStyle.Woodie ? 2 : 0;
+            var cw = style == PivotLevelStyle.Woodie ? 0 : 1;
+            var d = style == PivotLevelStyle.Woodie ? 4 : 3;
+            values[0] = Q(ow, 1, 1, cw, d);
             if (style == PivotLevelStyle.Fibonacci)
             {
-                var factors = new[] { 382, 618, 1000 };
                 for (var i = 0; i < 3; i++)
                 {
-                    values[i + 1] = Q(
-                        1000 * numerator - factors[i] * range * denominator,
-                        1000 * denominator
-                    );
-                    values[i + 5] = Q(
-                        1000 * numerator + factors[i] * range * denominator,
-                        1000 * denominator
-                    );
+                    var f = i == 0 ? 382 : i == 1 ? 618 : 1000;
+                    values[i + 1] = Q(0, 1000 - f * d, 1000 + f * d, 1000, 1000 * d);
+                    values[i + 5] = Q(0, 1000 + f * d, 1000 - f * d, 1000, 1000 * d);
                 }
             }
             else
             {
-                values[1] = Q(2 * numerator - h * denominator, denominator);
-                values[5] = Q(2 * numerator - l * denominator, denominator);
-                values[2] = Q(numerator - range * denominator, denominator);
-                values[6] = Q(numerator + range * denominator, denominator);
-                values[3] = Q(2 * numerator + (l - 2 * h) * denominator, denominator);
-                values[7] = Q(2 * numerator + (h - 2 * l) * denominator, denominator);
+                values[1] = Q(2 * ow, 2 - d, 2, 2 * cw, d);
+                values[5] = Q(2 * ow, 2, 2 - d, 2 * cw, d);
+                values[2] = Q(ow, 1 - d, 1 + d, cw, d);
+                values[6] = Q(ow, 1 + d, 1 - d, cw, d);
+                values[3] = Q(2 * ow, 2 - 2 * d, 2 + d, 2 * cw, d);
+                values[7] = Q(2 * ow, 2 + d, 2 - 2 * d, 2 * cw, d);
             }
         }
-        return new(
-            values[0],
-            values[1],
-            values[2],
-            values[3],
-            values[4],
-            values[5],
-            values[6],
-            values[7],
-            values[8]
-        );
     }
 }

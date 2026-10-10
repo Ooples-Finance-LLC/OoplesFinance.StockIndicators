@@ -1,0 +1,3582 @@
+{
+  "SourceRevision": "85c8918db3018a36a8af8f6425a41cf06ae360b0",
+  "RunUrl": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/37805347344",
+  "Workload": "Complete public builder lifecycle vs native owned batch, all eligible family routes on the same runner",
+  "Families": [
+    {
+      "Family": "QuanTAlib.Jma",
+      "Pairs": [
+        "QuanTAlib.Jma"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "INTEL XEON PLATINUM 8573C",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "f5a17a6a79b0b23d9a032323aed0beff056cffa0564276f6c83676418a8f950d"
+    },
+    {
+      "Family": "QuanTAlib.Atr",
+      "Pairs": [
+        "QuanTAlib.Atr"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "INTEL XEON PLATINUM 8573C",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "93a099a090181085e7b9d9dfa7e21cc5f3d557362a9589d5f7ae4e1595bd7004"
+    },
+    {
+      "Family": "Skender.GetRollingPivots",
+      "Pairs": [
+        "Skender.GetRollingPivots"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "9067933d506a60cd6341d089bfa0107b6afa01a7f63c70706f6835ed87984b64"
+    },
+    {
+      "Family": "Skender.GetFractal",
+      "Pairs": [
+        "Skender.GetFractal"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "INTEL XEON PLATINUM 8573C",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "aed6d3a290dfc8a7553e481cd7690ced8730a131ef968fe5dfab2a9f4c241c66"
+    },
+    {
+      "Family": "TaLib.Candles.RickshawMan",
+      "Pairs": [
+        "TaLib.Candles.RickshawMan"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V74",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "c6b629221f179d26e549137f2c05561905b3efc608689c3e82680e3271ef2b61"
+    },
+    {
+      "Family": "TaLib.Functions.Asin",
+      "Pairs": [
+        "TaLib.Functions.Asin"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "998d16175d79e35c3c559ac852e8f4f1770c6e050dc795d4e060737746c5255f"
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pairs": [
+        "Trady.Candlestick.BullishShortDay",
+        "Trady.Candlestick.BullishShortDay.Tuple"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V74",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "92d7761eaa50919a6b76850309b866c51f3ea6841a03fe6321781d970a67b938"
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pairs": [
+        "Trady.Indicator.SimpleMovingAverage",
+        "Trady.Indicator.SimpleMovingAverage.Tuple",
+        "Skender.GetSma",
+        "Skender.GetSma.Tuple",
+        "TaLib.Functions.Sma",
+        "QuanTAlib.Sma"
+      ],
+      "Host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 7763",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.401",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "ReportSha256": "d6e9cf9db07f2c52a08afe46e0020fed3e7c577833f0eebb0d936592e182a6e6"
+    }
+  ],
+  "Results": [
+    {
+      "Family": "QuanTAlib.Jma",
+      "Pair": "QuanTAlib.Jma",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          215815.8203125,
+          213565.03125,
+          213409.1875,
+          215195.34375,
+          213112.982421875
+        ],
+        "N": 5,
+        "Min": 213112.982421875,
+        "LowerFence": 210729.953125,
+        "Q1": 213409.1875,
+        "Median": 213565.03125,
+        "Mean": 214219.673046875,
+        "Q3": 215195.34375,
+        "UpperFence": 217874.578125,
+        "Max": 215815.8203125,
+        "InterquartileRange": 1786.15625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 538.9724602366286,
+        "Variance": 1452456.564467621,
+        "StandardDeviation": 1205.179059089404,
+        "Skewness": 0.32298438763254134,
+        "Kurtosis": 0.9017779225475122,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 214219.673046875,
+          "StandardError": 538.9724602366286,
+          "Level": 12,
+          "Margin": 4640.715416517027,
+          "Lower": 209578.95763035797,
+          "Upper": 218860.388463392
+        },
+        "Percentiles": {
+          "P0": 213112.982421875,
+          "P25": 213409.1875,
+          "P50": 213565.03125,
+          "P67": 214673.64375000002,
+          "P80": 215319.4390625,
+          "P85": 215443.534375,
+          "P90": 215567.6296875,
+          "P95": 215691.725,
+          "P100": 215815.8203125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 1,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 512,
+        "BytesAllocatedPerOperation": 265008
+      }
+    },
+    {
+      "Family": "QuanTAlib.Jma",
+      "Pair": "QuanTAlib.Jma",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          234249.5546875,
+          234859.609375,
+          227422.4765625,
+          228270.20703125,
+          227174.5078125
+        ],
+        "N": 5,
+        "Min": 227174.5078125,
+        "LowerFence": 217181.859375,
+        "Q1": 227422.4765625,
+        "Median": 228270.20703125,
+        "Mean": 230395.27109375,
+        "Q3": 234249.5546875,
+        "UpperFence": 244490.171875,
+        "Max": 234859.609375,
+        "InterquartileRange": 6827.078125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 1710.4464186154999,
+        "Variance": 14628134.754772952,
+        "StandardDeviation": 3824.6744638953196,
+        "Skewness": 0.27509306202262146,
+        "Kurtosis": 0.7701608002970376,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 230395.27109375,
+          "StandardError": 1710.4464186154999,
+          "Level": 12,
+          "Margin": 14727.45947076841,
+          "Lower": 215667.8116229816,
+          "Upper": 245122.7305645184
+        },
+        "Percentiles": {
+          "P0": 227174.5078125,
+          "P25": 227422.4765625,
+          "P50": 228270.20703125,
+          "P67": 232336.1634375,
+          "P80": 234371.565625,
+          "P85": 234493.5765625,
+          "P90": 234615.5875,
+          "P95": 234737.5984375,
+          "P100": 234859.609375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 1,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 392093
+      }
+    },
+    {
+      "Family": "QuanTAlib.Jma",
+      "Pair": "QuanTAlib.Jma",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          2533310.9609375,
+          2473998.5546875,
+          2437424.3046875,
+          2480070.9765625,
+          2585904.8046875
+        ],
+        "N": 5,
+        "Min": 2437424.3046875,
+        "LowerFence": 2385029.9453125,
+        "Q1": 2473998.5546875,
+        "Median": 2480070.9765625,
+        "Mean": 2502141.9203125,
+        "Q3": 2533310.9609375,
+        "UpperFence": 2622279.5703125,
+        "Max": 2585904.8046875,
+        "InterquartileRange": 59312.40625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 25937.69000046637,
+        "Variance": 3363818812.801465,
+        "StandardDeviation": 57998.438020359354,
+        "Skewness": 0.3217656368861187,
+        "Kurtosis": 1.2121357608830818,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 2502141.9203125,
+          "StandardError": 25937.69000046637,
+          "Level": 12,
+          "Margin": 223331.33273851735,
+          "Lower": 2278810.587573983,
+          "Upper": 2725473.2530510174
+        },
+        "Percentiles": {
+          "P0": 2437424.3046875,
+          "P25": 2473998.5546875,
+          "P50": 2480070.9765625,
+          "P67": 2516274.1659375,
+          "P80": 2543829.7296875,
+          "P85": 2554348.4984375,
+          "P90": 2564867.2671875,
+          "P95": 2575386.0359375,
+          "P100": 2585904.8046875
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 25,
+        "Gen1Collections": 24,
+        "Gen2Collections": 24,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3722482
+      }
+    },
+    {
+      "Family": "QuanTAlib.Jma",
+      "Pair": "QuanTAlib.Jma",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          2340612.1328125,
+          2305417.2578125,
+          2284292.5859375,
+          2315239.0078125,
+          2297050.8671875
+        ],
+        "N": 5,
+        "Min": 2284292.5859375,
+        "LowerFence": 2269768.65625,
+        "Q1": 2297050.8671875,
+        "Median": 2305417.2578125,
+        "Mean": 2308522.3703125,
+        "Q3": 2315239.0078125,
+        "UpperFence": 2342521.21875,
+        "Max": 2340612.1328125,
+        "InterquartileRange": 18188.140625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 9495.224154953761,
+        "Variance": 450796408.7640869,
+        "StandardDeviation": 21231.966672074606,
+        "Skewness": 0.36741356969014555,
+        "Kurtosis": 1.401949091565155,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 2308522.3703125,
+          "StandardError": 9495.224154953761,
+          "Level": 12,
+          "Margin": 81756.74337763527,
+          "Lower": 2226765.6269348646,
+          "Upper": 2390279.113690135
+        },
+        "Percentiles": {
+          "P0": 2284292.5859375,
+          "P25": 2297050.8671875,
+          "P50": 2305417.2578125,
+          "P67": 2312096.0478125,
+          "P80": 2320313.6328125,
+          "P85": 2325388.2578125,
+          "P90": 2330462.8828125,
+          "P95": 2335537.5078125,
+          "P100": 2340612.1328125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 3,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3970572
+      }
+    },
+    {
+      "Family": "QuanTAlib.Atr",
+      "Pair": "QuanTAlib.Atr",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          133449.61328125,
+          132960.5966796875,
+          134567.30859375,
+          134272.056640625
+        ],
+        "N": 4,
+        "Min": 132960.5966796875,
+        "LowerFence": 131799.59338378906,
+        "Q1": 133327.35913085938,
+        "Median": 133860.8349609375,
+        "Mean": 133812.39379882812,
+        "Q3": 134345.86962890625,
+        "UpperFence": 135873.63537597656,
+        "Max": 134567.30859375,
+        "InterquartileRange": 1018.510498046875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 369.49902027737005,
+        "Variance": 546118.1039437453,
+        "StandardDeviation": 738.9980405547401,
+        "Skewness": -0.08575037716107803,
+        "Kurtosis": 0.7654624041855893,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 133812.39379882812,
+          "StandardError": 369.49902027737005,
+          "Level": 12,
+          "Margin": 4775.397452271865,
+          "Lower": 129036.99634655626,
+          "Upper": 138587.7912511
+        },
+        "Percentiles": {
+          "P0": 132960.5966796875,
+          "P25": 133327.35913085938,
+          "P50": 133860.8349609375,
+          "P67": 134275.00916015625,
+          "P80": 134390.157421875,
+          "P85": 134434.44521484376,
+          "P90": 134478.7330078125,
+          "P95": 134523.02080078126,
+          "P100": 134567.30859375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 3,
+        "Gen1Collections": 1,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 261464
+      }
+    },
+    {
+      "Family": "QuanTAlib.Atr",
+      "Pair": "QuanTAlib.Atr",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          50252.33203125,
+          50114.1123046875,
+          49763.466796875,
+          49229.728515625,
+          48762.2734375
+        ],
+        "N": 5,
+        "Min": 48762.2734375,
+        "LowerFence": 47903.15283203125,
+        "Q1": 49229.728515625,
+        "Median": 49763.466796875,
+        "Mean": 49624.3826171875,
+        "Q3": 50114.1123046875,
+        "UpperFence": 51440.68798828125,
+        "Max": 50252.33203125,
+        "InterquartileRange": 884.3837890625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 278.6112111941287,
+        "Variance": 388121.03501529695,
+        "StandardDeviation": 622.9936075236221,
+        "Skewness": -0.27664308657085757,
+        "Kurtosis": 1.0489210835486151,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 49624.3826171875,
+          "StandardError": 278.6112111941287,
+          "Level": 12,
+          "Margin": 2398.926547073332,
+          "Lower": 47225.45607011417,
+          "Upper": 52023.30916426083
+        },
+        "Percentiles": {
+          "P0": 48762.2734375,
+          "P25": 49229.728515625,
+          "P50": 49763.466796875,
+          "P67": 50001.9057421875,
+          "P80": 50141.75625,
+          "P85": 50169.4001953125,
+          "P90": 50197.044140625,
+          "P95": 50224.6880859375,
+          "P100": 50252.33203125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 1,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 88759
+      }
+    },
+    {
+      "Family": "QuanTAlib.Atr",
+      "Pair": "QuanTAlib.Atr",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1490395,
+          1565448.890625,
+          1637230.5625,
+          1674380.375,
+          1682700.609375
+        ],
+        "N": 5,
+        "Min": 1490395,
+        "LowerFence": 1402051.6640625,
+        "Q1": 1565448.890625,
+        "Median": 1637230.5625,
+        "Mean": 1610031.0875,
+        "Q3": 1674380.375,
+        "UpperFence": 1837777.6015625,
+        "Max": 1682700.609375,
+        "InterquartileRange": 108931.484375,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 36374.35041487566,
+        "Variance": 6615466840.520826,
+        "StandardDeviation": 81335.52016505966,
+        "Skewness": -0.4202398585094719,
+        "Kurtosis": 1.1625328685985274,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 1610031.0875,
+          "StandardError": 36374.35041487566,
+          "Level": 12,
+          "Margin": 313194.1262119317,
+          "Lower": 1296836.9612880682,
+          "Upper": 1923225.2137119316
+        },
+        "Percentiles": {
+          "P0": 1490395,
+          "P25": 1565448.890625,
+          "P50": 1637230.5625,
+          "P67": 1662492.435,
+          "P80": 1676044.421875,
+          "P85": 1677708.46875,
+          "P90": 1679372.515625,
+          "P95": 1681036.5625,
+          "P100": 1682700.609375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 21,
+        "Gen1Collections": 20,
+        "Gen2Collections": 20,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3717642
+      }
+    },
+    {
+      "Family": "QuanTAlib.Atr",
+      "Pair": "QuanTAlib.Atr",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          510216.45703125,
+          497262.89843750006,
+          502154.24609375,
+          510212.55859374994,
+          508354.67578125006
+        ],
+        "N": 5,
+        "Min": 497262.89843750006,
+        "LowerFence": 490066.7773437501,
+        "Q1": 502154.24609375,
+        "Median": 508354.67578125006,
+        "Mean": 505640.1671875,
+        "Q3": 510212.55859374994,
+        "UpperFence": 522300.0273437499,
+        "Max": 510216.45703125,
+        "InterquartileRange": 8058.312499999942,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 2564.644482117136,
+        "Variance": 32887006.598269355,
+        "StandardDeviation": 5734.719400133659,
+        "Skewness": -0.44415205084247417,
+        "Kurtosis": 1.1100083523986863,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 505640.1671875,
+          "StandardError": 2564.644482117136,
+          "Level": 12,
+          "Margin": 22082.362391616447,
+          "Lower": 483557.80479588354,
+          "Upper": 527722.5295791164
+        },
+        "Percentiles": {
+          "P0": 497262.89843750006,
+          "P25": 502154.24609375,
+          "P50": 508354.67578125006,
+          "P67": 509618.03609375004,
+          "P80": 510213.33828125,
+          "P85": 510214.11796874995,
+          "P90": 510214.89765624993,
+          "P95": 510215.67734374997,
+          "P100": 510216.45703125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 2,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 880774
+      }
+    },
+    {
+      "Family": "Skender.GetRollingPivots",
+      "Pair": "Skender.GetRollingPivots",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          634835.96875,
+          633615.25,
+          635165,
+          642305.5625
+        ],
+        "N": 4,
+        "Min": 633615.25,
+        "LowerFence": 630901.76171875,
+        "Q1": 634530.7890625,
+        "Median": 635000.484375,
+        "Mean": 636480.4453125,
+        "Q3": 636950.140625,
+        "UpperFence": 640579.16796875,
+        "Max": 642305.5625,
+        "InterquartileRange": 2419.3515625,
+        "LowerOutliers": [],
+        "UpperOutliers": [
+          642305.5625
+        ],
+        "AllOutliers": [
+          642305.5625
+        ],
+        "StandardError": 1970.1106982787778,
+        "Variance": 15525344.653889975,
+        "StandardDeviation": 3940.2213965575556,
+        "Skewness": 0.6841753400857705,
+        "Kurtosis": 1.2747879525794523,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 636480.4453125,
+          "StandardError": 1970.1106982787778,
+          "Level": 12,
+          "Margin": 25461.668618746855,
+          "Lower": 611018.7766937532,
+          "Upper": 661942.1139312468
+        },
+        "Percentiles": {
+          "P0": 633615.25,
+          "P25": 634530.7890625,
+          "P50": 635000.484375,
+          "P67": 635236.405625,
+          "P80": 638021.225,
+          "P85": 639092.309375,
+          "P90": 640163.39375,
+          "P95": 641234.478125,
+          "P100": 642305.5625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 32,
+        "BytesAllocatedPerOperation": 404376
+      }
+    },
+    {
+      "Family": "Skender.GetRollingPivots",
+      "Pair": "Skender.GetRollingPivots",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          540068.12890625,
+          538007.99609375,
+          537281.05859375,
+          539468.37890625
+        ],
+        "N": 4,
+        "Min": 537281.05859375,
+        "LowerFence": 535138.1796875,
+        "Q1": 537826.26171875,
+        "Median": 538738.1875,
+        "Mean": 538706.390625,
+        "Q3": 539618.31640625,
+        "UpperFence": 542306.3984375,
+        "Max": 540068.12890625,
+        "InterquartileRange": 1792.0546875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 642.5394675278186,
+        "Variance": 1651427.8693237305,
+        "StandardDeviation": 1285.0789350556372,
+        "Skewness": -0.031660919613397044,
+        "Kurtosis": 0.7462613777063243,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 538706.390625,
+          "StandardError": 642.5394675278186,
+          "Level": 12,
+          "Margin": 8304.166365348246,
+          "Lower": 530402.2242596517,
+          "Upper": 547010.5569903483
+        },
+        "Percentiles": {
+          "P0": 537281.05859375,
+          "P25": 537826.26171875,
+          "P50": 538738.1875,
+          "P67": 539474.3764062499,
+          "P80": 539708.27890625,
+          "P85": 539798.24140625,
+          "P90": 539888.20390625,
+          "P95": 539978.16640625,
+          "P100": 540068.12890625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 3,
+        "Gen1Collections": 1,
+        "Gen2Collections": 0,
+        "TotalOperations": 128,
+        "BytesAllocatedPerOperation": 511654
+      }
+    },
+    {
+      "Family": "Skender.GetRollingPivots",
+      "Pair": "Skender.GetRollingPivots",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          6102237.171875,
+          6203816.015625,
+          6226788.640625,
+          6208127.203125,
+          6218909.234375
+        ],
+        "N": 5,
+        "Min": 6102237.171875,
+        "LowerFence": 6181176.1875,
+        "Q1": 6203816.015625,
+        "Median": 6208127.203125,
+        "Mean": 6191975.653125,
+        "Q3": 6218909.234375,
+        "UpperFence": 6241549.0625,
+        "Max": 6226788.640625,
+        "InterquartileRange": 15093.21875,
+        "LowerOutliers": [
+          6102237.171875
+        ],
+        "UpperOutliers": [],
+        "AllOutliers": [
+          6102237.171875
+        ],
+        "StandardError": 22794.104134859102,
+        "Variance": 2597855916.554004,
+        "StandardDeviation": 50969.166331753986,
+        "Skewness": -0.9894386822118173,
+        "Kurtosis": 1.9835504994520596,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 6191975.653125,
+          "StandardError": 22794.104134859102,
+          "Level": 12,
+          "Margin": 196264.110448043,
+          "Lower": 5995711.542676957,
+          "Upper": 6388239.763573043
+        },
+        "Percentiles": {
+          "P0": 6102237.171875,
+          "P25": 6203816.015625,
+          "P50": 6208127.203125,
+          "P67": 6215458.984375,
+          "P80": 6220485.115625001,
+          "P85": 6222060.996874999,
+          "P90": 6223636.878125001,
+          "P95": 6225212.759375,
+          "P100": 6226788.640625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 16,
+        "Gen1Collections": 15,
+        "Gen2Collections": 11,
+        "TotalOperations": 32,
+        "BytesAllocatedPerOperation": 5085864
+      }
+    },
+    {
+      "Family": "Skender.GetRollingPivots",
+      "Pair": "Skender.GetRollingPivots",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          6232156.4375,
+          6150752.34375,
+          6117166.65625,
+          6161942.28125,
+          6188797.34375
+        ],
+        "N": 5,
+        "Min": 6117166.65625,
+        "LowerFence": 6093684.84375,
+        "Q1": 6150752.34375,
+        "Median": 6161942.28125,
+        "Mean": 6170163.0125,
+        "Q3": 6188797.34375,
+        "UpperFence": 6245864.84375,
+        "Max": 6232156.4375,
+        "InterquartileRange": 38045,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 19291.696793891948,
+        "Variance": 1860847825.9373047,
+        "StandardDeviation": 43137.54543245715,
+        "Skewness": 0.21927197163590653,
+        "Kurtosis": 1.3241181081342284,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 6170163.0125,
+          "StandardError": 19291.696793891948,
+          "Level": 12,
+          "Margin": 166107.32704762078,
+          "Lower": 6004055.685452379,
+          "Upper": 6336270.339547621
+        },
+        "Percentiles": {
+          "P0": 6117166.65625,
+          "P25": 6150752.34375,
+          "P50": 6161942.28125,
+          "P67": 6180203.72375,
+          "P80": 6197469.1625,
+          "P85": 6206140.981249999,
+          "P90": 6214812.800000001,
+          "P95": 6223484.618749999,
+          "P100": 6232156.4375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 9,
+        "Gen1Collections": 7,
+        "Gen2Collections": 0,
+        "TotalOperations": 32,
+        "BytesAllocatedPerOperation": 5155881
+      }
+    },
+    {
+      "Family": "Skender.GetFractal",
+      "Pair": "Skender.GetFractal",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          152314.126953125,
+          152411.98046875,
+          152868.0400390625,
+          152212.5576171875
+        ],
+        "N": 4,
+        "Min": 152212.5576171875,
+        "LowerFence": 151932.84350585938,
+        "Q1": 152288.73461914062,
+        "Median": 152363.0537109375,
+        "Mean": 152451.67626953125,
+        "Q3": 152525.99536132812,
+        "UpperFence": 152881.88647460938,
+        "Max": 152868.0400390625,
+        "InterquartileRange": 237.2607421875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 144.63519901245064,
+        "Variance": 83677.3631734848,
+        "StandardDeviation": 289.2703980249013,
+        "Skewness": 0.5767631920750359,
+        "Kurtosis": 1.2026378351823643,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 152451.67626953125,
+          "StandardError": 144.63519901245064,
+          "Level": 12,
+          "Margin": 1869.262225254112,
+          "Lower": 150582.41404427713,
+          "Upper": 154320.93849478537
+        },
+        "Percentiles": {
+          "P0": 152212.5576171875,
+          "P25": 152288.73461914062,
+          "P50": 152363.0537109375,
+          "P67": 152416.54106445314,
+          "P80": 152594.404296875,
+          "P85": 152662.81323242188,
+          "P90": 152731.22216796875,
+          "P95": 152799.63110351562,
+          "P100": 152868.0400390625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 4,
+        "Gen1Collections": 1,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 389344
+      }
+    },
+    {
+      "Family": "Skender.GetFractal",
+      "Pair": "Skender.GetFractal",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          543783.84765625,
+          549553.18359375,
+          548370.546875,
+          535997.96484375
+        ],
+        "N": 4,
+        "Min": 535997.96484375,
+        "LowerFence": 531594.1333007812,
+        "Q1": 541837.376953125,
+        "Median": 546077.197265625,
+        "Mean": 544426.3857421875,
+        "Q3": 548666.2060546875,
+        "UpperFence": 558909.4497070312,
+        "Max": 549553.18359375,
+        "InterquartileRange": 6828.8291015625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 3072.6155699104424,
+        "Variance": 37763865.76182429,
+        "StandardDeviation": 6145.231139820885,
+        "Skewness": -0.4340283010991874,
+        "Kurtosis": 1.0482120554055148,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 544426.3857421875,
+          "StandardError": 3072.6155699104424,
+          "Level": 12,
+          "Margin": 39710.4180502203,
+          "Lower": 504715.9676919672,
+          "Upper": 584136.8037924079
+        },
+        "Percentiles": {
+          "P0": 535997.96484375,
+          "P25": 541837.376953125,
+          "P50": 546077.197265625,
+          "P67": 548382.3732421875,
+          "P80": 548843.6015625,
+          "P85": 549020.9970703125,
+          "P90": 549198.392578125,
+          "P95": 549375.7880859375,
+          "P100": 549553.18359375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 108419
+      }
+    },
+    {
+      "Family": "Skender.GetFractal",
+      "Pair": "Skender.GetFractal",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1911011.546875,
+          1913177.875,
+          1913973.140625,
+          1891892.015625
+        ],
+        "N": 4,
+        "Min": 1891892.015625,
+        "LowerFence": 1895514.123046875,
+        "Q1": 1906231.6640625,
+        "Median": 1912094.7109375,
+        "Mean": 1907513.64453125,
+        "Q3": 1913376.69140625,
+        "UpperFence": 1924094.232421875,
+        "Max": 1913973.140625,
+        "InterquartileRange": 7145.02734375,
+        "LowerOutliers": [
+          1891892.015625
+        ],
+        "UpperOutliers": [],
+        "AllOutliers": [
+          1891892.015625
+        ],
+        "StandardError": 5244.673544648931,
+        "Variance": 110026402.35976155,
+        "StandardDeviation": 10489.347089297862,
+        "Skewness": -0.7187775359018791,
+        "Kurtosis": 1.2901504372230235,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 1907513.64453125,
+          "StandardError": 5244.673544648931,
+          "Level": 12,
+          "Margin": 67782.04896000387,
+          "Lower": 1839731.5955712462,
+          "Upper": 1975295.6934912538
+        },
+        "Percentiles": {
+          "P0": 1891892.015625,
+          "P25": 1906231.6640625,
+          "P50": 1912094.7109375,
+          "P67": 1913185.82765625,
+          "P80": 1913495.9812500002,
+          "P85": 1913615.27109375,
+          "P90": 1913734.5609375,
+          "P95": 1913853.8507812498,
+          "P100": 1913973.140625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 23,
+        "Gen1Collections": 22,
+        "Gen2Collections": 21,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 4997632
+      }
+    },
+    {
+      "Family": "Skender.GetFractal",
+      "Pair": "Skender.GetFractal",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          5888376.84375,
+          5829044.28125,
+          5891115.75,
+          5877799.5
+        ],
+        "N": 4,
+        "Min": 5829044.28125,
+        "LowerFence": 5830434.3828125,
+        "Q1": 5865610.6953125,
+        "Median": 5883088.171875,
+        "Mean": 5871584.09375,
+        "Q3": 5889061.5703125,
+        "UpperFence": 5924237.8828125,
+        "Max": 5891115.75,
+        "InterquartileRange": 23450.875,
+        "LowerOutliers": [
+          5829044.28125
+        ],
+        "UpperOutliers": [],
+        "AllOutliers": [
+          5829044.28125
+        ],
+        "StandardError": 14467.633332195812,
+        "Variance": 837249656.9394531,
+        "StandardDeviation": 28935.266664391624,
+        "Skewness": -0.6661726912060556,
+        "Kurtosis": 1.2487131969108365,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 5871584.09375,
+          "StandardError": 14467.633332195812,
+          "Level": 12,
+          "Margin": 186979.38441923042,
+          "Lower": 5684604.709330769,
+          "Upper": 6058563.478169231
+        },
+        "Percentiles": {
+          "P0": 5829044.28125,
+          "P25": 5865610.6953125,
+          "P50": 5883088.171875,
+          "P67": 5888404.232812501,
+          "P80": 5889472.40625,
+          "P85": 5889883.2421875,
+          "P90": 5890294.078125,
+          "P95": 5890704.9140625,
+          "P100": 5891115.75
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 32,
+        "BytesAllocatedPerOperation": 1080548
+      }
+    },
+    {
+      "Family": "TaLib.Candles.RickshawMan",
+      "Pair": "TaLib.Candles.RickshawMan",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          204177.271484375,
+          204702.427734375,
+          206397.2890625,
+          204505.025390625
+        ],
+        "N": 4,
+        "Min": 204177.271484375,
+        "LowerFence": 203368.50268554688,
+        "Q1": 204423.0869140625,
+        "Median": 204603.7265625,
+        "Mean": 204945.50341796875,
+        "Q3": 205126.14306640625,
+        "UpperFence": 206180.72729492188,
+        "Max": 206397.2890625,
+        "InterquartileRange": 703.05615234375,
+        "LowerOutliers": [],
+        "UpperOutliers": [
+          206397.2890625
+        ],
+        "AllOutliers": [
+          206397.2890625
+        ],
+        "StandardError": 495.8972122986963,
+        "Variance": 983656.1806624731,
+        "StandardDeviation": 991.7944245973925,
+        "Skewness": 0.6423538043509154,
+        "Kurtosis": 1.2484167109046387,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 204945.50341796875,
+          "StandardError": 495.8972122986963,
+          "Level": 12,
+          "Margin": 6408.964988384163,
+          "Lower": 198536.5384295846,
+          "Upper": 211354.4684063529
+        },
+        "Percentiles": {
+          "P0": 204177.271484375,
+          "P25": 204423.0869140625,
+          "P50": 204603.7265625,
+          "P67": 204719.37634765625,
+          "P80": 205380.372265625,
+          "P85": 205634.60146484373,
+          "P90": 205888.8306640625,
+          "P95": 206143.05986328123,
+          "P100": 206397.2890625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 8,
+        "Gen1Collections": 2,
+        "Gen2Collections": 0,
+        "TotalOperations": 512,
+        "BytesAllocatedPerOperation": 263312
+      }
+    },
+    {
+      "Family": "TaLib.Candles.RickshawMan",
+      "Pair": "TaLib.Candles.RickshawMan",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          66894.91796875,
+          67003.28515625,
+          66492.83203125,
+          70166.80859375
+        ],
+        "N": 4,
+        "Min": 66492.83203125,
+        "LowerFence": 65294.7421875,
+        "Q1": 66794.396484375,
+        "Median": 66949.1015625,
+        "Mean": 67639.4609375,
+        "Q3": 67794.166015625,
+        "UpperFence": 69293.8203125,
+        "Max": 70166.80859375,
+        "InterquartileRange": 999.76953125,
+        "LowerOutliers": [],
+        "UpperOutliers": [
+          70166.80859375
+        ],
+        "AllOutliers": [
+          70166.80859375
+        ],
+        "StandardError": 849.5738088969742,
+        "Variance": 2887102.62705485,
+        "StandardDeviation": 1699.1476177939485,
+        "Skewness": 0.7117179529053373,
+        "Kurtosis": 1.2896760067825292,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 67639.4609375,
+          "StandardError": 849.5738088969742,
+          "Level": 12,
+          "Margin": 10979.873774707243,
+          "Lower": 56659.587162792755,
+          "Upper": 78619.33471220724
+        },
+        "Percentiles": {
+          "P0": 66492.83203125,
+          "P25": 66794.396484375,
+          "P50": 66949.1015625,
+          "P67": 67034.920390625,
+          "P80": 68268.69453125,
+          "P85": 68743.223046875,
+          "P90": 69217.7515625,
+          "P95": 69692.280078125,
+          "P100": 70166.80859375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 128,
+        "BytesAllocatedPerOperation": 4119
+      }
+    },
+    {
+      "Family": "TaLib.Candles.RickshawMan",
+      "Pair": "TaLib.Candles.RickshawMan",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          2356210.046875,
+          2384569.03125,
+          2332144.5,
+          2312373.921875,
+          2293249.09375
+        ],
+        "N": 5,
+        "Min": 2293249.09375,
+        "LowerFence": 2246619.734375,
+        "Q1": 2312373.921875,
+        "Median": 2332144.5,
+        "Mean": 2335709.31875,
+        "Q3": 2356210.046875,
+        "UpperFence": 2421964.234375,
+        "Max": 2384569.03125,
+        "InterquartileRange": 43836.125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 16074.31296560223,
+        "Variance": 1291917686.5806398,
+        "StandardDeviation": 35943.25648269283,
+        "Skewness": 0.1548582162859878,
+        "Kurtosis": 1.1291119991207925,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 2335709.31875,
+          "StandardError": 16074.31296560223,
+          "Level": 12,
+          "Margin": 138404.68204375284,
+          "Lower": 2197304.6367062475,
+          "Upper": 2474114.0007937527
+        },
+        "Percentiles": {
+          "P0": 2293249.09375,
+          "P25": 2312373.921875,
+          "P50": 2332144.5,
+          "P67": 2348509.071875,
+          "P80": 2361881.84375,
+          "P85": 2367553.640625,
+          "P90": 2373225.4375,
+          "P95": 2378897.234375,
+          "P100": 2384569.03125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 28,
+        "Gen1Collections": 25,
+        "Gen2Collections": 23,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3720185
+      }
+    },
+    {
+      "Family": "TaLib.Candles.RickshawMan",
+      "Pair": "TaLib.Candles.RickshawMan",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          684690.05859375,
+          675165.796875,
+          703693.5625,
+          688913.98828125,
+          673583.0546875
+        ],
+        "N": 5,
+        "Min": 673583.0546875,
+        "LowerFence": 654543.509765625,
+        "Q1": 675165.796875,
+        "Median": 684690.05859375,
+        "Mean": 685209.2921875,
+        "Q3": 688913.98828125,
+        "UpperFence": 709536.275390625,
+        "Max": 703693.5625,
+        "InterquartileRange": 13748.19140625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 5439.227068969035,
+        "Variance": 147925955.5390274,
+        "StandardDeviation": 12162.4814712717,
+        "Skewness": 0.4203745533087921,
+        "Kurtosis": 1.3286805009165474,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 685209.2921875,
+          "StandardError": 5439.227068969035,
+          "Level": 12,
+          "Margin": 46833.38533070726,
+          "Lower": 638375.9068567927,
+          "Upper": 732042.6775182073
+        },
+        "Percentiles": {
+          "P0": 673583.0546875,
+          "P25": 675165.796875,
+          "P50": 684690.05859375,
+          "P67": 687562.33078125,
+          "P80": 691869.9031250001,
+          "P85": 694825.8179687499,
+          "P90": 697781.7328125001,
+          "P95": 700737.64765625,
+          "P100": 703693.5625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 40091
+      }
+    },
+    {
+      "Family": "TaLib.Functions.Asin",
+      "Pair": "TaLib.Functions.Asin",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          168923.23828125,
+          165428.328125,
+          161211.75390625,
+          160635.984375,
+          163226.78125
+        ],
+        "N": 5,
+        "Min": 160635.984375,
+        "LowerFence": 154886.892578125,
+        "Q1": 161211.75390625,
+        "Median": 163226.78125,
+        "Mean": 163885.2171875,
+        "Q3": 165428.328125,
+        "UpperFence": 171753.189453125,
+        "Max": 168923.23828125,
+        "InterquartileRange": 4216.57421875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 1514.9472858207353,
+        "Variance": 11475326.394078065,
+        "StandardDeviation": 3387.5251134239675,
+        "Skewness": 0.40053634263306387,
+        "Kurtosis": 1.2342250885808943,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 163885.2171875,
+          "StandardError": 1514.9472858207353,
+          "Level": 12,
+          "Margin": 13044.1529821993,
+          "Lower": 150841.0642053007,
+          "Upper": 176929.3701696993
+        },
+        "Percentiles": {
+          "P0": 160635.984375,
+          "P25": 161211.75390625,
+          "P50": 163226.78125,
+          "P67": 164723.833125,
+          "P80": 166127.31015625002,
+          "P85": 166826.2921875,
+          "P90": 167525.27421875,
+          "P95": 168224.25625,
+          "P100": 168923.23828125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 4,
+        "Gen1Collections": 1,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 269560
+      }
+    },
+    {
+      "Family": "TaLib.Functions.Asin",
+      "Pair": "TaLib.Functions.Asin",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          13172.447937011719,
+          13111.749450683594,
+          12898.597229003906,
+          12908.846008300781,
+          12906.064758300781
+        ],
+        "N": 5,
+        "Min": 12898.597229003906,
+        "LowerFence": 12597.537719726562,
+        "Q1": 12906.064758300781,
+        "Median": 12908.846008300781,
+        "Mean": 12999.541076660156,
+        "Q3": 13111.749450683594,
+        "UpperFence": 13420.276489257812,
+        "Max": 13172.447937011719,
+        "InterquartileRange": 205.6846923828125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 59.008719464161196,
+        "Variance": 17410.14486400038,
+        "StandardDeviation": 131.9475079870794,
+        "Skewness": 0.34744168290664745,
+        "Kurtosis": 0.857886214378626,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 12999.541076660156,
+          "StandardError": 59.008719464161196,
+          "Level": 12,
+          "Margin": 508.0828694030754,
+          "Lower": 12491.458207257081,
+          "Upper": 13507.623946063231
+        },
+        "Percentiles": {
+          "P0": 12898.597229003906,
+          "P25": 12906.064758300781,
+          "P50": 12908.846008300781,
+          "P67": 13046.820349121093,
+          "P80": 13123.88914794922,
+          "P85": 13136.028845214843,
+          "P90": 13148.16854248047,
+          "P95": 13160.308239746093,
+          "P100": 13172.447937011719
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 3,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 8192,
+        "BytesAllocatedPerOperation": 8057
+      }
+    },
+    {
+      "Family": "TaLib.Functions.Asin",
+      "Pair": "TaLib.Functions.Asin",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          2044095.8124999998,
+          2132498.421875,
+          2091309.03125,
+          1997192.6093749998,
+          1916567.578125
+        ],
+        "N": 5,
+        "Min": 1916567.578125,
+        "LowerFence": 1856017.9765624995,
+        "Q1": 1997192.6093749998,
+        "Median": 2044095.8124999998,
+        "Mean": 2036332.690625,
+        "Q3": 2091309.03125,
+        "UpperFence": 2232483.6640625005,
+        "Max": 2132498.421875,
+        "InterquartileRange": 94116.42187500023,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 37554.054434244266,
+        "Variance": 7051535022.250907,
+        "StandardDeviation": 83973.41854569758,
+        "Skewness": -0.24381973134883286,
+        "Kurtosis": 1.2177153838075587,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 2036332.690625,
+          "StandardError": 37554.054434244266,
+          "Level": 12,
+          "Margin": 323351.7335731824,
+          "Lower": 1712980.9570518176,
+          "Upper": 2359684.4241981823
+        },
+        "Percentiles": {
+          "P0": 1916567.578125,
+          "P25": 1997192.6093749998,
+          "P50": 2044095.8124999998,
+          "P67": 2076200.80125,
+          "P80": 2099546.909375,
+          "P85": 2107784.7875,
+          "P90": 2116022.665625,
+          "P95": 2124260.54375,
+          "P100": 2132498.421875
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 28,
+        "Gen1Collections": 25,
+        "Gen2Collections": 23,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3798495
+      }
+    },
+    {
+      "Family": "TaLib.Functions.Asin",
+      "Pair": "TaLib.Functions.Asin",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          127384.56152343749,
+          127010.5791015625,
+          126597.0302734375,
+          126034.90234375
+        ],
+        "N": 4,
+        "Min": 126034.90234375,
+        "LowerFence": 125485.13366699219,
+        "Q1": 126456.49829101562,
+        "Median": 126803.8046875,
+        "Mean": 126756.76831054688,
+        "Q3": 127104.07470703125,
+        "UpperFence": 128075.43933105469,
+        "Max": 127384.56152343749,
+        "InterquartileRange": 647.576416015625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 289.4176552876822,
+        "Variance": 335050.31676887855,
+        "StandardDeviation": 578.8353105753644,
+        "Skewness": -0.15011727693749027,
+        "Kurtosis": 0.9613290725046512,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 126756.76831054688,
+          "StandardError": 289.4176552876822,
+          "Level": 12,
+          "Margin": 3740.427600229662,
+          "Lower": 123016.3407103172,
+          "Upper": 130497.19591077654
+        },
+        "Percentiles": {
+          "P0": 126034.90234375,
+          "P25": 126456.49829101562,
+          "P50": 126803.8046875,
+          "P67": 127014.31892578125,
+          "P80": 127160.17207031249,
+          "P85": 127216.26943359374,
+          "P90": 127272.366796875,
+          "P95": 127328.46416015623,
+          "P100": 127384.56152343749
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 4,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 80063
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1572928.5,
+          1407941.5,
+          1421336.5
+        ],
+        "N": 3,
+        "Min": 1407941.5,
+        "LowerFence": 1290898.75,
+        "Q1": 1414639,
+        "Median": 1421336.5,
+        "Mean": 1467402.1666666667,
+        "Q3": 1497132.5,
+        "UpperFence": 1620872.75,
+        "Max": 1572928.5,
+        "InterquartileRange": 82493.5,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 52904.66827648052,
+        "Variance": 8396711776.333334,
+        "StandardDeviation": 91633.57341244165,
+        "Skewness": 0.37566792336028326,
+        "Kurtosis": 0.6666666666666652,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 1467402.1666666667,
+          "StandardError": 52904.66827648052,
+          "Level": 12,
+          "Margin": 1671737.4934521324,
+          "Lower": -204335.3267854657,
+          "Upper": 3139139.660118799
+        },
+        "Percentiles": {
+          "P0": 1407941.5,
+          "P25": 1414639,
+          "P50": 1421336.5,
+          "P67": 1472877.78,
+          "P80": 1512291.7,
+          "P85": 1527450.9,
+          "P90": 1542610.1,
+          "P95": 1557769.3,
+          "P100": 1572928.5
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 263800
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          610804023,
+          615543968,
+          615017173
+        ],
+        "N": 3,
+        "Min": 610804023,
+        "LowerFence": 609355639.25,
+        "Q1": 612910598,
+        "Median": 615017173,
+        "Mean": 613788388,
+        "Q3": 615280570.5,
+        "UpperFence": 618835529.25,
+        "Max": 615543968,
+        "InterquartileRange": 2369972.5,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 1499911.5621623609,
+        "Variance": 6749204082925,
+        "StandardDeviation": 2597923.0325252134,
+        "Skewness": -0.3671720573821613,
+        "Kurtosis": 0.6666666666666666,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 613788388,
+          "StandardError": 1499911.5621623609,
+          "Level": 12,
+          "Margin": 47395787.120810695,
+          "Lower": 566392600.8791893,
+          "Upper": 661184175.1208107
+        },
+        "Percentiles": {
+          "P0": 610804023,
+          "P25": 612910598,
+          "P50": 615017173,
+          "P67": 615196283.3,
+          "P80": 615333250,
+          "P85": 615385929.5,
+          "P90": 615438609,
+          "P95": 615491288.5,
+          "P100": 615543968
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 71,
+        "Gen1Collections": 13,
+        "Gen2Collections": 0,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 1191318136
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1405575,
+          1366867,
+          1349542
+        ],
+        "N": 3,
+        "Min": 1349542,
+        "LowerFence": 1316179.75,
+        "Q1": 1358204.5,
+        "Median": 1366867,
+        "Mean": 1373994.6666666667,
+        "Q3": 1386221,
+        "UpperFence": 1428245.75,
+        "Max": 1405575,
+        "InterquartileRange": 28016.5,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 16563.282649013483,
+        "Variance": 823026996.3333333,
+        "StandardDeviation": 28688.447088215376,
+        "Skewness": 0.23311445134676304,
+        "Kurtosis": 0.6666666666666643,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 1373994.6666666667,
+          "StandardError": 16563.282649013483,
+          "Level": 12,
+          "Margin": 523384.0702732601,
+          "Lower": 850610.5963934066,
+          "Upper": 1897378.7369399269
+        },
+        "Percentiles": {
+          "P0": 1349542,
+          "P25": 1358204.5,
+          "P50": 1366867,
+          "P67": 1380027.72,
+          "P80": 1390091.8,
+          "P85": 1393962.6,
+          "P90": 1397833.4,
+          "P95": 1401704.2,
+          "P100": 1405575
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 271568
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          614440153.5,
+          614360815.5,
+          622727936.5
+        ],
+        "N": 3,
+        "Min": 614360815.5,
+        "LowerFence": 608125143.75,
+        "Q1": 614400484.5,
+        "Median": 614440153.5,
+        "Mean": 617176301.8333334,
+        "Q3": 618584045,
+        "UpperFence": 624859385.75,
+        "Max": 622727936.5,
+        "InterquartileRange": 4183560.5,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 2775911.8161823475,
+        "Variance": 23117059233662.332,
+        "StandardDeviation": 4808020.3029586235,
+        "Skewness": 0.3847822782589093,
+        "Kurtosis": 0.6666666666666541,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 617176301.8333334,
+          "StandardError": 2775911.8161823475,
+          "Level": 12,
+          "Margin": 87716188.62397958,
+          "Lower": 529460113.2093538,
+          "Upper": 704892490.457313
+        },
+        "Percentiles": {
+          "P0": 614360815.5,
+          "P25": 614400484.5,
+          "P50": 614440153.5,
+          "P67": 617257999.72,
+          "P80": 619412823.3,
+          "P85": 620241601.6,
+          "P90": 621070379.9,
+          "P95": 621899158.1999999,
+          "P100": 622727936.5
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 71,
+        "Gen1Collections": 17,
+        "Gen2Collections": 0,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 1190976104
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          11861550,
+          11187846,
+          11295736
+        ],
+        "N": 3,
+        "Min": 11187846,
+        "LowerFence": 10736513,
+        "Q1": 11241791,
+        "Median": 11295736,
+        "Mean": 11448377.333333334,
+        "Q3": 11578643,
+        "UpperFence": 12083921,
+        "Max": 11861550,
+        "InterquartileRange": 336852,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 208920.88006813594,
+        "Variance": 130943802385.33333,
+        "StandardDeviation": 361861.5790400154,
+        "Skewness": 0.34676581274364304,
+        "Kurtosis": 0.6666666666666644,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 11448377.333333334,
+          "StandardError": 208920.88006813594,
+          "Level": 12,
+          "Margin": 6601702.264716548,
+          "Lower": 4846675.068616786,
+          "Upper": 18050079.598049883
+        },
+        "Percentiles": {
+          "P0": 11187846,
+          "P25": 11241791,
+          "P50": 11295736,
+          "P67": 11488112.76,
+          "P80": 11635224.4,
+          "P85": 11691805.8,
+          "P90": 11748387.2,
+          "P95": 11804968.6,
+          "P100": 11861550
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 3725272
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          65774693054.5,
+          66001659697.5,
+          65768327497.50001
+        ],
+        "N": 3,
+        "Min": 65768327497.50001,
+        "LowerFence": 65596511126,
+        "Q1": 65771510276,
+        "Median": 65774693054.5,
+        "Mean": 65848226749.833336,
+        "Q3": 65888176376,
+        "UpperFence": 66063175526,
+        "Max": 66001659697.5,
+        "InterquartileRange": 116666100,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 76738478.29096997,
+        "Variance": 17666382151241006,
+        "StandardDeviation": 132914943.2954813,
+        "Skewness": 0.3839072416467051,
+        "Kurtosis": 0.6666666666666667,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 65848226749.833336,
+          "StandardError": 76738478.29096997,
+          "Level": 12,
+          "Margin": 2424863353.8168983,
+          "Lower": 63423363396.01643,
+          "Upper": 68273090103.65024
+        },
+        "Percentiles": {
+          "P0": 65768327497.50001,
+          "P25": 65771510276,
+          "P50": 65774693054.5,
+          "P67": 65851861713.119995,
+          "P80": 65910873040.3,
+          "P85": 65933569704.600006,
+          "P90": 65956266368.899994,
+          "P95": 65978963033.2,
+          "P100": 66001659697.5
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 8298,
+        "Gen1Collections": 1664,
+        "Gen2Collections": 1662,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 119403624040
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          3135472.5,
+          2502569.5,
+          2445213.5
+        ],
+        "N": 3,
+        "Min": 2445213.5,
+        "LowerFence": 1956197.25,
+        "Q1": 2473891.5,
+        "Median": 2502569.5,
+        "Mean": 2694418.5,
+        "Q3": 2819021,
+        "UpperFence": 3336715.25,
+        "Max": 3135472.5,
+        "InterquartileRange": 345129.5,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 221147.68886500562,
+        "Variance": 146718900871,
+        "StandardDeviation": 383039.0330906238,
+        "Skewness": 0.37521393510575807,
+        "Kurtosis": 0.6666666666666666,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 2694418.5,
+          "StandardError": 221147.68886500562,
+          "Level": 12,
+          "Margin": 6988057.861621108,
+          "Lower": -4293639.361621108,
+          "Upper": 9682476.361621108
+        },
+        "Percentiles": {
+          "P0": 2445213.5,
+          "P25": 2473891.5,
+          "P50": 2502569.5,
+          "P67": 2717756.5199999996,
+          "P80": 2882311.3,
+          "P85": 2945601.6,
+          "P90": 3008891.9,
+          "P95": 3072182.1999999997,
+          "P100": 3135472.5
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 0,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 3725360
+      }
+    },
+    {
+      "Family": "Trady.Candlestick.BullishShortDay",
+      "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          64160992317.5,
+          64318478944.5,
+          64154242656.5
+        ],
+        "N": 3,
+        "Min": 64154242656.5,
+        "LowerFence": 64034440271,
+        "Q1": 64157617487,
+        "Median": 64160992317.5,
+        "Mean": 64211237972.833336,
+        "Q3": 64239735631,
+        "UpperFence": 64362912847,
+        "Max": 64318478944.5,
+        "InterquartileRange": 82118144,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 53655875.676735334,
+        "Variance": 8636858983911833,
+        "StandardDeviation": 92934702.79670471,
+        "Skewness": 0.3826173684294443,
+        "Kurtosis": 0.6666666666666248,
+        "ConfidenceInterval": {
+          "N": 3,
+          "Mean": 64211237972.833336,
+          "StandardError": 53655875.676735334,
+          "Level": 12,
+          "Margin": 1695474936.9949543,
+          "Lower": 62515763035.83838,
+          "Upper": 65906712909.82829
+        },
+        "Percentiles": {
+          "P0": 64154242656.5,
+          "P25": 64157617487,
+          "P50": 64160992317.5,
+          "P67": 64214537770.68,
+          "P80": 64255484293.7,
+          "P85": 64271232956.399994,
+          "P90": 64286981619.100006,
+          "P95": 64302730281.8,
+          "P100": 64318478944.5
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 8313,
+        "Gen1Collections": 1931,
+        "Gen2Collections": 1679,
+        "TotalOperations": 1,
+        "BytesAllocatedPerOperation": 119394145808
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "QuanTAlib.Sma",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          134607.484375,
+          134762.8515625,
+          136669.890625,
+          138648.671875
+        ],
+        "N": 4,
+        "Min": 134607.484375,
+        "LowerFence": 131063.1455078125,
+        "Q1": 134724.009765625,
+        "Median": 135716.37109375,
+        "Mean": 136172.224609375,
+        "Q3": 137164.5859375,
+        "UpperFence": 140825.4501953125,
+        "Max": 138648.671875,
+        "InterquartileRange": 2440.576171875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 949.3509585000363,
+        "Variance": 3605068.969619751,
+        "StandardDeviation": 1898.7019170000726,
+        "Skewness": 0.31702852090024786,
+        "Kurtosis": 0.915873954466318,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 136172.224609375,
+          "StandardError": 949.3509585000363,
+          "Level": 12,
+          "Margin": 12269.391526748203,
+          "Lower": 123902.83308262679,
+          "Upper": 148441.6161361232
+        },
+        "Percentiles": {
+          "P0": 134607.484375,
+          "P25": 134724.009765625,
+          "P50": 135716.37109375,
+          "P67": 136689.6784375,
+          "P80": 137461.403125,
+          "P85": 137758.2203125,
+          "P90": 138055.0375,
+          "P95": 138351.85468750002,
+          "P100": 138648.671875
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 4,
+        "Gen1Collections": 1,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 288688
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "QuanTAlib.Sma",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          51799.2998046875,
+          51982.8876953125,
+          52838.6591796875,
+          52778.2451171875
+        ],
+        "N": 4,
+        "Min": 51799.2998046875,
+        "LowerFence": 50652.453857421875,
+        "Q1": 51936.99072265625,
+        "Median": 52380.56640625,
+        "Mean": 52349.77294921875,
+        "Q3": 52793.3486328125,
+        "UpperFence": 54077.885498046875,
+        "Max": 52838.6591796875,
+        "InterquartileRange": 856.35791015625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 267.7411090104519,
+        "Variance": 286741.2058165868,
+        "StandardDeviation": 535.4822180209038,
+        "Skewness": -0.033667967113981984,
+        "Kurtosis": 0.6104630108104027,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 52349.77294921875,
+          "StandardError": 267.7411090104519,
+          "Level": 12,
+          "Margin": 3460.2803787603484,
+          "Lower": 48889.4925704584,
+          "Upper": 55810.0533279791
+        },
+        "Percentiles": {
+          "P0": 51799.2998046875,
+          "P25": 51936.99072265625,
+          "P50": 52380.56640625,
+          "P67": 52778.8492578125,
+          "P80": 52802.4107421875,
+          "P85": 52811.4728515625,
+          "P90": 52820.5349609375,
+          "P95": 52829.5970703125,
+          "P100": 52838.6591796875
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 6,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 512,
+        "BytesAllocatedPerOperation": 219808
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          139470.3203125,
+          140008.2109375,
+          138510.626953125,
+          137774.3193359375,
+          139327.142578125
+        ],
+        "N": 5,
+        "Min": 137774.3193359375,
+        "LowerFence": 137071.0869140625,
+        "Q1": 138510.626953125,
+        "Median": 139327.142578125,
+        "Mean": 139018.1240234375,
+        "Q3": 139470.3203125,
+        "UpperFence": 140909.8603515625,
+        "Max": 140008.2109375,
+        "InterquartileRange": 959.693359375,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 392.73715290277767,
+        "Variance": 771212.3563508987,
+        "StandardDeviation": 878.1869711803397,
+        "Skewness": -0.284202264911499,
+        "Kurtosis": 1.1673659871950515,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 139018.1240234375,
+          "StandardError": 392.73715290277767,
+          "Level": 12,
+          "Margin": 3381.5853212884854,
+          "Lower": 135636.538702149,
+          "Upper": 142399.709344726
+        },
+        "Percentiles": {
+          "P0": 137774.3193359375,
+          "P25": 138510.626953125,
+          "P50": 139327.142578125,
+          "P67": 139424.5034375,
+          "P80": 139577.8984375,
+          "P85": 139685.4765625,
+          "P90": 139793.0546875,
+          "P95": 139900.6328125,
+          "P100": 140008.2109375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 17,
+        "Gen1Collections": 5,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 288696
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          49521.50341796875,
+          49383.10009765625,
+          48846.541015625,
+          48558.79638671875,
+          49843.98583984375
+        ],
+        "N": 5,
+        "Min": 48558.79638671875,
+        "LowerFence": 47834.097412109375,
+        "Q1": 48846.541015625,
+        "Median": 49383.10009765625,
+        "Mean": 49230.7853515625,
+        "Q3": 49521.50341796875,
+        "UpperFence": 50533.947021484375,
+        "Max": 49843.98583984375,
+        "InterquartileRange": 674.96240234375,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 232.69556220658575,
+        "Variance": 270736.12335319514,
+        "StandardDeviation": 520.3230951564567,
+        "Skewness": -0.144109892947793,
+        "Kurtosis": 1.0226244714964838,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 49230.7853515625,
+          "StandardError": 232.69556220658575,
+          "Level": 12,
+          "Margin": 2003.5789628529353,
+          "Lower": 47227.206388709565,
+          "Upper": 51234.36431441544
+        },
+        "Percentiles": {
+          "P0": 48558.79638671875,
+          "P25": 48846.541015625,
+          "P50": 49383.10009765625,
+          "P67": 49477.21435546875,
+          "P80": 49585.999902343756,
+          "P85": 49650.49638671875,
+          "P90": 49714.99287109375,
+          "P95": 49779.489355468744,
+          "P100": 49843.98583984375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 10,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 2048,
+        "BytesAllocatedPerOperation": 84548
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma.Tuple",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          139858.2607421875,
+          138190.8486328125,
+          137795.9697265625,
+          138069.83203125,
+          139481.814453125
+        ],
+        "N": 5,
+        "Min": 137795.9697265625,
+        "LowerFence": 135951.8583984375,
+        "Q1": 138069.83203125,
+        "Median": 138190.8486328125,
+        "Mean": 138679.3451171875,
+        "Q3": 139481.814453125,
+        "UpperFence": 141599.7880859375,
+        "Max": 139858.2607421875,
+        "InterquartileRange": 1411.982421875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 413.7805084780319,
+        "Variance": 856071.5459816932,
+        "StandardDeviation": 925.2413447213074,
+        "Skewness": 0.2835373838865095,
+        "Kurtosis": 0.8597161836863297,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 138679.3451171875,
+          "StandardError": 413.7805084780319,
+          "Level": 12,
+          "Margin": 3562.774958678227,
+          "Lower": 135116.57015850928,
+          "Upper": 142242.12007586574
+        },
+        "Percentiles": {
+          "P0": 137795.9697265625,
+          "P25": 138069.83203125,
+          "P50": 138190.8486328125,
+          "P67": 139068.705390625,
+          "P80": 139557.1037109375,
+          "P85": 139632.39296875,
+          "P90": 139707.6822265625,
+          "P95": 139782.971484375,
+          "P100": 139858.2607421875
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 17,
+        "Gen1Collections": 5,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 288752
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma.Tuple",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          52907.9482421875,
+          53474.83984375,
+          54302.2109375,
+          53248.13232421875
+        ],
+        "N": 4,
+        "Min": 52907.9482421875,
+        "LowerFence": 52385.191833496094,
+        "Q1": 53163.08630371094,
+        "Median": 53361.486083984375,
+        "Mean": 53483.28283691406,
+        "Q3": 53681.6826171875,
+        "UpperFence": 54459.577087402344,
+        "Max": 54302.2109375,
+        "InterquartileRange": 518.5963134765625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 296.79119730501134,
+        "Variance": 352340.0591909687,
+        "StandardDeviation": 593.5823946100227,
+        "Skewness": 0.4133104555200982,
+        "Kurtosis": 1.132535023033164,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 53483.28283691406,
+          "StandardError": 296.79119730501134,
+          "Level": 12,
+          "Margin": 3835.723099896592,
+          "Lower": 49647.55973701747,
+          "Upper": 57319.00593681065
+        },
+        "Percentiles": {
+          "P0": 52907.9482421875,
+          "P25": 53163.08630371094,
+          "P50": 53361.486083984375,
+          "P67": 53483.1135546875,
+          "P80": 53805.78828125,
+          "P85": 53929.893945312506,
+          "P90": 54053.999609375,
+          "P95": 54178.105273437504,
+          "P100": 54302.2109375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 11,
+        "Gen1Collections": 1,
+        "Gen2Collections": 0,
+        "TotalOperations": 2048,
+        "BytesAllocatedPerOperation": 92404
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "TaLib.Functions.Sma",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          132129.416015625,
+          133454.6064453125,
+          132695.0234375,
+          134187.8994140625
+        ],
+        "N": 4,
+        "Min": 132129.416015625,
+        "LowerFence": 130927.15942382812,
+        "Q1": 132553.62158203125,
+        "Median": 133074.81494140625,
+        "Mean": 133116.736328125,
+        "Q3": 133637.9296875,
+        "UpperFence": 135264.39184570312,
+        "Max": 134187.8994140625,
+        "InterquartileRange": 1084.30810546875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 448.5336975781784,
+        "Variance": 804729.9114526113,
+        "StandardDeviation": 897.0673951563568,
+        "Skewness": 0.07971109258504544,
+        "Kurtosis": 0.8923087565942034,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 133116.736328125,
+          "StandardError": 448.5336975781784,
+          "Level": 12,
+          "Margin": 5796.839934961242,
+          "Lower": 127319.89639316376,
+          "Upper": 138913.57626308623
+        },
+        "Percentiles": {
+          "P0": 132129.416015625,
+          "P25": 132553.62158203125,
+          "P50": 133074.81494140625,
+          "P67": 133461.93937500002,
+          "P80": 133747.9236328125,
+          "P85": 133857.917578125,
+          "P90": 133967.9115234375,
+          "P95": 134077.90546875,
+          "P100": 134187.8994140625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 17,
+        "Gen1Collections": 5,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 288696
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "TaLib.Functions.Sma",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          2288.6468811035156,
+          2228.6434326171875,
+          2273.58349609375,
+          2215.3951110839844,
+          2222.6912994384766
+        ],
+        "N": 5,
+        "Min": 2215.3951110839844,
+        "LowerFence": 2146.3530044555664,
+        "Q1": 2222.6912994384766,
+        "Median": 2228.6434326171875,
+        "Mean": 2245.792044067383,
+        "Q3": 2273.58349609375,
+        "UpperFence": 2349.92179107666,
+        "Max": 2288.6468811035156,
+        "InterquartileRange": 50.89219665527344,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 14.765829937738507,
+        "Variance": 1090.148668751074,
+        "StandardDeviation": 33.01739948498479,
+        "Skewness": 0.30401348388510113,
+        "Kurtosis": 0.8741659046007243,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 2245.792044067383,
+          "StandardError": 14.765829937738507,
+          "Level": 12,
+          "Margin": 127.13824858444009,
+          "Lower": 2118.6537954829428,
+          "Upper": 2372.930292651823
+        },
+        "Percentiles": {
+          "P0": 2215.3951110839844,
+          "P25": 2222.6912994384766,
+          "P50": 2228.6434326171875,
+          "P67": 2259.20267578125,
+          "P80": 2276.5961730957033,
+          "P85": 2279.6088500976566,
+          "P90": 2282.6215270996095,
+          "P95": 2285.634204101563,
+          "P100": 2288.6468811035156
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 31,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 65536,
+        "BytesAllocatedPerOperation": 8056
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          131438.845703125,
+          131358.671875,
+          131333.548828125,
+          130495.7900390625
+        ],
+        "N": 4,
+        "Min": 130495.7900390625,
+        "LowerFence": 130742.19982910156,
+        "Q1": 131124.10913085938,
+        "Median": 131346.1103515625,
+        "Mean": 131156.71411132812,
+        "Q3": 131378.71533203125,
+        "UpperFence": 131760.62463378906,
+        "Max": 131438.845703125,
+        "InterquartileRange": 254.606201171875,
+        "LowerOutliers": [
+          130495.7900390625
+        ],
+        "UpperOutliers": [],
+        "AllOutliers": [
+          130495.7900390625
+        ],
+        "StandardError": 221.44907611796282,
+        "Variance": 196158.77325399718,
+        "StandardDeviation": 442.89815223592564,
+        "Skewness": -0.7265363483365275,
+        "Kurtosis": 1.29806765126304,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 131156.71411132812,
+          "StandardError": 221.44907611796282,
+          "Level": 12,
+          "Margin": 2862.0031336154666,
+          "Lower": 128294.71097771266,
+          "Upper": 134018.7172449436
+        },
+        "Percentiles": {
+          "P0": 130495.7900390625,
+          "P25": 131124.10913085938,
+          "P50": 131346.1103515625,
+          "P67": 131359.47361328127,
+          "P80": 131390.74140625,
+          "P85": 131402.76748046876,
+          "P90": 131414.7935546875,
+          "P95": 131426.81962890626,
+          "P100": 131438.845703125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 17,
+        "Gen1Collections": 5,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 288696
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          828501.5,
+          823580.46875,
+          822452.71875,
+          824354.09375
+        ],
+        "N": 4,
+        "Min": 822452.71875,
+        "LowerFence": 820159.91015625,
+        "Q1": 823298.53125,
+        "Median": 823967.28125,
+        "Mean": 824722.1953125,
+        "Q3": 825390.9453125,
+        "UpperFence": 828529.56640625,
+        "Max": 828501.5,
+        "InterquartileRange": 2092.4140625,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 1318.8601799953783,
+        "Variance": 6957568.697509766,
+        "StandardDeviation": 2637.7203599907566,
+        "Skewness": 0.555156504935502,
+        "Kurtosis": 1.1994650298447571,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 824722.1953125,
+          "StandardError": 1318.8601799953783,
+          "Level": 12,
+          "Margin": 17044.920819343424,
+          "Lower": 807677.2744931566,
+          "Upper": 841767.1161318434
+        },
+        "Percentiles": {
+          "P0": 822452.71875,
+          "P25": 823298.53125,
+          "P50": 823967.28125,
+          "P67": 824395.5678125,
+          "P80": 826013.0562499999,
+          "P85": 826635.1671875,
+          "P90": 827257.278125,
+          "P95": 827879.3890625,
+          "P100": 828501.5
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 1,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 32,
+        "BytesAllocatedPerOperation": 772940
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+      "Bars": 1000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          135570.724609375,
+          135989.359375,
+          135622.109375,
+          135037.875
+        ],
+        "N": 4,
+        "Min": 135037.875,
+        "LowerFence": 135022.89770507812,
+        "Q1": 135437.51220703125,
+        "Median": 135596.4169921875,
+        "Mean": 135555.01708984375,
+        "Q3": 135713.921875,
+        "UpperFence": 136128.53637695312,
+        "Max": 135989.359375,
+        "InterquartileRange": 276.40966796875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 195.9671023964708,
+        "Variance": 153612.4208866755,
+        "StandardDeviation": 391.9342047929416,
+        "Skewness": -0.232769420352206,
+        "Kurtosis": 1.135031584217266,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 135555.01708984375,
+          "StandardError": 195.9671023964708,
+          "Level": 12,
+          "Margin": 2532.6746490713786,
+          "Lower": 133022.34244077237,
+          "Upper": 138087.69173891513
+        },
+        "Percentiles": {
+          "P0": 135037.875,
+          "P25": 135437.51220703125,
+          "P50": 135596.4169921875,
+          "P67": 135625.781875,
+          "P80": 135769.009375,
+          "P85": 135824.096875,
+          "P90": 135879.184375,
+          "P95": 135934.271875,
+          "P100": 135989.359375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 17,
+        "Gen1Collections": 5,
+        "Gen2Collections": 0,
+        "TotalOperations": 1024,
+        "BytesAllocatedPerOperation": 288793
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+      "Bars": 1000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          466506.56640625,
+          462341.6015625,
+          456682.8671875,
+          459182.453125,
+          457942.6796875
+        ],
+        "N": 5,
+        "Min": 456682.8671875,
+        "LowerFence": 451344.296875,
+        "Q1": 457942.6796875,
+        "Median": 459182.453125,
+        "Mean": 460531.23359375,
+        "Q3": 462341.6015625,
+        "UpperFence": 468939.984375,
+        "Max": 466506.56640625,
+        "InterquartileRange": 4398.921875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 1765.1030915730148,
+        "Variance": 15577944.619403075,
+        "StandardDeviation": 3946.8905000522977,
+        "Skewness": 0.4634916243124621,
+        "Kurtosis": 1.2799988857429012,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 460531.23359375,
+          "StandardError": 1765.1030915730148,
+          "Level": 12,
+          "Margin": 15198.06990733526,
+          "Lower": 445333.1636864147,
+          "Upper": 475729.30350108526
+        },
+        "Percentiles": {
+          "P0": 456682.8671875,
+          "P25": 457942.6796875,
+          "P50": 459182.453125,
+          "P67": 461330.6740625,
+          "P80": 463174.59453125,
+          "P85": 464007.5875,
+          "P90": 464840.58046875003,
+          "P95": 465673.57343750005,
+          "P100": 466506.56640625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 7,
+        "Gen1Collections": 2,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 493701
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "QuanTAlib.Sma",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1588736.7109375,
+          1548785.8515625,
+          1516398.3046875,
+          1539268.0703125
+        ],
+        "N": 4,
+        "Min": 1516398.3046875,
+        "LowerFence": 1495716.22265625,
+        "Q1": 1533550.62890625,
+        "Median": 1544026.9609375,
+        "Mean": 1548297.234375,
+        "Q3": 1558773.56640625,
+        "UpperFence": 1596607.97265625,
+        "Max": 1588736.7109375,
+        "InterquartileRange": 25222.9375,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 15095.963948134497,
+        "Variance": 911552510.0935059,
+        "StandardDeviation": 30191.927896268993,
+        "Skewness": 0.29920454197401253,
+        "Kurtosis": 1.1181508837398064,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 1548297.234375,
+          "StandardError": 15095.963948134497,
+          "Level": 12,
+          "Margin": 195099.9158898839,
+          "Lower": 1353197.3184851161,
+          "Upper": 1743397.1502648839
+        },
+        "Percentiles": {
+          "P0": 1516398.3046875,
+          "P25": 1533550.62890625,
+          "P50": 1544026.9609375,
+          "P67": 1549185.36015625,
+          "P80": 1564766.1953125,
+          "P85": 1570758.82421875,
+          "P90": 1576751.453125,
+          "P95": 1582744.08203125,
+          "P100": 1588736.7109375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 26,
+        "Gen1Collections": 22,
+        "Gen2Collections": 20,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3962692
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "QuanTAlib.Sma",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          509732.91992187494,
+          505671.486328125,
+          496974.865234375,
+          497154.103515625,
+          501497.34960937506
+        ],
+        "N": 5,
+        "Min": 496974.865234375,
+        "LowerFence": 484378.029296875,
+        "Q1": 497154.103515625,
+        "Median": 501497.34960937506,
+        "Mean": 502206.144921875,
+        "Q3": 505671.486328125,
+        "UpperFence": 518447.560546875,
+        "Max": 509732.91992187494,
+        "InterquartileRange": 8517.3828125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 2470.351526573003,
+        "Variance": 30513183.324207835,
+        "StandardDeviation": 5523.873941737613,
+        "Skewness": 0.23205161444000566,
+        "Kurtosis": 1.0212701146802128,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 502206.144921875,
+          "StandardError": 2470.351526573003,
+          "Level": 12,
+          "Margin": 21270.471609162563,
+          "Lower": 480935.6733127124,
+          "Upper": 523476.61653103755
+        },
+        "Percentiles": {
+          "P0": 496974.865234375,
+          "P25": 497154.103515625,
+          "P50": 501497.34960937506,
+          "P67": 504335.762578125,
+          "P80": 506483.77304687497,
+          "P85": 507296.05976562493,
+          "P90": 508108.34648437495,
+          "P95": 508920.633203125,
+          "P100": 509732.91992187494
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 34,
+        "Gen1Collections": 6,
+        "Gen2Collections": 0,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 2225029
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1549831.671875,
+          1609054.125,
+          1474899.8125,
+          1521366.953125
+        ],
+        "N": 4,
+        "Min": 1474899.8125,
+        "LowerFence": 1427419.4921875,
+        "Q1": 1509750.16796875,
+        "Median": 1535599.3125,
+        "Mean": 1538788.140625,
+        "Q3": 1564637.28515625,
+        "UpperFence": 1646967.9609375,
+        "Max": 1609054.125,
+        "InterquartileRange": 54887.1171875,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 28054.239708071596,
+        "Variance": 3148161462.391764,
+        "StandardDeviation": 56108.47941614319,
+        "Skewness": 0.11635377554960374,
+        "Kurtosis": 1.0378558213398767,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 1538788.140625,
+          "StandardError": 28054.239708071596,
+          "Level": 12,
+          "Margin": 362572.3952577264,
+          "Lower": 1176215.7453672737,
+          "Upper": 1901360.5358827263
+        },
+        "Percentiles": {
+          "P0": 1474899.8125,
+          "P25": 1509750.16796875,
+          "P50": 1535599.3125,
+          "P67": 1550423.89640625,
+          "P80": 1573520.6531250002,
+          "P85": 1582404.02109375,
+          "P90": 1591287.3890624999,
+          "P95": 1600170.75703125,
+          "P100": 1609054.125
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 26,
+        "Gen1Collections": 22,
+        "Gen2Collections": 20,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3962575
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          613972.06640625,
+          610750.83203125,
+          634989.16015625,
+          601526.95703125,
+          628299.0390625
+        ],
+        "N": 5,
+        "Min": 601526.95703125,
+        "LowerFence": 584428.521484375,
+        "Q1": 610750.83203125,
+        "Median": 613972.06640625,
+        "Mean": 617907.6109375,
+        "Q3": 628299.0390625,
+        "UpperFence": 654621.349609375,
+        "Max": 634989.16015625,
+        "InterquartileRange": 17548.20703125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 6061.332030405362,
+        "Variance": 183698729.91408998,
+        "StandardDeviation": 13553.550454183212,
+        "Skewness": 0.10308205875684592,
+        "Kurtosis": 1.017372520194103,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 617907.6109375,
+          "StandardError": 6061.332030405362,
+          "Level": 12,
+          "Margin": 52189.896652198135,
+          "Lower": 565717.7142853019,
+          "Upper": 670097.5075896982
+        },
+        "Percentiles": {
+          "P0": 601526.95703125,
+          "P25": 610750.83203125,
+          "P50": 613972.06640625,
+          "P67": 623714.4078125,
+          "P80": 629637.06328125,
+          "P85": 630975.0875,
+          "P90": 632313.11171875,
+          "P95": 633651.1359375,
+          "P100": 634989.16015625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 16,
+        "Gen1Collections": 9,
+        "Gen2Collections": 6,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 840850
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma.Tuple",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1591495.984375,
+          1553642.578125,
+          1605945.375,
+          1706077.1875,
+          1685316.515625
+        ],
+        "N": 5,
+        "Min": 1553642.578125,
+        "LowerFence": 1450765.1875,
+        "Q1": 1591495.984375,
+        "Median": 1605945.375,
+        "Mean": 1628495.528125,
+        "Q3": 1685316.515625,
+        "UpperFence": 1826047.3125,
+        "Max": 1706077.1875,
+        "InterquartileRange": 93820.53125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 28920.562113507833,
+        "Variance": 4181994564.806323,
+        "StandardDeviation": 64668.3428333085,
+        "Skewness": 0.12490224840864687,
+        "Kurtosis": 0.9168830512682338,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 1628495.528125,
+          "StandardError": 28920.562113507833,
+          "Level": 12,
+          "Margin": 249014.76115415996,
+          "Lower": 1379480.76697084,
+          "Upper": 1877510.2892791599
+        },
+        "Percentiles": {
+          "P0": 1553642.578125,
+          "P25": 1591495.984375,
+          "P50": 1605945.375,
+          "P67": 1659917.750625,
+          "P80": 1689468.65,
+          "P85": 1693620.7843749998,
+          "P90": 1697772.9187500002,
+          "P95": 1701925.053125,
+          "P100": 1706077.1875
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 26,
+        "Gen1Collections": 22,
+        "Gen2Collections": 20,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3962953
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Skender.GetSma.Tuple",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          729851.32421875,
+          791698.66015625,
+          728634.0390625,
+          733326.4453125,
+          783779.35546875
+        ],
+        "N": 5,
+        "Min": 728634.0390625,
+        "LowerFence": 648959.27734375,
+        "Q1": 729851.32421875,
+        "Median": 733326.4453125,
+        "Mean": 753457.96484375,
+        "Q3": 783779.35546875,
+        "UpperFence": 864671.40234375,
+        "Max": 791698.66015625,
+        "InterquartileRange": 53928.03125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 14072.1646501974,
+        "Variance": 990129089.7113266,
+        "StandardDeviation": 31466.316748410936,
+        "Skewness": 0.30291068554695527,
+        "Kurtosis": 0.7830386910416505,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 753457.96484375,
+          "StandardError": 14072.1646501974,
+          "Level": 12,
+          "Margin": 121165.58127527659,
+          "Lower": 632292.3835684734,
+          "Upper": 874623.5461190266
+        },
+        "Percentiles": {
+          "P0": 728634.0390625,
+          "P25": 729851.32421875,
+          "P50": 733326.4453125,
+          "P67": 767634.42421875,
+          "P80": 785363.21640625,
+          "P85": 786947.07734375,
+          "P90": 788530.93828125,
+          "P95": 790114.79921875,
+          "P100": 791698.66015625
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 21,
+        "Gen1Collections": 15,
+        "Gen2Collections": 12,
+        "TotalOperations": 256,
+        "BytesAllocatedPerOperation": 920936
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "TaLib.Functions.Sma",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1544713.15625,
+          1547813.140625,
+          1564589.1875,
+          1566901.140625,
+          1567287.59375
+        ],
+        "N": 5,
+        "Min": 1544713.15625,
+        "LowerFence": 1519181.140625,
+        "Q1": 1547813.140625,
+        "Median": 1564589.1875,
+        "Mean": 1558260.84375,
+        "Q3": 1566901.140625,
+        "UpperFence": 1595533.140625,
+        "Max": 1567287.59375,
+        "InterquartileRange": 19088,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 4944.083420891025,
+        "Variance": 122219804.36364746,
+        "StandardDeviation": 11055.306615542035,
+        "Skewness": -0.2949958210476355,
+        "Kurtosis": 0.7955464511190391,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 1558260.84375,
+          "StandardError": 4944.083420891025,
+          "Level": 12,
+          "Margin": 42570.049204001865,
+          "Lower": 1515690.794545998,
+          "Upper": 1600830.892954002
+        },
+        "Percentiles": {
+          "P0": 1544713.15625,
+          "P25": 1547813.140625,
+          "P50": 1564589.1875,
+          "P67": 1566161.315625,
+          "P80": 1566978.43125,
+          "P85": 1567055.721875,
+          "P90": 1567133.0125,
+          "P95": 1567210.303125,
+          "P100": 1567287.59375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 26,
+        "Gen1Collections": 22,
+        "Gen2Collections": 20,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3961986
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "TaLib.Functions.Sma",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          22432.460083007812,
+          22259.892700195312,
+          22112.67041015625,
+          22258.047241210938,
+          22336.341186523438
+        ],
+        "N": 5,
+        "Min": 22112.67041015625,
+        "LowerFence": 22140.606323242188,
+        "Q1": 22258.047241210938,
+        "Median": 22259.892700195312,
+        "Mean": 22279.88232421875,
+        "Q3": 22336.341186523438,
+        "UpperFence": 22453.782104492188,
+        "Max": 22432.460083007812,
+        "InterquartileRange": 78.2939453125,
+        "LowerOutliers": [
+          22112.67041015625
+        ],
+        "UpperOutliers": [],
+        "AllOutliers": [
+          22112.67041015625
+        ],
+        "StandardError": 52.58505288237064,
+        "Variance": 13825.938933208585,
+        "StandardDeviation": 117.583752845402,
+        "Skewness": -0.11830420300226943,
+        "Kurtosis": 1.3959829464772688,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 22279.88232421875,
+          "StandardError": 52.58505288237064,
+          "Level": 12,
+          "Margin": 452.7731629969395,
+          "Lower": 21827.10916122181,
+          "Upper": 22732.65548721569
+        },
+        "Percentiles": {
+          "P0": 22112.67041015625,
+          "P25": 22258.047241210938,
+          "P50": 22259.892700195312,
+          "P67": 22311.877670898437,
+          "P80": 22355.56496582031,
+          "P85": 22374.788745117185,
+          "P90": 22394.012524414065,
+          "P95": 22413.23630371094,
+          "P100": 22432.460083007812
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 39,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 8192,
+        "BytesAllocatedPerOperation": 80057
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1542074.6484375,
+          1541808.1328125,
+          1504801.5078125,
+          1540137.359375
+        ],
+        "N": 4,
+        "Min": 1504801.5078125,
+        "LowerFence": 1515446.3486328125,
+        "Q1": 1531303.396484375,
+        "Median": 1540972.74609375,
+        "Mean": 1532205.412109375,
+        "Q3": 1541874.76171875,
+        "UpperFence": 1557731.8095703125,
+        "Max": 1542074.6484375,
+        "InterquartileRange": 10571.365234375,
+        "LowerOutliers": [
+          1504801.5078125
+        ],
+        "UpperOutliers": [],
+        "AllOutliers": [
+          1504801.5078125
+        ],
+        "StandardError": 9144.68802429197,
+        "Variance": 334501276.2465159,
+        "StandardDeviation": 18289.37604858394,
+        "Skewness": -0.7451103966664574,
+        "Kurtosis": 1.3091088004332498,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 1532205.412109375,
+          "StandardError": 9144.68802429197,
+          "Level": 12,
+          "Margin": 118185.75286138438,
+          "Lower": 1414019.6592479907,
+          "Upper": 1650391.1649707593
+        },
+        "Percentiles": {
+          "P0": 1504801.5078125,
+          "P25": 1531303.396484375,
+          "P50": 1540972.74609375,
+          "P67": 1541810.79796875,
+          "P80": 1541914.7390625002,
+          "P85": 1541954.71640625,
+          "P90": 1541994.69375,
+          "P95": 1542034.67109375,
+          "P100": 1542074.6484375
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 54,
+        "Gen1Collections": 46,
+        "Gen2Collections": 41,
+        "TotalOperations": 128,
+        "BytesAllocatedPerOperation": 3962066
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          8690360.083333334,
+          8679865.5,
+          8718475.666666666,
+          8714079.166666666
+        ],
+        "N": 4,
+        "Min": 8679865.5,
+        "LowerFence": 8646573.65625,
+        "Q1": 8687736.4375,
+        "Median": 8702219.625,
+        "Mean": 8700695.104166666,
+        "Q3": 8715178.291666666,
+        "UpperFence": 8756341.072916664,
+        "Max": 8718475.666666666,
+        "InterquartileRange": 27441.854166666046,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 9291.423452059218,
+        "Variance": 345322199.06190413,
+        "StandardDeviation": 18582.846904118436,
+        "Skewness": -0.082688683900333,
+        "Kurtosis": 0.6953875786265831,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 8700695.104166666,
+          "StandardError": 9291.423452059218,
+          "Level": 12,
+          "Margin": 120082.15839824273,
+          "Lower": 8580612.945768423,
+          "Upper": 8820777.262564909
+        },
+        "Percentiles": {
+          "P0": 8679865.5,
+          "P25": 8687736.4375,
+          "P50": 8702219.625,
+          "P67": 8714123.131666666,
+          "P80": 8715837.766666666,
+          "P85": 8716497.241666665,
+          "P90": 8717156.716666665,
+          "P95": 8717816.191666666,
+          "P100": 8718475.666666666
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 5,
+        "Gen1Collections": 3,
+        "Gen2Collections": 1,
+        "TotalOperations": 12,
+        "BytesAllocatedPerOperation": 7637937
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+      "Bars": 10000,
+      "Method": "OoplesBuilderBatch",
+      "Statistics": {
+        "OriginalValues": [
+          1546902,
+          1527599.53125,
+          1536144.015625,
+          1526986.671875
+        ],
+        "N": 4,
+        "Min": 1526986.671875,
+        "LowerFence": 1510365.5234375,
+        "Q1": 1527446.31640625,
+        "Median": 1531871.7734375,
+        "Mean": 1534408.0546875,
+        "Q3": 1538833.51171875,
+        "UpperFence": 1555914.3046875,
+        "Max": 1546902,
+        "InterquartileRange": 11387.1953125,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 4659.62394849738,
+        "Variance": 86848381.36564128,
+        "StandardDeviation": 9319.24789699476,
+        "Skewness": 0.38028641565107196,
+        "Kurtosis": 0.9797039316504277,
+        "ConfidenceInterval": {
+          "N": 4,
+          "Mean": 1534408.0546875,
+          "StandardError": 4659.62394849738,
+          "Level": 12,
+          "Margin": 60220.88046538226,
+          "Lower": 1474187.1742221178,
+          "Upper": 1594628.9351528822
+        },
+        "Percentiles": {
+          "P0": 1526986.671875,
+          "P25": 1527446.31640625,
+          "P50": 1531871.7734375,
+          "P67": 1536251.59546875,
+          "P80": 1540447.209375,
+          "P85": 1542060.9070312502,
+          "P90": 1543674.6046875,
+          "P95": 1545288.30234375,
+          "P100": 1546902
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 26,
+        "Gen1Collections": 22,
+        "Gen2Collections": 20,
+        "TotalOperations": 64,
+        "BytesAllocatedPerOperation": 3962313
+      }
+    },
+    {
+      "Family": "Trady.Indicator.SimpleMovingAverage",
+      "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+      "Bars": 10000,
+      "Method": "CompetitorNativeBatch",
+      "Statistics": {
+        "OriginalValues": [
+          5417637.1875,
+          5310523.4375,
+          5057114.9375,
+          5037361,
+          4951016.21875
+        ],
+        "N": 5,
+        "Min": 4951016.21875,
+        "LowerFence": 4627617.34375,
+        "Q1": 5037361,
+        "Median": 5057114.9375,
+        "Mean": 5154730.55625,
+        "Q3": 5310523.4375,
+        "UpperFence": 5720267.09375,
+        "Max": 5417637.1875,
+        "InterquartileRange": 273162.4375,
+        "LowerOutliers": [],
+        "UpperOutliers": [],
+        "AllOutliers": [],
+        "StandardError": 88936.85166024578,
+        "Variance": 39548817916.182816,
+        "StandardDeviation": 198868.8460171246,
+        "Skewness": 0.2785075040402572,
+        "Kurtosis": 0.9423178127265557,
+        "ConfidenceInterval": {
+          "N": 5,
+          "Mean": 5154730.55625,
+          "StandardError": 88936.85166024578,
+          "Level": 12,
+          "Margin": 765773.1128135688,
+          "Lower": 4388957.443436432,
+          "Upper": 5920503.669063569
+        },
+        "Percentiles": {
+          "P0": 4951016.21875,
+          "P25": 5037361,
+          "P50": 5057114.9375,
+          "P67": 5229432.7175,
+          "P80": 5331946.1875,
+          "P85": 5353368.9375,
+          "P90": 5374791.6875,
+          "P95": 5396214.4375,
+          "P100": 5417637.1875
+        }
+      },
+      "Memory": {
+        "Gen0Collections": 13,
+        "Gen1Collections": 7,
+        "Gen2Collections": 7,
+        "TotalOperations": 32,
+        "BytesAllocatedPerOperation": 4839590
+      }
+    }
+  ],
+  "PullRequestHeadRevision": "ecd3229dd08356f1e91102c00b78b94f222af2b2"
+}

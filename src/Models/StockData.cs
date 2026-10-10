@@ -410,13 +410,25 @@ public class StockData : IStockData
     /// <param name="dates"></param>
     public StockData(IEnumerable<double> openPrices, IEnumerable<double> highPrices, IEnumerable<double> lowPrices, IEnumerable<double> closePrices,
         IEnumerable<double> volumes, IEnumerable<DateTime> dates)
+        : this(new List<double>(openPrices), new List<double>(highPrices), new List<double>(lowPrices),
+            new List<double>(closePrices), new List<double>(volumes), new List<DateTime>(dates))
     {
-        _openPrices = new List<double>(openPrices);
-        _highPrices = new List<double>(highPrices);
-        _lowPrices = new List<double>(lowPrices);
-        _closePrices = new List<double>(closePrices);
-        _volumes = new List<double>(volumes);
-        _dates = new List<DateTime>(dates);
+    }
+
+    // Only the builder may transfer its private columns. The public constructor still copies.
+    internal static StockData FromOwnedColumns(List<double> opens, List<double> highs, List<double> lows,
+        List<double> closes, List<double> volumes, List<DateTime> dates) =>
+        new(opens, highs, lows, closes, volumes, dates);
+
+    private StockData(List<double> openPrices, List<double> highPrices, List<double> lowPrices,
+        List<double> closePrices, List<double> volumes, List<DateTime> dates)
+    {
+        _openPrices = openPrices;
+        _highPrices = highPrices;
+        _lowPrices = lowPrices;
+        _closePrices = closePrices;
+        _volumes = volumes;
+        _dates = dates;
         _columnsInitialized = true;
         _rowsInitialized = false;
         _tickerDataList = null;
