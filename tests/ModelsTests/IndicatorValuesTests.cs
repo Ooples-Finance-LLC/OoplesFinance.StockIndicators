@@ -64,6 +64,79 @@ public sealed class IndicatorValuesTests
     }
 
     [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public async Task ComposedOwnedColumnsPreserveBitsWarmupAndOwnership(int data)
+    {
+        foreach (int count in new[] { 0, 1, 19, 2051 })
+        foreach (int period in new[] { 1, 20, 4096 })
+        foreach (bool publishMean in new[] { false, true })
+        {
+            var bars = Data(count, data);
+            var sma = new Sma(period);
+            var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            asin.Of(sma);
+            var other = new Sma(7);
+            var otherAsin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            otherAsin.Of(other);
+            var direct = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            var indicators = publishMean ? new IIndicator[] { sma, asin, other, otherAsin, direct, asin }
+                : new IIndicator[] { asin, otherAsin, direct };
+            using var expected = await Builder(bars, indicators).BuildAsync();
+            using var actual = await Builder(bars, indicators).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+            foreach (var output in indicators.SelectMany(i => i.Outputs))
+                Bits(expected[output].ToArray(), actual[output].ToArray());
+            if (!publishMean) Assert.Throws<KeyNotFoundException>(() => actual[sma].ToArray());
+            if (count == 0) Assert.Throws<InvalidOperationException>(() => actual.Latest);
+            else
+            {
+                var last = bars[^1];
+                Array.Clear(bars);
+                Assert.Equal(last, actual.Latest.Bar);
+                Assert.Equal(expected.Latest.IsWarmedUp, actual.Latest.IsWarmedUp);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public void ComposedAllocationsExcludeTemporaryHistory(bool publishMean)
+    {
+        var sma = new Sma(20);
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        asin.Of(sma);
+        var builder = Builder(Data(10_000), publishMean ? new IIndicator[] { sma, asin } : new IIndicator[] { asin })
+            .ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+        using var warm = builder.BuildAsync().GetAwaiter().GetResult();
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        using var run = builder.BuildAsync().GetAwaiter().GetResult();
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.InRange(allocated, publishMean ? 240_000 : 160_000, publishMean ? 270_000 : 190_000);
+        GC.KeepAlive(run);
+    }
+
+    [Fact]
+    public async Task ComposedValidationAndCancellationClearDiagnostics()
+    {
+        var bars = Data(2051);
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        asin.Of(new Sma(20));
+        var builder = Builder(bars, asin).ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+        using var prior = await builder.BuildAsync();
+        using var cancel = new CancellationTokenSource(); cancel.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
+        Assert.Null(builder.LastExecution);
+        bars[^1] = new Bar(default, 0, 1, 0, .5, double.NaN);
+        var expected = await Record.ExceptionAsync(() => Builder(bars, asin).BuildAsync());
+        var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+        Assert.NotNull(expected);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.GetType(), actual.GetType());
+        Assert.Equal(expected.Message, actual.Message);
+        Assert.Null(builder.LastExecution);
+        Assert.Equal(2051, prior.BarCount);
+    }
+
+    [Theory]
     [InlineData(0)] [InlineData(1)] [InlineData(19)]
     public async Task EmptyAndIncompleteWindows(int count)
     {

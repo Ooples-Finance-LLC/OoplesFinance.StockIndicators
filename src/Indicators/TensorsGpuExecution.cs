@@ -50,7 +50,7 @@ internal sealed class TensorsGpuExecution
         }
     }
 
-    internal void Execute(FusedBarExecution plan, Bar[] source, OwnedBarHistory history,
+    internal void Execute(FusedBarExecution plan, Bar[] source, OwnedBarHistory? history,
         bool fromMean, CancellationToken cancellation)
     {
         // Binding, reusable scratch and readback share the package's in-order queue.

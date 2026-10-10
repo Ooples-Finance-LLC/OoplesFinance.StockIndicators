@@ -133,7 +133,7 @@ internal static class ValuesBarExecution
             && double.IsFinite(bar.Close) && double.IsFinite(bar.Volume);
     }
 
-    private static bool ComputeSma(double[] close, double[] output, int period,
+    internal static bool ComputeSma(double[] close, double[] output, int period,
         Core.SmaCpuKernel.GridSummary summary, CancellationToken cancellation, bool inPlace, bool boundedPositive)
     {
         var proof = new Core.SmaCpuKernel.Certificate(period);

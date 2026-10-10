@@ -14,6 +14,7 @@ internal sealed class FusedBarExecution
     internal double[]? SmaValues { get; }
     internal double[][]? AsinValues { get; }
     internal bool UsedSmaFallback { get; private set; }
+    internal Bar LatestBar { get; private set; }
 
     private FusedBarExecution(int count, int smaLength, bool asin, bool asinOfSma, bool publishSma, Dictionary<IIndicator, FusedBarExecution>? regions = null)
     {
@@ -101,7 +102,7 @@ internal sealed class FusedBarExecution
     internal double[][] Values(IIndicator indicator) => _regions is not null ? _regions[indicator].Values(indicator)
         : indicator is Sma ? new[] { SmaValues! } : AsinValues!;
 
-    internal Builder.IndicatorExecutionInfo Execute(Bar[] source, OwnedBarHistory history,
+    internal Builder.IndicatorExecutionInfo Execute(Bar[] source, OwnedBarHistory? history,
         CancellationToken cancellation, Builder.IndicatorExecutionBackend backend)
     {
         cancellation.ThrowIfCancellationRequested();
@@ -124,13 +125,18 @@ internal sealed class FusedBarExecution
 #endif
         if (backend == Builder.IndicatorExecutionBackend.Gpu)
             throw new NotSupportedException("GPU execution requires a modern .NET target.");
-        Execute(source, history, cancellation);
+#if !NETFRAMEWORK
+        if (history is null) ExecuteWithoutHistory(source, cancellation);
+        else Execute(source, history, cancellation);
+#else
+        Execute(source, history!, cancellation);
+#endif
         return new(Builder.IndicatorExecutionBackend.Cpu, null,
             backend == Builder.IndicatorExecutionBackend.Cpu ? "CPU execution requested." : "Automatic execution uses CPU pending a validated GPU crossover.");
     }
 
 #if !NETFRAMEWORK
-    internal bool OwnCloses(Bar[] source, OwnedBarHistory history, double[] close,
+    internal bool OwnCloses(Bar[] source, OwnedBarHistory? history, double[] close,
         CancellationToken cancellation)
     {
         var proof = new Core.SmaCpuKernel.Certificate(Math.Max(1, SmaLength));
@@ -138,16 +144,19 @@ internal sealed class FusedBarExecution
         var reader = new CloseReader(cancellation);
         // A single uninitialized allocation avoids promoting hundreds of small
         // history chunks during large fresh-builder runs. Ownership is unchanged.
-        var contiguous = source.Length >= 16_384 ? GC.AllocateUninitializedArray<Bar>(source.Length) : null;
+        var contiguous = history is not null && source.Length >= 16_384 ? GC.AllocateUninitializedArray<Bar>(source.Length) : null;
         for (var offset = 0; offset < source.Length;)
         {
             var size = Math.Min(1024, source.Length - offset);
-            var chunk = contiguous is null ? GC.AllocateUninitializedArray<Bar>(size) : null;
+            var chunk = history is not null && contiguous is null ? GC.AllocateUninitializedArray<Bar>(size) : null;
             var owned = contiguous is null ? chunk.AsSpan() : contiguous.AsSpan(offset, size);
-            source.AsSpan(offset, size).CopyTo(owned);
+            if (history is not null) source.AsSpan(offset, size).CopyTo(owned);
             for (var i = 0; i < size; i++)
             {
-                var value = reader.Read(in owned[i]);
+                // Validate and snapshot the same local copy; never reread a caller bar.
+                LatestBar = history is null ? source[offset + i] : owned[i];
+                var bar = LatestBar;
+                var value = reader.Read(in bar);
                 close[offset + i] = value;
                 if (SmaLength > 1 && SmaLength <= source.Length)
                     certified &= proof.Include(value);
@@ -158,10 +167,10 @@ internal sealed class FusedBarExecution
                     if (!_asinOfSma) AsinValues[1][offset + i] = defined ? 1 : 0;
                 }
             }
-            if (chunk is not null) history.AppendOwnedChunk(chunk);
+            if (chunk is not null) history!.AppendOwnedChunk(chunk);
             offset += size;
         }
-        if (contiguous is not null) history.TakeOwnedArray(contiguous);
+        if (contiguous is not null) history!.TakeOwnedArray(contiguous);
         if (!certified)
             throw new NotSupportedException("SMA inputs do not satisfy the exact GPU rolling-sum certificate.");
         // An average of in-domain inputs (and warmup zero) is in-domain too.
@@ -171,6 +180,48 @@ internal sealed class FusedBarExecution
         if (AsinValues is not null && _asinOfSma && !devicePresence)
             Array.Fill(AsinValues[1], 1d);
         return devicePresence;
+    }
+
+    // Each region owns closes in one of its eventual output columns. This removes
+    // temporary OHLCV history while retaining the existing guarded SMA arithmetic.
+    // SMA and Asin currently remain separate passes on this storage path.
+    private void ExecuteWithoutHistory(Bar[] source, CancellationToken cancellation)
+    {
+        var regions = _regionPlans ?? new[] { this };
+        var reader = new CloseReader(cancellation);
+        for (int i = 0; i < source.Length; i++)
+        {
+            var bar = source[i];
+            double close = reader.Read(in bar);
+            LatestBar = bar;
+            foreach (var region in regions)
+            {
+                (region.SmaValues ?? region.AsinValues![0])[i] = close;
+                // An independent Asin must retain the original close when SMA
+                // shares this region but overwrites its own column below.
+                if (region.SmaValues is not null && region.AsinValues is not null && !region._asinOfSma)
+                    region.AsinValues[0][i] = close;
+            }
+        }
+        foreach (var region in regions)
+        {
+            var values = region.SmaValues ?? region.AsinValues![0];
+            if (region.SmaLength > 0)
+            {
+                Core.SmaCpuKernel.Summarize(values, out var grid, out var positive, cancellation);
+                region.UsedSmaFallback = !ValuesBarExecution.ComputeSma(values, values,
+                    region.SmaLength, grid, cancellation, true, positive.Certifies(region.SmaLength));
+            }
+            UsedSmaFallback |= region.UsedSmaFallback;
+            if (region.AsinValues is null) continue;
+            var input = region._asinOfSma ? values : region.AsinValues[0];
+            var asin = new AsinKernel(region.AsinValues);
+            for (int i = 0; i < input.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                asin.Append(input[i], i);
+            }
+        }
     }
 
 #endif
