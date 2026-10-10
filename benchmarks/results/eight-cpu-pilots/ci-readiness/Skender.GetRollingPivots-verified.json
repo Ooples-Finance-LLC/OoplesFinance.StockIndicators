@@ -1,0 +1,44 @@
+[
+  {
+    "Pair": "Skender.GetRollingPivots",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 439554.84765625,
+    "AllocatedBytes": 204614
+  },
+  {
+    "Pair": "Skender.GetRollingPivots",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 426944.7822265625,
+    "AllocatedBytes": 152049
+  },
+  {
+    "Pair": "Skender.GetRollingPivots",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 629922.578125,
+    "AllocatedBytes": 511656
+  },
+  {
+    "Pair": "Skender.GetRollingPivots",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 4393557.9125,
+    "AllocatedBytes": 1933344
+  },
+  {
+    "Pair": "Skender.GetRollingPivots",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 4336471.4921875,
+    "AllocatedBytes": 1448284
+  },
+  {
+    "Pair": "Skender.GetRollingPivots",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 6999176.766666666,
+    "AllocatedBytes": 5156156
+  }
+]

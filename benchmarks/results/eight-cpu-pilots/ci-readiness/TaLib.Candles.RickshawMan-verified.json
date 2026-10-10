@@ -1,0 +1,44 @@
+[
+  {
+    "Pair": "TaLib.Candles.RickshawMan",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 44895.02355957031,
+    "AllocatedBytes": 62202
+  },
+  {
+    "Pair": "TaLib.Candles.RickshawMan",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 42962.3916015625,
+    "AllocatedBytes": 11248
+  },
+  {
+    "Pair": "TaLib.Candles.RickshawMan",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 52557.86926269531,
+    "AllocatedBytes": 4067
+  },
+  {
+    "Pair": "TaLib.Candles.RickshawMan",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 468265.36953125,
+    "AllocatedBytes": 566699
+  },
+  {
+    "Pair": "TaLib.Candles.RickshawMan",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 432212.84140625,
+    "AllocatedBytes": 83272
+  },
+  {
+    "Pair": "TaLib.Candles.RickshawMan",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 532146.61171875,
+    "AllocatedBytes": 40093
+  }
+]
