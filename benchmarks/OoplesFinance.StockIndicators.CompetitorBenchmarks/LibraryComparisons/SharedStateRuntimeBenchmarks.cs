@@ -9,7 +9,9 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
 public class SharedStateRuntimeBenchmarks
 {
-    [Params("Ema", "Sum", "Convolution", "Regression", "Dispersion")]
+    public static IEnumerable<string> Cases => new[] { "Ema", "Sum", "Convolution", "Regression", "Dispersion" }
+        .Where(name => Environment.GetEnvironmentVariable("SHARED_STATE") is not { } selected || selected == name);
+    [ParamsSource(nameof(Cases))]
     public string Family { get; set; } = "";
     [Params(1_000, 10_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
