@@ -1,5 +1,9 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
+#if !NETFRAMEWORK
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+#endif
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Core;
@@ -109,6 +113,71 @@ internal static class SmaCpuKernel
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Consume(double mean, int index) => mean;
+    }
+
+    // A whole-series grid certificate proves every prefix and window difference
+    // is exactly representable. Only then may this SIMD scan replace rolling
+    // additions. It is deliberately stricter than the usual period certificate.
+    internal static bool TryProcessPrefixInPlace<TConsumer>(double[] values, int length,
+        GridSummary summary, ref TConsumer consumer, CancellationToken cancellation)
+        where TConsumer : struct, IMeanConsumer
+    {
+        if (!Vector256.IsHardwareAccelerated || values.Length < 256 || length < 2
+            || length > values.Length || !summary.Certifies(values.Length)) return false;
+        cancellation.ThrowIfCancellationRequested();
+        double carry = 0;
+        int i = 0;
+        for (; i <= values.Length - 4; i += 4)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var v = Vector256.LoadUnsafe(ref values[0], (nuint)i);
+            if (Avx2.IsSupported)
+            {
+                v += Avx.Blend(Avx2.Permute4x64(v, 0x90), Vector256<double>.Zero, 1);
+                v += Avx.Blend(Avx2.Permute4x64(v, 0x40), Vector256<double>.Zero, 3);
+            }
+            else
+            {
+                v += Vector256.Create(0d, v.GetElement(0), v.GetElement(1), v.GetElement(2));
+                v += Vector256.Create(0d, 0d, v.GetElement(0), v.GetElement(1));
+            }
+            v += Vector256.Create(carry);
+            v.StoreUnsafe(ref values[0], (nuint)i);
+            carry = v.GetElement(3);
+        }
+        for (; i < values.Length; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = carry += values[i];
+        }
+
+        // Traverse backwards: every needed earlier prefix remains intact until
+        // its final read. No duplicate prefix array or period-sized ring is needed.
+        int end = values.Length;
+        var divisor = Vector256.Create((double)length);
+        for (; end - length >= 4; end -= 4)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            int first = end - 4;
+            var means = (Vector256.LoadUnsafe(ref values[0], (nuint)first)
+                - Vector256.LoadUnsafe(ref values[0], (nuint)(first - length))) / divisor;
+            if (typeof(TConsumer) == typeof(MeanIdentity))
+                means.StoreUnsafe(ref values[0], (nuint)first);
+            else for (int lane = 0; lane < 4; lane++)
+                values[first + lane] = consumer.Consume(means.GetElement(lane), first + lane);
+        }
+        for (i = end - 1; i >= length; i--)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = consumer.Consume((values[i] - values[i - length]) / length, i);
+        }
+        values[length - 1] = consumer.Consume(values[length - 1] / length, length - 1);
+        for (i = 0; i < length - 1; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = consumer.Consume(0, i);
+        }
+        return true;
     }
 
     // Certify the already-owned close column in SIMD batches. Floating-point
@@ -233,6 +302,11 @@ internal static class SmaCpuKernel
     {
         private long _minimum = long.MaxValue, _maximum = long.MinValue;
         public PositiveRangeSummary() { }
+        internal void Merge(PositiveRangeSummary other)
+        {
+            _minimum = Math.Min(_minimum, other._minimum);
+            _maximum = Math.Max(_maximum, other._maximum);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Include(double value)
         {
@@ -245,6 +319,62 @@ internal static class SmaCpuKernel
         internal readonly bool Certifies(int period) => period is >= 2 and <= 4096
             && _minimum >= 0x2ff0000000000000L && _maximum <= 0x4ff0000000000000L
             && _maximum >= _minimum && _maximum - _minimum <= (1L << 52);
+    }
+
+    // Requires the bounded-positive or period grid proof. Split at rebuilds,
+    // preserving the scalar guarded loop's exact sum, eviction and rebuild order.
+    // Copy O(participants * period) boundary inputs before any compact stores;
+    // defer border results until all workers finish, so neighboring chunks never
+    // overwrite each other's live inputs.
+    internal static void ProcessRebasedParallel(double[] values, int length,
+        int participants, CancellationToken cancellation)
+    {
+        if (length < 2 || length > 4096) throw new ArgumentOutOfRangeException(nameof(length));
+        if (participants < 1 || (values.Length - length) / length < participants)
+            throw new ArgumentOutOfRangeException(nameof(participants));
+        cancellation.ThrowIfCancellationRequested();
+        int intervals = (values.Length - length) / length;
+        var edges = new double[2 * participants * length];
+        int Begin(int chunk) => length + (int)((long)intervals * chunk / participants) * length;
+        double firstSum = 0;
+        for (int i = 0; i < length; i++) firstSum += values[i];
+        double firstMean = firstSum / length;
+        for (int chunk = 0; chunk < participants; chunk++)
+            values.AsSpan(Begin(chunk) - length, length).CopyTo(edges.AsSpan(chunk * length, length));
+        AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(participants, participants, chunk =>
+        {
+            int start = Begin(chunk);
+            int end = chunk == participants - 1 ? values.Length : Begin(chunk + 1);
+            int edge = chunk * length;
+            int pending = participants * length + edge;
+            double sum = 0;
+            for (int j = 0; j < length; j++) sum += edges[edge + j];
+            int untilRebuild = length;
+            for (int i = start; i < end; i++)
+            {
+                if (cancellation.IsCancellationRequested) return;
+                sum += values[i];
+                int expired = i - length;
+                bool border = expired < start;
+                sum -= border ? edges[edge + i - start] : values[expired];
+                double mean = sum / length;
+                if (border) edges[pending + i - start] = mean;
+                else values[expired] = mean;
+                if (--untilRebuild == 0 && i + 1 < end)
+                {
+                    sum = 0;
+                    for (int j = i - length + 1; j <= i; j++) sum += values[j];
+                    untilRebuild = length;
+                }
+            }
+        });
+        cancellation.ThrowIfCancellationRequested();
+        for (int chunk = 0; chunk < participants; chunk++)
+            edges.AsSpan((participants + chunk) * length, length).CopyTo(values.AsSpan(Begin(chunk) - length, length));
+        values.AsSpan(0, values.Length - length).CopyTo(values.AsSpan(length));
+        values.AsSpan(0, length - 1).Clear();
+        values[length - 1] = firstMean;
+        cancellation.ThrowIfCancellationRequested();
     }
 
     // Preserve the guarded loop's floating-point operations and rebuild cadence.
@@ -329,6 +459,12 @@ internal static class SmaCpuKernel
         private int _lowest = 2047, _highest;
         private ulong _significands;
         public GridSummary() { }
+        internal void Merge(GridSummary other)
+        {
+            _lowest = Math.Min(_lowest, other._lowest);
+            _highest = Math.Max(_highest, other._highest);
+            _significands |= other._significands;
+        }
         internal static GridSummary FromMagnitudes(long nonzeroMinimum, long maximum, long combined) => new()
         {
             _lowest = nonzeroMinimum == long.MaxValue ? 2047 : (int)(nonzeroMinimum >> 52),

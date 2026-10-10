@@ -6,6 +6,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class IndicatorValuesTests
 {
     [Theory]
+    [InlineData(8191)] [InlineData(8192)] [InlineData(8193)]
     [InlineData(65535)] [InlineData(65536)] [InlineData(65537)] [InlineData(100001)]
     public async Task LargeAsinPreservesExactBitsDomainsAndOwnedSnapshot(int count)
     {
@@ -49,14 +50,15 @@ public sealed class IndicatorValuesTests
     }
 
     [Theory]
-    [InlineData(0)] [InlineData(16384)] [InlineData(32768)] [InlineData(49152)]
-    public async Task ParallelAsinReportsFirstInvalidOwnedBarInSourceOrder(int first)
+    [InlineData(0, false)] [InlineData(16384, false)] [InlineData(32768, false)] [InlineData(49152, false)]
+    [InlineData(0, true)] [InlineData(16384, true)] [InlineData(32768, true)] [InlineData(49152, true)]
+    public async Task ParallelPilotsReportFirstInvalidOwnedBarInSourceOrder(int first, bool sma)
     {
         var bars = Data(65537);
         bars[first] = new Bar(default, 0, double.NaN, 0, .5, 1);
         bars[^1] = new Bar(default, 0, 1, 0, .5, double.PositiveInfinity);
         var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[first]));
-        var builder = Builder(bars, new PriceCircularTransform(PriceCircularOperation.ArcSine))
+        var builder = Builder(bars, sma ? new Sma(20) : new PriceCircularTransform(PriceCircularOperation.ArcSine))
             .ConfigureHistory(IndicatorHistoryMode.LatestOnly);
         var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
         Assert.NotNull(expected);
@@ -64,6 +66,22 @@ public sealed class IndicatorValuesTests
         Assert.Equal(expected.GetType(), actual.GetType());
         Assert.Equal(expected.Message, actual.Message);
         Assert.Null(builder.LastExecution);
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public async Task LargeSmaPreservesFullHistoryBitsAcrossAllArithmeticRoutes(int mode)
+    {
+        var bars = Data(65537, mode);
+        foreach (int period in new[] { 1, 20, int.MaxValue })
+        {
+            var sma = new Sma(period);
+            using var expected = await Builder(bars, sma).BuildAsync();
+            using var actual = await Builder(bars, sma).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+            Bits(expected[sma].ToArray(), actual[sma].ToArray());
+            Assert.Equal(expected.Latest.Bar, actual.Latest.Bar);
+            Assert.Equal(expected.Latest.IsWarmedUp, actual.Latest.IsWarmedUp);
+        }
     }
 
     public static IEnumerable<object[]> Cases => Enumerable.Range(0, 8)

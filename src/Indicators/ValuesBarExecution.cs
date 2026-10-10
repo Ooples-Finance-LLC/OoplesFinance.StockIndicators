@@ -11,7 +11,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 // the existing builder automatically. Input bars are consumed once into local values.
 internal static class ValuesBarExecution
 {
-    private static readonly object ParallelAsinGate = new();
+    private static readonly object ParallelBarGate = new();
     internal static bool Supports(IReadOnlyList<IIndicator> indicators) => indicators.All(i =>
         i.Source is null && i.Components.Count == 0 && i is Sma or JurikAdaptive or ScaledTrueRange
             or RollingPivotLevels or RetrospectiveFractals or RickshawManCandle or BullishShortBodyCandle
@@ -34,10 +34,18 @@ internal static class ValuesBarExecution
             Bar latest = default;
             if (singleSma)
             {
-                latest = FillSma(source, close!, cancellation);
                 int period = Math.Max(1, ((Sma)nodes[0].Indicator).Length);
-                if (period > 1 && period <= close!.Length)
-                    Core.SmaCpuKernel.Summarize(close, out summary, out positiveRange, cancellation);
+                if (CanParallelize(source.Length) && Monitor.TryEnter(ParallelBarGate))
+                {
+                    try { latest = FillSmaParallel(source, close!, period, cancellation, out summary, out positiveRange); }
+                    finally { Monitor.Exit(ParallelBarGate); }
+                }
+                else
+                {
+                    latest = FillSma(source, close!, cancellation);
+                    if (period > 1 && period <= close!.Length)
+                        Core.SmaCpuKernel.Summarize(close, out summary, out positiveRange, cancellation);
+                }
             }
             else if (nodes.Count == 1 && nodes[0].Indicator is PriceCircularTransform)
                 latest = FillAsin(source, nodes[0].Values, cancellation);
@@ -107,12 +115,10 @@ internal static class ValuesBarExecution
     {
         // The published tensor pool is shared and serializes dispatches. Let one
         // large build use a bounded fan-out; competing builders continue inline.
-        if (source.Length >= 65_536 && Environment.ProcessorCount > 1
-            && AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism > 1
-            && Monitor.TryEnter(ParallelAsinGate))
+        if (CanParallelize(source.Length, 8192) && Monitor.TryEnter(ParallelBarGate))
         {
             try { return FillAsinParallel(source, output, cancellation); }
-            finally { Monitor.Exit(ParallelAsinGate); }
+            finally { Monitor.Exit(ParallelBarGate); }
         }
         var values = output[0];
         var flags = output[1];
@@ -130,6 +136,68 @@ internal static class ValuesBarExecution
         return latest;
     }
 
+    private static bool CanParallelize(int count, int minimum = 65_536) => count >= minimum && Environment.ProcessorCount > 1
+        && AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism > 1;
+
+    private struct SmaRegion
+    {
+        internal Bar Last;
+        internal bool Invalid;
+        internal Core.SmaCpuKernel.GridSummary Grid;
+        internal Core.SmaCpuKernel.PositiveRangeSummary Positive;
+    }
+
+    private static Bar FillSmaParallel(Bar[] source, double[] close, int period, CancellationToken cancellation,
+        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive)
+    {
+        int chunks = Math.Min(4, Environment.ProcessorCount);
+        var regions = new SmaRegion[chunks];
+        AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(chunks, chunks, chunk =>
+        {
+            int start = (int)((long)source.Length * chunk / chunks);
+            int end = (int)((long)source.Length * (chunk + 1) / chunks);
+            var input = source.AsSpan(start, end - start);
+            var output = close.AsSpan(start, end - start);
+            Bar latest = default;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (cancellation.IsCancellationRequested) return;
+                latest = input[i];
+                if (!AllFieldsFinite(in latest))
+                {
+                    regions[chunk].Invalid = true;
+                    regions[chunk].Last = latest;
+                    return;
+                }
+                output[i] = latest.Close;
+            }
+            regions[chunk].Last = latest;
+            try
+            {
+                if (period > 1 && period <= source.Length)
+                    Core.SmaCpuKernel.Summarize(close.AsSpan(start, end - start),
+                        out regions[chunk].Grid, out regions[chunk].Positive, cancellation);
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+                // Report cancellation on the caller after every worker quiesces.
+            }
+        });
+        cancellation.ThrowIfCancellationRequested();
+        grid = new Core.SmaCpuKernel.GridSummary();
+        positive = new Core.SmaCpuKernel.PositiveRangeSummary();
+        for (int chunk = 0; chunk < chunks; chunk++)
+        {
+            if (regions[chunk].Invalid) IndicatorInputDomain.Finite.Validate(in regions[chunk].Last);
+            if (period > 1 && period <= source.Length)
+            {
+                grid.Merge(regions[chunk].Grid);
+                positive.Merge(regions[chunk].Positive);
+            }
+        }
+        return regions[chunks - 1].Last;
+    }
+
     private static Bar FillAsinParallel(Bar[] source, double[][] output, CancellationToken cancellation)
     {
         var values = output[0];
@@ -141,13 +209,16 @@ internal static class ValuesBarExecution
         {
             int start = (int)((long)values.Length * chunk / chunks);
             int end = (int)((long)values.Length * (chunk + 1) / chunks);
+            var input = source.AsSpan(start, end - start);
+            var result = values.AsSpan(start, end - start);
+            var presence = flags.AsSpan(start, end - start);
             Bar latest = default;
-            for (int i = start; i < end; i++)
+            for (int i = 0; i < input.Length; i++)
             {
                 // The pool can wrap worker exceptions under its ThreadPool mode.
                 // Quiesce all workers, then throw cancellation on the caller.
                 if (cancellation.IsCancellationRequested) return;
-                latest = source[i];
+                latest = input[i];
                 if (!AllFieldsFinite(in latest))
                 {
                     invalid[chunk] = true;
@@ -155,8 +226,8 @@ internal static class ValuesBarExecution
                 }
                 double value = latest.Close;
                 bool defined = value is >= -1 and <= 1;
-                values[i] = defined ? Math.Asin(value) : 0;
-                flags[i] = defined ? 1 : 0;
+                result[i] = defined ? Math.Asin(value) : 0;
+                presence[i] = defined ? 1 : 0;
             }
             lastBars[chunk] = latest;
         });
@@ -188,6 +259,19 @@ internal static class ValuesBarExecution
         bool certified = CertifiesSma(close, period, summary, cancellation);
         if (inPlace)
         {
+            int participants = Math.Min(4, Environment.ProcessorCount);
+            // Bound temporary edge storage to at most one eighth of the output.
+            if ((boundedPositive || certified) && period is >= 2 and <= 4096 && CanParallelize(output.Length)
+                && period <= output.Length / (16 * participants)
+                && Monitor.TryEnter(ParallelBarGate))
+            {
+                try { Core.SmaCpuKernel.ProcessRebasedParallel(output, period, participants, cancellation); }
+                finally { Monitor.Exit(ParallelBarGate); }
+                return true;
+            }
+            var identity = new Core.SmaCpuKernel.MeanIdentity();
+            if (certified && Core.SmaCpuKernel.TryProcessPrefixInPlace(output, period, summary, ref identity, cancellation))
+                return true;
             Core.SmaCpuKernel.ProcessInPlace(output, period, certified, cancellation, boundedPositive);
             return certified || boundedPositive;
         }
