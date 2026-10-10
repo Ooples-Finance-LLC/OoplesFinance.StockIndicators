@@ -406,6 +406,26 @@ public sealed class StockIndicatorBuilder
             handles[indicator] = slots;
         }
 
+        // Only reviewed, sealed state families can omit the legacy runtime. Check
+        // the entire graph: a source/component can carry callbacks or require the
+        // built-in evaluator even when the configured root does not.
+        if (warmupCount == 0 && direct is not null && CanUseDirectFusedExecution
+            && reachable.Count != 0 && reachable.All(CanExecuteWithoutLegacyRuntime))
+        {
+            var engine = new Indicators.CustomIndicatorEngine(bars, _ => null, finiteInputValidated: true);
+            var outputs = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+            foreach (var indicator in _configuredIndicators)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var values = engine.Compute(indicator);
+                for (var slot = 0; slot < indicator.Outputs.Count; slot++)
+                    outputs[indicator.Outputs[slot]] = values[slot];
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+            LastExecution = new(IndicatorExecutionBackend.Cpu, null, "CPU state graph execution without legacy runtime.");
+            return new Indicators.IndicatorRun(null, outputs, bars, 0, reachable.Max(indicator => indicator.WarmupBars));
+        }
+
         var runtime = Build();
         try
         {
@@ -509,6 +529,10 @@ public sealed class StockIndicatorBuilder
             throw;
         }
     }
+
+    private static bool CanExecuteWithoutLegacyRuntime(Indicators.IIndicator indicator) => indicator is
+        Indicators.FirstValueEma or Indicators.RollingPriceSum or Indicators.NormalizedConvolution
+        or Indicators.WindowLinearRegression or Indicators.WindowDispersion;
 
     private static StockData CreateOwnedBatch(IReadOnlyList<Indicators.Bar> bars)
     {
