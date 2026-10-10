@@ -92,6 +92,33 @@ public sealed class CompactDispersionTests
         }
     }
 
+    [Fact]
+    public void SmallRootCertificateMatchesIndependentRounding()
+    {
+        var random = new Random(813);
+        for (var i = 0; i < 512; i++)
+        {
+            var numerator = (ulong)random.NextInt64(1, 1L << 52);
+            var denominator = (uint)random.Next(1, 4097);
+            var power = random.Next(-900, 901);
+            Assert.True(ExactPopulationDeviation.TrySmallScaledRoot(numerator, denominator, power, out var actual));
+            var rational = new ReferenceFraction(new BigInteger(numerator)) / new ReferenceFraction(denominator);
+            var scale = new ReferenceFraction(BigInteger.One << Math.Abs(power));
+            rational = power < 0 ? rational / scale : rational * scale;
+            AssertBits(rational.SqrtToDouble(), actual);
+        }
+        foreach (var numerator in new ulong[] { 1, 4, 9, 16, 49, 64, 256, 4096, 1UL << 52, 1UL << 53 })
+        foreach (var denominator in new uint[] { 1, 2, 4, 7, 64, 4096 })
+        {
+            Assert.True(ExactPopulationDeviation.TrySmallScaledRoot(numerator, denominator, 0, out var actual));
+            AssertBits((new ReferenceFraction(new BigInteger(numerator)) / new ReferenceFraction(denominator)).SqrtToDouble(), actual);
+        }
+        Assert.False(ExactPopulationDeviation.TrySmallScaledRoot(1, 1, -2148, out _));
+        Assert.False(ExactPopulationDeviation.TrySmallScaledRoot(1, 1, 4090, out _));
+        Assert.False(ExactPopulationDeviation.TrySmallScaledRoot(1UL << 53, 1, 1, out _));
+        Assert.False(ExactPopulationDeviation.TrySmallScaledRoot(1, 4097, 0, out _));
+    }
+
     private static void AssertBits(double expected, double actual) =>
         Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
 }
