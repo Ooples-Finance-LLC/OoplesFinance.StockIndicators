@@ -1,0 +1,18 @@
+{
+  "tests": {
+    "passed": 198,
+    "skipped": 0,
+    "failed": 0
+  },
+  "baselineCommit": "3fbe1290",
+  "parallelAsinThreshold": 65536,
+  "maxParticipants": 4,
+  "scheduler": "AiDotNet.Tensors 0.134.4 CpuParallelSettings.LightweightParallel",
+  "result": "At 100k bars, latest-only builder measured 0.619 ms (grid) and 0.818 ms (random); native single calls measured 1.075 ms and 1.661 ms. Caller-parallelized native remained faster at 0.511 ms and 0.643 ms.",
+  "limitations": [
+    "Four-worker builder is not a single-thread arithmetic win.",
+    "Full history and smaller inputs still use serial CPU execution at this stage.",
+    "Shared tensor pool initialization is excluded from steady-state timing.",
+    "Independent SMA rebuild SIMD prototype passed correctness but did not demonstrate a material end-to-end gain; production change rejected."
+  ]
+}

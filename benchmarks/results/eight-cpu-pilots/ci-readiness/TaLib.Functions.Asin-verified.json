@@ -1,0 +1,44 @@
+[
+  {
+    "Pair": "TaLib.Functions.Asin",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 15243.07958984375,
+    "AllocatedBytes": 66697
+  },
+  {
+    "Pair": "TaLib.Functions.Asin",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 13090.28662109375,
+    "AllocatedBytes": 19050
+  },
+  {
+    "Pair": "TaLib.Functions.Asin",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 9143.059143066406,
+    "AllocatedBytes": 8057
+  },
+  {
+    "Pair": "TaLib.Functions.Asin",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 138829.7138671875,
+    "AllocatedBytes": 643165
+  },
+  {
+    "Pair": "TaLib.Functions.Asin",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 114389.64233398438,
+    "AllocatedBytes": 163057
+  },
+  {
+    "Pair": "TaLib.Functions.Asin",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 90064.7705078125,
+    "AllocatedBytes": 80064
+  }
+]

@@ -16,6 +16,45 @@ public sealed class TensorsGpuExecutionTests
     }
 
     [SkippableTheory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public async Task LatestOnlyGpuOwnsOutputsWithoutTemporaryBarHistory(int shape)
+    {
+        RequireGpu();
+        var bars = BarsFor(Enumerable.Range(0, 10_000).Select(i => i == 0 ? -0d : (i % 17 - 8) / 16d));
+        var sma = new Sma(20);
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        if (shape == 2) asin.Of(sma);
+        var indicators = shape == 0 ? new IIndicator[] { sma } : new IIndicator[] { asin };
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicators)
+            .ConfigureExecution(IndicatorExecutionBackend.Gpu);
+        using var expected = await builder.BuildAsync();
+        builder.ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+        using var warm = await builder.BuildAsync();
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        using var actual = builder.BuildAsync().GetAwaiter().GetResult();
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.InRange(allocated, shape == 0 ? 80_000 : 160_000, shape == 0 ? 115_000 : 195_000);
+        Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+        foreach (var output in indicators.SelectMany(i => i.Outputs))
+        {
+            var saved = expected[output].ToArray();
+            var values = actual[output].ToArray();
+            for (int i = 0; i < saved.Length; i++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(saved[i]), BitConverter.DoubleToInt64Bits(values[i]));
+        }
+        var last = bars[^1];
+        Array.Clear(bars);
+        Assert.Equal(last, actual.Latest.Bar);
+        Assert.Equal(expected.Latest.IsWarmedUp, actual.Latest.IsWarmedUp);
+        using var cancel = new CancellationTokenSource(); cancel.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
+        Assert.Null(builder.LastExecution);
+        bars[^1] = new Bar(default, 0, 1, 0, .5, double.NaN);
+        await Assert.ThrowsAnyAsync<ArgumentException>(() => builder.BuildAsync());
+        Assert.Null(builder.LastExecution);
+    }
+
+    [SkippableTheory]
     [InlineData(1)]
     [InlineData(3)]
     [InlineData(20)]

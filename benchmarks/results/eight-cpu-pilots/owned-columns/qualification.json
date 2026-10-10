@@ -1,0 +1,38 @@
+{
+  "baselineCommit": "d35c474a0edce6385e6a7075549f9f85a00f61c9",
+  "baselineCases": 102,
+  "afterCases": 24,
+  "tests": {
+    "passed": 186,
+    "failed": 0,
+    "skipped": 0
+  },
+  "change": "Composed CPU and required GPU LatestOnly builds no longer retain temporary OHLCV history. A specialized mean consumer fuses composed Asin into certified, bounded-positive, and guarded in-place SMA execution.",
+  "limitations": [
+    "No GPU crossover against raw native CPU was demonstrated.",
+    "Raw competitor results omit builder validation, snapshots, and presence flags.",
+    "Default Full history retains replay and its allocation.",
+    "Decimal and late-rejection SMA preserve guarded arithmetic; raw competitor timing does not imply numerical equivalence.",
+    "Fusing composed Asin did not demonstrate a material additional end-to-end speedup over the owned-column storage fix."
+  ],
+  "sample100k": {
+    "cpuComposedGrid": {
+      "beforeMs": 2.18709,
+      "afterMs": 1.62,
+      "beforeKiB": 6254.9,
+      "afterKiB": 1566.53
+    },
+    "gpuAsin": {
+      "beforeMs": 2.094095,
+      "afterMs": 1.455,
+      "beforeKiB": 6256.63,
+      "afterKiB": 1566.76
+    }
+  },
+  "fusedCases": 22,
+  "fusedTests": {
+    "passed": 189,
+    "failed": 0,
+    "skipped": 0
+  }
+}

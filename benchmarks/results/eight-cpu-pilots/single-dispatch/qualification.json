@@ -1,0 +1,19 @@
+{
+  "implementation": "One dispatch per eligible independent SMA build; shared pooled owned closes; direct output; whole-series guarded replay on local proof rejection.",
+  "focusedTests": "Passed!  - Failed:     0, Passed:   252, Skipped:     0, Total:   252, Duration: 26 s - OoplesFinance.StockIndicators.Tests.Unit.dll (net10.0)",
+  "scalarTests": "Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 34 s - OoplesFinance.StockIndicators.Tests.Unit.dll (net10.0)",
+  "limitations": [
+    "ShortRun timing uncertainty; no overall competitor victory.",
+    "Pipeline A/B excludes builder facade; identical input/output allocations; Full history is allocated and filled but not returned by the diagnostic.",
+    "Full pipeline A/B means were 3-4% slower with overlapping uncertainty; no confirmed Full speedup.",
+    "Warm allocation excludes retained ArrayPool capacity (about 1 MiB at 100k).",
+    "Asin and GPU execution were not changed in this batch.",
+    "Native arms omit bar validation/history; native decimal parallel comparison tolerates 1e-10, builder output is checked bitwise."
+  ],
+  "parent": "d241d62c2a04e3f6578750a626b25681163713f9",
+  "runtime": ".NET 10, Windows, Ryzen 9 3950X",
+  "scalarFilter": "FusedParallelSmaOwnsBoundaries|FusedSmaReportsCapturedBoundary",
+  "benchmarkRows": 24,
+  "publishedTensors": "0.134.4",
+  "sourceReview": "TALib.NETCore 0.5.0, commit 0bc2086a6cafc5b4c17fd398e0c16895e4daf92c; Functions/TA_Sma.cs, TA_Asin.cs, FunctionHelpers.cs. Native parallelism is our benchmark wrapper using the same AiDotNet scheduler."
+}

@@ -77,9 +77,31 @@ public sealed class StockIndicatorBuilder
             LastExecution = new(IndicatorExecutionBackend.Cpu, null, "CPU values execution without retained bar history.");
             return values;
         }
+        if (CanUseDirectFusedExecution
+            && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } fusedSource
+            && Indicators.FusedBarExecution.TryCreate(_configuredIndicators, fusedSource.Length) is { } plan)
+        {
+            var execution = plan.Execute(fusedSource, null, cancellationToken, _executionBackend);
+            var outputs = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+            int warmup = 0;
+            foreach (var indicator in _configuredIndicators)
+            {
+                var values = plan.Values(indicator);
+                for (int slot = 0; slot < indicator.Outputs.Count; slot++)
+                    outputs[indicator.Outputs[slot]] = values[slot];
+                warmup = Math.Max(warmup, Math.Max(indicator.WarmupBars, indicator.Source?.WarmupBars ?? 0));
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+            Indicators.IBarSnapshot? latest = fusedSource.Length == 0 ? null
+                : new Indicators.BarSnapshot(plan.LatestBar, fusedSource.Length - 1, outputs,
+                    fusedSource.Length >= warmup && outputs.Values.All(v => !double.IsNaN(v[fusedSource.Length - 1])));
+            var result = new Indicators.LatestOnlyIndicatorRun(outputs, fusedSource.Length, latest);
+            LastExecution = execution;
+            return result;
+        }
 #endif
         // Preserve the established route for arbitrary graphs, sources, warmup and
-        // required GPU execution. Do not keep its temporary history in this builder.
+        // unsupported execution plans. Do not keep temporary history in this builder.
         var previousSource = _configuredSource;
         try
         {

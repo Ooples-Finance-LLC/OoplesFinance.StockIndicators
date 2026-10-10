@@ -3,8 +3,261 @@ using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
+[CollectionDefinition("IndicatorValuesDispatch", DisableParallelization = true)]
+public sealed class IndicatorValuesDispatchCollection { }
+
+[Collection("IndicatorValuesDispatch")]
 public sealed class IndicatorValuesTests
 {
+    [Fact]
+    public void FusedSmaReportsCapturedBoundaryValidationBeforeLaterErrorsAndRecovers()
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 4;
+            if (Environment.ProcessorCount < 2) return;
+            var bars = Data(65537);
+            int chunks = Math.Min(4, Environment.ProcessorCount);
+            int boundary = 20 + ((bars.Length - 20) / 20 / chunks) * 20 - 1;
+            bars[boundary] = new Bar(default, double.NaN, 1, 1, 1, 1);
+            bars[^1] = new Bar(default, 1, 1, 1, 1, double.NaN);
+            var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[boundary]));
+            var output = new double[bars.Length];
+            var actual = Record.Exception(() => ValuesBarExecution.TryExecuteSmaParallel(bars, output, 20,
+                default, out _, out _, out _, new Bar[bars.Length]));
+            Assert.NotNull(actual);
+            Assert.Equal(expected!.GetType(), actual.GetType());
+            Assert.Equal(expected.Message, actual.Message);
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            Assert.ThrowsAny<OperationCanceledException>(() => ValuesBarExecution.TryExecuteSmaParallel(bars,
+                output, 20, cancellation.Token, out _, out _, out _));
+            bars[boundary] = bars[^1] = bars[0];
+            Assert.True(ValuesBarExecution.TryExecuteSmaParallel(bars, output, 20, default,
+                out _, out var finite, out _));
+            Assert.True(finite);
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Theory]
+    [InlineData(2, 0)] [InlineData(3, 1)] [InlineData(20, 2)]
+    [InlineData(127, 0)] [InlineData(1000, 1)] [InlineData(4096, 2)]
+    public void FusedParallelSmaOwnsBoundariesAndReplaysUnprovenRegions(int period, int mode)
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 4;
+            foreach (bool full in new[] { false, true })
+            {
+                var bars = Data(Math.Max(65537, period * 64 + 1), mode);
+                var original = bars.ToArray();
+                var expected = new double[bars.Length];
+                OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
+                    bars.Select(b => b.Close).ToArray(), expected, period);
+                var actual = new double[bars.Length];
+                var owned = full ? new Bar[bars.Length] : null;
+                bool used = ValuesBarExecution.TryExecuteSmaParallel(bars, actual, period, default,
+                    out var latest, out var finite, out _, owned);
+                Assert.Equal(Environment.ProcessorCount > 1, used);
+                if (!used) continue;
+                Assert.Equal(mode != 2, finite);
+                Array.Clear(bars);
+                Bits(expected, actual);
+                Assert.Equal(original[^1], latest);
+                if (owned is not null) Assert.Equal(original, owned);
+            }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public async Task ConcurrentSmaBuildsCannotChangePreviouslyPublishedSeriesThroughScratchReuse()
+    {
+        var completed = await Task.WhenAll(Enumerable.Range(0, 8).Select(k => Task.Run(async () =>
+        {
+            var bars = Enumerable.Range(0, 65537 + k)
+                .Select(i => new Bar(default, 1, 1, 1, 100 + k + i % 19 / 100d, 1)).ToArray();
+            var sma = new Sma(k % 2 == 0 ? 20 : 1000);
+            var expected = new double[bars.Length];
+            OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
+                bars.Select(b => b.Close).ToArray(), expected, sma.Length);
+            var run = await Builder(bars, sma).ConfigureHistory(k % 2 == 0
+                ? IndicatorHistoryMode.Full : IndicatorHistoryMode.LatestOnly).BuildAsync();
+            Array.Clear(bars);
+            return (run, sma, expected);
+        })));
+        try
+        {
+            // Later dispatches reuse the same pool before any retained result is
+            // checked. Disposal must not return a published column to that pool.
+            foreach (var result in completed) result.run.Dispose();
+            for (int i = 0; i < 3; i++)
+            {
+                using var later = await Builder(Data(100000, 1), new Sma(20))
+                    .ConfigureHistory(IndicatorHistoryMode.Full).BuildAsync();
+            }
+            foreach (var result in completed) Bits(result.expected, result.run[result.sma].ToArray());
+        }
+        finally { foreach (var result in completed) result.run.Dispose(); }
+    }
+
+    [Theory]
+    [InlineData(65535, 0)] [InlineData(65536, 0)] [InlineData(65537, 0)]
+    [InlineData(65537, 1)] [InlineData(65537, 2)]
+    public async Task FullParallelSmaMatchesGuardedValuesAndOwnsReplay(int count, int mode)
+    {
+        var bars = Data(count, mode);
+        var original = bars.ToArray();
+        var sma = new Sma(20);
+        var expected = new double[count];
+        OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
+            bars.Select(b => b.Close).ToArray(), expected, 20);
+        var run = await Builder(bars, sma).BuildAsync();
+        Bits(expected, run[sma].ToArray());
+        Array.Clear(bars);
+        int index = 0;
+        IBarSnapshot? retained = null;
+        await foreach (var snapshot in run)
+        {
+            Assert.Equal(original[index], snapshot.Bar);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected[index]), BitConverter.DoubleToInt64Bits(snapshot[sma]));
+            retained = snapshot;
+            index++;
+        }
+        Assert.Equal(count, index);
+        run.Dispose();
+        Assert.Equal(original[^1], retained!.Bar);
+        Bits(expected, run[sma].ToArray());
+    }
+
+    [Theory]
+    [InlineData(8191)] [InlineData(8192)] [InlineData(8193)] [InlineData(65537)]
+    public async Task FullParallelAsinOwnsReplayAndPreservesDomainBits(int count)
+    {
+        double[] domain = [-0d, 0d, -1d, 1d, double.Epsilon, -double.Epsilon,
+            Math.BitIncrement(1d), Math.BitDecrement(-1d), .17d];
+        var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 1, 1, 1, domain[i % domain.Length], 1)).ToArray();
+        var original = bars.ToArray();
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        using var run = await Builder(bars, asin).BuildAsync();
+        Array.Clear(bars);
+        int index = 0;
+        await foreach (var snapshot in run)
+        {
+            var close = original[index].Close;
+            bool defined = close is >= -1 and <= 1;
+            Assert.Equal(original[index], snapshot.Bar);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(defined ? Math.Asin(close) : 0),
+                BitConverter.DoubleToInt64Bits(snapshot[asin.Value]));
+            Assert.Equal(defined ? 1d : 0d, snapshot[asin.IsDefined]);
+            index++;
+        }
+        Assert.Equal(count, index);
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task FullParallelPilotsPreserveValidationOrderAndRecover(bool sma)
+    {
+        var bars = Data(65537);
+        var original = bars[8192];
+        bars[8192] = new Bar(default, 0, double.NaN, 0, .5, 1);
+        var builder = Builder(bars, sma ? new Sma(20) : new PriceCircularTransform(PriceCircularOperation.ArcSine));
+        var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[8192]));
+        bars[^1] = new Bar(default, 0, 1, 0, .5, double.NaN);
+        var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+        Assert.NotNull(actual);
+        Assert.Equal(expected!.GetType(), actual.GetType());
+        Assert.Equal(expected.Message, actual.Message);
+        Assert.Null(builder.LastExecution);
+        bars[8192] = original;
+        bars[^1] = original;
+        using var recovered = await builder.BuildAsync();
+        Assert.Equal(bars[^1], recovered.Latest.Bar);
+    }
+
+    [Theory]
+    [InlineData(8191)] [InlineData(8192)] [InlineData(8193)]
+    [InlineData(65535)] [InlineData(65536)] [InlineData(65537)] [InlineData(100001)]
+    public async Task LargeAsinPreservesExactBitsDomainsAndOwnedSnapshot(int count)
+    {
+        double[] edge = [-0d, 0d, -1d, 1d, double.Epsilon, -double.Epsilon,
+            Math.BitIncrement(1d), Math.BitDecrement(-1d), double.MaxValue, -double.MaxValue];
+        var close = Enumerable.Range(0, count).Select(i => i % 31 < edge.Length
+            ? edge[i % 31] : (i % 2049 - 1024) / 1024d).ToArray();
+        var bars = close.Select(x => new Bar(default, x, x, x, x, 1)).ToArray();
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        using var run = await Builder(bars, asin).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+        var last = bars[^1];
+        Array.Clear(bars);
+        Assert.Equal(last, run.Latest.Bar);
+        for (int i = 0; i < count; i++)
+        {
+            bool defined = close[i] is >= -1 and <= 1;
+            double expected = defined ? Math.Asin(close[i]) : 0;
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(run[asin.Value][i]));
+            Assert.Equal(defined ? 1d : 0d, run[asin.IsDefined][i]);
+        }
+    }
+
+    [Fact]
+    public async Task ConcurrentLargeAsinBuildsRemainIsolatedAndReleaseDispatchAfterFailure()
+    {
+        await Task.WhenAll(Enumerable.Range(0, 8).Select(k => Task.Run(async () =>
+        {
+            var bars = Data(65536 + k);
+            var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            var builder = Builder(bars, asin).ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+            using var run = await builder.BuildAsync();
+            for (int i = 0; i < bars.Length; i++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(Math.Asin(bars[i].Close)), BitConverter.DoubleToInt64Bits(run[asin.Value][i]));
+            bars[^1] = new Bar(default, 0, 1, 0, .5, double.NaN);
+            await Assert.ThrowsAnyAsync<ArgumentException>(() => builder.BuildAsync());
+            Assert.Null(builder.LastExecution);
+            bars[^1] = new Bar(default, 0, 1, 0, .5, 1);
+            using var recovered = await builder.BuildAsync();
+            Assert.Equal(Math.Asin(.5), recovered[asin.Value][bars.Length - 1]);
+        })));
+    }
+
+    [Theory]
+    [InlineData(0, false)] [InlineData(16384, false)] [InlineData(32768, false)] [InlineData(49152, false)]
+    [InlineData(0, true)] [InlineData(16384, true)] [InlineData(32768, true)] [InlineData(49152, true)]
+    public async Task ParallelPilotsReportFirstInvalidOwnedBarInSourceOrder(int first, bool sma)
+    {
+        var bars = Data(65537);
+        bars[first] = new Bar(default, 0, double.NaN, 0, .5, 1);
+        bars[^1] = new Bar(default, 0, 1, 0, .5, double.PositiveInfinity);
+        var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[first]));
+        var builder = Builder(bars, sma ? new Sma(20) : new PriceCircularTransform(PriceCircularOperation.ArcSine))
+            .ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+        var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+        Assert.NotNull(expected);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.GetType(), actual.GetType());
+        Assert.Equal(expected.Message, actual.Message);
+        Assert.Null(builder.LastExecution);
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public async Task LargeSmaPreservesFullHistoryBitsAcrossAllArithmeticRoutes(int mode)
+    {
+        var bars = Data(65537, mode);
+        foreach (int period in new[] { 1, 20, 1000, int.MaxValue })
+        {
+            var sma = new Sma(period);
+            using var expected = await Builder(bars, sma).BuildAsync();
+            using var actual = await Builder(bars, sma).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+            Bits(expected[sma].ToArray(), actual[sma].ToArray());
+            Assert.Equal(expected.Latest.Bar, actual.Latest.Bar);
+            Assert.Equal(expected.Latest.IsWarmedUp, actual.Latest.IsWarmedUp);
+        }
+    }
+
     public static IEnumerable<object[]> Cases => Enumerable.Range(0, 8)
         .SelectMany(kind => new[] { 0, 1, 2 }.Select(data => new object[] { kind, data }));
     private static IIndicator Indicator(int kind) => kind switch
@@ -61,6 +314,79 @@ public sealed class IndicatorValuesTests
         var actual = await builder.ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
         foreach (var indicator in indicators)
             foreach (var output in indicator.Outputs) Bits(expected[output].ToArray(), actual[output].ToArray());
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public async Task ComposedOwnedColumnsPreserveBitsWarmupAndOwnership(int data)
+    {
+        foreach (int count in new[] { 0, 1, 19, 2051 })
+        foreach (int period in new[] { 1, 20, 4096 })
+        foreach (bool publishMean in new[] { false, true })
+        {
+            var bars = Data(count, data);
+            var sma = new Sma(period);
+            var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            asin.Of(sma);
+            var other = new Sma(7);
+            var otherAsin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            otherAsin.Of(other);
+            var direct = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            var indicators = publishMean ? new IIndicator[] { sma, asin, other, otherAsin, direct, asin }
+                : new IIndicator[] { asin, otherAsin, direct };
+            using var expected = await Builder(bars, indicators).BuildAsync();
+            using var actual = await Builder(bars, indicators).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+            foreach (var output in indicators.SelectMany(i => i.Outputs))
+                Bits(expected[output].ToArray(), actual[output].ToArray());
+            if (!publishMean) Assert.Throws<KeyNotFoundException>(() => actual[sma].ToArray());
+            if (count == 0) Assert.Throws<InvalidOperationException>(() => actual.Latest);
+            else
+            {
+                var last = bars[^1];
+                Array.Clear(bars);
+                Assert.Equal(last, actual.Latest.Bar);
+                Assert.Equal(expected.Latest.IsWarmedUp, actual.Latest.IsWarmedUp);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public void ComposedAllocationsExcludeTemporaryHistory(bool publishMean)
+    {
+        var sma = new Sma(20);
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        asin.Of(sma);
+        var builder = Builder(Data(10_000), publishMean ? new IIndicator[] { sma, asin } : new IIndicator[] { asin })
+            .ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+        using var warm = builder.BuildAsync().GetAwaiter().GetResult();
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        using var run = builder.BuildAsync().GetAwaiter().GetResult();
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.InRange(allocated, publishMean ? 240_000 : 160_000, publishMean ? 270_000 : 190_000);
+        GC.KeepAlive(run);
+    }
+
+    [Fact]
+    public async Task ComposedValidationAndCancellationClearDiagnostics()
+    {
+        var bars = Data(2051);
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        asin.Of(new Sma(20));
+        var builder = Builder(bars, asin).ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+        using var prior = await builder.BuildAsync();
+        using var cancel = new CancellationTokenSource(); cancel.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
+        Assert.Null(builder.LastExecution);
+        bars[^1] = new Bar(default, 0, 1, 0, .5, double.NaN);
+        var expected = await Record.ExceptionAsync(() => Builder(bars, asin).BuildAsync());
+        var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+        Assert.NotNull(expected);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.GetType(), actual.GetType());
+        Assert.Equal(expected.Message, actual.Message);
+        Assert.Null(builder.LastExecution);
+        Assert.Equal(2051, prior.BarCount);
     }
 
     [Theory]
