@@ -3,8 +3,76 @@ using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
+[CollectionDefinition("IndicatorValuesDispatch", DisableParallelization = true)]
+public sealed class IndicatorValuesDispatchCollection { }
+
+[Collection("IndicatorValuesDispatch")]
 public sealed class IndicatorValuesTests
 {
+    [Fact]
+    public void FusedSmaReportsCapturedBoundaryValidationBeforeLaterErrorsAndRecovers()
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 4;
+            if (Environment.ProcessorCount < 2) return;
+            var bars = Data(65537);
+            int chunks = Math.Min(4, Environment.ProcessorCount);
+            int boundary = 20 + ((bars.Length - 20) / 20 / chunks) * 20 - 1;
+            bars[boundary] = new Bar(default, double.NaN, 1, 1, 1, 1);
+            bars[^1] = new Bar(default, 1, 1, 1, 1, double.NaN);
+            var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[boundary]));
+            var output = new double[bars.Length];
+            var actual = Record.Exception(() => ValuesBarExecution.TryExecuteSmaParallel(bars, output, 20,
+                default, out _, out _, out _, new Bar[bars.Length]));
+            Assert.NotNull(actual);
+            Assert.Equal(expected!.GetType(), actual.GetType());
+            Assert.Equal(expected.Message, actual.Message);
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            Assert.ThrowsAny<OperationCanceledException>(() => ValuesBarExecution.TryExecuteSmaParallel(bars,
+                output, 20, cancellation.Token, out _, out _, out _));
+            bars[boundary] = bars[^1] = bars[0];
+            Assert.True(ValuesBarExecution.TryExecuteSmaParallel(bars, output, 20, default,
+                out _, out var finite, out _));
+            Assert.True(finite);
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Theory]
+    [InlineData(2, 0)] [InlineData(3, 1)] [InlineData(20, 2)]
+    [InlineData(127, 0)] [InlineData(1000, 1)] [InlineData(4096, 2)]
+    public void FusedParallelSmaOwnsBoundariesAndReplaysUnprovenRegions(int period, int mode)
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 4;
+            foreach (bool full in new[] { false, true })
+            {
+                var bars = Data(Math.Max(65537, period * 64 + 1), mode);
+                var original = bars.ToArray();
+                var expected = new double[bars.Length];
+                OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
+                    bars.Select(b => b.Close).ToArray(), expected, period);
+                var actual = new double[bars.Length];
+                var owned = full ? new Bar[bars.Length] : null;
+                bool used = ValuesBarExecution.TryExecuteSmaParallel(bars, actual, period, default,
+                    out var latest, out var finite, out _, owned);
+                Assert.Equal(Environment.ProcessorCount > 1, used);
+                if (!used) continue;
+                Assert.Equal(mode != 2, finite);
+                Array.Clear(bars);
+                Bits(expected, actual);
+                Assert.Equal(original[^1], latest);
+                if (owned is not null) Assert.Equal(original, owned);
+            }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
     [Fact]
     public async Task ConcurrentSmaBuildsCannotChangePreviouslyPublishedSeriesThroughScratchReuse()
     {

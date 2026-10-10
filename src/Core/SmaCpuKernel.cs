@@ -355,30 +355,38 @@ internal static class SmaCpuKernel
             edges.AsSpan(chunk * length, length).CopyTo(input);
             values.AsSpan(start, end - start).CopyTo(input.Slice(length));
             var output = values.AsSpan(start, end - start);
-            double sum = 0;
-            for (int j = 0; j < length; j++) sum += input[j];
-            int untilRebuild = length;
-            for (int i = length; i < input.Length; i++)
-            {
-                if (cancellation.IsCancellationRequested) return;
-                sum += input[i];
-                sum -= input[i - length];
-                output[i - length] = sum / length;
-                if (--untilRebuild == 0)
-                {
-                    if (i + 1 < input.Length)
-                    {
-                        sum = 0;
-                        for (int j = i - length + 1; j <= i; j++) sum += input[j];
-                    }
-                    untilRebuild = length;
-                }
-            }
+            ProcessRebasedRegion(input, output, length, cancellation);
         }, scratch => System.Buffers.ArrayPool<double>.Shared.Return(scratch));
         cancellation.ThrowIfCancellationRequested();
         values.AsSpan(0, length - 1).Clear();
         values[length - 1] = firstMean;
         cancellation.ThrowIfCancellationRequested();
+    }
+
+    // Input starts with the preceding window at a scheduled rebuild boundary.
+    // It must be owned, disjoint from output, and grid/bounded-positive proven.
+    internal static void ProcessRebasedRegion(ReadOnlySpan<double> input, Span<double> output,
+        int length, CancellationToken cancellation)
+    {
+        double sum = 0;
+        for (int j = 0; j < length; j++) sum += input[j];
+        int untilRebuild = length;
+        for (int i = length; i < input.Length; i++)
+        {
+            if (cancellation.IsCancellationRequested) return;
+            sum += input[i];
+            sum -= input[i - length];
+            output[i - length] = sum / length;
+            if (--untilRebuild == 0)
+            {
+                if (i + 1 < input.Length)
+                {
+                    sum = 0;
+                    for (int j = i - length + 1; j <= i; j++) sum += input[j];
+                }
+                untilRebuild = length;
+            }
+        }
     }
 
     // Preserve the guarded loop's floating-point operations and rebuild cadence.

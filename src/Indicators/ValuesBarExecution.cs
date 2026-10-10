@@ -32,10 +32,14 @@ internal static class ValuesBarExecution
             var summary = new Core.SmaCpuKernel.GridSummary();
             var positiveRange = new Core.SmaCpuKernel.PositiveRangeSummary();
             Bar latest = default;
+            bool fusedSma = false, fusedFinite = false;
             if (singleSma)
             {
                 int period = Math.Max(1, ((Sma)nodes[0].Indicator).Length);
-                latest = FillSmaColumn(source, close!, period, cancellation, out summary, out positiveRange);
+                fusedSma = TryExecuteSmaParallel(source, close!, period, cancellation,
+                    out latest, out fusedFinite, out _);
+                if (!fusedSma)
+                    latest = FillSmaColumn(source, close!, period, cancellation, out summary, out positiveRange);
             }
             else if (nodes.Count == 1 && nodes[0].Indicator is PriceCircularTransform)
                 latest = FillAsin(source, nodes[0].Values, cancellation);
@@ -59,7 +63,8 @@ internal static class ValuesBarExecution
                 node.Failure?.Throw();
                 bool finiteByConstruction = node.Indicator is PriceCircularTransform;
                 if (node.Indicator is Sma sma)
-                    finiteByConstruction = ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
+                    finiteByConstruction = fusedSma ? fusedFinite
+                        : ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
                 for (int slot = 0; slot < node.Values.Length; slot++)
                 {
                     cancellation.ThrowIfCancellationRequested();
@@ -83,6 +88,148 @@ internal static class ValuesBarExecution
             return new LatestOnlyIndicatorRun(published, source.Length, snapshot);
         }
         finally { foreach (var node in nodes) node.Dispose(); }
+    }
+
+    private struct FusedSmaRegion
+    {
+        internal Bar Last;
+        internal bool Invalid, Certified, Proven;
+    }
+
+    internal static bool TryExecuteSmaParallel(Bar[] source, double[] output, int period,
+        CancellationToken cancellation, out Bar latest, out bool finite, out bool certified, Bar[]? owned = null)
+    {
+        latest = default;
+        finite = certified = false;
+        if (period is < 2 or > 4096 || !CanParallelize(source.Length)) return false;
+        int chunks = Math.Min(WorkerCount(owned is null ? 8 : 4), source.Length / (16 * period));
+        if (chunks < 2 || !Monitor.TryEnter(ParallelBarGate)) return false;
+        double[]? closes = null;
+        try
+        {
+            cancellation.ThrowIfCancellationRequested();
+            closes = System.Buffers.ArrayPool<double>.Shared.Rent(source.Length);
+            var captured = closes;
+            int intervals = (source.Length - period) / period;
+            int Begin(int chunk) => chunk == 0 ? 0 : period + (int)((long)intervals * chunk / chunks) * period;
+            var regions = new FusedSmaRegion[chunks];
+            // Capture each overlap once before workers start, directly into its
+            // final owned storage. Defer errors until each earlier body is checked.
+            for (int chunk = 1; chunk < chunks; chunk++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                int start = Begin(chunk) - period;
+                var boundary = new FusedSmaRegion();
+                for (int i = start; i < start + period; i++)
+                {
+                    if (cancellation.IsCancellationRequested) cancellation.ThrowIfCancellationRequested();
+                    var bar = source[i];
+                    captured[i] = bar.Close;
+                    if (owned is not null) owned[i] = bar;
+                    if (!boundary.Invalid)
+                    {
+                        boundary.Last = bar;
+                        boundary.Invalid = !AllFieldsFinite(in bar);
+                    }
+                }
+                regions[chunk - 1] = boundary;
+            }
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(chunks, chunks, chunk =>
+            {
+                int start = Begin(chunk);
+                int end = chunk == chunks - 1 ? source.Length : Begin(chunk + 1);
+                int bodyEnd = chunk == chunks - 1 ? end : end - period;
+                var history = owned is null ? Span<Bar>.Empty : owned.AsSpan(start, bodyEnd - start);
+                var region = new FusedSmaRegion();
+                if (!CaptureSmaRegion(source.AsSpan(start, bodyEnd - start),
+                    captured.AsSpan(start, bodyEnd - start), history, ref region, cancellation))
+                {
+                    regions[chunk] = region;
+                    return;
+                }
+                if (bodyEnd == end) regions[chunk] = region;
+                if (regions[chunk].Invalid) return;
+                int arithmeticStart = Math.Max(period, start);
+                var input = captured.AsSpan(arithmeticStart - period, end - arithmeticStart + period);
+                try
+                {
+                    Core.SmaCpuKernel.Summarize(input, out var grid, out var positive, cancellation);
+                    bool gridProof = grid.Certifies(period);
+                    if (!gridProof && grid.CanRefine)
+                    {
+                        var proof = new Core.SmaCpuKernel.Certificate(period);
+                        gridProof = true;
+                        foreach (double value in input)
+                        {
+                            if (cancellation.IsCancellationRequested) return;
+                            if (!proof.Include(value)) { gridProof = false; break; }
+                        }
+                    }
+                    regions[chunk].Certified = gridProof;
+                    regions[chunk].Proven = gridProof || positive.Certifies(period);
+                    if (regions[chunk].Proven)
+                        Core.SmaCpuKernel.ProcessRebasedRegion(input,
+                            output.AsSpan(arithmeticStart, end - arithmeticStart), period, cancellation);
+                }
+                catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+                {
+                    // Quiesce the pool before reporting cancellation on the caller.
+                }
+            });
+            cancellation.ThrowIfCancellationRequested();
+            finite = certified = true;
+            foreach (var region in regions)
+            {
+                if (region.Invalid) IndicatorInputDomain.Finite.Validate(in region.Last);
+                finite &= region.Proven;
+                certified &= region.Certified;
+            }
+            latest = regions[chunks - 1].Last;
+            if (finite)
+            {
+                output.AsSpan(0, period - 1).Clear();
+                double sum = 0;
+                for (int i = 0; i < period; i++) sum += captured[i];
+                output[period - 1] = sum / period;
+            }
+            else
+            {
+                // A rejected region may depend on earlier guarded state. Replay
+                // the entire owned close column, not just that region.
+                var reader = new Core.SmaCpuKernel.DoubleReader();
+                var consumer = new Core.SmaCpuKernel.Identity();
+                Core.SmaCpuKernel.ProcessGuarded<double, Core.SmaCpuKernel.DoubleReader, Core.SmaCpuKernel.Identity>(
+                    captured.AsSpan(0, source.Length), output, period, ref reader, ref consumer, cancellation);
+            }
+            cancellation.ThrowIfCancellationRequested();
+            return true;
+        }
+        finally
+        {
+            if (closes is not null) System.Buffers.ArrayPool<double>.Shared.Return(closes);
+            Monitor.Exit(ParallelBarGate);
+        }
+    }
+
+    private static bool CaptureSmaRegion(ReadOnlySpan<Bar> source, Span<double> closes, Span<Bar> history,
+        ref FusedSmaRegion region, CancellationToken cancellation)
+    {
+        Bar latest = default;
+        for (int i = 0; i < source.Length; i++)
+        {
+            if (cancellation.IsCancellationRequested) return false;
+            latest = source[i];
+            if (!AllFieldsFinite(in latest))
+            {
+                region.Last = latest;
+                region.Invalid = true;
+                return false;
+            }
+            closes[i] = latest.Close;
+            if (!history.IsEmpty) history[i] = latest;
+        }
+        region.Last = latest;
+        return true;
     }
 
     internal static Bar FillSmaColumn(Bar[] source, double[] close, int period, CancellationToken cancellation,
