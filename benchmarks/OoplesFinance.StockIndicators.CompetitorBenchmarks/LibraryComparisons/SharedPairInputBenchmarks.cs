@@ -12,7 +12,10 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 public class SharedPairInputBenchmarks
 {
     private const int Period = 20;
-    [Params("Add", "Sub", "Mult", "Div", "Correl", "Beta")] public string Operation { get; set; } = "";
+    public static IEnumerable<string> Cases => new[] { "Add", "Sub", "Mult", "Div", "Correl", "Beta" }
+        .Where(name => Environment.GetEnvironmentVariable("SHARED_PAIR") is not { } selected
+            || selected.Split(',').Contains(name, StringComparer.Ordinal));
+    [ParamsSource(nameof(Cases))] public string Operation { get; set; } = "";
     [Params(1_000, 10_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
     private double[] _closes = null!, _opens = null!;

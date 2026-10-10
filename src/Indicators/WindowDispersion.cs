@@ -193,18 +193,6 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
         private BigInteger OnGrid((long Integer, int Exponent) value) => value.Integer == 0
             ? BigInteger.Zero : new BigInteger(value.Integer) << (value.Exponent - _grid);
 
-        private static (long Integer, int Exponent) Decompose(double value)
-        {
-            var bits = BitConverter.DoubleToInt64Bits(value);
-            var exponent = (int)((bits >> 52) & 2047);
-            if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
-            var integer = bits & ((1L << 52) - 1);
-            if (exponent != 0) integer |= 1L << 52;
-            if (integer == 0) return (0, 0);
-            var power = exponent == 0 ? -1074 : exponent - 1075;
-            var zeros = ExactMeanAccumulator.TrailingBinaryZeros(integer);
-            integer >>= zeros; power += zeros;
-            return (bits < 0 ? -integer : integer, power);
-        }
+        private static (long Integer, int Exponent) Decompose(double value) => ExactMeanAccumulator.DecomposeFinite(value);
     }
 }

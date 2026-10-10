@@ -122,6 +122,34 @@ internal struct ExactMeanAccumulator
 #endif
     }
 
+    // Nonzero exact integers use the same power-of-two normalization as small
+    // significands, including extended-range rounded returns.
+    internal static int TrailingBinaryZeros(BigInteger value)
+    {
+#if NETFRAMEWORK
+        var bytes = value.ToByteArray();
+        var index = 0;
+        while (bytes[index] == 0) index++;
+        return index * 8 + TrailingBinaryZeros((long)bytes[index]);
+#else
+        return (int)BigInteger.TrailingZeroCount(value);
+#endif
+    }
+
+    internal static (long Integer, int Exponent) DecomposeFinite(double value)
+    {
+        var bits = BitConverter.DoubleToInt64Bits(value);
+        var exponent = (int)((bits >> 52) & 2047);
+        if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
+        var integer = bits & ((1L << 52) - 1);
+        if (exponent != 0) integer |= 1L << 52;
+        if (integer == 0) return (0, 0);
+        var power = exponent == 0 ? -1074 : exponent - 1075;
+        var zeros = TrailingBinaryZeros(integer);
+        integer >>= zeros;
+        return (bits < 0 ? -integer : integer, power + zeros);
+    }
+
     // Same binary64 quantization as Mean, with an exact (possibly wide) divisor.
     // A zero total weight retains the indicators' explicit zero-volume convention.
     internal double Ratio(ExactMeanAccumulator denominator)

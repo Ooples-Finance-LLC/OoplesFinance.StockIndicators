@@ -320,12 +320,20 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
 
     private void Accumulate(BigInteger x, BigInteger y, int sign)
     {
+        static (BigInteger Value, int Grid) Compact(BigInteger value)
+        {
+            if (value.IsZero) return (BigInteger.Zero, 0);
+            var grid = ExactMeanAccumulator.TrailingBinaryZeros(value);
+            return (value >> grid, grid);
+        }
+        var left = Compact(x);
+        var right = Compact(y);
         if (Included(0))
-            _moments[0].Add(x, y, sign);
+            _moments[0].Add(left, right, sign);
         if (x.Sign > 0 && Included(1))
-            _moments[1].Add(x, y, sign);
+            _moments[1].Add(left, right, sign);
         if (x.Sign < 0 && Included(2))
-            _moments[2].Add(x, y, sign);
+            _moments[2].Add(left, right, sign);
     }
 
     internal double? Beta(int slot, bool flatZero) =>
@@ -334,6 +342,10 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
     private sealed class Moments
     {
         private int _count;
+        // A common return grid cancels from covariance / market variance. Keep
+        // the public return units unchanged, including extended upper exponents.
+        private int _grid;
+        private bool _hasGrid;
         private BigInteger _x,
             _y,
             _xx,
@@ -343,10 +355,29 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
         {
             _count = 0;
             _x = _y = _xx = _xy = 0;
+            _grid = 0;
+            _hasGrid = false;
         }
 
-        internal void Add(BigInteger x, BigInteger y, int sign)
+        internal void Add((BigInteger Value, int Grid) left, (BigInteger Value, int Grid) right, int sign)
         {
+            if (!left.Value.IsZero || !right.Value.IsZero)
+            {
+                var grid = left.Value.IsZero ? right.Grid : right.Value.IsZero ? left.Grid : Math.Min(left.Grid, right.Grid);
+                if (!_hasGrid || grid < _grid)
+                {
+                    if (_hasGrid)
+                    {
+                        var shift = _grid - grid;
+                        _x <<= shift; _y <<= shift;
+                        _xx <<= 2 * shift; _xy <<= 2 * shift;
+                    }
+                    _grid = grid;
+                    _hasGrid = true;
+                }
+            }
+            var x = left.Value.IsZero ? BigInteger.Zero : left.Value << (left.Grid - _grid);
+            var y = right.Value.IsZero ? BigInteger.Zero : right.Value << (right.Grid - _grid);
             _count += sign;
             _x += sign * x;
             _y += sign * y;
@@ -361,7 +392,7 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
                 ? flatZero
                     ? 0
                     : null
-                : ExactMeanAccumulator.UnitRatio((_count * _xy - _x * _y) << 1074, denominator);
+                : ExactMeanAccumulator.ScaledRatio(_count * _xy - _x * _y, denominator, 0);
         }
     }
 }

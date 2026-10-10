@@ -201,6 +201,10 @@ public sealed class WindowPairStatistics : MultiOutputIndicatorBase, IIndicatorV
 internal sealed class PairStatisticsWindow(int period)
 {
     private readonly Queue<(double A, double B)> _history = new();
+    // Keep the binary exponent separate from the moments. The finest observed
+    // grid is retained until reset; wider inputs still use exact BigInteger math.
+    private int _grid;
+    private bool _hasGrid;
     private BigInteger _x,
         _y,
         _xx,
@@ -233,12 +237,32 @@ internal sealed class PairStatisticsWindow(int period)
     {
         _history.Clear();
         _x = _y = _xx = _yy = _xy = _a = _b = _c = 0;
+        _grid = 0;
+        _hasGrid = false;
     }
 
     private void Accumulate(double a, double b, int sign)
     {
-        var x = ExactVarianceWindow.Units(a);
-        var y = ExactVarianceWindow.Units(b);
+        var left = ExactMeanAccumulator.DecomposeFinite(a);
+        var right = ExactMeanAccumulator.DecomposeFinite(b);
+        if (left.Integer != 0 || right.Integer != 0)
+        {
+            var grid = left.Integer == 0 ? right.Exponent : right.Integer == 0 ? left.Exponent
+                : Math.Min(left.Exponent, right.Exponent);
+            if (!_hasGrid || grid < _grid)
+            {
+                if (_hasGrid)
+                {
+                    var shift = _grid - grid;
+                    _x <<= shift; _y <<= shift;
+                    _xx <<= 2 * shift; _yy <<= 2 * shift; _xy <<= 2 * shift;
+                }
+                _grid = grid;
+                _hasGrid = true;
+            }
+        }
+        var x = left.Integer == 0 ? BigInteger.Zero : new BigInteger(left.Integer) << (left.Exponent - _grid);
+        var y = right.Integer == 0 ? BigInteger.Zero : new BigInteger(right.Integer) << (right.Exponent - _grid);
         _x += sign * x;
         _y += sign * y;
         _xx += sign * x * x;
@@ -268,17 +292,17 @@ internal sealed class PairStatisticsWindow(int period)
         if (slot >= 2)
         {
             var n = new BigInteger(_history.Count);
-            return ExactMeanAccumulator.UnitRatio(
+            return ExactMeanAccumulator.ScaledRatio(
                 slot == 2 ? _c
                     : slot == 3 ? _a
                     : _b,
-                (n * n) << 1074
+                n * n, 2 * _grid
             );
         }
         if (_a.IsZero || _b.IsZero)
             return flatZero ? 0 : null;
         return slot == 0
-            ? _c.Sign * ExactPopulationDeviation.RootRatio((_c * _c) << 2148, _a * _b)
-            : ExactMeanAccumulator.UnitRatio((_c * _c) << 1074, _a * _b);
+            ? _c.Sign * ExactPopulationDeviation.ScaledRootRatio(_c * _c, _a * _b, 0)
+            : ExactMeanAccumulator.ScaledRatio(_c * _c, _a * _b, 0);
     }
 }
