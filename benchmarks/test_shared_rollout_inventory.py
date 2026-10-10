@@ -1,5 +1,6 @@
 import gzip
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -70,12 +71,35 @@ class InventoryDiagnosticsTests(unittest.TestCase):
                            ('SharedDispersionBenchmarks.BuilderFull(Variance: False, Count: 10000)', 'StdDev'),
                            ('SharedDispersionBenchmarks.BuilderFull(Variance: True, Count: 10000)', 'Var'),
                            ('SharedRollingSumBenchmarks.BuilderFull(Count: 10000)', 'Sum'),
-                           ('SharedRegressionBenchmarks.BuilderFull(Operation: "LinearReg", Count: 10000)', 'LinearReg')]:
+                           ('SharedRegressionBenchmarks.BuilderFull(Operation: "LinearReg", Count: 10000)', 'LinearReg'),
+                           ('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)', 'Add'),
+                           ('SharedPairInputBenchmarks.BuilderFull(Operation: "Correl", Count: 10000)', 'Correl'),
+                           ('SharedPairInputBenchmarks.BuilderFull(Operation: "Beta", Count: 10000)', 'Beta')]:
             with self.subTest(pair=pair):
                 result = inventory(self.root, [self.qualification(name)])
                 row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.' + pair)
                 self.assertEqual(4, len(row['current'][0]['methods']))
                 self.assertFalse(row['current'][0]['full_clear_win'])
+
+    def test_qualification_paths_use_one_benchmark_root(self):
+        self.write()
+        path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')
+        for input_path in (path.resolve(), Path(os.path.relpath(path))):
+            with self.subTest(path=input_path):
+                result = inventory(self.root, [input_path])
+                row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.Add')
+                self.assertEqual('qualification.json', row['current'][0]['evidence'])
+
+    def test_external_qualification_is_an_explicit_absolute_file_uri(self):
+        self.write()
+        path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')
+        with tempfile.TemporaryDirectory() as external:
+            outside = Path(external) / 'report with spaces.json'
+            outside.write_bytes(path.read_bytes())
+            result = inventory(self.root, [outside])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.Add')
+            self.assertEqual(outside.resolve().as_uri(), row['current'][0]['evidence'])
+            self.assertIn('%20', row['current'][0]['evidence'])
 
 
 if __name__ == '__main__':

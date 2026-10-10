@@ -67,7 +67,7 @@ def inventory(root: Path, qualifications=()):
             operation = re.search(r'Operation: "([^"]+)"', row['FullName'])
             count = re.search(r'Count: (\d+)', row['FullName'])
             if operation and any(name in row['FullName'] for name in
-                                 ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.')):
+                                 ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.', 'SharedPairInputBenchmarks.')):
                 api = operation[1]
             elif 'SharedDispersionBenchmarks.' in row['FullName']:
                 variance = re.search(r'Variance: (True|False)', row['FullName'])
@@ -101,7 +101,14 @@ def inventory(root: Path, qualifications=()):
                 raise ValueError(f'Incomplete qualification: {pair_id}/{count}')
             best = min(('NativeSingle', 'NativeParallel'), key=lambda name: methods[name]['mean_ns'])
             native_lower = min(methods[name]['confidence_interval']['Lower'] for name in ('NativeSingle', 'NativeParallel'))
-            result = dict(bars=count, evidence=path.as_posix(), methods=methods, fastest_measured_native=best,
+            resolved = path.resolve()
+            try:
+                evidence = resolved.relative_to(root.resolve()).as_posix()
+            except ValueError:
+                # External files have no portable benchmark-root-relative name.
+                # A file URI stays absolute when the inventory itself is moved.
+                evidence = resolved.as_uri()
+            result = dict(bars=count, evidence=evidence, methods=methods, fastest_measured_native=best,
                           full_mean_ratio=methods['BuilderFull']['mean_ns'] / methods[best]['mean_ns'],
                           latest_mean_ratio=methods['BuilderLatestOnly']['mean_ns'] / methods[best]['mean_ns'],
                           full_clear_win=methods['BuilderFull']['confidence_interval']['Upper'] < native_lower,
@@ -110,7 +117,8 @@ def inventory(root: Path, qualifications=()):
             indexed[pair_id]['qualification'] = 'measured-against-serial-and-eight-worker-native'
     return dict(paired_apis=len(rows), indicator_mappings=len({r['indicator_mapping'] for r in rows}),
                 measured_current_apis=sum('current' in row for row in rows),
-                note='Historical normalized-adapter results are prioritization evidence, not raw native or current builder wins. '
+                note='Evidence paths are relative to the benchmarks root; external qualification reports use absolute file URIs. '
+                     'Historical normalized-adapter results are prioritization evidence, not raw native or current builder wins. '
                      'A mapping can contain multiple operations/startup conventions; do not collapse it into one formula. '
                      'Clear wins use nonoverlapping reported confidence intervals against both tested native methods; '
                      'other worker budgets and workloads still require qualification. Contracts are in competitor-library-manifest.json.',

@@ -529,9 +529,8 @@ public sealed class StockIndicatorBuilder
         }
     }
 
-    private static bool CanExecuteWithoutLegacyRuntime(Indicators.IIndicator indicator) => indicator is
-        Indicators.FirstValueEma or Indicators.RollingPriceSum or Indicators.NormalizedConvolution
-        or Indicators.WindowLinearRegression or Indicators.WindowDispersion;
+    private static bool CanExecuteWithoutLegacyRuntime(Indicators.IIndicator indicator) =>
+        indicator is Indicators.RollingPriceSum || Indicators.SharedCpuStates.Contains(indicator);
 
     private static StockData CreateOwnedBatch(IReadOnlyList<Indicators.Bar> bars)
     {

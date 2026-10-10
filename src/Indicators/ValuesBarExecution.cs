@@ -15,9 +15,7 @@ internal static partial class ValuesBarExecution
     // These sealed states read finite bars, have no user callbacks, and publish
     // their own outputs without graph or built-in evaluator substitution.
     private static bool IsSharedState(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
-        && indicator is FirstValueEma or NormalizedConvolution or WindowLinearRegression or WindowDispersion
-            or EndpointWeightedAverage or GaussianWeightedAverage or SineWeightedAverage
-            or StandardDeviationWithDetails or WindowDeviationBands or ClassicDeviationBands;
+        && SharedCpuStates.Contains(indicator);
 
     internal static bool SupportsOwned(IReadOnlyList<IIndicator> indicators) =>
         indicators.Count == 1 && IsPointwise(indicators[0])
