@@ -69,7 +69,8 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         for name, pair in [('SharedPointwiseBenchmarks.BuilderFull(Operation: "Sin", Count: 10000)', 'Sin'),
                            ('SharedDispersionBenchmarks.BuilderFull(Variance: False, Count: 10000)', 'StdDev'),
                            ('SharedDispersionBenchmarks.BuilderFull(Variance: True, Count: 10000)', 'Var'),
-                           ('SharedRollingSumBenchmarks.BuilderFull(Count: 10000)', 'Sum')]:
+                           ('SharedRollingSumBenchmarks.BuilderFull(Count: 10000)', 'Sum'),
+                           ('SharedRegressionBenchmarks.BuilderFull(Operation: "LinearReg", Count: 10000)', 'LinearReg')]:
             with self.subTest(pair=pair):
                 result = inventory(self.root, [self.qualification(name)])
                 row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.' + pair)
