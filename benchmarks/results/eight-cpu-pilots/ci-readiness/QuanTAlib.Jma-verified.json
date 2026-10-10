@@ -1,0 +1,44 @@
+[
+  {
+    "Pair": "QuanTAlib.Jma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 136393.148046875,
+    "AllocatedBytes": 65306
+  },
+  {
+    "Pair": "QuanTAlib.Jma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 123908.36401367188,
+    "AllocatedBytes": 12760
+  },
+  {
+    "Pair": "QuanTAlib.Jma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 187331.01640625,
+    "AllocatedBytes": 392086
+  },
+  {
+    "Pair": "QuanTAlib.Jma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 1424660.1265625,
+    "AllocatedBytes": 569833
+  },
+  {
+    "Pair": "QuanTAlib.Jma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 1320340.45703125,
+    "AllocatedBytes": 84813
+  },
+  {
+    "Pair": "QuanTAlib.Jma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 1871950.89453125,
+    "AllocatedBytes": 3970587
+  }
+]

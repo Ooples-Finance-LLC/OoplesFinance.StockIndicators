@@ -5,6 +5,106 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 public sealed class SmaCpuKernelTests
 {
+    [Theory]
+    [InlineData(2, 257)] [InlineData(20, 1025)] [InlineData(127, 513)]
+    [InlineData(256, 257)] [InlineData(255, 256)]
+    public void PrefixSmaMatchesIndependentRationalWindows(int period, int count)
+    {
+        var input = Enumerable.Range(0, count).Select(i => (i % 31 - 15) / 16d).ToArray();
+        input[0] = -0d;
+        SmaCpuKernel.Summarize(input, out var grid, out _, default);
+        var actual = input.ToArray();
+        var consumer = new SmaCpuKernel.MeanIdentity();
+        bool used = SmaCpuKernel.TryProcessPrefixInPlace(actual, period, grid, ref consumer, default);
+        Assert.Equal(System.Runtime.Intrinsics.Vector256.IsHardwareAccelerated, used);
+        if (!used) { Assert.Equal(input, actual); return; }
+        for (int i = 0; i < count; i++)
+        {
+            var sum = new ReferenceFraction(0);
+            if (i >= period - 1)
+                for (int j = i - period + 1; j <= i; j++) sum += ReferenceFraction.FromDouble(input[j]);
+            double expected = (sum / new ReferenceFraction(period)).ToDouble();
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual[i]));
+        }
+    }
+
+    [Fact]
+    public void PrefixProofMustCoverWholeHistoryAndCancellationCannotMutateInput()
+    {
+        var input = Enumerable.Repeat(1d + Math.Pow(2, -48), 257).ToArray();
+        SmaCpuKernel.Summarize(input, out var grid, out _, default);
+        Assert.True(grid.Certifies(2));
+        Assert.False(grid.Certifies(input.Length));
+        var actual = input.ToArray();
+        var consumer = new SmaCpuKernel.MeanIdentity();
+        Assert.False(SmaCpuKernel.TryProcessPrefixInPlace(actual, 2, grid, ref consumer, default));
+        Assert.Equal(input, actual);
+        if (!System.Runtime.Intrinsics.Vector256.IsHardwareAccelerated) return;
+        Array.Fill(input, .25d);
+        actual = input.ToArray();
+        SmaCpuKernel.Summarize(input, out grid, out _, default);
+        using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
+        Assert.ThrowsAny<OperationCanceledException>(() => SmaCpuKernel.TryProcessPrefixInPlace(actual, 2, grid, ref consumer, cancellation.Token));
+        Assert.Equal(input, actual);
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public void PartitionedCertificatesEqualWholeSequenceCertificates(int mode)
+    {
+        var input = Enumerable.Range(0, 65537).Select(i => mode == 0 ? (i % 31 - 15) / 16d
+            : mode == 1 ? 100 + i % 19 / 100d : i == 32768 ? double.Epsilon : .25d).ToArray();
+        SmaCpuKernel.Summarize(input, out var expectedGrid, out var expectedPositive, default);
+        var grid = new SmaCpuKernel.GridSummary();
+        var positive = new SmaCpuKernel.PositiveRangeSummary();
+        for (int chunk = 0; chunk < 4; chunk++)
+        {
+            int start = input.Length * chunk / 4, end = input.Length * (chunk + 1) / 4;
+            SmaCpuKernel.Summarize(input.AsSpan(start, end - start), out var partGrid, out var partPositive, default);
+            grid.Merge(partGrid); positive.Merge(partPositive);
+        }
+        foreach (int period in new[] { 1, 2, 20, 4096, 65537, int.MaxValue })
+        {
+            Assert.Equal(expectedGrid.Certifies(period), grid.Certifies(period));
+            Assert.Equal(expectedPositive.Certifies(period), positive.Certifies(period));
+        }
+        Assert.Equal(expectedGrid.CanRefine, grid.CanRefine);
+    }
+
+    private struct IndexedMeanConsumer(int[] visits) : SmaCpuKernel.IMeanConsumer
+    {
+        internal int Calls;
+        public double Consume(double mean, int index)
+        {
+            Calls++;
+            visits[index]++;
+            return mean + index + .25;
+        }
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public void InPlaceConsumersPreserveEveryIndexAndReturnUpdatedState(int mode)
+    {
+        foreach (int count in new[] { 0, 1, 19, 137 })
+        foreach (int period in new[] { 1, 3, 20, 4096 })
+        {
+            var input = Enumerable.Range(0, count).Select(i => mode == 0 ? (i % 17 - 8) / 16d
+                : mode == 1 ? .25 + i % 19 / 100d : (i % 17 - 8) / 10d).ToArray();
+            var expected = input.ToArray();
+            bool certified = mode == 0;
+            bool bounded = mode == 1;
+            SmaCpuKernel.ProcessInPlace(expected, period, certified, default, bounded);
+            var visits = new int[count];
+            var consumer = new IndexedMeanConsumer(visits);
+            SmaCpuKernel.ProcessInPlace(input, period, certified, ref consumer, default, bounded);
+            Assert.Equal(count, consumer.Calls);
+            Assert.All(visits, n => Assert.Equal(1, n));
+            for (int i = 0; i < count; i++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] + i + .25), BitConverter.DoubleToInt64Bits(input[i]));
+        }
+    }
+
     private struct Deviation : SmaCpuKernel.IConsumer
     {
         internal int Calls;
@@ -107,15 +207,71 @@ public sealed class SmaCpuKernelTests
         Assert.Equal(new[] { 1d, 2d, 3d }, input);
     }
 
-    public static IEnumerable<object[]> PositiveCases => new[] { 2, 3, 20, 127, 4096 }
+    public static IEnumerable<object[]> PositiveCases => new[] { 2, 3, 20, 127, 1000, 4096 }
         .SelectMany(period => new[] { -256, -1, 0, 255 }.Select(exponent => new object[] { period, exponent }));
+
+    [Theory, MemberData(nameof(PositiveCases))]
+    public void ParallelPositivePreservesGuardedBitsAtPartitionBoundaries(int period, int exponent)
+    {
+        foreach (int participants in new[] { 1, 2, 3, 4, 6, 8 })
+        foreach (int tail in new[] { -1, 0, 1 })
+        {
+            var random = new Random(793);
+            var input = Enumerable.Range(0, period * 10 + tail)
+                .Select(_ => Math.ScaleB(1 + random.NextDouble(), exponent)).ToArray();
+            var expected = new double[input.Length];
+            var reader = new SmaCpuKernel.DoubleReader();
+            var identity = new SmaCpuKernel.Identity();
+            SmaCpuKernel.ProcessGuarded<double, SmaCpuKernel.DoubleReader, SmaCpuKernel.Identity>(
+                input, expected, period, ref reader, ref identity);
+            var actual = input.ToArray();
+            SmaCpuKernel.ProcessRebasedParallel(actual, period, participants, default);
+            Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), actual.Select(BitConverter.DoubleToInt64Bits));
+        }
+    }
+
+    [Fact]
+    public void ParallelPositiveRejectsInvalidPartitionsAndPreCancellationWithoutMutation()
+    {
+        var input = Enumerable.Repeat(1.1, 100).ToArray();
+        var original = input.ToArray();
+        Assert.Throws<ArgumentOutOfRangeException>(() => SmaCpuKernel.ProcessRebasedParallel(input, 0, 4, default));
+        Assert.Throws<ArgumentOutOfRangeException>(() => SmaCpuKernel.ProcessRebasedParallel(input, 20, 5, default));
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        Assert.ThrowsAny<OperationCanceledException>(() => SmaCpuKernel.ProcessRebasedParallel(input, 20, 4, cancellation.Token));
+        Assert.Equal(original, input);
+    }
+
+    [Theory]
+    [InlineData(2)] [InlineData(20)] [InlineData(127)] [InlineData(4096)]
+    public void ParallelCertifiedSignedGridPreservesExactWindows(int period)
+    {
+        foreach (int participants in new[] { 1, 2, 3, 4, 6, 8 })
+        {
+            var input = Enumerable.Range(0, period * 9 + 1).Select(i => (i % 31 - 15) / 16d).ToArray();
+            input[0] = -0d;
+            SmaCpuKernel.Summarize(input, out var grid, out _, default);
+            Assert.True(grid.Certifies(period));
+            var actual = input.ToArray();
+            SmaCpuKernel.ProcessRebasedParallel(actual, period, participants, default);
+            long units = 0;
+            for (int i = 0; i < input.Length; i++)
+            {
+                units += (long)(input[i] * 16);
+                if (i >= period) units -= (long)(input[i - period] * 16);
+                double expected = i < period - 1 ? 0 : (units / 16d) / period;
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual[i]));
+            }
+        }
+    }
 
     [Theory, MemberData(nameof(PositiveCases))]
     public void PositiveRangeProofPreservesEveryGuardedBit(int period, int exponent)
     {
         var random = new Random(173);
         var scale = Math.Pow(2, exponent);
-        var input = Enumerable.Range(0, period * 3 + 17).Select(i =>
+        var input = Enumerable.Range(0, period * 9 + 17).Select(i =>
             scale * (i % 7 == 0 ? 1 : i % 7 == 1 ? 2 : 1 + random.NextDouble())).ToArray();
         var proof = new SmaCpuKernel.PositiveRangeSummary();
         foreach (var value in input) proof.Include(value);
@@ -148,7 +304,9 @@ public sealed class SmaCpuKernelTests
     public void CompactPositiveResultsPreserveFirstWindowAndRebuildBoundaries(int period)
     {
         foreach (int count in new[] { 0, 1, period - 1, period, period + 1,
-                     2 * period - 1, 2 * period, 2 * period + 1, 3 * period + 1 })
+                     2 * period - 1, 2 * period, 2 * period + 1, 3 * period + 1,
+                     5 * period - 1, 5 * period, 5 * period + 1,
+                     9 * period - 1, 9 * period, 9 * period + 1 })
         {
             var input = Enumerable.Range(0, count).Select(i => 100 + i % 19 / 100d).ToArray();
             var expected = new double[count];
