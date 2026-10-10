@@ -69,8 +69,12 @@ internal struct ExactPopulationDeviation
         if (numerator.Sign < 0 || denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(numerator));
         if (numerator.IsZero) return 0;
 #if !NETFRAMEWORK
-        if (numerator <= (1UL << 53) && denominator <= 4096
-            && TrySmallScaledRoot((ulong)numerator, (uint)denominator, binaryExponent, out var small)) return small;
+        if (numerator <= (1UL << 53) && denominator <= 4096)
+        {
+            if (TrySmallScaledRoot((ulong)numerator, (uint)denominator, binaryExponent, out var small)) return small;
+        }
+        else if (numerator.GetBitLength() <= 64 && denominator.GetBitLength() <= 64
+            && TryWideScaledRoot((ulong)numerator, (ulong)denominator, binaryExponent, out var wide)) return wide;
 #endif
         var exponent = BitLength(numerator) - BitLength(denominator);
         if (exponent >= 0 ? numerator < (denominator << exponent) : (numerator << -exponent) < denominator) exponent--;
@@ -104,6 +108,40 @@ internal struct ExactPopulationDeviation
             numerator <<= 1;
             power--;
         }
+        return TryCertifiedRoot<SmallMidpoint>(numerator, denominator, power, out result);
+    }
+
+    // Full-width compact correlation moments need up to 174 product bits when
+    // comparing binary64 midpoints. Three 64-bit words certify them exactly.
+    internal static bool TryWideScaledRoot(ulong numerator, ulong denominator, int power, out double result)
+    {
+        result = 0;
+        if (numerator == 0 || denominator == 0 || (power & 1) != 0) return false;
+        return TryCertifiedRoot<WideMidpoint>(numerator, denominator, power, out result);
+    }
+
+    private interface IRootMidpoint
+    {
+        bool Compare(ulong numerator, ulong denominator, ulong midpoint, int power, out int comparison);
+    }
+
+    private readonly struct SmallMidpoint : IRootMidpoint
+    {
+        public bool Compare(ulong numerator, ulong denominator, ulong midpoint, int power, out int comparison) =>
+            CompareMidpoint(numerator, (uint)denominator, midpoint, power, out comparison);
+    }
+
+    private readonly struct WideMidpoint : IRootMidpoint
+    {
+        public bool Compare(ulong numerator, ulong denominator, ulong midpoint, int power, out int comparison) =>
+            CompareWideMidpoint(numerator, denominator, midpoint, power, out comparison);
+    }
+
+    private static bool TryCertifiedRoot<TMidpoint>(ulong numerator, ulong denominator, int power, out double result)
+        where TMidpoint : struct, IRootMidpoint
+    {
+        result = 0;
+        var proof = default(TMidpoint);
         var bits = BitConverter.DoubleToInt64Bits(Math.Sqrt((double)numerator / denominator));
         for (var attempt = 0; attempt < 3; attempt++)
         {
@@ -113,9 +151,9 @@ internal struct ExactPopulationDeviation
             var boundary = significand == (1UL << 52);
             var lower = boundary ? (significand << 2) - 1 : (significand << 1) - 1;
             var lowerPower = exponent - (boundary ? 54 : 53);
-            if (!CompareMidpoint(numerator, denominator, lower, lowerPower, out var comparison)) return false;
+            if (!proof.Compare(numerator, denominator, lower, lowerPower, out var comparison)) return false;
             if (comparison < 0 || comparison == 0 && (bits & 1) != 0) { bits--; continue; }
-            if (!CompareMidpoint(numerator, denominator, (significand << 1) + 1, exponent - 53, out comparison)) return false;
+            if (!proof.Compare(numerator, denominator, (significand << 1) + 1, exponent - 53, out comparison)) return false;
             if (comparison > 0 || comparison == 0 && (bits & 1) != 0) { bits++; continue; }
             var scaledExponent = (long)exponent + power / 2;
             if (scaledExponent is < -1022 or > 1023) return false;
@@ -134,6 +172,35 @@ internal struct ExactPopulationDeviation
         var left = (UInt128)numerator << shift;
         var right = (UInt128)midpoint * midpoint * denominator;
         comparison = left.CompareTo(right);
+        return true;
+    }
+
+    private static bool CompareWideMidpoint(ulong numerator, ulong denominator, ulong midpoint, int power, out int comparison)
+    {
+        comparison = 0;
+        var shift = -2 * power;
+        if (shift is < 0 or >= 192 || 64 - BitOperations.LeadingZeroCount(numerator) + shift > 192) return false;
+        ulong low = 0, middle = 0, high = 0;
+        if (shift < 64)
+        {
+            low = numerator << shift;
+            if (shift != 0) middle = numerator >> (64 - shift);
+        }
+        else if (shift < 128)
+        {
+            middle = numerator << (shift - 64);
+            if (shift != 64) high = numerator >> (128 - shift);
+        }
+        else high = numerator << (shift - 128);
+
+        // midpoint < 2^55, so its square times a 64-bit denominator is < 2^174.
+        // The upper partial product plus carry therefore cannot overflow UInt128.
+        var square = (UInt128)midpoint * midpoint;
+        var lowerProduct = (UInt128)unchecked((ulong)square) * denominator;
+        var upperProduct = (square >> 64) * denominator + (lowerProduct >> 64);
+        comparison = high.CompareTo((ulong)(upperProduct >> 64));
+        if (comparison == 0) comparison = middle.CompareTo(unchecked((ulong)upperProduct));
+        if (comparison == 0) comparison = low.CompareTo(unchecked((ulong)lowerProduct));
         return true;
     }
 #endif
