@@ -174,7 +174,7 @@ internal static partial class ValuesBarExecution
     // not a pool lease and must never be written by an execution kernel.
     private static double[]? _allPresent;
     private static readonly object PresenceGate = new();
-    private static double[] CompletePointwisePresence(int count, ulong[]? missing, bool hasUndefined,
+    internal static double[] CompletePointwisePresence(int count, ulong[]? missing, bool hasUndefined,
         CancellationToken cancellation)
     {
         cancellation.ThrowIfCancellationRequested();

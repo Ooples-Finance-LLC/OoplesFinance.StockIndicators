@@ -69,6 +69,10 @@ public sealed class StockIndicatorBuilder
         var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
         if (!source.IsFinite) return await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
 #if !NETFRAMEWORK
+        if (_executionBackend == IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
+            && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } gpuSource
+            && Indicators.ValuesBarExecution.SupportsGpu(_configuredIndicators))
+            return ExecutePointwiseGpu(gpuSource, null, cancellationToken);
         if (_executionBackend != IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
             && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } direct
             && Indicators.ValuesBarExecution.Supports(_configuredIndicators))
@@ -111,6 +115,20 @@ public sealed class StockIndicatorBuilder
         catch { LastExecution = null; throw; }
         finally { _configuredSource = previousSource; }
     }
+#if !NETFRAMEWORK
+    private Indicators.IIndicatorRun ExecutePointwiseGpu(Indicators.Bar[] source, Indicators.OwnedBarHistory? history,
+        CancellationToken cancellation)
+    {
+        cancellation.ThrowIfCancellationRequested();
+        if (source.Length == 0) throw new NotSupportedException("An empty run has no device work to execute.");
+        if (!Indicators.TensorsGpuExecution.TryGet(out var gpu, out var reason))
+            throw new NotSupportedException(reason);
+        var result = Indicators.ValuesBarExecution.Execute(source, _configuredIndicators, cancellation, history, gpu);
+        LastExecution = new(IndicatorExecutionBackend.Gpu, gpu!.DeviceName,
+            "Fused FP64 pointwise kernel executed through AiDotNet.Tensors OpenCL.");
+        return result;
+    }
+#endif
     private int _nextId;
 
     // Legacy execution can invoke customer callbacks which change the typed
@@ -298,6 +316,13 @@ public sealed class StockIndicatorBuilder
             execution = fused.Execute(direct!, bars, cancellationToken, _executionBackend);
         }
 #if !NETFRAMEWORK
+        else if (_executionBackend == IndicatorExecutionBackend.Gpu && warmupCount == 0 && direct is not null
+            && CanUseDirectFusedExecution && Indicators.ValuesBarExecution.SupportsGpu(_configuredIndicators))
+        {
+            var result = ExecutePointwiseGpu(direct, bars, cancellationToken);
+            _configuredSource = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() => CreateOwnedBatch(bars)), bars);
+            return result;
+        }
         else if (_executionBackend != IndicatorExecutionBackend.Gpu && warmupCount == 0 && direct is not null
             && CanUseDirectFusedExecution && Indicators.ValuesBarExecution.SupportsOwned(_configuredIndicators))
         {
@@ -309,7 +334,7 @@ public sealed class StockIndicatorBuilder
 #endif
         else if (_executionBackend == IndicatorExecutionBackend.Gpu)
         {
-            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin and Asin.Of(Sma) runs without warmup sources or legacy callbacks.");
+            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin, Asin.Of(Sma), and standalone candle arithmetic or rounding transforms without warmup sources or legacy callbacks.");
         }
         else if (source is Indicators.ISynchronousBarSource synchronous)
         {

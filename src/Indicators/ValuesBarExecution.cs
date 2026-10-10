@@ -21,6 +21,9 @@ internal static partial class ValuesBarExecution
         indicators.Count == 1 && IsPointwise(indicators[0])
         || indicators.Count > 0 && indicators.All(IsSharedState);
 
+    internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
+        && IsPointwise(indicators[0]) && indicators[0] is CandleArithmetic or PriceRoundingTransform;
+
     internal static bool Supports(IReadOnlyList<IIndicator> indicators) =>
         SupportsOwned(indicators) || indicators.All(i => IsSharedState(i) ||
         i.Source is null && i.Components.Count == 0 && i is Sma or JurikAdaptive or ScaledTrueRange
@@ -28,8 +31,10 @@ internal static partial class ValuesBarExecution
             or PriceCircularTransform { Operation: PriceCircularOperation.ArcSine });
 
     internal static IIndicatorRun Execute(Bar[] source, IReadOnlyList<IIndicator> indicators, CancellationToken cancellation,
-        OwnedBarHistory? history = null)
+        OwnedBarHistory? history = null, TensorsGpuExecution? gpu = null)
     {
+        if (gpu is not null && (!SupportsGpu(indicators) || source.Length == 0))
+            throw new NotSupportedException("Required GPU pointwise execution needs a nonempty supported standalone indicator.");
         var nodes = new List<Node>();
         try
         {
@@ -57,7 +62,8 @@ internal static partial class ValuesBarExecution
                     latest = FillSmaColumn(source, close!, period, cancellation, out summary, out positiveRange);
             }
             else if (nodes.Count == 1 && IsPointwise(nodes[0].Indicator))
-                latest = FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
+                latest = gpu is null ? FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned)
+                    : gpu.ExecutePointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
             else for (int i = 0; i < source.Length; i++)
@@ -424,7 +430,7 @@ internal static partial class ValuesBarExecution
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool AllFieldsFinite(in Bar bar)
+    internal static bool AllFieldsFinite(in Bar bar)
     {
         if (Vector256.IsHardwareAccelerated)
         {

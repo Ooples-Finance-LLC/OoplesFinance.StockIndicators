@@ -130,9 +130,9 @@ public sealed class SharedArithmeticExecutionTests
         cancellation.Cancel();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancellation.Token));
         Assert.Null(builder.LastExecution);
+        indicator.Of(new Sma(3));
         await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
         Assert.Null(builder.LastExecution);
-        indicator.Of(new Sma(3));
         Assert.False(ValuesBarExecution.IsPointwise(indicator));
         using var actual = await builder.ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync();
         using var expected = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, b => b))
