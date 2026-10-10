@@ -184,7 +184,7 @@ internal sealed class FusedBarExecution
 
     // Each region owns closes in one of its eventual output columns. This removes
     // temporary OHLCV history while retaining the existing guarded SMA arithmetic.
-    // SMA and Asin currently remain separate passes on this storage path.
+    // Composed Asin is consumed by the SMA loop without a separate transform pass.
     private void ExecuteWithoutHistory(Bar[] source, CancellationToken cancellation)
     {
         var regions = _regionPlans ?? new[] { this };
@@ -209,18 +209,42 @@ internal sealed class FusedBarExecution
             if (region.SmaLength > 0)
             {
                 Core.SmaCpuKernel.Summarize(values, out var grid, out var positive, cancellation);
-                region.UsedSmaFallback = !ValuesBarExecution.ComputeSma(values, values,
-                    region.SmaLength, grid, cancellation, true, positive.Certifies(region.SmaLength));
+                bool certified = ValuesBarExecution.CertifiesSma(values, region.SmaLength, grid, cancellation);
+                region.UsedSmaFallback = !certified;
+                if (region._asinOfSma)
+                {
+                    var consumer = new InPlaceAsinConsumer(region.AsinValues!, region.SmaValues is not null);
+                    Core.SmaCpuKernel.ProcessInPlace(values, region.SmaLength, certified, ref consumer,
+                        cancellation, positive.Certifies(region.SmaLength));
+                }
+                else Core.SmaCpuKernel.ProcessInPlace(values, region.SmaLength, certified,
+                    cancellation, positive.Certifies(region.SmaLength));
             }
             UsedSmaFallback |= region.UsedSmaFallback;
-            if (region.AsinValues is null) continue;
-            var input = region._asinOfSma ? values : region.AsinValues[0];
+            if (region.AsinValues is null || region._asinOfSma) continue;
+            var input = region.AsinValues[0];
             var asin = new AsinKernel(region.AsinValues);
             for (int i = 0; i < input.Length; i++)
             {
                 cancellation.ThrowIfCancellationRequested();
                 asin.Append(input[i], i);
             }
+        }
+    }
+
+    private readonly struct InPlaceAsinConsumer(double[][] output, bool publishMean) : Core.SmaCpuKernel.IMeanConsumer
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double Consume(double mean, int index)
+        {
+            bool defined = mean is >= -1 and <= 1;
+            double value = defined ? Math.Asin(mean) : 0;
+            output[1][index] = defined ? 1 : 0;
+            // When only Asin is published, its eventual values buffer still owns
+            // live closes. Return its result to the kernel's delayed/compact store.
+            if (!publishMean) return value;
+            output[0][index] = value;
+            return mean;
         }
     }
 

@@ -136,17 +136,7 @@ internal static class ValuesBarExecution
     internal static bool ComputeSma(double[] close, double[] output, int period,
         Core.SmaCpuKernel.GridSummary summary, CancellationToken cancellation, bool inPlace, bool boundedPositive)
     {
-        var proof = new Core.SmaCpuKernel.Certificate(period);
-        bool certified = period == 1 || period > close.Length || summary.Certifies(period);
-        if (!certified && summary.CanRefine)
-        {
-            certified = true;
-            foreach (var value in close)
-            {
-                cancellation.ThrowIfCancellationRequested();
-                if (!proof.Include(value)) { certified = false; break; }
-            }
-        }
+        bool certified = CertifiesSma(close, period, summary, cancellation);
         if (inPlace)
         {
             Core.SmaCpuKernel.ProcessInPlace(output, period, certified, cancellation, boundedPositive);
@@ -158,6 +148,23 @@ internal static class ValuesBarExecution
             close, output, period, ref reader, ref consumer, cancellation);
         else Core.SmaCpuKernel.ProcessGuarded<double, Core.SmaCpuKernel.DoubleReader, Core.SmaCpuKernel.Identity>(
             close, output, period, ref reader, ref consumer, cancellation);
+        return certified;
+    }
+
+    internal static bool CertifiesSma(double[] close, int period,
+        Core.SmaCpuKernel.GridSummary summary, CancellationToken cancellation)
+    {
+        var proof = new Core.SmaCpuKernel.Certificate(period);
+        bool certified = period == 1 || period > close.Length || summary.Certifies(period);
+        if (!certified && summary.CanRefine)
+        {
+            certified = true;
+            foreach (var value in close)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                if (!proof.Include(value)) { certified = false; break; }
+            }
+        }
         return certified;
     }
 

@@ -102,6 +102,15 @@ internal static class SmaCpuKernel
     }
 
 #if !NETFRAMEWORK
+    // An in-place consumer may observe only the completed mean. Original input
+    // slots are reused, and warmup callbacks may run after complete windows.
+    internal interface IMeanConsumer { double Consume(double mean, int index); }
+    internal readonly struct MeanIdentity : IMeanConsumer
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double Consume(double mean, int index) => mean;
+    }
+
     // Certify the already-owned close column in SIMD batches. Floating-point
     // arithmetic is unchanged: these reductions operate only on IEEE encodings.
     internal static void Summarize(ReadOnlySpan<double> values, out GridSummary grid,
@@ -159,9 +168,24 @@ internal static class SmaCpuKernel
     internal static void ProcessInPlace(double[] values, int length, bool certified,
         CancellationToken cancellation, bool boundedPositive = false)
     {
+        var consumer = new MeanIdentity();
+        ProcessInPlace(values, length, certified, ref consumer, cancellation, boundedPositive);
+    }
+
+    internal static void ProcessInPlace<TConsumer>(double[] values, int length, bool certified,
+        ref TConsumer consumer, CancellationToken cancellation, bool boundedPositive = false)
+        where TConsumer : struct, IMeanConsumer
+    {
         cancellation.ThrowIfCancellationRequested();
-        if (length == 1) return;
-        if (length > values.Length) { Array.Clear(values); return; }
+        if (length == 1 || length > values.Length)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                values[i] = consumer.Consume(length == 1 ? values[i] : 0, i);
+            }
+            return;
+        }
         if (certified)
         {
             // Compact results overwrite only closes already evicted from the sum.
@@ -180,24 +204,29 @@ internal static class SmaCpuKernel
                 double mean = sum / length;
                 int expired = i - warmup;
                 sum -= values[expired];
-                values[expired] = mean;
+                values[expired] = consumer.Consume(mean, i);
             }
             values.AsSpan(0, values.Length - warmup).CopyTo(values.AsSpan(warmup));
-            values.AsSpan(0, warmup).Clear();
+            for (int i = 0; i < warmup; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                values[i] = consumer.Consume(0, i);
+            }
             cancellation.ThrowIfCancellationRequested();
             return;
         }
         if (boundedPositive)
         {
-            ProcessBoundedPositive(values, length, cancellation);
+            ProcessBoundedPositive(values, length, ref consumer, cancellation);
             return;
         }
         var pending = new double[length];
         var reader = new DoubleReader();
-        var consumer = new DelayedStore(values, pending);
-        ProcessGuarded<double, DoubleReader, DelayedStore>(values, Span<double>.Empty,
-            length, ref reader, ref consumer, cancellation);
-        consumer.Flush(cancellation);
+        var delayed = new DelayedStore<TConsumer>(values, pending, consumer);
+        ProcessGuarded<double, DoubleReader, DelayedStore<TConsumer>>(values, Span<double>.Empty,
+            length, ref reader, ref delayed, cancellation);
+        delayed.Flush(cancellation);
+        consumer = delayed.Consumer;
     }
 
     internal struct PositiveRangeSummary
@@ -228,7 +257,8 @@ internal static class SmaCpuKernel
     // operand: neither 1e-4 cancellation/rebuild trigger can fire. Exponent bounds
     // exclude overflow, subnormal means and outward-bound underflow. Unqualified
     // input always uses the original guarded path.
-    private static void ProcessBoundedPositive(double[] values, int length, CancellationToken cancellation)
+    private static void ProcessBoundedPositive<TConsumer>(double[] values, int length,
+        ref TConsumer consumer, CancellationToken cancellation) where TConsumer : struct, IMeanConsumer
     {
         double sum = 0;
         for (int i = 0; i < length; i++)
@@ -236,7 +266,7 @@ internal static class SmaCpuKernel
             cancellation.ThrowIfCancellationRequested();
             sum += values[i];
         }
-        double firstMean = sum / length;
+        double firstMean = consumer.Consume(sum / length, length - 1);
         // The first scheduled rebuild repeats precisely the additions above.
         // Retain that sum; all later rebuilds keep the original cadence/order.
         int untilRebuild = length;
@@ -248,7 +278,7 @@ internal static class SmaCpuKernel
             sum -= values[expired];
             // Only the expired close is overwritten. Rebuilds start one slot
             // later, so they continue to read original input without a ring.
-            values[expired] = sum / length;
+            values[expired] = consumer.Consume(sum / length, i);
             if (--untilRebuild == 0)
             {
                 sum = 0;
@@ -261,19 +291,25 @@ internal static class SmaCpuKernel
             }
         }
         values.AsSpan(0, values.Length - length).CopyTo(values.AsSpan(length));
-        values.AsSpan(0, length - 1).Clear();
+        for (int i = 0; i < length - 1; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = consumer.Consume(0, i);
+        }
         values[length - 1] = firstMean;
         cancellation.ThrowIfCancellationRequested();
     }
 
-    private struct DelayedStore(double[] values, double[] pending) : IConsumer
+    private struct DelayedStore<TConsumer>(double[] values, double[] pending, TConsumer consumer) : IConsumer
+        where TConsumer : struct, IMeanConsumer
     {
+        internal TConsumer Consumer = consumer;
         private int _slot;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Consume(double input, double mean, int index)
         {
             if (index >= pending.Length) values[index - pending.Length] = pending[_slot];
-            pending[_slot] = mean;
+            pending[_slot] = Consumer.Consume(mean, index);
             if (++_slot == pending.Length) _slot = 0;
             return mean;
         }

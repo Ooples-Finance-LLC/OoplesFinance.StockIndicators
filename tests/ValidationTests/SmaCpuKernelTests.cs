@@ -5,6 +5,40 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 public sealed class SmaCpuKernelTests
 {
+    private struct IndexedMeanConsumer(int[] visits) : SmaCpuKernel.IMeanConsumer
+    {
+        internal int Calls;
+        public double Consume(double mean, int index)
+        {
+            Calls++;
+            visits[index]++;
+            return mean + index + .25;
+        }
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public void InPlaceConsumersPreserveEveryIndexAndReturnUpdatedState(int mode)
+    {
+        foreach (int count in new[] { 0, 1, 19, 137 })
+        foreach (int period in new[] { 1, 3, 20, 4096 })
+        {
+            var input = Enumerable.Range(0, count).Select(i => mode == 0 ? (i % 17 - 8) / 16d
+                : mode == 1 ? .25 + i % 19 / 100d : (i % 17 - 8) / 10d).ToArray();
+            var expected = input.ToArray();
+            bool certified = mode == 0;
+            bool bounded = mode == 1;
+            SmaCpuKernel.ProcessInPlace(expected, period, certified, default, bounded);
+            var visits = new int[count];
+            var consumer = new IndexedMeanConsumer(visits);
+            SmaCpuKernel.ProcessInPlace(input, period, certified, ref consumer, default, bounded);
+            Assert.Equal(count, consumer.Calls);
+            Assert.All(visits, n => Assert.Equal(1, n));
+            for (int i = 0; i < count; i++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] + i + .25), BitConverter.DoubleToInt64Bits(input[i]));
+        }
+    }
+
     private struct Deviation : SmaCpuKernel.IConsumer
     {
         internal int Calls;
