@@ -6,6 +6,35 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactWeightedAccumulatorTests
 {
     [Fact]
+    public void CompactScaledRatiosDoNotAllocate()
+    {
+        // Cancel denominator powers of two before sizing the division workspace.
+        static double Run() => ExactMeanAccumulator.ScaledRatio(305235, 31920, 0);
+        for (var i = 0; i < 100; i++) Run();
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        double total = 0;
+        for (var i = 0; i < 1000; i++) total += Run();
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(9562.5, total);
+    }
+
+    [Fact]
+    public void ScaledRatiosMatchIndependentRationalsAtSignedIntegerBoundaries()
+    {
+        var boundary = System.Numerics.BigInteger.One << 63;
+        foreach (var numerator in new[] { -boundary - 1, -boundary, -boundary + 1, -1, 0, 1, boundary - 1, boundary, boundary + 1 })
+        foreach (var denominator in new[] { System.Numerics.BigInteger.One, 3, boundary - 1, boundary, boundary + 1 })
+        foreach (var power in new[] { -2149, -1075, -1074, -63, 0, 63, 1023, 2047 })
+        {
+            var expected = new ReferenceFraction(numerator) / new ReferenceFraction(denominator);
+            var scale = new ReferenceFraction(System.Numerics.BigInteger.One << Math.Abs(power));
+            expected = power < 0 ? expected / scale : expected * scale;
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected.ToDouble()),
+                BitConverter.DoubleToInt64Bits(ExactMeanAccumulator.ScaledRatio(numerator, denominator, power)));
+        }
+    }
+
+    [Fact]
     public void WideWeightedMeansRoundMidpointsToEven()
     {
         // Multiplication by this odd divisor forces a >64-bit significand,
