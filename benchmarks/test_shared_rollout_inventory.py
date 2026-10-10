@@ -75,7 +75,9 @@ class InventoryDiagnosticsTests(unittest.TestCase):
                            ('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)', 'Add'),
                            ('SharedPairInputBenchmarks.BuilderFull(Operation: "Correl", Count: 10000)', 'Correl'),
                            ('SharedPairInputBenchmarks.BuilderFull(Operation: "Beta", Count: 10000)', 'Beta'),
-                           ('SharedPriceProjectionBenchmarks.BuilderFull(Operation: "MedPrice", Count: 10000)', 'MedPrice')]:
+                           ('SharedPriceProjectionBenchmarks.BuilderFull(Operation: "MedPrice", Count: 10000)', 'MedPrice'),
+                           ('SharedGeneratedStateBenchmarks.BuilderFull(Operation: "MinMax", Count: 10000)', 'MinMax'),
+                           ('SharedGeneratedStateBenchmarks.BuilderFull(Operation: "TRange", Count: 10000)', 'TRange')]:
             with self.subTest(pair=pair):
                 result = inventory(self.root, [self.qualification(name)])
                 row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.' + pair)

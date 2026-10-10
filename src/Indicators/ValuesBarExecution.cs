@@ -15,7 +15,7 @@ internal static partial class ValuesBarExecution
     // These sealed states read finite bars, have no user callbacks, and publish
     // their own outputs without graph or built-in evaluator substitution.
     private static bool IsSharedState(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
-        && SharedCpuStates.Contains(indicator);
+        && (SharedCpuStates.Contains(indicator) || IsGeneratedState(indicator));
 
     internal static bool SupportsOwned(IReadOnlyList<IIndicator> indicators) =>
         indicators.Count == 1 && IsPointwise(indicators[0])
@@ -516,6 +516,7 @@ internal static partial class ValuesBarExecution
             {
                 Sma => null,
                 _ when pointwise => null,
+                _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),

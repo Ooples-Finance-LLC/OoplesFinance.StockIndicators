@@ -68,7 +68,7 @@ def inventory(root: Path, qualifications=()):
             count = re.search(r'Count: (\d+)', row['FullName'])
             if operation and any(name in row['FullName'] for name in
                                  ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.', 'SharedPairInputBenchmarks.',
-                                  'SharedPriceProjectionBenchmarks.')):
+                                  'SharedPriceProjectionBenchmarks.', 'SharedGeneratedStateBenchmarks.')):
                 api = operation[1]
             elif 'SharedDispersionBenchmarks.' in row['FullName']:
                 variance = re.search(r'Variance: (True|False)', row['FullName'])
