@@ -72,8 +72,7 @@ internal static partial class ValuesBarExecution
                 var bar = source[i];
                 latest = bar;
                 if (owned is not null) owned[i] = bar;
-                if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
-                    || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
+                if (!AllFieldsFinite(in bar))
                     IndicatorInputDomain.Finite.Validate(in bar);
                 if (close is not null) { close[i] = bar.Close; summary.Include(bar.Close); }
                 foreach (var node in active) node.Append(in bar, i);
@@ -569,10 +568,20 @@ internal static partial class ValuesBarExecution
             // Keep the existing Rickshaw batch's concrete Update call available to
             // the JIT; an interface call here loses its hot-loop specialization.
             if (_state is RickshawGridState grid) return FillScalar(source, new GridUpdate(grid), cancellation, owned);
+            if (_state is PriceExtremeState extreme) return FillScalar(source, new ExtremeUpdate(extreme), cancellation, owned);
+            if (_state is TrueRangeValueState range) return FillScalar(source, new TrueRangeUpdate(range), cancellation, owned);
             return FillScalar(source, new StateUpdate((IIndicatorState)_state!), cancellation, owned);
         }
         private interface IScalarUpdate { double Update(in Bar bar); }
         private readonly struct GridUpdate(RickshawGridState state) : IScalarUpdate
+        {
+            public double Update(in Bar bar) => state.Update(in bar);
+        }
+        private readonly struct ExtremeUpdate(PriceExtremeState state) : IScalarUpdate
+        {
+            public double Update(in Bar bar) => state.Update(in bar);
+        }
+        private readonly struct TrueRangeUpdate(TrueRangeValueState state) : IScalarUpdate
         {
             public double Update(in Bar bar) => state.Update(in bar);
         }
@@ -590,8 +599,7 @@ internal static partial class ValuesBarExecution
                 var bar = source[i];
                 latest = bar;
                 if (owned is not null) owned[i] = bar;
-                if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
-                    || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
+                if (!AllFieldsFinite(in bar))
                     IndicatorInputDomain.Finite.Validate(in bar);
                 if (Failure is not null) continue;
                 try { output[i] = state.Update(in bar); }
