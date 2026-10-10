@@ -5,6 +5,67 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class IndicatorValuesTests
 {
+    [Theory]
+    [InlineData(65535)] [InlineData(65536)] [InlineData(65537)] [InlineData(100001)]
+    public async Task LargeAsinPreservesExactBitsDomainsAndOwnedSnapshot(int count)
+    {
+        double[] edge = [-0d, 0d, -1d, 1d, double.Epsilon, -double.Epsilon,
+            Math.BitIncrement(1d), Math.BitDecrement(-1d), double.MaxValue, -double.MaxValue];
+        var close = Enumerable.Range(0, count).Select(i => i % 31 < edge.Length
+            ? edge[i % 31] : (i % 2049 - 1024) / 1024d).ToArray();
+        var bars = close.Select(x => new Bar(default, x, x, x, x, 1)).ToArray();
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        using var run = await Builder(bars, asin).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+        var last = bars[^1];
+        Array.Clear(bars);
+        Assert.Equal(last, run.Latest.Bar);
+        for (int i = 0; i < count; i++)
+        {
+            bool defined = close[i] is >= -1 and <= 1;
+            double expected = defined ? Math.Asin(close[i]) : 0;
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(run[asin.Value][i]));
+            Assert.Equal(defined ? 1d : 0d, run[asin.IsDefined][i]);
+        }
+    }
+
+    [Fact]
+    public async Task ConcurrentLargeAsinBuildsRemainIsolatedAndReleaseDispatchAfterFailure()
+    {
+        await Task.WhenAll(Enumerable.Range(0, 8).Select(k => Task.Run(async () =>
+        {
+            var bars = Data(65536 + k);
+            var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+            var builder = Builder(bars, asin).ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+            using var run = await builder.BuildAsync();
+            for (int i = 0; i < bars.Length; i++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(Math.Asin(bars[i].Close)), BitConverter.DoubleToInt64Bits(run[asin.Value][i]));
+            bars[^1] = new Bar(default, 0, 1, 0, .5, double.NaN);
+            await Assert.ThrowsAnyAsync<ArgumentException>(() => builder.BuildAsync());
+            Assert.Null(builder.LastExecution);
+            bars[^1] = new Bar(default, 0, 1, 0, .5, 1);
+            using var recovered = await builder.BuildAsync();
+            Assert.Equal(Math.Asin(.5), recovered[asin.Value][bars.Length - 1]);
+        })));
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(16384)] [InlineData(32768)] [InlineData(49152)]
+    public async Task ParallelAsinReportsFirstInvalidOwnedBarInSourceOrder(int first)
+    {
+        var bars = Data(65537);
+        bars[first] = new Bar(default, 0, double.NaN, 0, .5, 1);
+        bars[^1] = new Bar(default, 0, 1, 0, .5, double.PositiveInfinity);
+        var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[first]));
+        var builder = Builder(bars, new PriceCircularTransform(PriceCircularOperation.ArcSine))
+            .ConfigureHistory(IndicatorHistoryMode.LatestOnly);
+        var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+        Assert.NotNull(expected);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.GetType(), actual.GetType());
+        Assert.Equal(expected.Message, actual.Message);
+        Assert.Null(builder.LastExecution);
+    }
+
     public static IEnumerable<object[]> Cases => Enumerable.Range(0, 8)
         .SelectMany(kind => new[] { 0, 1, 2 }.Select(data => new object[] { kind, data }));
     private static IIndicator Indicator(int kind) => kind switch

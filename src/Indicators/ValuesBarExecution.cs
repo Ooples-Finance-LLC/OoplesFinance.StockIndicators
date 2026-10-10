@@ -11,6 +11,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 // the existing builder automatically. Input bars are consumed once into local values.
 internal static class ValuesBarExecution
 {
+    private static readonly object ParallelAsinGate = new();
     internal static bool Supports(IReadOnlyList<IIndicator> indicators) => indicators.All(i =>
         i.Source is null && i.Components.Count == 0 && i is Sma or JurikAdaptive or ScaledTrueRange
             or RollingPivotLevels or RetrospectiveFractals or RickshawManCandle or BullishShortBodyCandle
@@ -104,6 +105,15 @@ internal static class ValuesBarExecution
 
     private static Bar FillAsin(Bar[] source, double[][] output, CancellationToken cancellation)
     {
+        // The published tensor pool is shared and serializes dispatches. Let one
+        // large build use a bounded fan-out; competing builders continue inline.
+        if (source.Length >= 65_536 && Environment.ProcessorCount > 1
+            && AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism > 1
+            && Monitor.TryEnter(ParallelAsinGate))
+        {
+            try { return FillAsinParallel(source, output, cancellation); }
+            finally { Monitor.Exit(ParallelAsinGate); }
+        }
         var values = output[0];
         var flags = output[1];
         Bar latest = default;
@@ -118,6 +128,45 @@ internal static class ValuesBarExecution
             flags[i] = defined ? 1 : 0;
         }
         return latest;
+    }
+
+    private static Bar FillAsinParallel(Bar[] source, double[][] output, CancellationToken cancellation)
+    {
+        var values = output[0];
+        var flags = output[1];
+        int chunks = Math.Min(4, Environment.ProcessorCount);
+        var lastBars = new Bar[chunks];
+        var invalid = new bool[chunks];
+        AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(chunks, chunks, chunk =>
+        {
+            int start = (int)((long)values.Length * chunk / chunks);
+            int end = (int)((long)values.Length * (chunk + 1) / chunks);
+            Bar latest = default;
+            for (int i = start; i < end; i++)
+            {
+                // The pool can wrap worker exceptions under its ThreadPool mode.
+                // Quiesce all workers, then throw cancellation on the caller.
+                if (cancellation.IsCancellationRequested) return;
+                latest = source[i];
+                if (!AllFieldsFinite(in latest))
+                {
+                    invalid[chunk] = true;
+                    break;
+                }
+                double value = latest.Close;
+                bool defined = value is >= -1 and <= 1;
+                values[i] = defined ? Math.Asin(value) : 0;
+                flags[i] = defined ? 1 : 0;
+            }
+            lastBars[chunk] = latest;
+        });
+        cancellation.ThrowIfCancellationRequested();
+        // Each region saves its first invalid owned bar. Visiting regions in
+        // source order preserves the serial validator's first exception, without
+        // a second input traversal or any reread of mutable caller storage.
+        for (int chunk = 0; chunk < chunks; chunk++)
+            if (invalid[chunk]) IndicatorInputDomain.Finite.Validate(in lastBars[chunk]);
+        return lastBars[chunks - 1];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

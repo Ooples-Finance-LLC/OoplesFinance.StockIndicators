@@ -1,8 +1,7 @@
 {
   "run": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38068054236",
   "commit": "d35c474a0edce6385e6a7075549f9f85a00f61c9",
-  "complete": false,
-  "pendingFamily": "Trady.Candlestick.BullishShortDay",
+  "complete": true,
   "completed": [
     {
       "family": "QuanTAlib.Atr",
@@ -31,11 +30,16 @@
     {
       "family": "Trady.Indicator.SimpleMovingAverage",
       "rows": 36
+    },
+    {
+      "family": "Trady.Candlestick.BullishShortDay",
+      "rows": 12
     }
   ],
   "limitations": [
     "CI timings are Linux measurements; do not compare directly against local Windows timings.",
     "The completeness verifier does not assert a speed win.",
     "Raw native calls and builders have different validation, presence, and history contracts."
-  ]
+  ],
+  "totalRows": 84
 }
