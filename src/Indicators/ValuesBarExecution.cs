@@ -12,8 +12,19 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static readonly object ParallelBarGate = new();
+    // These sealed states read finite bars, have no user callbacks, and publish
+    // their own outputs without graph or built-in evaluator substitution.
+    private static bool IsSharedState(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
+        && indicator is FirstValueEma or NormalizedConvolution or WindowLinearRegression or WindowDispersion
+            or EndpointWeightedAverage or GaussianWeightedAverage or SineWeightedAverage
+            or StandardDeviationWithDetails or WindowDeviationBands or ClassicDeviationBands;
+
+    internal static bool SupportsOwned(IReadOnlyList<IIndicator> indicators) =>
+        indicators.Count == 1 && IsPointwise(indicators[0])
+        || indicators.Count > 0 && indicators.All(IsSharedState);
+
     internal static bool Supports(IReadOnlyList<IIndicator> indicators) =>
-        indicators.Count == 1 && IsPointwise(indicators[0]) || indicators.All(i =>
+        SupportsOwned(indicators) || indicators.All(i => IsSharedState(i) ||
         i.Source is null && i.Components.Count == 0 && i is Sma or JurikAdaptive or ScaledTrueRange
             or RollingPivotLevels or RetrospectiveFractals or RickshawManCandle or BullishShortBodyCandle
             or PriceCircularTransform { Operation: PriceCircularOperation.ArcSine });
@@ -24,8 +35,8 @@ internal static partial class ValuesBarExecution
         var nodes = new List<Node>();
         try
         {
-            if (history is not null && (indicators.Count != 1 || !IsPointwise(indicators[0])))
-                throw new InvalidOperationException("Owned values execution requires one independent pointwise indicator.");
+            if (history is not null && !SupportsOwned(indicators))
+                throw new InvalidOperationException("Unqualified owned values execution plan.");
             var owned = history is null ? null : GC.AllocateUninitializedArray<Bar>(source.Length);
             foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer)) nodes.Add(new Node(indicator, source.Length));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
@@ -49,12 +60,13 @@ internal static partial class ValuesBarExecution
             else if (nodes.Count == 1 && IsPointwise(nodes[0].Indicator))
                 latest = FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
-                latest = nodes[0].FillScalar(source, cancellation);
+                latest = nodes[0].FillScalar(source, cancellation, owned);
             else for (int i = 0; i < source.Length; i++)
             {
                 cancellation.ThrowIfCancellationRequested();
                 var bar = source[i];
                 latest = bar;
+                if (owned is not null) owned[i] = bar;
                 if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
                     || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
                     IndicatorInputDomain.Finite.Validate(in bar);
@@ -545,12 +557,12 @@ internal static partial class ValuesBarExecution
                 Failure = ExceptionDispatchInfo.Capture(error);
             }
         }
-        internal Bar FillScalar(Bar[] source, CancellationToken cancellation)
+        internal Bar FillScalar(Bar[] source, CancellationToken cancellation, Bar[]? owned)
         {
             // Keep the existing Rickshaw batch's concrete Update call available to
             // the JIT; an interface call here loses its hot-loop specialization.
-            if (_state is RickshawGridState grid) return FillScalar(source, new GridUpdate(grid), cancellation);
-            return FillScalar(source, new StateUpdate((IIndicatorState)_state!), cancellation);
+            if (_state is RickshawGridState grid) return FillScalar(source, new GridUpdate(grid), cancellation, owned);
+            return FillScalar(source, new StateUpdate((IIndicatorState)_state!), cancellation, owned);
         }
         private interface IScalarUpdate { double Update(in Bar bar); }
         private readonly struct GridUpdate(RickshawGridState state) : IScalarUpdate
@@ -561,7 +573,7 @@ internal static partial class ValuesBarExecution
         {
             public double Update(in Bar bar) => state.Update(in bar);
         }
-        private Bar FillScalar<T>(Bar[] source, T state, CancellationToken cancellation) where T : struct, IScalarUpdate
+        private Bar FillScalar<T>(Bar[] source, T state, CancellationToken cancellation, Bar[]? owned) where T : struct, IScalarUpdate
         {
             var output = Values[0];
             Bar latest = default;
@@ -570,6 +582,7 @@ internal static partial class ValuesBarExecution
                 cancellation.ThrowIfCancellationRequested();
                 var bar = source[i];
                 latest = bar;
+                if (owned is not null) owned[i] = bar;
                 if (!double.IsFinite(bar.Open) || !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
                     || !double.IsFinite(bar.Close) || !double.IsFinite(bar.Volume))
                     IndicatorInputDomain.Finite.Validate(in bar);

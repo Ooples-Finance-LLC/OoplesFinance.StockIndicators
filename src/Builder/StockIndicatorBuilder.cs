@@ -299,12 +299,11 @@ public sealed class StockIndicatorBuilder
         }
 #if !NETFRAMEWORK
         else if (_executionBackend != IndicatorExecutionBackend.Gpu && warmupCount == 0 && direct is not null
-            && CanUseDirectFusedExecution && _configuredIndicators.Count == 1
-            && Indicators.ValuesBarExecution.IsPointwise(_configuredIndicators[0]))
+            && CanUseDirectFusedExecution && Indicators.ValuesBarExecution.SupportsOwned(_configuredIndicators))
         {
             var result = Indicators.ValuesBarExecution.Execute(direct, _configuredIndicators, cancellationToken, bars);
             _configuredSource = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() => CreateOwnedBatch(bars)), bars);
-            LastExecution = new(IndicatorExecutionBackend.Cpu, null, "Fused CPU pointwise execution with owned history.");
+            LastExecution = new(IndicatorExecutionBackend.Cpu, null, "Fused CPU values execution with owned history.");
             return result;
         }
 #endif

@@ -4,12 +4,13 @@ using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
-// Isolates legacy-runtime overhead with identical state arithmetic and Full history.
+// Compares the shared execution routes with identical state arithmetic.
 // This is an internal before/after comparison, not native-competitor qualification.
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
 public class SharedStateRuntimeBenchmarks
 {
-    public static IEnumerable<string> Cases => new[] { "Ema", "Sum", "Convolution", "Regression", "Dispersion" }
+    public static IEnumerable<string> Cases => new[]
+        { "Ema", "Sum", "Convolution", "Regression", "Dispersion", "Endpoint", "Gaussian", "Sine", "DeviationDetails", "DeviationBands", "ClassicBands" }
         .Where(name => Environment.GetEnvironmentVariable("SHARED_STATE") is not { } selected
             || selected.Split(',').Contains(name, StringComparer.Ordinal));
     [ParamsSource(nameof(Cases))]
@@ -27,17 +28,22 @@ public class SharedStateRuntimeBenchmarks
         }).ToArray();
         var indicator = Create();
         using var direct = Build(indicator, false);
+        using var latest = Build(indicator, false, IndicatorHistoryMode.LatestOnly);
         using var legacy = Build(indicator, true);
         foreach (var output in indicator.Outputs)
+        {
             AsinFeasibilityBenchmarks.RequireSame(legacy[output].ToArray(), direct[output].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(legacy[output].ToArray(), latest[output].ToArray());
+        }
     }
 
     [Benchmark(Baseline = true)] public IIndicatorRun LegacyRuntime() => Build(Create(), true);
     [Benchmark] public IIndicatorRun StateGraph() => Build(Create(), false);
+    [Benchmark] public IIndicatorRun StateLatestOnly() => Build(Create(), false, IndicatorHistoryMode.LatestOnly);
 
-    private IIndicatorRun Build(IIndicator indicator, bool legacy)
+    private IIndicatorRun Build(IIndicator indicator, bool legacy, IndicatorHistoryMode history = IndicatorHistoryMode.Full)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator);
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (legacy) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }
@@ -49,6 +55,12 @@ public class SharedStateRuntimeBenchmarks
         "Convolution" => new NormalizedConvolution(new[] { 1d, 2d, 3d, 4d }),
         "Regression" => new WindowLinearRegression(20),
         "Dispersion" => new WindowDispersion(20),
+        "Endpoint" => new EndpointWeightedAverage(20),
+        "Gaussian" => new GaussianWeightedAverage(20),
+        "Sine" => new SineWeightedAverage(20),
+        "DeviationDetails" => new StandardDeviationWithDetails(20, 3),
+        "DeviationBands" => new WindowDeviationBands(20),
+        "ClassicBands" => new ClassicDeviationBands(20),
         _ => throw new ArgumentOutOfRangeException(nameof(Family))
     };
 }
