@@ -6,12 +6,17 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     internal static bool IsPointwise(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
-        && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform or CandleArithmetic;
+        && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform or CandleArithmetic
+            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice;
 
     private static Bar FillPointwise(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, Bar[]? owned) => indicator switch
     {
         CandleArithmetic arithmetic => FillArithmetic(source, output, arithmetic, cancellation, owned),
+        MedianPrice => FillPointwiseKernel(source, output, indicator, new MedianPriceKernel(), cancellation, owned),
+        TypicalPrice => FillPointwiseKernel(source, output, indicator, new TypicalPriceKernel(), cancellation, owned),
+        WeightedClose => FillPointwiseKernel(source, output, indicator, new WeightedCloseKernel(), cancellation, owned),
+        FullTypicalPrice => FillPointwiseKernel(source, output, indicator, new FullTypicalPriceKernel(), cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcSine } => FillAsin(source, output, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.Sine } => FillPointwise<Sine, AllReal>(source, output, indicator, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.Cosine } => FillPointwise<Cosine, AllReal>(source, output, indicator, cancellation, owned),
@@ -109,7 +114,8 @@ internal static partial class ValuesBarExecution
                 cancellation.ThrowIfCancellationRequested();
                 ValidatePointwiseInput(in region);
                 ValidatePointwiseOutput(indicator, in region);
-                output[1] = CompletePointwisePresence(source.Length, missing, region.HasUndefined, cancellation);
+                if (output.Length > 1)
+                    output[1] = CompletePointwisePresence(source.Length, missing, region.HasUndefined, cancellation);
                 return region.Last;
             }
             try
@@ -131,7 +137,8 @@ internal static partial class ValuesBarExecution
                 // that arithmetic overflow occurred in an earlier worker region.
                 foreach (var region in regions) ValidatePointwiseInput(in region);
                 foreach (var region in regions) ValidatePointwiseOutput(indicator, in region);
-                output[1] = CompletePointwisePresence(source.Length, missing, regions.Any(r => r.HasUndefined), cancellation);
+                if (output.Length > 1)
+                    output[1] = CompletePointwisePresence(source.Length, missing, regions.Any(r => r.HasUndefined), cancellation);
                 return regions[chunks - 1].Last;
             }
             finally { Monitor.Exit(ParallelBarGate); }
