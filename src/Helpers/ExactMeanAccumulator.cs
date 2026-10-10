@@ -192,23 +192,25 @@ internal struct ExactMeanAccumulator
         // Signed bit lengths include -2^63 but exclude +2^63. Keep already
         // compact moments out of AddLarge's byte-array normalization path.
         if (numerator.GetBitLength() <= 63 && denominator.GetBitLength() <= 63)
-        {
-            var smallNumerator = (long)numerator;
-            if (smallNumerator == 0) return 0;
-            var smallDenominator = (long)denominator;
-            var numeratorZeros = TrailingBinaryZeros(smallNumerator);
-            var denominatorZeros = TrailingBinaryZeros(smallDenominator);
-            var compact = new ExactMeanAccumulator
-            {
-                _small = smallNumerator >> numeratorZeros,
-                _scale = binaryExponent + 1074 + numeratorZeros - denominatorZeros
-            };
-            return compact.Mean(smallDenominator >> denominatorZeros);
-        }
+            return ScaledRatio((long)numerator, (long)denominator, binaryExponent);
 #endif
         var top = new ExactMeanAccumulator(); top.AddLarge(numerator, binaryExponent + 1074);
         var bottom = new ExactMeanAccumulator(); bottom.AddLarge(denominator, 1074);
         return top.Ratio(bottom);
+    }
+
+    internal static double ScaledRatio(long numerator, long denominator, int binaryExponent)
+    {
+        if (denominator <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
+        if (numerator == 0) return 0;
+        var numeratorZeros = TrailingBinaryZeros(numerator);
+        var denominatorZeros = TrailingBinaryZeros(denominator);
+        var compact = new ExactMeanAccumulator
+        {
+            _small = numerator >> numeratorZeros,
+            _scale = binaryExponent + 1074 + numeratorZeros - denominatorZeros
+        };
+        return compact.Mean(denominator >> denominatorZeros);
     }
 
     private void AddSmall(long value, int scale)
