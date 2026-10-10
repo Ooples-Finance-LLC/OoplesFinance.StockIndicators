@@ -19,7 +19,10 @@ def inventory(root: Path, qualifications=()):
             match = re.search(r'PairId: "([^"]+)"', row['FullName'])
             if not match or match[1] not in pairs:
                 raise ValueError(f'Unmapped benchmark: {path.name}: {row["FullName"]}')
-            count = int(re.search(r'Bars: (\d+)', row['FullName'])[1])
+            bars = re.search(r'Bars: (\d+)', row['FullName'])
+            if not bars:
+                raise ValueError(f'Missing Bars: {path.name}: {row["FullName"]}')
+            count = int(bars[1])
             key = (match[1], count, row['Method'])
             if key in measurements:
                 raise ValueError(f'Duplicate measurement: {key}')
@@ -33,6 +36,9 @@ def inventory(root: Path, qualifications=()):
     for pair_id, pair in sorted(pairs.items()):
         sizes = []
         for count in (1000, 10000):
+            for method in ('Ooples', 'Competitor'):
+                if (pair_id, count, method) not in measurements:
+                    raise ValueError(f'Missing measurement: {pair_id}, bars={count}, method={method}')
             ours = measurements[(pair_id, count, 'Ooples')]
             theirs = measurements[(pair_id, count, 'Competitor')]
             sizes.append(dict(bars=count, saved_ooples=ours, saved_competitor=theirs,
@@ -47,6 +53,8 @@ def inventory(root: Path, qualifications=()):
                  'TaLib.Candles.RickshawMan', 'TaLib.Functions.Asin', 'Trady.Candlestick.BullishShortDay',
                  'Trady.Indicator.SimpleMovingAverage', 'Skender.GetSma', 'TaLib.Functions.Sma', 'QuanTAlib.Sma')
     for pair_id in pilot_ids:
+        if pair_id not in indexed:
+            raise ValueError(f'Pilot ID missing from paired manifest: {pair_id}')
         indexed[pair_id]['qualification'] = 'prior-pilot-evidence'
         indexed[pair_id]['prior_evidence'] = 'results/eight-cpu-pilots'
     qualified_keys = set()
@@ -58,9 +66,20 @@ def inventory(root: Path, qualifications=()):
         for row in qualified['Benchmarks']:
             operation = re.search(r'Operation: "([^"]+)"', row['FullName'])
             count = re.search(r'Count: (\d+)', row['FullName'])
-            if not operation or not count:
+            if 'SharedPointwiseBenchmarks.' in row['FullName'] and operation:
+                api = operation[1]
+            elif 'SharedDispersionBenchmarks.' in row['FullName']:
+                variance = re.search(r'Variance: (True|False)', row['FullName'])
+                if not variance:
+                    raise ValueError(f'Unknown dispersion format: {row["FullName"]}')
+                api = 'Var' if variance[1] == 'True' else 'StdDev'
+            elif 'SharedRollingSumBenchmarks.' in row['FullName']:
+                api = 'Sum'
+            else:
                 raise ValueError(f'Unknown qualification format: {row["FullName"]}')
-            key = ('TaLib.Functions.' + operation[1], int(count[1]))
+            if not count:
+                raise ValueError(f'Missing count: {row["FullName"]}')
+            key = ('TaLib.Functions.' + api, int(count[1]))
             methods = cases.setdefault(key, {})
             if row['Method'] in methods:
                 raise ValueError(f'Duplicate qualification: {key}: {row["Method"]}')
@@ -71,6 +90,8 @@ def inventory(root: Path, qualifications=()):
             methods[row['Method']] = dict(mean_ns=mean, allocated_bytes=allocation,
                                          confidence_interval=row['Statistics']['ConfidenceInterval'])
         for (pair_id, count), methods in sorted(cases.items()):
+            if pair_id not in indexed:
+                raise ValueError(f'Unknown qualified workload: {pair_id}/{count}: {path}')
             if (pair_id, count) in qualified_keys:
                 raise ValueError(f'Duplicate qualified workload: {pair_id}/{count}')
             qualified_keys.add((pair_id, count))
@@ -79,7 +100,7 @@ def inventory(root: Path, qualifications=()):
                 raise ValueError(f'Incomplete qualification: {pair_id}/{count}')
             best = min(('NativeSingle', 'NativeParallel'), key=lambda name: methods[name]['mean_ns'])
             native_lower = min(methods[name]['confidence_interval']['Lower'] for name in ('NativeSingle', 'NativeParallel'))
-            result = dict(bars=count, evidence=path.name, methods=methods, fastest_measured_native=best,
+            result = dict(bars=count, evidence=path.as_posix(), methods=methods, fastest_measured_native=best,
                           full_mean_ratio=methods['BuilderFull']['mean_ns'] / methods[best]['mean_ns'],
                           latest_mean_ratio=methods['BuilderLatestOnly']['mean_ns'] / methods[best]['mean_ns'],
                           full_clear_win=methods['BuilderFull']['confidence_interval']['Upper'] < native_lower,

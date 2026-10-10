@@ -10,7 +10,8 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 public class SharedStateRuntimeBenchmarks
 {
     public static IEnumerable<string> Cases => new[] { "Ema", "Sum", "Convolution", "Regression", "Dispersion" }
-        .Where(name => Environment.GetEnvironmentVariable("SHARED_STATE") is not { } selected || selected == name);
+        .Where(name => Environment.GetEnvironmentVariable("SHARED_STATE") is not { } selected
+            || selected.Split(',').Contains(name, StringComparer.Ordinal));
     [ParamsSource(nameof(Cases))]
     public string Family { get; set; } = "";
     [Params(1_000, 10_000)] public int Count { get; set; }
