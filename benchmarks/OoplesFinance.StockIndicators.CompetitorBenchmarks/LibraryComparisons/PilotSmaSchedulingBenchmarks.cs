@@ -59,7 +59,7 @@ public class PilotSmaSchedulingBenchmarks
     public double[] NativeParallelOwned()
     {
         var output = new double[Count];
-        int chunks = Math.Min(4, Environment.ProcessorCount);
+        int chunks = Math.Min(8, Environment.ProcessorCount);
         int defined = Count - 19;
         CpuParallelSettings.LightweightParallel(chunks, chunks, chunk =>
         {

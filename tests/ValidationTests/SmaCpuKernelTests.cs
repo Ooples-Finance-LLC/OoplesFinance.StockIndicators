@@ -207,17 +207,17 @@ public sealed class SmaCpuKernelTests
         Assert.Equal(new[] { 1d, 2d, 3d }, input);
     }
 
-    public static IEnumerable<object[]> PositiveCases => new[] { 2, 3, 20, 127, 4096 }
+    public static IEnumerable<object[]> PositiveCases => new[] { 2, 3, 20, 127, 1000, 4096 }
         .SelectMany(period => new[] { -256, -1, 0, 255 }.Select(exponent => new object[] { period, exponent }));
 
     [Theory, MemberData(nameof(PositiveCases))]
     public void ParallelPositivePreservesGuardedBitsAtPartitionBoundaries(int period, int exponent)
     {
-        foreach (int participants in new[] { 1, 2, 3, 4 })
+        foreach (int participants in new[] { 1, 2, 3, 4, 6, 8 })
         foreach (int tail in new[] { -1, 0, 1 })
         {
             var random = new Random(793);
-            var input = Enumerable.Range(0, period * 9 + tail)
+            var input = Enumerable.Range(0, period * 10 + tail)
                 .Select(_ => Math.ScaleB(1 + random.NextDouble(), exponent)).ToArray();
             var expected = new double[input.Length];
             var reader = new SmaCpuKernel.DoubleReader();
@@ -247,7 +247,7 @@ public sealed class SmaCpuKernelTests
     [InlineData(2)] [InlineData(20)] [InlineData(127)] [InlineData(4096)]
     public void ParallelCertifiedSignedGridPreservesExactWindows(int period)
     {
-        foreach (int participants in new[] { 1, 2, 3, 4 })
+        foreach (int participants in new[] { 1, 2, 3, 4, 6, 8 })
         {
             var input = Enumerable.Range(0, period * 9 + 1).Select(i => (i % 31 - 15) / 16d).ToArray();
             input[0] = -0d;

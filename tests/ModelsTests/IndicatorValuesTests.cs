@@ -5,6 +5,112 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class IndicatorValuesTests
 {
+    [Fact]
+    public async Task ConcurrentSmaBuildsCannotChangePreviouslyPublishedSeriesThroughScratchReuse()
+    {
+        var completed = await Task.WhenAll(Enumerable.Range(0, 8).Select(k => Task.Run(async () =>
+        {
+            var bars = Enumerable.Range(0, 65537 + k)
+                .Select(i => new Bar(default, 1, 1, 1, 100 + k + i % 19 / 100d, 1)).ToArray();
+            var sma = new Sma(k % 2 == 0 ? 20 : 1000);
+            var expected = new double[bars.Length];
+            OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
+                bars.Select(b => b.Close).ToArray(), expected, sma.Length);
+            var run = await Builder(bars, sma).ConfigureHistory(k % 2 == 0
+                ? IndicatorHistoryMode.Full : IndicatorHistoryMode.LatestOnly).BuildAsync();
+            Array.Clear(bars);
+            return (run, sma, expected);
+        })));
+        try
+        {
+            // Later dispatches reuse the same pool before any retained result is
+            // checked. Disposal must not return a published column to that pool.
+            foreach (var result in completed) result.run.Dispose();
+            for (int i = 0; i < 3; i++)
+            {
+                using var later = await Builder(Data(100000, 1), new Sma(20))
+                    .ConfigureHistory(IndicatorHistoryMode.Full).BuildAsync();
+            }
+            foreach (var result in completed) Bits(result.expected, result.run[result.sma].ToArray());
+        }
+        finally { foreach (var result in completed) result.run.Dispose(); }
+    }
+
+    [Theory]
+    [InlineData(65535, 0)] [InlineData(65536, 0)] [InlineData(65537, 0)]
+    [InlineData(65537, 1)] [InlineData(65537, 2)]
+    public async Task FullParallelSmaMatchesGuardedValuesAndOwnsReplay(int count, int mode)
+    {
+        var bars = Data(count, mode);
+        var original = bars.ToArray();
+        var sma = new Sma(20);
+        var expected = new double[count];
+        OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
+            bars.Select(b => b.Close).ToArray(), expected, 20);
+        var run = await Builder(bars, sma).BuildAsync();
+        Bits(expected, run[sma].ToArray());
+        Array.Clear(bars);
+        int index = 0;
+        IBarSnapshot? retained = null;
+        await foreach (var snapshot in run)
+        {
+            Assert.Equal(original[index], snapshot.Bar);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected[index]), BitConverter.DoubleToInt64Bits(snapshot[sma]));
+            retained = snapshot;
+            index++;
+        }
+        Assert.Equal(count, index);
+        run.Dispose();
+        Assert.Equal(original[^1], retained!.Bar);
+        Bits(expected, run[sma].ToArray());
+    }
+
+    [Theory]
+    [InlineData(8191)] [InlineData(8192)] [InlineData(8193)] [InlineData(65537)]
+    public async Task FullParallelAsinOwnsReplayAndPreservesDomainBits(int count)
+    {
+        double[] domain = [-0d, 0d, -1d, 1d, double.Epsilon, -double.Epsilon,
+            Math.BitIncrement(1d), Math.BitDecrement(-1d), .17d];
+        var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 1, 1, 1, domain[i % domain.Length], 1)).ToArray();
+        var original = bars.ToArray();
+        var asin = new PriceCircularTransform(PriceCircularOperation.ArcSine);
+        using var run = await Builder(bars, asin).BuildAsync();
+        Array.Clear(bars);
+        int index = 0;
+        await foreach (var snapshot in run)
+        {
+            var close = original[index].Close;
+            bool defined = close is >= -1 and <= 1;
+            Assert.Equal(original[index], snapshot.Bar);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(defined ? Math.Asin(close) : 0),
+                BitConverter.DoubleToInt64Bits(snapshot[asin.Value]));
+            Assert.Equal(defined ? 1d : 0d, snapshot[asin.IsDefined]);
+            index++;
+        }
+        Assert.Equal(count, index);
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task FullParallelPilotsPreserveValidationOrderAndRecover(bool sma)
+    {
+        var bars = Data(65537);
+        var original = bars[8192];
+        bars[8192] = new Bar(default, 0, double.NaN, 0, .5, 1);
+        var builder = Builder(bars, sma ? new Sma(20) : new PriceCircularTransform(PriceCircularOperation.ArcSine));
+        var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[8192]));
+        bars[^1] = new Bar(default, 0, 1, 0, .5, double.NaN);
+        var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+        Assert.NotNull(actual);
+        Assert.Equal(expected!.GetType(), actual.GetType());
+        Assert.Equal(expected.Message, actual.Message);
+        Assert.Null(builder.LastExecution);
+        bars[8192] = original;
+        bars[^1] = original;
+        using var recovered = await builder.BuildAsync();
+        Assert.Equal(bars[^1], recovered.Latest.Bar);
+    }
+
     [Theory]
     [InlineData(8191)] [InlineData(8192)] [InlineData(8193)]
     [InlineData(65535)] [InlineData(65536)] [InlineData(65537)] [InlineData(100001)]
@@ -73,7 +179,7 @@ public sealed class IndicatorValuesTests
     public async Task LargeSmaPreservesFullHistoryBitsAcrossAllArithmeticRoutes(int mode)
     {
         var bars = Data(65537, mode);
-        foreach (int period in new[] { 1, 20, int.MaxValue })
+        foreach (int period in new[] { 1, 20, 1000, int.MaxValue })
         {
             var sma = new Sma(period);
             using var expected = await Builder(bars, sma).BuildAsync();

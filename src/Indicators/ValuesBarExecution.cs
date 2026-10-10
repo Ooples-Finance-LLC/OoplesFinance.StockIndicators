@@ -35,17 +35,7 @@ internal static class ValuesBarExecution
             if (singleSma)
             {
                 int period = Math.Max(1, ((Sma)nodes[0].Indicator).Length);
-                if (CanParallelize(source.Length) && Monitor.TryEnter(ParallelBarGate))
-                {
-                    try { latest = FillSmaParallel(source, close!, period, cancellation, out summary, out positiveRange); }
-                    finally { Monitor.Exit(ParallelBarGate); }
-                }
-                else
-                {
-                    latest = FillSma(source, close!, cancellation);
-                    if (period > 1 && period <= close!.Length)
-                        Core.SmaCpuKernel.Summarize(close, out summary, out positiveRange, cancellation);
-                }
+                latest = FillSmaColumn(source, close!, period, cancellation, out summary, out positiveRange);
             }
             else if (nodes.Count == 1 && nodes[0].Indicator is PriceCircularTransform)
                 latest = FillAsin(source, nodes[0].Values, cancellation);
@@ -95,7 +85,23 @@ internal static class ValuesBarExecution
         finally { foreach (var node in nodes) node.Dispose(); }
     }
 
-    private static Bar FillSma(Bar[] source, double[] close, CancellationToken cancellation)
+    internal static Bar FillSmaColumn(Bar[] source, double[] close, int period, CancellationToken cancellation,
+        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive, Bar[]? owned = null)
+    {
+        if (CanParallelize(source.Length) && Monitor.TryEnter(ParallelBarGate))
+        {
+            try { return FillSmaParallel(source, close, period, cancellation, out grid, out positive, owned); }
+            finally { Monitor.Exit(ParallelBarGate); }
+        }
+        var latest = FillSma(source, close, cancellation, owned);
+        grid = new Core.SmaCpuKernel.GridSummary();
+        positive = new Core.SmaCpuKernel.PositiveRangeSummary();
+        if (period > 1 && period <= close.Length)
+            Core.SmaCpuKernel.Summarize(close, out grid, out positive, cancellation);
+        return latest;
+    }
+
+    private static Bar FillSma(Bar[] source, double[] close, CancellationToken cancellation, Bar[]? owned)
     {
         Bar latest = default;
         for (int i = 0; i < source.Length; i++)
@@ -107,17 +113,18 @@ internal static class ValuesBarExecution
             if (!AllFieldsFinite(in latest))
                 IndicatorInputDomain.Finite.Validate(in latest);
             close[i] = latest.Close;
+            if (owned is not null) owned[i] = latest;
         }
         return latest;
     }
 
-    private static Bar FillAsin(Bar[] source, double[][] output, CancellationToken cancellation)
+    internal static Bar FillAsin(Bar[] source, double[][] output, CancellationToken cancellation, Bar[]? owned = null)
     {
         // The published tensor pool is shared and serializes dispatches. Let one
         // large build use a bounded fan-out; competing builders continue inline.
         if (CanParallelize(source.Length, 8192) && Monitor.TryEnter(ParallelBarGate))
         {
-            try { return FillAsinParallel(source, output, cancellation); }
+            try { return FillAsinParallel(source, output, cancellation, owned); }
             finally { Monitor.Exit(ParallelBarGate); }
         }
         var values = output[0];
@@ -132,12 +139,16 @@ internal static class ValuesBarExecution
             bool defined = latest.Close is >= -1 and <= 1;
             values[i] = defined ? Math.Asin(latest.Close) : 0;
             flags[i] = defined ? 1 : 0;
+            if (owned is not null) owned[i] = latest;
         }
         return latest;
     }
 
     private static bool CanParallelize(int count, int minimum = 65_536) => count >= minimum && Environment.ProcessorCount > 1
         && AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism > 1;
+
+    private static int WorkerCount(int maximum = 8) => Math.Max(1, Math.Min(maximum, Math.Min(Environment.ProcessorCount,
+        AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism)));
 
     private struct SmaRegion
     {
@@ -148,9 +159,11 @@ internal static class ValuesBarExecution
     }
 
     private static Bar FillSmaParallel(Bar[] source, double[] close, int period, CancellationToken cancellation,
-        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive)
+        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive, Bar[]? owned)
     {
-        int chunks = Math.Min(4, Environment.ProcessorCount);
+        // Full history also writes the wide bar column; its measured crossover
+        // favors four workers, while the close-only path benefits from eight.
+        int chunks = WorkerCount(owned is null ? 8 : 4);
         var regions = new SmaRegion[chunks];
         AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(chunks, chunks, chunk =>
         {
@@ -170,6 +183,7 @@ internal static class ValuesBarExecution
                     return;
                 }
                 output[i] = latest.Close;
+                if (owned is not null) owned[start + i] = latest;
             }
             regions[chunk].Last = latest;
             try
@@ -198,11 +212,11 @@ internal static class ValuesBarExecution
         return regions[chunks - 1].Last;
     }
 
-    private static Bar FillAsinParallel(Bar[] source, double[][] output, CancellationToken cancellation)
+    private static Bar FillAsinParallel(Bar[] source, double[][] output, CancellationToken cancellation, Bar[]? owned)
     {
         var values = output[0];
         var flags = output[1];
-        int chunks = Math.Min(4, Environment.ProcessorCount);
+        int chunks = WorkerCount();
         var lastBars = new Bar[chunks];
         var invalid = new bool[chunks];
         AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(chunks, chunks, chunk =>
@@ -228,6 +242,7 @@ internal static class ValuesBarExecution
                 bool defined = value is >= -1 and <= 1;
                 result[i] = defined ? Math.Asin(value) : 0;
                 presence[i] = defined ? 1 : 0;
+                if (owned is not null) owned[start + i] = latest;
             }
             lastBars[chunk] = latest;
         });
@@ -254,15 +269,20 @@ internal static class ValuesBarExecution
     }
 
     internal static bool ComputeSma(double[] close, double[] output, int period,
-        Core.SmaCpuKernel.GridSummary summary, CancellationToken cancellation, bool inPlace, bool boundedPositive)
+        Core.SmaCpuKernel.GridSummary summary, CancellationToken cancellation, bool inPlace, bool boundedPositive,
+        int maxWorkers = 8)
     {
         bool certified = CertifiesSma(close, period, summary, cancellation);
         if (inPlace)
         {
-            int participants = Math.Min(4, Environment.ProcessorCount);
-            // Bound temporary edge storage to at most one eighth of the output.
+            int participants = WorkerCount(maxWorkers);
+            // Reduce fan-out for long periods instead of losing an existing
+            // parallel route when the normal worker cap increases.
+            if (period is >= 2 and <= 4096)
+                participants = Math.Min(participants, Math.Max(1, output.Length / (16 * period)));
+            // Bound edge storage to at most one sixteenth of the output.
             if ((boundedPositive || certified) && period is >= 2 and <= 4096 && CanParallelize(output.Length)
-                && period <= output.Length / (16 * participants)
+                && participants > 1
                 && Monitor.TryEnter(ParallelBarGate))
             {
                 try { Core.SmaCpuKernel.ProcessRebasedParallel(output, period, participants, cancellation); }

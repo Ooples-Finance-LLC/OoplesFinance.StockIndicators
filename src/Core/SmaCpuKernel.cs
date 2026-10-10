@@ -323,9 +323,9 @@ internal static class SmaCpuKernel
 
     // Requires the bounded-positive or period grid proof. Split at rebuilds,
     // preserving the scalar guarded loop's exact sum, eviction and rebuild order.
-    // Copy O(participants * period) boundary inputs before any compact stores;
-    // defer border results until all workers finish, so neighboring chunks never
-    // overwrite each other's live inputs.
+    // Capture preceding windows before any writes. Worker-local pooled scratch
+    // retains original closes while results go directly to final positions.
+    // Only scratch is pooled: published values always retain owned storage.
     internal static void ProcessRebasedParallel(double[] values, int length,
         int participants, CancellationToken cancellation)
     {
@@ -334,44 +334,48 @@ internal static class SmaCpuKernel
             throw new ArgumentOutOfRangeException(nameof(participants));
         cancellation.ThrowIfCancellationRequested();
         int intervals = (values.Length - length) / length;
-        var edges = new double[2 * participants * length];
+        var edges = new double[participants * length];
         int Begin(int chunk) => length + (int)((long)intervals * chunk / participants) * length;
         double firstSum = 0;
         for (int i = 0; i < length; i++) firstSum += values[i];
         double firstMean = firstSum / length;
+        int scratchLength = 0;
         for (int chunk = 0; chunk < participants; chunk++)
+        {
             values.AsSpan(Begin(chunk) - length, length).CopyTo(edges.AsSpan(chunk * length, length));
-        AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(participants, participants, chunk =>
+            int end = chunk == participants - 1 ? values.Length : Begin(chunk + 1);
+            scratchLength = Math.Max(scratchLength, end - Begin(chunk) + length);
+        }
+        AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(participants, participants,
+            () => System.Buffers.ArrayPool<double>.Shared.Rent(scratchLength), (chunk, scratch) =>
         {
             int start = Begin(chunk);
             int end = chunk == participants - 1 ? values.Length : Begin(chunk + 1);
-            int edge = chunk * length;
-            int pending = participants * length + edge;
+            var input = scratch.AsSpan(0, end - start + length);
+            edges.AsSpan(chunk * length, length).CopyTo(input);
+            values.AsSpan(start, end - start).CopyTo(input.Slice(length));
+            var output = values.AsSpan(start, end - start);
             double sum = 0;
-            for (int j = 0; j < length; j++) sum += edges[edge + j];
+            for (int j = 0; j < length; j++) sum += input[j];
             int untilRebuild = length;
-            for (int i = start; i < end; i++)
+            for (int i = length; i < input.Length; i++)
             {
                 if (cancellation.IsCancellationRequested) return;
-                sum += values[i];
-                int expired = i - length;
-                bool border = expired < start;
-                sum -= border ? edges[edge + i - start] : values[expired];
-                double mean = sum / length;
-                if (border) edges[pending + i - start] = mean;
-                else values[expired] = mean;
-                if (--untilRebuild == 0 && i + 1 < end)
+                sum += input[i];
+                sum -= input[i - length];
+                output[i - length] = sum / length;
+                if (--untilRebuild == 0)
                 {
-                    sum = 0;
-                    for (int j = i - length + 1; j <= i; j++) sum += values[j];
+                    if (i + 1 < input.Length)
+                    {
+                        sum = 0;
+                        for (int j = i - length + 1; j <= i; j++) sum += input[j];
+                    }
                     untilRebuild = length;
                 }
             }
-        });
+        }, scratch => System.Buffers.ArrayPool<double>.Shared.Return(scratch));
         cancellation.ThrowIfCancellationRequested();
-        for (int chunk = 0; chunk < participants; chunk++)
-            edges.AsSpan((participants + chunk) * length, length).CopyTo(values.AsSpan(Begin(chunk) - length, length));
-        values.AsSpan(0, values.Length - length).CopyTo(values.AsSpan(length));
         values.AsSpan(0, length - 1).Clear();
         values[length - 1] = firstMean;
         cancellation.ThrowIfCancellationRequested();

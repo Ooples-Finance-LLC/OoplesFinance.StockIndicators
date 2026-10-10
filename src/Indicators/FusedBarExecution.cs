@@ -276,6 +276,16 @@ internal sealed class FusedBarExecution
         {
             cancellation.ThrowIfCancellationRequested();
             var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
+            if (AsinValues is null && source.Length >= 65_536)
+            {
+                LatestBar = ValuesBarExecution.FillSmaColumn(source, SmaValues!, SmaLength, cancellation,
+                    out var grid, out var positive, owned);
+                UsedSmaFallback = !ValuesBarExecution.CertifiesSma(SmaValues!, SmaLength, grid, cancellation);
+                ValuesBarExecution.ComputeSma(SmaValues!, SmaValues!, SmaLength, grid, cancellation,
+                    inPlace: true, boundedPositive: positive.Certifies(SmaLength), maxWorkers: 4);
+                history.TakeOwnedArray(owned);
+                return;
+            }
             var summary = new Core.SmaCpuKernel.GridSummary();
             var validator = new CloseReader(cancellation);
             bool needProof = SmaLength > 1 && SmaLength <= source.Length;
@@ -304,6 +314,14 @@ internal sealed class FusedBarExecution
         }
         else
         {
+            if (source.Length >= 8192)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
+                LatestBar = ValuesBarExecution.FillAsin(source, AsinValues!, cancellation, owned);
+                history.TakeOwnedArray(owned);
+                return;
+            }
             var asin = new AsinKernel(AsinValues!);
             Drain(source, history, ref asin, cancellation);
         }

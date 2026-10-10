@@ -55,7 +55,7 @@ public class PilotAsinSchedulingBenchmarks
     public double[] NativeParallelOwned()
     {
         var output = new double[Count];
-        int chunks = Math.Min(4, Environment.ProcessorCount);
+        int chunks = Math.Min(8, Environment.ProcessorCount);
         CpuParallelSettings.LightweightParallel(chunks, chunks, chunk =>
         {
             int start = (int)((long)Count * chunk / chunks);
