@@ -9,19 +9,24 @@ namespace OoplesFinance.StockIndicators.Indicators;
 // Internal facade plan: no public field masks, array counts or kernel selection.
 // Only sealed, independently qualified states enter this route. Other graphs use
 // the existing builder automatically. Input bars are consumed once into local values.
-internal static class ValuesBarExecution
+internal static partial class ValuesBarExecution
 {
     private static readonly object ParallelBarGate = new();
-    internal static bool Supports(IReadOnlyList<IIndicator> indicators) => indicators.All(i =>
+    internal static bool Supports(IReadOnlyList<IIndicator> indicators) =>
+        indicators.Count == 1 && IsPointwise(indicators[0]) || indicators.All(i =>
         i.Source is null && i.Components.Count == 0 && i is Sma or JurikAdaptive or ScaledTrueRange
             or RollingPivotLevels or RetrospectiveFractals or RickshawManCandle or BullishShortBodyCandle
             or PriceCircularTransform { Operation: PriceCircularOperation.ArcSine });
 
-    internal static IIndicatorRun Execute(Bar[] source, IReadOnlyList<IIndicator> indicators, CancellationToken cancellation)
+    internal static IIndicatorRun Execute(Bar[] source, IReadOnlyList<IIndicator> indicators, CancellationToken cancellation,
+        OwnedBarHistory? history = null)
     {
         var nodes = new List<Node>();
         try
         {
+            if (history is not null && (indicators.Count != 1 || !IsPointwise(indicators[0])))
+                throw new InvalidOperationException("Owned values execution requires one independent pointwise indicator.");
+            var owned = history is null ? null : GC.AllocateUninitializedArray<Bar>(source.Length);
             foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer)) nodes.Add(new Node(indicator, source.Length));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
@@ -41,8 +46,8 @@ internal static class ValuesBarExecution
                 if (!fusedSma)
                     latest = FillSmaColumn(source, close!, period, cancellation, out summary, out positiveRange);
             }
-            else if (nodes.Count == 1 && nodes[0].Indicator is PriceCircularTransform)
-                latest = FillAsin(source, nodes[0].Values, cancellation);
+            else if (nodes.Count == 1 && IsPointwise(nodes[0].Indicator))
+                latest = FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation);
             else for (int i = 0; i < source.Length; i++)
@@ -61,7 +66,7 @@ internal static class ValuesBarExecution
             {
                 cancellation.ThrowIfCancellationRequested();
                 node.Failure?.Throw();
-                bool finiteByConstruction = node.Indicator is PriceCircularTransform;
+                bool finiteByConstruction = IsPointwise(node.Indicator);
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
                         : ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
@@ -82,6 +87,11 @@ internal static class ValuesBarExecution
             }
             int warmup = 0;
             foreach (var node in nodes) warmup = Math.Max(warmup, node.Indicator.WarmupBars);
+            if (history is not null)
+            {
+                history.TakeOwnedArray(owned!);
+                return new IndicatorRun(null, published, history, 0, warmup);
+            }
             IBarSnapshot? snapshot = source.Length == 0 ? null
                 : new BarSnapshot(latest, source.Length - 1, published,
                     source.Length >= warmup && published.Values.All(v => !double.IsNaN(v[source.Length - 1])));
@@ -479,11 +489,15 @@ internal static class ValuesBarExecution
         internal Node(IIndicator indicator, int count)
         {
             Indicator = indicator;
-            Values = Enumerable.Range(0, indicator.Outputs.Count).Select(_ => indicator is Sma or PriceCircularTransform ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
+            Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
+                slot == 1 && IsPointwise(indicator) && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine }
+                    ? Array.Empty<double>()
+                    : indicator is Sma || IsPointwise(indicator) ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
             _scratch = new double[indicator.Outputs.Count];
             _state = indicator switch
             {
-                Sma or PriceCircularTransform => null,
+                Sma => null,
+                _ when IsPointwise(indicator) => null,
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),

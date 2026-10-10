@@ -1,0 +1,22 @@
+{
+  "parent": "eb097ee0",
+  "scope": "14 pointwise APIs beyond Asin; CPU only. Full remains default; required GPU continues to reject these new operations.",
+  "tests": {
+    "focused": 171,
+    "scalar_pointwise": 40
+  },
+  "final_benchmark_rows": 112,
+  "before_presence_rows": 112,
+  "fixture": "Random valid-domain closes in [0.125,0.875), 10000 and 100000 bars; 8-worker budget; Full and LatestOnly builders.",
+  "native": "TALib.NETCore 0.5.0 serial public functions and our AiDotNet parallel wrapper. Final native arrays are uninitialized, like ours; before-presence native arrays were zero-initialized.",
+  "result": "No statistically clear win over the fastest tested native arm at either size. Warm all-defined LatestOnly allocation falls from about 1567 KiB to about 786 KiB at 100k.",
+  "ownership": "Read-only all-one presence arrays share one exact-length cache entry, capped at 8 MiB retained. Cache replacement never mutates prior arrays. Undefined-domain outputs materialize owned double presence arrays before BuildAsync returns; pooled bitmaps never escape.",
+  "limits": [
+    "Warm benchmark excludes initial presence-cache allocation; mixed sizes can miss the single-entry cache.",
+    "Domain bitmaps retain pooled capacity; at 100k this is about 16 KiB.",
+    "Full retains all original bars and still trails native values-only output.",
+    "Serial and up-to-eight-worker native routes were tested; no blanket fastest-native or GPU win is claimed.",
+    "The remaining shared catalog is tracked separately; historical normalized-adapter evidence is not promoted to current native qualification."
+  ],
+  "tensors_source_review": "Double SqrtOperator and FloorOperator vector overloads currently unpack lanes and call scalar Math methods; changing to those APIs alone would not provide a faster SIMD kernel."
+}
