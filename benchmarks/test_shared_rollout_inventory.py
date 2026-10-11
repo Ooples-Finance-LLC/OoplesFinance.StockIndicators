@@ -315,6 +315,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         row = next(r for r in result['pairs'] if r['pair_id'] == api)
         self.assertEqual(4, len(row['current'][0]['methods']))
 
+    def test_trady_bands_qualification_uses_explicit_native_apis(self):
+        self.write()
+        for api in ('Trady.Indicator.BollingerBands', 'Trady.Indicator.BollingerBandWidth'):
+            path = self.qualification(f'SharedTradyBandsBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == api)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
     def test_qualification_paths_use_one_benchmark_root(self):
         self.write()
         path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')
