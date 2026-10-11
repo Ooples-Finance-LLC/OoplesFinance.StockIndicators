@@ -195,6 +195,74 @@ public sealed class SharedBoundedWindowTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
+    [Theory]
+    [InlineData(1)] [InlineData(3)] [InlineData(20)] [InlineData(4096)] [InlineData(4097)] [InlineData(int.MaxValue)]
+    public async Task MixedBoundedWindowsShareCaptureAndPreserveEachStartupAndPeriod(int period)
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            double[] prices = [-0d, 0d, 1, -1, .5, -.5, 1, 1];
+            int count = period == int.MaxValue ? 65 : 8193;
+            var bars = Enumerable.Range(0, count).Select(i => new Bar(default, prices[i % 8],
+                prices[(i + 1) % 8], prices[(i + 3) % 8], prices[(i + 5) % 8], 1)).ToArray();
+            IIndicator[] indicators = [new LowestLow(period), new HighestHigh(3), new Wma(period),
+                new WilliamsR(7), new RollingPriceSum(period), new EngulfingPattern()];
+            foreach (int workers in new[] { 1, 2, 8 })
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                await CompareRoutes(bars, indicators);
+                await CompareRoutes(bars, indicators.Reverse().ToArray());
+            }
+            foreach (int size in new[] { 0, 1, 2, 3, 7 })
+                await CompareRoutes(bars.Take(size).ToArray(), indicators);
+            await CompareRoutes(bars, [indicators[0], indicators[0]]);
+            var builder = Build(bars, indicators);
+            using var saved = await builder.BuildAsync();
+            var expected = indicators.Select(i => saved[i].ToArray()).ToArray();
+            var original = bars.ToArray();
+            Array.Clear(bars);
+            using var later = await builder.BuildAsync();
+            for (int i = 0; i < indicators.Length; i++) Assert.Equal(expected[i], saved[indicators[i]].ToArray());
+            int position = 0;
+            await foreach (var snapshot in saved) Assert.Equal(original[position++], snapshot.Bar);
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public async Task MixedBoundedFailuresRetainInputThenIndicatorThenIndexOrdering()
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Enumerable.Repeat(new Bar(default, 0, 1, 0, .5, 1), 8193).ToArray();
+            var sum = new RollingPriceSum(2);
+            var range = new WilliamsR(1);
+            // Williams overflows first in time; sum wins when it is the first
+            // configured output, even though its overflow is in a later worker.
+            bars[0] = new Bar(default, 0, double.Epsilon, 0, 1, 1);
+            bars[2047] = bars[2048] = new Bar(default, 0, double.MaxValue, 0, double.MaxValue, 1);
+            await CompareRoutes(bars, [sum, range]);
+            await CompareRoutes(bars, [range, sum]);
+            foreach (int index in new[] { 1022, 1023, 1024, 8192 })
+            {
+                var original = bars[index];
+                bars[index] = new Bar(default, 0, 1, 0, 0, double.NaN);
+                await CompareRoutes(bars, [sum, range]);
+                bars[index] = original;
+            }
+            using var cancel = new CancellationTokenSource(); cancel.Cancel();
+            var builder = Build(bars, [sum, range]);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
+            Assert.Null(builder.LastExecution);
+            await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
+            Assert.Null(builder.LastExecution);
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
     private static async Task CompareRoutes(Bar[] bars, IIndicator[] indicators)
     {
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())

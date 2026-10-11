@@ -41,8 +41,9 @@ internal static partial class ValuesBarExecution
             if (history is not null && !SupportsOwned(indicators))
                 throw new InvalidOperationException("Unqualified owned values execution plan.");
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
+            bool boundedBatch = indicators.Count > 1 && indicators.All(i => IsSharedState(i) && IsBoundedWindowIndicator(i));
             foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
-                nodes.Add(new Node(indicator, source.Length, indicators.Count == 1));
+                nodes.Add(new Node(indicator, source.Length, indicators.Count == 1, boundedBatch));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
             bool singleSma = nodes.Count == 1 && nodes[0].Indicator is Sma;
@@ -70,6 +71,8 @@ internal static partial class ValuesBarExecution
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
                 latest = FillBoundedWindow(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
+            else if (boundedBatch)
+                latest = FillBoundedBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
             else for (int i = 0; i < source.Length; i++)
@@ -91,7 +94,7 @@ internal static partial class ValuesBarExecution
                 // Standalone BOP validates raw ratios before smoothing; its default
                 // EMA is an exactly rounded convex mean of finite values. Neither
                 // output needs the generic scan (including shared EMA(1) arrays).
-                bool finiteByConstruction = nodes.Count == 1 && (IsPointwise(node.Indicator)
+                bool finiteByConstruction = boundedBatch || nodes.Count == 1 && (IsPointwise(node.Indicator)
                     || node.Indicator is TrueRange or BalanceOfPower || IsBoundedWindowIndicator(node.Indicator));
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
@@ -511,7 +514,7 @@ internal static partial class ValuesBarExecution
         private readonly object? _state;
         private readonly double[] _scratch;
         internal bool HasScalarState => _state is IIndicatorState;
-        internal Node(IIndicator indicator, int count, bool singleRoot)
+        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch)
         {
             Indicator = indicator;
             bool pointwise = singleRoot && IsPointwise(indicator);
@@ -526,7 +529,7 @@ internal static partial class ValuesBarExecution
                 Sma => null,
                 _ when pointwise => null,
                 BalanceOfPower when singleRoot => null,
-                _ when singleRoot && IsBoundedWindowIndicator(indicator) => null,
+                _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,
                 _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
