@@ -38,6 +38,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "TaLib.Functions.HtDcPeriod" or "TaLib.Functions.HtPhasor" or "TaLib.Functions.Mama")
+        {
+            var fixture = new SharedHilbertBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else throw new ArgumentException("Unsupported shared allocation operation.", nameof(operation));
 
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];

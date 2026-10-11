@@ -3,6 +3,7 @@ using Xunit;
 
 namespace OoplesFinance.StockIndicators.CompetitorTests;
 
+[Collection("TA MACD settings")]
 public sealed class SharedAllocationProbeTests
 {
     [Fact]
@@ -30,6 +31,9 @@ public sealed class SharedAllocationProbeTests
     [InlineData("TaLib.Functions.Beta")]
     [InlineData("TaLib.Functions.Rsi")]
     [InlineData("TaLib.Functions.Cmo")]
+    [InlineData("TaLib.Functions.HtDcPeriod")]
+    [InlineData("TaLib.Functions.HtPhasor")]
+    [InlineData("TaLib.Functions.Mama")]
     public void SharedFixtureSetupAndAllFourOwnedResultArmsComplete(string operation)
     {
         var report = SharedAllocationProbe.Run(operation, 64, 2);
