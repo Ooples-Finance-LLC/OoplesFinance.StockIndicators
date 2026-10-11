@@ -200,10 +200,10 @@ class InventoryDiagnosticsTests(unittest.TestCase):
 
     def test_gpu_median_qualification_keeps_native_namespace(self):
         self.write()
-        api = 'Trady.Indicator.Median'
-        path = self.qualification(f'SharedGpuMedianBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
-        result = inventory(self.root, [path])
-        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+        for api in ('Trady.Indicator.Median', 'QuanTAlib.Median'):
+            path = self.qualification(f'SharedGpuMedianBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
     def test_alma_preserves_competitor_identity(self):
         self.write()

@@ -63,14 +63,60 @@ public sealed class TensorsMedianGpuExecutionTests
     public async Task UnsupportedMedianShapesRejectRatherThanUsingCpu()
     {
         foreach (var indicator in new[] { new RollingPercentile(3), new RollingPercentile(66),
-            new RollingPercentile(20, .25), new RollingPercentile(20, .5, true) })
+            new RollingPercentile(20, .25) })
         {
             Assert.False(ValuesBarExecution.SupportsGpu([indicator]));
             await Assert.ThrowsAsync<NotSupportedException>(() => Build([new Bar(default, 0, 1, -1, 0, 1)], indicator).BuildAsync());
         }
         Assert.True(ValuesBarExecution.SupportsGpu([new RollingPercentile(1, .5, true)]));
+        Assert.True(ValuesBarExecution.SupportsGpu([new RollingPercentile(20, .5, true)]));
         Assert.False(ValuesBarExecution.SupportsGpu([new RollingPercentile(20).Of(new Sma(3))]));
         Assert.False(ValuesBarExecution.SupportsGpu([new RollingPercentile(20), new HighestHigh(3)]));
         await Assert.ThrowsAsync<NotSupportedException>(() => Build([], new RollingPercentile(20)).BuildAsync());
+    }
+
+    [SkippableTheory]
+    [InlineData(2)] [InlineData(20)] [InlineData(64)]
+    public async Task CertifiedStartupMeanAndMedianShareCachedKernel(int period)
+    {
+        Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
+        foreach (int count in new[] { 1, period - 1, period, period + 3, 257 })
+        {
+            var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0, 1, -1,
+                i < period ? (i % 7 - 3) / 8d : i % 3 == 0 ? double.MaxValue : i % 3 == 1 ? double.Epsilon : -double.MaxValue, 1)).ToArray();
+            foreach (bool average in new[] { false, true, false })
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                var indicator = new RollingPercentile(period, .5, average);
+                using var cpu = await Build(bars, indicator).ConfigureHistory(history)
+                    .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureBehavior(_ => { }).BuildAsync();
+                var builder = Build(bars, indicator).ConfigureHistory(history);
+                using var gpu = await builder.BuildAsync();
+                Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+                Assert.Equal(cpu[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                    gpu[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                Assert.Equal(cpu.Latest.IsWarmedUp, gpu.Latest.IsWarmedUp);
+            }
+        }
+    }
+
+    [SkippableFact]
+    public async Task StartupCertificateRejectsAfterInputValidationAndRecovers()
+    {
+        Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
+        var bars = Enumerable.Range(0, 32).Select(i => new Bar(default, 0, 1, -1, i == 1 ? double.Epsilon : 1, 1)).ToArray();
+        var indicator = new RollingPercentile(20, .5, true);
+        var builder = Build(bars, indicator);
+        await Assert.ThrowsAsync<NotSupportedException>(() => builder.BuildAsync());
+        Assert.Null(builder.LastExecution);
+        var last = bars[^1]; bars[^1] = new Bar(default, 0, 1, -1, 1, double.NaN);
+        var cpuFailure = await Record.ExceptionAsync(() => Build(bars, indicator).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync());
+        var gpuFailure = await Record.ExceptionAsync(() => builder.BuildAsync());
+        Assert.NotNull(cpuFailure); Assert.NotNull(gpuFailure);
+        Assert.Equal(cpuFailure.GetType(), gpuFailure.GetType()); Assert.Equal(cpuFailure.Message, gpuFailure.Message);
+        bars[^1] = last; bars[1] = last;
+        using var recovered = await builder.BuildAsync();
+        Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+        Assert.All(recovered[indicator].ToArray(), value => Assert.Equal(1, value));
     }
 }

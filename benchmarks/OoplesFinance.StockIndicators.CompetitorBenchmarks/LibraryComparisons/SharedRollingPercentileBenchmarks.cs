@@ -95,6 +95,15 @@ public class SharedRollingPercentileBenchmarks
         ? new MedianByTuple(values, Period).Compute(startIndex: skip)
         : new PercentileByTuple(values, Period, (decimal)Fraction).Compute(startIndex: skip);
     internal RollingPercentile Create() => new(Period, Fraction, Quan);
-    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+            .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose(); throw new InvalidOperationException("Required GPU median did not execute on the device.");
+        }
+        return run;
+    }
 }

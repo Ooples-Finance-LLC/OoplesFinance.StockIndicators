@@ -34,7 +34,7 @@ internal static partial class ValuesBarExecution
 
     internal static bool IsGpuMedian(IIndicator indicator) => indicator is RollingPercentile
         { Percentile: .5, Period: > 0 and <= 64 } median
-        && (median.Period == 1 || !median.AverageDuringWarmup && (median.Period & 1) == 0);
+        && (median.Period == 1 || (median.Period & 1) == 0);
 
     internal static bool IsGpuCandleWindow(IIndicator indicator) => indicator is
         StrictHaramiCandle or BullishHaramiPattern or BearishHaramiPattern or UpsideTasukiGapPattern or DownsideTasukiGapPattern;

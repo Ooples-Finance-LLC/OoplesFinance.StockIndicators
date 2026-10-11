@@ -7,7 +7,7 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
 public class SharedGpuMedianBenchmarks
 {
-    [Params("Trady.Indicator.Median")] public string Operation { get; set; } = "";
+    [Params("Trady.Indicator.Median", "QuanTAlib.Median")] public string Operation { get; set; } = "";
     [Params(1_000, 10_000, 100_000)] public int Count { get; set; }
     private SharedRollingPercentileBenchmarks _cpu = null!;
     [GlobalSetup]

@@ -11,10 +11,18 @@ internal sealed partial class TensorsGpuExecution
             #pragma OPENCL EXTENSION cl_khr_fp64 : enable
             #pragma OPENCL FP_CONTRACT OFF
             __kernel void median_window(__global const double* input, __global const double* unused,
-                __global double* output, int count, int period)
+                __global double* output, int count, int period, int average_warmup)
             {
                 size_t i = get_global_id(0);
                 if (i >= (size_t)count) return;
+                if (average_warmup && i + 1 < (size_t)period)
+                {
+                    // The host certifies every startup partial sum as exact.
+                    double total = 0.0;
+                    for (size_t j = 0; j <= i; j++) total += input[j];
+                    output[i] = total == 0.0 ? 0.0 : total / (double)(i + 1);
+                    return;
+                }
                 size_t start = i + 1 > (size_t)period ? i + 1 - (size_t)period : 0;
                 double sorted[64];
                 int length = 0;
