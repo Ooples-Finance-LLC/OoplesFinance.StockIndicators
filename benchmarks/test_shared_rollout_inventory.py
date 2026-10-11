@@ -61,6 +61,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
                 result = inventory(self.root, [path])
                 self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_price_range_qualification_preserves_trady_namespace(self):
+        self.write()
+        api = 'Trady.Indicator.HighestHighLowestLowDifference'
+        path = self.qualification(f'SharedPriceRangeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_alma_preserves_competitor_identity(self):
         self.write()
         for api in ('QuanTAlib.Alma', 'Skender.GetAlma'):

@@ -31,7 +31,7 @@ public sealed class WindowPriceRange : IndicatorBase, IIndicatorValidationContra
             ),
         ];
 
-    private sealed class State(int period) : IIndicatorState
+    internal sealed class State(int period) : IIndicatorState
     {
         private readonly WindowExtremeDeque _high = new(period, true),
             _low = new(period, false);
@@ -46,10 +46,9 @@ public sealed class WindowPriceRange : IndicatorBase, IIndicatorValidationContra
         {
             _high.Add(bar.High);
             _low.Add(bar.Low);
-            var difference = new ExactMeanAccumulator();
-            difference.Add(_high.Value);
-            difference.Add(_low.Value, -1);
-            return difference.Mean(1);
+            // IEEE subtraction rounds this two-value difference once. Exact zero
+            // is positive by contract, including opposite signed-zero inputs.
+            return _high.Value == _low.Value ? 0 : _high.Value - _low.Value;
         }
     }
 }

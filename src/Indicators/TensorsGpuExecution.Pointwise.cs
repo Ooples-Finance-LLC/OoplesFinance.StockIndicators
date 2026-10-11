@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Twenty-two fixed keys; window/lag periods are arguments, never new compiled programs.
+    // Twenty-three fixed keys; window/lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -21,6 +21,7 @@ internal sealed partial class TensorsGpuExecution
         var extreme = indicator as DecayingWindowExtreme;
         var index = indicator as WindowExtremeIndex;
         var aroon = indicator as WindowAroon;
+        var priceRange = indicator as WindowPriceRange;
         if (secondary is not null && (index is not { Maximum: false }
             || secondary is not WindowExtremeIndex { Maximum: true } maximum || maximum.Period != index.Period))
             throw new NotSupportedException("GPU index pairs require matching minimum and maximum periods.");
@@ -28,7 +29,7 @@ internal sealed partial class TensorsGpuExecution
         bool polarity = indicator is BullishCandle or BearishCandle;
         bool body = engulfing || polarity;
         if (source.Length == 0 || extreme is { Decay: not 0 }
-            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && aroon is null && !body && !ValuesBarExecution.IsGpuLagged(indicator))
+            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && aroon is null && priceRange is null && !body && !ValuesBarExecution.IsGpuLagged(indicator))
             throw new NotSupportedException("Unqualified GPU pointwise kernel.");
         int operation = lagged is not null ? lagged.Kind switch
         {
@@ -37,7 +38,7 @@ internal sealed partial class TensorsGpuExecution
             PriceChangeKind.Loss => 10,
             PriceChangeKind.Ratio => 11,
             _ => throw new NotSupportedException("Unqualified GPU lagged operation.")
-        } : aroon is not null ? 21 : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
+        } : priceRange is not null ? 22 : aroon is not null ? 21 : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
             : extreme is not null ? extreme.Maximum ? 17 : 16
             : midpoint is not null ? midpoint.CandleRanges ? 15 : 14
             : polarity ? indicator is BullishCandle ? 12 : 13
@@ -60,7 +61,7 @@ internal sealed partial class TensorsGpuExecution
             try
             {
                 var left = work.Input;
-                var right = arithmetic is not null || body || midpoint is { CandleRanges: true } || aroon is not null ? work.RightInput : null;
+                var right = arithmetic is not null || body || midpoint is { CandleRanges: true } || aroon is not null || priceRange is not null ? work.RightInput : null;
                 double[]? presence = null;
                 Bar latest = default;
                 for (int i = 0; i < source.Length; i++)
@@ -69,9 +70,9 @@ internal sealed partial class TensorsGpuExecution
                     latest = source[i];
                     if (!ValuesBarExecution.AllFieldsFinite(in latest)) IndicatorInputDomain.Finite.Validate(in latest);
                     if (owned is not null) owned[i] = latest;
-                    left[i] = aroon is not null ? latest.High : midpoint is { CandleRanges: true } ? latest.Low
+                    left[i] = aroon is not null ? latest.High : priceRange is not null ? latest.Low : midpoint is { CandleRanges: true } ? latest.Low
                         : body ? latest.Open : arithmetic is null ? latest.Close : Select(in latest, arithmetic.Left);
-                    if (right is not null) right[i] = aroon is not null ? latest.Low : midpoint is not null ? latest.High
+                    if (right is not null) right[i] = aroon is not null ? latest.Low : priceRange is not null ? latest.High : midpoint is not null ? latest.High
                         : body ? latest.Close : Select(in latest, arithmetic!.Right);
                     bool defined = operation != 3 || Math.Abs(right![i]) > 0;
                     if (operation == 6) defined = left[i] >= 0;
@@ -101,7 +102,7 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(1, deviceRight.Handle);
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
-                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? 0);
+                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? 0);
                 if (secondary is not null) kernel.SetArg(5, work.Right.Handle);
                 if (aroon is not null)
                 {
@@ -182,6 +183,7 @@ internal sealed partial class TensorsGpuExecution
             // An overflowing sum has normal operands whose halves are exact.
             // Only an exact zero sum is canonicalized; underflow keeps its sign.
             14 or 15 => "total == 0.0 ? 0.0 : isinf(total) ? x * 0.5 + y * 0.5 : total * 0.5",
+            22 => "x == y ? 0.0 : y - x",
             16 or 17 => "x",
             18 or 19 or 20 => "(double)bestIndex",
             21 => "(double)(100L * ((long)period - ((long)i - highIndex))) / (double)period",
@@ -190,7 +192,7 @@ internal sealed partial class TensorsGpuExecution
         var previous = operation == 7
             ? "if (i < 2) { output[i] = 0.0; return; } double p = left[i - 1]; double q = right[i - 1];"
             : operation is >= 8 and <= 11 ? "if (i < (size_t)period) { output[i] = 0.0; return; } y = left[i - (size_t)period];"
-            : operation is 14 or 15 ? """
+            : operation is 14 or 15 or 22 ? """
                 size_t start = i + 1 > (size_t)period ? i + 1 - (size_t)period : 0;
                 x = left[start]; y = right[start];
                 for (size_t j = start + 1; j <= i; j++)
