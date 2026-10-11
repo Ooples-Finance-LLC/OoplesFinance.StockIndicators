@@ -26,14 +26,20 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation == "TaLib.Functions.Beta")
+        {
+            var fixture = new SharedPairInputBenchmarks { Operation = "Beta", Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else throw new ArgumentException("Unsupported shared allocation operation.", nameof(operation));
 
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
         var arms = new Arm[methods.Length];
         try
         {
-            // Existing setup verifies complete values/presence against independent
-            // references and prepares identical inputs outside the measured arms.
+            // Reuse each benchmark's agreement checks and prepare identical inputs
+            // outside the measured arms. Exact contracts have separate reference tests.
             setup();
             for (int arm = 0; arm < methods.Length; arm++)
             {

@@ -66,6 +66,16 @@ internal struct ExactMeanAccumulator
         AddLarge(product, scale);
     }
 
+    internal void Multiply(ExactMeanAccumulator factor)
+    {
+        if (IsZero || factor.IsZero) { this = default; return; }
+        var scale = checked(_scale + factor._scale - 1074);
+        var product = (_wide ? _large : new BigInteger(_small))
+            * (factor._wide ? factor._large : new BigInteger(factor._small));
+        this = default;
+        AddLarge(product, scale);
+    }
+
     internal void Add(double value, BigInteger weight)
     {
         if (weight >= int.MinValue && weight <= int.MaxValue)

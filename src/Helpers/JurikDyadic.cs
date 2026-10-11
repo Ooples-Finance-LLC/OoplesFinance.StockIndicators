@@ -113,6 +113,26 @@ internal struct JurikDyadic
 #endif
         var product = Accumulator(); product.Multiply(factor); SetFallback(product);
     }
+    internal void Multiply(JurikDyadic other)
+    {
+#if !NETFRAMEWORK
+        if (!_wide && !other._wide)
+        {
+            Promote(); other.Promote();
+            if (_integer == 0 || other._integer == 0) { this = default; return; }
+            var size = Bits(Magnitude(_integer)) + Bits(Magnitude(other._integer));
+            if (size <= 127 || size == 128 && Magnitude(_integer) * Magnitude(other._integer) <= (UInt128)Int128.MaxValue)
+            {
+                _integer *= other._integer;
+                _exponent = checked(_exponent + other._exponent);
+                Normalize();
+                return;
+            }
+        }
+#endif
+        var product = Accumulator(); product.Multiply(other.Accumulator()); SetFallback(product);
+    }
+
     internal void Square()
     {
 #if !NETFRAMEWORK

@@ -323,10 +323,11 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
 
     private void Accumulate(RocBankValue x, RocBankValue y, int sign)
     {
-        static (BigInteger Value, int Grid) Compact(RocBankValue value)
+        static JurikDyadic Compact(RocBankValue value)
         {
-            var (integer, power) = ExactMeanAccumulator.DecomposeFinite(value.Mantissa);
-            return (new BigInteger(integer), power + value.UpperShift + 1074);
+            var result = JurikDyadic.FromDouble(value.Mantissa);
+            if (value.UpperShift != 0) result.ScaleByPowerOfTwo(value.UpperShift);
+            return result;
         }
         var left = Compact(x);
         var right = Compact(y);
@@ -344,57 +345,47 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
     private sealed class Moments
     {
         private int _count;
-        // A common return grid cancels from covariance / market variance. Keep
-        // the public return units unchanged, including extended upper exponents.
-        private int _grid;
-        private bool _hasGrid;
-        private BigInteger _x,
-            _y,
-            _xx,
-            _xy;
+        private JurikDyadic _x, _y, _xx, _xy;
 
         internal void Reset()
         {
             _count = 0;
-            _x = _y = _xx = _xy = 0;
-            _grid = 0;
-            _hasGrid = false;
+            _x = _y = _xx = _xy = default;
         }
 
-        internal void Add((BigInteger Value, int Grid) left, (BigInteger Value, int Grid) right, int sign)
+        internal void Add(JurikDyadic x, JurikDyadic y, int sign)
         {
-            if (!left.Value.IsZero || !right.Value.IsZero)
-            {
-                var grid = left.Value.IsZero ? right.Grid : right.Value.IsZero ? left.Grid : Math.Min(left.Grid, right.Grid);
-                if (!_hasGrid || grid < _grid)
-                {
-                    if (_hasGrid)
-                    {
-                        var shift = _grid - grid;
-                        _x <<= shift; _y <<= shift;
-                        _xx <<= 2 * shift; _xy <<= 2 * shift;
-                    }
-                    _grid = grid;
-                    _hasGrid = true;
-                }
-            }
-            var x = left.Value.IsZero ? BigInteger.Zero : left.Value << (left.Grid - _grid);
-            var y = right.Value.IsZero ? BigInteger.Zero : right.Value << (right.Grid - _grid);
+            var xx = x;
+            xx.Square();
+            var xy = x;
+            xy.Multiply(y);
             _count += sign;
-            _x += sign * x;
-            _y += sign * y;
-            _xx += sign * x * x;
-            _xy += sign * x * y;
+            if (sign > 0)
+            {
+                _x.AddExact(x); _y.AddExact(y);
+                _xx.AddExact(xx); _xy.AddExact(xy);
+            }
+            else
+            {
+                _x.Subtract(x); _y.Subtract(y);
+                _xx.Subtract(xx); _xy.Subtract(xy);
+            }
         }
 
         internal double? Beta(bool flatZero)
         {
-            var denominator = _count * _xx - _x * _x;
-            return denominator.IsZero
-                ? flatZero
-                    ? 0
-                    : null
-                : ExactMeanAccumulator.ScaledRatio(_count * _xy - _x * _y, denominator, 0);
+            var denominator = _xx;
+            denominator.Multiply(_count);
+            var square = _x;
+            square.Square();
+            denominator.Subtract(square);
+            if (denominator.Sign == 0) return flatZero ? 0 : null;
+            var numerator = _xy;
+            numerator.Multiply(_count);
+            var cross = _x;
+            cross.Multiply(_y);
+            numerator.Subtract(cross);
+            return numerator.Ratio(denominator);
         }
     }
 }
