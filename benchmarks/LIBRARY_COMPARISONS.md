@@ -1277,6 +1277,15 @@ Full trajectories checked 64,504 values. Eight timing cases passed; the complete
 archive verifies 1,140 cases across 285 pairs. Explicit-alpha/compensated single
 EMA and QEMA use the separate convention described below.
 
+The compensated CPU stages now reuse the exact dyadic blend helper. Certified
+subtractions use fused multiply-add; other differences, compensation products
+and final combinations retain exact arithmetic and their original rounding.
+The net10.0 build, 12 focused unit tests and 32 comparison/setup tests passed.
+DEMA/TEMA state updates allocate zero managed bytes over 4,000 ordinary inputs
+after JIT warmup and state reset, including seeding/compensation startup. Existing
+seeded variants are covered by the same regression tests. These are state-level
+allocation checks; updated builder latency is pending consolidated timing.
+
 ## Mass-normalized single and quadruple EMA
 
 `MassNormalizedEma` covers Quan's compensated integer-period and explicit-alpha
