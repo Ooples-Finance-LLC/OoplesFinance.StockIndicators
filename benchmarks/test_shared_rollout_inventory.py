@@ -81,6 +81,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_ta_directional_qualification_preserves_selected_api(self):
+        self.write()
+        for name in ('PlusDM', 'MinusDM', 'PlusDI', 'MinusDI', 'Dx', 'Adx', 'Adxr'):
+            api = 'TaLib.Functions.' + name
+            path = self.qualification(f'SharedTaDirectionalBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_gpu_fixed_weighted_average_maps_native_api(self):
         self.write()
         path = self.qualification('SharedGpuFixedWmaBenchmarks.BuilderFull(Operation: "Wma", Count: 1000)')

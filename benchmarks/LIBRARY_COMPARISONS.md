@@ -2487,6 +2487,24 @@ order-statistic/rational and staged-native references cover odd/even periods,
 negative/zero medians, threshold neighbors, extreme prices, huge periods, fresh
 calls, prefixes and output/threshold mutations. Archive: 1,548 arms /387 pairs.
 
+## Selected TA directional builder qualification
+
+`PriorSeededDirectionalMeasure` now retains decoded prior high/low/close values,
+skips unused movement/range streams and allocates rating history only for ADXR.
+Every required seed, rounded stage, suppression rule, presence output and DX's
+extra range update is preserved. Eight focused state/input-validation tests and
+23 independent comparison/setup tests passed, including reset with changed inputs,
+period-one rules, extreme/subnormal stages, source composition and native masks.
+
+`SharedTaDirectionalBenchmarks` compares all seven APIs at 1k/10k against direct
+packed native arrays. Parallel native workers replay complete prefixes because
+bounded overlap changes recursive results. All 56 cases completed; native serial
+wins all cases and every builder arm remains a loss. At 10k, LatestOnly +DM is
+11.55 ms / 15.95 MiB versus native 87.21 us / 78.04 KiB; ADX is 50.16 ms /
+72.74 MiB versus 138.09 us / 77.89 KiB. These are direct qualifications, not wins.
+Fixed minimum-unit BigInteger intermediates remain a major allocation target.
+Raw evidence is retained in `ta-directional-cpu`; inventory checks passed 51 tests.
+
 ## Shared SMA builder qualification
 
 `SharedSmaBenchmarks` compares Full/LatestOnly with native serial and parallel

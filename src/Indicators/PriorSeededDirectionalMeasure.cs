@@ -106,12 +106,15 @@ public sealed class PriorSeededDirectionalMeasure
     private sealed class State(PriorDirectionalMeasure measure, int period, int unstable)
         : IMultiOutputState
     {
-        private readonly Queue<double?> _history = new();
+        private readonly Queue<double?>? _history = measure == PriorDirectionalMeasure.Rating ? new() : null;
+        private readonly bool _needsPositive = measure is not (PriorDirectionalMeasure.NegativeMovement or PriorDirectionalMeasure.NegativeIndicator);
+        private readonly bool _needsNegative = measure is not (PriorDirectionalMeasure.PositiveMovement or PriorDirectionalMeasure.PositiveIndicator);
+        private readonly bool _needsRange = measure >= PriorDirectionalMeasure.PositiveIndicator;
         private BigInteger _positive,
             _negative,
             _range,
             _seedDx;
-        private Bar _previous;
+        private BigInteger _previousHigh, _previousLow, _previousClose;
         private long _index = -1;
         private double _average,
             _lastDx;
@@ -125,9 +128,9 @@ public sealed class PriorSeededDirectionalMeasure
 
         public void Reset()
         {
-            _history.Clear();
+            _history?.Clear();
             _positive = _negative = _range = _seedDx = 0;
-            _previous = default;
+            _previousHigh = _previousLow = _previousClose = 0;
             _index = -1;
             _average = _lastDx = 0;
         }
@@ -141,26 +144,35 @@ public sealed class PriorSeededDirectionalMeasure
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
+            // Decode each required price once and retain it for the next bar.
+            // Movement-only outputs never need the true-range stream.
+            var high = U(bar.High);
+            var low = U(bar.Low);
+            var close = _needsRange ? U(bar.Close) : BigInteger.Zero;
             if (++_index == 0)
             {
-                _previous = bar;
+                _previousHigh = high;
+                _previousLow = low;
+                _previousClose = close;
                 return;
             }
-            var up = U(bar.High) - U(_previous.High);
-            var down = U(_previous.Low) - U(bar.Low);
-            var positive = R(up > 0 && up > down ? up : BigInteger.Zero, 1);
-            var negative = R(down > 0 && down > up ? down : BigInteger.Zero, 1);
-            var range = R(
+            var up = high - _previousHigh;
+            var down = _previousLow - low;
+            var positive = _needsPositive && up > 0 && up > down ? R(up, 1) : BigInteger.Zero;
+            var negative = _needsNegative && down > 0 && down > up ? R(down, 1) : BigInteger.Zero;
+            var range = _needsRange ? R(
                 BigInteger.Max(
-                    U(bar.High) - U(bar.Low),
+                    high - low,
                     BigInteger.Max(
-                        BigInteger.Abs(U(bar.High) - U(_previous.Close)),
-                        BigInteger.Abs(U(bar.Low) - U(_previous.Close))
+                        BigInteger.Abs(high - _previousClose),
+                        BigInteger.Abs(low - _previousClose)
                     )
                 ),
                 1
-            );
-            _previous = bar;
+            ) : BigInteger.Zero;
+            _previousHigh = high;
+            _previousLow = low;
+            _previousClose = close;
             if (period == 1)
             {
                 var movement = measure
@@ -179,21 +191,21 @@ public sealed class PriorSeededDirectionalMeasure
             }
             if (_index < period)
             {
-                _positive += positive;
-                _negative += negative;
-                _range += range;
+                if (_needsPositive) _positive += positive;
+                if (_needsNegative) _negative += negative;
+                if (_needsRange) _range += range;
                 if (_index == period - 1)
                 {
-                    _positive = R(_positive, 1);
-                    _negative = R(_negative, 1);
-                    _range = R(_range, 1);
+                    if (_needsPositive) _positive = R(_positive, 1);
+                    if (_needsNegative) _negative = R(_negative, 1);
+                    if (_needsRange) _range = R(_range, 1);
                 }
             }
             else
             {
-                _positive = R(_positive * (period - 1) + positive * period, period);
-                _negative = R(_negative * (period - 1) + negative * period, period);
-                _range = R(_range * (period - 1) + range * period, period);
+                if (_needsPositive) _positive = R(_positive * (period - 1) + positive * period, period);
+                if (_needsNegative) _negative = R(_negative * (period - 1) + negative * period, period);
+                if (_needsRange) _range = R(_range * (period - 1) + range * period, period);
             }
             if (measure <= PriorDirectionalMeasure.NegativeMovement)
             {
@@ -216,10 +228,10 @@ public sealed class PriorSeededDirectionalMeasure
             {
                 var currentRange = R(
                     BigInteger.Max(
-                        U(bar.High) - U(bar.Low),
+                        high - low,
                         BigInteger.Max(
-                            BigInteger.Abs(U(bar.High) - U(bar.Close)),
-                            BigInteger.Abs(U(bar.Low) - U(bar.Close))
+                            BigInteger.Abs(high - close),
+                            BigInteger.Abs(low - close)
                         )
                     ),
                     1
@@ -281,7 +293,7 @@ public sealed class PriorSeededDirectionalMeasure
                     Publish(_average, output);
                 return;
             }
-            var prior = _history.Count == period - 1 ? _history.Dequeue() : null;
+            var prior = _history!.Count == period - 1 ? _history.Dequeue() : null;
             _history.Enqueue(available ? _average : null);
             if (available && prior.HasValue)
                 Publish(ExactMeanAccumulator.UnitRatio(U(_average) + U(prior.Value), 2), output);
