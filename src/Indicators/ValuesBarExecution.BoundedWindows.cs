@@ -175,20 +175,50 @@ internal static partial class ValuesBarExecution
         private readonly double[] _window = new double[Math.Min(period, Math.Max(1, count))];
         private readonly long _denominator = (long)period * (period + 1L) / 2;
         private ExactMeanAccumulator _sum, _weighted;
+        private Core.SmaCpuKernel.Certificate _certificate = new(period <= 65535 ? (int)((long)period * (period + 1) / 2) : int.MaxValue);
+        private bool _certified = period <= 65535;
+        private double _fastSum, _fastWeighted;
         private int _position, _seen;
-        public void Reset() { _position = _seen = 0; _sum = _weighted = default; }
+        public void Reset()
+        {
+            _position = _seen = 0; _sum = _weighted = default;
+            _fastSum = _fastWeighted = 0;
+            _certified = period <= 65535;
+            _certificate = new(_certified ? (int)_denominator : int.MaxValue);
+        }
         public double Update(in Bar bar)
         {
+            if (period == 1) return bar.Close == 0 ? 0 : bar.Close;
+            if (_certified && !_certificate.Include(bar.Close))
+            {
+                // Previous totals were exact doubles. Promote them once before
+                // including the first value outside the common-grid certificate.
+                _sum.Add(_fastSum);
+                _weighted.Add(_fastWeighted);
+                _certified = false;
+            }
             // Match MovingAverageCore's fixed denominator, including zero-padded
             // startup. Capacity is bounded by the observations this execution owns.
-            _weighted.Subtract(_sum);
-            _weighted.Add(bar.Close, period);
-            _sum.Add(bar.Close);
-            if (_seen >= period) _sum.Add(_window[_position], -1);
-            else _seen++;
+            if (_certified)
+            {
+                // Subtraction first lowers the total weight to T-P; adding the
+                // newest P-weighted price restores T. No intermediate rounds.
+                _fastWeighted -= _fastSum;
+                _fastWeighted += bar.Close * period;
+                _fastSum += bar.Close;
+                if (_seen >= period) _fastSum -= _window[_position];
+            }
+            else
+            {
+                _weighted.Subtract(_sum);
+                _weighted.Add(bar.Close, period);
+                _sum.Add(bar.Close);
+                if (_seen >= period) _sum.Add(_window[_position], -1);
+            }
+            if (_seen < period) _seen++;
             _window[_position] = bar.Close;
             if (++_position == _window.Length) _position = 0;
-            return _weighted.Mean(_denominator);
+            return _certified ? _fastWeighted == 0 ? 0 : _fastWeighted / _denominator : _weighted.Mean(_denominator);
         }
     }
 

@@ -433,6 +433,42 @@ public sealed class SharedBoundedWindowTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
+    [Theory]
+    [InlineData(1)] [InlineData(19)] [InlineData(20)] [InlineData(21)]
+    [InlineData(63)] [InlineData(64)] [InlineData(65)] [InlineData(512)]
+    public async Task WeightedCertificatePromotesPriorExactTotalsBeforeFirstUnsupportedValue(int transition)
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (int workers in new[] { 1, 8 })
+            foreach (double rejected in new[] { .1, double.Epsilon, double.MaxValue, -double.MaxValue })
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                var bars = Enumerable.Range(0, 1025).Select(i => new Bar(default, 0, 1, -1,
+                    i % 7 == 0 ? -0d : (i % 31 - 15) / 8d, 1)).ToArray();
+                bars[transition] = new Bar(default, 0, 1, -1, rejected, 1);
+                await CompareRoutes(bars, [new Wma(20)]);
+                await CompareRoutes(bars, [new Wma(20), new HighestHigh(7)]);
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Theory]
+    [InlineData(2)] [InlineData(65535)] [InlineData(65536)]
+    public async Task WeightedCertificateHandlesExponentAndPeriodBoundaries(int period)
+    {
+        double[] values = [Math.ScaleB(1, -512), -Math.ScaleB(1, -512), Math.ScaleB(1, -513),
+            Math.ScaleB(1, 500), Math.ScaleB(1, 501), 0, -0d];
+        foreach (double value in values)
+        {
+            var bars = Enumerable.Range(0, 65).Select(i => new Bar(default, 0, 1, -1,
+                i % 2 == 0 ? value : -value, 1)).ToArray();
+            await CompareRoutes(bars, [new Wma(period)]);
+        }
+    }
+
     private static async Task CompareRoutes(Bar[] bars, IIndicator[] indicators)
     {
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
