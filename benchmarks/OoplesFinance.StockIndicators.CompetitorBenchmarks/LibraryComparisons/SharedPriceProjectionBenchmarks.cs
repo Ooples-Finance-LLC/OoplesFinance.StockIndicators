@@ -12,7 +12,7 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
 public class SharedPriceProjectionBenchmarks
 {
-    [Params("AvgPrice", "MedPrice", "TypPrice", "WclPrice")] public string Operation { get; set; } = "";
+    [Params("AvgPrice", "MedPrice", "TypPrice", "WclPrice", "Bop")] public string Operation { get; set; } = "";
     [Params(1_000, 10_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
     private double[] _open = null!, _high = null!, _low = null!, _close = null!;
@@ -74,6 +74,7 @@ public class SharedPriceProjectionBenchmarks
             "MedPrice" => Functions.MedPrice<double>(high, low, System.Range.All, output, out range),
             "TypPrice" => Functions.TypPrice<double>(high, low, close, System.Range.All, output, out range),
             "WclPrice" => Functions.WclPrice<double>(high, low, close, System.Range.All, output, out range),
+            "Bop" => Functions.Bop<double>(open, high, low, close, System.Range.All, output, out range),
             _ => throw new InvalidOperationException("Unknown price projection.")
         };
         if (status != TALib.Core.RetCode.Success || range.Start.Value != 0 || range.End.Value != output.Length)
@@ -86,6 +87,7 @@ public class SharedPriceProjectionBenchmarks
         "MedPrice" => new MedianPrice(1),
         "TypPrice" => new TypicalPrice(1),
         "WclPrice" => new WeightedClose(1),
+        "Bop" => new BalanceOfPower(1),
         _ => throw new InvalidOperationException("Unknown price projection.")
     };
 

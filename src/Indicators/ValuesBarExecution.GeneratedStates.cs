@@ -6,13 +6,14 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
-        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange;
+        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower;
 
-    private static IIndicatorState CreateGeneratedState(IIndicator indicator, int count) => indicator switch
+    private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
         HighestHigh high => new PriceExtremeState(high.Length, count, true),
         LowestLow low => new PriceExtremeState(low.Length, count, false),
         TrueRange => new TrueRangeValueState(),
+        BalanceOfPower power => new BalanceOfPowerValueState(Math.Max(1, power.Length)),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
 

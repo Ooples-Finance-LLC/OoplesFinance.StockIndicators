@@ -66,6 +66,8 @@ internal static partial class ValuesBarExecution
                     : gpu.ExecutePointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is TrueRange)
                 latest = FillTrueRange(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
+                latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
             else for (int i = 0; i < source.Length; i++)
@@ -517,6 +519,7 @@ internal static partial class ValuesBarExecution
             {
                 Sma => null,
                 _ when pointwise => null,
+                BalanceOfPower when singleRoot => null,
                 _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
