@@ -35,6 +35,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         path.write_text(json.dumps({'Benchmarks': rows}))
         return path
 
+    def test_gpu_weighted_average_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedWeightedAverageBenchmarks.BuilderFull(Operation: "TaLib.Functions.Wma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(result['measured_current_apis'], 1)
+
     def test_midpoint_qualification_maps_both_price_sources(self):
         self.write()
         for family in ('SharedMidpointBenchmarks', 'SharedGpuMidpointBenchmarks'):
