@@ -30,6 +30,33 @@ internal struct JurikDyadic
         var result = new JurikDyadic(); result.Add(value); return result;
 #endif
     }
+    internal static JurikDyadic FromUnits(BigInteger units)
+    {
+        if (units.IsZero) return default;
+#if !NETFRAMEWORK
+        var magnitude = BigInteger.Abs(units);
+        int zeros = (int)BigInteger.TrailingZeroCount(magnitude);
+        if (magnitude.GetBitLength() - zeros <= 127)
+            return new JurikDyadic { _fixed = true, _integer = (Int128)(units >> zeros), _exponent = zeros - 1074 };
+#endif
+        var sum = new ExactMeanAccumulator();
+        sum.Add(1, units);
+        sum.ScaleByPowerOfTwo(-1074);
+        var result = new JurikDyadic(); result.SetFallback(sum); return result;
+    }
+    internal BigInteger RoundedUnits()
+    {
+        var rounded = Rounded();
+#if !NETFRAMEWORK
+        if (!rounded._wide)
+        {
+            rounded.Promote();
+            return (BigInteger)rounded._integer << (rounded._exponent + 1074);
+        }
+#endif
+        var value = RocBankValue.Round(rounded.Accumulator());
+        return ExactVarianceWindow.Units(value.Mantissa) << value.UpperShift;
+    }
     internal void Add(double value)
     {
 #if !NETFRAMEWORK

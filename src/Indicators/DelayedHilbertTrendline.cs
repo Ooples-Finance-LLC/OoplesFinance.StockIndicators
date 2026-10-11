@@ -70,7 +70,7 @@ public sealed class DelayedHilbertTrendline : MultiOutputIndicatorBase, IIndicat
             output.Clear();
             _index++;
             var price = ExactVarianceWindow.Units(bar.Close);
-            _phase.Update(price);
+            _phase.Update(bar.Close);
             if (_index >= 37)
             {
                 _period = .33 * _phase.Period + .67 * _period;
