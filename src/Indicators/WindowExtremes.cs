@@ -90,7 +90,7 @@ public sealed class WindowRangeMidpoint : IndicatorBase, IIndicatorValidationCon
             ),
         ];
 
-    private sealed class State(int period, bool candleRanges) : IIndicatorState
+    internal sealed class State(int period, bool candleRanges) : IIndicatorState
     {
         private readonly WindowExtremeDeque _minimum = new(period, false);
         private readonly WindowExtremeDeque _maximum = new(period, true);

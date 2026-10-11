@@ -246,6 +246,13 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private readonly struct MidpointKernel(WindowRangeMidpoint.State state) : IBoundedKernel<MidpointKernel>
+    {
+        public static MidpointKernel Create(int period, int count, IIndicator indicator) =>
+            new(new(period, ((WindowRangeMidpoint)indicator).CandleRanges));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
         public static StateWindowKernel Create(int period, int count, IIndicator indicator) =>
@@ -261,7 +268,7 @@ internal static partial class ValuesBarExecution
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
-        WindowRangeMidpoint midpoint => FillBoundedWindow<StateWindowKernel>(source, output, indicator, midpoint.Period, cancellation, owned),
+        WindowRangeMidpoint midpoint => FillBoundedWindow<MidpointKernel>(source, output, indicator, midpoint.Period, cancellation, owned),
         LaggedPriceChange change => FillBoundedWindow<LaggedKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
         // Two seed bars preserve the pattern's two-bar startup in every worker.
         EngulfingPattern => FillBoundedWindow<EngulfingKernel>(source, output, indicator, 3, cancellation, owned),
