@@ -86,6 +86,7 @@ internal static partial class ValuesBarExecution
         EndpointWeightedAverage { Period: <= 1073741824 } endpoint => endpoint.Period,
         FixedPeriodWma average => average.Period,
         FibonacciWeightedAverage average => average.Period,
+        TriangularWindowAverage average => average.Period,
         NormalizedConvolution convolution => convolution.Kernel.Count,
         GaussianWeightedAverage average => average.Period,
         SineWeightedAverage average => average.Period,
@@ -95,6 +96,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
+        if (indicator is TriangularWindowAverage) return 512;
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
         if (indicator is Wma or WilliamsR or EndpointWeightedAverage or FixedPeriodWma or FibonacciWeightedAverage or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or PriorPriceChannel or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
@@ -271,6 +273,11 @@ internal static partial class ValuesBarExecution
     {
         public static WmaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new(new(period, count, indicator is FixedPeriodWma));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+    private readonly struct TriangularKernel(TriangularWindowAverage.State state) : IBoundedKernel<TriangularKernel>
+    {
+        public static TriangularKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct WilliamsKernel(WilliamsValueState state) : IBoundedKernel<WilliamsKernel>
@@ -632,6 +639,7 @@ internal static partial class ValuesBarExecution
         LowestLow low => FillBoundedWindow<LowKernel>(source, output, indicator, low.Length, cancellation, owned),
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
         FixedPeriodWma average => FillBoundedWindow<WmaKernel>(source, output, indicator, average.Period, cancellation, owned),
+        TriangularWindowAverage average => FillBoundedWindow<TriangularKernel>(source, output, indicator, average.Period, cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
         WindowAroon when AroonWindow(indicator) > 0 => FillBoundedWindow<AroonKernel>(source, output, indicator, AroonWindow(indicator), cancellation, owned),

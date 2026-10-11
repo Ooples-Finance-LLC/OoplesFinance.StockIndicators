@@ -22,6 +22,7 @@ internal sealed partial class TensorsGpuExecution
         {
             Wma weighted => Math.Max(1, weighted.Length),
             FixedPeriodWma weighted => weighted.Period,
+            TriangularWindowAverage weighted => weighted.Period,
             _ => 0
         };
         var midpoint = indicator as WindowRangeMidpoint;
@@ -120,7 +121,7 @@ internal sealed partial class TensorsGpuExecution
                 if (!percentileCertified) throw new NotSupportedException("Percentile inputs do not satisfy the exact GPU interpolation certificate.");
                 if (!sumCertified) throw new NotSupportedException(weightedPeriod == 0
                     ? "Rolling sum inputs do not satisfy the exact GPU sum certificate."
-                    : "WMA period or inputs do not satisfy the exact GPU weighted-sum certificate.");
+                    : "Weighted-average period or inputs do not satisfy the exact GPU weighted-sum certificate.");
                 if (!_pointwiseKernels.TryGetValue(operation, out var compiled))
                 {
                     compiled = CompilePointwise(operation);
@@ -138,7 +139,7 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
                 kernel.SetArg(4, weightedPeriod > 0 ? weightedPeriod : rollingSum?.Period ?? lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
-                if (weightedPeriod > 0) kernel.SetArg(5, indicator is FixedPeriodWma ? 1 : 0);
+                if (weightedPeriod > 0) kernel.SetArg(5, indicator is TriangularWindowAverage ? 2 : indicator is FixedPeriodWma ? 1 : 0);
                 if (median is not null)
                 {
                     kernel.SetArg(5, median.AverageDuringWarmup ? 1 : 0);

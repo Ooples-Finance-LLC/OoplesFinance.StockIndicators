@@ -68,6 +68,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['QuanTAlib.Fwma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_triangular_builder_maps_both_native_apis(self):
+        self.write()
+        for api in ('QuanTAlib.Trima', 'TaLib.Functions.Trima'):
+            path = self.qualification(f'SharedTriangularBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_sinc_builder_maps_native_api(self):
         self.write()
         path = self.qualification('SharedWindowedSincBenchmarks.BuilderFull(Operation: "QuanTAlib.Afirma", Count: 1000)')

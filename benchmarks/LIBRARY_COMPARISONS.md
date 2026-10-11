@@ -2487,6 +2487,28 @@ order-statistic/rational and staged-native references cover odd/even periods,
 negative/zero medians, threshold neighbors, extreme prices, huge periods, fresh
 calls, prefixes and output/threshold mutations. Archive: 1,548 arms /387 pairs.
 
+## Triangular CPU and GPU execution (timing pending)
+
+`TriangularWindowAverage` now reuses the pilot's exact-sum certificate for its
+unrounded box-sum convolution. Certified CPU states use double sums; rejection
+promotes every retained sum before including the new value. A concrete typed
+kernel uses P-1 replay bars in the shared bounded parallel loop. Reset, startup
+zeros, signed-zero canonicalization and extreme-value fallback remain intact.
+
+Required GPU uses mode 2 of the existing cached weighted-average kernel, through
+AiDotNet.Tensors 0.134.4. Each 64-output tile seeds the triangular total and two
+box sums, then updates them without intermediate series or intermediate rounding.
+The existing weighted-mass certificate limits supported periods to 1..65535 and
+rejects uncertified inputs after validating all raw bars. Auto remains CPU.
+
+Validation passed 36 focused CPU/GPU tests (no skips), including WMA mode-cache
+regressions, 10 independent comparison/setup tests and 52 inventory checks.
+`SharedTriangularBenchmarks` includes both history modes, required-device GPU and
+native serial/eight-worker paths for QuanTAlib.Trima and TaLib.Functions.Trima at
+1k/10k. Timing qualification is pending a quiet machine; concurrent test processes
+in other repositories prevented a reliable campaign. Neither API has been added
+to the 176 qualified count, and no new latency/allocation win is claimed yet.
+
 ## Selected TA directional builder qualification
 
 `PriorSeededDirectionalMeasure` skips unused movement/range streams and allocates
