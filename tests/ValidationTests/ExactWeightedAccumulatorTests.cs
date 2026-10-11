@@ -9,7 +9,8 @@ public sealed class ExactWeightedAccumulatorTests
     public void CachedProductFactorsPreserveWideProductsSignsAndIntegerWeights()
     {
         double[] inputs = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,
-            Math.BitIncrement(1d), -Math.BitDecrement(1d), .125];
+            Math.BitIncrement(1d), -Math.BitDecrement(1d), .125,
+            Math.ScaleB(1, 32) - 1, Math.ScaleB(1, 31) - 1, Math.ScaleB(1, 31) + 1, -(Math.ScaleB(1, 32) - 1)];
         foreach (double left in inputs)
         foreach (double right in inputs)
         foreach (int weight in new[] { int.MinValue, -1, 0, 1, int.MaxValue })
@@ -36,6 +37,26 @@ public sealed class ExactWeightedAccumulatorTests
             Assert.Throws<ArithmeticException>(() => sum.AddProduct(0d, invalid, weight));
             Assert.Throws<ArithmeticException>(() => sum.AddProduct(invalid, 0d, weight));
         }
+    }
+
+    [Fact]
+    public void FixedCoefficientBoundsPreserveCompactLimitsAndWideFallback()
+    {
+        double[] inputs = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,
+            Math.BitIncrement(1d), .125, Math.ScaleB(1, 32) - 1, Math.ScaleB(1, 31) - 1, Math.ScaleB(1, 31) + 1];
+        foreach (double left in inputs)
+        foreach (double right in inputs)
+        {
+            var sum = new ExactMeanAccumulator();
+            var price = new ExactMeanAccumulator.ProductFactor(left);
+            var coefficient = new ExactMeanAccumulator.ProductCoefficient(right);
+            sum.AddProduct(in price, in coefficient);
+            var exact = ReferenceFraction.FromDouble(left) * ReferenceFraction.FromDouble(right);
+            Assert.Equal(BitConverter.DoubleToInt64Bits((exact / new ReferenceFraction(17)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(sum.Mean(17)));
+        }
+        foreach (double invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            Assert.Throws<ArithmeticException>(() => new ExactMeanAccumulator.ProductCoefficient(invalid));
     }
 
     [Fact]

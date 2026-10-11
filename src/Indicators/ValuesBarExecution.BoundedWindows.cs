@@ -20,6 +20,16 @@ internal static partial class ValuesBarExecution
         _ => 0
     };
 
+    private static int BoundedParallelMinimum(IIndicator indicator)
+    {
+        // Fixed convolutions perform one exact product per coefficient per bar.
+        // Keep the existing threshold for constant-work kernels; for convolutions
+        // use an 8192-term work estimate and at least 512 bars for scheduling.
+        int terms = indicator is NormalizedConvolution or GaussianWeightedAverage or SineWeightedAverage
+            ? WeightedWindowPeriod(indicator) : 1;
+        return Math.Max(512, 1 + 8191 / terms);
+    }
+
     private static int BodyShadowPeriod(IIndicator indicator) => indicator switch
     {
         MarubozuCandle c => c.Period,
@@ -188,7 +198,7 @@ internal static partial class ValuesBarExecution
         Bar[][]? tails = null;
         try
         {
-            if (chunks >= 2 && CanParallelize(source.Length, 8192))
+            if (chunks >= 2 && CanParallelize(source.Length, BoundedParallelMinimum(indicator)))
                 Monitor.TryEnter(ParallelBarGate, ref lockTaken);
             if (!lockTaken)
             {

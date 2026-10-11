@@ -121,7 +121,7 @@ public sealed class EndpointWeightedAverage
 internal sealed class NormalizedKernelState(int length, Func<int, double> weight) : IIndicatorState
 {
     private readonly Queue<ExactMeanAccumulator.ProductFactor> _history = new();
-    private readonly List<ExactMeanAccumulator.ProductFactor> _coefficients = new();
+    private readonly List<ExactMeanAccumulator.ProductCoefficient> _coefficients = new();
     private ExactMeanAccumulator _denominator;
 
     public void Reset()
@@ -139,8 +139,8 @@ internal sealed class NormalizedKernelState(int length, Func<int, double> weight
             // These internal kernels have fixed newest-first coefficients. Only
             // startup extends the coefficient prefix; eviction does not change it.
             if (_coefficients.Count == _history.Count)
-                _coefficients.Add(new ExactMeanAccumulator.ProductFactor(weight(_history.Count)));
-            _denominator.AddFactor(_coefficients[_history.Count]);
+                _coefficients.Add(new ExactMeanAccumulator.ProductCoefficient(weight(_history.Count)));
+            _denominator.AddFactor(_coefficients[_history.Count].Factor);
         }
         _history.Enqueue(new ExactMeanAccumulator.ProductFactor(bar.Close));
         var numerator = new ExactMeanAccumulator();
@@ -148,7 +148,7 @@ internal sealed class NormalizedKernelState(int length, Func<int, double> weight
         foreach (var price in _history)
         {
             var coefficient = _coefficients[--lag];
-            numerator.AddProduct(price, coefficient);
+            numerator.AddProduct(in price, in coefficient);
         }
         return _denominator.IsExactlyZero
             ? numerator.Mean(_history.Count)

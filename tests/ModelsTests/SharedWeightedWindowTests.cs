@@ -36,11 +36,14 @@ public sealed class SharedWeightedWindowTests : IDisposable
     {
         foreach (int count in new[] { 8191, 8192, 8193 })
             await Compare(Fixture(count), [Create(operation, 7)]);
+        foreach (int count in new[] { 511, 512, 513 })
+            await Compare(Fixture(count), [Create(operation, 20)]);
     }
 
     [Fact]
     public async Task MixedPeriodsAndExtremeValuesPreserveExactReplay()
     {
+        await Compare(Fixture(513), [Create(1, 20), new SineWeightedAverage(3), new RollingPriceSum(7)]);
         await Compare(Fixture(8193), [new FixedPeriodWma(11), new NormalizedConvolution([1, -1, 2, -2]),
             new GaussianWeightedAverage(7), new SineWeightedAverage(3), new MarubozuCandle(10)]);
         foreach (int count in new[] { 0, 1, 41 })
@@ -55,6 +58,11 @@ public sealed class SharedWeightedWindowTests : IDisposable
     [Fact]
     public async Task InputPrecedenceCancellationAndSourcedFallbackRemainIntact()
     {
+        var shortBars = Fixture(513);
+        shortBars[0] = new Bar(default, 0, 1, 0, -double.MaxValue, 1);
+        shortBars[1] = new Bar(default, 0, 1, 0, double.MaxValue, 1);
+        shortBars[63] = new Bar(default, 0, 1, 0, 1, double.NaN);
+        await Compare(shortBars, [new NormalizedConvolution(new[] { 2d, -2d }.Concat(new double[18]))], expectError: true);
         var bars = Fixture(8193);
         IIndicator[] indicators = [new NormalizedConvolution([2, -2]), new FixedPeriodWma(7)];
         bars[0] = new Bar(default, 0, 1, 0, -double.MaxValue, 1);

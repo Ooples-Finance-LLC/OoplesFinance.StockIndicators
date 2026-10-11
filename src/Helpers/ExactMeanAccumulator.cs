@@ -99,6 +99,30 @@ internal struct ExactMeanAccumulator
 
     internal void AddFactor(ProductFactor value) => AddSmall(value.Mantissa, value.Scale);
 
+    internal readonly struct ProductCoefficient
+    {
+        internal readonly ProductFactor Factor;
+        internal readonly long PartnerLimit;
+
+        internal ProductCoefficient(double value)
+        {
+            Factor = new ProductFactor(value);
+            PartnerLimit = Factor.Mantissa == 0 ? long.MaxValue : long.MaxValue / Math.Abs(Factor.Mantissa);
+        }
+    }
+
+    internal void AddProduct(in ProductFactor price, in ProductCoefficient coefficient)
+    {
+        var factor = coefficient.Factor;
+        if (price.Mantissa == 0 || factor.Mantissa == 0) return;
+        var scale = price.Scale + factor.Scale - 1074;
+        // This bound is exact and fixed with the coefficient, so each window
+        // term needs only comparison and multiplication, not another division.
+        if (Math.Abs(price.Mantissa) <= coefficient.PartnerLimit)
+            AddSmall(price.Mantissa * factor.Mantissa, scale);
+        else AddLarge(new BigInteger(price.Mantissa) * factor.Mantissa, scale);
+    }
+
     internal void AddProduct(double left, double right, int weight = 1) =>
         AddProduct(new ProductFactor(left), new ProductFactor(right), weight);
 

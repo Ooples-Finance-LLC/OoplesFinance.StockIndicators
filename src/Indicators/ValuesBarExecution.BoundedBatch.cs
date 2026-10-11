@@ -47,7 +47,8 @@ internal static partial class ValuesBarExecution
         int period = nodes.Max(n => BoundedPeriod(n.Indicator));
         int chunks = period <= 4096 ? Math.Min(WorkerCount(), source.Length / period) : 1;
         BoundedBatchRegion[] regions;
-        if (chunks < 2 || !CanParallelize(source.Length, 8192) || !Monitor.TryEnter(ParallelBarGate))
+        int parallelMinimum = nodes.Min(n => BoundedParallelMinimum(n.Indicator));
+        if (chunks < 2 || !CanParallelize(source.Length, parallelMinimum) || !Monitor.TryEnter(ParallelBarGate))
             regions = [ComputeBoundedBatch(source, nodes, owned, 0, source.Length, [], [], cancellation)];
         else
         {
