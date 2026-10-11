@@ -210,6 +210,10 @@ internal struct ExactPopulationDeviation
 
     internal static BigInteger IntegerRoot(BigInteger value)
     {
+#if !NETFRAMEWORK
+        if (value.Sign >= 0 && value.GetBitLength() <= 128)
+            return (ulong)CompactIntegerRoot((UInt128)value);
+#endif
         var current = BigInteger.One << ((BitLength(value) + 1) / 2);
         while (true)
         {
@@ -218,6 +222,25 @@ internal struct ExactPopulationDeviation
             current = next;
         }
     }
+
+#if !NETFRAMEWORK
+    // Normalizing a binary64 root to its final rounding grid leaves at most
+    // 106 quotient bits. Keep Newton's temporary division/addition off the heap.
+    internal static UInt128 CompactIntegerRoot(UInt128 value)
+    {
+        if (value == 0) return 0;
+        ulong upper = (ulong)(value >> 64);
+        int bits = upper == 0 ? 64 - BitOperations.LeadingZeroCount((ulong)value)
+            : 128 - BitOperations.LeadingZeroCount(upper);
+        UInt128 current = (UInt128)1 << ((bits + 1) / 2);
+        while (true)
+        {
+            var next = (current + value / current) >> 1;
+            if (next >= current) return current;
+            current = next;
+        }
+    }
+#endif
 
     private static int BitLength(BigInteger value)
     {

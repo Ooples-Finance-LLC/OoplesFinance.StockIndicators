@@ -2725,3 +2725,9 @@ bytes over 4,000 updates after warmup in the regression dataset. This excludes
 square-root publication, which can still allocate. Exact-reference tests cover
 wide cancellation, subnormal roots, copied state, missing returns, reset and
 irreversible realized-volatility poisoning. Timing qualification remains unchanged.
+
+The shared integer-root helper now uses fixed-width Newton iterations when its
+input fits 128 bits, retaining arbitrary precision for larger values. This
+follow-up passed 91 focused unit tests and ten volatility comparison tests. Its
+iterations allocate no scratch objects over 4,000 warmed-up calls; conversion
+and final midpoint arithmetic can still allocate. Latency remains unmeasured.
