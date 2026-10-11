@@ -111,8 +111,11 @@ internal sealed partial class TensorsGpuExecution
             {
                 // Do not reuse potentially failed buffers/queue work after a driver error
                 // or cancellation. OpenCL retains pending command references on release.
-                if (retain) _workspace = null;
-                work.Dispose();
+                if (retain)
+                {
+                    _workspace = null;
+                    work.Dispose();
+                }
                 throw;
             }
             finally { if (!retain) work.Dispose(); }

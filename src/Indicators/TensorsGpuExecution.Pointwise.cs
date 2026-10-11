@@ -104,8 +104,11 @@ internal sealed partial class TensorsGpuExecution
             }
             catch
             {
-                if (retain) _workspace = null;
-                work.Dispose();
+                if (retain)
+                {
+                    _workspace = null;
+                    work.Dispose();
+                }
                 throw;
             }
             finally { if (!retain) work.Dispose(); }
