@@ -585,6 +585,7 @@ internal static partial class ValuesBarExecution
             // the JIT; an interface call here loses its hot-loop specialization.
             if (_state is RickshawGridState grid) return FillScalar(source, new GridUpdate(grid), cancellation, owned);
             if (_state is PriceExtremeState extreme) return FillScalar(source, new ExtremeUpdate(extreme), cancellation, owned);
+            if (_state is EmaValueState ema) return FillScalar(source, new EmaUpdate(ema), cancellation, owned);
             if (_state is TrueRangeValueState range) return FillScalar(source, new TrueRangeUpdate(range), cancellation, owned);
             return FillScalar(source, new StateUpdate((IIndicatorState)_state!), cancellation, owned);
         }
@@ -594,6 +595,10 @@ internal static partial class ValuesBarExecution
             public double Update(in Bar bar) => state.Update(in bar);
         }
         private readonly struct ExtremeUpdate(PriceExtremeState state) : IScalarUpdate
+        {
+            public double Update(in Bar bar) => state.Update(in bar);
+        }
+        private readonly struct EmaUpdate(EmaValueState state) : IScalarUpdate
         {
             public double Update(in Bar bar) => state.Update(in bar);
         }

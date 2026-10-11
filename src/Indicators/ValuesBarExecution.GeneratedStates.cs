@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
-        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR;
+        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -16,8 +16,31 @@ internal static partial class ValuesBarExecution
         BalanceOfPower power => new BalanceOfPowerValueState(Math.Max(1, power.Length)),
         Wma average => new WmaValueState(Math.Max(1, average.Length), count),
         WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
+        Ema average => new EmaValueState(average.Length),
+        Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
+
+    private sealed class EmaValueState(int period) : IIndicatorState
+    {
+        private readonly Streaming.EmaState _state = new(period);
+        public void Reset() => _state.Reset();
+        public double Update(in Bar bar) => _state.GetNext(bar.Close, commit: true);
+    }
+
+    private sealed class AdlValueState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly MoneyFlowAccumulationWindow _line = new();
+        private readonly RocBankAverage _signal = new(MovingAvgType.ExponentialMovingAverage, period, count);
+        public void Reset() { _line.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> output)
+        {
+            var value = _line.Next(bar.High, bar.Low, bar.Close, bar.Volume, commit: true);
+            output[0] = value.Publish();
+            output[1] = _signal.Next(value, true).Publish();
+        }
+        public void Dispose() => _signal.Dispose();
+    }
 
     private sealed class PriceExtremeState(int period, int count, bool maximum) : IIndicatorState
     {
