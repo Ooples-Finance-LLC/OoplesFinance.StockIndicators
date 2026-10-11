@@ -4,6 +4,9 @@ using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
+// Allocation checks require the warmed shared workspace to retain its size
+// between warmup and measurement; concurrent workspace reuse is tested separately.
+[Collection("IndicatorValuesDispatch")]
 public sealed class TensorsGpuExecutionTests
 {
     private static Bar[] BarsFor(IEnumerable<double> values) => values.Select((x, i) =>

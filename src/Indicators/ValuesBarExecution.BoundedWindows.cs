@@ -156,10 +156,11 @@ internal static partial class ValuesBarExecution
         }
         finally
         {
+            // Workers have quiesced. Release the gate even if pool cleanup fails.
+            if (lockTaken) Monitor.Exit(ParallelBarGate);
             if (tails is not null)
                 foreach (var tail in tails)
                     if (tail is { Length: > 0 }) System.Buffers.ArrayPool<Bar>.Shared.Return(tail);
-            if (lockTaken) Monitor.Exit(ParallelBarGate);
         }
     }
 

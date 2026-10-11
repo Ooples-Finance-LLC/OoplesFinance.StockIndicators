@@ -334,7 +334,7 @@ public sealed class StockIndicatorBuilder
 #endif
         else if (_executionBackend == IndicatorExecutionBackend.Gpu)
         {
-            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin, Asin.Of(Sma), and standalone candle arithmetic or rounding transforms without warmup sources or legacy callbacks.");
+            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin, Asin.Of(Sma), and standalone candle arithmetic, rounding transforms or engulfing patterns without warmup sources or legacy callbacks.");
         }
         else if (source is Indicators.ISynchronousBarSource synchronous)
         {

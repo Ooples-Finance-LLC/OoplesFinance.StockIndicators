@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Exactly seven keys: four arithmetic and three rounding operations.
+    // Eight keys: four arithmetic, three rounding and one adjacent-candle kernel.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -14,9 +14,10 @@ internal sealed partial class TensorsGpuExecution
     {
         var arithmetic = indicator as CandleArithmetic;
         var rounding = indicator as PriceRoundingTransform;
-        if (source.Length == 0 || arithmetic is null && rounding is null)
+        bool engulfing = indicator is EngulfingPattern;
+        if (source.Length == 0 || arithmetic is null && rounding is null && !engulfing)
             throw new NotSupportedException("Unqualified GPU pointwise kernel.");
-        int operation = arithmetic is not null ? (int)arithmetic.Operation : 4 + (int)rounding!.Operation;
+        int operation = engulfing ? 7 : arithmetic is not null ? (int)arithmetic.Operation : 4 + (int)rounding!.Operation;
         lock (_gate)
         {
             cancellation.ThrowIfCancellationRequested();
@@ -35,7 +36,7 @@ internal sealed partial class TensorsGpuExecution
             try
             {
                 var left = work.Input;
-                var right = arithmetic is null ? null : work.RightInput;
+                var right = arithmetic is not null || engulfing ? work.RightInput : null;
                 double[]? presence = null;
                 Bar latest = default;
                 for (int i = 0; i < source.Length; i++)
@@ -44,8 +45,8 @@ internal sealed partial class TensorsGpuExecution
                     latest = source[i];
                     if (!ValuesBarExecution.AllFieldsFinite(in latest)) IndicatorInputDomain.Finite.Validate(in latest);
                     if (owned is not null) owned[i] = latest;
-                    left[i] = arithmetic is null ? latest.Close : Select(in latest, arithmetic.Left);
-                    if (right is not null) right[i] = Select(in latest, arithmetic!.Right);
+                    left[i] = engulfing ? latest.Open : arithmetic is null ? latest.Close : Select(in latest, arithmetic.Left);
+                    if (right is not null) right[i] = engulfing ? latest.Close : Select(in latest, arithmetic!.Right);
                     bool defined = operation != 3 || Math.Abs(right![i]) > 0;
                     if (operation == 6) defined = left[i] >= 0;
                     if (!defined)
@@ -82,7 +83,8 @@ internal sealed partial class TensorsGpuExecution
                     cancellation.ThrowIfCancellationRequested();
                     if (!double.IsFinite(output[0][i])) IndicatorOutputPolicy.Validate(indicator, 0, i, output[0][i]);
                 }
-                output[1] = presence ?? ValuesBarExecution.CompletePointwisePresence(source.Length, null, false, cancellation);
+                if (output.Length > 1)
+                    output[1] = presence ?? ValuesBarExecution.CompletePointwisePresence(source.Length, null, false, cancellation);
                 cancellation.ThrowIfCancellationRequested();
                 return latest;
             }
@@ -117,8 +119,13 @@ internal sealed partial class TensorsGpuExecution
             4 => "ceil(x)",
             5 => "floor(x)",
             6 => "x >= 0.0 ? sqrt(x) : 0.0",
+            7 => "y >= x && q < p && x <= q && y >= p && (x < q || y > p) ? 100.0 : " +
+                 "y < x && q >= p && x >= q && y <= p && (x > q || y < p) ? -100.0 : 0.0",
             _ => throw new NotSupportedException("Unqualified GPU pointwise operation.")
         };
+        var previous = operation == 7
+            ? "if (i < 2) { output[i] = 0.0; return; } double p = left[i - 1]; double q = right[i - 1];"
+            : "";
         var source = $$"""
             #pragma OPENCL EXTENSION cl_khr_fp64 : enable
             #pragma OPENCL FP_CONTRACT OFF
@@ -129,6 +136,7 @@ internal sealed partial class TensorsGpuExecution
                 if (i >= (size_t)count) return;
                 double x = left[i];
                 double y = right[i];
+                {{previous}}
                 output[i] = {{expression}};
             }
             """;

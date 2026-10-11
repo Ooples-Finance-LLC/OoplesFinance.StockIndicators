@@ -19,7 +19,7 @@ public class SharedEngulfingBenchmarks
     {
         _previousDop = CpuParallelSettings.MaxDegreeOfParallelism;
         CpuParallelSettings.MaxDegreeOfParallelism = 8;
-        var fixture = CandleComparison.Fixture(20);
+        var fixture = CandleComparison.Fixture((Count - 1) / 512 + 1);
         _open = fixture.Opens.Take(Count).ToArray();
         _close = fixture.Closes.Take(Count).ToArray();
         _high = fixture.Highs.Take(Count).ToArray();
@@ -67,11 +67,15 @@ public class SharedEngulfingBenchmarks
         if (status != TALib.Core.RetCode.Success || range.Start.Value != 2 || range.End.Value - range.Start.Value != output.Length)
             throw new InvalidOperationException("Unexpected native engulfing output range.");
     }
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool ordinary = false)
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool ordinary = false,
+        IndicatorExecutionBackend backend = IndicatorExecutionBackend.Cpu)
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
+            .ConfigureHistory(history).ConfigureExecution(backend);
         if (ordinary) builder.ConfigureBehavior(_ => { });
-        return builder.BuildAsync().GetAwaiter().GetResult();
+        var result = builder.BuildAsync().GetAwaiter().GetResult();
+        if (!ordinary && builder.LastExecution?.Backend != backend)
+            throw new InvalidOperationException("Requested engulfing backend did not execute.");
+        return result;
     }
 }

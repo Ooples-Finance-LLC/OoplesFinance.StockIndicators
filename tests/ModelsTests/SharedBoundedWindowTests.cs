@@ -189,7 +189,8 @@ public sealed class SharedBoundedWindowTests
             builder = Build(bars, [pattern]);
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
             Assert.Null(builder.LastExecution);
-            await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
+            await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureIndicators(pattern, new HighestHigh(3))
+                .ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
             Assert.Null(builder.LastExecution);
         }
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }

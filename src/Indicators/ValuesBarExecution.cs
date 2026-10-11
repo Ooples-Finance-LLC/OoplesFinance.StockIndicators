@@ -22,7 +22,8 @@ internal static partial class ValuesBarExecution
         || indicators.Count > 0 && indicators.All(IsSharedState);
 
     internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
-        && IsPointwise(indicators[0]) && indicators[0] is CandleArithmetic or PriceRoundingTransform;
+        && indicators[0].Source is null && indicators[0].Components.Count == 0
+        && indicators[0] is CandleArithmetic or PriceRoundingTransform or EngulfingPattern;
 
     internal static bool Supports(IReadOnlyList<IIndicator> indicators) =>
         SupportsOwned(indicators) || indicators.All(i => IsSharedState(i) ||
@@ -62,7 +63,7 @@ internal static partial class ValuesBarExecution
                 if (!fusedSma)
                     latest = FillSmaColumn(source, close!, period, cancellation, out summary, out positiveRange);
             }
-            else if (nodes.Count == 1 && IsPointwise(nodes[0].Indicator))
+            else if (nodes.Count == 1 && (IsPointwise(nodes[0].Indicator) || gpu is not null))
                 latest = gpu is null ? FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned)
                     : gpu.ExecutePointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is TrueRange)
