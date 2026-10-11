@@ -74,6 +74,7 @@ internal static class SharedCpuStates
         typeof(FilteredDeviationAverage),
         typeof(FirstValueEma),
         typeof(FixedPeriodWma),
+        typeof(FibonacciWeightedAverage),
         typeof(GapSideBySideWhiteLinesCandle),
         typeof(GatorWithDetails),
         typeof(GaussianWeightedAverage),

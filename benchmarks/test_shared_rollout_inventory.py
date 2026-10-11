@@ -62,6 +62,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_fibonacci_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedFibonacciWeightedBenchmarks.BuilderFull(Operation: "QuanTAlib.Fwma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Fwma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_gpu_fixed_weighted_average_maps_native_api(self):
         self.write()
         path = self.qualification('SharedGpuFixedWmaBenchmarks.BuilderFull(Operation: "Wma", Count: 1000)')

@@ -2496,6 +2496,16 @@ response for all five windows, extending startup with the newest price. Its
 unused cubic calculation is omitted. Undefined kernels are rejected explicitly;
 complete weighted ratios round once. Kernel storage scales with period/taps.
 
+`FibonacciWeightedAverage` adds the builder route with two exact running sums,
+using F(k-2)=F(k)-F(k-1) and explicit removal of the expired term. The normalized
+prefix mass is retained after warmup. Bounded CPU workers replay period-1 bars;
+Required GPU rejects this indicator. The independent doubling-identity reference,
+long-period eviction/reset, extreme binary64 values, and worker boundaries are
+covered. In the eight-arm `fibonacci-cpu` campaign, both builder modes beat native
+serial and parallel at 1k/10k. At 10k, Full/LatestOnly measured 201.38/186.27 us and
+557.99/88.23 KiB versus native parallel 295.31 us and 2583.04 KiB. The LatestOnly
+99.9% interval was wide (144.74-227.80 us), still below native's 289.85-300.78 us.
+
 Eight tests, 95,728 trajectory comparisons and eight timing arms passed.
 The archive verifier passed 1,556 arms across all 389 paired families.
 
