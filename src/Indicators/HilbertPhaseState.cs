@@ -14,14 +14,17 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
     private JurikDyadic _i2,
         _q2,
         _real,
-        _imaginary;
+        _imaginary,
+        _inPhaseValue,
+        _quadratureValue,
+        _smoothPriceValue;
     private double _olderPeriod,
         _olderPhase;
     private long _index = -1;
     private int _priceCursor, _filterCursor;
-    internal JurikDyadic InPhase { get; private set; }
-    internal JurikDyadic Quadrature { get; private set; }
-    internal JurikDyadic SmoothPrice { get; private set; }
+    internal JurikDyadic InPhase => _inPhaseValue;
+    internal JurikDyadic Quadrature => _quadratureValue;
+    internal JurikDyadic SmoothPrice => _smoothPriceValue;
     internal double Period { get; private set; }
     internal double Phase { get; private set; }
 
@@ -31,11 +34,11 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         return value;
     }
 
-    private JurikDyadic Fir(JurikDyadic value, JurikDyadic[] past, double correction)
+    private JurikDyadic Fir(in JurikDyadic value, JurikDyadic[] past, double correction)
     {
-        var lag2 = past[(_filterCursor + 4) % 6];
-        var lag4 = past[(_filterCursor + 2) % 6];
-        var lag6 = past[_filterCursor];
+        ref readonly var lag2 = ref past[(_filterCursor + 4) % 6];
+        ref readonly var lag4 = ref past[(_filterCursor + 2) % 6];
+        ref readonly var lag6 = ref past[_filterCursor];
 #if !NETFRAMEWORK
         if (value.TryDouble(out double v) && lag2.TryDouble(out double a)
             && lag4.TryDouble(out double b) && lag6.TryDouble(out double c)
@@ -54,7 +57,7 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         return Product(sum.Rounded(), correction).Rounded();
     }
 
-    private static JurikDyadic Blend(JurikDyadic value, JurikDyadic old)
+    private static JurikDyadic Blend(in JurikDyadic value, in JurikDyadic old)
     {
 #if !NETFRAMEWORK
         if (value.TryDouble(out double a) && old.TryDouble(out double b)
@@ -66,8 +69,8 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         return sum.Rounded();
     }
 
-    private static JurikDyadic ProductSum(JurikDyadic a, JurikDyadic b,
-        JurikDyadic c, JurikDyadic d, bool subtract = false)
+    private static JurikDyadic ProductSum(in JurikDyadic a, in JurikDyadic b,
+        in JurikDyadic c, in JurikDyadic d, bool subtract = false)
     {
 #if !NETFRAMEWORK
         if (a.TryDouble(out double av) && b.TryDouble(out double bv)
@@ -75,16 +78,18 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
             && HilbertRoundedKernel.TryProductSum(av, bv, subtract ? -cv : cv, dv, out double rounded))
             return JurikDyadic.FromDouble(rounded);
 #endif
-        a.Multiply(b); c.Multiply(d);
-        if (subtract) a.Subtract(c); else a.AddExact(c);
-        return a.Rounded();
+        var first = a;
+        var second = c;
+        first.Multiply(b); second.Multiply(d);
+        if (subtract) first.Subtract(second); else first.AddExact(second);
+        return first.Rounded();
     }
 
-    private JurikDyadic Smooth(JurikDyadic price, JurikDyadic[] past)
+    private JurikDyadic Smooth(in JurikDyadic price, JurikDyadic[] past)
     {
-        var lag1 = past[(_priceCursor + 2) % 3];
-        var lag2 = past[(_priceCursor + 1) % 3];
-        var lag3 = past[_priceCursor];
+        ref readonly var lag1 = ref past[(_priceCursor + 2) % 3];
+        ref readonly var lag2 = ref past[(_priceCursor + 1) % 3];
+        ref readonly var lag3 = ref past[_priceCursor];
 #if !NETFRAMEWORK
         if (price.TryDouble(out double p) && lag1.TryDouble(out double a)
             && lag2.TryDouble(out double b) && lag3.TryDouble(out double c)
@@ -102,7 +107,7 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
     {
         foreach (var a in new[] { _prices, _smooth, _detrended, _quadrature, _inphase })
             Array.Clear(a, 0, a.Length);
-        _i2 = _q2 = _real = _imaginary = InPhase = Quadrature = SmoothPrice = default;
+        _i2 = _q2 = _real = _imaginary = _inPhaseValue = _quadratureValue = _smoothPriceValue = default;
         _olderPeriod = _olderPhase = Period = Phase = 0;
         _index = -1;
         _priceCursor = _filterCursor = 0;
@@ -117,14 +122,14 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         if (_index >= start)
         {
             var correction = .075 * Period + .54;
-            SmoothPrice = Smooth(price, _prices);
-            var detrended = Fir(SmoothPrice, _smooth, correction);
-            Quadrature = Fir(detrended, _detrended, correction);
-            InPhase = _detrended[(_filterCursor + 3) % 6];
-            var ji = Fir(InPhase, _inphase, correction);
-            var jq = Fir(Quadrature, _quadrature, correction);
-            var inphase = JurikDyadic.SumProduct(InPhase, jq, -1);
-            var quadrature = JurikDyadic.SumProduct(Quadrature, ji, 1);
+            _smoothPriceValue = Smooth(price, _prices);
+            var detrended = Fir(in _smoothPriceValue, _smooth, correction);
+            _quadratureValue = Fir(in detrended, _detrended, correction);
+            _inPhaseValue = _detrended[(_filterCursor + 3) % 6];
+            var ji = Fir(in _inPhaseValue, _inphase, correction);
+            var jq = Fir(in _quadratureValue, _quadrature, correction);
+            var inphase = JurikDyadic.SumProduct(in _inPhaseValue, in jq, -1);
+            var quadrature = JurikDyadic.SumProduct(in _quadratureValue, in ji, 1);
             var i2 = Blend(inphase, _i2);
             var q2 = Blend(quadrature, _q2);
             var real = Blend(ProductSum(i2, _i2, q2, _q2), _real);
@@ -139,13 +144,15 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
             measured = Math.Max(6, Math.Min(50, measured));
             var period = .2 * measured + .8 * Period;
             var phase =
-                InPhase.Sign != 0 ? Math.Atan(Quadrature.Ratio(InPhase)) * 180 / Math.PI
+                // Ratio may promote its receiver; preserve the owned field by
+                // taking the existing value-property snapshot at this boundary.
+                _inPhaseValue.Sign != 0 ? Math.Atan(Quadrature.Ratio(_inPhaseValue)) * 180 / Math.PI
                 : retainOlder ? _olderPhase
                 : 0;
-            _smooth[_filterCursor] = SmoothPrice;
+            _smooth[_filterCursor] = _smoothPriceValue;
             _detrended[_filterCursor] = detrended;
-            _quadrature[_filterCursor] = Quadrature;
-            _inphase[_filterCursor] = InPhase;
+            _quadrature[_filterCursor] = _quadratureValue;
+            _inphase[_filterCursor] = _inPhaseValue;
             _filterCursor = (_filterCursor + 1) % 6;
             _i2 = i2;
             _q2 = q2;

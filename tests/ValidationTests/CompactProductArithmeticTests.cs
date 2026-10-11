@@ -1,3 +1,4 @@
+using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -5,6 +6,33 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 public sealed class CompactProductArithmeticTests
 {
+    [Fact]
+    public void RoundedProductSumAllowsAliasedReadonlyOperandsWithoutMutation()
+    {
+        BigInteger grid = BigInteger.One << 1074;
+        BigInteger[] inputs = [0, 1, -1, ExactVarianceWindow.Units(1.3),
+            (BigInteger.One << 3000) + 1, -(BigInteger.One << 3000) - 1];
+        foreach (BigInteger units in inputs)
+        foreach (double factor in new[] { -1d, .2, 2, double.Epsilon })
+        {
+            var original = JurikDyadic.FromUnits(units);
+            var result = JurikDyadic.SumProduct(in original, in original, factor);
+            BigInteger expected = RocBankValue.RoundUnits(units * (grid + ExactVarianceWindow.Units(factor)), grid);
+            Assert.Equal(expected, result.RoundedUnits());
+            // Compare unrounded values so a mutated low bit cannot hide behind
+            // binary64 publication or extended-value rounding.
+            var difference = original;
+            difference.Subtract(JurikDyadic.FromUnits(units));
+            Assert.Equal(0, difference.Sign);
+        }
+        var simple = JurikDyadic.FromDouble(1.3);
+        var simpleResult = JurikDyadic.SumProduct(in simple, in simple, .2);
+        var reference = ReferenceFraction.FromDouble(1.3)
+            * (ReferenceFraction.FromDouble(1) + ReferenceFraction.FromDouble(.2));
+        Assert.Equal(BitConverter.DoubleToInt64Bits(reference.ToDouble()), BitConverter.DoubleToInt64Bits(simpleResult.Mean(1)));
+        Assert.Equal(1.3, simple.Mean(1));
+    }
+
     [Fact]
     public void ProductsOfExactSumsPreserveWideFallbackAndOperandOwnership()
     {
