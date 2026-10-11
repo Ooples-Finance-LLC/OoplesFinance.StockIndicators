@@ -96,6 +96,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_return_qualification_preserves_trady_aliases(self):
+        self.write()
+        for name in ('RateOfChange', 'PercentageDifference'):
+            path = self.qualification(f'SharedTradyReturnBenchmarks.BuilderFull(Operation: "{name}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_mode_qualification_keeps_native_namespace(self):
         self.write()
         api = 'QuanTAlib.Mode'
