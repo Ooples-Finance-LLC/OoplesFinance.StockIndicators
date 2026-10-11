@@ -60,11 +60,13 @@ public sealed class TriangularWindowAverage
             _secondLength;
         private readonly Queue<double> _prices = new();
         private readonly Queue<ExactMeanAccumulator> _sums = new();
-        private readonly Queue<double> _fastSums = new();
         private readonly long _mass;
+#if !NETFRAMEWORK
+        private readonly Queue<double> _fastSums = new();
         private Core.SmaCpuKernel.Certificate _certificate;
         private bool _certified;
         private double _fastFirst, _fastSecond;
+#endif
         private ExactMeanAccumulator _first,
             _second;
 
@@ -73,27 +75,34 @@ public sealed class TriangularWindowAverage
             _firstLength = (int)(((long)period + 1) / 2);
             _secondLength = period - _firstLength + 1;
             _mass = (long)_firstLength * _secondLength;
+#if !NETFRAMEWORK
             ResetCertificate();
+#endif
         }
 
         public void Reset()
         {
             _prices.Clear();
             _sums.Clear();
-            _fastSums.Clear();
             _first = _second = default;
+#if !NETFRAMEWORK
+            _fastSums.Clear();
             _fastFirst = _fastSecond = 0;
             ResetCertificate();
+#endif
         }
 
+#if !NETFRAMEWORK
         private void ResetCertificate()
         {
             _certified = _mass <= int.MaxValue;
             _certificate = new(_certified ? (int)_mass : int.MaxValue);
         }
+#endif
 
         public double Update(in Bar bar)
         {
+#if !NETFRAMEWORK
             if (_certified && !_certificate.Include(bar.Close))
             {
                 // Every retained box sum and the convolution total is still
@@ -121,6 +130,7 @@ public sealed class TriangularWindowAverage
                 _fastSecond += _fastFirst;
                 return _fastSums.Count < _secondLength || _fastSecond == 0 ? 0 : _fastSecond / _mass;
             }
+#endif
             if (_prices.Count == _firstLength)
                 _first.Add(_prices.Dequeue(), -1);
             _prices.Enqueue(bar.Close);
