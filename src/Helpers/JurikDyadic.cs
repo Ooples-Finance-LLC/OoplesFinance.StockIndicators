@@ -230,7 +230,7 @@ internal struct JurikDyadic
         result.Add(wide.Mantissa); result.ScaleByPowerOfTwo(wide.UpperShift);
         return result;
     }
-    internal static JurikDyadic SumProduct(JurikDyadic sum, JurikDyadic term, double factor)
+    internal static JurikDyadic SumProduct(in JurikDyadic sum, in JurikDyadic term, double factor)
     {
 #if !NETFRAMEWORK
         if (sum.TryDouble(out var addend) && term.TryDouble(out var operand))
@@ -242,7 +242,8 @@ internal struct JurikDyadic
             }
         }
 #endif
-        term.Multiply(factor); term.AddExact(sum); return term.Rounded();
+        var product = term;
+        product.Multiply(factor); product.AddExact(sum); return product.Rounded();
     }
     internal static bool TryBlend(JurikDyadic old, JurikDyadic next, double weight, out JurikDyadic result)
     {
@@ -306,7 +307,7 @@ internal struct JurikDyadic
         _exponent = Math.Max(0, exponent - 1) - 1074;
         _fixed = true; Normalize();
     }
-    internal bool TryDouble(out double value)
+    internal readonly bool TryDouble(out double value)
     {
         value = 0;
         if (!_wide && !_fixed) { value = _simple; return true; }
@@ -315,7 +316,7 @@ internal struct JurikDyadic
         if (bits > 53 || _exponent + bits - 1 > 1023) return false;
         value = RoundedDouble(); return true;
     }
-    private double RoundedDouble()
+    private readonly double RoundedDouble()
     {
         if (_integer == 0) return 0;
         var magnitude = Magnitude(_integer);
