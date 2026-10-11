@@ -141,6 +141,8 @@ public sealed class SharedBoundedWindowTests
             using var cancel = new CancellationTokenSource(); cancel.Cancel();
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
             Assert.Null(builder.LastExecution);
+            // Certified sums now support GPU; this finer grid must still reject.
+            bars[0] = new Bar(default, 0, 1, 0, .1, 1);
             await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
             Assert.Null(builder.LastExecution);
         }

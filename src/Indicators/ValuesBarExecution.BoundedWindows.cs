@@ -133,18 +133,40 @@ internal static partial class ValuesBarExecution
 
     private sealed class SumValueState(int period, int count) : IIndicatorState
     {
-        private readonly double[] _window = new double[Math.Min(period, Math.Max(1, count))];
+        private readonly double[] _window = period == 1 || period > count ? [] : new double[period];
         private ExactMeanAccumulator _sum;
+        private Core.SmaCpuKernel.Certificate _proof = new(period);
+        private double _running;
+        private bool _certified = true;
         private int _position, _seen;
-        public void Reset() { _position = _seen = 0; _sum = default; }
+        public void Reset()
+        {
+            _position = _seen = 0; _sum = default; _running = 0;
+            _proof = new(period); _certified = true;
+        }
         public double Update(in Bar bar)
         {
-            if (_seen == period) _sum.Add(_window[_position], -1);
+            if (period > count) return 0;
+            if (period == 1) return bar.Close == 0 ? 0 : bar.Close;
+            if (_certified && !_proof.Include(bar.Close))
+            {
+                // Reconstruct from retained input, never from a rounded running
+                // result. The new value has not been inserted or evicted yet.
+                for (int i = 0; i < _seen; i++) _sum.Add(_window[i]);
+                _certified = false;
+            }
+            if (_seen == period)
+            {
+                if (_certified) _running -= _window[_position];
+                else _sum.Add(_window[_position], -1);
+            }
             else _seen++;
-            _sum.Add(bar.Close);
+            // Evict first so the certificate bounds at most P inputs.
+            if (_certified) _running += bar.Close;
+            else _sum.Add(bar.Close);
             _window[_position] = bar.Close;
             if (++_position == _window.Length) _position = 0;
-            return _seen < period ? 0 : _sum.Mean(1);
+            return _seen < period ? 0 : _certified ? _running == 0 ? 0 : _running : _sum.Mean(1);
         }
     }
 
