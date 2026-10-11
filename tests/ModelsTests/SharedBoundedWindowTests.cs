@@ -7,7 +7,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SharedBoundedWindowTests
 {
-    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 12)
+    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 13)
         from period in new[] { 1, 3, 20, 4096, 4097, int.MaxValue } select new object[] { operation, period };
     private static IndicatorBase Create(int operation, int period) => operation switch
     {
@@ -15,7 +15,8 @@ public sealed class SharedBoundedWindowTests
         3 => new LowestLow(period), 4 => new RollingPriceSum(period),
         5 => new WindowRangeMidpoint(period), 6 => new WindowRangeMidpoint(period, true),
         7 => new DecayingWindowExtreme(period), 8 => new DecayingWindowExtreme(period, true),
-        9 => new WindowExtremeIndex(period), 10 => new WindowExtremeIndex(period, true), _ => new WindowPriceRange(period)
+        9 => new WindowExtremeIndex(period), 10 => new WindowExtremeIndex(period, true),
+        11 => new WindowPriceRange(period), _ => new FixedPeriodWma(period)
     };
 
     [Theory, MemberData(nameof(Configurations))]
@@ -450,6 +451,8 @@ public sealed class SharedBoundedWindowTests
                 bars[transition] = new Bar(default, 0, 1, -1, rejected, 1);
                 await CompareRoutes(bars, [new Wma(20)]);
                 await CompareRoutes(bars, [new Wma(20), new HighestHigh(7)]);
+                await CompareRoutes(bars, [new FixedPeriodWma(20)]);
+                await CompareRoutes(bars, [new FixedPeriodWma(20), new HighestHigh(7)]);
             }
         }
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
@@ -466,6 +469,7 @@ public sealed class SharedBoundedWindowTests
             var bars = Enumerable.Range(0, 65).Select(i => new Bar(default, 0, 1, -1,
                 i % 2 == 0 ? value : -value, 1)).ToArray();
             await CompareRoutes(bars, [new Wma(period)]);
+            await CompareRoutes(bars, [new FixedPeriodWma(period)]);
         }
     }
 

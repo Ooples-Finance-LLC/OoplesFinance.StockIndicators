@@ -170,7 +170,7 @@ internal static partial class ValuesBarExecution
         }
     }
 
-    private sealed class WmaValueState(int period, int count) : IIndicatorState
+    private sealed class WmaValueState(int period, int count, bool normalizeAvailable = false) : IIndicatorState
     {
         private readonly double[] _window = new double[Math.Min(period, Math.Max(1, count))];
         private readonly long _denominator = (long)period * (period + 1L) / 2;
@@ -218,7 +218,8 @@ internal static partial class ValuesBarExecution
             if (_seen < period) _seen++;
             _window[_position] = bar.Close;
             if (++_position == _window.Length) _position = 0;
-            return _certified ? _fastWeighted == 0 ? 0 : _fastWeighted / _denominator : _weighted.Mean(_denominator);
+            long denominator = normalizeAvailable ? (long)_seen * (2L * period - _seen + 1) / 2 : _denominator;
+            return _certified ? _fastWeighted == 0 ? 0 : _fastWeighted / denominator : _weighted.Mean(denominator);
         }
     }
 
@@ -266,7 +267,8 @@ internal static partial class ValuesBarExecution
     }
     private readonly struct WmaKernel(WmaValueState state) : IBoundedKernel<WmaKernel>
     {
-        public static WmaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count));
+        public static WmaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(period, count, indicator is FixedPeriodWma));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct WilliamsKernel(WilliamsValueState state) : IBoundedKernel<WilliamsKernel>
@@ -627,6 +629,7 @@ internal static partial class ValuesBarExecution
         HighestHigh high => FillBoundedWindow<HighKernel>(source, output, indicator, high.Length, cancellation, owned),
         LowestLow low => FillBoundedWindow<LowKernel>(source, output, indicator, low.Length, cancellation, owned),
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
+        FixedPeriodWma average => FillBoundedWindow<WmaKernel>(source, output, indicator, average.Period, cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
         WindowAroon when AroonWindow(indicator) > 0 => FillBoundedWindow<AroonKernel>(source, output, indicator, AroonWindow(indicator), cancellation, owned),

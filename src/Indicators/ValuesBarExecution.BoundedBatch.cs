@@ -35,6 +35,7 @@ internal static partial class ValuesBarExecution
         HighestHigh high => new PriceExtremeState(high.Length, count, true),
         LowestLow low => new PriceExtremeState(low.Length, count, false),
         Wma average => new WmaValueState(Math.Max(1, average.Length), count),
+        FixedPeriodWma average => new WmaValueState(average.Period, count, true),
         WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
         RollingPriceSum sum => new SumValueState(sum.Period, count),
         RollingPercentile { HasFractionalFullRank: true } percentile => new RollingPercentile.State(percentile.Period, percentile.Percentile, percentile.AverageDuringWarmup),
