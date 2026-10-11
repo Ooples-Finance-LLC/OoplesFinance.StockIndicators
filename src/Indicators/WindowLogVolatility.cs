@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -66,11 +65,10 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
 
     internal sealed class State(int period, bool realized, bool annualized) : IMultiOutputState
     {
-        private readonly Queue<ExactMeanAccumulator.ProductFactor?> _returns = new();
-        private int _grid;
-        private bool _hasGrid;
+        private readonly Queue<double?> _returns = new();
+        private readonly long _denominator = realized ? period : (long)period * (period - 1);
         private double _previous;
-        private BigInteger _sum,
+        private JurikDyadic _sum,
             _squares;
         private int _missing;
         private bool _poisoned;
@@ -79,17 +77,10 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
         {
             _returns.Clear();
             _previous = 0;
-            _sum = _squares = 0;
-            _grid = 0;
-            _hasGrid = false;
+            _sum = _squares = default;
             _missing = 0;
             _poisoned = false;
         }
-
-        // Retain each return's exact binary factor so changing the common grid
-        // never requires rewriting queued history or storing minimum-unit padding.
-        private BigInteger OnGrid(ExactMeanAccumulator.ProductFactor factor) => factor.Mantissa == 0
-            ? BigInteger.Zero : new BigInteger(factor.Mantissa) << (factor.Scale - _grid);
 
         public void Update(in Bar bar, Span<double> output)
         {
@@ -100,30 +91,19 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
             _previous = value;
             if (prior != 0) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
             {
-                ExactMeanAccumulator.ProductFactor? next =
+                double? next =
                     value != 0 && Math.Sign(value) == Math.Sign(prior) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
-                        ? new ExactMeanAccumulator.ProductFactor(CertifiedLogReturn.Of(value, prior))
+                        ? CertifiedLogReturn.Of(value, prior)
                         : null;
-                if (next.HasValue && next.Value.Mantissa != 0
-                    && (!_hasGrid || next.Value.Scale < _grid))
-                {
-                    if (_hasGrid)
-                    {
-                        int shift = _grid - next.Value.Scale;
-                        _sum <<= shift;
-                        _squares <<= 2 * shift;
-                    }
-                    _grid = next.Value.Scale;
-                    _hasGrid = true;
-                }
                 if (_returns.Count == period)
                 {
                     var old = _returns.Dequeue();
                     if (old.HasValue)
                     {
-                        var expired = OnGrid(old.Value);
-                        _sum -= expired;
-                        _squares -= expired * expired;
+                        var expired = JurikDyadic.FromDouble(old.Value);
+                        if (!realized) _sum.Subtract(expired);
+                        expired.Square();
+                        _squares.Subtract(expired);
                     }
                     else
                         _missing--;
@@ -131,9 +111,10 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 _returns.Enqueue(next);
                 if (next.HasValue)
                 {
-                    var current = OnGrid(next.Value);
-                    _sum += current;
-                    _squares += current * current;
+                    var current = JurikDyadic.FromDouble(next.Value);
+                    if (!realized) _sum.AddExact(current);
+                    current.Square();
+                    _squares.AddExact(current);
                 }
                 else
                 {
@@ -150,12 +131,16 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 output[1] = 0;
                 return;
             }
-            var numerator = realized ? _squares : period * _squares - _sum * _sum;
-            var denominator = realized ? (BigInteger)period : (BigInteger)period * (period - 1);
-            output[0] = ExactPopulationDeviation.ScaledRootRatio(
-                numerator * (annualized ? 252 : 1),
-                denominator, 2 * (_grid - 1074)
-            );
+            var numerator = _squares;
+            if (!realized)
+            {
+                numerator.Multiply(period);
+                var sumSquared = _sum;
+                sumSquared.Square();
+                numerator.Subtract(sumSquared);
+            }
+            if (annualized) numerator.Multiply(252);
+            output[0] = numerator.SqrtMean(_denominator);
         }
     }
 }

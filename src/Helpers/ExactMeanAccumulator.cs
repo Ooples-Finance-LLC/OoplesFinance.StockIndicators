@@ -291,6 +291,14 @@ internal struct ExactMeanAccumulator
         else { _small = (long)total; _large = default; }
     }
 
+    internal void Square()
+    {
+        var value = _wide ? _large : new BigInteger(_small);
+        var scale = checked(2 * _scale - 1074);
+        this = default;
+        AddLarge(value * value, scale);
+    }
+
     internal double SqrtMean(long count)
     {
         if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));

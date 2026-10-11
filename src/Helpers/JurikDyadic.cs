@@ -113,6 +113,37 @@ internal struct JurikDyadic
 #endif
         var product = Accumulator(); product.Multiply(factor); SetFallback(product);
     }
+    internal void Square()
+    {
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            Promote();
+            if (Bits(Magnitude(_integer)) <= 63)
+            {
+                _integer *= _integer;
+                _exponent = checked(2 * _exponent);
+                Normalize();
+                return;
+            }
+        }
+#endif
+        var squared = Accumulator(); squared.Square(); SetFallback(squared);
+    }
+
+    internal double SqrtMean(long count)
+    {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            Promote();
+            return ExactPopulationDeviation.ScaledRootRatio((System.Numerics.BigInteger)_integer, count, _exponent);
+        }
+#endif
+        return Accumulator().SqrtMean(count);
+    }
+
     internal double Mean(int count)
     {
 #if !NETFRAMEWORK

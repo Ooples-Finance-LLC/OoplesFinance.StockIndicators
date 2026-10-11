@@ -221,11 +221,6 @@ internal struct ExactPopulationDeviation
 
     private static int BitLength(BigInteger value)
     {
-        var bytes = value.ToByteArray();
-        var last = bytes.Length - 1;
-        while (last > 0 && bytes[last] == 0) last--;
-        var bits = last * 8;
-        for (var head = bytes[last]; head != 0; head >>= 1) bits++;
-        return bits;
+        return checked((int)FrameworkCompatibility.GetBitLength(value));
     }
 }

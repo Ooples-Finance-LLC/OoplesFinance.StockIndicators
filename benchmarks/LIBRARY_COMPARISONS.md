@@ -2708,3 +2708,20 @@ subnormals, exponent extremes, reduction boundaries and explicit fallback. The
 ordinary-return regression dataset allocates zero managed bytes over 4,000 calls
 after 1,000 warmups. This does not include rolling moments or builder output
 storage, and no latency claim or qualification increase is made pending timing.
+
+
+## Compact logarithmic-volatility rolling moments (timing pending)
+
+`WindowLogVolatility` reuses the existing exact dyadic representation for rolling
+sums and squares. Ordinary updates fit fixed-width integers; larger exponent
+spans and products retain arbitrary-precision fallback. Realized volatility skips
+the unused running sum. Publication retains exact annualization and the existing
+certified square root, and shared root bit-length checks no longer allocate a
+byte array on modern runtimes.
+
+The net10.0 production build, 22 focused unit tests and ten volatility comparison
+tests passed. Ordinary rolling-moment add/remove operations allocate zero managed
+bytes over 4,000 updates after warmup in the regression dataset. This excludes
+square-root publication, which can still allocate. Exact-reference tests cover
+wide cancellation, subnormal roots, copied state, missing returns, reset and
+irreversible realized-volatility poisoning. Timing qualification remains unchanged.
