@@ -164,15 +164,34 @@ internal sealed class MassNormalizedStage(double alpha)
             // A previous update has already reset mass to one. Factor the exact
             // convex sum; keep the first zero-residual update on the path below
             // because it must still use the previous, nonunit startup mass.
-            var next = new ExactMeanAccumulator();
-            next.Add(input);
-            next.Add(_mean, -1);
+            var previous = JurikDyadic.FromDouble(_mean);
+            var next = JurikDyadic.FromDouble(input);
+            if (JurikDyadic.TryBlend(previous, next, alpha, out var blended))
+            {
+                var value = blended.Mean(1);
+                // The reusable blend canonicalizes zero. This stage publishes
+                // directly, so use exact arithmetic to retain negative underflow.
+                if (value != 0) // NOSONAR: Preserve the signed-zero rounding contract.
+                {
+                    _mean = value;
+                    return _mean;
+                }
+            }
+            next.Subtract(previous);
             next.Multiply(alpha);
-            next.Add(_mean);
+            next.AddExact(previous);
             _mean = next.Mean(1);
             return _mean;
         }
         _residual = _residual > 1e-10 ? (1 - alpha) * _residual : 0;
+        if (_mass == 0) // NOSONAR: Only the initial/reset state has zero mass.
+        {
+            // The exact numerator alpha*input divided by alpha is the input,
+            // including tiny alphas whose floating product would underflow.
+            _mean = input == 0 ? 0 : input; // NOSONAR: Preserve canonical exact zero.
+            _mass = alpha;
+            return _mean;
+        }
         // Retain exact weights on their natural binary scales instead of padding
         // every term to the minimum-subnormal grid. No intermediate is rounded.
         var previousWeight = _retention;

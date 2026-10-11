@@ -1312,6 +1312,15 @@ The outstanding EMA configuration list is now empty. Its unchanged SMA-seeded
 benchmark retains valid archived timings; four new QEMA timing cases passed.
 The complete archive verifies 1,144 cases across 286 pairs.
 
+The shared mass-normalized stage now returns the exact input on its first
+update and uses certified fused blends after compensation has ended. Zero blends
+retain the exact path to preserve negative underflow. The startup mass recurrence
+and cutoff-transition update retain their existing arithmetic. The net10.0 build,
+six focused state tests and 16 comparison tests passed. Single and quadruple EMA
+steady-state updates allocate zero managed bytes over 4,000 ordinary inputs after
+warmup in the regression dataset. Startup beyond the first update can still
+allocate; updated builder latency remains pending consolidated timing.
+
 ## Adjusted skewness and excess kurtosis
 
 `WindowSampleShape` covers Quan's adjusted Fisher-Pearson sample skewness and
