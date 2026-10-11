@@ -15,6 +15,8 @@ internal static partial class ValuesBarExecution
         _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue => BodyShadowPeriod(indicator) + 1,
         _ when WeightedWindowPeriod(indicator) > 0 => WeightedWindowPeriod(indicator),
         _ when PercentileCandlePeriod(indicator) > 0 => PercentileCandlePeriod(indicator),
+        _ when HaramiWindow(indicator) > 0 => HaramiWindow(indicator),
+        _ when TasukiWindow(indicator) > 0 => TasukiWindow(indicator),
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
@@ -29,6 +31,10 @@ internal static partial class ValuesBarExecution
         EngulfingPattern => new EngulfingPattern.State(),
         _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue =>
             (BodyShadowCandleState)((IndicatorBase)indicator).CreateState()!,
+        _ when HaramiWindow(indicator) > 0 =>
+            (StrictHaramiState)((IndicatorBase)indicator).CreateState()!,
+        _ when TasukiWindow(indicator) > 0 =>
+            (TrendTasukiState)((IndicatorBase)indicator).CreateState()!,
         _ when PercentileCandlePeriod(indicator) > 0 =>
             (PercentileCandleState)((IndicatorBase)indicator).CreateState()!,
         _ when WeightedWindowPeriod(indicator) > 0 =>

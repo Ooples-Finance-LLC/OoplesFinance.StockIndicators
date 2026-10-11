@@ -134,6 +134,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
             self.assertEqual(4, len(row['current'][0]['methods']))
 
+    def test_containment_gap_qualification_uses_trady_namespace(self):
+        self.write()
+        for operation in ('Harami', 'BullishHarami', 'BearishHarami', 'UpsideTasukiGap', 'DownsideTasukiGap'):
+            path = self.qualification(f'SharedContainmentGapBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
     def test_qualification_paths_use_one_benchmark_root(self):
         self.write()
         path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')

@@ -10,7 +10,24 @@ internal static partial class ValuesBarExecution
             or LaggedPriceChange { Period: < int.MaxValue }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || WeightedWindowPeriod(indicator) > 0
-        || PercentileCandlePeriod(indicator) > 0;
+        || PercentileCandlePeriod(indicator) > 0
+        || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0;
+
+    // Directional predicates inspect P transitions ending on the previous bar:
+    // P+1 seeds, plus the current bar. Guard the addition for extreme periods.
+    private static int HaramiWindow(IIndicator indicator) => indicator switch
+    {
+        StrictHaramiCandle => 2,
+        BullishHaramiPattern { Period: < int.MaxValue - 1 } candle => candle.Period + 2,
+        BearishHaramiPattern { Period: < int.MaxValue - 1 } candle => candle.Period + 2,
+        _ => 0
+    };
+    private static int TasukiWindow(IIndicator indicator) => indicator switch
+    {
+        UpsideTasukiGapPattern { Period: < int.MaxValue - 1 } candle => candle.Period + 2,
+        DownsideTasukiGapPattern { Period: < int.MaxValue - 1 } candle => candle.Period + 2,
+        _ => 0
+    };
 
     private static int PercentileCandlePeriod(IIndicator indicator) => indicator switch
     {
@@ -176,6 +193,19 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private readonly struct HaramiKernel(StrictHaramiState state) : IBoundedKernel<HaramiKernel>
+    {
+        public static HaramiKernel Create(int period, int count, IIndicator indicator) =>
+            new((StrictHaramiState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+    private readonly struct TasukiKernel(TrendTasukiState state) : IBoundedKernel<TasukiKernel>
+    {
+        public static TasukiKernel Create(int period, int count, IIndicator indicator) =>
+            new((TrendTasukiState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private readonly struct PercentileCandleKernel(PercentileCandleState state) : IBoundedKernel<PercentileCandleKernel>
     {
         public static PercentileCandleKernel Create(int period, int count, IIndicator indicator) =>
@@ -210,6 +240,10 @@ internal static partial class ValuesBarExecution
         // Percentile windows include the current candle, requiring only P-1 seeds.
         _ when PercentileCandlePeriod(indicator) > 0 =>
             FillBoundedWindow<PercentileCandleKernel>(source, output, indicator, PercentileCandlePeriod(indicator), cancellation, owned),
+        _ when HaramiWindow(indicator) > 0 =>
+            FillBoundedWindow<HaramiKernel>(source, output, indicator, HaramiWindow(indicator), cancellation, owned),
+        _ when TasukiWindow(indicator) > 0 =>
+            FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 
