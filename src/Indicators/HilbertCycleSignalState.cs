@@ -67,7 +67,7 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
         output.Clear();
         _index++;
         var price = ExactVarianceWindow.Units(bar.Close);
-        _filter.Update(price);
+        _filter.Update(bar.Close);
         if (_index < 37)
         {
             _trend?.Update(price, null);
@@ -75,7 +75,7 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
         }
         _period = .33 * _filter.Period + .67 * _period;
         var count = (int)(_period + .5);
-        _smooth[_cursor] = _filter.SmoothPrice;
+        _smooth[_cursor] = _filter.SmoothPrice.RoundedUnits();
         BigInteger real = 0,
             imaginary = 0;
         for (var lag = 0; lag < count; lag++)
@@ -129,7 +129,7 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
             var baseline = _trend.RoundedUnits;
             if (
                 !baseline.IsZero
-                && BigInteger.Abs(_filter.SmoothPrice - baseline) * Grid
+                && BigInteger.Abs(_filter.SmoothPrice.RoundedUnits() - baseline) * Grid
                     >= ExactVarianceWindow.Units(.015) * BigInteger.Abs(baseline)
             )
                 trend = 1;

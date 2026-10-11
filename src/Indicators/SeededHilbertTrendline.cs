@@ -99,7 +99,7 @@ public sealed class SeededHilbertTrendline : MultiOutputIndicatorBase, IIndicato
             _means.Update(price, count == 0 ? 1 : count);
             if (_index >= 11)
                 output[0] = ExactMeanAccumulator.UnitRatio(_means.RoundedUnits, 1);
-            output[1] = ExactMeanAccumulator.UnitRatio(_filter.SmoothPrice, 1);
+            output[1] = _filter.SmoothPrice.Mean(1);
             output[4] = 1;
             if (count > 0)
             {
