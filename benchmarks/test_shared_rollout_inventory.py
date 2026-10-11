@@ -131,6 +131,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_native_hull_qualification_preserves_library_identity(self):
+        self.write()
+        for api in ('Skender.GetHma', 'Trady.Indicator.HullMovingAverage'):
+            path = self.qualification(f'SharedNativeHullBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_mode_qualification_keeps_native_namespace(self):
         self.write()
         api = 'QuanTAlib.Mode'
