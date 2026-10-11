@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
-        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower;
+        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -14,6 +14,8 @@ internal static partial class ValuesBarExecution
         LowestLow low => new PriceExtremeState(low.Length, count, false),
         TrueRange => new TrueRangeValueState(),
         BalanceOfPower power => new BalanceOfPowerValueState(Math.Max(1, power.Length)),
+        Wma average => new WmaValueState(Math.Max(1, average.Length), count),
+        WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
 

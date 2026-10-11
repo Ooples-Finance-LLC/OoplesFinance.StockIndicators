@@ -68,6 +68,8 @@ internal static partial class ValuesBarExecution
                 latest = FillTrueRange(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
+            else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
+                latest = FillBoundedWindow(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
             else for (int i = 0; i < source.Length; i++)
@@ -90,7 +92,7 @@ internal static partial class ValuesBarExecution
                 // EMA is an exactly rounded convex mean of finite values. Neither
                 // output needs the generic scan (including shared EMA(1) arrays).
                 bool finiteByConstruction = nodes.Count == 1 && (IsPointwise(node.Indicator)
-                    || node.Indicator is TrueRange or BalanceOfPower);
+                    || node.Indicator is TrueRange or BalanceOfPower || IsBoundedWindowIndicator(node.Indicator));
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
                         : ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
@@ -525,6 +527,7 @@ internal static partial class ValuesBarExecution
                 Sma => null,
                 _ when pointwise => null,
                 BalanceOfPower when singleRoot => null,
+                _ when singleRoot && IsBoundedWindowIndicator(indicator) => null,
                 _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
