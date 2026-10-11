@@ -64,6 +64,8 @@ internal static partial class ValuesBarExecution
             else if (nodes.Count == 1 && IsPointwise(nodes[0].Indicator))
                 latest = gpu is null ? FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned)
                     : gpu.ExecutePointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is TrueRange)
+                latest = FillTrueRange(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
             else for (int i = 0; i < source.Length; i++)
@@ -82,7 +84,7 @@ internal static partial class ValuesBarExecution
             {
                 cancellation.ThrowIfCancellationRequested();
                 node.Failure?.Throw();
-                bool finiteByConstruction = nodes.Count == 1 && IsPointwise(node.Indicator);
+                bool finiteByConstruction = nodes.Count == 1 && (IsPointwise(node.Indicator) || node.Indicator is TrueRange);
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
                         : ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));

@@ -3,8 +3,69 @@ using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
+[Collection("IndicatorValuesDispatch")]
 public sealed class SharedGeneratedStateTests
 {
+    [Theory]
+    [InlineData(8191)] [InlineData(8192)] [InlineData(8193)] [InlineData(10003)]
+    public async Task TrueRangeWorkerBoundariesMatchSerialBitsAndOwnedHistory(int count)
+    {
+        int previousDop = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            double[] values = [-0d, 0d, double.Epsilon, -double.Epsilon, -8, 16, .25];
+            var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0,
+                values[i % values.Length], values[(i + 2) % values.Length], values[(i + 3) % values.Length], 1)).ToArray();
+            var indicator = new TrueRange(1);
+            using var expected = await Builder(bars, indicator, IndicatorHistoryMode.Full).ConfigureBehavior(_ => { }).BuildAsync();
+            foreach (int dop in new[] { 1, 2, 8 })
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = dop;
+                using var actual = await Builder(bars, indicator, history).BuildAsync();
+                Bits(expected[indicator].ToArray(), actual[indicator].ToArray());
+                Assert.Equal(bars[^1], actual.Latest.Bar);
+                if (history == IndicatorHistoryMode.Full)
+                {
+                    int index = 0;
+                    await foreach (var snapshot in actual) Assert.Equal(bars[index++], snapshot.Bar);
+                    Assert.Equal(count, index);
+                }
+            }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previousDop; }
+    }
+
+    [Theory]
+    [InlineData(1249)] [InlineData(1250)] [InlineData(9999)]
+    public async Task TrueRangeParallelInputErrorsPrecedeEarlierOutputOverflow(int invalidIndex)
+    {
+        int previousDop = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Enumerable.Repeat(new Bar(default, 0, 1, 0, .5, 1), 10000).ToArray();
+            bars[0] = new Bar(default, 0, double.MaxValue, -double.MaxValue, 0, 1);
+            var indicator = new TrueRange(1);
+            foreach (bool invalid in new[] { false, true })
+            {
+                if (invalid) bars[invalidIndex] = new Bar(default, 0, 1, 0, .5, double.NaN);
+                var builder = Builder(bars, indicator, IndicatorHistoryMode.Full);
+                var expected = await Record.ExceptionAsync(async () =>
+                {
+                    using var result = await Builder(bars, indicator, IndicatorHistoryMode.Full).ConfigureBehavior(_ => { }).BuildAsync();
+                });
+                var actual = await Record.ExceptionAsync(async () => { using var result = await builder.BuildAsync(); });
+                Assert.NotNull(expected);
+                Assert.NotNull(actual);
+                Assert.Equal(expected.GetType(), actual.GetType());
+                Assert.Equal(expected.Message, actual.Message);
+                Assert.Null(builder.LastExecution);
+            }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previousDop; }
+    }
+
     public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 3)
         from period in new[] { 1, 3, 20, int.MaxValue } select new object[] { operation, period };
     private static IIndicator Create(int operation, int period) => operation switch
