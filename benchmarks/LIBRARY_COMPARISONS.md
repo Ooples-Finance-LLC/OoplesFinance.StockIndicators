@@ -2867,3 +2867,10 @@ One unprivileged sampled-thread-time trace located active work in `ValuesBarExec
 The subsequent shared strength helper change certifies same-sign, nearby-price subtraction directly and uses guarded integer percentage numerators and denominators when aligned operands fit 56 bits. Both retain exact fallback, unpublished extended exponents and once-rounded publication. These paths serve nullable and Wilder strength indicators. The archived timing predates these guards; no post-change speedup is claimed.
 
 Validation: net10.0 production and benchmark builds passed; all 26 focused strength unit tests, 34 nullable/Wilder comparison and fixture tests, and 54 inventory checks passed. The profiling CLI smoke check passed. Existing ordinary-state allocation assertions still pass. PR #255 has five review threads, all resolved.
+
+
+### Shared compact quotient/remainder execution
+
+Compact mean and dyadic ratio publication now share one guarded quotient/remainder operation. The x64 path uses the processor's 128-by-64 DIV when the divisor fits 64 bits and the numerator's upper limb is smaller than the divisor; this proves the quotient fits and excludes a zero divisor. Wider quotients/divisors and other CPUs retain `UInt128.DivRem`. Dyadic ratios also stop calculating `/` and `%` separately. Rounding, signed zero and overflow behavior are unchanged. This reuses the existing arithmetic across strength, directional, beta and other shared consumers.
+
+The net10.0 production/benchmark builds, 38 focused unit tests and 59 strength/directional/beta comparison tests passed. All 12 primitive/rounding tests also passed with `DOTNET_EnableHWIntrinsic=0`, using the same binaries. Integer-reference tests cover 4,000 random divisions and hardware overflow boundaries; existing rational-reference and allocation assertions passed. A JIT-only RSI replay confirmed one DIV instruction in the guarded Tier1 path (`results/shared-rollout/arithmetic/compact-divrem-disasm.txt.gz`). No timing campaign was run and no latency win is claimed; direct timing qualification remains 177/401 APIs.

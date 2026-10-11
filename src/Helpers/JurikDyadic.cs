@@ -348,14 +348,14 @@ internal struct JurikDyadic
             if (shift < 128 && Bits(top) + shift <= 128)
             {
                 top <<= shift;
-                quotient = top / bottom; remainder = top % bottom;
+                (quotient, remainder) = ExactMeanAccumulator.CompactDivRem(top, bottom);
             }
             else
             {
                 // Produce the rounding-grid quotient without materializing the
                 // shifted numerator. Each remainder stays below the denominator;
                 // comparing with its complement avoids overflowing a doubled value.
-                quotient = top / bottom; remainder = top % bottom;
+                (quotient, remainder) = ExactMeanAccumulator.CompactDivRem(top, bottom);
                 for (int bit = 0; bit < shift; bit++)
                 {
                     quotient <<= 1;
@@ -373,7 +373,7 @@ internal struct JurikDyadic
         {
             if (-shift >= 128 || Bits(bottom) - shift > 128) return false;
             bottom <<= -shift;
-            quotient = top / bottom; remainder = top % bottom;
+            (quotient, remainder) = ExactMeanAccumulator.CompactDivRem(top, bottom);
         }
         var otherHalf = bottom - remainder;
         if (remainder > otherHalf || remainder == otherHalf && (quotient & 1) != 0) quotient++;
