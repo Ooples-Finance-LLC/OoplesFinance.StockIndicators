@@ -325,6 +325,7 @@ internal struct ExactMeanAccumulator
         if (!_wide && TrySmallMean((ulong)count, out var value)) return value;
         var signed = _wide ? _large : new BigInteger(_small);
         var magnitude = BigInteger.Abs(signed);
+        if (count == 1) return RoundSum(magnitude, signed.Sign < 0);
         var divisor = new BigInteger(count);
         var exponent = BitLength(magnitude) - BitLength(divisor);
         if (exponent >= 0 ? magnitude < (divisor << exponent) : (magnitude << -exponent) < divisor) exponent--;
@@ -336,6 +337,25 @@ internal struct ExactMeanAccumulator
         var halfway = (remainder << 1).CompareTo(divisor);
         if (halfway > 0 || halfway == 0 && !mantissa.IsEven) mantissa++;
         return Encode((ulong)mantissa, grid, signed.Sign < 0);
+    }
+
+    private double RoundSum(BigInteger magnitude, bool negative)
+    {
+        var grid = Math.Max(0, BitLength(magnitude) + _scale - 53);
+        var shift = grid - _scale;
+        ulong mantissa;
+        if (shift > 0)
+        {
+            // Retain one guard bit. A set bit below it distinguishes greater
+            // than halfway from a tie without allocating a divisor/remainder.
+            var guarded = (ulong)(magnitude >> (shift - 1));
+            mantissa = guarded >> 1;
+            if ((guarded & 1) != 0
+                && ((mantissa & 1) != 0 || TrailingBinaryZeros(magnitude) < shift - 1))
+                mantissa++;
+        }
+        else mantissa = (ulong)magnitude << -shift;
+        return Encode(mantissa, grid, negative);
     }
 
     private bool TrySmallMean(ulong divisor, out double value)

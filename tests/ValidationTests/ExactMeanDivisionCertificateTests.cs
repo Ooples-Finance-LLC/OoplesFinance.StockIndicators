@@ -7,6 +7,28 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactMeanDivisionCertificateTests
 {
     [Fact]
+    public void WideSumGuardAndStickyBitsMatchIndependentRounding()
+    {
+        foreach (int sign in new[] { -1, 1 })
+        foreach (int width in new[] { 65, 106, 128, 257 })
+        foreach (int exponent in new[] { -1400, -1200, -1075, -1074, -1022, -53, 0, 970, 1023 })
+        foreach (int parity in new[] { 0, 1 })
+        foreach (int residual in new[] { -1, 0, 1 })
+        {
+            // Even/odd retained significands, on either side of their midpoint.
+            var units = sign * (((BigInteger.One << 52) + parity) * (BigInteger.One << (width - 53))
+                + (BigInteger.One << (width - 54)) + residual);
+            var sum = new ExactMeanAccumulator();
+            sum.Add(1, units);
+            sum.ScaleByPowerOfTwo(exponent);
+            var exact = new ReferenceFraction(units);
+            var power = new ReferenceFraction(BigInteger.One << Math.Abs(exponent));
+            exact = exponent < 0 ? exact / power : exact * power;
+            Bits(exact.ToDouble(), sum.Mean(1));
+        }
+    }
+
+    [Fact]
     public void ExtendedCompactDivisionRoundsBothSignsOfHalfwayCasesToEven()
     {
         foreach (int sign in new[] { -1, 1 })
