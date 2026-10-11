@@ -116,11 +116,13 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
             _period = period;
             _average = average;
             _warming = average;
-            var top = ExactVarianceWindow.Units(percentile);
-            var bottom = BigInteger.One << 1074;
-            var gcd = BigInteger.GreatestCommonDivisor(top, bottom);
-            _top = top / gcd;
-            _bottom = bottom / gcd;
+            // The normalized binary significand is already coprime to its
+            // power-of-two denominator; avoid minimum-unit padding and a GCD
+            // for every independently seeded worker.
+            var factor = new ExactMeanAccumulator.ProductFactor(percentile);
+            _top = factor.Mantissa;
+            _bottom = factor.Mantissa == 0 ? BigInteger.One
+                : BigInteger.One << (1074 - factor.Scale);
             _fullIndex = (int)BigInteger.DivRem(_top * (period - 1), _bottom, out _fullRemainder);
             _fullLowerWeight = _bottom - _fullRemainder;
             var denominator = new ExactMeanAccumulator();
