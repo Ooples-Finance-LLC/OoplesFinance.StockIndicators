@@ -2851,3 +2851,8 @@ Five allocation-only samples for each 10k RSI/CMO arm were identical: Full 644,2
 ## Shared strength integer recurrence follow-up
 
 Ordinary positive-strength weighted sums now use a guarded signed-64-bit path and the existing exact ratio rounder, avoiding repeated general dyadic construction when the complete numerator fits. Conservative product/shift bounds and a separate addition check retain the wider path otherwise. Production/benchmark builds, 24 focused arithmetic/allocation tests and 34 nullable/Wilder comparison/setup tests passed. Product, shift and sum boundary cases match the wide recurrence. State allocation remains zero for the tested ordinary updates including reset startup. Latency benefit is not yet measured; no timing qualification count or competitor-win claim changes.
+
+
+## Seeded ATR trailing-band allocation follow-up
+
+The seeded ATR trailing-stop layer now keeps rounded widths and candidate bands in compact exact arithmetic instead of padding them to minimum-subnormal units. Exact comparison signs preserve ties and reversals; midpoint arithmetic is skipped for the other basis modes. Production/benchmark builds, eight focused unit tests and ten independent comparison tests passed. All three price-basis modes allocate zero bytes over 4,000 ordinary state updates including startup after reset, while extreme unpublished bands retain the wide fallback. End-to-end timing and allocation qualification remain pending; coverage stays 176/401.
