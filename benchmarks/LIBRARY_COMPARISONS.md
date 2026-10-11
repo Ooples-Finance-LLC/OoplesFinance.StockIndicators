@@ -2506,6 +2506,17 @@ serial and parallel at 1k/10k. At 10k, Full/LatestOnly measured 201.38/186.27 us
 557.99/88.23 KiB versus native parallel 295.31 us and 2583.04 KiB. The LatestOnly
 99.9% interval was wide (144.74-227.80 us), still below native's 289.85-300.78 us.
 
+`WindowedSinc` adds the shared CPU builder path for Afirma. The snapshot and
+builder reuse coefficient generation; decoded products and the exact denominator
+are shared across workers. Private price rings retain oldest-first order and
+repeat the newest value through missing startup taps. GPU remains unsupported.
+Fourteen unit/registration tests, 15 independent comparison/setup tests, and eight
+timing cases passed. At 10k, Full/LatestOnly measured 1449.94/1382.38 us with
+4803.99/4334.23 KiB, versus native parallel 525.49 us and 481.80 KiB. Both builder
+modes beat native serial latency but lose to parallel and allocate substantially
+more. This is a qualified rollout path, not a performance win; wide exact-product
+accumulation remains an optimization target.
+
 Eight tests, 95,728 trajectory comparisons and eight timing arms passed.
 The archive verifier passed 1,556 arms across all 389 paired families.
 

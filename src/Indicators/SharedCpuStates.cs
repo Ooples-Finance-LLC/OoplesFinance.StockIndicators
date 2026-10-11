@@ -210,6 +210,7 @@ internal static class SharedCpuStates
         typeof(WindowRegressionStatistics),
         typeof(WindowReturnBeta),
         typeof(WindowSampleShape),
+        typeof(WindowedSinc),
         typeof(WindowStochasticKdj),
         typeof(WindowStochasticMomentum),
         typeof(WindowUlcerIndex),

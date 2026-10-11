@@ -89,6 +89,7 @@ internal static partial class ValuesBarExecution
         NormalizedConvolution convolution => convolution.Kernel.Count,
         GaussianWeightedAverage average => average.Period,
         SineWeightedAverage average => average.Period,
+        WindowedSinc sinc => sinc.Taps,
         _ => 0
     };
 
@@ -100,7 +101,7 @@ internal static partial class ValuesBarExecution
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
-        int terms = indicator is NormalizedConvolution { HasAffineKernel: false } or GaussianWeightedAverage or SineWeightedAverage
+        int terms = indicator is NormalizedConvolution { HasAffineKernel: false } or GaussianWeightedAverage or SineWeightedAverage or WindowedSinc
             ? WeightedWindowPeriod(indicator) : 1;
         return Math.Max(512, 1 + 8191 / terms);
     }

@@ -75,6 +75,25 @@ public static class WindowedSincSnapshot
     )
     {
         FixedKernelSnapshotInput.Validate(bars);
+        ValidateParameters(period, taps, window);
+        if (bars.Count == 0) return Array.Empty<double>();
+        var weights = CreateWeights(period, taps, window, out var mass);
+        var output = new double[bars.Count];
+        for (var i = 0; i < bars.Count; i++)
+        {
+            var sum = new ExactMeanAccumulator();
+            var start = Math.Max(0, i - taps + 1);
+            for (var k = 0; k < taps; k++)
+                sum.AddProduct(bars[Math.Min(i, start + k)].Close, weights[k]);
+            output[i] = sum.Ratio(mass);
+            if (!FrameworkCompatibility.IsFinite(output[i]))
+                throw new OverflowException("Sinc output is not representable.");
+        }
+        return output;
+    }
+
+    internal static void ValidateParameters(int period, int taps, SincWindow window)
+    {
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
         if (
@@ -88,10 +107,12 @@ public static class WindowedSincSnapshot
             );
         if (!Enum.IsDefined(window.GetType(), window))
             throw new ArgumentOutOfRangeException(nameof(window));
-        if (bars.Count == 0)
-            return Array.Empty<double>();
+    }
+
+    internal static double[] CreateWeights(int period, int taps, SincWindow window, out ExactMeanAccumulator mass)
+    {
         var weights = new double[taps];
-        var mass = new ExactMeanAccumulator();
+        mass = new ExactMeanAccumulator();
         var center = (taps - 1) / 2d;
         for (var k = 0; k < taps; k++)
         {
@@ -116,19 +137,9 @@ public static class WindowedSincSnapshot
         }
         if (mass.IsExactlyZero)
             throw new ArgumentException("The selected kernel has zero mass.");
-        var output = new double[bars.Count];
-        for (var i = 0; i < bars.Count; i++)
-        {
-            var sum = new ExactMeanAccumulator();
-            var start = Math.Max(0, i - taps + 1);
-            for (var k = 0; k < taps; k++)
-                sum.AddProduct(bars[Math.Min(i, start + k)].Close, weights[k]);
-            output[i] = sum.Ratio(mass);
-            if (!FrameworkCompatibility.IsFinite(output[i]))
-                throw new OverflowException("Sinc output is not representable.");
-        }
-        return output;
+        return weights;
     }
+
 }
 
 internal static class FixedKernelSnapshotInput
