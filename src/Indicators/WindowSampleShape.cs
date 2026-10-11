@@ -57,9 +57,11 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
                 )
             );
 
-    private sealed class State(int period, bool kurtosis) : IMultiOutputState
+    internal sealed class State(int period, bool kurtosis) : IMultiOutputState
     {
         private readonly Queue<double> _history = new();
+        private int _grid;
+        private bool _hasGrid;
         private BigInteger _s1,
             _s2,
             _s3,
@@ -69,11 +71,28 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
         {
             _history.Clear();
             _s1 = _s2 = _s3 = _s4 = 0;
+            _grid = 0;
+            _hasGrid = false;
         }
 
         private void Add(double price, int sign)
         {
-            var x = ExactVarianceWindow.Units(price);
+            var parts = new ExactMeanAccumulator.ProductFactor(price);
+            if (parts.Mantissa != 0 && (!_hasGrid || parts.Scale < _grid))
+            {
+                if (_hasGrid)
+                {
+                    int shift = _grid - parts.Scale;
+                    _s1 <<= shift; _s2 <<= 2 * shift; _s3 <<= 3 * shift;
+                    if (kurtosis) _s4 <<= 4 * shift;
+                }
+                _grid = parts.Scale;
+                _hasGrid = true;
+            }
+            // The same power of two cancels from numerator and denominator of
+            // both statistics. Preserve exact moments without minimum-unit padding.
+            var x = parts.Mantissa == 0 ? BigInteger.Zero
+                : new BigInteger(parts.Mantissa) << (parts.Scale - _grid);
             var x2 = x * x;
             _s1 += sign * x;
             _s2 += sign * x2;
@@ -108,16 +127,16 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
                     + 6 * n * _s1 * _s1 * _s2
                     - 3 * BigInteger.Pow(_s1, 4);
                 var top = (n * n - 1) * c - 3 * (n - 1) * (n - 1) * a * a;
-                outputs[0] = ExactMeanAccumulator.UnitRatio(top << 1074, a * a * (n - 2) * (n - 3));
+                outputs[0] = ExactMeanAccumulator.ScaledRatio(top, a * a * (n - 2) * (n - 3), 0);
             }
             else
             {
                 var b = n * n * _s3 - 3 * n * _s1 * _s2 + 2 * _s1 * _s1 * _s1;
                 outputs[0] =
                     b.Sign
-                    * ExactPopulationDeviation.RootRatio(
-                        (b * b * n * (n - 1)) << 2148,
-                        a * a * a * (n - 2) * (n - 2)
+                    * ExactPopulationDeviation.ScaledRootRatio(
+                        b * b * n * (n - 1),
+                        a * a * a * (n - 2) * (n - 2), 0
                     );
             }
         }

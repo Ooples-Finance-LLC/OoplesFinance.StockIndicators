@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
         || HullReplayWindow(indicator) > 0
@@ -95,7 +95,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is EndpointWeightedAverage or FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or StandardDeviationWithDetails or HullWindow or RateOfChangeWithValidity) return 512;
+        if (indicator is EndpointWeightedAverage or FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or HullWindow or RateOfChangeWithValidity) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
@@ -426,6 +426,21 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private struct SampleShapeKernel(WindowSampleShape.State state, BoundedOutput target) : IBoundedKernel<SampleShapeKernel>
+    {
+        private readonly double[] _scratch = new double[2];
+        private int _index = target.Origin;
+        public static SampleShapeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(period, ((WindowSampleShape)indicator).Kurtosis), target);
+        public double Update(in Bar bar)
+        {
+            state.Update(in bar, _scratch);
+            int index = _index++;
+            if (index >= target.WriteStart) target.Values[1][index] = _scratch[1];
+            return _scratch[0];
+        }
+    }
+
     private struct HullKernel(HullWindow.State state, BoundedOutput target) : IBoundedKernel<HullKernel>
     {
         private readonly double[] _scratch = new double[2];
@@ -521,6 +536,7 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<HullKernel>(source, output, indicator, HullReplayWindow(indicator), cancellation, owned),
         StandardDeviationWithDetails when DetailedDeviationWindow(indicator) > 0 =>
             FillBoundedWindow<DetailedDeviationKernel>(source, output, indicator, DetailedDeviationWindow(indicator), cancellation, owned),
+        WindowSampleShape shape => FillBoundedWindow<SampleShapeKernel>(source, output, indicator, shape.Period, cancellation, owned),
         WindowDispersion dispersion => FillBoundedWindow<DispersionKernel>(source, output, indicator, dispersion.Period, cancellation, owned),
         WindowMode mode => FillBoundedWindow<ModeKernel>(source, output, indicator, mode.Period, cancellation, owned),
         WindowPriceRange range => FillBoundedWindow<PriceRangeKernel>(source, output, indicator, range.Period, cancellation, owned),
