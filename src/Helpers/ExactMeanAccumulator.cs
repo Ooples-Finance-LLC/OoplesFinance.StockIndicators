@@ -334,12 +334,12 @@ internal struct ExactMeanAccumulator
         var shift = grid - _scale;
         if (shift < 0)
         {
-            if (bits - shift > 64) { value = 0; return false; }
+            if (bits - shift > 64) return TryExtendedMean(magnitude, divisor, grid, shift, out value);
             magnitude <<= -shift;
         }
         else
         {
-            if (BitLength(divisor) + shift > 64) { value = 0; return false; }
+            if (BitLength(divisor) + shift > 64) return TryExtendedMean(magnitude, divisor, grid, shift, out value);
             divisor <<= shift;
         }
         var mantissa = magnitude / divisor;
@@ -349,6 +349,28 @@ internal struct ExactMeanAccumulator
         if (remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0) mantissa++;
         value = Encode(mantissa, grid, _small < 0);
         return true;
+    }
+
+    private bool TryExtendedMean(ulong magnitude, ulong divisor, int grid, int shift, out double value)
+    {
+#if !NETFRAMEWORK
+        // A compact numerator/divisor can need up to 116 bits to align the
+        // binary64 rounding grid. Keep that division off the BigInteger heap.
+        // Very small subnormal scales may need more; retain the exact fallback.
+        if (shift < 0 ? BitLength(magnitude) - shift <= 128 : BitLength(divisor) + shift <= 128)
+        {
+            UInt128 top = magnitude, bottom = divisor;
+            if (shift < 0) top <<= -shift;
+            else bottom <<= shift;
+            var (mantissa, remainder) = UInt128.DivRem(top, bottom);
+            var otherHalf = bottom - remainder;
+            if (remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0) mantissa++;
+            value = Encode((ulong)mantissa, grid, _small < 0);
+            return true;
+        }
+#endif
+        value = 0;
+        return false;
     }
 
     internal static double Encode(ulong mantissa, int grid, bool negative)

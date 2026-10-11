@@ -7,6 +7,33 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactMeanDivisionCertificateTests
 {
     [Fact]
+    public void ExtendedCompactDivisionDoesNotAllocate()
+    {
+        static double Run() => ExactMeanAccumulator.ScaledRatio(305235, long.MaxValue - 24, 0);
+        var expected = (new ReferenceFraction(305235) / new ReferenceFraction(long.MaxValue - 24)).ToDouble();
+        for (int i = 0; i < 100; i++) Bits(expected, Run());
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        double total = 0;
+        for (int i = 0; i < 1000; i++) total += Run();
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.True(total > 0);
+    }
+
+    [Fact]
+    public void ExtendedGridLimitsAndFallbackPreserveSignedUnderflowAndOverflow()
+    {
+        foreach (long numerator in new[] { long.MinValue, -long.MaxValue, -3, 3, (1L << 53) + 1, long.MaxValue })
+        foreach (long denominator in new[] { 1L, 3, (1L << 53) + 1, long.MaxValue - 24, long.MaxValue })
+        foreach (int exponent in new[] { -1203, -1202, -1139, -1138, -1137, -1076, -1075, -1074, 0, 1023, 1088 })
+        {
+            var exact = new ReferenceFraction(numerator) / new ReferenceFraction(denominator);
+            var power = new ReferenceFraction(BigInteger.One << Math.Abs(exponent));
+            exact = exponent < 0 ? exact / power : exact * power;
+            Bits(exact.ToDouble(), ExactMeanAccumulator.ScaledRatio(numerator, denominator, exponent));
+        }
+    }
+
+    [Fact]
     public void IntegerAndExponentBoundariesMatchIndependentRounding()
     {
         long[] numerators = [long.MinValue, -((1L << 53) + 1), -(1L << 53), -((1L << 53) - 1),
