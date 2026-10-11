@@ -19,10 +19,7 @@ public class SharedHullBenchmarks
     public void Setup()
     {
         _priorDop = CpuParallelSettings.MaxDegreeOfParallelism; CpuParallelSettings.MaxDegreeOfParallelism = 8;
-        var values = Enumerable.Range(0, Count).Select(i => ((i * 13 + i / 37) % 31 - 15) / 8d).ToArray();
-        _bars = values.Select(v => new Bar(default, v, v + 1, v - 1, v, 1)).ToArray();
-        _input = values.Select(v => new QuanTAlib.TValue(default, v, true, false)).ToArray();
-        var data = CompetitorData.FromOhlc(values, values.Select(v => v + 1).ToArray(), values.Select(v => v - 1).ToArray(), values);
+        (_bars, _input, var data) = QuanWindowBenchmarkInput.Create(Count);
         var pair = HullComparison.Create(HullWindowConvention.ExpandingFloor);
         var expectedColumn = pair.Reference!(data, Period).Outputs["Value"];
         var expected = expectedColumn.Values;

@@ -277,7 +277,9 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
             if (sample)
             {
                 if (top > ulong.MaxValue / (uint)(n - 1) || bottom > ulong.MaxValue / (uint)n) return false;
+#pragma warning disable S3949 // n is 2..4096; the preceding MaxValue/factor guards prove both unsigned products fit.
                 top = checked(top * (uint)(n - 1)); bottom = checked(bottom * (uint)n);
+#pragma warning restore S3949
             }
             if (!TryCompactRoot(top, bottom, 2 * _scale.Exponent, out result)) return false;
             result *= Math.Sign(deviation) * _scale.Integer;
