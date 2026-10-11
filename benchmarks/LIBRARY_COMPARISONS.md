@@ -2674,3 +2674,21 @@ Momentum Index completed last. Builds and correctness workers were stopped
 before the timing run. Results are machine-specific observations, with the
 BenchmarkDotNet environment, sample errors and allocation measurements retained
 in the archive.
+
+
+## Trady directional allocation reduction (timing pending)
+
+`WindowDirectionalMeasure` now retains compact rounded movement stages and reuses
+the existing `JurikDyadic` exact arithmetic for weighted recurrence and DI/DX
+ratios. Raw movements skip ATR state; single-direction outputs skip the unused
+smoothing stream; rating history exists only for a positive rating lag.
+Extended unpublished stages, strict exact dominance, early ADX seeding and
+missing-value propagation retain their original rounding/presence contracts.
+
+The net10.0 production build, 17 focused unit tests and 47 directional comparison
+tests passed. All seven measures allocate zero managed bytes across 4,000 ordinary
+streaming updates after 1,000 warmups in the regression dataset. Independent
+reference checks cover reset, extremes/subnormals, exact ties, periods 1/3/20 and
+int.MaxValue, and lags 0/2. This is a state-allocation result, not an end-to-end
+builder latency claim. Consolidated timing remains deferred; qualification stays
+at 176/401 APIs.
