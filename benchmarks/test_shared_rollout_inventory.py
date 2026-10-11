@@ -89,6 +89,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_percentile_qualification_preserves_library_and_median(self):
+        self.write()
+        for api in ('QuanTAlib.Median', 'QuanTAlib.Percentile', 'Trady.Indicator.Median', 'Trady.Indicator.Percentile'):
+            path = self.qualification(f'SharedRollingPercentileBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_alma_preserves_competitor_identity(self):
         self.write()
         for api in ('QuanTAlib.Alma', 'Skender.GetAlma'):

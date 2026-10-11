@@ -35,6 +35,24 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
     /// <summary>Whether incomplete windows publish their mean instead of their percentile.</summary>
     public bool AverageDuringWarmup { get; }
 
+#if !NETFRAMEWORK
+    // A fractional full-window rank always uses arithmetic interpolation, which
+    // ignores equal-zero ordering. Integer ranks expose the sorted list's zero bits.
+    internal bool HasFractionalFullRank
+    {
+        get
+        {
+            ulong bits = unchecked((ulong)BitConverter.DoubleToInt64Bits(Percentile));
+            int exponent = (int)((bits >> 52) & 0x7ff);
+            ulong significand = bits & 0x000fffffffffffffUL;
+            if (exponent != 0) significand |= 1UL << 52;
+            return Period > 1 && significand != 0
+                && BitOperations.TrailingZeroCount(significand) + BitOperations.TrailingZeroCount((uint)(Period - 1))
+                    < (exponent == 0 ? 1074 : 1075 - exponent);
+        }
+    }
+#endif
+
     /// <inheritdoc/>
     public override int WarmupBars => Period - 1;
 
@@ -79,7 +97,7 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
         return values;
     }
 
-    private sealed class State : IIndicatorState
+    internal sealed class State : IIndicatorState
     {
         private readonly int _period;
         private readonly bool _average;
@@ -88,16 +106,26 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
         private readonly Queue<double> _history = new();
         private readonly List<double> _sorted = new();
         private ExactMeanAccumulator _sum;
+        private bool _warming;
+        private readonly int _fullIndex;
+        private readonly BigInteger _fullRemainder, _fullLowerWeight;
+        private readonly ExactMeanAccumulator _denominator;
 
         internal State(int period, double percentile, bool average)
         {
             _period = period;
             _average = average;
+            _warming = average;
             var top = ExactVarianceWindow.Units(percentile);
             var bottom = BigInteger.One << 1074;
             var gcd = BigInteger.GreatestCommonDivisor(top, bottom);
             _top = top / gcd;
             _bottom = bottom / gcd;
+            _fullIndex = (int)BigInteger.DivRem(_top * (period - 1), _bottom, out _fullRemainder);
+            _fullLowerWeight = _bottom - _fullRemainder;
+            var denominator = new ExactMeanAccumulator();
+            denominator.Add(1, _bottom);
+            _denominator = denominator;
         }
 
         public void Reset()
@@ -105,6 +133,7 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
             _history.Clear();
             _sorted.Clear();
             _sum = default;
+            _warming = _average;
         }
 
         public double Update(in Bar bar)
@@ -113,24 +142,42 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
             {
                 var oldest = _history.Dequeue();
                 _sorted.RemoveAt(_sorted.BinarySearch(oldest));
-                _sum.Add(oldest, -1);
             }
             var insertion = _sorted.BinarySearch(bar.Close);
             _sorted.Insert(insertion < 0 ? ~insertion : insertion, bar.Close);
             _history.Enqueue(bar.Close);
-            _sum.Add(bar.Close);
-            if (_average && _history.Count < _period)
-                return _sum.Mean(_history.Count);
-            var index = (int)
-                BigInteger.DivRem(_top * (_history.Count - 1), _bottom, out var remainder);
+            if (_warming)
+            {
+                if (_history.Count < _period)
+                {
+                    _sum.Add(bar.Close);
+                    return _sum.Mean(_history.Count);
+                }
+                // A complete window never returns to warmup until Reset.
+                _sum = default;
+                _warming = false;
+            }
+            bool full = _history.Count == _period;
+            BigInteger remainder;
+            int index;
+            if (full) { index = _fullIndex; remainder = _fullRemainder; }
+            else index = (int)BigInteger.DivRem(_top * (_history.Count - 1), _bottom, out remainder);
             if (remainder.IsZero)
                 return _sorted[index];
+            if (_bottom == 2)
+            {
+                double total = _sorted[index] + _sorted[index + 1];
+                if (total == 0) return 0; // NOSONAR: S1244 - Exact cancellation alone produces canonical zero.
+                if (FrameworkCompatibility.IsFinite(total) && Math.Abs(total) >= 4.450147717014403E-308)
+                    return total * .5;
+                var mean = new ExactMeanAccumulator();
+                mean.Add(_sorted[index]); mean.Add(_sorted[index + 1]);
+                return mean.Mean(2);
+            }
             var numerator = new ExactMeanAccumulator();
-            numerator.Add(_sorted[index], _bottom - remainder);
+            numerator.Add(_sorted[index], full ? _fullLowerWeight : _bottom - remainder);
             numerator.Add(_sorted[index + 1], remainder);
-            var denominator = new ExactMeanAccumulator();
-            denominator.Add(1, _bottom);
-            return numerator.Ratio(denominator);
+            return numerator.Ratio(_denominator);
         }
     }
 }
