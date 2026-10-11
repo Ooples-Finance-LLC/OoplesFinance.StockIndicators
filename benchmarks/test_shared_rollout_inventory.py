@@ -101,8 +101,10 @@ class InventoryDiagnosticsTests(unittest.TestCase):
 
     def test_candle_qualification_uses_trady_namespace(self):
         self.write()
-        for operation in ('DragonflyDoji', 'GravestoneDoji', 'Doji', 'Bullish', 'Bearish'):
+        for operation in ('DragonflyDoji', 'GravestoneDoji', 'Doji', 'Bullish', 'Bearish', 'UpTrend', 'DownTrend', 'BullishEngulfingPattern', 'BearishEngulfingPattern'):
             benchmark = 'SharedShadowDojiBenchmarks' if operation in ('DragonflyDoji', 'GravestoneDoji') else 'SharedBasicCandleBenchmarks'
+            if operation in ('UpTrend', 'DownTrend', 'BullishEngulfingPattern', 'BearishEngulfingPattern'):
+                benchmark = 'SharedTrendCandleBenchmarks'
             path = self.qualification(f'{benchmark}.BuilderFull(Operation: "{operation}", Count: 10000)')
             result = inventory(self.root, [path])
             row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
