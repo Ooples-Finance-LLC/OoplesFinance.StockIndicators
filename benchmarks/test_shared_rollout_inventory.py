@@ -99,6 +99,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         self.assertEqual(4, len(row['current'][0]['methods']))
         self.assertFalse(row['current'][0]['full_clear_win'])
 
+    def test_shadow_doji_qualification_uses_trady_namespace(self):
+        self.write()
+        for operation in ('DragonflyDoji', 'GravestoneDoji'):
+            path = self.qualification(f'SharedShadowDojiBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
     def test_qualification_paths_use_one_benchmark_root(self):
         self.write()
         path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')

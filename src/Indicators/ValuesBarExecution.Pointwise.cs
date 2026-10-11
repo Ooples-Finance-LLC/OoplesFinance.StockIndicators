@@ -7,7 +7,8 @@ internal static partial class ValuesBarExecution
 {
     internal static bool IsPointwise(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
         && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform or CandleArithmetic
-            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice;
+            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice
+        || IsShadowDojiGraph(indicator);
 
     private static Bar FillPointwise(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
@@ -17,6 +18,10 @@ internal static partial class ValuesBarExecution
         TypicalPrice => FillPointwiseKernel(source, output, indicator, new TypicalPriceKernel(), cancellation, owned),
         WeightedClose => FillPointwiseKernel(source, output, indicator, new WeightedCloseKernel(), cancellation, owned),
         FullTypicalPrice => FillPointwiseKernel(source, output, indicator, new FullTypicalPriceKernel(), cancellation, owned),
+        DragonflyDojiCandle candle => FillPointwiseKernel(source, output, indicator,
+            new ShadowDojiKernel(candle.BodyFraction, candle.ShadowFraction, true), cancellation, owned),
+        GravestoneDojiCandle candle => FillPointwiseKernel(source, output, indicator,
+            new ShadowDojiKernel(candle.BodyFraction, candle.ShadowFraction, false), cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcSine } => FillAsin(source, output, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.Sine } => FillPointwise<Sine, AllReal>(source, output, indicator, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.Cosine } => FillPointwise<Cosine, AllReal>(source, output, indicator, cancellation, owned),

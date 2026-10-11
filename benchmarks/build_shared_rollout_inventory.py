@@ -67,7 +67,10 @@ def inventory(root: Path, qualifications=()):
             prefix = 'TaLib.Functions.'
             operation = re.search(r'Operation: "([^"]+)"', row['FullName'])
             count = re.search(r'Count: (\d+)', row['FullName'])
-            if operation and any(name in row['FullName'] for name in
+            if operation and 'SharedShadowDojiBenchmarks.' in row['FullName']:
+                api = operation[1]
+                prefix = 'Trady.Candlestick.'
+            elif operation and any(name in row['FullName'] for name in
                                  ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.', 'SharedPairInputBenchmarks.',
                                   'SharedPriceProjectionBenchmarks.', 'SharedGeneratedStateBenchmarks.',
                                   'SharedRecursiveStateBenchmarks.', 'SharedLaggedChangeBenchmarks.')):
