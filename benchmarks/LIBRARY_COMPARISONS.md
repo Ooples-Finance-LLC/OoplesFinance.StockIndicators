@@ -2930,3 +2930,21 @@ HilbertRoundedKernel now certifies local two-product sums using FMA residuals an
 Adversarial review covered overflow/underflow guards, cancellation, rounding ties, stage boundaries, canonical dyadic zero, and history cursor/reset ordering. Independent integer-reference tests cover accepted and rejected exponent ranges, ordinary price-scale blends, ties and subnormals. The first coverage assertion exposed deliberately conservative rejection for unrelated exponent scales; representative ordinary blends are now also tested, with an explicit acceptance floor. No approximate result is accepted.
 
 Validation: net10.0 production and benchmark builds passed; 23 focused arithmetic/allocation tests and 48 independent Hilbert/phase comparison tests passed. Initial allocation checks exposed tier-transition sensitivity (8080/8136 bytes); all 23 passed with tiering disabled, then passed normally after increasing warmup to three reset/replays. Zero-allocation assertions and measured startup/reset coverage remain unchanged. Commands: `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark build with `-f net10.0 --no-restore -p:BuildProjectReferences=false`; unit and comparison `dotnet test -c Release --no-restore -p:BuildProjectReferences=false` filtered respectively to HilbertRoundedKernelTests/CompactHilbertPhaseTests/CompactPhaseAdaptiveTests and the six affected Hilbert/phase comparison classes. Logs: `C:/Users/cheat/temp/si-hilbert-certified-*`. No new latency claim follows from these checks.
+
+
+### Hilbert certified-kernel checkpoint and tighter certificates (2026-10-11)
+
+One four-arm 10k cycle-period run on production `01164679` completed with 20 warmups and 15 requested measurement iterations. Raw report: `results/shared-rollout/hilbert-cpu/period-10k-certified.json.gz`; source/fixture/contention context is adjacent. Preflight CPU was 2%, completion 6%; process samples before, during and after found no competing dotnet build/test workload. This was sampled observation, not a continuous isolation guarantee.
+
+| Arm | Mean ns | CI lower / upper ns | BDN allocation bytes |
+|---|---:|---:|---:|
+| Full | 16264460.58 | 16129162.28 / 16399758.88 | 646132 |
+| LatestOnly | 16586580.61 | 16100995.70 / 17072165.52 | 166182 |
+| Native serial | 966709.11 | 957141.48 / 976276.75 | 80236 |
+| Native parallel | 1045051.82 | 1030252.20 / 1059851.45 | 442295 |
+
+LatestOnly improved about 47.6% from the preceding 31.65 ms campaign but remains 17.2 times slower than native serial and uses 2.07 times its managed allocation. The inventory replaces only HtDcPeriod's current evidence; timing-qualified coverage remains 178/401 APIs, not a win count. The original report remains archived.
+
+The subsequent arithmetic follow-up is NOT included in those timings. When residual sums are inexact, it now bounds all omitted terms outward and accepts only when the entire exact-result enclosure lies strictly inside the candidate's rounding cell. The original product exponent bounds prevent lost underflow residuals. Uncertain midpoints still fall back to exact arithmetic; exact tails preserve ties-to-even directly. Both final phase additions now use the existing rounded SumProduct primitive, retaining the prior stage boundaries and wide fallback. The ordinary blend regression now requires over 5900 of 6000 cases to certify, all checked against independent integer arithmetic, plus explicit midpoint rejection and separated-residual cases.
+
+Production/benchmark net10.0 builds, 24 focused arithmetic/allocation tests, 48 independent Hilbert/phase comparison tests and 55 inventory checks passed. Commands follow the preceding batch with unchanged build-reference restrictions and test filters. Logs: `C:/Users/cheat/temp/si-hilbert-cell-*`.

@@ -42,7 +42,7 @@ public sealed class HilbertRoundedKernelTests
             else rejected++;
             CheckProduct(a, b, -b, a);
         }
-        Assert.True(ordinaryAccepted > 1000, $"Only {ordinaryAccepted} ordinary blends certified.");
+        Assert.True(ordinaryAccepted > 5900, $"Only {ordinaryAccepted} ordinary blends certified.");
         Assert.True(accepted > 1000, $"Only {accepted} certified cases.");
         Assert.True(rejected > 1000, $"Only {rejected} fallback cases.");
     }
@@ -69,6 +69,21 @@ public sealed class HilbertRoundedKernelTests
         Assert.False(HilbertRoundedKernel.TryProductSum(double.Epsilon, .5, 0, 1, out _));
         Assert.False(HilbertRoundedKernel.TryProductSum(double.MaxValue, 2, 0, 1, out _));
         Assert.False(HilbertRoundedKernel.TryProductSum(0, double.PositiveInfinity, 0, 1, out _));
+    }
+
+    [Fact]
+    public void RoundingCellCertificateAcceptsSeparatedTailsButRejectsUncertainMidpoints()
+    {
+        foreach (int exponent in new[] { -400, -200, -60 })
+        foreach (int sign in new[] { -1, 1 })
+            Assert.True(CheckProduct(1.1, 1.3, sign * Math.ScaleB(1.7, exponent), 1.9));
+
+        // The second exact product sits just below the midpoint above 2^-53.
+        // Rounded products sum to the tie at 1 + 2^-53; the residual changes
+        // the correct result. An interval touching that tie must not certify 1.
+        double c = Math.BitIncrement(Math.ScaleB(1, -53)), d = Math.BitDecrement(1d);
+        Assert.False(HilbertRoundedKernel.TryProductSum(1, 1, c, d, out _));
+        Assert.False(HilbertRoundedKernel.TryProductSum(-1, 1, -c, d, out _));
     }
 
     [Fact]
