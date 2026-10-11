@@ -10,7 +10,8 @@ public sealed class CertifiedLogReturnTests
     {
         double[] values = [double.Epsilon, 3 * double.Epsilon, Math.ScaleB(1, -1022),
             Math.BitDecrement(1), 1, Math.BitIncrement(1), Math.BitDecrement(2), 2,
-            Math.BitIncrement(2), .1, 1.23456789012345, double.MaxValue];
+            Math.BitIncrement(2), Math.BitDecrement(4), 4, Math.BitIncrement(4),
+            .1, 1.23456789012345, double.MaxValue];
         foreach (double current in values)
         foreach (double previous in values)
             Check(current, previous);

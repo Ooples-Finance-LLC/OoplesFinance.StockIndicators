@@ -13,15 +13,24 @@ internal static class CertifiedLogReturn
 
     private static BigInteger Ceiling(BigInteger n, BigInteger d) => (n + d - 1) / d;
 
+    private static BigInteger CeilingShift(BigInteger value, int bits)
+    {
+        if (value.IsZero) return BigInteger.Zero;
+        var floor = value >> bits;
+        return ExactMeanAccumulator.TrailingBinaryZeros(value) >= bits ? floor : floor + 1;
+    }
+
     private static (BigInteger Low, BigInteger High) Series(BigInteger n, BigInteger d, int bits)
     {
         if (n.IsZero)
             return (0, 0);
         var scale = BigInteger.One << bits;
-        var low = n * scale / d;
-        var high = Ceiling(n * scale, d);
-        var squareLow = low * low / scale;
-        var squareHigh = Ceiling(high * high, scale);
+        var low = BigInteger.DivRem(n << bits, d, out var remainder);
+        var high = remainder.IsZero ? low : low + 1;
+        // These nonnegative fixed-point divisions have power-of-two divisors.
+        // Shifts retain the same directed bounds without general division.
+        var squareLow = (low * low) >> bits;
+        var squareHigh = CeilingShift(high * high, bits);
         var powerLow = low;
         var powerHigh = high;
         BigInteger sumLow = 0,
@@ -32,8 +41,8 @@ internal static class CertifiedLogReturn
             var odd = 2 * j + 1;
             sumLow += powerLow / odd;
             sumHigh += Ceiling(powerHigh, odd);
-            powerLow = powerLow * squareLow / scale;
-            powerHigh = Ceiling(powerHigh * squareHigh, scale);
+            powerLow = (powerLow * squareLow) >> bits;
+            powerHigh = CeilingShift(powerHigh * squareHigh, bits);
             // Once the next power is at most one fixed-point unit, further
             // rounded terms add no useful precision. The same geometric tail
             // bound remains valid at this earlier truncation point.
