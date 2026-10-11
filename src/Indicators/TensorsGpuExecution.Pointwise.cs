@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Eight keys: four arithmetic, three rounding and one adjacent-candle kernel.
+    // Twelve fixed keys; lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -14,10 +14,18 @@ internal sealed partial class TensorsGpuExecution
     {
         var arithmetic = indicator as CandleArithmetic;
         var rounding = indicator as PriceRoundingTransform;
+        var lagged = indicator as LaggedPriceChange;
         bool engulfing = indicator is EngulfingPattern;
-        if (source.Length == 0 || arithmetic is null && rounding is null && !engulfing)
+        if (source.Length == 0 || arithmetic is null && rounding is null && !engulfing && !ValuesBarExecution.IsGpuLagged(indicator))
             throw new NotSupportedException("Unqualified GPU pointwise kernel.");
-        int operation = engulfing ? 7 : arithmetic is not null ? (int)arithmetic.Operation : 4 + (int)rounding!.Operation;
+        int operation = lagged is not null ? lagged.Kind switch
+        {
+            PriceChangeKind.Difference => 8,
+            PriceChangeKind.Gain => 9,
+            PriceChangeKind.Loss => 10,
+            PriceChangeKind.Ratio => 11,
+            _ => throw new NotSupportedException("Unqualified GPU lagged operation.")
+        } : engulfing ? 7 : arithmetic is not null ? (int)arithmetic.Operation : 4 + (int)rounding!.Operation;
         lock (_gate)
         {
             cancellation.ThrowIfCancellationRequested();
@@ -75,6 +83,7 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(1, deviceRight.Handle);
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
+                kernel.SetArg(4, lagged?.Period ?? 0);
                 cancellation.ThrowIfCancellationRequested();
                 kernel.Enqueue(new[] { (ulong)source.Length });
                 deviceOutput.CopyToHost(output[0]);
@@ -121,16 +130,20 @@ internal sealed partial class TensorsGpuExecution
             6 => "x >= 0.0 ? sqrt(x) : 0.0",
             7 => "y >= x && q < p && x <= q && y >= p && (x < q || y > p) ? 100.0 : " +
                  "y < x && q >= p && x >= q && y <= p && (x > q || y < p) ? -100.0 : 0.0",
+            8 => "x == y ? 0.0 : x - y",
+            9 => "x <= y ? 0.0 : x - y",
+            10 => "x >= y ? 0.0 : y - x",
+            11 => "x == 0.0 || y == 0.0 ? 0.0 : x / y",
             _ => throw new NotSupportedException("Unqualified GPU pointwise operation.")
         };
         var previous = operation == 7
             ? "if (i < 2) { output[i] = 0.0; return; } double p = left[i - 1]; double q = right[i - 1];"
-            : "";
+            : operation >= 8 ? "if (i < (size_t)period) { output[i] = 0.0; return; } y = left[i - (size_t)period];" : "";
         var source = $$"""
             #pragma OPENCL EXTENSION cl_khr_fp64 : enable
             #pragma OPENCL FP_CONTRACT OFF
             __kernel void pointwise(__global const double* left, __global const double* right,
-                __global double* output, int count)
+                __global double* output, int count, int period)
             {
                 size_t i = get_global_id(0);
                 if (i >= (size_t)count) return;

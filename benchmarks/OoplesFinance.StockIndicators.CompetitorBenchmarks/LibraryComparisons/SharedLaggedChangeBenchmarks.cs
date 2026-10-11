@@ -71,11 +71,12 @@ public class SharedLaggedChangeBenchmarks
         if (status != TALib.Core.RetCode.Success || range.Start.Value != Period || range.End.Value - range.Start.Value != output.Length)
             throw new InvalidOperationException("Unexpected native lagged output range.");
     }
-    private LaggedPriceChange Create() => new(Period, _kind);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
+    internal LaggedPriceChange Create() => new(Period, _kind);
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false,
+        IndicatorExecutionBackend backend = IndicatorExecutionBackend.Cpu)
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
+            .ConfigureHistory(history).ConfigureExecution(backend);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }
