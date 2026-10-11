@@ -401,8 +401,9 @@ public sealed class SharedBoundedWindowTests
     }
 
     [Theory]
-    [InlineData(511)] [InlineData(512)] [InlineData(513)] [InlineData(1025)]
-    public async Task WilliamsWorkerThresholdPreservesSingleMixedAndFailureRoutes(int count)
+    [InlineData(511, false)] [InlineData(512, false)] [InlineData(513, false)] [InlineData(1025, false)]
+    [InlineData(511, true)] [InlineData(512, true)] [InlineData(513, true)] [InlineData(1025, true)]
+    public async Task WeightedAndWilliamsWorkerThresholdPreservesSingleMixedAndFailureRoutes(int count, bool weighted)
     {
         int previous = CpuParallelSettings.MaxDegreeOfParallelism;
         try
@@ -414,15 +415,16 @@ public sealed class SharedBoundedWindowTests
                 CpuParallelSettings.MaxDegreeOfParallelism = workers;
                 foreach (int period in new[] { 1, 20 })
                 {
-                    var williams = new WilliamsR(period);
-                    await CompareRoutes(bars, [williams]);
-                    await CompareRoutes(bars, [williams, new HighestHigh(7)]);
+                    IIndicator indicator = weighted ? new Wma(period) : new WilliamsR(period);
+                    await CompareRoutes(bars, [indicator]);
+                    await CompareRoutes(bars, [indicator, new HighestHigh(7)]);
                 }
                 var saved = bars[0];
                 bars[0] = new Bar(default, 0, double.Epsilon, 0, double.MaxValue, 1);
-                await CompareRoutes(bars, [new WilliamsR(20)]);
+                IIndicator extreme = weighted ? new Wma(20) : new WilliamsR(20);
+                await CompareRoutes(bars, [extreme]);
                 bars[^1] = new Bar(default, 0, 1, 0, 1, double.NaN);
-                await CompareRoutes(bars, [new WilliamsR(20), new HighestHigh(7)]);
+                await CompareRoutes(bars, [extreme, new HighestHigh(7)]);
                 bars[0] = saved;
                 int last = bars.Length - 1;
                 bars[last] = new Bar(default, 0, last % 31 - 14, last % 31 - 16, last % 31 - 15, 1);
