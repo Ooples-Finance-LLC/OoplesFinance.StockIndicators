@@ -1,5 +1,5 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
+using ReturnKey = OoplesFinance.StockIndicators.Helpers.ReturnOrderStatistic.ReturnKey;
 
 namespace OoplesFinance.StockIndicators.Indicators;
 
@@ -51,13 +51,13 @@ public static class ConnorsStrengthSnapshot
         var priceOutput = new double[2];
         var streakOutput = new double[2];
         var result = new ConnorsStrengthValue[bars.Count];
-        var returns = new Queue<(BigInteger N, BigInteger D)>();
+        var returns = new Queue<ReturnKey?>();
         var streak = 0;
         for (var i = 0; i < bars.Count; i++)
         {
             var bar = bars[i];
             rsi.Update(bar, priceOutput);
-            var change = (N: BigInteger.Zero, D: BigInteger.One);
+            ReturnKey? change = new ReturnKey(1, 1);
             if (i > 0)
             {
                 var previous = bars[i - 1].Close;
@@ -70,14 +70,7 @@ public static class ConnorsStrengthSnapshot
                     new Bar(bar.Time, streak, streak, streak, streak, 0),
                     streakOutput
                 );
-                change =
-                    previous > 0
-                        ? (
-                            ExactVarianceWindow.Units(bar.Close)
-                                - ExactVarianceWindow.Units(previous),
-                            ExactVarianceWindow.Units(previous)
-                        )
-                        : (BigInteger.Zero, BigInteger.Zero);
+                change = previous > 0 ? new ReturnKey(bar.Close, previous) : null;
             }
             if (returns.Count > rankPeriod)
                 returns.Dequeue();
@@ -85,9 +78,10 @@ public static class ConnorsStrengthSnapshot
             double? rank = null;
             if (i >= rankPeriod)
             {
-                var count = change.D.IsZero
-                    ? 0
-                    : returns.Count(r => !r.D.IsZero && r.N * change.D < change.N * r.D);
+                var count = 0;
+                if (change.HasValue)
+                    foreach (var prior in returns)
+                        if (prior.HasValue && prior.Value.CompareTo(change.Value) < 0) count++;
                 rank = (100L * count) / rankPeriod;
             }
             double? priceValue = priceOutput[1] > 0 ? priceOutput[0] : null;
