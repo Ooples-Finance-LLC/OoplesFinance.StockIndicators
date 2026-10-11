@@ -96,7 +96,7 @@ public sealed class WindowAroon : MultiOutputIndicatorBase, IIndicatorValidation
         return result;
     }
 
-    private sealed class State(int period, bool extra, bool oldest) : IMultiOutputState
+    internal sealed class State(int period, bool extra, bool oldest) : IMultiOutputState
     {
         private readonly long _size = (long)period + (extra ? 1 : 0);
         private readonly WindowExtremeDeque _high =

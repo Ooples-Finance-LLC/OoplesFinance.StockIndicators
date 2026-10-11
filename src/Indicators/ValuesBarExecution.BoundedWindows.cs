@@ -9,10 +9,15 @@ internal static partial class ValuesBarExecution
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
             or LaggedPriceChange { Period: < int.MaxValue } or WindowRangeMidpoint or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
+        || AroonWindow(indicator) > 0
         || WeightedWindowPeriod(indicator) > 0
         || PercentileCandlePeriod(indicator) > 0
         || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0
         || TrendReversalWindow(indicator) > 0;
+
+    private static int AroonWindow(IIndicator indicator) => indicator is WindowAroon aroon
+        && (!aroon.IncludeExtraBar || aroon.Period < int.MaxValue)
+            ? aroon.Period + (aroon.IncludeExtraBar ? 1 : 0) : 0;
 
     private static int TrendReversalWindow(IIndicator indicator)
     {
@@ -72,7 +77,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint) return 512;
+        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowAroon) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
@@ -162,44 +167,46 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private readonly record struct BoundedOutput(double[][] Values, int Origin, int WriteStart);
+
     private interface IBoundedKernel<T> where T : struct, IBoundedKernel<T>
     {
-        static abstract T Create(int period, int count, IIndicator indicator);
+        static abstract T Create(int period, int count, IIndicator indicator, in BoundedOutput target);
         double Update(in Bar bar);
     }
     private readonly struct HighKernel(PriceExtremeState state) : IBoundedKernel<HighKernel>
     {
-        public static HighKernel Create(int period, int count, IIndicator indicator) => new(new(period, count, true));
+        public static HighKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count, true));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct LowKernel(PriceExtremeState state) : IBoundedKernel<LowKernel>
     {
-        public static LowKernel Create(int period, int count, IIndicator indicator) => new(new(period, count, false));
+        public static LowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count, false));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct WmaKernel(WmaValueState state) : IBoundedKernel<WmaKernel>
     {
-        public static WmaKernel Create(int period, int count, IIndicator indicator) => new(new(period, count));
+        public static WmaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct WilliamsKernel(WilliamsValueState state) : IBoundedKernel<WilliamsKernel>
     {
-        public static WilliamsKernel Create(int period, int count, IIndicator indicator) => new(new(period, count));
+        public static WilliamsKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct SumKernel(SumValueState state) : IBoundedKernel<SumKernel>
     {
-        public static SumKernel Create(int period, int count, IIndicator indicator) => new(new(period, count));
+        public static SumKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct EngulfingKernel(EngulfingPattern.State state) : IBoundedKernel<EngulfingKernel>
     {
-        public static EngulfingKernel Create(int period, int count, IIndicator indicator) => new(new());
+        public static EngulfingKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new());
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct LaggedKernel(LaggedValueState state) : IBoundedKernel<LaggedKernel>
     {
-        public static LaggedKernel Create(int period, int count, IIndicator indicator)
+        public static LaggedKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
         {
             var change = (LaggedPriceChange)indicator;
             return new(new(change.Period, count, change.Kind));
@@ -208,47 +215,47 @@ internal static partial class ValuesBarExecution
     }
     private readonly struct BodyShadowKernel(BodyShadowCandleState state) : IBoundedKernel<BodyShadowKernel>
     {
-        public static BodyShadowKernel Create(int period, int count, IIndicator indicator) =>
+        public static BodyShadowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new((BodyShadowCandleState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
     private readonly struct TrendBabyKernel(TrendBabyState state) : IBoundedKernel<TrendBabyKernel>
     {
-        public static TrendBabyKernel Create(int period, int count, IIndicator indicator) =>
+        public static TrendBabyKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new((TrendBabyState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct TrendStarKernel(TrendStarState state) : IBoundedKernel<TrendStarKernel>
     {
-        public static TrendStarKernel Create(int period, int count, IIndicator indicator) =>
+        public static TrendStarKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new((TrendStarState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
     private readonly struct HaramiKernel(StrictHaramiState state) : IBoundedKernel<HaramiKernel>
     {
-        public static HaramiKernel Create(int period, int count, IIndicator indicator) =>
+        public static HaramiKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new((StrictHaramiState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct TasukiKernel(TrendTasukiState state) : IBoundedKernel<TasukiKernel>
     {
-        public static TasukiKernel Create(int period, int count, IIndicator indicator) =>
+        public static TasukiKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new((TrendTasukiState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
     private readonly struct PercentileCandleKernel(PercentileCandleState state) : IBoundedKernel<PercentileCandleKernel>
     {
-        public static PercentileCandleKernel Create(int period, int count, IIndicator indicator) =>
+        public static PercentileCandleKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new((PercentileCandleState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
     private readonly struct MidpointKernel(WindowRangeMidpoint.State state) : IBoundedKernel<MidpointKernel>
     {
-        public static MidpointKernel Create(int period, int count, IIndicator indicator) =>
+        public static MidpointKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new(new(period, ((WindowRangeMidpoint)indicator).CandleRanges));
         public double Update(in Bar bar) => state.Update(in bar);
     }
@@ -266,7 +273,7 @@ internal static partial class ValuesBarExecution
 
     private readonly struct CloseExtremeKernel(CloseExtremeState state) : IBoundedKernel<CloseExtremeKernel>
     {
-        public static CloseExtremeKernel Create(int period, int count, IIndicator indicator) =>
+        public static CloseExtremeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new(new(period, ((DecayingWindowExtreme)indicator).Maximum));
         public double Update(in Bar bar) => state.Update(in bar);
     }
@@ -284,8 +291,8 @@ internal static partial class ValuesBarExecution
 
     private readonly struct ExtremeIndexKernel(ExtremeIndexState state) : IBoundedKernel<ExtremeIndexKernel>
     {
-        public static ExtremeIndexKernel Create(int period, int count, IIndicator indicator) =>
-            new(new(period, ((WindowExtremeIndex)indicator).Maximum));
+        public static ExtremeIndexKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(period, ((WindowExtremeIndex)indicator).Maximum, target.Origin));
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
@@ -331,19 +338,39 @@ internal static partial class ValuesBarExecution
 
     private readonly struct SmallExtremeIndexKernel(SmallExtremeIndexState state) : IBoundedKernel<SmallExtremeIndexKernel>
     {
-        public static SmallExtremeIndexKernel Create(int period, int count, IIndicator indicator) =>
-            new(new(period, ((WindowExtremeIndex)indicator).Maximum));
+        public static SmallExtremeIndexKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(period, ((WindowExtremeIndex)indicator).Maximum, target.Origin));
         public double Update(in Bar bar) => state.Update(in bar);
+    }
+
+    private struct AroonKernel(WindowAroon.State state, BoundedOutput target) : IBoundedKernel<AroonKernel>
+    {
+        private readonly double[] _scratch = new double[6];
+        private int _index = target.Origin;
+        public static AroonKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var aroon = (WindowAroon)indicator;
+            return new(new(aroon.Period, aroon.IncludeExtraBar, aroon.OldestTie), target);
+        }
+        public double Update(in Bar bar)
+        {
+            state.Update(in bar, _scratch);
+            int index = _index++;
+            // Captured seed inputs initialize state but belong to another worker.
+            if (index >= target.WriteStart)
+                for (int slot = 1; slot < _scratch.Length; slot++) target.Values[slot][index] = _scratch[slot];
+            return _scratch[0];
+        }
     }
 
     private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
-        public static StateWindowKernel Create(int period, int count, IIndicator indicator) =>
+        public static StateWindowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
             new((IIndicatorState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
-    private static Bar FillBoundedWindow(Bar[] source, double[] output, IIndicator indicator,
+    private static Bar FillBoundedWindow(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
         HighestHigh high => FillBoundedWindow<HighKernel>(source, output, indicator, high.Length, cancellation, owned),
@@ -351,6 +378,7 @@ internal static partial class ValuesBarExecution
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
+        WindowAroon when AroonWindow(indicator) > 0 => FillBoundedWindow<AroonKernel>(source, output, indicator, AroonWindow(indicator), cancellation, owned),
         WindowRangeMidpoint midpoint => FillBoundedWindow<MidpointKernel>(source, output, indicator, midpoint.Period, cancellation, owned),
         WindowExtremeIndex { Period: <= 32 } index => FillBoundedWindow<SmallExtremeIndexKernel>(source, output, indicator, index.Period, cancellation, owned),
         WindowExtremeIndex index => FillBoundedWindow<ExtremeIndexKernel>(source, output, indicator, index.Period, cancellation, owned),
@@ -378,7 +406,7 @@ internal static partial class ValuesBarExecution
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 
-    private static Bar FillBoundedWindow<T>(Bar[] source, double[] output, IIndicator indicator, int period,
+    private static Bar FillBoundedWindow<T>(Bar[] source, double[][] output, IIndicator indicator, int period,
         CancellationToken cancellation, OwnedBarBuffer? owned) where T : struct, IBoundedKernel<T>
     {
         cancellation.ThrowIfCancellationRequested();
@@ -431,12 +459,14 @@ internal static partial class ValuesBarExecution
         }
     }
 
-    private static PointwiseRegion ComputeBoundedRegion<T>(Bar[] source, double[] output, OwnedBarBuffer? owned,
+    private static PointwiseRegion ComputeBoundedRegion<T>(Bar[] source, double[][] output, OwnedBarBuffer? owned,
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };
-        var kernel = T.Create(period, end - start + seed.Length, indicator);
+        var target = new BoundedOutput(output, start - seed.Length, start);
+        var kernel = T.Create(period, end - start + seed.Length, indicator, in target);
+        var primary = output[0];
         foreach (ref readonly var bar in seed)
         {
             if (cancellation.IsCancellationRequested) return region;
@@ -452,10 +482,7 @@ internal static partial class ValuesBarExecution
             latest = i >= tailStart ? tail[i - tailStart] : source[i];
             if (!AllFieldsFinite(in latest)) { region.InvalidInput = true; break; }
             var value = kernel.Update(in latest);
-            // Each worker's deque starts at zero, including its captured seeds.
-            // The closed-generic check folds away for every non-index kernel.
-            if (typeof(T) == typeof(ExtremeIndexKernel) || typeof(T) == typeof(SmallExtremeIndexKernel)) value += start - seed.Length;
-            output[i] = value;
+            primary[i] = value;
             if (owned is not null) owned[i] = latest;
             if (!double.IsFinite(value) && region.InvalidOutputIndex < 0)
             {

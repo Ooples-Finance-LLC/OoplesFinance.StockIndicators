@@ -1,0 +1,11 @@
+Aroon shared bounded CPU execution (net10 Release)
+135 focused Aroon/bounded-window/exact-percentage tests passed, zero skips.
+After the 512-bar threshold change: 26 Aroon tests passed, zero skips.
+20 inventory tests passed. Benchmark build passed.
+20 initial builder timing cases and 10 final affected 1k cases completed.
+All timings use existing independent benchmark setup value/presence checks.
+Final evidence merges final 1k rows with initial 10k rows and fastest retained native arms; per-row statistics/memory provenance verified.
+Skender and both Trady mappings win at 1k and 10k in Full and LatestOnly. TA-Lib Aroon/AroonOsc still lose.
+Full retains owned OHLCV snapshots and all six output slots; LatestOnly retains all values and latest snapshot. Native result shapes differ as documented in SharedAroonBenchmarks.
+Review: seed writes are suppressed until each worker owns the index; period+1 overflow falls back; mixed multi-output roots retain evaluator; percentage outputs are bounded and finite for finite input; aliases are read-only and run-owned.
+ShortRun results include minimum-iteration and bimodal-distribution warnings; no universal performance claim.

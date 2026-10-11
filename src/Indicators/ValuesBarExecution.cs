@@ -55,7 +55,7 @@ internal static partial class ValuesBarExecution
             if (history is not null && !SupportsOwned(indicators))
                 throw new InvalidOperationException("Unqualified owned values execution plan.");
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
-            bool boundedBatch = indicators.Count > 1 && indicators.All(i => IsSharedState(i) && IsBoundedWindowIndicator(i));
+            bool boundedBatch = indicators.Count > 1 && indicators.All(i => i.Outputs.Count == 1 && IsSharedState(i) && IsBoundedWindowIndicator(i));
             bool pointwiseBatch = indicators.Count > 1 && indicators.All(IsPointwise);
             foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
                 nodes.Add(new Node(indicator, source.Length, indicators.Count == 1, boundedBatch, pointwiseBatch));
@@ -94,7 +94,7 @@ internal static partial class ValuesBarExecution
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
-                latest = FillBoundedWindow(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
+                latest = FillBoundedWindow(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (boundedBatch)
                 latest = FillBoundedBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
