@@ -6,6 +6,24 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactWeightedAccumulatorTests
 {
     [Fact]
+    public void WideNormalizationAndDivisionPreserveByteAndLimbBoundaries()
+    {
+        foreach (int width in new[] { 7, 8, 63, 64, 65, 127, 128, 129, 512 })
+        foreach (int shift in new[] { 0, 1, 63, 64, 1074 })
+        foreach (int offset in new[] { -1, 0, 1 })
+        foreach (int sign in new[] { -1, 1 })
+        {
+            var weight = sign * (((System.Numerics.BigInteger.One << width) + offset) << shift);
+            var sum = new ExactMeanAccumulator(); sum.Add(1, weight);
+            foreach (long divisor in new[] { 1L, long.MaxValue })
+                Assert.Equal(BitConverter.DoubleToInt64Bits((new ReferenceFraction(weight) / new ReferenceFraction(divisor)).ToDouble()),
+                    BitConverter.DoubleToInt64Bits(sum.Mean(divisor)));
+            sum.Add(1, -weight);
+            Assert.Equal(0, BitConverter.DoubleToInt64Bits(sum.Mean(1)));
+        }
+    }
+
+    [Fact]
     public void CachedProductFactorsPreserveWideProductsSignsAndIntegerWeights()
     {
         double[] inputs = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,

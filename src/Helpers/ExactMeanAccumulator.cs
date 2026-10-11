@@ -283,12 +283,7 @@ internal struct ExactMeanAccumulator
         if (total.IsZero) { this = default; return; }
         // Discard only exact powers of two, so old tiny inputs do not permanently force
         // a wide representation after they leave a rolling window.
-        var bytes = BigInteger.Abs(total).ToByteArray();
-        var trailing = 0;
-        var index = 0;
-        while (bytes[index] == 0) { trailing += 8; index++; }
-        var low = bytes[index];
-        while ((low & 1) == 0) { trailing++; low >>= 1; }
+        var trailing = TrailingBinaryZeros(total);
         total >>= trailing;
         _scale = common + trailing;
         _wide = total < long.MinValue || total > long.MaxValue;
@@ -435,9 +430,13 @@ internal struct ExactMeanAccumulator
 
     private static int BitLength(BigInteger value)
     {
+#if !NETFRAMEWORK
+        return checked((int)value.GetBitLength());
+#else
         var bytes = value.ToByteArray();
         var last = bytes.Length - 1;
         while (last > 0 && bytes[last] == 0) last--;
         return last * 8 + BitLength(bytes[last]);
+#endif
     }
 }
