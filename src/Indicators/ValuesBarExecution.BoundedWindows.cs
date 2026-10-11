@@ -116,17 +116,20 @@ internal static partial class ValuesBarExecution
     {
         cancellation.ThrowIfCancellationRequested();
         int chunks = period <= 4096 ? Math.Min(WorkerCount(), source.Length / period) : 1;
-        if (chunks < 2 || !CanParallelize(source.Length, 8192) || !Monitor.TryEnter(ParallelBarGate))
-        {
-            var region = ComputeBoundedRegion<T>(source, output, owned, 0, source.Length, period, [], [], cancellation);
-            cancellation.ThrowIfCancellationRequested();
-            ValidatePointwiseInput(in region);
-            ValidatePointwiseOutput(indicator, in region);
-            return region.Last;
-        }
+        bool lockTaken = false;
         Bar[][]? tails = null;
         try
         {
+            if (chunks >= 2 && CanParallelize(source.Length, 8192))
+                Monitor.TryEnter(ParallelBarGate, ref lockTaken);
+            if (!lockTaken)
+            {
+                var region = ComputeBoundedRegion<T>(source, output, owned, 0, source.Length, period, [], [], cancellation);
+                cancellation.ThrowIfCancellationRequested();
+                ValidatePointwiseInput(in region);
+                ValidatePointwiseOutput(indicator, in region);
+                return region.Last;
+            }
             tails = new Bar[chunks - 1][];
             var regions = new PointwiseRegion[chunks];
             // Each tail belongs to one disjoint input region. Its owner consumes
@@ -156,7 +159,7 @@ internal static partial class ValuesBarExecution
             if (tails is not null)
                 foreach (var tail in tails)
                     if (tail is { Length: > 0 }) System.Buffers.ArrayPool<Bar>.Shared.Return(tail);
-            Monitor.Exit(ParallelBarGate);
+            if (lockTaken) Monitor.Exit(ParallelBarGate);
         }
     }
 

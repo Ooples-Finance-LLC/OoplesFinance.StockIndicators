@@ -263,6 +263,37 @@ public sealed class SharedBoundedWindowTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
+    [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(20)] [InlineData(64)] [InlineData(65)]
+    public async Task ExtremaPreserveMonotonicPlateauAndSignedZeroWindowsAcrossWorkers(int period)
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (int shape in Enumerable.Range(0, 4))
+            {
+                double[] extremes = [double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon, -0d, 0d];
+                var bars = Enumerable.Range(0, 8193).Select(i =>
+                {
+                    double price = shape switch
+                    {
+                        0 => i, 1 => -i, 2 => i % 2 == 0 ? -0d : 0d,
+                        _ => extremes[(i / (period + 1)) % extremes.Length]
+                    };
+                    return new Bar(default, price, price, price, price, 1);
+                }).ToArray();
+                IIndicator[] pair = [new HighestHigh(period), new LowestLow(period)];
+                foreach (int workers in new[] { 1, 8 })
+                {
+                    CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                    await CompareRoutes(bars, pair);
+                    foreach (var indicator in pair) await CompareRoutes(bars, [indicator]);
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
     private static async Task CompareRoutes(Bar[] bars, IIndicator[] indicators)
     {
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
