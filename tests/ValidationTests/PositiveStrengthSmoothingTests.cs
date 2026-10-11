@@ -5,6 +5,22 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 public sealed class PositiveStrengthSmoothingTests
 {
+    [Fact]
+    public void GuardedIntegerRecurrencesPreserveProductShiftAndSumBoundaries()
+    {
+        foreach (int period in new[] { 1, 2, 3, 20, 1024, 1025, 4096, int.MaxValue })
+        foreach (long mantissa in new[] { 0L, 1L << 52, (1L << 53) - 1 })
+        foreach (long exponent in new[] { -62L, -52L, 10L })
+        foreach (double change in new[] { 0d, double.Epsilon, .5, 1, 4, 1024 })
+        foreach (bool exponential in new[] { false, true })
+        {
+            var prior = new PositiveStrengthValue(mantissa, exponent);
+            var units = ExactVarianceWindow.Units(change);
+            var expected = exponential ? prior.UpdateExponential(units, period) : prior.Update(units, period);
+            Assert.Equal(expected, prior.Update(change, period, exponential));
+        }
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(2)]
