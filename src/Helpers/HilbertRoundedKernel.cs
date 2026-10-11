@@ -42,11 +42,29 @@ internal static class HilbertRoundedKernel
         double eq = Math.FusedMultiplyAdd(c, d, -q);
         double sum = p + q;
         double error = SumError(p, q, sum);
-        if (!TryExactSum(ep, eq, out double tail)
-            || !TryExactSum(tail, error, out tail)) return false;
+        double tail = ep + eq;
+        double tailError = SumError(ep, eq, tail);
+        double combined = tail + error;
+        double combinedError = SumError(tail, error, combined);
+        double rounded = sum + combined;
+        if (tailError != 0 || combinedError != 0)
+        {
+            // Exact target = rounded + roundingError + tailError + combinedError.
+            // Outward rounding encloses the omitted terms even when their sum
+            // is inexact. Accept only strictly inside rounded's rounding cell;
+            // a midpoint (including any uncertain tie) goes to the exact path.
+            double roundingError = SumError(sum, combined, rounded);
+            double bound = Math.BitIncrement(Math.Abs(tailError) + Math.Abs(combinedError));
+            double lower = Math.BitDecrement(roundingError - bound);
+            double upper = Math.BitIncrement(roundingError + bound);
+            double below = (rounded - Math.BitDecrement(rounded)) * .5;
+            double above = (Math.BitIncrement(rounded) - rounded) * .5;
+            if (!(lower > -below && upper < above)) return false;
+        }
 
-        // Exact target = sum + tail. This is its only rounding, including ties.
-        result = sum + tail;
+        // With an exact tail, sum + combined is the single final rounding,
+        // including ties. Otherwise the strict rounding-cell test proved it.
+        result = rounded;
         if (result == 0) result = 0; // Dyadic zero is canonical positive zero.
         return true;
     }

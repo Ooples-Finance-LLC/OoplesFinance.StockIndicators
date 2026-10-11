@@ -123,10 +123,10 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
             InPhase = _detrended[(_filterCursor + 3) % 6];
             var ji = Fir(InPhase, _inphase, correction);
             var jq = Fir(Quadrature, _quadrature, correction);
-            var inphase = InPhase; inphase.Subtract(jq);
-            var quadrature = Quadrature; quadrature.AddExact(ji);
-            var i2 = Blend(inphase.Rounded(), _i2);
-            var q2 = Blend(quadrature.Rounded(), _q2);
+            var inphase = JurikDyadic.SumProduct(InPhase, jq, -1);
+            var quadrature = JurikDyadic.SumProduct(Quadrature, ji, 1);
+            var i2 = Blend(inphase, _i2);
+            var q2 = Blend(quadrature, _q2);
             var real = Blend(ProductSum(i2, _i2, q2, _q2), _real);
             var imaginary = Blend(ProductSum(i2, _q2, q2, _i2, subtract: true), _imaginary);
             var measured =

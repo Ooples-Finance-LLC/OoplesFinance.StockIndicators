@@ -1,0 +1,8 @@
+{
+  "production_commit": "01164679",
+  "fixture_sha256": "d222f5c766412b87db7f1addd8d897efbb46850d3ed93bd3deaa43f1238e1a86",
+  "warmup_count": 20,
+  "iteration_count": 15,
+  "contention_observation": "Preflight CPU 2%, completion 6%. No competing dotnet builds/tests observed at preflight, during-run process sample, or completion. Reusable MSBuild nodes and dotnet --version present. This is a sampled contention check, not continuous monitoring.",
+  "scope": "Four CPU arms at 10000 bars, Hilbert cycle period only; unchanged fixture retains native outputs and includes parallel prefix replay/scratch."
+}
