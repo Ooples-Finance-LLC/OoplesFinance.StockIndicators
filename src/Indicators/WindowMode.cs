@@ -56,36 +56,47 @@ public sealed class WindowMode : IndicatorBase, IIndicatorValidationContract
         return result;
     }
 
-    private sealed class State(int period) : IIndicatorState
+    internal sealed class State(int period) : IIndicatorState
     {
         private readonly Queue<double> _window = new();
         private readonly Dictionary<double, int> _frequencies = new();
         private ExactMeanAccumulator _sum;
+        private bool _warming = true;
 
         public void Reset()
         {
             _window.Clear();
             _frequencies.Clear();
             _sum = default;
+            _warming = true;
         }
 
         public double Update(in Bar bar)
         {
+            if (double.IsNaN(bar.Close) || double.IsInfinity(bar.Close))
+                throw new ArithmeticException("An exact finite mean requires finite inputs.");
             if (_window.Count == period)
             {
                 var old = _window.Dequeue();
-                _sum.Add(old, -1);
                 if (_frequencies[old] == 1)
                     _frequencies.Remove(old);
                 else
                     _frequencies[old]--;
             }
             _window.Enqueue(bar.Close);
-            _sum.Add(bar.Close);
             _frequencies.TryGetValue(bar.Close, out var current);
             _frequencies[bar.Close] = current + 1;
             if (_window.Count < period)
+            {
+                _sum.Add(bar.Close);
                 return _sum.Mean(_window.Count);
+            }
+            if (_warming)
+            {
+                // The expanding mean is never used again until Reset.
+                _sum = default;
+                _warming = false;
+            }
             var maximum = 0;
             var modes = new ExactMeanAccumulator();
             var count = 0;

@@ -96,6 +96,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_mode_qualification_keeps_native_namespace(self):
+        self.write()
+        api = 'QuanTAlib.Mode'
+        path = self.qualification(f'SharedWindowModeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_gpu_median_qualification_keeps_native_namespace(self):
         self.write()
         api = 'Trady.Indicator.Median'
