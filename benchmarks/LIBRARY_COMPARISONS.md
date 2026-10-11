@@ -2508,6 +2508,18 @@ ADX fell from 50.16 ms / 72.74 MiB to 7.68 ms / 169.64 KiB. Native serial remain
 faster: +DM 87.21 us / 78.04 KiB; ADX 138.09 us / 77.89 KiB. All builder arms still
 lose to native. The catalog selects the new builders and retains original natives.
 
+Directional profiling can be replayed with the benchmark executable's
+`--profile-directional Adx 10000 4000` arguments. It validates the existing
+benchmark setup, warms 100 builds, then repeatedly builds and disposes LatestOnly
+results. An EventPipe sampled-thread trace of commit `c0f54212` attributed 97.8%
+of time beneath `ValuesBarExecution.Execute` to `Node.Append`, including 62.7%
+in directional `State.Update` and 14.6% in `Direction`. Inlined arithmetic is
+attributed to callers; these percentages do not establish dispatch-only cost.
+The trace is diagnostic, not benchmark qualification. A subsequent quotient/remainder
+rewrite passed 17 focused unit tests and 23 comparison tests, but its 14 timing
+cases showed no win during concurrent work in another repository. That production
+experiment was reverted; the qualified results above remain unchanged.
+
 ## Shared SMA builder qualification
 
 `SharedSmaBenchmarks` compares Full/LatestOnly with native serial and parallel
