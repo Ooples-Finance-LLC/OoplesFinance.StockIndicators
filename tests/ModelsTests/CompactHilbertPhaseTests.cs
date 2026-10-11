@@ -4,8 +4,64 @@ using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
-public sealed class CompactHilbertPhaseTests
+public sealed class CompactHilbertPhaseTests(Xunit.Abstractions.ITestOutputHelper log)
 {
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void SignalStatesAvoidPaddedProjectionAllocation(int kind)
+    {
+        var state = new HilbertCycleSignalState((HilbertCycleSignal)kind, 0);
+        var output = new double[kind == 1 ? 4 : 2];
+        void Run()
+        {
+            for (int i = 0; i < 4000; i++)
+            {
+                double price = 100 + (i * 13 % 101) / 8d;
+                state.Update(new Bar(default, price, price + 1, price - 1, price, 1), output);
+            }
+        }
+        Run();
+        var expected = output.ToArray();
+        state.Reset();
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        Run();
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        log.WriteLine($"Hilbert signal kind {kind}: {allocated} bytes over 4000 updates including startup.");
+        // Wide exact projection tails remain allowed. Prevent a return to the
+        // padded arithmetic's tens of kilobytes of scratch per ordinary bar.
+        Assert.InRange(allocated, 0, 64_000_000);
+        Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), output.Select(BitConverter.DoubleToInt64Bits));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void CompleteTrendlineStatesAllocateNothingIncludingStartup(int kind)
+    {
+        MultiOutputIndicatorBase indicator = kind == 0 ? new DelayedHilbertTrendline()
+            : new SeededHilbertTrendline(useMidpoint: kind == 1);
+        var state = (IMultiOutputState)indicator.CreateState();
+        var output = new double[indicator.Outputs.Count];
+        void Run()
+        {
+            for (int i = 0; i < 4000; i++)
+            {
+                double price = 100 + (i * 13 % 101) / 8d;
+                state.Update(new Bar(default, price, price + 1, price - 1, price, 1), output);
+            }
+        }
+        Run();
+        var expected = output.ToArray();
+        state.Reset();
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        Run();
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), output.Select(BitConverter.DoubleToInt64Bits));
+    }
+
     [Theory]
     [InlineData(6, false, false)]
     [InlineData(6, false, true)]

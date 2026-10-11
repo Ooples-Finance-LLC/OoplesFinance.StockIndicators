@@ -197,6 +197,11 @@ internal struct JurikDyadic
     {
 #if !NETFRAMEWORK
         if (!_wide && count == 1) return _fixed ? RoundedDouble() : _simple;
+        if (!_wide && count > 0)
+        {
+            if (!_fixed && double.IsFinite(_simple)) return _simple == 0 ? 0 : _simple / count;
+            if (_fixed && TryRatio(_integer, _exponent, count, 0, out var result)) return result;
+        }
 #endif
         return Accumulator().Mean(count);
     }
@@ -212,15 +217,16 @@ internal struct JurikDyadic
 #endif
         return Accumulator().Ratio(denominator.Accumulator());
     }
-    internal JurikDyadic Rounded()
+    internal JurikDyadic Rounded(int count = 1)
     {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
 #if !NETFRAMEWORK
-        if (!_wide && !_fixed) return this;
+        if (count == 1 && !_wide && !_fixed) return this;
 #endif
-        var value = Mean(1);
+        var value = Mean(count);
         var result = new JurikDyadic();
         if (!double.IsInfinity(value)) return FromDouble(value);
-        var wide = RocBankValue.Round(Accumulator());
+        var wide = RocBankValue.Round(Accumulator(), count: count);
         result.Add(wide.Mantissa); result.ScaleByPowerOfTwo(wide.UpperShift);
         return result;
     }

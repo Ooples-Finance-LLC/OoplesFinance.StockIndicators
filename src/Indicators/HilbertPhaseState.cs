@@ -60,21 +60,7 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         sum.AddExact(Product(past[0], 3));
         sum.AddExact(Product(past[1], 2));
         sum.AddExact(past[2]);
-        var denominator = JurikDyadic.FromDouble(10);
-        // Match the former extended-upper-exponent rounding, including inputs
-        // from wide adaptive-average chains. Rescaling the exact numerator does
-        // not introduce an intermediate rounding.
-        for (int shift = 0; ; shift += 32)
-        {
-            var value = sum.Ratio(denominator);
-            if (!double.IsInfinity(value))
-            {
-                var result = JurikDyadic.FromDouble(value);
-                if (shift != 0) result.ScaleByPowerOfTwo(shift);
-                return result;
-            }
-            sum.ScaleByPowerOfTwo(-32);
-        }
+        return sum.Rounded(10);
     }
 
     private static void Shift(JurikDyadic[] a, JurikDyadic value)
@@ -96,7 +82,7 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
     internal void Update(BigInteger price) => Update(JurikDyadic.FromUnits(price));
     internal void Update(double price) => Update(JurikDyadic.FromDouble(price));
 
-    private void Update(JurikDyadic price)
+    internal void Update(JurikDyadic price)
     {
         _index++;
         if (_index >= start)

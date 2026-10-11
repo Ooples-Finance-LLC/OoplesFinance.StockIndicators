@@ -6,6 +6,40 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 public sealed class CompactRatioArithmeticTests
 {
+    [Fact]
+    public void CompactMeansPreserveRoundingAndExtendedUnpublishedRange()
+    {
+        UInt128[] values = [0, 1, 3, ((UInt128)1 << 53) + 1, ((UInt128)1 << 100) + 17,
+            ((UInt128)1 << 127) - 1];
+        foreach (var integer in values)
+        foreach (int exponent in new[] { -1200, -1075, -1074, -1022, 0, 971, 1023, 1100 })
+        foreach (int count in new[] { 1, 2, 3, 10, 50, int.MaxValue })
+        foreach (bool negative in new[] { false, true })
+        {
+            var value = Exact(integer, exponent, negative);
+            BigInteger numerator = (BigInteger)integer * (negative ? -1 : 1), denominator = count;
+            int shift = exponent + 1074;
+            if (shift >= 0) numerator <<= shift; else denominator <<= -shift;
+            Assert.Equal(RocBankValue.RoundUnits(numerator, denominator), value.Rounded(count).RoundedUnits());
+            var expected = (new ReferenceFraction(numerator) / new ReferenceFraction(denominator << 1074)).ToDouble();
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(value.Mean(count)));
+        }
+        Assert.Throws<ArgumentOutOfRangeException>(() => default(JurikDyadic).Rounded(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => default(JurikDyadic).Mean(-1));
+    }
+
+    [Fact]
+    public void CompactMeanPublicationAllocatesNoObjects()
+    {
+        var value = Exact(((UInt128)1 << 100) + 17, -80);
+        double result = 0;
+        for (int i = 0; i < 1000; i++) result = value.Rounded(10).Mean(1);
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 4000; i++) result = value.Rounded(10).Mean(1);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.True(double.IsFinite(result));
+    }
+
     private static JurikDyadic Exact(UInt128 integer, int exponent, bool negative = false)
     {
         var value = new JurikDyadic();

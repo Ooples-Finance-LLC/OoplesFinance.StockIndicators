@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -14,11 +13,33 @@ internal enum HilbertCycleSignal
 internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppression)
     : IMultiOutputState
 {
-    private static readonly BigInteger Grid = BigInteger.One << 1074;
+    private readonly record struct ProjectionCoefficient(JurikDyadic Sine, JurikDyadic Cosine,
+        bool SmallSine, bool SmallCosine);
+    private static readonly ProjectionCoefficient[][] ProjectionCoefficients = CreateProjectionCoefficients();
+
+    private static ProjectionCoefficient[][] CreateProjectionCoefficients()
+    {
+        var result = new ProjectionCoefficient[51][];
+        for (int count = 0; count <= 50; count++)
+        {
+            result[count] = new ProjectionCoefficient[count];
+            for (int lag = 0; lag < count; lag++)
+            {
+                // Preserve the original binary64 angle operation order.
+                var angle = lag * 2d * Math.PI / count;
+                double sine = Math.Sin(angle), cosine = Math.Cos(angle);
+                var sin = JurikDyadic.FromDouble(sine); sin.ScaleByPowerOfTwo(0);
+                var cos = JurikDyadic.FromDouble(cosine); cos.ScaleByPowerOfTwo(0);
+                result[count][lag] = new(sin, cos, Math.Abs(sine) < 1e-12, Math.Abs(cosine) < 1e-12);
+            }
+        }
+        return result;
+    }
+
     private readonly HilbertPhaseState _filter = new(37, true, false);
     private readonly HilbertTrendMeanState? _trend =
         kind == HilbertCycleSignal.Trend ? new() : null;
-    private readonly BigInteger[] _smooth = new BigInteger[50];
+    private readonly JurikDyadic[] _smooth = new JurikDyadic[50];
     private long _index = -1;
     private int _cursor,
         _days;
@@ -66,8 +87,8 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
     {
         output.Clear();
         _index++;
-        var price = ExactVarianceWindow.Units(bar.Close);
-        _filter.Update(bar.Close);
+        var price = JurikDyadic.FromDouble(bar.Close);
+        _filter.Update(price);
         if (_index < 37)
         {
             _trend?.Update(price, null);
@@ -75,28 +96,32 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
         }
         _period = .33 * _filter.Period + .67 * _period;
         var count = (int)(_period + .5);
-        _smooth[_cursor] = _filter.SmoothPrice.RoundedUnits();
-        BigInteger real = 0,
-            imaginary = 0;
+        _smooth[_cursor] = _filter.SmoothPrice;
+        JurikDyadic real = default,
+            imaginary = default,
+            smallReal = default,
+            smallImaginary = default;
+        var coefficients = ProjectionCoefficients[count];
         for (var lag = 0; lag < count; lag++)
         {
-            var angle = lag * 2d * Math.PI / count;
             var value = _smooth[(_cursor - lag + 50) % 50];
-            real += ExactVarianceWindow.Units(Math.Sin(angle)) * value;
-            imaginary += ExactVarianceWindow.Units(Math.Cos(angle)) * value;
+            var coefficient = coefficients[lag];
+            var term = value; term.Multiply(coefficient.Sine);
+            if (coefficient.SmallSine) smallReal.AddExact(term); else real.AddExact(term);
+            term = value; term.Multiply(coefficient.Cosine);
+            if (coefficient.SmallCosine) smallImaginary.AddExact(term); else imaginary.AddExact(term);
         }
-        real = RocBankValue.RoundUnits(real, Grid);
-        imaginary = RocBankValue.RoundUnits(imaginary, Grid);
+        // Near-axis Math.Sin/Cos values are small but nonzero. Keep every bit,
+        // combining their exact sums last so they do not force all subsequent
+        // ordinary products onto the wide path. This partition never rounds or
+        // discards a term; only the complete projections round below.
+        real.AddExact(smallReal);
+        imaginary.AddExact(smallImaginary);
+        real = real.Rounded();
+        imaginary = imaginary.Rounded();
         var oldPhase = _phase;
-        var phase = !imaginary.IsZero
-            ? Math.Atan(
-                ExactMeanAccumulator.UnitRatio(
-                    (real * imaginary.Sign) << 1074,
-                    BigInteger.Abs(imaginary)
-                )
-            )
-                * 180
-                / Math.PI
+        var phase = imaginary.Sign != 0
+            ? Math.Atan(real.Ratio(imaginary)) * 180 / Math.PI
             : _phase
                 + (
                     real.Sign < 0 ? -90
@@ -126,13 +151,16 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
             var delta = phase - oldPhase;
             if (delta > .67 * 90 * 4 / _period && delta < 1.5 * 90 * 4 / _period)
                 trend = 0;
-            var baseline = _trend.RoundedUnits;
-            if (
-                !baseline.IsZero
-                && BigInteger.Abs(_filter.SmoothPrice.RoundedUnits() - baseline) * Grid
-                    >= ExactVarianceWindow.Units(.015) * BigInteger.Abs(baseline)
-            )
-                trend = 1;
+            var baseline = _trend.Average;
+            if (baseline.Sign != 0)
+            {
+                var deviation = _filter.SmoothPrice; deviation.Subtract(baseline);
+                if (deviation.Sign < 0) deviation.Multiply(-1);
+                if (baseline.Sign < 0) baseline.Multiply(-1);
+                baseline.Multiply(.015);
+                deviation.Subtract(baseline);
+                if (deviation.Sign >= 0) trend = 1;
+            }
         }
         _phase = phase;
         _sine = sine;
