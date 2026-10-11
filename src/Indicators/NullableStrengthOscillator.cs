@@ -130,7 +130,7 @@ public sealed class NullableStrengthOscillator
         private readonly Queue<double?> _history = new();
         private int _seedSteps,
             _known;
-        private BigInteger _gainSeed,
+        private ExactMeanAccumulator _gainSeed,
             _lossSeed;
         private PositiveStrengthValue _gain,
             _loss;
@@ -141,8 +141,8 @@ public sealed class NullableStrengthOscillator
             _history.Clear();
             _seedSteps = 0;
             _known = 0;
-            _gainSeed = 0;
-            _lossSeed = 0;
+            _gainSeed = default;
+            _lossSeed = default;
             _gain = default;
             _loss = default;
             _poisoned = false;
@@ -158,22 +158,20 @@ public sealed class NullableStrengthOscillator
             if (!ready)
                 return null;
             var hasDifference = price.HasValue && prior.HasValue;
-            double compactChange = 0;
-            var compact = _seedSteps >= period && hasDifference
-                && PositiveStrengthValue.TryDifference(price!.Value, prior!.Value, out compactChange);
-            BigInteger? difference =
-                hasDifference && !compact
-                    ? ExactVarianceWindow.Units(price!.Value)
-                        - ExactVarianceWindow.Units(prior!.Value)
-                    : null;
-            var up = difference.HasValue ? BigInteger.Max(difference.Value, 0) : BigInteger.Zero;
-            var down = difference.HasValue ? BigInteger.Max(-difference.Value, 0) : BigInteger.Zero;
             if (_seedSteps < period)
             {
-                _gainSeed += up;
-                _lossSeed += down;
-                if (difference.HasValue)
+                if (hasDifference)
+                {
+                    if (price!.Value > prior!.Value)
+                    {
+                        _gainSeed.Add(price.Value); _gainSeed.Add(prior.Value, -1);
+                    }
+                    else if (price.Value < prior.Value)
+                    {
+                        _lossSeed.Add(prior.Value); _lossSeed.Add(price.Value, -1);
+                    }
                     _known++;
+                }
                 if (++_seedSteps < period)
                     return null;
                 if (_known == 0)
@@ -183,8 +181,8 @@ public sealed class NullableStrengthOscillator
                 }
                 _gain = PositiveStrengthValue.Seed(_gainSeed, _known);
                 _loss = PositiveStrengthValue.Seed(_lossSeed, _known);
-                _gainSeed = 0;
-                _lossSeed = 0;
+                _gainSeed = default;
+                _lossSeed = default;
             }
             else
             {
@@ -193,13 +191,16 @@ public sealed class NullableStrengthOscillator
                     _poisoned = true;
                     return null;
                 }
-                if (compact)
+                if (PositiveStrengthValue.TryDifference(price!.Value, prior!.Value, out var compactChange))
                 {
                     _gain = _gain.Update(Math.Max(compactChange, 0), period, IsMomentum(convention));
                     _loss = _loss.Update(Math.Max(-compactChange, 0), period, IsMomentum(convention));
                 }
                 else
                 {
+                    var difference = ExactVarianceWindow.Units(price!.Value) - ExactVarianceWindow.Units(prior!.Value);
+                    var up = BigInteger.Max(difference, 0);
+                    var down = BigInteger.Max(-difference, 0);
                     _gain = IsMomentum(convention)
                         ? _gain.UpdateExponential(up, period)
                         : _gain.Update(up, period);

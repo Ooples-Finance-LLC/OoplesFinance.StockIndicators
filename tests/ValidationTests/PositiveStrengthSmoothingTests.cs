@@ -6,6 +6,26 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class PositiveStrengthSmoothingTests
 {
     [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(20)]
+    [InlineData(int.MaxValue)]
+    public void CompactSeedPreservesUnpublishedRangeAndExactWideSums(int period)
+    {
+        double[][] inputs = [[0], [double.Epsilon], [double.MaxValue, double.MaxValue],
+            [1, double.Epsilon], [1.25, .125, .375], [double.MaxValue, double.Epsilon, 1]];
+        foreach (var values in inputs)
+        {
+            var sum = new ExactMeanAccumulator();
+            var units = System.Numerics.BigInteger.Zero;
+            foreach (var value in values) { sum.Add(value); units += ExactVarianceWindow.Units(value); }
+            var before = sum.Mean(1);
+            Assert.Equal(PositiveStrengthValue.Seed(units, period), PositiveStrengthValue.Seed(sum, period));
+            Assert.Equal(BitConverter.DoubleToInt64Bits(before), BitConverter.DoubleToInt64Bits(sum.Mean(1)));
+        }
+    }
+
+    [Theory]
     [InlineData(1, false)]
     [InlineData(2, false)]
     [InlineData(14, false)]
@@ -44,7 +64,7 @@ public sealed class PositiveStrengthSmoothingTests
     [InlineData(5)]
     [InlineData(6)]
     [InlineData(7)]
-    public void BothStrengthFamiliesAllocateNoPerBarObjectsAfterSeeding(int kind)
+    public void BothStrengthFamiliesAllocateNoPerBarObjectsIncludingResetStartup(int kind)
     {
         var state = (IMultiOutputState)(kind < 5
             ? new NullableStrengthOscillator(14, (NullableStrengthConvention)kind,
@@ -54,6 +74,7 @@ public sealed class PositiveStrengthSmoothingTests
             100 + (i * 13 % 101) / 8d, 1)).ToArray();
         var output = new double[2];
         for (int i = 0; i < 1000; i++) state.Update(in bars[i % bars.Length], output);
+        state.Reset();
         var before = GC.GetAllocatedBytesForCurrentThread();
         for (int i = 0; i < 4000; i++) state.Update(in bars[i % bars.Length], output);
         Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
