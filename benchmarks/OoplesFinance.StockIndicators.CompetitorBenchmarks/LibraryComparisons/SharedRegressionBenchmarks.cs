@@ -25,8 +25,7 @@ public class SharedRegressionBenchmarks
     {
         _previousDop = CpuParallelSettings.MaxDegreeOfParallelism;
         CpuParallelSettings.MaxDegreeOfParallelism = 8;
-        _closes = Enumerable.Range(0, Count).Select(i => 10 + (i % 101) / 8d).ToArray();
-        _bars = _closes.Select(v => new Bar(default, v, v + 1, v - 1, v, 1)).ToArray();
+        (_closes, _bars) = PackedWindowBenchmarkExecution.Input(Count);
         PackedWindowBenchmarkChecks.Verify(Period, NativeSingle(), NativeParallel(),
             () => Create(), Build);
     }
