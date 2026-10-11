@@ -27,14 +27,8 @@ public class SharedRegressionBenchmarks
         CpuParallelSettings.MaxDegreeOfParallelism = 8;
         _closes = Enumerable.Range(0, Count).Select(i => 10 + (i % 101) / 8d).ToArray();
         _bars = _closes.Select(v => new Bar(default, v, v + 1, v - 1, v, 1)).ToArray();
-        var expected = NativeSingle();
-        Check(expected, NativeParallel());
-        foreach (var mode in new[] { IndicatorHistoryMode.Full, IndicatorHistoryMode.LatestOnly })
-        {
-            var indicator = Create();
-            using var result = Build(indicator, mode);
-            Check(expected, result[indicator].Slice(Period - 1).ToArray());
-        }
+        PackedWindowBenchmarkChecks.Verify(Period, NativeSingle(), NativeParallel(),
+            () => Create(), Build);
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _previousDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);
@@ -84,11 +78,4 @@ public class SharedRegressionBenchmarks
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
         .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
-    private static void Check(double[] expected, double[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("Output length mismatch.");
-        for (int i = 0; i < expected.Length; i++)
-            if (!double.IsFinite(actual[i]) || Math.Abs(expected[i] - actual[i]) > 1e-10 * Math.Max(1, Math.Abs(expected[i])))
-                throw new InvalidOperationException($"Regression mismatch at {i}.");
-    }
 }

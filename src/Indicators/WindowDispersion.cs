@@ -277,7 +277,7 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
             if (sample)
             {
                 if (top > ulong.MaxValue / (uint)(n - 1) || bottom > ulong.MaxValue / (uint)n) return false;
-                top *= (uint)(n - 1); bottom *= (uint)n;
+                top = checked(top * (uint)(n - 1)); bottom = checked(bottom * (uint)n);
             }
             if (!TryCompactRoot(top, bottom, 2 * _scale.Exponent, out result)) return false;
             result *= Math.Sign(deviation) * _scale.Integer;
