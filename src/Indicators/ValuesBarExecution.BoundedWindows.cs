@@ -9,7 +9,21 @@ internal static partial class ValuesBarExecution
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
             or LaggedPriceChange { Period: < int.MaxValue }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
-        || WeightedWindowPeriod(indicator) > 0;
+        || WeightedWindowPeriod(indicator) > 0
+        || PercentileCandlePeriod(indicator) > 0;
+
+    private static int PercentileCandlePeriod(IIndicator indicator) => indicator switch
+    {
+        LongBodyCandle candle => candle.Period,
+        ShortBodyCandle candle => candle.Period,
+        BullishLongBodyCandle candle => candle.Period,
+        BearishLongBodyCandle candle => candle.Period,
+        BullishShortBodyCandle candle => candle.Period,
+        BearishShortBodyCandle candle => candle.Period,
+        UpperShadowAtOrAbovePercentileCandle candle => candle.Period,
+        LowerShadowBelowPercentileCandle candle => candle.Period,
+        _ => 0
+    };
 
     private static int WeightedWindowPeriod(IIndicator indicator) => indicator switch
     {
@@ -162,6 +176,13 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private readonly struct PercentileCandleKernel(PercentileCandleState state) : IBoundedKernel<PercentileCandleKernel>
+    {
+        public static PercentileCandleKernel Create(int period, int count, IIndicator indicator) =>
+            new((PercentileCandleState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private readonly struct WeightedWindowKernel(IIndicatorState state) : IBoundedKernel<WeightedWindowKernel>
     {
         public static WeightedWindowKernel Create(int period, int count, IIndicator indicator) =>
@@ -186,6 +207,9 @@ internal static partial class ValuesBarExecution
         // Fixed coefficients and exact eviction make P-1 preceding closes sufficient.
         _ when WeightedWindowPeriod(indicator) > 0 =>
             FillBoundedWindow<WeightedWindowKernel>(source, output, indicator, WeightedWindowPeriod(indicator), cancellation, owned),
+        // Percentile windows include the current candle, requiring only P-1 seeds.
+        _ when PercentileCandlePeriod(indicator) > 0 =>
+            FillBoundedWindow<PercentileCandleKernel>(source, output, indicator, PercentileCandlePeriod(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 
