@@ -134,7 +134,7 @@ internal static partial class ValuesBarExecution
                     // Unproven guarded SMA and other states still validate every output.
                     // Deviation bands can overflow secondary slots while their mean stays finite.
                     // Keep slot-major validation after every input has been checked.
-                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands)
+                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel)
                     for (int i = 0; i < source.Length; i++)
                     {
                         cancellation.ThrowIfCancellationRequested();
@@ -553,6 +553,7 @@ internal static partial class ValuesBarExecution
                     || indicator is StandardDeviationWithDetails && slot == 5
                     || indicator is WindowDeviationBands && slot is 7 or 8
                     || indicator is ClassicDeviationBands && slot is 4 or 5
+                    || indicator is PriorPriceChannel && slot is 5 or 6
                     || slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
@@ -563,6 +564,7 @@ internal static partial class ValuesBarExecution
             if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
             if (indicator is WindowDeviationBands) Values[7] = Values[8] = Values[6];
             if (indicator is ClassicDeviationBands) Values[4] = Values[5] = Values[3];
+            if (indicator is PriorPriceChannel) Values[5] = Values[6] = Values[4];
             _scratch = pointwise ? Array.Empty<double>() : new double[indicator.Outputs.Count];
             _state = indicator switch
             {

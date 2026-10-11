@@ -116,7 +116,7 @@ public sealed class PriorPriceChannel : MultiOutputIndicatorBase, IIndicatorVali
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly WindowExtremeDeque _high = new(period, true),
             _low = new(period, false);
