@@ -95,6 +95,53 @@ internal struct ExactPopulationDeviation
     }
 
 #if !NETFRAMEWORK
+    // Round on the final binary64 grid without exporting a compact moment to
+    // BigInteger. Compare the remainder above root^2 with root + 1/4 rather
+    // than forming the much larger squared midpoint product.
+    internal static bool TryCompactScaledRoot(UInt128 numerator, ulong denominator, int binaryExponent, out double result)
+    {
+        result = 0;
+        if (denominator == 0) return false;
+        if (numerator == 0) return true;
+        if (numerator <= (1UL << 53) && denominator <= SmallRootMaximumDenominator
+            && TrySmallScaledRoot((ulong)numerator, (uint)denominator, binaryExponent, out result)) return true;
+        if (numerator <= ulong.MaxValue
+            && TryWideScaledRoot((ulong)numerator, denominator, binaryExponent, out result)) return true;
+
+        ulong upper = (ulong)(numerator >> 64);
+        int numeratorBits = upper == 0 ? 64 - BitOperations.LeadingZeroCount((ulong)numerator)
+            : 128 - BitOperations.LeadingZeroCount(upper);
+        int denominatorBits = 64 - BitOperations.LeadingZeroCount(denominator);
+        int power = numeratorBits - denominatorBits;
+        if (power >= 0 ? numerator < ((UInt128)denominator << power)
+            : (numerator << -power) < denominator) power--;
+        long exponent = (long)power + binaryExponent;
+        long rootExponent = exponent >= 0 ? exponent / 2 : (exponent - 1) / 2;
+        if (rootExponent is < -1075 or > 1023) return false;
+        int grid = (int)Math.Max(-1074, rootExponent - 52);
+        long shift = (long)binaryExponent - 2L * grid;
+        UInt128 divisor = denominator;
+        if (shift >= 0)
+        {
+            if (shift >= 128 || numeratorBits + shift > 128) return false;
+            numerator <<= (int)shift;
+        }
+        else
+        {
+            if (-shift >= 128 || denominatorBits - shift > 128) return false;
+            divisor <<= (int)-shift;
+        }
+        UInt128 root = CompactIntegerRoot(numerator / divisor);
+        // root^2 * divisor <= numerator, so the product cannot overflow.
+        UInt128 remainder = numerator - root * root * divisor;
+        UInt128 boundary = (root << 2) + 1;
+        if (remainder > (UInt128.MaxValue >> 2) || divisor > UInt128.MaxValue / boundary) return false;
+        int comparison = (remainder << 2).CompareTo(divisor * boundary);
+        if (comparison > 0 || comparison == 0 && (root & 1) != 0) root++;
+        result = ExactMeanAccumulator.Encode((ulong)root, grid + 1074, false);
+        return true;
+    }
+
     // The floating estimate is never trusted for rounding. Compare the exact
     // rational with both binary64 midpoints using bounded 128-bit integers.
     // Wider operands and subnormal/overflow results keep the general path.

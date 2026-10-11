@@ -138,6 +138,8 @@ internal struct JurikDyadic
         if (!_wide)
         {
             Promote();
+            if (_integer >= 0 && ExactPopulationDeviation.TryCompactScaledRoot(
+                (UInt128)_integer, (ulong)count, _exponent, out var result)) return result;
             return ExactPopulationDeviation.ScaledRootRatio((System.Numerics.BigInteger)_integer, count, _exponent);
         }
 #endif
