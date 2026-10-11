@@ -6,6 +6,21 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class PositiveStrengthSmoothingTests
 {
     [Fact]
+    public void CompactRecurrenceMantissaCarryAndHalfwayCasesMatchWideRounding()
+    {
+        foreach (long mantissa in new[] { (1L << 52) + 1, (1L << 53) - 3, (1L << 53) - 1 })
+        foreach (double change in new[] { Math.BitDecrement(Math.ScaleB(1, 53)), Math.ScaleB(1, 53),
+            Math.BitIncrement(Math.ScaleB(1, 53)) })
+        foreach (bool exponential in new[] { false, true })
+        {
+            var prior = new PositiveStrengthValue(mantissa, 0);
+            var units = ExactVarianceWindow.Units(change);
+            var expected = exponential ? prior.UpdateExponential(units, 2) : prior.Update(units, 2);
+            Assert.Equal(expected, prior.Update(change, 2, exponential));
+        }
+    }
+
+    [Fact]
     public void CertifiedDifferencesAreExactAtSterbenzAndSubnormalBoundaries()
     {
         double[] values = [0, -0d, double.Epsilon, 3 * double.Epsilon,
