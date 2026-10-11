@@ -133,7 +133,7 @@ public sealed class CompactDispersionTests
         {
             var values = Enumerable.Range(0, 24).Select(_ => Math.ScaleB(random.Next(-7, 8) / 8d, exponent)).ToArray();
             if (exponent == 0)
-                values = values.Concat(new double[] { 32767, 32768, 32769, -46340, 46341, -65536 })
+                values = values.Concat(new double[] { 32767, 32768, 32769, -46340, 46341, -65536, 67108863, -67108864, 67108865 })
                     .Concat(Enumerable.Range(0, 24).Select(i => (double)(i % 7))).ToArray();
             var state = new WindowDispersion.State(period, selected, sample, multiplier);
             for (int i = 0; i < values.Length; i++)

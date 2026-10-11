@@ -150,6 +150,9 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
                 _grid = parts.Exponent;
                 _hasGrid = true;
             }
+#if !NETFRAMEWORK
+            if (TrySmallUpdate(parts, bar.Close)) return Reading(output);
+#endif
             var value = OnGrid(parts);
             if (_history.Count == period)
             {
@@ -194,6 +197,36 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
         }
 
 #if !NETFRAMEWORK
+        private bool TrySmallUpdate((long Integer, int Exponent) parts, double close)
+        {
+            if (_sum.GetBitLength() > 31 || _squares.GetBitLength() > 31
+                || !TrySmallGrid(parts, out long current)) return false;
+            bool full = _history.Count == period;
+            long expired = 0;
+            if (full && !TrySmallGrid(Decompose(_history.Peek()), out expired)) return false;
+            // Each price magnitude is at most 2^26 and retained moments fit
+            // signed 32-bit values. All intermediate updates fit signed 64 bits.
+            long sum = (long)_sum + current - expired;
+            long squares = (long)_squares + current * current - expired * expired;
+            if (full) _history.Dequeue();
+            _history.Enqueue(close);
+            _sum = sum;
+            _squares = squares;
+            _current = current;
+            return true;
+        }
+
+        private bool TrySmallGrid((long Integer, int Exponent) parts, out long value)
+        {
+            value = 0;
+            if (parts.Integer == 0) return true;
+            int shift = parts.Exponent - _grid;
+            const long maximum = 1L << 26;
+            if (shift is < 0 or > 26 || Math.Abs(parts.Integer) > (maximum >> shift)) return false;
+            value = parts.Integer << shift;
+            return true;
+        }
+
         private bool TrySmallReading(WindowDispersionOutput selected, out double result)
         {
             result = 0;
