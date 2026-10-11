@@ -18,11 +18,7 @@ public class SharedFibonacciWeightedBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _priorDop = CpuParallelSettings.MaxDegreeOfParallelism;
-        CpuParallelSettings.MaxDegreeOfParallelism = 8;
-        var values = Enumerable.Range(0, Count).Select(i => (i * 13 % 101 - 50) / 8d).ToArray();
-        _bars = values.Select(v => new Bar(default, v, v + 1, v - 1, v, 1)).ToArray();
-        _input = values.Select(v => new QuanTAlib.TValue(v, true, false)).ToArray();
+        var values = FixedKernelBenchmarkInput.Create(Count, out _bars, out _input, out _priorDop);
         var pair = FixedKernelSnapshotComparison.Pair(true);
         var data = CompetitorData.FromCloses(values);
         var expected = pair.Reference!(data, Period).Outputs["Value"].Values;
