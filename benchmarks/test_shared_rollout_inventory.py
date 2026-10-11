@@ -145,6 +145,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_log_volatility_qualification_preserves_quan_identity(self):
+        self.write()
+        for api in ('QuanTAlib.Historical', 'QuanTAlib.Realized'):
+            path = self.qualification(f'SharedLogVolatilityBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_mode_qualification_keeps_native_namespace(self):
         self.write()
         api = 'QuanTAlib.Mode'

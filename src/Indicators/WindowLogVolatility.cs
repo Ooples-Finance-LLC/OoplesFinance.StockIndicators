@@ -64,9 +64,11 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 )
             );
 
-    private sealed class State(int period, bool realized, bool annualized) : IMultiOutputState
+    internal sealed class State(int period, bool realized, bool annualized) : IMultiOutputState
     {
-        private readonly Queue<BigInteger?> _returns = new();
+        private readonly Queue<ExactMeanAccumulator.ProductFactor?> _returns = new();
+        private int _grid;
+        private bool _hasGrid;
         private double _previous;
         private BigInteger _sum,
             _squares;
@@ -78,9 +80,16 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
             _returns.Clear();
             _previous = 0;
             _sum = _squares = 0;
+            _grid = 0;
+            _hasGrid = false;
             _missing = 0;
             _poisoned = false;
         }
+
+        // Retain each return's exact binary factor so changing the common grid
+        // never requires rewriting queued history or storing minimum-unit padding.
+        private BigInteger OnGrid(ExactMeanAccumulator.ProductFactor factor) => factor.Mantissa == 0
+            ? BigInteger.Zero : new BigInteger(factor.Mantissa) << (factor.Scale - _grid);
 
         public void Update(in Bar bar, Span<double> output)
         {
@@ -91,17 +100,30 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
             _previous = value;
             if (prior != 0) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
             {
-                BigInteger? next =
+                ExactMeanAccumulator.ProductFactor? next =
                     value != 0 && Math.Sign(value) == Math.Sign(prior) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
-                        ? ExactVarianceWindow.Units(CertifiedLogReturn.Of(value, prior))
+                        ? new ExactMeanAccumulator.ProductFactor(CertifiedLogReturn.Of(value, prior))
                         : null;
+                if (next.HasValue && next.Value.Mantissa != 0
+                    && (!_hasGrid || next.Value.Scale < _grid))
+                {
+                    if (_hasGrid)
+                    {
+                        int shift = _grid - next.Value.Scale;
+                        _sum <<= shift;
+                        _squares <<= 2 * shift;
+                    }
+                    _grid = next.Value.Scale;
+                    _hasGrid = true;
+                }
                 if (_returns.Count == period)
                 {
                     var old = _returns.Dequeue();
                     if (old.HasValue)
                     {
-                        _sum -= old.Value;
-                        _squares -= old.Value * old.Value;
+                        var expired = OnGrid(old.Value);
+                        _sum -= expired;
+                        _squares -= expired * expired;
                     }
                     else
                         _missing--;
@@ -109,8 +131,9 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 _returns.Enqueue(next);
                 if (next.HasValue)
                 {
-                    _sum += next.Value;
-                    _squares += next.Value * next.Value;
+                    var current = OnGrid(next.Value);
+                    _sum += current;
+                    _squares += current * current;
                 }
                 else
                 {
@@ -129,9 +152,9 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
             }
             var numerator = realized ? _squares : period * _squares - _sum * _sum;
             var denominator = realized ? (BigInteger)period : (BigInteger)period * (period - 1);
-            output[0] = ExactPopulationDeviation.RootRatio(
+            output[0] = ExactPopulationDeviation.ScaledRootRatio(
                 numerator * (annualized ? 252 : 1),
-                denominator
+                denominator, 2 * (_grid - 1074)
             );
         }
     }
