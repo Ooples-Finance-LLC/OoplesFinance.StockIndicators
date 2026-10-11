@@ -99,6 +99,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         self.assertEqual(4, len(row['current'][0]['methods']))
         self.assertFalse(row['current'][0]['full_clear_win'])
 
+    def test_weighted_qualification_uses_quantalib_namespace(self):
+        self.write()
+        for operation in ('Wma', 'Convolution', 'Gma', 'Sinema'):
+            path = self.qualification(f'SharedWeightedWindowBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'QuanTAlib.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
     def test_body_shadow_qualification_uses_talib_candles_namespace(self):
         self.write()
         for operation in ('BeltHold', 'Marubozu', 'ClosingMarubozu', 'SpinningTop', 'HighWave', 'LongLine', 'ShortLine'):

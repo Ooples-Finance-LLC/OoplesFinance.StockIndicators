@@ -8,7 +8,17 @@ internal static partial class ValuesBarExecution
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
             or LaggedPriceChange { Period: < int.MaxValue }
-        || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue;
+        || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
+        || WeightedWindowPeriod(indicator) > 0;
+
+    private static int WeightedWindowPeriod(IIndicator indicator) => indicator switch
+    {
+        FixedPeriodWma average => average.Period,
+        NormalizedConvolution convolution => convolution.Kernel.Count,
+        GaussianWeightedAverage average => average.Period,
+        SineWeightedAverage average => average.Period,
+        _ => 0
+    };
 
     private static int BodyShadowPeriod(IIndicator indicator) => indicator switch
     {
@@ -142,6 +152,13 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private readonly struct WeightedWindowKernel(IIndicatorState state) : IBoundedKernel<WeightedWindowKernel>
+    {
+        public static WeightedWindowKernel Create(int period, int count, IIndicator indicator) =>
+            new((IIndicatorState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private static Bar FillBoundedWindow(Bar[] source, double[] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
@@ -156,6 +173,9 @@ internal static partial class ValuesBarExecution
         // Each predicate reads the preceding P candles, excluding the current bar.
         _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue =>
             FillBoundedWindow<BodyShadowKernel>(source, output, indicator, BodyShadowPeriod(indicator) + 1, cancellation, owned),
+        // Fixed coefficients and exact eviction make P-1 preceding closes sufficient.
+        _ when WeightedWindowPeriod(indicator) > 0 =>
+            FillBoundedWindow<WeightedWindowKernel>(source, output, indicator, WeightedWindowPeriod(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 

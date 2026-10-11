@@ -73,6 +73,9 @@ def inventory(root: Path, qualifications=()):
             elif operation and 'SharedBodyShadowBenchmarks.' in row['FullName']:
                 api = operation[1]
                 prefix = 'TaLib.Candles.'
+            elif operation and 'SharedWeightedWindowBenchmarks.' in row['FullName']:
+                api = operation[1]
+                prefix = 'QuanTAlib.'
             elif operation and any(name in row['FullName'] for name in
                                  ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.', 'SharedPairInputBenchmarks.',
                                   'SharedPriceProjectionBenchmarks.', 'SharedGeneratedStateBenchmarks.',
