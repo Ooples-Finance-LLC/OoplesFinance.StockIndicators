@@ -74,7 +74,9 @@ public sealed class CompactHilbertPhaseTests(Xunit.Abstractions.ITestOutputHelpe
         {
             for (int i = 0; i < 4000; i++) state.Update(100 + (i * 13 % 101) / 8d);
         }
-        Run();
+        // Let tiered compilation settle before counting managed allocations.
+        // The measured replay below still starts from a freshly reset state.
+        for (int warmup = 0; warmup < 3; warmup++) { state.Reset(); Run(); }
         double period = state.Period, phase = state.Phase;
         state.Reset();
         long before = GC.GetAllocatedBytesForCurrentThread();
