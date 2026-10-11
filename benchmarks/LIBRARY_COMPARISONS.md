@@ -2846,3 +2846,8 @@ The six-case volatility timing attempt began after an idle preflight but a new A
 Nullable/Wilder strength seed differences now accumulate on natural binary scales. Normalizing before rounding preserves means below the binary64 floor without padding each input to minimum-subnormal units. All eight state variants allocate zero bytes over 4,000 ordinary updates including startup after reset. Production/benchmark builds, 23 focused unit tests and 34 independent comparison/setup tests passed.
 
 Five allocation-only samples for each 10k RSI/CMO arm were identical: Full 644,296 bytes, LatestOnly 163,272 bytes, native serial 79,896 bytes and native parallel 439,736 bytes. LatestOnly dropped from 179.35 to 159.45 KiB but remains above native serial (78.02 KiB). Raw samples are in `results/shared-rollout/allocation-probes/wilder-strength-seed.json`. No new timing qualification is claimed; coverage remains 176/401.
+
+
+## Shared strength integer recurrence follow-up
+
+Ordinary positive-strength weighted sums now use a guarded signed-64-bit path and the existing exact ratio rounder, avoiding repeated general dyadic construction when the complete numerator fits. Conservative product/shift bounds and a separate addition check retain the wider path otherwise. Production/benchmark builds, 24 focused arithmetic/allocation tests and 34 nullable/Wilder comparison/setup tests passed. Product, shift and sum boundary cases match the wide recurrence. State allocation remains zero for the tested ordinary updates including reset startup. Latency benefit is not yet measured; no timing qualification count or competitor-win claim changes.

@@ -53,25 +53,48 @@ internal readonly record struct PositiveStrengthValue(long Mantissa, long Expone
                 : Update(ExactVarianceWindow.Units(change), period);
         if (!hasPrior && integer == 0) return default;
         long common = !hasPrior ? exponent : integer == 0 ? Exponent : Math.Min(Exponent, exponent);
-        var sum = hasPrior ? JurikDyadic.FromDouble(Mantissa) : default;
-        if (hasPrior)
+        int priorShift = hasPrior ? (int)(Exponent - common) : 0;
+        int currentShift = integer != 0 ? (int)(exponent - common) : 0;
+        double rounded;
+        if (TryWeightedTerm(hasPrior ? Mantissa : 0, priorWeight, priorShift, out var prior)
+            && TryWeightedTerm(integer, exponential ? 2 : 1, currentShift, out var current)
+            && prior <= long.MaxValue - current)
         {
-            sum.ScaleByPowerOfTwo((int)(Exponent - common));
-            sum.Multiply(priorWeight);
+            rounded = ExactMeanAccumulator.ScaledRatio(prior + current, divisor, 0);
         }
-        if (integer != 0)
+        else
         {
-            var term = JurikDyadic.FromDouble(integer);
-            term.ScaleByPowerOfTwo((int)(exponent - common));
-            if (exponential) term.Multiply(2);
-            sum.AddExact(term);
+            var sum = hasPrior ? JurikDyadic.FromDouble(Mantissa) : default;
+            if (hasPrior)
+            {
+                sum.ScaleByPowerOfTwo(priorShift);
+                sum.Multiply(priorWeight);
+            }
+            if (integer != 0)
+            {
+                var term = JurikDyadic.FromDouble(integer);
+                term.ScaleByPowerOfTwo(currentShift);
+                if (exponential) term.Multiply(2);
+                sum.AddExact(term);
+            }
+            rounded = sum.Ratio(JurikDyadic.FromDouble(divisor));
         }
         // Round only after normalizing the common exponent away. This keeps
         // positive means alive below binary64's subnormal floor.
-        var rounded = sum.Ratio(JurikDyadic.FromDouble(divisor));
         var (mantissa, power) = ExactMeanAccumulator.DecomposeFinite(rounded);
         var padding = 53 - Bits(mantissa);
         return new(mantissa << padding, common + power - padding);
+    }
+
+    private static bool TryWeightedTerm(long mantissa, int weight, int shift, out long value)
+    {
+        value = 0;
+        if (mantissa == 0 || weight == 0) return true;
+        // A conservative bit bound proves both multiplication and shift fit;
+        // the caller separately checks the addition before evaluating it.
+        if (Bits(mantissa) + Bits(weight) + shift > 63) return false;
+        value = (mantissa * weight) << shift;
+        return true;
     }
 
     private static int Bits(long value)
