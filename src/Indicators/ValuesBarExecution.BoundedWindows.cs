@@ -6,7 +6,24 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
-        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR;
+        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum;
+
+    private sealed class SumValueState(int period, int count) : IIndicatorState
+    {
+        private readonly double[] _window = new double[Math.Min(period, Math.Max(1, count))];
+        private ExactMeanAccumulator _sum;
+        private int _position, _seen;
+        public void Reset() { _position = _seen = 0; _sum = default; }
+        public double Update(in Bar bar)
+        {
+            if (_seen == period) _sum.Add(_window[_position], -1);
+            else _seen++;
+            _sum.Add(bar.Close);
+            _window[_position] = bar.Close;
+            if (++_position == _window.Length) _position = 0;
+            return _seen < period ? 0 : _sum.Mean(1);
+        }
+    }
 
     private sealed class WmaValueState(int period, int count) : IIndicatorState
     {
@@ -70,6 +87,11 @@ internal static partial class ValuesBarExecution
         public static WilliamsKernel Create(int period, int count) => new(new(period, count));
         public double Update(in Bar bar) => state.Update(in bar);
     }
+    private readonly struct SumKernel(SumValueState state) : IBoundedKernel<SumKernel>
+    {
+        public static SumKernel Create(int period, int count) => new(new(period, count));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     private static Bar FillBoundedWindow(Bar[] source, double[] output, IIndicator indicator,
         CancellationToken cancellation, Bar[]? owned) => indicator switch
@@ -78,6 +100,7 @@ internal static partial class ValuesBarExecution
         LowestLow low => FillBoundedWindow<LowKernel>(source, output, indicator, low.Length, cancellation, owned),
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
+        RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 

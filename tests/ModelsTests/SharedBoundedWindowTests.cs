@@ -7,11 +7,12 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SharedBoundedWindowTests
 {
-    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 4)
+    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 5)
         from period in new[] { 1, 3, 20, 4096, 4097, int.MaxValue } select new object[] { operation, period };
     private static IndicatorBase Create(int operation, int period) => operation switch
     {
-        0 => new Wma(period), 1 => new WilliamsR(period), 2 => new HighestHigh(period), _ => new LowestLow(period)
+        0 => new Wma(period), 1 => new WilliamsR(period), 2 => new HighestHigh(period),
+        3 => new LowestLow(period), _ => new RollingPriceSum(period)
     };
 
     [Theory, MemberData(nameof(Configurations))]
@@ -91,6 +92,50 @@ public sealed class SharedBoundedWindowTests
             await foreach (var snapshot in saved) Assert.Equal(original[index++], snapshot.Bar);
             using var cancel = new CancellationTokenSource(); cancel.Cancel();
             var builder = Build(bars, [indicator]);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
+            Assert.Null(builder.LastExecution);
+            await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
+            Assert.Null(builder.LastExecution);
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Theory]
+    [InlineData(1)] [InlineData(3)] [InlineData(int.MaxValue)]
+    public async Task SumStartupWideCancellationAndMixedRootsMatchTheOwnedEvaluator(int period)
+    {
+        double[] values = [double.MaxValue, double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon, -0d, 0d, 1];
+        foreach (int count in new[] { 0, 1, 65 })
+        {
+            var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0, 1, 0, values[i % values.Length], 1)).ToArray();
+            var sum = new RollingPriceSum(period);
+            await CompareRoutes(bars, [sum]);
+            await CompareRoutes(bars, [sum, new FirstValueEma(3)]);
+        }
+    }
+
+    [Theory]
+    [InlineData(1)] [InlineData(-1)]
+    public async Task SumParallelInputErrorsPrecedeOverflowAndSnapshotsSurviveLaterRuns(int sign)
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Enumerable.Repeat(new Bar(default, 0, 1, 0, .5, 1), 8193).ToArray();
+            var sum = new RollingPriceSum(20);
+            using var saved = await Build(bars, [sum]).BuildAsync();
+            var values = saved[sum].ToArray();
+            for (int i = 0; i < 20; i++) bars[i] = new Bar(default, 0, 1, 0, sign * double.MaxValue, 1);
+            await CompareRoutes(bars, [sum]);
+            bars[1023] = new Bar(default, 0, 1, 0, .5, double.NaN);
+            await CompareRoutes(bars, [sum]);
+            Array.Fill(bars, new Bar(default, 0, 1, 0, .25, 1));
+            using var again = await Build(bars, [sum]).BuildAsync();
+            Assert.Equal(values, saved[sum].ToArray());
+            await foreach (var snapshot in saved) Assert.Equal(.5, snapshot.Bar.Close);
+            var builder = Build(bars, [sum]);
+            using var cancel = new CancellationTokenSource(); cancel.Cancel();
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
             Assert.Null(builder.LastExecution);
             await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
