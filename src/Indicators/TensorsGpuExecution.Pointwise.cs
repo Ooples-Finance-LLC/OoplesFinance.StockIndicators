@@ -29,7 +29,7 @@ internal sealed partial class TensorsGpuExecution
         var index = indicator as WindowExtremeIndex;
         var aroon = indicator as WindowAroon;
         var priceRange = indicator as WindowPriceRange;
-        var median = ValuesBarExecution.IsGpuMedian(indicator) ? (RollingPercentile)indicator : null;
+        var median = ValuesBarExecution.IsGpuPercentile(indicator) ? (RollingPercentile)indicator : null;
         int candleExtremePeriod = indicator is HighestHigh high ? high.Length : indicator is LowestLow low ? low.Length : 0;
         if (secondary is not null && (index is not { Maximum: false }
             || secondary is not WindowExtremeIndex { Maximum: true } maximum || maximum.Period != index.Period))
@@ -84,6 +84,9 @@ internal sealed partial class TensorsGpuExecution
                 bool sumCertified = weightedPeriod <= 65535;
                 var medianProof = new Core.SmaCpuKernel.Certificate(Math.Max(1, (median?.Period ?? 1) - 1));
                 bool medianCertified = true;
+                var percentileProof = new Core.SmaCpuKernel.Certificate(4);
+                bool percentileCertified = true;
+                bool quarterPercentile = median is { Percentile: .25 or .75, Period: > 1 };
                 for (int i = 0; i < source.Length; i++)
                 {
                     cancellation.ThrowIfCancellationRequested();
@@ -96,6 +99,7 @@ internal sealed partial class TensorsGpuExecution
                         sumCertified &= sumProof.Include(left[i]);
                     if (median is { AverageDuringWarmup: true } && i < median.Period - 1)
                         medianCertified &= medianProof.Include(left[i]);
+                    if (quarterPercentile) percentileCertified &= percentileProof.Include(left[i]);
                     if (lowColumn is not null) lowColumn[i] = latest.Low;
                     if (right is not null) right[i] = trueRange ? latest.High : aroon is not null ? latest.Low : priceRange is not null ? latest.High : midpoint is not null ? latest.High
                         : body ? latest.Close : Select(in latest, arithmetic!.Right);
@@ -113,6 +117,7 @@ internal sealed partial class TensorsGpuExecution
                 }
                 cancellation.ThrowIfCancellationRequested();
                 if (!medianCertified) throw new NotSupportedException("Median startup inputs do not satisfy the exact GPU mean certificate.");
+                if (!percentileCertified) throw new NotSupportedException("Percentile inputs do not satisfy the exact GPU interpolation certificate.");
                 if (!sumCertified) throw new NotSupportedException(weightedPeriod == 0
                     ? "Rolling sum inputs do not satisfy the exact GPU sum certificate."
                     : "WMA period or inputs do not satisfy the exact GPU weighted-sum certificate.");
@@ -134,7 +139,11 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(3, source.Length);
                 kernel.SetArg(4, weightedPeriod > 0 ? weightedPeriod : rollingSum?.Period ?? lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
                 if (weightedPeriod > 0) kernel.SetArg(5, indicator is FixedPeriodWma ? 1 : 0);
-                if (median is not null) kernel.SetArg(5, median.AverageDuringWarmup ? 1 : 0);
+                if (median is not null)
+                {
+                    kernel.SetArg(5, median.AverageDuringWarmup ? 1 : 0);
+                    kernel.SetArg(6, (int)(median.Percentile * 4));
+                }
                 if (trueRange) kernel.SetArg(5, work.Sma.Handle);
                 if (secondary is not null) kernel.SetArg(5, work.Right.Handle);
                 if (aroon is not null)

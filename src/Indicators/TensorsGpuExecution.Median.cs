@@ -11,7 +11,7 @@ internal sealed partial class TensorsGpuExecution
             #pragma OPENCL EXTENSION cl_khr_fp64 : enable
             #pragma OPENCL FP_CONTRACT OFF
             __kernel void median_window(__global const double* input, __global const double* unused,
-                __global double* output, int count, int period, int average_warmup)
+                __global double* output, int count, int period, int average_warmup, int quarters)
             {
                 size_t i = get_global_id(0);
                 if (i >= (size_t)count) return;
@@ -43,7 +43,15 @@ internal sealed partial class TensorsGpuExecution
                     sorted[low] = value;
                     length++;
                 }
-                if ((length & 1) != 0) { output[i] = sorted[length / 2]; return; }
+                int rank = (length - 1) * quarters, index = rank / 4, remainder = rank % 4;
+                if (remainder == 0) { output[i] = sorted[index]; return; }
+                if (quarters != 2)
+                {
+                    // A host certificate makes each weighted term and sum exact.
+                    double total = (double)(4 - remainder) * sorted[index] + (double)remainder * sorted[index + 1];
+                    output[i] = total == 0.0 ? 0.0 : total * 0.25;
+                    return;
+                }
                 double a = sorted[length / 2 - 1], b = sorted[length / 2];
                 double total = a + b;
                 output[i] = total == 0.0 ? 0.0 : isinf(total) ? a * 0.5 + b * 0.5 : total * 0.5;

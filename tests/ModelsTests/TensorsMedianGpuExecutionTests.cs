@@ -63,7 +63,7 @@ public sealed class TensorsMedianGpuExecutionTests
     public async Task UnsupportedMedianShapesRejectRatherThanUsingCpu()
     {
         foreach (var indicator in new[] { new RollingPercentile(3), new RollingPercentile(66),
-            new RollingPercentile(20, .25) })
+            new RollingPercentile(20, .125), new RollingPercentile(5, .25) })
         {
             Assert.False(ValuesBarExecution.SupportsGpu([indicator]));
             await Assert.ThrowsAsync<NotSupportedException>(() => Build([new Bar(default, 0, 1, -1, 0, 1)], indicator).BuildAsync());
@@ -118,5 +118,60 @@ public sealed class TensorsMedianGpuExecutionTests
         using var recovered = await builder.BuildAsync();
         Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
         Assert.All(recovered[indicator].ToArray(), value => Assert.Equal(1, value));
+    }
+
+    [SkippableTheory]
+    [InlineData(.25, false)] [InlineData(.25, true)]
+    [InlineData(.75, false)] [InlineData(.75, true)]
+    public async Task QuarterInterpolationPreservesAllBits(double fraction, bool average)
+    {
+        Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
+        foreach (int period in new[] { 1, 2, 3, 4, 20, 64 })
+        foreach (int count in new[] { 1, period, period + 3, 257 })
+        {
+            var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0, 1, -1,
+                i % 13 == 6 ? (i % 2 == 0 ? -0d : 0d) : (i % 13 - 6) / 8d, 1)).ToArray();
+            var indicator = new RollingPercentile(period, fraction, average);
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                using var cpu = await Build(bars, indicator).ConfigureHistory(history)
+                    .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureBehavior(_ => { }).BuildAsync();
+                var builder = Build(bars, indicator).ConfigureHistory(history);
+                using var gpu = await builder.BuildAsync();
+                Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+                Assert.Equal(cpu[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                    gpu[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits));
+            }
+        }
+    }
+
+    [SkippableFact]
+    public async Task InterpolationCertificateIncludesMatureInputsAndRecoversAcrossFractions()
+    {
+        Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
+        var bars = Enumerable.Range(0, 32).Select(i => new Bar(default, 0, 1, -1, i == 31 ? double.Epsilon : 1, 1)).ToArray();
+        foreach (double fraction in new[] { .25, .5, .75, .5, .25 })
+        {
+            var indicator = new RollingPercentile(20, fraction, true);
+            var builder = Build(bars, indicator);
+            if (fraction != .5)
+            {
+                await Assert.ThrowsAsync<NotSupportedException>(() => builder.BuildAsync());
+                Assert.Null(builder.LastExecution);
+            }
+            else
+            {
+                using var run = await builder.BuildAsync();
+                Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+                Assert.All(run[indicator].ToArray(), value => Assert.Equal(1, value));
+            }
+            var valid = Enumerable.Range(0, 32).Select(i => new Bar(default, 0, 1, -1, i, 1)).ToArray();
+            using var cpu = await Build(valid, indicator).ConfigureExecution(IndicatorExecutionBackend.Cpu)
+                .ConfigureBehavior(_ => { }).BuildAsync();
+            using var recovered = await builder.ConfigureSource(Bars.From(valid)).BuildAsync();
+            Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+            Assert.Equal(cpu[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                recovered[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits));
+        }
     }
 }
