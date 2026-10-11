@@ -38,6 +38,9 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
         ? new AffineConvolutionState(_kernel.Length, _firstWeight, _weightStep)
         : new NormalizedKernelState(_kernel.Length, lag => _kernel[lag]);
 
+    // Exact equality is the eligibility proof: accepting even a one-ULP
+    // near-progression would change the filter's coefficients and results.
+#pragma warning disable S1244
     private static bool TryIntegerProgression(double[] kernel, out int first, out int step)
     {
         first = step = 0;
@@ -54,6 +57,7 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
         }
         return true;
     }
+#pragma warning restore S1244
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -189,39 +193,51 @@ internal sealed class AffineConvolutionState(int length, int first, int step) : 
 
 internal sealed class NormalizedKernelState(int length, Func<int, double> weight) : IIndicatorState
 {
-    private readonly Queue<ExactMeanAccumulator.ProductFactor> _history = new();
-    private readonly List<ExactMeanAccumulator.ProductCoefficient> _coefficients = new();
+    private ExactMeanAccumulator.ProductFactor[] _history = [];
+    private ExactMeanAccumulator.ProductCoefficient[] _coefficients = [];
+    private int _count, _position, _cachedCoefficients;
     private ExactMeanAccumulator _denominator;
 
     public void Reset()
     {
-        _history.Clear();
+        _count = _position = 0;
         _denominator = default;
     }
 
     public double Update(in Bar bar)
     {
-        if (_history.Count == length)
-            _history.Dequeue();
-        else
+        if (_count < length)
         {
-            // These internal kernels have fixed newest-first coefficients. Only
-            // startup extends the coefficient prefix; eviction does not change it.
-            if (_coefficients.Count == _history.Count)
-                _coefficients.Add(new ExactMeanAccumulator.ProductCoefficient(weight(_history.Count)));
-            _denominator.AddFactor(_coefficients[_history.Count].Factor);
+            if (_count == _history.Length)
+            {
+                // Growth occurs only while filling, when retained prices are
+                // contiguous. Cap storage at the requested window, not a power of two.
+                int capacity = _count == 0 ? Math.Min(length, 4)
+                    : _count <= length / 2 ? _count * 2 : length;
+                Array.Resize(ref _history, capacity);
+                Array.Resize(ref _coefficients, capacity);
+                _position = _count;
+            }
+            if (_cachedCoefficients == _count)
+            {
+                _coefficients[_count] = new ExactMeanAccumulator.ProductCoefficient(weight(_count));
+                _cachedCoefficients++;
+            }
+            _denominator.AddFactor(_coefficients[_count].Factor);
+            _count++;
         }
-        _history.Enqueue(new ExactMeanAccumulator.ProductFactor(bar.Close));
+        _history[_position] = new ExactMeanAccumulator.ProductFactor(bar.Close);
+        if (++_position == _history.Length) _position = 0;
         var numerator = new ExactMeanAccumulator();
-        var lag = _history.Count;
-        foreach (var price in _history)
-        {
-            var coefficient = _coefficients[--lag];
-            numerator.AddProduct(in price, in coefficient);
-        }
-        return _denominator.IsExactlyZero
-            ? numerator.Mean(_history.Count)
-            : numerator.Ratio(_denominator);
+        var history = _history; var coefficients = _coefficients;
+        int oldest = _count == length ? _position : 0, lag = _count;
+        // Preserve oldest-to-newest accumulation order without enumerator state
+        // or a wrap/modulo branch on every product.
+        for (int i = oldest; i < _count; i++)
+            numerator.AddProduct(in history[i], in coefficients[--lag]);
+        for (int i = 0; i < oldest; i++)
+            numerator.AddProduct(in history[i], in coefficients[--lag]);
+        return _denominator.IsExactlyZero ? numerator.Mean(_count) : numerator.Ratio(_denominator);
     }
 }
 

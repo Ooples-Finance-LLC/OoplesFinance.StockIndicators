@@ -1,0 +1,18 @@
+{
+  "base_commit": "c099b467",
+  "verification": {
+    "focused_tests": 82,
+    "skipped": 0,
+    "inventory_tests": 15,
+    "ring_only_benchmark_cases": 20,
+    "final_gaussian_sine_cases": 20,
+    "final_affine_cases": 20,
+    "wma_confirmation_cases": 1
+  },
+  "storage": "Lazy coefficient and price arrays replace Queue/List storage. Filling grows from four entries up to the requested period. A ring retains decoded prices; two array loops preserve oldest-to-newest accumulation order. Reset retains coefficients and capacity but rebuilds the exact denominator and retained count.",
+  "jit": "FullOpts disassembly on this host showed per-product AddProduct calls before the hints (907-byte Update). AggressiveInlining on cached-coefficient AddProduct and AddSmall eliminates both calls in Update (2628 bytes). This is a JIT hint, not a guarantee across runtimes. Arithmetic, overflow fallback and rounding are unchanged.",
+  "review": "Checked partial capacity, exact-capacity wrap, non-power-of-two periods, reset after partial/full runs, coefficient-cache reuse and lazy huge-period storage. Six new reference-based cases cover periods 1, 4, 5, 8, 9 and 20. Existing tests cover extreme arithmetic, zero mass, failure precedence and worker boundaries. S1244 is suppressed only around exact integer-progression recognition because tolerances would admit incorrect coefficients.",
+  "comparison": "ring-only records the array change before inlining; gaussian-sine and affine record the final arithmetic binary. All use five warmups and fifteen measured iterations. weighted-native selects final builder rows and the fastest native rows across all retained campaigns, with benchmark-root-relative source provenance checked against the original statistics and memory. Native and builder have different rounding contracts; setup validates each against its independent reference.",
+  "confirmation": "The full campaign measured WMA 1k LatestOnly at 19.42 us versus the preceding 17.07 us. A targeted unchanged-binary confirmation measured 16.50 us (99.9% interval 15.57-17.44 us), so the slowdown was not consistently reproduced. Qualification conservatively retains the 19.42 us campaign result instead of selecting the faster builder repeat. Both beat retained native timing.",
+  "limitations": "Gaussian and sine remain slower than the fastest native parallel paths. This batch does not increase the 87 directly qualified APIs or add GPU dispatch. Smaller allocation is not claimed as proof of a latency win. Hosted analysis must rerun on the new head."
+}

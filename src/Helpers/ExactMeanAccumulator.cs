@@ -111,6 +111,7 @@ internal struct ExactMeanAccumulator
         }
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     internal void AddProduct(in ProductFactor price, in ProductCoefficient coefficient)
     {
         var factor = coefficient.Factor;
@@ -246,6 +247,7 @@ internal struct ExactMeanAccumulator
         return compact.Mean(denominator >> denominatorZeros);
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     private void AddSmall(long value, int scale)
     {
         if (value == 0) return;

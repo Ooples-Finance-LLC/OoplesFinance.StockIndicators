@@ -31,6 +31,23 @@ public sealed class SharedWeightedWindowTests : IDisposable
     }
 
     [Theory]
+    [InlineData(1)] [InlineData(4)] [InlineData(5)] [InlineData(8)] [InlineData(9)] [InlineData(20)]
+    public void KernelRingGrowthWrapAndPartialResetPreserveExactOrder(int period)
+    {
+        var bars = Fixture(3 * period + 5);
+        var weights = Enumerable.Range(0, period).Select(i => (i % 3 - 1) * .125 + .0625).ToArray();
+        var expected = NormalizedKernelReference.Values(bars, period,
+            lag => ReferenceFraction.FromDouble(weights[lag]));
+        var state = new NormalizedKernelState(period, lag => weights[lag]);
+        foreach (int count in new[] { bars.Length, 2, period, bars.Length })
+        {
+            state.Reset();
+            for (int i = 0; i < count; i++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i]), BitConverter.DoubleToInt64Bits(state.Update(in bars[i])));
+        }
+    }
+
+    [Theory]
     [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)]
     public async Task ExactWindowsPreserveStartupAndWorkerBoundaries(int operation)
     {
