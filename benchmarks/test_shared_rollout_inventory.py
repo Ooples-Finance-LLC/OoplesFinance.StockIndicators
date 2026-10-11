@@ -103,6 +103,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_true_range_qualification_preserves_all_native_namespaces(self):
+        self.write()
+        for api in ('TaLib.Functions.TRange', 'Skender.GetTr', 'Trady.Indicator.TrueRange'):
+            path = self.qualification(f'SharedTrueRangeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_mode_qualification_keeps_native_namespace(self):
         self.write()
         api = 'QuanTAlib.Mode'
