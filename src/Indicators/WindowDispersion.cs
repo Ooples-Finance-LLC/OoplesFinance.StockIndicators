@@ -168,6 +168,9 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
         {
             if (_history.Count < 2 || _scale.Integer == 0)
                 return 0;
+#if !NETFRAMEWORK
+            if (TrySmallReading(selected, out var compact)) return compact;
+#endif
             var n = new BigInteger(_history.Count);
             var variance = n * _squares - _sum * _sum;
             var denominator = n * (sample ? n - 1 : n);
@@ -189,6 +192,70 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
                     n * n * variance, 2 * _scale.Exponent
                 );
         }
+
+#if !NETFRAMEWORK
+        private bool TrySmallReading(WindowDispersionOutput selected, out double result)
+        {
+            result = 0;
+            // These bounds make n*squares, sum*sum and n*current-sum exact Int64
+            // operations. A power-of-two multiplier changes only the binary grid.
+            int n = _history.Count;
+            if (n > 4096 || _scale.Integer is not (1 or -1)
+                || _sum.GetBitLength() > 31 || _squares.GetBitLength() > 31) return false;
+            long sum = (long)_sum;
+            long variance = n * (long)_squares - sum * sum;
+            long denominator = (long)n * (sample ? n - 1 : n);
+            if (selected == WindowDispersionOutput.Variance)
+            {
+                long numerator = variance * _scale.Integer;
+                int power = 2 * _grid + _scale.Exponent;
+                // Exact binary64 integer operands plus a normal final exponent
+                // allow one hardware division, then an exact exponent adjustment.
+                if (variance <= (1L << 53))
+                {
+                    if (variance == 0) return true;
+                    long bits = BitConverter.DoubleToInt64Bits((double)numerator / denominator);
+                    long exponent = ((bits >> 52) & 2047) + power;
+                    if (exponent is > 0 and < 2047)
+                    {
+                        result = BitConverter.Int64BitsToDouble(bits + ((long)power << 52));
+                        return true;
+                    }
+                }
+                result = ExactMeanAccumulator.ScaledRatio(numerator, denominator, power);
+                return true;
+            }
+            if (selected == WindowDispersionOutput.StandardDeviation)
+            {
+                if (variance == 0) { result = _scale.Integer * 0d; return true; }
+                if (!TryCompactRoot((ulong)variance, (ulong)denominator,
+                    2 * (_grid + _scale.Exponent), out result)) return false;
+                result *= _scale.Integer;
+                return true;
+            }
+            if (variance == 0) return true;
+            if (_current.GetBitLength() > 31) return false;
+            long deviation = n * (long)_current - sum;
+            ulong magnitude = (ulong)Math.Abs(deviation);
+            if (magnitude == 0) return true;
+            if (magnitude > ulong.MaxValue / magnitude) return false;
+            ulong top = magnitude * magnitude, bottom = (ulong)variance;
+            // Cancel n^2 exactly for population Z; for sample Z retain (n-1)/n.
+            if (sample)
+            {
+                if (top > ulong.MaxValue / (uint)(n - 1) || bottom > ulong.MaxValue / (uint)n) return false;
+                top *= (uint)(n - 1); bottom *= (uint)n;
+            }
+            if (!TryCompactRoot(top, bottom, 2 * _scale.Exponent, out result)) return false;
+            result *= Math.Sign(deviation) * _scale.Integer;
+            return true;
+        }
+
+        private static bool TryCompactRoot(ulong numerator, ulong denominator, int power, out double result) =>
+            numerator <= (1UL << 53) && denominator <= 4096
+                ? ExactPopulationDeviation.TrySmallScaledRoot(numerator, (uint)denominator, power, out result)
+                : ExactPopulationDeviation.TryWideScaledRoot(numerator, denominator, power, out result);
+#endif
 
         private BigInteger OnGrid((long Integer, int Exponent) value) => value.Integer == 0
             ? BigInteger.Zero : new BigInteger(value.Integer) << (value.Exponent - _grid);

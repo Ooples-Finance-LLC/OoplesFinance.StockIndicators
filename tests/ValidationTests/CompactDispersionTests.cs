@@ -119,6 +119,49 @@ public sealed class CompactDispersionTests
         Assert.False(ExactPopulationDeviation.TrySmallScaledRoot(1, 4097, 0, out _));
     }
 
+    [Theory]
+    [InlineData(WindowDispersionOutput.Variance)]
+    [InlineData(WindowDispersionOutput.StandardDeviation)]
+    [InlineData(WindowDispersionOutput.ZScore)]
+    public void SmallMomentReadingsMatchRationalsAtScalingAndFallbackBoundaries(WindowDispersionOutput selected)
+    {
+        var random = new Random(914);
+        foreach (int period in new[] { 2, 20, 4097 })
+        foreach (bool sample in new[] { false, true })
+        foreach (double multiplier in new[] { 1d, -2d, 3d })
+        foreach (int exponent in new[] { -1074, -1022, 0, 500, 1020 })
+        {
+            var values = Enumerable.Range(0, 24).Select(_ => Math.ScaleB(random.Next(-7, 8) / 8d, exponent)).ToArray();
+            if (exponent == 0)
+                values = values.Concat(new double[] { 32767, 32768, 32769, -46340, 46341, -65536 })
+                    .Concat(Enumerable.Range(0, 24).Select(i => (double)(i % 7))).ToArray();
+            var state = new WindowDispersion.State(period, selected, sample, multiplier);
+            for (int i = 0; i < values.Length; i++)
+            {
+                var window = values.Skip(Math.Max(0, i - period + 1)).Take(Math.Min(period, i + 1))
+                    .Select(ReferenceFraction.FromDouble).ToArray();
+                var n = new ReferenceFraction(window.Length);
+                var mean = window.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / n;
+                var variance = window.Aggregate(new ReferenceFraction(0), (a, b) => a + (b - mean) * (b - mean));
+                if (window.Length > 1) variance /= new ReferenceFraction(sample ? window.Length - 1 : window.Length);
+                var scale = ReferenceFraction.FromDouble(multiplier);
+                double expected = 0;
+                if (window.Length > 1)
+                {
+                    if (selected == WindowDispersionOutput.Variance) expected = (variance * scale).ToDouble();
+                    else if (selected == WindowDispersionOutput.StandardDeviation) expected = scale.Sign * (variance * scale * scale).SqrtToDouble();
+                    else if (variance.Sign != 0)
+                    {
+                        var difference = (window[^1] - mean) * scale;
+                        expected = difference.Sign * (difference * difference / variance).SqrtToDouble();
+                    }
+                }
+                var bar = new Bar(default, 0, 1, -1, values[i], 1);
+                AssertBits(expected, state.Update(in bar));
+            }
+        }
+    }
+
     private static void AssertBits(double expected, double actual) =>
         Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
 }
