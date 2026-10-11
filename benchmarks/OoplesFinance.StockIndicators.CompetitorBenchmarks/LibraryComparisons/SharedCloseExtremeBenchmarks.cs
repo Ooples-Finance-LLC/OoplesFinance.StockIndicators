@@ -35,13 +35,7 @@ public class SharedCloseExtremeBenchmarks
         var native = NativeSingle();
         AsinFeasibilityBenchmarks.RequireSame(exact, native);
         AsinFeasibilityBenchmarks.RequireSame(native, NativeParallel());
-        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
-        foreach (bool reference in new[] { false, true })
-        {
-            var indicator = Create();
-            using var run = Build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(exact, run[indicator].ToArray());
-        }
+        SharedWindowBenchmarkValidation.Cpu(exact, Create, (indicator, history, reference) => Build(indicator, history, reference));
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);

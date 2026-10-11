@@ -32,13 +32,7 @@ public class SharedWeightedWindowBenchmarks
         AsinFeasibilityBenchmarks.RequireSame(pair.CompetitorReference!(data, Period).Outputs["Value"].Values, native);
         AsinFeasibilityBenchmarks.RequireSame(native, NativeParallel());
         var exact = pair.Reference!(data, Period).Outputs["Value"].Values;
-        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
-        foreach (bool reference in new[] { false, true })
-        {
-            var indicator = Create();
-            using var run = Build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(exact, run[indicator].ToArray());
-        }
+        SharedWindowBenchmarkValidation.Cpu(exact, Create, (indicator, history, reference) => Build(indicator, history, reference));
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);

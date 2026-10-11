@@ -16,13 +16,7 @@ public class SharedGpuCloseExtremeBenchmarks
     {
         _cpu = new SharedCloseExtremeBenchmarks { Operation = Operation, Count = Count };
         _cpu.Setup();
-        var indicator = _cpu.Create();
-        using var expected = _cpu.Build(indicator, IndicatorHistoryMode.Full);
-        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
-        {
-            using var gpu = _cpu.Build(indicator, history, gpu: true);
-            AsinFeasibilityBenchmarks.RequireSame(expected[indicator].ToArray(), gpu[indicator].ToArray());
-        }
+        SharedWindowBenchmarkValidation.Gpu(_cpu.Create(), _cpu.Build);
     }
     [GlobalCleanup] public void Cleanup() => _cpu.Cleanup();
     [Benchmark] public IIndicatorRun BuilderFull() => _cpu.BuilderFull();
