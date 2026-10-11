@@ -16,7 +16,15 @@ internal readonly struct RocBankValue
         if (UpperShift == 0 && weight >= int.MinValue && weight <= int.MaxValue) sum.Add(Mantissa, (int)weight);
         else sum.Add(Mantissa, new BigInteger(weight) << UpperShift);
     }
-    internal double Publish() { var sum = new ExactMeanAccumulator(); AddTo(ref sum); return sum.Mean(1); }
+    internal double Publish()
+    {
+        // Ordinary stages already have binary64 precision and range. Publishing
+        // them is identity except that AddTo deliberately canonicalizes both zeros.
+        // Keep extended/nonfinite values on the validating accumulator path.
+        if (UpperShift == 0 && Math.Abs(Mantissa) <= double.MaxValue)
+            return Mantissa == 0 ? 0 : Mantissa;
+        var sum = new ExactMeanAccumulator(); AddTo(ref sum); return sum.Mean(1);
+    }
     internal RocBankValue Multiply(double factor)
     {
         var product = new ExactMeanAccumulator(); product.AddProduct(Mantissa, factor);
