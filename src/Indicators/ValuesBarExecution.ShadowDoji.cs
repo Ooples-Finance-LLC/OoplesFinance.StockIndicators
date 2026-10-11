@@ -45,7 +45,7 @@ internal static partial class ValuesBarExecution
             if (!Body(in bar, exactRange, range)) return 0;
             return Shadow(in bar, exactRange, range) ? 1 : 0;
         }
-        private bool Body(in Bar bar, bool exactRange, double range)
+        internal bool Body(in Bar bar, bool exactRange, double range)
         {
             if (_smallBody && exactRange
                 && Binary64ArithmeticCertificate.TryDifference(bar.Close, bar.Open, out double body)
@@ -88,6 +88,30 @@ internal static partial class ValuesBarExecution
             var denominator = BigInteger.Pow(10, (bits[3] >> 16) & 255);
             var divisor = BigInteger.GreatestCommonDivisor(numerator, denominator);
             return (numerator / divisor, denominator / divisor);
+        }
+    }
+
+    private readonly struct DojiKernel(decimal fraction) : IPointwiseKernel
+    {
+        private readonly ShadowDojiKernel _predicate = new(fraction, 0, false);
+        public bool AlwaysDefined => true;
+        public bool CanOverflow => false;
+        public double Invoke(in Bar bar, out bool defined)
+        {
+            defined = true;
+            bool exactRange = Binary64ArithmeticCertificate.TryDifference(bar.High, bar.Low, out double range);
+            return _predicate.Body(in bar, exactRange, range) ? 1 : 0;
+        }
+    }
+
+    private readonly struct CandlePolarityKernel(bool bullish) : IPointwiseKernel
+    {
+        public bool AlwaysDefined => true;
+        public bool CanOverflow => false;
+        public double Invoke(in Bar bar, out bool defined)
+        {
+            defined = true;
+            return (bullish ? bar.Close > bar.Open : bar.Close < bar.Open) ? 1 : 0;
         }
     }
 }

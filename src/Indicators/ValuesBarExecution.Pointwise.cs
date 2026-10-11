@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     internal static bool IsPointwise(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
         && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform or CandleArithmetic
-            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice
+            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice or DojiCandle or BullishCandle or BearishCandle
         || IsShadowDojiGraph(indicator);
 
     private static Bar FillPointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -18,6 +18,9 @@ internal static partial class ValuesBarExecution
         TypicalPrice => FillPointwiseKernel(source, output, indicator, new TypicalPriceKernel(), cancellation, owned),
         WeightedClose => FillPointwiseKernel(source, output, indicator, new WeightedCloseKernel(), cancellation, owned),
         FullTypicalPrice => FillPointwiseKernel(source, output, indicator, new FullTypicalPriceKernel(), cancellation, owned),
+        DojiCandle candle => FillPointwiseKernel(source, output, indicator, new DojiKernel(candle.BodyFraction), cancellation, owned),
+        BullishCandle => FillPointwiseKernel(source, output, indicator, new CandlePolarityKernel(true), cancellation, owned),
+        BearishCandle => FillPointwiseKernel(source, output, indicator, new CandlePolarityKernel(false), cancellation, owned),
         DragonflyDojiCandle candle => FillPointwiseKernel(source, output, indicator,
             new ShadowDojiKernel(candle.BodyFraction, candle.ShadowFraction, true), cancellation, owned),
         GravestoneDojiCandle candle => FillPointwiseKernel(source, output, indicator,
