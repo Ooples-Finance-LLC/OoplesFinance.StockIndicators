@@ -2839,3 +2839,10 @@ A direct RSI/CMO fixture now measures both builder history modes against TA-Lib 
 At 10k bars, both RSI and CMO allocation probes measured medians of Full 664,680 bytes, LatestOnly 183,656 bytes, native serial 79,896 bytes and native parallel 439,736 bytes. Five samples per arm, including small runtime-allocation variation, are preserved in `results/shared-rollout/allocation-probes/wilder-strength.json`. LatestOnly (179.35 KiB) still loses allocation to native serial (78.02 KiB); startup and retained outputs remain costs. No timing win is claimed.
 
 The six-case volatility timing attempt began after an idle preflight but a new AiDotNet build overlapped it. All six rows completed, but none enter qualification. The rejected report and reason are retained in `results/shared-rollout/rejected/volatility-08640579.json.gz`. Timing qualification remains 176/401.
+
+
+## Shared strength seed allocation follow-up
+
+Nullable/Wilder strength seed differences now accumulate on natural binary scales. Normalizing before rounding preserves means below the binary64 floor without padding each input to minimum-subnormal units. All eight state variants allocate zero bytes over 4,000 ordinary updates including startup after reset. Production/benchmark builds, 23 focused unit tests and 34 independent comparison/setup tests passed.
+
+Five allocation-only samples for each 10k RSI/CMO arm were identical: Full 644,296 bytes, LatestOnly 163,272 bytes, native serial 79,896 bytes and native parallel 439,736 bytes. LatestOnly dropped from 179.35 to 159.45 KiB but remains above native serial (78.02 KiB). Raw samples are in `results/shared-rollout/allocation-probes/wilder-strength-seed.json`. No new timing qualification is claimed; coverage remains 176/401.
