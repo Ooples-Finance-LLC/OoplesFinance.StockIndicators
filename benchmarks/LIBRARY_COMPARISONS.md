@@ -2692,3 +2692,19 @@ reference checks cover reset, extremes/subnormals, exact ties, periods 1/3/20 an
 int.MaxValue, and lags 0/2. This is a state-allocation result, not an end-to-end
 builder latency claim. Consolidated timing remains deferred; qualification stays
 at 176/401 APIs.
+
+
+## Certified log-return fixed-width execution (timing pending)
+
+`CertifiedLogReturn` now evaluates its directed 96-bit atanh interval with fixed
+integer limbs on modern runtimes. Exact mantissa normalization, directed products,
+and a geometric tail bound preserve the certificate: both endpoints must round
+to the same binary64 value. Unresolved intervals use the existing adaptive
+arbitrary-precision path; .NET Framework retains that path throughout.
+
+The net10.0 production build, six focused log-return tests and ten logarithmic
+volatility comparison tests passed. Checks cover adjacent prices, signed inputs,
+subnormals, exponent extremes, reduction boundaries and explicit fallback. The
+ordinary-return regression dataset allocates zero managed bytes over 4,000 calls
+after 1,000 warmups. This does not include rolling moments or builder output
+storage, and no latency claim or qualification increase is made pending timing.

@@ -4,7 +4,7 @@ namespace OoplesFinance.StockIndicators.Helpers;
 
 // Directed fixed-point atanh intervals certify the rounded logarithm before
 // dispersion. Ordinary log approximations can erase or invent tiny variance.
-internal static class CertifiedLogReturn
+internal static partial class CertifiedLogReturn
 {
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<
         int,
@@ -56,6 +56,9 @@ internal static class CertifiedLogReturn
     {
         var currentFactor = new ExactMeanAccumulator.ProductFactor(Math.Abs(current));
         var previousFactor = new ExactMeanAccumulator.ProductFactor(Math.Abs(previous));
+#if !NETFRAMEWORK
+        if (TryFixed(currentFactor, previousFactor, out var certified)) return certified;
+#endif
         var n = new BigInteger(currentFactor.Mantissa);
         var d = new BigInteger(previousFactor.Mantissa);
         int exponent = currentFactor.Scale - previousFactor.Scale;
