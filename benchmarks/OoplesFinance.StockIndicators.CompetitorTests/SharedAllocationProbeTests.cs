@@ -28,6 +28,8 @@ public sealed class SharedAllocationProbeTests
     [InlineData("QuanTAlib.Tema")]
     [InlineData("QuanTAlib.Qema")]
     [InlineData("TaLib.Functions.Beta")]
+    [InlineData("TaLib.Functions.Rsi")]
+    [InlineData("TaLib.Functions.Cmo")]
     public void SharedFixtureSetupAndAllFourOwnedResultArmsComplete(string operation)
     {
         var report = SharedAllocationProbe.Run(operation, 64, 2);
