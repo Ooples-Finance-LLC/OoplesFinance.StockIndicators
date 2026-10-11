@@ -94,7 +94,7 @@ public class SharedRollingPercentileBenchmarks
     private IReadOnlyList<decimal?> Trady(decimal?[] values, int skip) => Median
         ? new MedianByTuple(values, Period).Compute(startIndex: skip)
         : new PercentileByTuple(values, Period, (decimal)Fraction).Compute(startIndex: skip);
-    private RollingPercentile Create() => new(Period, Fraction, Quan);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history).BuildAsync().GetAwaiter().GetResult();
+    internal RollingPercentile Create() => new(Period, Fraction, Quan);
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false) => new StockIndicatorBuilder()
+        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 }

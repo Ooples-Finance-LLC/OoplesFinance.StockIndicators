@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Twenty-seven fixed keys; window/lag periods are arguments, never new compiled programs.
+    // Twenty-eight fixed keys; window/lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -22,6 +22,7 @@ internal sealed partial class TensorsGpuExecution
         var index = indicator as WindowExtremeIndex;
         var aroon = indicator as WindowAroon;
         var priceRange = indicator as WindowPriceRange;
+        var median = ValuesBarExecution.IsGpuMedian(indicator) ? (RollingPercentile)indicator : null;
         int candleExtremePeriod = indicator is HighestHigh high ? high.Length : indicator is LowestLow low ? low.Length : 0;
         if (secondary is not null && (index is not { Maximum: false }
             || secondary is not WindowExtremeIndex { Maximum: true } maximum || maximum.Period != index.Period))
@@ -30,7 +31,7 @@ internal sealed partial class TensorsGpuExecution
         bool polarity = indicator is BullishCandle or BearishCandle;
         bool body = engulfing || polarity;
         if (source.Length == 0 || extreme is { Decay: not 0 }
-            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && aroon is null && priceRange is null && candleExtremePeriod <= 0 && !body && !ValuesBarExecution.IsGpuLagged(indicator))
+            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && aroon is null && priceRange is null && median is null && candleExtremePeriod <= 0 && !body && !ValuesBarExecution.IsGpuLagged(indicator))
             throw new NotSupportedException("Unqualified GPU pointwise kernel.");
         int operation = lagged is not null ? lagged.Kind switch
         {
@@ -39,7 +40,7 @@ internal sealed partial class TensorsGpuExecution
             PriceChangeKind.Loss => 10,
             PriceChangeKind.Ratio => 11,
             _ => throw new NotSupportedException("Unqualified GPU lagged operation.")
-        } : candleExtremePeriod >= source.Length ? indicator is HighestHigh ? 26 : 25
+        } : median is not null ? 27 : candleExtremePeriod >= source.Length ? indicator is HighestHigh ? 26 : 25
             : candleExtremePeriod > 0 ? indicator is HighestHigh ? 24 : 23 : priceRange is not null ? 22 : aroon is not null ? 21 : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
             : extreme is not null ? extreme.Maximum ? 17 : 16
             : midpoint is not null ? midpoint.CandleRanges ? 15 : 14
@@ -104,7 +105,7 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(1, deviceRight.Handle);
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
-                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? candleExtremePeriod);
+                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
                 if (secondary is not null) kernel.SetArg(5, work.Right.Handle);
                 if (aroon is not null)
                 {
@@ -173,6 +174,7 @@ internal sealed partial class TensorsGpuExecution
     private CompiledKernel CompilePointwise(int operation)
     {
         if (operation is 25 or 26) return CompilePrefixExtreme(operation == 26);
+        if (operation == 27) return CompileMedian();
         // OpenCL C table-ulp-double requires correctly rounded FP64 arithmetic,
         // ceil, floor and sqrt. Never enable relaxed math or flush denormals.
         var expression = operation switch

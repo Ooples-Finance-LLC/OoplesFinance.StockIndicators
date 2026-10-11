@@ -24,13 +24,17 @@ internal static partial class ValuesBarExecution
     internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
         && indicators[0].Source is null && indicators[0].Components.Count == 0
         && (indicators[0] is CandleArithmetic or PriceRoundingTransform or EngulfingPattern or BullishCandle or BearishCandle or WindowRangeMidpoint or WindowPriceRange or HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or WindowExtremeIndex or WindowAroon or DecayingWindowExtreme { Decay: 0 }
-            || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]))
+            || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]) || IsGpuMedian(indicators[0]))
         || IsGpuIndexPair(indicators);
 
     private static bool IsGpuIndexPair(IReadOnlyList<IIndicator> indicators) => indicators.Count == 2
         && indicators[0] is WindowExtremeIndex first && indicators[1] is WindowExtremeIndex second
         && first.Source is null && second.Source is null && first.Components.Count == 0 && second.Components.Count == 0
         && first.Period == second.Period && first.Maximum != second.Maximum;
+
+    internal static bool IsGpuMedian(IIndicator indicator) => indicator is RollingPercentile
+        { Percentile: .5, Period: > 0 and <= 64 } median
+        && (median.Period == 1 || !median.AverageDuringWarmup && (median.Period & 1) == 0);
 
     internal static bool IsGpuCandleWindow(IIndicator indicator) => indicator is
         StrictHaramiCandle or BullishHaramiPattern or BearishHaramiPattern or UpsideTasukiGapPattern or DownsideTasukiGapPattern;
