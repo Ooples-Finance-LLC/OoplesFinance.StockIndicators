@@ -2498,7 +2498,13 @@ trailing/chandelier/volatility stops, directional measures and ATR Renko.
 Five focused tests passed, including zero managed allocation for 4,000 ordinary
 streaming updates after warmup. All 118 selected comparison tests passed across
 the shared consumers. This is a state-allocation result, not a measured builder
-latency win or direct competitor qualification. Timing remains pending.
+latency win or direct competitor qualification. Timing remains pending. The new
+`SharedSeededAtrBenchmarks` fixture covers Skender ATR, TA-Lib ATR/NATR and Trady
+ATR at 1k/10k, with both builder history modes and native serial/parallel results.
+Native workers replay full prefixes; Trady uses its public tuple path. Four setup
+tests passed at 64/513/1k/10k, checking exact values and every presence flag against
+independent native and builder references. All 53 inventory checks passed.
+
 
 ## Triangular CPU and GPU execution (timing pending)
 

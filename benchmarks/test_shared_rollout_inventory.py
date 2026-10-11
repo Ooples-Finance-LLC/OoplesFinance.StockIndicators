@@ -68,6 +68,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['QuanTAlib.Fwma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_seeded_atr_builder_maps_all_native_apis(self):
+        self.write()
+        for api in ('Skender.GetAtr', 'TaLib.Functions.Atr', 'TaLib.Functions.Natr', 'Trady.Indicator.AverageTrueRange'):
+            path = self.qualification(f'SharedSeededAtrBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_triangular_builder_maps_both_native_apis(self):
         self.write()
         for api in ('QuanTAlib.Trima', 'TaLib.Functions.Trima'):
