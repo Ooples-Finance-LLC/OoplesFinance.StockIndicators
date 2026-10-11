@@ -2813,3 +2813,8 @@ Five allocation-only samples at 10k bars were identical: Full 647,080 bytes, Lat
 ## Seeded true-strength allocation follow-up
 
 The Skender-compatible true-strength engine now retains signed/absolute changes, both EMA stages and the signal in existing compact exact arithmetic, with wide-value fallback. Once-rounded extended values, the shortened smoothing-one startup, absent signal-one output, poisoned missing signals and reset behavior remain bitwise equivalent to the independent rational reference. Production/benchmark builds and all 18 focused unit/comparison tests passed. On ordinary prices, 4,000 state updates including startup after reset allocate zero managed bytes. This is state-level allocation evidence; no new end-to-end timing or competitor win is claimed, and qualification remains 176/401.
+
+
+## Seeded price-momentum allocation follow-up
+
+The Skender-compatible PMO engine now uses compact exact arithmetic for percent returns, both smoothing stages, the tenfold scaling boundary and the signal. Once-rounded extended values, smoothing-one overshoot, zero-prior-price poisoning, output presence and reset remain bitwise equivalent to the independent rational reference. Production/benchmark builds, seven focused unit tests and nine seeded-momentum comparison tests passed. On ordinary prices, 4,000 state updates including startup after reset allocate zero managed bytes. End-to-end latency and allocation qualification remain pending; this does not change the 176/401 timing-qualified count.
