@@ -2830,3 +2830,12 @@ Nullable and Wilder strength/momentum formulas now reuse compact exact ratios fo
 Positive strength means now retain their 53-bit mantissa in a long and use compact exact arithmetic for ordinary smoothing at a relative exponent. Certified exact price differences avoid minimum-unit padding after seeding. Large exponent gaps retain the established wide recurrence; positive means below the binary64 floor remain alive. All five nullable strength/momentum and three Wilder conventions allocate zero bytes across 4,000 ordinary updates after seeding. Startup still uses the existing exact seed accumulator.
 
 Production/benchmark builds, 19 focused arithmetic/allocation tests and 30 independent nullable/Wilder comparison tests passed. Differential tests cover both recurrence types, periods through int.MaxValue, and unpublished exponents from -5000 through +5000. End-to-end timing and allocation qualification remain pending; the timing-qualified count stays 176/401.
+
+
+## Direct Wilder-strength allocation evidence
+
+A direct RSI/CMO fixture now measures both builder history modes against TA-Lib serial and eight-worker prefix replay. Setup validates complete builder values/presence against the independent reference and requires native parallel to match native serial bitwise. The benchmark build, 14 setup/probe tests and 54 inventory checks passed. Production code was unchanged.
+
+At 10k bars, both RSI and CMO allocation probes measured medians of Full 664,680 bytes, LatestOnly 183,656 bytes, native serial 79,896 bytes and native parallel 439,736 bytes. Five samples per arm, including small runtime-allocation variation, are preserved in `results/shared-rollout/allocation-probes/wilder-strength.json`. LatestOnly (179.35 KiB) still loses allocation to native serial (78.02 KiB); startup and retained outputs remain costs. No timing win is claimed.
+
+The six-case volatility timing attempt began after an idle preflight but a new AiDotNet build overlapped it. All six rows completed, but none enter qualification. The rejected report and reason are retained in `results/shared-rollout/rejected/volatility-08640579.json.gz`. Timing qualification remains 176/401.

@@ -1,0 +1,109 @@
+{
+  "production_commit": "08640579c948271fb5e994118064543bfd95b17a",
+  "target_framework": "net10.0",
+  "counter": "GC.GetTotalAllocatedBytes(precise: true)",
+  "warmup_calls_per_arm": 10,
+  "result_lifetime": "Retained through sample; disposable results released after sample.",
+  "qualification": "Allocation-only probe; no latency measurements or catalog qualification increase.",
+  "commands": [
+    "--alloc-shared TaLib.Functions.Rsi 10000 5",
+    "--alloc-shared TaLib.Functions.Cmo 10000 5"
+  ],
+  "reports": [
+    {
+      "Operation": "TaLib.Functions.Rsi",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            664680,
+            664704,
+            677016,
+            664680,
+            664680
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            183656,
+            183656,
+            183656,
+            183656,
+            184560
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            79896,
+            79896,
+            79896,
+            79896,
+            79896
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            439736,
+            439736,
+            439736,
+            439736,
+            439736
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "TaLib.Functions.Cmo",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            664680,
+            664680,
+            664680,
+            664680,
+            664680
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            183656,
+            183656,
+            184560,
+            183656,
+            183656
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            79896,
+            79896,
+            79896,
+            79896,
+            79896
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            439736,
+            439736,
+            439736,
+            439736,
+            439736
+          ]
+        }
+      ]
+    }
+  ],
+  "fixture_commit": "7a36492b4c5ba5cf34cecf6b3b8699b4944c4be2"
+}
