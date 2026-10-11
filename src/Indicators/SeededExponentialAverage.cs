@@ -119,6 +119,7 @@ public sealed class SeededExponentialAverage
 
     private sealed class State(int period, int order, ExponentialSeedMode mode) : IIndicatorState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _previousWeight = new(period - 1);
         private readonly ExactMeanAccumulator[] _seeds = new ExactMeanAccumulator[order];
         private readonly int[] _counts = new int[order];
         private readonly double[] _averages = new double[order];
@@ -159,7 +160,7 @@ public sealed class SeededExponentialAverage
                 {
                     var sum = new ExactMeanAccumulator();
                     sum.Add(value, 2);
-                    sum.Add(_averages[i], period - 1);
+                    sum.AddProduct(new ExactMeanAccumulator.ProductFactor(_averages[i]), _previousWeight);
                     _averages[i] = sum.Mean((long)period + 1);
                 }
                 value = _averages[i];
