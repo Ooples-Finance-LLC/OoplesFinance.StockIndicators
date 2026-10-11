@@ -34,7 +34,9 @@ public sealed class CompactPhaseAdaptiveTests
                 state.Update(new Bar(default, price, price + 1, price - 1, price, 1), output);
             }
         }
-        Run();
+        // Warm the fused stages through their tiered compilation transition;
+        // retain startup and reset in the measured replay.
+        for (int warmup = 0; warmup < 3; warmup++) { state.Reset(); Run(); }
         var expected = output.ToArray();
         state.Reset();
         long before = GC.GetAllocatedBytesForCurrentThread();

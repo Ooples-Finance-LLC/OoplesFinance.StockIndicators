@@ -1,6 +1,25 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+if (args.Length == 4 && args[0] == "--profile-hilbert")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1 || args[1] is not
+        ("TaLib.Functions.HtDcPeriod" or "TaLib.Functions.HtPhasor" or "TaLib.Functions.Mama"))
+        throw new ArgumentException("Expected a supported Hilbert operation, at least 64 bars, and positive iterations.");
+    var benchmark = new SharedHilbertBenchmarks { Operation = args[1], Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("Hilbert warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
 if (args.Length == 4 && args[0] == "--profile-strength")
 {
     var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
