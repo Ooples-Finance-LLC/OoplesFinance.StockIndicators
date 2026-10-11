@@ -39,6 +39,37 @@ public sealed class SelectedDirectionalStateTests
     }
 
     [Fact]
+    public void UnpublishedDirectionalOverflowStillProducesFiniteDxAndAdx()
+    {
+        foreach (int direction in new[] { -1, 1 })
+        {
+            var bars = Enumerable.Range(0, 9).Select(i =>
+            {
+                double price = i == 0 ? -direction * double.MaxValue : direction * i * double.Epsilon;
+                return new Bar(default, 0, price, price, i == 0 ? 0 : price, 1);
+            }).ToArray();
+            foreach (var measure in new[] { PriorDirectionalMeasure.Index, PriorDirectionalMeasure.Average, PriorDirectionalMeasure.Rating })
+            {
+                var expected = PriorDirectionalReference.Calculate(bars, measure, 2, 0);
+                var state = (IMultiOutputState)new PriorSeededDirectionalMeasure(measure, 2).CreateState();
+                var output = new double[2];
+                for (int i = 0; i < bars.Length; i++)
+                {
+                    state.Update(bars[i], output);
+                    Assert.Equal(expected[i].HasValue ? 1d : 0d, output[1]);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(output[0]));
+                }
+                Assert.Equal(100, output[0]);
+            }
+            var published = (IMultiOutputState)new PriorSeededDirectionalMeasure(direction > 0
+                ? PriorDirectionalMeasure.PositiveIndicator : PriorDirectionalMeasure.NegativeIndicator, 2).CreateState();
+            var value = new double[2];
+            foreach (var bar in bars) published.Update(bar, value);
+            Assert.True(double.IsPositiveInfinity(value[0]));
+        }
+    }
+
+    [Fact]
     public async Task PrunedArithmeticStillValidatesEveryInputField()
     {
         foreach (var measure in Enum.GetValues<PriorDirectionalMeasure>())

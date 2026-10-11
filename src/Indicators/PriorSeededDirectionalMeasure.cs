@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -110,27 +109,20 @@ public sealed class PriorSeededDirectionalMeasure
         private readonly bool _needsPositive = measure is not (PriorDirectionalMeasure.NegativeMovement or PriorDirectionalMeasure.NegativeIndicator);
         private readonly bool _needsNegative = measure is not (PriorDirectionalMeasure.PositiveMovement or PriorDirectionalMeasure.PositiveIndicator);
         private readonly bool _needsRange = measure >= PriorDirectionalMeasure.PositiveIndicator;
-        private BigInteger _positive,
-            _negative,
-            _range,
-            _seedDx;
-        private BigInteger _previousHigh, _previousLow, _previousClose;
+        private readonly ExactMeanAccumulator.ProductCoefficient _priorCoefficient = new(period - 1);
+        private readonly ExactMeanAccumulator.ProductCoefficient _currentCoefficient = new(period);
+        private RocBankValue _positive, _negative, _range;
+        private ExactMeanAccumulator _positiveSeed, _negativeSeed, _rangeSeed, _seedDx;
+        private ExactMeanAccumulator.ProductFactor _previousHigh, _previousLow, _previousClose;
         private long _index = -1;
-        private double _average,
-            _lastDx;
-
-        private static BigInteger U(double x) => ExactVarianceWindow.Units(x);
-
-        private static BigInteger R(BigInteger n, BigInteger d) => RocBankValue.RoundUnits(n, d);
-
-        private static double Ratio(BigInteger n, BigInteger d) =>
-            ExactMeanAccumulator.UnitRatio(n << 1074, d);
+        private double _average, _lastDx;
 
         public void Reset()
         {
             _history?.Clear();
-            _positive = _negative = _range = _seedDx = 0;
-            _previousHigh = _previousLow = _previousClose = 0;
+            _positive = _negative = _range = default;
+            _positiveSeed = _negativeSeed = _rangeSeed = _seedDx = default;
+            _previousHigh = _previousLow = _previousClose = default;
             _index = -1;
             _average = _lastDx = 0;
         }
@@ -141,162 +133,163 @@ public sealed class PriorSeededDirectionalMeasure
             output[1] = 1;
         }
 
+        private static ExactMeanAccumulator Difference(ExactMeanAccumulator.ProductFactor left, ExactMeanAccumulator.ProductFactor right)
+        {
+            var result = new ExactMeanAccumulator(); result.AddFactor(left);
+            var subtract = new ExactMeanAccumulator(); subtract.AddFactor(right);
+            result.Subtract(subtract);
+            return result;
+        }
+
+        private static ExactMeanAccumulator Absolute(ExactMeanAccumulator value)
+        {
+            if (value.Sign >= 0) return value;
+            var result = new ExactMeanAccumulator(); result.Subtract(value); return result;
+        }
+
+        private static ExactMeanAccumulator Maximum(ExactMeanAccumulator left, ExactMeanAccumulator right)
+        {
+            var difference = left; difference.Subtract(right);
+            return difference.Sign >= 0 ? left : right;
+        }
+
+        private static RocBankValue TrueRange(ExactMeanAccumulator.ProductFactor high,
+            ExactMeanAccumulator.ProductFactor low, ExactMeanAccumulator.ProductFactor close) =>
+            RocBankValue.Round(Maximum(Difference(high, low),
+                Maximum(Absolute(Difference(high, close)), Absolute(Difference(low, close)))));
+
+        private static void AddWeighted(ref ExactMeanAccumulator sum, RocBankValue value,
+            in ExactMeanAccumulator.ProductCoefficient coefficient, int weight)
+        {
+            if (value.UpperShift == 0)
+                sum.AddProduct(new ExactMeanAccumulator.ProductFactor(value.Mantissa), coefficient);
+            else value.AddTo(ref sum, weight);
+        }
+
+        private RocBankValue Smooth(RocBankValue previous, RocBankValue current)
+        {
+            var sum = new ExactMeanAccumulator();
+            AddWeighted(ref sum, previous, _priorCoefficient, period - 1);
+            AddWeighted(ref sum, current, _currentCoefficient, period);
+            return RocBankValue.Round(sum, count: period);
+        }
+
+        private static double Ratio(RocBankValue value, RocBankValue divisor, int weight = 1)
+        {
+            var numerator = new ExactMeanAccumulator(); value.AddTo(ref numerator, weight);
+            var denominator = new ExactMeanAccumulator(); divisor.AddTo(ref denominator);
+            return numerator.Ratio(denominator);
+        }
+
+        private static RocBankValue Direction(RocBankValue movement, RocBankValue range)
+        {
+            if (range.Mantissa is 0) return default;
+            var numerator = new ExactMeanAccumulator(); movement.AddTo(ref numerator, 100);
+            numerator.ScaleByPowerOfTwo(-range.UpperShift);
+            // DI is an unpublished rounded stage for DX/ADX. Keep its upper
+            // exponent extended so a later finite ratio can cancel large values.
+            return RocBankValue.Round(numerator, range.Mantissa);
+        }
+
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            // Decode each required price once and retain it for the next bar.
-            // Movement-only outputs never need the true-range stream.
-            var high = U(bar.High);
-            var low = U(bar.Low);
-            var close = _needsRange ? U(bar.Close) : BigInteger.Zero;
+            var high = new ExactMeanAccumulator.ProductFactor(bar.High);
+            var low = new ExactMeanAccumulator.ProductFactor(bar.Low);
+            var close = _needsRange ? new ExactMeanAccumulator.ProductFactor(bar.Close) : default;
             if (++_index == 0)
             {
-                _previousHigh = high;
-                _previousLow = low;
-                _previousClose = close;
+                _previousHigh = high; _previousLow = low; _previousClose = close;
                 return;
             }
-            var up = high - _previousHigh;
-            var down = _previousLow - low;
-            var positive = _needsPositive && up > 0 && up > down ? R(up, 1) : BigInteger.Zero;
-            var negative = _needsNegative && down > 0 && down > up ? R(down, 1) : BigInteger.Zero;
-            var range = _needsRange ? R(
-                BigInteger.Max(
-                    high - low,
-                    BigInteger.Max(
-                        BigInteger.Abs(high - _previousClose),
-                        BigInteger.Abs(low - _previousClose)
-                    )
-                ),
-                1
-            ) : BigInteger.Zero;
-            _previousHigh = high;
-            _previousLow = low;
-            _previousClose = close;
+            var up = Difference(high, _previousHigh);
+            var down = Difference(_previousLow, low);
+            var dominance = up; dominance.Subtract(down);
+            var positive = _needsPositive && up.Sign > 0 && dominance.Sign > 0 ? RocBankValue.Round(up) : default;
+            var negative = _needsNegative && down.Sign > 0 && dominance.Sign < 0 ? RocBankValue.Round(down) : default;
+            var range = _needsRange ? TrueRange(high, low, _previousClose) : default;
+            _previousHigh = high; _previousLow = low; _previousClose = close;
             if (period == 1)
             {
-                var movement = measure
-                    is PriorDirectionalMeasure.PositiveMovement
-                        or PriorDirectionalMeasure.PositiveIndicator
-                    ? positive
-                    : negative;
-                Publish(
-                    measure <= PriorDirectionalMeasure.NegativeMovement
-                            ? ExactMeanAccumulator.UnitRatio(movement, 1)
-                        : range.IsZero ? 0
-                        : Ratio(movement, range),
-                    output
-                );
+                var movement = measure is PriorDirectionalMeasure.PositiveMovement or PriorDirectionalMeasure.PositiveIndicator
+                    ? positive : negative;
+                Publish(measure <= PriorDirectionalMeasure.NegativeMovement ? movement.Publish() : Ratio(movement, range), output);
                 return;
             }
             if (_index < period)
             {
-                if (_needsPositive) _positive += positive;
-                if (_needsNegative) _negative += negative;
-                if (_needsRange) _range += range;
+                if (_needsPositive) positive.AddTo(ref _positiveSeed);
+                if (_needsNegative) negative.AddTo(ref _negativeSeed);
+                if (_needsRange) range.AddTo(ref _rangeSeed);
                 if (_index == period - 1)
                 {
-                    if (_needsPositive) _positive = R(_positive, 1);
-                    if (_needsNegative) _negative = R(_negative, 1);
-                    if (_needsRange) _range = R(_range, 1);
+                    if (_needsPositive) _positive = RocBankValue.Round(_positiveSeed);
+                    if (_needsNegative) _negative = RocBankValue.Round(_negativeSeed);
+                    if (_needsRange) _range = RocBankValue.Round(_rangeSeed);
+                    _positiveSeed = _negativeSeed = _rangeSeed = default;
                 }
             }
             else
             {
-                if (_needsPositive) _positive = R(_positive * (period - 1) + positive * period, period);
-                if (_needsNegative) _negative = R(_negative * (period - 1) + negative * period, period);
-                if (_needsRange) _range = R(_range * (period - 1) + range * period, period);
+                if (_needsPositive) _positive = Smooth(_positive, positive);
+                if (_needsNegative) _negative = Smooth(_negative, negative);
+                if (_needsRange) _range = Smooth(_range, range);
             }
             if (measure <= PriorDirectionalMeasure.NegativeMovement)
             {
                 if (_index >= (long)period - 1 + unstable)
-                    Publish(
-                        ExactMeanAccumulator.UnitRatio(
-                            measure == PriorDirectionalMeasure.PositiveMovement
-                                ? _positive
-                                : _negative,
-                            1
-                        ),
-                        output
-                    );
+                    Publish((measure == PriorDirectionalMeasure.PositiveMovement ? _positive : _negative).Publish(), output);
                 return;
             }
-            if (_index < period)
-                return;
+            if (_index < period) return;
             var firstDx = (long)period + unstable;
             if (measure == PriorDirectionalMeasure.Index && _index > firstDx)
-            {
-                var currentRange = R(
-                    BigInteger.Max(
-                        high - low,
-                        BigInteger.Max(
-                            BigInteger.Abs(high - close),
-                            BigInteger.Abs(low - close)
-                        )
-                    ),
-                    1
-                );
-                _range = R(_range * (period - 1) + currentRange * period, period);
-            }
-            if (
-                measure
-                is PriorDirectionalMeasure.PositiveIndicator
-                    or PriorDirectionalMeasure.NegativeIndicator
-            )
+                _range = Smooth(_range, TrueRange(high, low, close));
+            if (measure is PriorDirectionalMeasure.PositiveIndicator or PriorDirectionalMeasure.NegativeIndicator)
             {
                 if (_index >= firstDx)
-                    Publish(
-                        _range.IsZero
-                            ? 0
-                            : Ratio(
-                                100
-                                    * (
-                                        measure == PriorDirectionalMeasure.PositiveIndicator
-                                            ? _positive
-                                            : _negative
-                                    ),
-                                _range
-                            ),
-                        output
-                    );
+                    Publish(Ratio(measure == PriorDirectionalMeasure.PositiveIndicator ? _positive : _negative, _range, 100), output);
                 return;
             }
-            var pdi = _range.IsZero ? BigInteger.Zero : R((100 * _positive) << 1074, _range);
-            var mdi = _range.IsZero ? BigInteger.Zero : R((100 * _negative) << 1074, _range);
-            var hasDirection = !(pdi + mdi).IsZero;
-            var dx = hasDirection ? Ratio(100 * BigInteger.Abs(pdi - mdi), pdi + mdi) : 0;
+            var pdi = Direction(_positive, _range);
+            var mdi = Direction(_negative, _range);
+            var total = new ExactMeanAccumulator(); pdi.AddTo(ref total); mdi.AddTo(ref total);
+            var difference = new ExactMeanAccumulator(); pdi.AddTo(ref difference, 100); mdi.AddTo(ref difference, -100);
+            var hasDirection = !total.IsExactlyZero;
+            var dx = hasDirection ? Absolute(difference).Ratio(total) : 0;
             if (measure == PriorDirectionalMeasure.Index)
             {
-                if (_index < firstDx)
-                    return;
-                if (_index == firstDx || hasDirection)
-                    _lastDx = dx;
+                if (_index < firstDx) return;
+                if (_index == firstDx || hasDirection) _lastDx = dx;
                 Publish(_lastDx, output);
                 return;
             }
             var seedIndex = 2L * period - 1;
             if (_index <= seedIndex)
             {
-                _seedDx += U(dx);
-                if (_index == seedIndex)
-                    _average = ExactMeanAccumulator.UnitRatio(_seedDx, period);
+                _seedDx.Add(dx);
+                if (_index == seedIndex) _average = _seedDx.Mean(period);
             }
             else if (hasDirection)
-                _average = ExactMeanAccumulator.UnitRatio(
-                    U(_average) * (period - 1) + U(dx),
-                    period
-                );
+            {
+                var average = new ExactMeanAccumulator();
+                average.AddProduct(new ExactMeanAccumulator.ProductFactor(_average), _priorCoefficient);
+                average.Add(dx);
+                _average = average.Mean(period);
+            }
             var available = _index >= seedIndex + unstable;
             if (measure == PriorDirectionalMeasure.Average)
             {
-                if (available)
-                    Publish(_average, output);
+                if (available) Publish(_average, output);
                 return;
             }
             var prior = _history!.Count == period - 1 ? _history.Dequeue() : null;
             _history.Enqueue(available ? _average : null);
             if (available && prior.HasValue)
-                Publish(ExactMeanAccumulator.UnitRatio(U(_average) + U(prior.Value), 2), output);
+            {
+                var average = new ExactMeanAccumulator(); average.Add(_average); average.Add(prior.Value);
+                Publish(average.Mean(2), output);
+            }
         }
     }
 }

@@ -2489,21 +2489,24 @@ calls, prefixes and output/threshold mutations. Archive: 1,548 arms /387 pairs.
 
 ## Selected TA directional builder qualification
 
-`PriorSeededDirectionalMeasure` now retains decoded prior high/low/close values,
-skips unused movement/range streams and allocates rating history only for ADXR.
-Every required seed, rounded stage, suppression rule, presence output and DX's
-extra range update is preserved. Eight focused state/input-validation tests and
-23 independent comparison/setup tests passed, including reset with changed inputs,
-period-one rules, extreme/subnormal stages, source composition and native masks.
+`PriorSeededDirectionalMeasure` skips unused movement/range streams and allocates
+rating history only for ADXR. It retains decoded price factors and uses the existing
+compact exact accumulator and `RocBankValue` for rounded stages. Exact dominance
+is decided before rounding; seed sums round at their original boundary. Unpublished
+DI values retain an extended upper exponent so DX/ADX can remain finite even when
+publishing DI would overflow. Suppression, presence and DX's extra range update
+remain unchanged. Nine focused unit tests and 23 independent comparison/setup
+tests passed, including reset, subnormals, source composition and extreme DI ratios.
 
 `SharedTaDirectionalBenchmarks` compares all seven APIs at 1k/10k against direct
 packed native arrays. Parallel native workers replay complete prefixes because
-bounded overlap changes recursive results. All 56 cases completed; native serial
-wins all cases and every builder arm remains a loss. At 10k, LatestOnly +DM is
-11.55 ms / 15.95 MiB versus native 87.21 us / 78.04 KiB; ADX is 50.16 ms /
-72.74 MiB versus 138.09 us / 77.89 KiB. These are direct qualifications, not wins.
-Fixed minimum-unit BigInteger intermediates remain a major allocation target.
-Raw evidence is retained in `ta-directional-cpu`; inventory checks passed 51 tests.
+bounded overlap changes recursive results. The original 56 cases and native rows
+remain in `ta-directional-cpu`; `scaled-directional` holds the 28 updated builder
+cases. Every updated case clearly improved, with 96.0-99.8% lower allocation.
+At 10k, LatestOnly +DM fell from 11.55 ms / 15.95 MiB to 2.20 ms / 159.74 KiB;
+ADX fell from 50.16 ms / 72.74 MiB to 7.68 ms / 169.64 KiB. Native serial remains
+faster: +DM 87.21 us / 78.04 KiB; ADX 138.09 us / 77.89 KiB. All builder arms still
+lose to native. The catalog selects the new builders and retains original natives.
 
 ## Shared SMA builder qualification
 
