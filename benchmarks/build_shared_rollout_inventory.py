@@ -73,7 +73,7 @@ def inventory(root: Path, qualifications=()):
             elif operation and 'SharedBodyShadowBenchmarks.' in row['FullName']:
                 api = operation[1]
                 prefix = 'TaLib.Candles.'
-            elif operation and 'SharedAlmaWindowBenchmarks.' in row['FullName']:
+            elif operation and any(name in row['FullName'] for name in ('SharedAlmaWindowBenchmarks.', 'SharedAroonBenchmarks.')):
                 api = operation[1]
                 prefix = ''
             elif operation and any(name in row['FullName'] for name in ('SharedWeightedWindowBenchmarks.', 'SharedCloseExtremeBenchmarks.', 'SharedGpuCloseExtremeBenchmarks.')):

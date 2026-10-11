@@ -543,10 +543,14 @@ internal static partial class ValuesBarExecution
             Indicator = indicator;
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
             Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
-                slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
+                indicator is WindowAroon && slot >= 4
+                    || slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
                     : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
+            // These three presence outputs are identical by contract. Completed
+            // series expose read-only spans, so one run-owned column serves all three.
+            if (indicator is WindowAroon) Values[4] = Values[5] = Values[3];
             _scratch = pointwise ? Array.Empty<double>() : new double[indicator.Outputs.Count];
             _state = indicator switch
             {

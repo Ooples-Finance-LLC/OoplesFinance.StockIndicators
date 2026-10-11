@@ -53,6 +53,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
                 qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
                 self.assertEqual(['TaLib.Functions.' + api], qualified)
 
+    def test_aroon_qualification_preserves_native_namespaces(self):
+        self.write()
+        for api in ('TaLib.Functions.Aroon', 'TaLib.Functions.AroonOsc', 'Skender.GetAroon', 'Trady.Indicator.Aroon', 'Trady.Indicator.AroonOscillator'):
+            path = self.qualification(f'SharedAroonBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_alma_preserves_competitor_identity(self):
         self.write()
         for api in ('QuanTAlib.Alma', 'Skender.GetAlma'):
