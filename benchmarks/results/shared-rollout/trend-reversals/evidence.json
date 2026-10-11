@@ -1,0 +1,19 @@
+{
+  "verification": {
+    "focused_tests": 75,
+    "skipped": 0,
+    "inventory_tests": 15,
+    "benchmark_cases": 70
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "source_studied": {
+    "repository": "karlwancl/Trady",
+    "commit": "08de02a68dd69fce3f7fc1dd916419117da7457e",
+    "limitation": "Checkout is not proven to be the exact package revision."
+  },
+  "window": "max(trend period, configured body period, 20)+1 prior candles suffice for long-body qualification at i-2, middle-body/doji and trend ending at i-1. Bounded engine period adds the current bar. Extreme periods that would overflow retain ordinary shared-state fallback.",
+  "native_contract": "Raw public tuple/generic APIs in 20-output blocks with 21 seed candles (default body=20, trend=3), serial loop versus up to eight workers. Inputs/segments prepared outside timing; raw nullable Boolean lists returned without normalization. Full builder additionally owns OHLCV snapshots. MorningDojiStar uses the generic public class; MoringinDojiStar benchmarks the published misspelled tuple alias separately.",
+  "setup_checks": "Full-data independent exact and native-decimal references, exact nullable startup mask, true/false outcomes, native serial/parallel equality, unpartitioned ordinary-native prefix, both history modes and ordinary evaluator. Existing fixtures include strict midpoint/doji/gap boundaries; this workload matches both references, without asserting universal binary64/decimal equality.",
+  "result": "Both builder history modes have nonoverlapping-interval wins against both tested native paths at both 1k and 10k. Coverage increases from 80 to 87 APIs (six variants plus a native alias).",
+  "scope": "CPU bounded replay only. Variable-anchor three-methods patterns were inspected and deliberately excluded from finite-window eligibility. Their remaining rollout needs a different state strategy."
+}

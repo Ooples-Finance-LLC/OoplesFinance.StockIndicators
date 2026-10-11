@@ -11,7 +11,24 @@ internal static partial class ValuesBarExecution
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || WeightedWindowPeriod(indicator) > 0
         || PercentileCandlePeriod(indicator) > 0
-        || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0;
+        || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0
+        || TrendReversalWindow(indicator) > 0;
+
+    private static int TrendReversalWindow(IIndicator indicator)
+    {
+        var (trend, body) = indicator switch
+        {
+            BullishAbandonedBabyPattern c => (c.TrendPeriod, c.LongPeriod),
+            BearishAbandonedBabyPattern c => (c.TrendPeriod, c.LongPeriod),
+            TrendStarPattern c => (c.TrendPeriod, c.Period),
+            _ => (0, 0)
+        };
+        if (trend == 0) return 0;
+        // Long-body qualification at i-2 needs P+1 seed bars. Bearish bodies
+        // always use the fixed 20-bar window; trends end on the middle candle.
+        int longest = Math.Max(20, Math.Max(trend, body));
+        return longest < int.MaxValue - 1 ? longest + 2 : 0;
+    }
 
     // Directional predicates inspect P transitions ending on the previous bar:
     // P+1 seeds, plus the current bar. Guard the addition for extreme periods.
@@ -193,6 +210,19 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private readonly struct TrendBabyKernel(TrendBabyState state) : IBoundedKernel<TrendBabyKernel>
+    {
+        public static TrendBabyKernel Create(int period, int count, IIndicator indicator) =>
+            new((TrendBabyState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+    private readonly struct TrendStarKernel(TrendStarState state) : IBoundedKernel<TrendStarKernel>
+    {
+        public static TrendStarKernel Create(int period, int count, IIndicator indicator) =>
+            new((TrendStarState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private readonly struct HaramiKernel(StrictHaramiState state) : IBoundedKernel<HaramiKernel>
     {
         public static HaramiKernel Create(int period, int count, IIndicator indicator) =>
@@ -240,6 +270,10 @@ internal static partial class ValuesBarExecution
         // Percentile windows include the current candle, requiring only P-1 seeds.
         _ when PercentileCandlePeriod(indicator) > 0 =>
             FillBoundedWindow<PercentileCandleKernel>(source, output, indicator, PercentileCandlePeriod(indicator), cancellation, owned),
+        TrendStarPattern when TrendReversalWindow(indicator) > 0 =>
+            FillBoundedWindow<TrendStarKernel>(source, output, indicator, TrendReversalWindow(indicator), cancellation, owned),
+        _ when TrendReversalWindow(indicator) > 0 =>
+            FillBoundedWindow<TrendBabyKernel>(source, output, indicator, TrendReversalWindow(indicator), cancellation, owned),
         _ when HaramiWindow(indicator) > 0 =>
             FillBoundedWindow<HaramiKernel>(source, output, indicator, HaramiWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
