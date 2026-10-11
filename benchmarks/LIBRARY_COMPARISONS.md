@@ -2794,3 +2794,10 @@ unnecessary reruns of unrelated sizes and methods.
 ## Sum-seeded directional allocation follow-up
 
 The Skender-compatible sum-seeded directional engine now uses the existing compact exact dyadic arithmetic for movement selection, smoothed sums, DI/DX and ADX. Extended unpublished values, once-rounded recurrences, missed seeds and period-delayed rating presence are preserved. Five focused unit tests and ten independent comparison tests passed, including bitwise reference/reset checks over ordinary, extreme and mixed-exponent inputs. After warmup, 4,000 ordinary state updates allocate zero managed bytes. Production and benchmark builds passed. This is state-level allocation evidence, not an end-to-end timing win; the timing qualification count remains 176/401.
+
+
+## Return-beta compact rolling moments
+
+Return beta now reuses compact exact products and rolling sums, with arbitrary-precision fallback for wide exponent spans. Both scalar and full-statistics APIs preserve bitwise reference outputs, selection/presence rules, reset and extended unpublished returns. Production/benchmark builds, six focused unit tests, 21 comparison/probe tests and 53 inventory checks passed. Ordinary warmed-up rolling updates allocate zero bytes over 4,000 updates; this excludes beta publication.
+
+An allocation-only probe of the existing 10k beta benchmark fixture measured median Full 7,452,568 bytes, LatestOnly 6,971,544 bytes, TA-Lib serial 79,896 bytes and TA-Lib parallel 80,280 bytes (five samples per arm). LatestOnly is below the archived 16,408,312-byte measurement but remains far above native allocation; publication still falls back to arbitrary precision. Original samples are in `results/shared-rollout/allocation-probes/beta-moments.json`. No latency qualification or win is claimed; 176/401 APIs remain timing-qualified.
