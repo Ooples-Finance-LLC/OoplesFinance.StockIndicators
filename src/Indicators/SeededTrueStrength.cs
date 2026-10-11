@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -78,8 +77,8 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
     private sealed class State(int period, int smooth, int signal) : IMultiOutputState
     {
         private long _index = -1;
-        private BigInteger _previous,
-            _signed,
+        private double _previous;
+        private JurikDyadic _signed,
             _absolute,
             _secondSigned,
             _secondAbsolute,
@@ -89,21 +88,41 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
         private double? _signal;
         private bool _signalMissing;
 
-        private static BigInteger R(BigInteger x, BigInteger divisor) =>
-            RocBankValue.RoundUnits(x, divisor);
+        private static JurikDyadic R(JurikDyadic numerator, long divisor)
+        {
+            var denominator = JurikDyadic.FromDouble(divisor);
+            for (int shift = 0; ; shift += 1024)
+            {
+                var value = numerator.Ratio(denominator);
+                if (!double.IsInfinity(value))
+                {
+                    var result = JurikDyadic.FromDouble(value);
+                    if (shift != 0) result.ScaleByPowerOfTwo(shift);
+                    return result;
+                }
+                numerator.ScaleByPowerOfTwo(-1024);
+            }
+        }
+
+        private static JurikDyadic Numerator(JurikDyadic previous, JurikDyadic current, int length)
+        {
+            previous.Multiply(length - 1);
+            current.Multiply(2);
+            previous.AddExact(current);
+            return previous;
+        }
 
         public void Reset()
         {
             _index = -1;
-            _previous =
-                _signed =
+            _previous = 0;
+            _signed =
                 _absolute =
                 _secondSigned =
                 _secondAbsolute =
                 _sumSigned =
                 _sumAbsolute =
-                _seedSignal =
-                    0;
+                _seedSignal = default;
             _signal = null;
             _signalMissing = false;
         }
@@ -120,15 +139,18 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var value = ExactVarianceWindow.Units(bar.Close);
-            var change = R(value - _previous, 1);
-            _previous = value;
+            var change = JurikDyadic.FromDouble(bar.Close);
+            change.Subtract(JurikDyadic.FromDouble(_previous));
+            change = change.Rounded();
+            var absoluteChange = change;
+            if (absoluteChange.Sign < 0) absoluteChange.Multiply(-1);
+            _previous = bar.Close;
             if (++_index == 0)
                 return;
             if (_index <= period)
             {
-                _sumSigned += change;
-                _sumAbsolute += BigInteger.Abs(change);
+                _sumSigned.AddExact(change);
+                _sumAbsolute.AddExact(absoluteChange);
                 if (_index == period)
                 {
                     _signed = R(_sumSigned, period);
@@ -138,35 +160,32 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
                 }
                 return;
             }
-            _signed = R(_signed * (period - 1) + 2 * change, (long)period + 1);
-            _absolute = R(_absolute * (period - 1) + 2 * BigInteger.Abs(change), (long)period + 1);
+            _signed = R(Numerator(_signed, change, period), (long)period + 1);
+            _absolute = R(Numerator(_absolute, absoluteChange, period), (long)period + 1);
             var secondStart = (long)period + smooth - 1;
             if (_index <= secondStart)
             {
-                _sumSigned += _signed;
-                _sumAbsolute += _absolute;
+                _sumSigned.AddExact(_signed);
+                _sumAbsolute.AddExact(_absolute);
                 if (_index < secondStart)
                     return;
                 _secondSigned = R(_sumSigned, smooth);
                 _secondAbsolute = R(_sumAbsolute, smooth);
-                _sumSigned = _sumAbsolute = 0;
+                _sumSigned = _sumAbsolute = default;
             }
             else
             {
-                _secondSigned = R(_secondSigned * (smooth - 1) + 2 * _signed, (long)smooth + 1);
-                _secondAbsolute = R(
-                    _secondAbsolute * (smooth - 1) + 2 * _absolute,
-                    (long)smooth + 1
-                );
+                _secondSigned = R(Numerator(_secondSigned, _signed, smooth), (long)smooth + 1);
+                _secondAbsolute = R(Numerator(_secondAbsolute, _absolute, smooth), (long)smooth + 1);
             }
-            double? tsi = _secondAbsolute.IsZero
-                ? null
-                : ExactMeanAccumulator.UnitRatio((100 * _secondSigned) << 1074, _secondAbsolute);
+            var percent = _secondSigned;
+            percent.Multiply(100);
+            double? tsi = _secondAbsolute.Sign == 0 ? null : percent.Ratio(_secondAbsolute);
             Publish(tsi, 0, output);
             if (_index == secondStart)
             {
                 _signalMissing = !tsi.HasValue;
-                _seedSignal = tsi.HasValue ? ExactVarianceWindow.Units(tsi.Value) : 0;
+                _seedSignal = tsi.HasValue ? JurikDyadic.FromDouble(tsi.Value) : default;
                 return;
             }
             if (signal <= 1)
@@ -175,18 +194,15 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
             if (_index <= seedIndex)
             {
                 if (tsi.HasValue)
-                    _seedSignal += ExactVarianceWindow.Units(tsi.Value);
+                    _seedSignal.Add(tsi.Value);
                 else
                     _signalMissing = true;
                 if (_index == seedIndex && !_signalMissing)
-                    _signal = ExactMeanAccumulator.UnitRatio(_seedSignal, signal);
+                    _signal = _seedSignal.Ratio(JurikDyadic.FromDouble(signal));
             }
             else if (_signal.HasValue && tsi.HasValue)
-                _signal = ExactMeanAccumulator.UnitRatio(
-                    ExactVarianceWindow.Units(_signal.Value) * (signal - 1)
-                        + 2 * ExactVarianceWindow.Units(tsi.Value),
-                    (long)signal + 1
-                );
+                _signal = Numerator(JurikDyadic.FromDouble(_signal.Value),
+                    JurikDyadic.FromDouble(tsi.Value), signal).Ratio(JurikDyadic.FromDouble((long)signal + 1));
             else
                 _signal = null;
             Publish(_signal, 1, output);
