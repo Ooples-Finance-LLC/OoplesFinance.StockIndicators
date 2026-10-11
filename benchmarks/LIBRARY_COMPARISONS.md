@@ -1675,6 +1675,13 @@ unmeasured pair. Final complete correctness union and current-head gates remain
 required before readiness.
 
 
+T3 now caches the four exact cubic coefficients and their common denominator
+once per state, removing repeated fixed-factor products from each update.
+All three seed modes and classical-average composition share this path. The
+net10.0 build, three extended-value/reset tests and 25 T3/classical-average
+comparison tests passed. Updated allocation and latency measurements remain
+pending; smoothing stages still use their existing exact arithmetic.
+
 ## Triple EMA rate and optional signal
 
 `TripleExponentialRate` covers Skender TRIX, EMA3 and optional SMA signal,
