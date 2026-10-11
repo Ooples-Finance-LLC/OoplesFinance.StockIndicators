@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue }
+            or LaggedPriceChange { Period: < int.MaxValue } or WindowRangeMidpoint
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || WeightedWindowPeriod(indicator) > 0
         || PercentileCandlePeriod(indicator) > 0
@@ -72,7 +72,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true }) return 512;
+        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
@@ -246,9 +246,9 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
-    private readonly struct WeightedWindowKernel(IIndicatorState state) : IBoundedKernel<WeightedWindowKernel>
+    private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
-        public static WeightedWindowKernel Create(int period, int count, IIndicator indicator) =>
+        public static StateWindowKernel Create(int period, int count, IIndicator indicator) =>
             new((IIndicatorState)((IndicatorBase)indicator).CreateState()!);
         public double Update(in Bar bar) => state.Update(in bar);
     }
@@ -261,6 +261,7 @@ internal static partial class ValuesBarExecution
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
+        WindowRangeMidpoint midpoint => FillBoundedWindow<StateWindowKernel>(source, output, indicator, midpoint.Period, cancellation, owned),
         LaggedPriceChange change => FillBoundedWindow<LaggedKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
         // Two seed bars preserve the pattern's two-bar startup in every worker.
         EngulfingPattern => FillBoundedWindow<EngulfingKernel>(source, output, indicator, 3, cancellation, owned),
@@ -269,7 +270,7 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<BodyShadowKernel>(source, output, indicator, BodyShadowPeriod(indicator) + 1, cancellation, owned),
         // Fixed coefficients and exact eviction make P-1 preceding closes sufficient.
         _ when WeightedWindowPeriod(indicator) > 0 =>
-            FillBoundedWindow<WeightedWindowKernel>(source, output, indicator, WeightedWindowPeriod(indicator), cancellation, owned),
+            FillBoundedWindow<StateWindowKernel>(source, output, indicator, WeightedWindowPeriod(indicator), cancellation, owned),
         // Percentile windows include the current candle, requiring only P-1 seeds.
         _ when PercentileCandlePeriod(indicator) > 0 =>
             FillBoundedWindow<PercentileCandleKernel>(source, output, indicator, PercentileCandlePeriod(indicator), cancellation, owned),

@@ -7,12 +7,13 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SharedBoundedWindowTests
 {
-    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 5)
+    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 7)
         from period in new[] { 1, 3, 20, 4096, 4097, int.MaxValue } select new object[] { operation, period };
     private static IndicatorBase Create(int operation, int period) => operation switch
     {
         0 => new Wma(period), 1 => new WilliamsR(period), 2 => new HighestHigh(period),
-        3 => new LowestLow(period), _ => new RollingPriceSum(period)
+        3 => new LowestLow(period), 4 => new RollingPriceSum(period),
+        5 => new WindowRangeMidpoint(period), _ => new WindowRangeMidpoint(period, true)
     };
 
     [Theory, MemberData(nameof(Configurations))]
@@ -208,7 +209,8 @@ public sealed class SharedBoundedWindowTests
             var bars = Enumerable.Range(0, count).Select(i => new Bar(default, prices[i % 8],
                 prices[(i + 1) % 8], prices[(i + 3) % 8], prices[(i + 5) % 8], 1)).ToArray();
             IIndicator[] indicators = [new LowestLow(period), new HighestHigh(3), new Wma(period),
-                new WilliamsR(7), new RollingPriceSum(period), new EngulfingPattern()];
+                new WilliamsR(7), new RollingPriceSum(period), new EngulfingPattern(),
+                new WindowRangeMidpoint(period), new WindowRangeMidpoint(7, true)];
             foreach (int workers in new[] { 1, 2, 8 })
             {
                 CpuParallelSettings.MaxDegreeOfParallelism = workers;
@@ -290,6 +292,27 @@ public sealed class SharedBoundedWindowTests
                     await CompareRoutes(bars, pair);
                     foreach (var indicator in pair) await CompareRoutes(bars, [indicator]);
                 }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public async Task MidpointWorkerThresholdPreservesStandaloneAndMixedBoundaries()
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (int count in new[] { 511, 512, 513 })
+            {
+                var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0,
+                    (i % 13 - 6) / 8d, -(i % 11) / 8d, (i % 7 - 3) / 8d, 1)).ToArray();
+                await CompareRoutes(bars, [new WindowRangeMidpoint(20)]);
+                await CompareRoutes(bars, [new WindowRangeMidpoint(20, true)]);
+                await CompareRoutes(bars, [new WindowRangeMidpoint(20), new WindowRangeMidpoint(7, true)]);
+                bars[256] = new Bar(default, 0, double.NaN, 0, 0, 1);
+                await CompareRoutes(bars, [new WindowRangeMidpoint(20)]);
             }
         }
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
