@@ -287,7 +287,7 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
         }
 
         private static bool TryCompactRoot(ulong numerator, ulong denominator, int power, out double result) =>
-            numerator <= (1UL << 53) && denominator <= 4096
+            numerator <= (1UL << 53) && denominator <= ExactPopulationDeviation.SmallRootMaximumDenominator
                 ? ExactPopulationDeviation.TrySmallScaledRoot(numerator, (uint)denominator, power, out result)
                 : ExactPopulationDeviation.TryWideScaledRoot(numerator, denominator, power, out result);
 #endif

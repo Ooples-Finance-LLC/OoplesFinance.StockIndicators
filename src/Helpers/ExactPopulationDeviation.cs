@@ -69,7 +69,7 @@ internal struct ExactPopulationDeviation
         if (numerator.Sign < 0 || denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(numerator));
         if (numerator.IsZero) return 0;
 #if !NETFRAMEWORK
-        if (numerator <= (1UL << 53) && denominator <= 4096)
+        if (numerator <= (1UL << 53) && denominator <= SmallRootMaximumDenominator)
         {
             if (TrySmallScaledRoot((ulong)numerator, (uint)denominator, binaryExponent, out var small)) return small;
         }
@@ -98,10 +98,12 @@ internal struct ExactPopulationDeviation
     // The floating estimate is never trusted for rounding. Compare the exact
     // rational with both binary64 midpoints using bounded 128-bit integers.
     // Wider operands and subnormal/overflow results keep the general path.
+    internal const uint SmallRootMaximumDenominator = 1U << 18;
+
     internal static bool TrySmallScaledRoot(ulong numerator, uint denominator, int power, out double result)
     {
         result = 0;
-        if (numerator == 0 || numerator > (1UL << 53) || denominator is 0 or > 4096) return false;
+        if (numerator == 0 || numerator > (1UL << 53) || denominator is 0 or > SmallRootMaximumDenominator) return false;
         if ((power & 1) != 0)
         {
             if (numerator > (1UL << 52)) return false;
@@ -168,7 +170,8 @@ internal struct ExactPopulationDeviation
         comparison = 0;
         var shift = -2 * power;
         if (shift is < 0 or >= 128 || (UInt128)numerator > (UInt128.MaxValue >> shift)) return false;
-        // midpoint < 2^55 and denominator <= 2^12, hence the product fits 122 bits.
+        // Both midpoint forms are < 2^54; denominator <= 2^18 makes the
+        // product < 2^126. The separate left-shift guard proves the other side fits.
         var left = (UInt128)numerator << shift;
         var right = unchecked((UInt128)midpoint * midpoint * denominator);
         comparison = left.CompareTo(right);
