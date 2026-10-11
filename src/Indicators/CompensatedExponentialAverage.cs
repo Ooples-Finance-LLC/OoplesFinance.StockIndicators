@@ -60,17 +60,21 @@ public sealed class CompensatedExponentialAverage
         public double Update(in Bar bar)
         {
             _residual = _residual > 1e-10 ? (1 - _alpha) * _residual : 0;
-            var compensation = _residual > 1e-10 ? 1 / (1 - _residual) : 1;
+            var compensate = _residual > 1e-10;
+            var compensation = compensate ? 1 / (1 - _residual) : 1;
             var value = new RocBankValue(bar.Close);
             var total = new ExactMeanAccumulator();
             for (var stage = 0; stage < order; stage++)
             {
                 var next = new ExactMeanAccumulator();
+                // Factor the two products in exact arithmetic. Do not round the
+                // difference: only the complete convex update is rounded.
+                value.AddTo(ref next);
+                _stages[stage].AddTo(ref next, -1);
+                next.Multiply(_alpha);
                 _stages[stage].AddTo(ref next);
-                AddProduct(ref next, _stages[stage], _alpha, -1);
-                AddProduct(ref next, value, _alpha, 1);
                 _stages[stage] = RocBankValue.Round(next);
-                value = _stages[stage].Multiply(compensation);
+                value = compensate ? _stages[stage].Multiply(compensation) : _stages[stage];
                 value.AddTo(
                     ref total,
                     order == 2
@@ -83,19 +87,6 @@ public sealed class CompensatedExponentialAverage
                 );
             }
             return total.Mean(1);
-        }
-
-        private static void AddProduct(
-            ref ExactMeanAccumulator total,
-            RocBankValue value,
-            double factor,
-            int sign
-        )
-        {
-            var term = new ExactMeanAccumulator();
-            term.AddProduct(value.Mantissa, factor, sign);
-            term.ScaleByPowerOfTwo(value.UpperShift);
-            total.AddExact(term);
         }
     }
 }
