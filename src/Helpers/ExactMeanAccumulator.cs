@@ -312,6 +312,22 @@ internal struct ExactMeanAccumulator
     {
         var magnitude = _small < 0 ? unchecked((ulong)(~_small)) + 1 : (ulong)_small;
         var bits = BitLength(magnitude);
+#if !NETFRAMEWORK
+        // Hardware division is the same single rounding when BOTH operands are
+        // exactly representable binary64 values. Refuse an overflowing total even
+        // if its mean would be finite, fractional minimum-unit scales, and integers
+        // wider than 53 bits. Those cases retain the integer rounding path below.
+        if (bits <= 53 && divisor <= (1UL << 53) && _scale >= 0 && _scale <= 2098 - bits)
+        {
+            int biasedExponent = bits + _scale - 52;
+            ulong payload = biasedExponent > 0
+                ? ((ulong)biasedExponent << 52) | ((magnitude << (53 - bits)) & 0xfffffffffffffUL)
+                : magnitude << _scale;
+            if (_small < 0) payload |= 1UL << 63;
+            value = BitConverter.Int64BitsToDouble(unchecked((long)payload)) / divisor;
+            return true;
+        }
+#endif
         var exponent = bits - BitLength(divisor);
         if (exponent >= 0 ? magnitude < (divisor << exponent) : (magnitude << -exponent) < divisor) exponent--;
         var grid = Math.Max(0, exponent + _scale - 52);
@@ -346,6 +362,9 @@ internal struct ExactMeanAccumulator
 
     private static int BitLength(ulong value)
     {
+#if !NETFRAMEWORK
+        return 64 - BitOperations.LeadingZeroCount(value);
+#else
         var bits = 0;
         if (value >= (1UL << 32)) { value >>= 32; bits += 32; }
         if (value >= (1UL << 16)) { value >>= 16; bits += 16; }
@@ -354,6 +373,7 @@ internal struct ExactMeanAccumulator
         if (value >= (1UL << 2)) { value >>= 2; bits += 2; }
         if (value >= 2) { value >>= 1; bits++; }
         return bits + (value == 0 ? 0 : 1);
+#endif
     }
 
     private static int BitLength(BigInteger value)
