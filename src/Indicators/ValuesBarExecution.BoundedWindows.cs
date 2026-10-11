@@ -83,6 +83,7 @@ internal static partial class ValuesBarExecution
 
     private static int WeightedWindowPeriod(IIndicator indicator) => indicator switch
     {
+        EndpointWeightedAverage { Period: <= 1073741824 } endpoint => endpoint.Period,
         FixedPeriodWma average => average.Period,
         NormalizedConvolution convolution => convolution.Kernel.Count,
         GaussianWeightedAverage average => average.Period,
@@ -94,7 +95,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or StandardDeviationWithDetails or HullWindow or RateOfChangeWithValidity) return 512;
+        if (indicator is EndpointWeightedAverage or FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or StandardDeviationWithDetails or HullWindow or RateOfChangeWithValidity) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
@@ -484,6 +485,18 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private readonly struct EndpointKernel(AffineConvolutionState state) : IBoundedKernel<EndpointKernel>
+    {
+        public static EndpointKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var endpoint = (EndpointWeightedAverage)indicator;
+            // Fixed endpoint weights are 2P-1, 2P-4, ...; the bounded eligibility
+            // guarantees that the newest weight fits Int32 without truncation.
+            return new(new(period, (int)(2L * period - 1), -3, endpoint.AverageDuringWarmup));
+        }
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
         public static StateWindowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
@@ -522,6 +535,8 @@ internal static partial class ValuesBarExecution
         _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue =>
             FillBoundedWindow<BodyShadowKernel>(source, output, indicator, BodyShadowPeriod(indicator) + 1, cancellation, owned),
         // Fixed coefficients and exact eviction make P-1 preceding closes sufficient.
+        EndpointWeightedAverage { Period: <= 1073741824 } endpoint =>
+            FillBoundedWindow<EndpointKernel>(source, output, indicator, endpoint.Period, cancellation, owned),
         _ when WeightedWindowPeriod(indicator) > 0 =>
             FillBoundedWindow<StateWindowKernel>(source, output, indicator, WeightedWindowPeriod(indicator), cancellation, owned),
         // Percentile windows include the current candle, requiring only P-1 seeds.

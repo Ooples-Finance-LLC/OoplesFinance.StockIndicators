@@ -235,7 +235,7 @@ class InventoryDiagnosticsTests(unittest.TestCase):
 
     def test_weighted_qualification_uses_quantalib_namespace(self):
         self.write()
-        for operation in ('Wma', 'Convolution', 'Gma', 'Sinema'):
+        for operation in ('Wma', 'Convolution', 'Gma', 'Sinema', 'Epma', 'Mma'):
             path = self.qualification(f'SharedWeightedWindowBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
             result = inventory(self.root, [path])
             row = next(r for r in result['pairs'] if r['pair_id'] == 'QuanTAlib.' + operation)

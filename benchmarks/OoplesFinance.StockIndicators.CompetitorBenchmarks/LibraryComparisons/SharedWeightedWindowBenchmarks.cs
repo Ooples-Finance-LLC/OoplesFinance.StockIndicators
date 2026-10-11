@@ -9,7 +9,7 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 public class SharedWeightedWindowBenchmarks
 {
     private const int Period = 20;
-    [Params("Wma", "Convolution", "Gma", "Sinema")] public string Operation { get; set; } = "";
+    [Params("Wma", "Convolution", "Gma", "Sinema", "Epma", "Mma")] public string Operation { get; set; } = "";
     [Params(1_000, 10_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
     private QuanTAlib.TValue[] _inputs = null!;
@@ -24,7 +24,7 @@ public class SharedWeightedWindowBenchmarks
         _bars = close.Select(v => new Bar(default, v, v + 1, v - 1, v, 1)).ToArray();
         _inputs = close.Select(v => new QuanTAlib.TValue(default, v, true, false)).ToArray();
         var data = CompetitorData.FromCloses(close);
-        var pair = FixedWeightedComparison.Pairs.Concat(ConvolutionComparison.Pairs).Concat(AnalyticKernelComparison.Pairs)
+        var pair = FixedWeightedComparison.Pairs.Concat(ConvolutionComparison.Pairs).Concat(AnalyticKernelComparison.Pairs).Append(MeanStartupEndpointComparison.Pair)
             .Single(p => p.Id == "QuanTAlib." + Operation);
         // The published contracts have different rounding boundaries. Validate
         // each against its independent arithmetic oracle, including startup.
@@ -65,6 +65,8 @@ public class SharedWeightedWindowBenchmarks
     }
     private QuanTAlib.AbstractBase CreateNative() => Operation switch
     {
+        "Epma" => new QuanTAlib.Epma(Period),
+        "Mma" => new QuanTAlib.Mma(Period),
         "Wma" => new QuanTAlib.Wma(Period),
         "Convolution" => new QuanTAlib.Convolution(Kernel()),
         "Gma" => new QuanTAlib.Gma(Period),
@@ -73,6 +75,8 @@ public class SharedWeightedWindowBenchmarks
     };
     private IIndicator Create() => Operation switch
     {
+        "Epma" => new EndpointWeightedAverage(Period),
+        "Mma" => new EndpointWeightedAverage(Period, true),
         "Wma" => new FixedPeriodWma(Period),
         "Convolution" => new NormalizedConvolution(Kernel()),
         "Gma" => new GaussianWeightedAverage(Period),

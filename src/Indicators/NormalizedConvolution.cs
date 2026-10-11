@@ -146,7 +146,7 @@ public sealed class EndpointWeightedAverage
 // Exact FIR recurrence for integer arithmetic progressions, newest coefficient first.
 // Shifting the old window adds step*sum; the evicted sample then has coefficient
 // first+step*length. Partial windows retain the same coefficients and exact mass.
-internal sealed class AffineConvolutionState(int length, int first, int step) : IIndicatorState
+internal sealed class AffineConvolutionState(int length, int first, int step, bool averageDuringWarmup = false) : IIndicatorState
 {
     private readonly Queue<double> _history = new();
     private ExactMeanAccumulator _sum, _weighted;
@@ -164,6 +164,14 @@ internal sealed class AffineConvolutionState(int length, int first, int step) : 
     {
         if (step == 1) _weighted.AddExact(_sum);
         else if (step == -1) _weighted.Subtract(_sum);
+        else if (step == -3)
+        {
+            // Endpoint weights shift by -3. Exact subtraction keeps ordinary
+            // windows in the compact accumulator without Multiply's wide normalization.
+            _weighted.Subtract(_sum);
+            _weighted.Subtract(_sum);
+            _weighted.Subtract(_sum);
+        }
         else if (step != 0)
         {
             var shift = _sum;
@@ -182,6 +190,7 @@ internal sealed class AffineConvolutionState(int length, int first, int step) : 
         _history.Enqueue(bar.Close);
         _sum.Add(bar.Close);
         _weighted.Add(bar.Close, first);
+        if (averageDuringWarmup && _history.Count < length) return _sum.Mean(_history.Count);
         if (_mass == 0) return _weighted.Mean(_history.Count);
         // The mass fits long: every retained coefficient is an Int32 and there
         // are at most Int32.MaxValue of them. Preserve the existing zero sign.
