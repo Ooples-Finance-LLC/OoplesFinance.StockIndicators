@@ -41,6 +41,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(result['measured_current_apis'], 1)
 
+    def test_native_ema_qualification_keeps_both_namespaces(self):
+        self.write()
+        for api in ('QuanTAlib.Ema', 'Skender.GetEma'):
+            path = self.qualification(f'SharedNativeEmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_double_weighted_average_maps_native_api(self):
         self.write()
         path = self.qualification('SharedWeightedWindowBenchmarks.BuilderFull(Operation: "Dwma", Count: 1000)')
