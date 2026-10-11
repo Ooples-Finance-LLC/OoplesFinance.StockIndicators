@@ -2767,19 +2767,23 @@ and retains each result through the sample before disposing it outside the sampl
 No timing is collected. Seven probe tests passed, including worker allocation
 accounting and result disposal; all five 10k fixture setups verified their outputs.
 
-Median KiB per call (five samples; production commit `24fc7e30`):
+Median KiB per call (five samples; EMA commit `24fc7e30`, volatility commit `e45827ba`):
 
 | Operation | Builder Full | Builder LatestOnly | Native serial | Native parallel |
 |---|---:|---:|---:|---:|
 | Quan DEMA | 550.96 | 81.21 | 469.06 | 1838.43 |
 | Quan TEMA | 551.01 | 81.26 | 469.08 | 1838.55 |
 | Quan QEMA | 850.45 | 380.70 | 2033.41 | 8884.43 |
-| Quan Historical | 4060.05 | 3590.30 | 4200.43 | 4211.11 |
-| Quan Realized | 4097.91 | 3628.16 | 469.39 | 1840.87 |
+| Quan Historical | 630.22 | 160.47 | 4200.43 | 4211.11 |
+| Quan Realized | 630.22 | 160.47 | 469.39 | 1840.87 |
 
-Full retains additional OHLCV history. Realized volatility remains an allocation
-loss despite the shared improvements. The raw samples, including observed
-variation, are in `results/shared-rollout/allocation-probes/recent-cpu.json`.
+Full retains additional OHLCV history; realized volatility Full still exceeds
+native serial allocation. LatestOnly now allocates less than both native arms
+for all five operations. The original samples, including observed variation,
+remain in `results/shared-rollout/allocation-probes/recent-cpu.json`; the updated
+volatility samples are in `results/shared-rollout/allocation-probes/root-publication.json`.
+The compact root publication path passed 15 focused unit tests and ten volatility
+comparison tests, including rounding ties, subnormals, overflow and wide fallback.
 These allocation-only observations do not replace BenchmarkDotNet timing evidence
 or raise the 176/401 direct qualification count. The targeted queued volatility
 campaign selects `*SharedLogVolatilityBenchmarks.BuilderLatestOnly(*Count: 10000)`
