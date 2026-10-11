@@ -32,6 +32,7 @@ internal static partial class ValuesBarExecution
         WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
         RollingPriceSum sum => new SumValueState(sum.Period, count),
         WindowRangeMidpoint midpoint => (IIndicatorState)midpoint.CreateState(),
+        WindowExtremeIndex { Period: <= 32 } index => new SmallExtremeIndexState(index.Period, index.Maximum, origin),
         WindowExtremeIndex index => new ExtremeIndexState(index.Period, index.Maximum, origin),
         DecayingWindowExtreme { Decay: 0 } extreme => new CloseExtremeState(extreme.Period, extreme.Maximum),
         LaggedPriceChange change => new LaggedValueState(change.Period, count, change.Kind),

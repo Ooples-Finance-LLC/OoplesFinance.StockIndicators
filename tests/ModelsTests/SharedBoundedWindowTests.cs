@@ -374,6 +374,30 @@ public sealed class SharedBoundedWindowTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
+    [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(20)] [InlineData(32)] [InlineData(33)]
+    public async Task IndexExpiryRescansPreserveMonotoneAndRepeatedWinners(int period)
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (int shape in new[] { 0, 1, 2 })
+            {
+                var bars = Enumerable.Range(0, 8193).Select(i => new Bar(default, 0, 1, -1,
+                    shape == 0 ? i : shape == 1 ? -i : (i / 2) % (period + 1), 1)).ToArray();
+                IIndicator[] indices = [new WindowExtremeIndex(period), new WindowExtremeIndex(period, true)];
+                foreach (var index in indices) await CompareRoutes(bars, [index]);
+                // The shared seed is longer than either small index window.
+                await CompareRoutes(bars, [indices[0], indices[1], new WindowExtremeIndex(65)]);
+                using var run = await Build(bars, indices).BuildAsync();
+                foreach (WindowExtremeIndex index in indices)
+                    Assert.Equal(WindowExtremeReference.Indices(bars, period, index.Maximum), run[index].ToArray());
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
     private static async Task CompareRoutes(Bar[] bars, IIndicator[] indicators)
     {
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())

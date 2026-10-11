@@ -289,6 +289,53 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    // Small windows can retain the winner and rescan only when it expires.
+    // Cap this route so monotone inputs cannot turn large windows into O(NP) work.
+    private sealed class SmallExtremeIndexState(int period, bool maximum, int origin = 0) : IIndicatorState
+    {
+        private readonly double[] _window = new double[period];
+        private int _position, _next, _bestIndex;
+        private double _best;
+        public void Reset() { _position = _next = _bestIndex = 0; _best = 0; }
+        public double Update(in Bar bar)
+        {
+            double value = bar.Close;
+            int current = _next++;
+            _window[_position] = value;
+            if (++_position == period) _position = 0;
+            if (current == 0 || (maximum ? value >= _best : value <= _best))
+            {
+                _best = value;
+                _bestIndex = current;
+            }
+            else if (_bestIndex <= current - period)
+            {
+                _best = value;
+                _bestIndex = current;
+                int slot = _position == 0 ? period - 1 : _position - 1;
+                // Reverse traversal plus strict comparison preserves newest ties.
+                for (int age = 1; age < period; age++)
+                {
+                    if (--slot < 0) slot = period - 1;
+                    value = _window[slot];
+                    if (maximum ? value > _best : value < _best)
+                    {
+                        _best = value;
+                        _bestIndex = current - age;
+                    }
+                }
+            }
+            return origin + _bestIndex;
+        }
+    }
+
+    private readonly struct SmallExtremeIndexKernel(SmallExtremeIndexState state) : IBoundedKernel<SmallExtremeIndexKernel>
+    {
+        public static SmallExtremeIndexKernel Create(int period, int count, IIndicator indicator) =>
+            new(new(period, ((WindowExtremeIndex)indicator).Maximum));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
         public static StateWindowKernel Create(int period, int count, IIndicator indicator) =>
@@ -305,6 +352,7 @@ internal static partial class ValuesBarExecution
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
         WindowRangeMidpoint midpoint => FillBoundedWindow<MidpointKernel>(source, output, indicator, midpoint.Period, cancellation, owned),
+        WindowExtremeIndex { Period: <= 32 } index => FillBoundedWindow<SmallExtremeIndexKernel>(source, output, indicator, index.Period, cancellation, owned),
         WindowExtremeIndex index => FillBoundedWindow<ExtremeIndexKernel>(source, output, indicator, index.Period, cancellation, owned),
         DecayingWindowExtreme { Decay: 0 } extreme => FillBoundedWindow<CloseExtremeKernel>(source, output, indicator, extreme.Period, cancellation, owned),
         LaggedPriceChange change => FillBoundedWindow<LaggedKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
@@ -406,7 +454,7 @@ internal static partial class ValuesBarExecution
             var value = kernel.Update(in latest);
             // Each worker's deque starts at zero, including its captured seeds.
             // The closed-generic check folds away for every non-index kernel.
-            if (typeof(T) == typeof(ExtremeIndexKernel)) value += start - seed.Length;
+            if (typeof(T) == typeof(ExtremeIndexKernel) || typeof(T) == typeof(SmallExtremeIndexKernel)) value += start - seed.Length;
             output[i] = value;
             if (owned is not null) owned[i] = latest;
             if (!double.IsFinite(value) && region.InvalidOutputIndex < 0)
