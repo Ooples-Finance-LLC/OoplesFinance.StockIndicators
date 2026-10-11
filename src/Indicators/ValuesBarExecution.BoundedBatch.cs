@@ -11,6 +11,7 @@ internal static partial class ValuesBarExecution
         WilliamsR range => Math.Max(1, range.Length),
         RollingPriceSum sum => sum.Period,
         WindowRangeMidpoint midpoint => midpoint.Period,
+        WindowExtremeIndex index => index.Period,
         DecayingWindowExtreme { Decay: 0 } extreme => extreme.Period,
         LaggedPriceChange change => change.Period + 1,
         EngulfingPattern => 3,
@@ -23,7 +24,7 @@ internal static partial class ValuesBarExecution
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
-    private static IIndicatorState CreateBoundedState(IIndicator indicator, int count) => indicator switch
+    private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
         HighestHigh high => new PriceExtremeState(high.Length, count, true),
         LowestLow low => new PriceExtremeState(low.Length, count, false),
@@ -31,6 +32,7 @@ internal static partial class ValuesBarExecution
         WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
         RollingPriceSum sum => new SumValueState(sum.Period, count),
         WindowRangeMidpoint midpoint => (IIndicatorState)midpoint.CreateState(),
+        WindowExtremeIndex index => new ExtremeIndexState(index.Period, index.Maximum, origin),
         DecayingWindowExtreme { Decay: 0 } extreme => new CloseExtremeState(extreme.Period, extreme.Maximum),
         LaggedPriceChange change => new LaggedValueState(change.Period, count, change.Kind),
         EngulfingPattern => new EngulfingPattern.State(),
@@ -121,7 +123,8 @@ internal static partial class ValuesBarExecution
     {
         var region = new BoundedBatchRegion(nodes.Count);
         int count = end - start + seed.Length;
-        var states = nodes.Select(n => CreateBoundedState(n.Indicator, count)).ToArray();
+        int origin = start - seed.Length;
+        var states = nodes.Select(n => CreateBoundedState(n.Indicator, count, origin)).ToArray();
         // All states have bounded memory and exact eviction. Feeding the shared
         // longest tail leaves shorter windows with the same final state.
         foreach (ref readonly var bar in seed)

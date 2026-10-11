@@ -7,14 +7,15 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SharedBoundedWindowTests
 {
-    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 9)
+    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 11)
         from period in new[] { 1, 3, 20, 4096, 4097, int.MaxValue } select new object[] { operation, period };
     private static IndicatorBase Create(int operation, int period) => operation switch
     {
         0 => new Wma(period), 1 => new WilliamsR(period), 2 => new HighestHigh(period),
         3 => new LowestLow(period), 4 => new RollingPriceSum(period),
         5 => new WindowRangeMidpoint(period), 6 => new WindowRangeMidpoint(period, true),
-        7 => new DecayingWindowExtreme(period), _ => new DecayingWindowExtreme(period, true)
+        7 => new DecayingWindowExtreme(period), 8 => new DecayingWindowExtreme(period, true),
+        9 => new WindowExtremeIndex(period), _ => new WindowExtremeIndex(period, true)
     };
 
     [Theory, MemberData(nameof(Configurations))]
@@ -344,6 +345,31 @@ public sealed class SharedBoundedWindowTests
                 await CompareRoutes(ordinary, [new DecayingWindowExtreme(20, maximum, .5)]);
                 await CompareRoutes(ordinary, [new DecayingWindowExtreme(20, maximum, .5), new DecayingWindowExtreme(7, !maximum)]);
             }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public async Task IndexWorkersKeepAbsoluteNewestTiesAndDifferentLengthSharedSeeds()
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (bool tied in new[] { false, true })
+            {
+                var bars = Enumerable.Range(0, 8193).Select(i => new Bar(default, 0, 1, -1,
+                    tied ? i % 2 == 0 ? -0d : 0d : (i % 53 - 26) / 8d, 1)).ToArray();
+                IIndicator[] indices = [new WindowExtremeIndex(3), new WindowExtremeIndex(20, true)];
+                await CompareRoutes(bars, indices);
+                await CompareRoutes(bars, [indices[0], indices[1], new DecayingWindowExtreme(31)]);
+                using var run = await Build(bars, indices).BuildAsync();
+                foreach (WindowExtremeIndex index in indices)
+                    Assert.Equal(WindowExtremeReference.Indices(bars, index.Period, index.Maximum), run[index].ToArray());
+                bars[1023] = new Bar(default, 0, 1, -1, 0, double.NaN);
+                await CompareRoutes(bars, indices);
+            }
+            await CompareRoutes([], [new WindowExtremeIndex(3)]);
         }
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }

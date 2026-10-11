@@ -80,7 +80,7 @@ def inventory(root: Path, qualifications=()):
                 api = operation[1]
                 prefix = 'QuanTAlib.'
             elif operation and any(name in row['FullName'] for name in
-                                 ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.', 'SharedPairInputBenchmarks.', 'SharedMidpointBenchmarks.', 'SharedGpuMidpointBenchmarks.',
+                                 ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.', 'SharedPairInputBenchmarks.', 'SharedExtremeIndexBenchmarks.', 'SharedMidpointBenchmarks.', 'SharedGpuMidpointBenchmarks.',
                                   'SharedPriceProjectionBenchmarks.', 'SharedGeneratedStateBenchmarks.',
                                   'SharedRecursiveStateBenchmarks.', 'SharedLaggedChangeBenchmarks.')):
                 api = operation[1]
