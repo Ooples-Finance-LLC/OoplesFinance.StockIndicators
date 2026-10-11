@@ -24,7 +24,10 @@ internal static partial class ValuesBarExecution
     internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
         && indicators[0].Source is null && indicators[0].Components.Count == 0
         && (indicators[0] is CandleArithmetic or PriceRoundingTransform or EngulfingPattern or BullishCandle or BearishCandle
-            || IsGpuLagged(indicators[0]));
+            || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]));
+
+    internal static bool IsGpuCandleWindow(IIndicator indicator) => indicator is
+        StrictHaramiCandle or BullishHaramiPattern or BearishHaramiPattern or UpsideTasukiGapPattern or DownsideTasukiGapPattern;
 
     internal static bool IsGpuLagged(IIndicator indicator) => indicator is LaggedPriceChange
         { Kind: PriceChangeKind.Difference or PriceChangeKind.Gain or PriceChangeKind.Loss or PriceChangeKind.Ratio };

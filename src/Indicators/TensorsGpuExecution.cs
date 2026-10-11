@@ -11,7 +11,8 @@ internal sealed partial class TensorsGpuExecution
     private readonly OpenClContext _context;
     private readonly object _gate = new();
     private readonly Dictionary<(int Period, bool Sma, bool Asin, bool FromMean, bool Presence), CompiledKernel> _kernels = new();
-    // One reusable workspace, bounded to 56 MiB (two host inputs + five FP64 buffers).
+    // One reusable workspace, bounded to 56 MiB. Four-column candle execution
+    // uses a lower count cap to allow two extra host inputs within the same budget.
     // Published host arrays are never cached or pooled.
     private const int MaxRetainedCount = 1_048_576;
     private Workspace? _workspace;
@@ -122,7 +123,9 @@ internal sealed partial class TensorsGpuExecution
     {
         internal int Count => count;
         internal double[] Input { get; } = GC.AllocateUninitializedArray<double>(count);
-        private double[]? _rightInput;
+        private double[]? _rightInput, _highInput, _lowInput;
+        internal double[] HighInput => _highInput ??= GC.AllocateUninitializedArray<double>(count);
+        internal double[] LowInput => _lowInput ??= GC.AllocateUninitializedArray<double>(count);
         internal double[] RightInput => _rightInput ??= GC.AllocateUninitializedArray<double>(count);
         private OpenClBuffer<double>? _input, _sma, _asin, _presence, _right;
         internal OpenClBuffer<double> DeviceInput => _input ??= new(context, count);

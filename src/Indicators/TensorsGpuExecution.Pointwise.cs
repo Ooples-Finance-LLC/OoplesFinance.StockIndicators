@@ -12,6 +12,8 @@ internal sealed partial class TensorsGpuExecution
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned)
     {
+        if (ValuesBarExecution.IsGpuCandleWindow(indicator))
+            return ExecuteCandleWindow(source, output[0], indicator, cancellation, owned);
         var arithmetic = indicator as CandleArithmetic;
         var rounding = indicator as PriceRoundingTransform;
         var lagged = indicator as LaggedPriceChange;

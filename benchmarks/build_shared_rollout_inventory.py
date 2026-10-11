@@ -67,7 +67,7 @@ def inventory(root: Path, qualifications=()):
             prefix = 'TaLib.Functions.'
             operation = re.search(r'Operation: "([^"]+)"', row['FullName'])
             count = re.search(r'Count: (\d+)', row['FullName'])
-            if operation and any(name in row['FullName'] for name in ('SharedShadowDojiBenchmarks.', 'SharedBasicCandleBenchmarks.', 'SharedTrendCandleBenchmarks.', 'SharedPercentileCandleBenchmarks.', 'SharedContainmentGapBenchmarks.')):
+            if operation and any(name in row['FullName'] for name in ('SharedShadowDojiBenchmarks.', 'SharedBasicCandleBenchmarks.', 'SharedTrendCandleBenchmarks.', 'SharedPercentileCandleBenchmarks.', 'SharedContainmentGapBenchmarks.', 'SharedGpuContainmentGapBenchmarks.')):
                 api = operation[1]
                 prefix = 'Trady.Candlestick.'
             elif operation and 'SharedBodyShadowBenchmarks.' in row['FullName']:

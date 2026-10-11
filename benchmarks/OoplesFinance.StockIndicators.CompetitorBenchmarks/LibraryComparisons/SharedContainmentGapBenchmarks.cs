@@ -86,11 +86,12 @@ public class SharedContainmentGapBenchmarks
         "DownsideTasukiGap" => new TC.DownsideTasukiGapByTuple(candles, Period).Compute(start, null),
         _ => throw new InvalidOperationException("Unknown containment/gap pattern.")
     };
-    private IIndicator Create() => IsTasuki ? TrendTasukiComparison.Create(Operation == "UpsideTasukiGap", Period)
+    internal IIndicator Create() => IsTasuki ? TrendTasukiComparison.Create(Operation == "UpsideTasukiGap", Period)
         : StrictHaramiComparison.Create(Operation, Period);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false,
+        IndicatorExecutionBackend backend = IndicatorExecutionBackend.Auto)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history).ConfigureExecution(backend);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }
