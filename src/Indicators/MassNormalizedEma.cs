@@ -159,6 +159,19 @@ internal sealed class MassNormalizedStage(double alpha)
 
     internal double Next(double input)
     {
+        if (_residual == 0)
+        {
+            // A previous update has already reset mass to one. Factor the exact
+            // convex sum; keep the first zero-residual update on the path below
+            // because it must still use the previous, nonunit startup mass.
+            var next = new ExactMeanAccumulator();
+            next.Add(input);
+            next.Add(_mean, -1);
+            next.Multiply(alpha);
+            next.Add(_mean);
+            _mean = next.Mean(1);
+            return _mean;
+        }
         _residual = _residual > 1e-10 ? (1 - alpha) * _residual : 0;
         // Retain exact weights on their natural binary scales instead of padding
         // every term to the minimum-subnormal grid. No intermediate is rounded.

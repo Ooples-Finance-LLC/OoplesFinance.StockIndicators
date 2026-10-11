@@ -13,7 +13,7 @@ public sealed class MassNormalizedComparisonTests
     [InlineData(true)]
     public async Task ScaledWeightsPreserveBitsInBothHistoryModes(bool quadruple)
     {
-        foreach (double alpha in new[] { double.Epsilon, .1, 1d })
+        foreach (double alpha in new[] { double.Epsilon, .1, Math.BitDecrement(1d), 1d })
         foreach (double scale in new[] { double.Epsilon, 1d, 1e280 })
         {
             var alphas = Enumerable.Repeat(alpha, quadruple ? 4 : 1).ToArray();
