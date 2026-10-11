@@ -73,7 +73,11 @@ internal readonly record struct PositiveStrengthValue(long Mantissa, long Expone
             && TryWeightedTerm(integer, exponential ? 2 : 1, currentShift, out var current)
             && prior <= long.MaxValue - current)
         {
+#if !NETFRAMEWORK
+            return FromCompactRatio(prior + current, divisor, common);
+#else
             rounded = ExactMeanAccumulator.ScaledRatio(prior + current, divisor, 0);
+#endif
         }
         else
         {
@@ -98,6 +102,39 @@ internal readonly record struct PositiveStrengthValue(long Mantissa, long Expone
         var padding = 53 - Bits(mantissa);
         return new(mantissa << padding, common + power - padding);
     }
+
+#if !NETFRAMEWORK
+    private static PositiveStrengthValue FromCompactRatio(long numerator, long divisor, long exponent)
+    {
+        if (numerator == 0) return default;
+        // Store the rounded 53-bit quotient directly. Encoding it as binary64
+        // and then decomposing it again is unnecessary for unpublished means.
+        ulong top = (ulong)numerator, bottom = (ulong)divisor;
+        int numeratorBits = Bits(numerator);
+        int power = numeratorBits - Bits(divisor);
+        if (power >= 0 ? top < (bottom << power) : (top << -power) < bottom) power--;
+        int quantum = power - 52;
+        ulong mantissa, remainder;
+        if (quantum < 0 && numeratorBits - quantum > 64)
+        {
+            // A positive long divisor needs at most 63 + 53 grid bits.
+            var divided = ExactMeanAccumulator.CompactDivRem((UInt128)top << -quantum, bottom);
+            mantissa = (ulong)divided.Quotient;
+            remainder = (ulong)divided.Remainder;
+        }
+        else
+        {
+            if (quantum < 0) top <<= -quantum;
+            else bottom <<= quantum;
+            mantissa = top / bottom;
+            remainder = top % bottom;
+        }
+        var otherHalf = bottom - remainder;
+        if (remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0) mantissa++;
+        if (mantissa == (1UL << 53)) { mantissa >>= 1; quantum++; }
+        return new((long)mantissa, exponent + quantum);
+    }
+#endif
 
     private static bool TryWeightedTerm(long mantissa, int weight, int shift, out long value)
     {
