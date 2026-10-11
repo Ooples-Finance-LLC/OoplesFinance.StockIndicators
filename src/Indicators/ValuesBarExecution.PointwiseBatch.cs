@@ -129,7 +129,9 @@ internal static partial class ValuesBarExecution
                 // Complete bitmap words belong to exactly one worker.
                 int start = (int)((long)source.Length * chunk / chunks / 64) * 64;
                 int end = chunk == chunks - 1 ? source.Length : (int)((long)source.Length * (chunk + 1) / chunks / 64) * 64;
-                ref var input = ref inputs[chunk];
+                // Keep the hot record local. Adjacent worker records can share a
+                // cache line; publishing Last per bar causes inter-core traffic.
+                var input = new PointwiseRegion();
                 var results = outputs[chunk];
                 for (int i = start; i < end; i++)
                 {
@@ -140,6 +142,7 @@ internal static partial class ValuesBarExecution
                     if (owned is not null) owned[i] = bar;
                     for (int step = 0; step < kernels.Length; step++) kernels[step].Append(in bar, i, ref results[step]);
                 }
+                inputs[chunk] = input;
             }
             if (parallel) AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(chunks, chunks, Compute);
             else Compute(0);

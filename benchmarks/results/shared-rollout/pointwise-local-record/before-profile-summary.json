@@ -1,0 +1,92 @@
+{
+  "scope": "Arithmetic/10k BuilderLatestOnly, managed sampled-thread-time stacks containing the batch Compute worker. Includes setup/warmup. Excludes exporter wait and other stacks; not hardware CPU counters.",
+  "note": "Benchmark workload completed. Export was waiting on an unresponsive dotnet --version child; terminating only that SDK-probe child allowed trace export. Profile timing is not performance evidence.",
+  "total_worker_sampled_ms": 44259.65080897556,
+  "exclusive": [
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass98_0.<FillPointwiseBatch>g__Compute|0(int32)",
+      "sampled_ms": 35173.77189220712,
+      "fraction": 0.7947141753109837
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseStep`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Multiply]].Append(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,int32,value class PointwiseRegion&)",
+      "sampled_ms": 4515.924958154476,
+      "fraction": 0.10203254828297645
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseStep`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Subtract]].Append(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,int32,value class PointwiseRegion&)",
+      "sampled_ms": 2995.40000323581,
+      "fraction": 0.06767789506889564
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Multiply].OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.IPointwiseKernel.Invoke(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,bool&)",
+      "sampled_ms": 263.7970963411335,
+      "fraction": 0.005960216393926842
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Subtract].Select(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class OoplesFinance.StockIndicators.Indicators.CandlePriceField)",
+      "sampled_ms": 262.624191770552,
+      "fraction": 0.005933715855645512
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Subtract].OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.IPointwiseKernel.Invoke(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,bool&)",
+      "sampled_ms": 232.19918776950863,
+      "fraction": 0.005246295068428787
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Multiply].Invoke(value class OoplesFinance.StockIndicators.Indicators.Bar&,bool&)",
+      "sampled_ms": 218.84959344425442,
+      "fraction": 0.004944675103488914
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Subtract].Invoke(value class OoplesFinance.StockIndicators.Indicators.Bar&,bool&)",
+      "sampled_ms": 134.90709878444613,
+      "fraction": 0.003048083216171418
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Add].Invoke(value class OoplesFinance.StockIndicators.Indicators.Bar&,bool&)",
+      "sampled_ms": 106.6960965038279,
+      "fraction": 0.00241068545624835
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseStep`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Add]].Append(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,int32,value class PointwiseRegion&)",
+      "sampled_ms": 91.18929593811072,
+      "fraction": 0.0020603256978163537
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Add].OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.IPointwiseKernel.Invoke(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&,bool&)",
+      "sampled_ms": 73.92109888896994,
+      "fraction": 0.0016701690487349989
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Add].Select(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class OoplesFinance.StockIndicators.Indicators.CandlePriceField)",
+      "sampled_ms": 65.33229821968143,
+      "fraction": 0.001476114181326358
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Multiply].Select(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class OoplesFinance.StockIndicators.Indicators.CandlePriceField)",
+      "sampled_ms": 60.92669839840164,
+      "fraction": 0.0013765743128286525
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.AllFieldsFinite(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "sampled_ms": 20.159999831962068,
+      "fraction": 0.0004554938745217971
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Multiply].get_AlwaysDefined()",
+      "sampled_ms": 18.854999726486312,
+      "fraction": 0.00042600877733682085
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Subtract].get_AlwaysDefined()",
+      "sampled_ms": 15.337899794196801,
+      "fraction": 0.00034654362413284967
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+BinaryKernel`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Add].get_AlwaysDefined()",
+      "sampled_ms": 9.758399966621255,
+      "fraction": 0.00022048072653664763
+    }
+  ]
+}
