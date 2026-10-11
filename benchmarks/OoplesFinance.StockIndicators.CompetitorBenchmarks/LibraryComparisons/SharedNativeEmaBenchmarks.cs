@@ -12,7 +12,8 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 public class SharedNativeEmaBenchmarks
 {
     private const int Period = 20;
-    [Params("QuanTAlib.Ema", "Skender.GetEma", "QuanTAlib.Dema", "QuanTAlib.Tema")] public string Operation { get; set; } = "";
+    [Params("QuanTAlib.Ema", "Skender.GetEma", "QuanTAlib.Dema", "QuanTAlib.Tema", "QuanTAlib.Qema")] public string Operation { get; set; } = "";
+    private static readonly double[] QuadrupleAlphas = [.2, .2, .2, .2];
     [Params(1_000, 10_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
     private QuanTAlib.TValue[] _inputs = null!;
@@ -31,7 +32,10 @@ public class SharedNativeEmaBenchmarks
         int chunks = Math.Min(8, Environment.ProcessorCount);
         _prefixes = Enumerable.Range(0, chunks).Select(i => _tuples[..(Count * (i + 1) / chunks)]).ToArray();
         int order = CompensatedOrder;
-        var (exact, native) = order == 0 ? References(input.Prices)
+        var (exact, native) = Operation == "QuanTAlib.Qema"
+            ? (MassNormalizedComparison.Reference(input.Prices, QuadrupleAlphas, false),
+                MassNormalizedComparison.Reference(input.Prices, QuadrupleAlphas, true))
+            : order == 0 ? References(input.Prices)
             : (CompensatedAverageComparison.Reference(input.Prices, Period, order, false),
                 CompensatedAverageComparison.Reference(input.Prices, Period, order, true));
         CheckNative(NativeSingle(), native); CheckNative(NativeParallel(), native);
@@ -82,7 +86,8 @@ public class SharedNativeEmaBenchmarks
 
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     private int CompensatedOrder => Operation == "QuanTAlib.Dema" ? 2 : Operation == "QuanTAlib.Tema" ? 3 : 0;
-    private IIndicator Create() => CompensatedOrder == 0 ? new Ema(Period) : new CompensatedExponentialAverage(Period, CompensatedOrder);
+    private IIndicator Create() => Operation == "QuanTAlib.Qema" ? new MassNormalizedQuadrupleEma()
+        : CompensatedOrder == 0 ? new Ema(Period) : new CompensatedExponentialAverage(Period, CompensatedOrder);
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(Create(), IndicatorHistoryMode.LatestOnly);
     [Benchmark(Baseline = true)] public object NativeSingle()
@@ -113,7 +118,8 @@ public class SharedNativeEmaBenchmarks
     }
     private void Quan(int start, int end, double[] values)
     {
-        QuanTAlib.AbstractBase state = CompensatedOrder == 0 ? new QuanTAlib.Ema(Period, true)
+        QuanTAlib.AbstractBase state = Operation == "QuanTAlib.Qema" ? MassNormalizedComparison.NativeIndicator(Period, QuadrupleAlphas)
+            : CompensatedOrder == 0 ? new QuanTAlib.Ema(Period, true)
             : CompensatedAverageComparison.NativeIndicator(Period, CompensatedOrder);
         // Recursive EMA needs its whole prefix, not a finite window overlap.
         for (int i = 0; i < start; i++) state.Calc(_inputs[i]);
