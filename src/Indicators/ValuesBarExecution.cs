@@ -18,7 +18,7 @@ internal static partial class ValuesBarExecution
         && (SharedCpuStates.Contains(indicator) || IsGeneratedState(indicator));
 
     internal static bool SupportsOwned(IReadOnlyList<IIndicator> indicators) =>
-        indicators.Count == 1 && IsPointwise(indicators[0])
+        indicators.Count > 0 && indicators.All(IsPointwise)
         || indicators.Count > 0 && indicators.All(IsSharedState);
 
     internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
@@ -47,8 +47,9 @@ internal static partial class ValuesBarExecution
                 throw new InvalidOperationException("Unqualified owned values execution plan.");
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
             bool boundedBatch = indicators.Count > 1 && indicators.All(i => IsSharedState(i) && IsBoundedWindowIndicator(i));
+            bool pointwiseBatch = indicators.Count > 1 && indicators.All(IsPointwise);
             foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
-                nodes.Add(new Node(indicator, source.Length, indicators.Count == 1, boundedBatch));
+                nodes.Add(new Node(indicator, source.Length, indicators.Count == 1, boundedBatch, pointwiseBatch));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
             bool singleSma = nodes.Count == 1 && nodes[0].Indicator is Sma;
@@ -70,6 +71,8 @@ internal static partial class ValuesBarExecution
             else if (nodes.Count == 1 && (IsPointwise(nodes[0].Indicator) || gpu is not null))
                 latest = gpu is null ? FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned)
                     : gpu.ExecutePointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
+            else if (pointwiseBatch)
+                latest = FillPointwiseBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is TrueRange)
                 latest = FillTrueRange(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
@@ -99,7 +102,7 @@ internal static partial class ValuesBarExecution
                 // Standalone BOP validates raw ratios before smoothing; its default
                 // EMA is an exactly rounded convex mean of finite values. Neither
                 // output needs the generic scan (including shared EMA(1) arrays).
-                bool finiteByConstruction = boundedBatch || nodes.Count == 1 && (IsPointwise(node.Indicator)
+                bool finiteByConstruction = boundedBatch || pointwiseBatch || nodes.Count == 1 && (IsPointwise(node.Indicator)
                     || node.Indicator is TrueRange or BalanceOfPower || IsBoundedWindowIndicator(node.Indicator));
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
@@ -519,16 +522,16 @@ internal static partial class ValuesBarExecution
         private readonly object? _state;
         private readonly double[] _scratch;
         internal bool HasScalarState => _state is IIndicatorState;
-        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch)
+        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch)
         {
             Indicator = indicator;
-            bool pointwise = singleRoot && IsPointwise(indicator);
+            bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
             Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
                 slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
                     : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
-            _scratch = new double[indicator.Outputs.Count];
+            _scratch = pointwise ? Array.Empty<double>() : new double[indicator.Outputs.Count];
             _state = indicator switch
             {
                 Sma => null,
