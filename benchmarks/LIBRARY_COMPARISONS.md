@@ -2801,3 +2801,10 @@ The Skender-compatible sum-seeded directional engine now uses the existing compa
 Return beta now reuses compact exact products and rolling sums, with arbitrary-precision fallback for wide exponent spans. Both scalar and full-statistics APIs preserve bitwise reference outputs, selection/presence rules, reset and extended unpublished returns. Production/benchmark builds, six focused unit tests, 21 comparison/probe tests and 53 inventory checks passed. Ordinary warmed-up rolling updates allocate zero bytes over 4,000 updates; this excludes beta publication.
 
 An allocation-only probe of the existing 10k beta benchmark fixture measured median Full 7,452,568 bytes, LatestOnly 6,971,544 bytes, TA-Lib serial 79,896 bytes and TA-Lib parallel 80,280 bytes (five samples per arm). LatestOnly is below the archived 16,408,312-byte measurement but remains far above native allocation; publication still falls back to arbitrary precision. Original samples are in `results/shared-rollout/allocation-probes/beta-moments.json`. No latency qualification or win is claimed; 176/401 APIs remain timing-qualified.
+
+
+## Compact ratio publication follow-up
+
+The existing compact dyadic ratio helper now computes rounding-grid quotient bits with bounded remainder arithmetic when shifting the numerator would exceed 128 bits. This avoids arbitrary-precision scratch allocations while preserving exact ties, signed underflow and overflow. Production/benchmark builds, 26 focused unit tests and 60 beta/directional comparison tests passed. Complete scalar beta updates, including publication, allocate zero bytes over 4,000 warmed-up updates on the benchmark price sequence.
+
+Five allocation-only samples at 10k bars were identical: Full 647,080 bytes, LatestOnly 166,056 bytes, TA-Lib serial 79,896 bytes and parallel 80,280 bytes. LatestOnly dropped from the preceding 6,971,544-byte median to 162.16 KiB, but still loses allocation to native serial (78.02 KiB). Wide operands retain the exact fallback. Raw evidence: `results/shared-rollout/allocation-probes/beta-publication.json`. Latency remains unmeasured after this change; qualification stays 176/401.
