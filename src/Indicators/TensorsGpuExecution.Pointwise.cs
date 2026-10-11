@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Twenty-one fixed keys; window/lag periods are arguments, never new compiled programs.
+    // Twenty-two fixed keys; window/lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -20,6 +20,7 @@ internal sealed partial class TensorsGpuExecution
         var midpoint = indicator as WindowRangeMidpoint;
         var extreme = indicator as DecayingWindowExtreme;
         var index = indicator as WindowExtremeIndex;
+        var aroon = indicator as WindowAroon;
         if (secondary is not null && (index is not { Maximum: false }
             || secondary is not WindowExtremeIndex { Maximum: true } maximum || maximum.Period != index.Period))
             throw new NotSupportedException("GPU index pairs require matching minimum and maximum periods.");
@@ -27,7 +28,7 @@ internal sealed partial class TensorsGpuExecution
         bool polarity = indicator is BullishCandle or BearishCandle;
         bool body = engulfing || polarity;
         if (source.Length == 0 || extreme is { Decay: not 0 }
-            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && !body && !ValuesBarExecution.IsGpuLagged(indicator))
+            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && aroon is null && !body && !ValuesBarExecution.IsGpuLagged(indicator))
             throw new NotSupportedException("Unqualified GPU pointwise kernel.");
         int operation = lagged is not null ? lagged.Kind switch
         {
@@ -36,7 +37,7 @@ internal sealed partial class TensorsGpuExecution
             PriceChangeKind.Loss => 10,
             PriceChangeKind.Ratio => 11,
             _ => throw new NotSupportedException("Unqualified GPU lagged operation.")
-        } : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
+        } : aroon is not null ? 21 : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
             : extreme is not null ? extreme.Maximum ? 17 : 16
             : midpoint is not null ? midpoint.CandleRanges ? 15 : 14
             : polarity ? indicator is BullishCandle ? 12 : 13
@@ -59,7 +60,7 @@ internal sealed partial class TensorsGpuExecution
             try
             {
                 var left = work.Input;
-                var right = arithmetic is not null || body || midpoint is { CandleRanges: true } ? work.RightInput : null;
+                var right = arithmetic is not null || body || midpoint is { CandleRanges: true } || aroon is not null ? work.RightInput : null;
                 double[]? presence = null;
                 Bar latest = default;
                 for (int i = 0; i < source.Length; i++)
@@ -68,9 +69,9 @@ internal sealed partial class TensorsGpuExecution
                     latest = source[i];
                     if (!ValuesBarExecution.AllFieldsFinite(in latest)) IndicatorInputDomain.Finite.Validate(in latest);
                     if (owned is not null) owned[i] = latest;
-                    left[i] = midpoint is { CandleRanges: true } ? latest.Low
+                    left[i] = aroon is not null ? latest.High : midpoint is { CandleRanges: true } ? latest.Low
                         : body ? latest.Open : arithmetic is null ? latest.Close : Select(in latest, arithmetic.Left);
-                    if (right is not null) right[i] = midpoint is not null ? latest.High
+                    if (right is not null) right[i] = aroon is not null ? latest.Low : midpoint is not null ? latest.High
                         : body ? latest.Close : Select(in latest, arithmetic!.Right);
                     bool defined = operation != 3 || Math.Abs(right![i]) > 0;
                     if (operation == 6) defined = left[i] >= 0;
@@ -100,12 +101,28 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(1, deviceRight.Handle);
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
-                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? 0);
+                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? 0);
                 if (secondary is not null) kernel.SetArg(5, work.Right.Handle);
+                if (aroon is not null)
+                {
+                    kernel.SetArg(5, work.Sma.Handle); kernel.SetArg(6, work.Presence.Handle);
+                    kernel.SetArg(7, aroon.IncludeExtraBar ? 1 : 0); kernel.SetArg(8, aroon.OldestTie ? 1 : 0);
+                }
                 cancellation.ThrowIfCancellationRequested();
                 kernel.Enqueue(new[] { (ulong)source.Length });
                 deviceOutput.CopyToHost(output[0]);
                 if (secondary is not null) work.Right.CopyToHost(output[1]);
+                if (aroon is not null)
+                {
+                    work.Sma.CopyToHost(output[1]); work.Presence.CopyToHost(output[2]);
+                    // Presence depends only on the window length. Numeric outputs all come from the device.
+                    long size = (long)aroon.Period + (aroon.IncludeExtraBar ? 1 : 0);
+                    for (int i = 0; i < source.Length; i++)
+                    {
+                        cancellation.ThrowIfCancellationRequested();
+                        output[3][i] = output[4][i] = output[5][i] = i + 1L >= size ? 1 : 0;
+                    }
+                }
                 for (int i = 0; i < source.Length; i++)
                 {
                     cancellation.ThrowIfCancellationRequested();
@@ -113,7 +130,7 @@ internal sealed partial class TensorsGpuExecution
                     if (secondary is not null && !double.IsFinite(output[1][i]))
                         IndicatorOutputPolicy.Validate(secondary, 0, i, output[1][i]);
                 }
-                if (output.Length > 1 && secondary is null)
+                if (output.Length > 1 && secondary is null && aroon is null)
                     output[1] = presence ?? ValuesBarExecution.CompletePointwisePresence(source.Length, null, false, cancellation);
                 cancellation.ThrowIfCancellationRequested();
                 return latest;
@@ -167,6 +184,7 @@ internal sealed partial class TensorsGpuExecution
             14 or 15 => "total == 0.0 ? 0.0 : isinf(total) ? x * 0.5 + y * 0.5 : total * 0.5",
             16 or 17 => "x",
             18 or 19 or 20 => "(double)bestIndex",
+            21 => "(double)(100L * ((long)period - ((long)i - highIndex))) / (double)period",
             _ => throw new NotSupportedException("Unqualified GPU pointwise operation.")
         };
         var previous = operation == 7
@@ -193,12 +211,13 @@ internal sealed partial class TensorsGpuExecution
                     if (next {{(operation == 17 ? ">=" : "<=")}} x) x = next;
                 }
                 """
-            : operation is >= 18 and <= 20 ? IndexWindowSource(operation) : "";
+            : operation is >= 18 and <= 20 ? IndexWindowSource(operation)
+            : operation == 21 ? AroonWindowSource : "";
         var source = $$"""
             #pragma OPENCL EXTENSION cl_khr_fp64 : enable
             #pragma OPENCL FP_CONTRACT OFF
             __kernel void pointwise(__global const double* left, __global const double* right,
-                __global double* output, int count, int period{{(operation == 20 ? ", __global double* secondary" : "")}})
+                __global double* output, int count, int period{{(operation == 20 ? ", __global double* secondary" : operation == 21 ? ", __global double* down, __global double* oscillator, int extra, int oldest" : "")}})
             {
                 size_t i = get_global_id(0);
                 if (i >= (size_t)count) return;
@@ -217,6 +236,24 @@ internal sealed partial class TensorsGpuExecution
         }
         catch { program.Dispose(); throw; }
     }
+
+    // One traversal finds both extreme indices. Integer numerators are exact (< 2^38),
+    // and the single final division preserves the CPU percentage contract.
+    private const string AroonWindowSource = """
+        size_t size = (size_t)period + (size_t)extra;
+        if (i + 1 < size) { output[i] = down[i] = oscillator[i] = 0.0; return; }
+        size_t start = i + 1 - size;
+        long highIndex = (long)start, lowIndex = (long)start;
+        double high = left[start], low = right[start];
+        for (size_t j = start + 1; j <= i; j++)
+        {
+            double h = left[j], l = right[j];
+            if (h > high || (!oldest && h == high)) { high = h; highIndex = (long)j; }
+            if (l < low || (!oldest && l == low)) { low = l; lowIndex = (long)j; }
+        }
+        down[i] = (double)(100L * ((long)period - ((long)i - lowIndex))) / (double)period;
+        oscillator[i] = (double)(100L * (highIndex - lowIndex)) / (double)period;
+        """;
 
     private static string IndexWindowSource(int operation)
     {
