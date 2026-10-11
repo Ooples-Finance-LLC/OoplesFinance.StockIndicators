@@ -400,6 +400,37 @@ public sealed class SharedBoundedWindowTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
+    [Theory]
+    [InlineData(511)] [InlineData(512)] [InlineData(513)] [InlineData(1025)]
+    public async Task WilliamsWorkerThresholdPreservesSingleMixedAndFailureRoutes(int count)
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0,
+                i % 31 - 14, i % 31 - 16, i % 31 - 15, 1)).ToArray();
+            foreach (int workers in new[] { 1, 8 })
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                foreach (int period in new[] { 1, 20 })
+                {
+                    var williams = new WilliamsR(period);
+                    await CompareRoutes(bars, [williams]);
+                    await CompareRoutes(bars, [williams, new HighestHigh(7)]);
+                }
+                var saved = bars[0];
+                bars[0] = new Bar(default, 0, double.Epsilon, 0, double.MaxValue, 1);
+                await CompareRoutes(bars, [new WilliamsR(20)]);
+                bars[^1] = new Bar(default, 0, 1, 0, 1, double.NaN);
+                await CompareRoutes(bars, [new WilliamsR(20), new HighestHigh(7)]);
+                bars[0] = saved;
+                int last = bars.Length - 1;
+                bars[last] = new Bar(default, 0, last % 31 - 14, last % 31 - 16, last % 31 - 15, 1);
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
     private static async Task CompareRoutes(Bar[] bars, IIndicator[] indicators)
     {
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())

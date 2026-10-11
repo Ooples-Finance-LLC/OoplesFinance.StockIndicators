@@ -95,7 +95,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is EndpointWeightedAverage or FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or PriorPriceChannel or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
+        if (indicator is WilliamsR or EndpointWeightedAverage or FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or PriorPriceChannel or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
