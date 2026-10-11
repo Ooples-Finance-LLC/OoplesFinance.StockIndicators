@@ -157,10 +157,14 @@ public sealed class NullableStrengthOscillator
             _history.Enqueue(price);
             if (!ready)
                 return null;
+            var hasDifference = price.HasValue && prior.HasValue;
+            double compactChange = 0;
+            var compact = _seedSteps >= period && hasDifference
+                && PositiveStrengthValue.TryDifference(price!.Value, prior!.Value, out compactChange);
             BigInteger? difference =
-                price.HasValue && prior.HasValue
-                    ? ExactVarianceWindow.Units(price.Value)
-                        - ExactVarianceWindow.Units(prior.Value)
+                hasDifference && !compact
+                    ? ExactVarianceWindow.Units(price!.Value)
+                        - ExactVarianceWindow.Units(prior!.Value)
                     : null;
             var up = difference.HasValue ? BigInteger.Max(difference.Value, 0) : BigInteger.Zero;
             var down = difference.HasValue ? BigInteger.Max(-difference.Value, 0) : BigInteger.Zero;
@@ -184,17 +188,25 @@ public sealed class NullableStrengthOscillator
             }
             else
             {
-                if (!difference.HasValue)
+                if (!hasDifference)
                 {
                     _poisoned = true;
                     return null;
                 }
-                _gain = IsMomentum(convention)
-                    ? _gain.UpdateExponential(up, period)
-                    : _gain.Update(up, period);
-                _loss = IsMomentum(convention)
-                    ? _loss.UpdateExponential(down, period)
-                    : _loss.Update(down, period);
+                if (compact)
+                {
+                    _gain = _gain.Update(Math.Max(compactChange, 0), period, IsMomentum(convention));
+                    _loss = _loss.Update(Math.Max(-compactChange, 0), period, IsMomentum(convention));
+                }
+                else
+                {
+                    _gain = IsMomentum(convention)
+                        ? _gain.UpdateExponential(up, period)
+                        : _gain.Update(up, period);
+                    _loss = IsMomentum(convention)
+                        ? _loss.UpdateExponential(down, period)
+                        : _loss.Update(down, period);
+                }
             }
             if (
                 _loss.IsZero

@@ -2823,3 +2823,10 @@ The Skender-compatible PMO engine now uses compact exact arithmetic for percent 
 ## Shared strength publication allocation follow-up
 
 Nullable and Wilder strength/momentum formulas now reuse compact exact ratios for quotient and percentage publication. Common exponents cancel before publication, preserving unpublished means below the binary64 floor and retaining wide-value fallback. Production/benchmark builds, three focused arithmetic tests (including 1,000 rational-reference cases) and 30 nullable/Wilder comparison tests passed. Ordinary quotient, unsigned percentage and signed percentage publication allocates zero bytes across 4,000 repetitions. Gain/loss smoothing and input differences still allocate; this is not a zero-allocation state or an end-to-end performance claim. Timing qualification remains 176/401.
+
+
+## Shared strength smoothing allocation follow-up
+
+Positive strength means now retain their 53-bit mantissa in a long and use compact exact arithmetic for ordinary smoothing at a relative exponent. Certified exact price differences avoid minimum-unit padding after seeding. Large exponent gaps retain the established wide recurrence; positive means below the binary64 floor remain alive. All five nullable strength/momentum and three Wilder conventions allocate zero bytes across 4,000 ordinary updates after seeding. Startup still uses the existing exact seed accumulator.
+
+Production/benchmark builds, 19 focused arithmetic/allocation tests and 30 independent nullable/Wilder comparison tests passed. Differential tests cover both recurrence types, periods through int.MaxValue, and unpublished exponents from -5000 through +5000. End-to-end timing and allocation qualification remain pending; the timing-qualified count stays 176/401.

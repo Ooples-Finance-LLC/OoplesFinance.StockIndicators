@@ -8,18 +8,73 @@ namespace OoplesFinance.StockIndicators.Helpers;
 // rounded mantissa times a period at most 84. Keeping 4096 bits therefore retains
 // the dominant addend exactly; at most one subordinate positive tail is discarded.
 // That tail is below one retained unit and only changes a rounding midpoint.
-internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long Exponent)
+internal readonly record struct PositiveStrengthValue(long Mantissa, long Exponent)
 {
-    internal bool IsZero => Mantissa.IsZero;
+    internal bool IsZero => Mantissa == 0;
 
     internal static PositiveStrengthValue Seed(BigInteger units, int period) =>
         Combine(units, -1074, 0, 0, period);
 
     internal PositiveStrengthValue Update(BigInteger change, int period) =>
-        Combine(Mantissa * (period - 1), Exponent, change, -1074, period);
+        Combine((BigInteger)Mantissa * (period - 1), Exponent, change, -1074, period);
 
     internal PositiveStrengthValue UpdateExponential(BigInteger change, int period) =>
-        Combine(Mantissa * (period - 1), Exponent, 2 * change, -1074, (long)period + 1);
+        Combine((BigInteger)Mantissa * (period - 1), Exponent, 2 * change, -1074, (long)period + 1);
+
+    internal static bool TryDifference(double current, double previous, out double difference)
+    {
+#if !NETFRAMEWORK
+        var exact = JurikDyadic.FromDouble(current);
+        exact.Subtract(JurikDyadic.FromDouble(previous));
+        return exact.TryDouble(out difference);
+#else
+        difference = 0;
+        return false;
+#endif
+    }
+
+    internal PositiveStrengthValue Update(double change, int period, bool exponential = false)
+    {
+        var (integer, exponent) = ExactMeanAccumulator.DecomposeFinite(change);
+        int priorWeight = period - 1;
+        long divisor = exponential ? (long)period + 1 : period;
+        bool hasPrior = Mantissa != 0 && priorWeight != 0;
+        if (hasPrior && integer != 0 && (Exponent < exponent - 64L || Exponent > exponent + 64L))
+            return exponential ? UpdateExponential(ExactVarianceWindow.Units(change), period)
+                : Update(ExactVarianceWindow.Units(change), period);
+        if (!hasPrior && integer == 0) return default;
+        long common = !hasPrior ? exponent : integer == 0 ? Exponent : Math.Min(Exponent, exponent);
+        var sum = hasPrior ? JurikDyadic.FromDouble(Mantissa) : default;
+        if (hasPrior)
+        {
+            sum.ScaleByPowerOfTwo((int)(Exponent - common));
+            sum.Multiply(priorWeight);
+        }
+        if (integer != 0)
+        {
+            var term = JurikDyadic.FromDouble(integer);
+            term.ScaleByPowerOfTwo((int)(exponent - common));
+            if (exponential) term.Multiply(2);
+            sum.AddExact(term);
+        }
+        // Round only after normalizing the common exponent away. This keeps
+        // positive means alive below binary64's subnormal floor.
+        var rounded = sum.Ratio(JurikDyadic.FromDouble(divisor));
+        var (mantissa, power) = ExactMeanAccumulator.DecomposeFinite(rounded);
+        var padding = 53 - Bits(mantissa);
+        return new(mantissa << padding, common + power - padding);
+    }
+
+    private static int Bits(long value)
+    {
+#if !NETFRAMEWORK
+        return 64 - BitOperations.LeadingZeroCount((ulong)value);
+#else
+        int bits = 0;
+        while (value != 0) { bits++; value >>= 1; }
+        return bits;
+#endif
+    }
 
     internal static double Quotient(
         PositiveStrengthValue numerator,
@@ -32,9 +87,9 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
             return 0;
         var gap =
             numerator.Exponent
-            + FrameworkCompatibility.GetBitLength(numerator.Mantissa)
+            + Bits(numerator.Mantissa)
             - denominator.Exponent
-            - FrameworkCompatibility.GetBitLength(denominator.Mantissa);
+            - Bits(denominator.Mantissa);
         if (gap > 4096)
             return double.PositiveInfinity;
         if (gap < -4096)
@@ -113,7 +168,7 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
             mantissa >>= 1;
             resultExponent++;
         }
-        return new(mantissa, resultExponent);
+        return new((long)mantissa, resultExponent);
     }
 
     internal static double Percent(
@@ -130,9 +185,9 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
             return 100;
         var gap =
             gain.Exponent
-            + FrameworkCompatibility.GetBitLength(gain.Mantissa)
+            + Bits(gain.Mantissa)
             - loss.Exponent
-            - FrameworkCompatibility.GetBitLength(loss.Mantissa);
+            - Bits(loss.Mantissa);
         // Beyond this gap the small term cannot affect any binary64 result,
         // including the RSI subnormal rounding boundary or either CMO endpoint.
         if (gap > 4096)

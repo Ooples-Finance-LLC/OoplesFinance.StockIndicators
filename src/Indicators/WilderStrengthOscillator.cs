@@ -108,8 +108,10 @@ public sealed class WilderStrengthOscillator
                 _previous = bar.Close;
                 return;
             }
-            var difference =
-                ExactVarianceWindow.Units(bar.Close) - ExactVarianceWindow.Units(_previous);
+            double compactChange = 0;
+            var compact = _count >= period && PositiveStrengthValue.TryDifference(bar.Close, _previous, out compactChange);
+            var difference = compact ? BigInteger.Zero
+                : ExactVarianceWindow.Units(bar.Close) - ExactVarianceWindow.Units(_previous);
             _previous = bar.Close;
             var gain = BigInteger.Max(difference, 0);
             var loss = BigInteger.Max(-difference, 0);
@@ -123,6 +125,11 @@ public sealed class WilderStrengthOscillator
                 _loss = PositiveStrengthValue.Seed(_lossSeed, period);
                 _gainSeed = 0;
                 _lossSeed = 0;
+            }
+            else if (compact)
+            {
+                _gain = _gain.Update(Math.Max(compactChange, 0), period);
+                _loss = _loss.Update(Math.Max(-compactChange, 0), period);
             }
             else
             {
