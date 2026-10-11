@@ -7,13 +7,14 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SharedBoundedWindowTests
 {
-    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 7)
+    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 9)
         from period in new[] { 1, 3, 20, 4096, 4097, int.MaxValue } select new object[] { operation, period };
     private static IndicatorBase Create(int operation, int period) => operation switch
     {
         0 => new Wma(period), 1 => new WilliamsR(period), 2 => new HighestHigh(period),
         3 => new LowestLow(period), 4 => new RollingPriceSum(period),
-        5 => new WindowRangeMidpoint(period), _ => new WindowRangeMidpoint(period, true)
+        5 => new WindowRangeMidpoint(period), 6 => new WindowRangeMidpoint(period, true),
+        7 => new DecayingWindowExtreme(period), _ => new DecayingWindowExtreme(period, true)
     };
 
     [Theory, MemberData(nameof(Configurations))]
@@ -313,6 +314,35 @@ public sealed class SharedBoundedWindowTests
                 await CompareRoutes(bars, [new WindowRangeMidpoint(20), new WindowRangeMidpoint(7, true)]);
                 bars[256] = new Bar(default, 0, double.NaN, 0, 0, 1);
                 await CompareRoutes(bars, [new WindowRangeMidpoint(20)]);
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public async Task CloseExtremaPreserveWideValuesMixedSeedsAndExcludePositiveDecay()
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            double[] values = [-0d, 0d, double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon, 1];
+            foreach (int count in new[] { 0, 1, 8193 })
+            {
+                var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0, 1, -1, values[i % values.Length], 1)).ToArray();
+                await CompareRoutes(bars, [new DecayingWindowExtreme(20), new DecayingWindowExtreme(7, true)]);
+                if (count > 1)
+                {
+                    bars[1023] = new Bar(default, 0, 1, -1, 1, double.NaN);
+                    await CompareRoutes(bars, [new DecayingWindowExtreme(20), new DecayingWindowExtreme(7, true)]);
+                }
+            }
+            var ordinary = Enumerable.Range(0, 8193).Select(i => new Bar(default, 0, 1, -1, (i % 101 - 50) / 8d, 1)).ToArray();
+            // Nonzero decay remembers pre-window state: never restart it at worker boundaries.
+            foreach (bool maximum in new[] { false, true })
+            {
+                await CompareRoutes(ordinary, [new DecayingWindowExtreme(20, maximum, .5)]);
+                await CompareRoutes(ordinary, [new DecayingWindowExtreme(20, maximum, .5), new DecayingWindowExtreme(7, !maximum)]);
             }
         }
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }

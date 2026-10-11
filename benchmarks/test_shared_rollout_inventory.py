@@ -52,6 +52,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
             self.assertEqual([api], qualified)
 
+    def test_close_extrema_preserve_quantalib_identity(self):
+        self.write()
+        for api in ('Min', 'Max'):
+            path = self.qualification(f'SharedCloseExtremeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
+            self.assertEqual(['QuanTAlib.' + api], qualified)
+
     def test_missing_bars_names_file_and_benchmark(self):
         self.rows[0]['FullName'] = self.rows[0]['FullName'].replace('Bars: 1000', 'MissingCount')
         self.write()

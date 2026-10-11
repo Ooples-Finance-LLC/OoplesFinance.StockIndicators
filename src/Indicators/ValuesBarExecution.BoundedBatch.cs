@@ -11,6 +11,7 @@ internal static partial class ValuesBarExecution
         WilliamsR range => Math.Max(1, range.Length),
         RollingPriceSum sum => sum.Period,
         WindowRangeMidpoint midpoint => midpoint.Period,
+        DecayingWindowExtreme { Decay: 0 } extreme => extreme.Period,
         LaggedPriceChange change => change.Period + 1,
         EngulfingPattern => 3,
         _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue => BodyShadowPeriod(indicator) + 1,
@@ -30,6 +31,7 @@ internal static partial class ValuesBarExecution
         WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
         RollingPriceSum sum => new SumValueState(sum.Period, count),
         WindowRangeMidpoint midpoint => (IIndicatorState)midpoint.CreateState(),
+        DecayingWindowExtreme { Decay: 0 } extreme => new CloseExtremeState(extreme.Period, extreme.Maximum),
         LaggedPriceChange change => new LaggedValueState(change.Period, count, change.Kind),
         EngulfingPattern => new EngulfingPattern.State(),
         _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue =>

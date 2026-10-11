@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue } or WindowRangeMidpoint
+            or LaggedPriceChange { Period: < int.MaxValue } or WindowRangeMidpoint or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || WeightedWindowPeriod(indicator) > 0
         || PercentileCandlePeriod(indicator) > 0
@@ -253,6 +253,24 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private sealed class CloseExtremeState(int period, bool maximum) : IIndicatorState
+    {
+        private readonly WindowExtremeDeque _deque = new(period, maximum);
+        public void Reset() => _deque.Reset();
+        public double Update(in Bar bar)
+        {
+            _deque.Add(bar.Close);
+            return _deque.Value;
+        }
+    }
+
+    private readonly struct CloseExtremeKernel(CloseExtremeState state) : IBoundedKernel<CloseExtremeKernel>
+    {
+        public static CloseExtremeKernel Create(int period, int count, IIndicator indicator) =>
+            new(new(period, ((DecayingWindowExtreme)indicator).Maximum));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
         public static StateWindowKernel Create(int period, int count, IIndicator indicator) =>
@@ -269,6 +287,7 @@ internal static partial class ValuesBarExecution
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
         WindowRangeMidpoint midpoint => FillBoundedWindow<MidpointKernel>(source, output, indicator, midpoint.Period, cancellation, owned),
+        DecayingWindowExtreme { Decay: 0 } extreme => FillBoundedWindow<CloseExtremeKernel>(source, output, indicator, extreme.Period, cancellation, owned),
         LaggedPriceChange change => FillBoundedWindow<LaggedKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
         // Two seed bars preserve the pattern's two-bar startup in every worker.
         EngulfingPattern => FillBoundedWindow<EngulfingKernel>(source, output, indicator, 3, cancellation, owned),
