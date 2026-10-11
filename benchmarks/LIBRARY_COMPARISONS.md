@@ -2902,3 +2902,20 @@ Production/benchmark builds, all 17 focused unit tests and 69 independent Hilber
 Seeded and delayed MAMA/FAMA now retain their seed and both adaptive averages in compact exact arithmetic and accept ordinary closes/midpoints without padded-unit conversion. The update uses the existing certified fused blend when possible, otherwise exact `old + alpha * (new - old)` followed by the original stage rounding. This preserves the exact complement of alpha, including gains where binary64 `1 - alpha` would be rounded. Wide composition still imports/exports exact rounded units at the existing interface boundary.
 
 Production/benchmark builds, nine focused unit tests and 31 independent seeded/delayed phase, classical-average and wide MACD-composition tests passed. All six ordinary configuration probes allocate zero managed bytes over 4,000 state updates including startup after reset. Constant-gain tests compare both stages with the original integer recurrence at alpha 0.1, 1 and the minimum subnormal, including unpublished values above binary64 range. Unit import/export for wide composition can still allocate. No new end-to-end timing or competitor win is claimed; qualification remains 177/401 APIs.
+
+
+### Direct Hilbert builder/native fixture and first timing qualification
+
+`SharedHilbertBenchmarks` now measures cycle period, phasor and MAMA/FAMA through Full/LatestOnly `BuildAsync()` and direct TA-Lib serial/full-prefix parallel calls. Native APIs write all mature outputs into disjoint spans of one retained packed array; no full-length expansion or nullable adapter is timed. Setup checks native outputs bitwise against an independent native-stage model, both builder histories bitwise against the exact reference, every presence column, and native prefix replay. Minimum 33-bar and uneven 65-bar cases, suppressed settings, and allocation-probe integration passed. The benchmark build, all 22 fixture/probe tests and 55 inventory checks passed; unchanged production binaries are from `7a518455`.
+
+Five allocation-only 10k samples per arm produced these medians (bytes):
+
+| API | Full | LatestOnly | Native serial | Native parallel |
+|---|---:|---:|---:|---:|
+| HtDcPeriod | 646,000 | 164,976 | 80,176 | 442,232 |
+| HtPhasor | 806,408 | 325,384 | 159,920 | 880,824 |
+| Mama | 806,608 | 325,584 | 159,920 | 880,824 |
+
+Raw samples, including occasional larger observations, are in `results/shared-rollout/allocation-probes/hilbert-native.json`. Builder value/presence columns still cost about twice native packed output storage. State-level zero allocation does not mean zero allocation per build.
+
+One four-arm 10k HtDcPeriod timing run completed after an idle preflight, with no other dotnet build/test workloads observed before, during or after it. Means were Full 31,806.57 us / 646,124 bytes, LatestOnly 31,654.61 us / 166,808 bytes, native serial 972.22 us / 80,236 bytes, and native parallel 1,026.52 us / 442,292 bytes. LatestOnly remains about 32.6 times slower than native serial. The small Full/LatestOnly latency difference shows history retention is not the main latency cost. BDN timing/allocation observations are distinct from the allocation-only probe above. Raw timing/context are in `results/shared-rollout/hilbert-cpu/period-10k*`; direct timing qualification rises to **178/401 APIs**, not a win count. Phasor/MAMA timings remain pending.

@@ -1,0 +1,150 @@
+{
+  "production_commit": "7a518455",
+  "scope": "BuildAsync Full/LatestOnly and direct packed native serial/full-prefix parallel arms; 10000 bars, 10 warmups and 5 measured allocation samples per arm. No timings in this probe.",
+  "fixture": "SharedHilbertBenchmarks",
+  "native_layout": "All mature output columns retained in one packed double array; native API writes disjoint spans directly.",
+  "measurement": "GC.GetTotalAllocatedBytes(precise: true); all managed threads; disposal outside measurement; retain result until sample completes.",
+  "reports": [
+    {
+      "Operation": "TaLib.Functions.HtDcPeriod",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            646000,
+            646000,
+            658336,
+            646000,
+            646000
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            164976,
+            164976,
+            164976,
+            164976,
+            164976
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            80176,
+            80176,
+            80176,
+            80176,
+            80176
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            442232,
+            442232,
+            442232,
+            442232,
+            442232
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "TaLib.Functions.HtPhasor",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            806408,
+            806408,
+            806408,
+            806408,
+            806408
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            325384,
+            325384,
+            325384,
+            325384,
+            325384
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            159920,
+            159920,
+            159920,
+            159920,
+            159920
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            880824,
+            881496,
+            880824,
+            880824,
+            880824
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "TaLib.Functions.Mama",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            806608,
+            806608,
+            806608,
+            806608,
+            807264
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            325584,
+            325584,
+            325584,
+            325584,
+            325584
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            159920,
+            159920,
+            159920,
+            159920,
+            159920
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            943736,
+            880824,
+            880824,
+            880824,
+            880824
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -82,6 +82,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_hilbert_builder_maps_native_apis(self):
+        self.write()
+        for api in ('TaLib.Functions.HtDcPeriod', 'TaLib.Functions.HtPhasor', 'TaLib.Functions.Mama'):
+            path = self.qualification(f'SharedHilbertBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_triangular_builder_maps_both_native_apis(self):
         self.write()
         for api in ('QuanTAlib.Trima', 'TaLib.Functions.Trima'):
