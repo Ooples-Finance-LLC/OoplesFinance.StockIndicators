@@ -37,11 +37,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
 
     def test_midpoint_qualification_maps_both_price_sources(self):
         self.write()
-        for api in ('MidPoint', 'MidPrice'):
-            path = self.qualification(f'SharedMidpointBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
-            result = inventory(self.root, [path])
-            qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
-            self.assertEqual(['TaLib.Functions.' + api], qualified)
+        for family in ('SharedMidpointBenchmarks', 'SharedGpuMidpointBenchmarks'):
+            for api in ('MidPoint', 'MidPrice'):
+                path = self.qualification(f'{family}.BuilderFull(Operation: "{api}", Count: 1000)')
+                result = inventory(self.root, [path])
+                qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
+                self.assertEqual(['TaLib.Functions.' + api], qualified)
 
     def test_alma_preserves_competitor_identity(self):
         self.write()

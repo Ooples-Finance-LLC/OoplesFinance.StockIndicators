@@ -76,11 +76,18 @@ public class SharedMidpointBenchmarks
         if (code != TALib.Core.RetCode.Success || range.Start.Value != Period - 1 || range.End.Value != end - seed)
             throw new InvalidOperationException("Unexpected native midpoint output range.");
     }
-    private WindowRangeMidpoint Create() => new(Period, Operation == "MidPrice");
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
+    internal WindowRangeMidpoint Create() => new(Period, Operation == "MidPrice");
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
-        return builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Midpoint benchmark did not dispatch GPU work.");
+        }
+        return run;
     }
 }
