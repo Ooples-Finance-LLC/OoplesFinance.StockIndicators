@@ -79,7 +79,7 @@ def inventory(root: Path, qualifications=()):
             elif operation and any(name in row['FullName'] for name in ('SharedAlmaWindowBenchmarks.', 'SharedAroonBenchmarks.', 'SharedGpuAroonBenchmarks.', 'SharedPriceRangeBenchmarks.', 'SharedRollingPercentileBenchmarks.', 'SharedGpuMedianBenchmarks.', 'SharedWindowModeBenchmarks.', 'SharedTrueRangeBenchmarks.', 'SharedNativeDispersionBenchmarks.', 'SharedDetailedDeviationBenchmarks.', 'SharedHullBenchmarks.', 'SharedNativeHullBenchmarks.', 'SharedSampleShapeBenchmarks.', 'SharedLogVolatilityBenchmarks.', 'SharedDeviationBandsBenchmarks.', 'SharedTradyBandsBenchmarks.', 'SharedClassicBandsBenchmarks.', 'SharedPriorChannelBenchmarks.', 'SharedSkenderWilliamsBenchmarks.', 'SharedSkenderWmaBenchmarks.', 'SharedWeightedAverageBenchmarks.', 'SharedNativeEmaBenchmarks.')):
                 api = operation[1]
                 prefix = ''
-            elif operation and any(name in row['FullName'] for name in ('SharedWeightedWindowBenchmarks.', 'SharedCloseExtremeBenchmarks.', 'SharedGpuCloseExtremeBenchmarks.')):
+            elif operation and any(name in row['FullName'] for name in ('SharedWeightedWindowBenchmarks.', 'SharedGpuFixedWmaBenchmarks.', 'SharedCloseExtremeBenchmarks.', 'SharedGpuCloseExtremeBenchmarks.')):
                 api = operation[1]
                 prefix = 'QuanTAlib.'
             elif operation and any(name in row['FullName'] for name in

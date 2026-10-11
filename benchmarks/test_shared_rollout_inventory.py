@@ -48,6 +48,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_gpu_fixed_weighted_average_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedGpuFixedWmaBenchmarks.BuilderFull(Operation: "Wma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Wma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_double_weighted_average_maps_native_api(self):
         self.write()
         path = self.qualification('SharedWeightedWindowBenchmarks.BuilderFull(Operation: "Dwma", Count: 1000)')

@@ -76,7 +76,7 @@ public class SharedWeightedWindowBenchmarks
         "Sinema" => new QuanTAlib.Sinema(Period),
         _ => throw new InvalidOperationException("Unknown weighted-window operation.")
     };
-    private IIndicator Create() => Operation switch
+    internal IIndicator Create() => Operation switch
     {
         "Epma" => new EndpointWeightedAverage(Period),
         "Mma" => new EndpointWeightedAverage(Period, true),
@@ -88,10 +88,16 @@ public class SharedWeightedWindowBenchmarks
         _ => throw new InvalidOperationException("Unknown weighted-window operation.")
     };
     private static double[] Kernel() => Enumerable.Range(1, Period).Select(i => (double)i).ToArray();
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
-        return builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose(); throw new InvalidOperationException("Required GPU weighted window did not execute on the device.");
+        }
+        return run;
     }
 }

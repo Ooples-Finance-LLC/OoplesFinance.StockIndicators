@@ -23,7 +23,7 @@ internal static partial class ValuesBarExecution
 
     internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
         && indicators[0].Source is null && indicators[0].Components.Count == 0
-        && (indicators[0] is Wma or RollingPriceSum or TrueRange or CandleArithmetic or PriceRoundingTransform or EngulfingPattern or BullishCandle or BearishCandle or WindowRangeMidpoint or WindowPriceRange or HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or WindowExtremeIndex or WindowAroon or DecayingWindowExtreme { Decay: 0 }
+        && (indicators[0] is Wma or FixedPeriodWma or RollingPriceSum or TrueRange or CandleArithmetic or PriceRoundingTransform or EngulfingPattern or BullishCandle or BearishCandle or WindowRangeMidpoint or WindowPriceRange or HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or WindowExtremeIndex or WindowAroon or DecayingWindowExtreme { Decay: 0 }
             || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]) || IsGpuMedian(indicators[0]))
         || IsGpuIndexPair(indicators);
 

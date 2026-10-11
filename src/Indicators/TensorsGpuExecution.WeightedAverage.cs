@@ -11,7 +11,7 @@ internal sealed partial class TensorsGpuExecution
             #pragma OPENCL EXTENSION cl_khr_fp64 : enable
             #pragma OPENCL FP_CONTRACT OFF
             __kernel void weighted_average(__global const double* input, __global const double* unused,
-                __global double* output, int count, int period)
+                __global double* output, int count, int period, int normalize_available)
             {
                 size_t start = get_global_id(0) * 64;
                 if (start >= (size_t)count) return;
@@ -31,7 +31,12 @@ internal sealed partial class TensorsGpuExecution
                 for (size_t i = start; i < end; i++) {
                     weighted += input[i] * period;
                     sum += input[i];
-                    output[i] = weighted == 0.0 ? 0.0 : weighted / denominator;
+                    double mass = denominator;
+                    if (normalize_available && i < (size_t)period) {
+                        double available = (double)(i + 1);
+                        mass = available * (2.0 * period - available + 1.0) / 2.0;
+                    }
+                    output[i] = weighted == 0.0 ? 0.0 : weighted / mass;
                     // Subtract while sum still contains P terms. This lowers each
                     // coefficient by one, leaving total weight at most T-P.
                     weighted -= sum;

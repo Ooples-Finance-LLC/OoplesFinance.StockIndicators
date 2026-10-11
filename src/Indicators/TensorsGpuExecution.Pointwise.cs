@@ -18,8 +18,12 @@ internal sealed partial class TensorsGpuExecution
         var rounding = indicator as PriceRoundingTransform;
         var lagged = indicator as LaggedPriceChange;
         var rollingSum = indicator as RollingPriceSum;
-        var weighted = indicator as Wma;
-        int weightedPeriod = weighted is null ? 0 : Math.Max(1, weighted.Length);
+        int weightedPeriod = indicator switch
+        {
+            Wma weighted => Math.Max(1, weighted.Length),
+            FixedPeriodWma weighted => weighted.Period,
+            _ => 0
+        };
         var midpoint = indicator as WindowRangeMidpoint;
         var extreme = indicator as DecayingWindowExtreme;
         var index = indicator as WindowExtremeIndex;
@@ -35,7 +39,7 @@ internal sealed partial class TensorsGpuExecution
         bool polarity = indicator is BullishCandle or BearishCandle;
         bool body = engulfing || polarity;
         if (source.Length == 0 || extreme is { Decay: not 0 }
-            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && aroon is null && priceRange is null && median is null && candleExtremePeriod <= 0 && rollingSum is null && weighted is null && !trueRange && !body && !ValuesBarExecution.IsGpuLagged(indicator))
+            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && aroon is null && priceRange is null && median is null && candleExtremePeriod <= 0 && rollingSum is null && weightedPeriod == 0 && !trueRange && !body && !ValuesBarExecution.IsGpuLagged(indicator))
             throw new NotSupportedException("Unqualified GPU pointwise kernel.");
         int operation = lagged is not null ? lagged.Kind switch
         {
@@ -44,7 +48,7 @@ internal sealed partial class TensorsGpuExecution
             PriceChangeKind.Loss => 10,
             PriceChangeKind.Ratio => 11,
             _ => throw new NotSupportedException("Unqualified GPU lagged operation.")
-        } : weighted is not null ? 30 : rollingSum is not null ? 29 : trueRange ? 28 : median is not null ? 27 : candleExtremePeriod >= source.Length ? indicator is HighestHigh ? 26 : 25
+        } : weightedPeriod > 0 ? 30 : rollingSum is not null ? 29 : trueRange ? 28 : median is not null ? 27 : candleExtremePeriod >= source.Length ? indicator is HighestHigh ? 26 : 25
             : candleExtremePeriod > 0 ? indicator is HighestHigh ? 24 : 23 : priceRange is not null ? 22 : aroon is not null ? 21 : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
             : extreme is not null ? extreme.Maximum ? 17 : 16
             : midpoint is not null ? midpoint.CandleRanges ? 15 : 14
@@ -104,7 +108,7 @@ internal sealed partial class TensorsGpuExecution
                     }
                 }
                 cancellation.ThrowIfCancellationRequested();
-                if (!sumCertified) throw new NotSupportedException(weighted is null
+                if (!sumCertified) throw new NotSupportedException(weightedPeriod == 0
                     ? "Rolling sum inputs do not satisfy the exact GPU sum certificate."
                     : "WMA period or inputs do not satisfy the exact GPU weighted-sum certificate.");
                 if (!_pointwiseKernels.TryGetValue(operation, out var compiled))
@@ -123,7 +127,8 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(1, deviceRight.Handle);
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
-                kernel.SetArg(4, weighted is not null ? weightedPeriod : rollingSum?.Period ?? lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
+                kernel.SetArg(4, weightedPeriod > 0 ? weightedPeriod : rollingSum?.Period ?? lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
+                if (weightedPeriod > 0) kernel.SetArg(5, indicator is FixedPeriodWma ? 1 : 0);
                 if (trueRange) kernel.SetArg(5, work.Sma.Handle);
                 if (secondary is not null) kernel.SetArg(5, work.Right.Handle);
                 if (aroon is not null)
@@ -143,7 +148,7 @@ internal sealed partial class TensorsGpuExecution
                     kernel.SetArg(6, 1);
                     kernel.Enqueue(new[] { blocks });
                 }
-                else kernel.Enqueue(new[] { rollingSum is null && weighted is null ? (ulong)source.Length : ((ulong)source.Length + 63) / 64 });
+                else kernel.Enqueue(new[] { rollingSum is null && weightedPeriod == 0 ? (ulong)source.Length : ((ulong)source.Length + 63) / 64 });
                 deviceOutput.CopyToHost(output[0]);
                 if (secondary is not null) work.Right.CopyToHost(output[1]);
                 if (aroon is not null)
