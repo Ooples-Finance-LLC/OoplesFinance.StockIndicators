@@ -74,15 +74,16 @@ public class SharedBasicCandleBenchmarks
         "Doji" => new TC.DojiByTuple(candles).Compute(null, null),
         _ => throw new InvalidOperationException("Unknown candle operation.")
     };
-    private IIndicator Create() => Operation switch
+    internal IIndicator Create() => Operation switch
     {
         "Bullish" => new BullishCandle(), "Bearish" => new BearishCandle(), "Doji" => new DojiCandle(),
         _ => throw new InvalidOperationException("Unknown candle operation.")
     };
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false,
+        IndicatorExecutionBackend backend = IndicatorExecutionBackend.Cpu)
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
+            .ConfigureHistory(history).ConfigureExecution(backend);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }
