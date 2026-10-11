@@ -10,7 +10,7 @@ internal sealed partial class TensorsGpuExecution
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
-        CancellationToken cancellation, Bar[]? owned)
+        CancellationToken cancellation, OwnedBarBuffer? owned)
     {
         var arithmetic = indicator as CandleArithmetic;
         var rounding = indicator as PriceRoundingTransform;

@@ -18,7 +18,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static Bar FillBalanceOfPower(Bar[] source, double[][] output, BalanceOfPower indicator,
-        CancellationToken cancellation, Bar[]? owned)
+        CancellationToken cancellation, OwnedBarBuffer? owned)
     {
         // The second output is a signal, not a presence channel. Compute the raw
         // ratio through the parallel pointwise engine, then smooth its owned array.

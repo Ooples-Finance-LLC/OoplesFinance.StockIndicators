@@ -99,7 +99,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static Bar FillBoundedWindow(Bar[] source, double[] output, IIndicator indicator,
-        CancellationToken cancellation, Bar[]? owned) => indicator switch
+        CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
         HighestHigh high => FillBoundedWindow<HighKernel>(source, output, indicator, high.Length, cancellation, owned),
         LowestLow low => FillBoundedWindow<LowKernel>(source, output, indicator, low.Length, cancellation, owned),
@@ -112,7 +112,7 @@ internal static partial class ValuesBarExecution
     };
 
     private static Bar FillBoundedWindow<T>(Bar[] source, double[] output, IIndicator indicator, int period,
-        CancellationToken cancellation, Bar[]? owned) where T : struct, IBoundedKernel<T>
+        CancellationToken cancellation, OwnedBarBuffer? owned) where T : struct, IBoundedKernel<T>
     {
         cancellation.ThrowIfCancellationRequested();
         int chunks = period <= 4096 ? Math.Min(WorkerCount(), source.Length / period) : 1;
@@ -160,7 +160,7 @@ internal static partial class ValuesBarExecution
         }
     }
 
-    private static PointwiseRegion ComputeBoundedRegion<T>(Bar[] source, double[] output, Bar[]? owned,
+    private static PointwiseRegion ComputeBoundedRegion<T>(Bar[] source, double[] output, OwnedBarBuffer? owned,
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation) where T : struct, IBoundedKernel<T>
     {

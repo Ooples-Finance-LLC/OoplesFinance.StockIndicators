@@ -4,7 +4,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static Bar FillTrueRange(Bar[] source, double[] output, IIndicator indicator,
-        CancellationToken cancellation, Bar[]? owned)
+        CancellationToken cancellation, OwnedBarBuffer? owned)
     {
         cancellation.ThrowIfCancellationRequested();
         if (!CanParallelize(source.Length, 8192) || !Monitor.TryEnter(ParallelBarGate))
@@ -39,7 +39,7 @@ internal static partial class ValuesBarExecution
         finally { Monitor.Exit(ParallelBarGate); }
     }
 
-    private static PointwiseRegion ComputeTrueRangeRegion(Bar[] source, double[] output, Bar[]? owned,
+    private static PointwiseRegion ComputeTrueRangeRegion(Bar[] source, double[] output, OwnedBarBuffer? owned,
         int start, int end, Bar previous, Bar boundary, bool capturedBoundary, CancellationToken cancellation)
     {
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };

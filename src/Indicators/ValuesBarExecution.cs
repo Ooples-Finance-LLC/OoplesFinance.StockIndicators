@@ -40,7 +40,7 @@ internal static partial class ValuesBarExecution
         {
             if (history is not null && !SupportsOwned(indicators))
                 throw new InvalidOperationException("Unqualified owned values execution plan.");
-            var owned = history is null ? null : GC.AllocateUninitializedArray<Bar>(source.Length);
+            var owned = history is null ? null : new OwnedBarBuffer(source.Length);
             foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
                 nodes.Add(new Node(indicator, source.Length, indicators.Count == 1));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
@@ -115,7 +115,7 @@ internal static partial class ValuesBarExecution
             foreach (var node in nodes) warmup = Math.Max(warmup, node.Indicator.WarmupBars);
             if (history is not null)
             {
-                history.TakeOwnedArray(owned!);
+                owned!.TransferTo(history);
                 return new IndicatorRun(null, published, history, 0, warmup);
             }
             IBarSnapshot? snapshot = source.Length == 0 ? null
@@ -133,7 +133,7 @@ internal static partial class ValuesBarExecution
     }
 
     internal static bool TryExecuteSmaParallel(Bar[] source, double[] output, int period,
-        CancellationToken cancellation, out Bar latest, out bool finite, out bool certified, Bar[]? owned = null)
+        CancellationToken cancellation, out Bar latest, out bool finite, out bool certified, OwnedBarBuffer? owned = null)
     {
         latest = default;
         finite = certified = false;
@@ -175,10 +175,9 @@ internal static partial class ValuesBarExecution
                 int start = Begin(chunk);
                 int end = chunk == chunks - 1 ? source.Length : Begin(chunk + 1);
                 int bodyEnd = chunk == chunks - 1 ? end : end - period;
-                var history = owned is null ? Span<Bar>.Empty : owned.AsSpan(start, bodyEnd - start);
                 var region = new FusedSmaRegion();
                 if (!CaptureSmaRegion(source.AsSpan(start, bodyEnd - start),
-                    captured.AsSpan(start, bodyEnd - start), history, ref region, cancellation))
+                    captured.AsSpan(start, bodyEnd - start), owned, start, ref region, cancellation))
                 {
                     regions[chunk] = region;
                     return;
@@ -247,7 +246,7 @@ internal static partial class ValuesBarExecution
         }
     }
 
-    private static bool CaptureSmaRegion(ReadOnlySpan<Bar> source, Span<double> closes, Span<Bar> history,
+    private static bool CaptureSmaRegion(ReadOnlySpan<Bar> source, Span<double> closes, OwnedBarBuffer? history, int offset,
         ref FusedSmaRegion region, CancellationToken cancellation)
     {
         Bar latest = default;
@@ -262,14 +261,14 @@ internal static partial class ValuesBarExecution
                 return false;
             }
             closes[i] = latest.Close;
-            if (!history.IsEmpty) history[i] = latest;
+            if (history is not null) history[offset + i] = latest;
         }
         region.Last = latest;
         return true;
     }
 
     internal static Bar FillSmaColumn(Bar[] source, double[] close, int period, CancellationToken cancellation,
-        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive, Bar[]? owned = null)
+        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive, OwnedBarBuffer? owned = null)
     {
         if (CanParallelize(source.Length) && Monitor.TryEnter(ParallelBarGate))
         {
@@ -284,7 +283,7 @@ internal static partial class ValuesBarExecution
         return latest;
     }
 
-    private static Bar FillSma(Bar[] source, double[] close, CancellationToken cancellation, Bar[]? owned)
+    private static Bar FillSma(Bar[] source, double[] close, CancellationToken cancellation, OwnedBarBuffer? owned)
     {
         Bar latest = default;
         for (int i = 0; i < source.Length; i++)
@@ -301,7 +300,7 @@ internal static partial class ValuesBarExecution
         return latest;
     }
 
-    internal static Bar FillAsin(Bar[] source, double[][] output, CancellationToken cancellation, Bar[]? owned = null)
+    internal static Bar FillAsin(Bar[] source, double[][] output, CancellationToken cancellation, OwnedBarBuffer? owned = null)
     {
         // The published tensor pool is shared and serializes dispatches. Let one
         // large build use a bounded fan-out; competing builders continue inline.
@@ -342,7 +341,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static Bar FillSmaParallel(Bar[] source, double[] close, int period, CancellationToken cancellation,
-        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive, Bar[]? owned)
+        out Core.SmaCpuKernel.GridSummary grid, out Core.SmaCpuKernel.PositiveRangeSummary positive, OwnedBarBuffer? owned)
     {
         // Full history also writes the wide bar column; its measured crossover
         // favors four workers, while the close-only path benefits from eight.
@@ -395,7 +394,7 @@ internal static partial class ValuesBarExecution
         return regions[chunks - 1].Last;
     }
 
-    private static Bar FillAsinParallel(Bar[] source, double[][] output, CancellationToken cancellation, Bar[]? owned)
+    private static Bar FillAsinParallel(Bar[] source, double[][] output, CancellationToken cancellation, OwnedBarBuffer? owned)
     {
         var values = output[0];
         var flags = output[1];
@@ -576,7 +575,7 @@ internal static partial class ValuesBarExecution
                 Failure = ExceptionDispatchInfo.Capture(error);
             }
         }
-        internal Bar FillScalar(Bar[] source, CancellationToken cancellation, Bar[]? owned)
+        internal Bar FillScalar(Bar[] source, CancellationToken cancellation, OwnedBarBuffer? owned)
         {
             // Keep the existing Rickshaw batch's concrete Update call available to
             // the JIT; an interface call here loses its hot-loop specialization.
@@ -602,7 +601,7 @@ internal static partial class ValuesBarExecution
         {
             public double Update(in Bar bar) => state.Update(in bar);
         }
-        private Bar FillScalar<T>(Bar[] source, T state, CancellationToken cancellation, Bar[]? owned) where T : struct, IScalarUpdate
+        private Bar FillScalar<T>(Bar[] source, T state, CancellationToken cancellation, OwnedBarBuffer? owned) where T : struct, IScalarUpdate
         {
             var output = Values[0];
             Bar latest = default;

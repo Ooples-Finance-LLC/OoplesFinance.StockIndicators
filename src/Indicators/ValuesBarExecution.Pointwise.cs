@@ -10,7 +10,7 @@ internal static partial class ValuesBarExecution
             or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice;
 
     private static Bar FillPointwise(Bar[] source, double[][] output, IIndicator indicator,
-        CancellationToken cancellation, Bar[]? owned) => indicator switch
+        CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
         CandleArithmetic arithmetic => FillArithmetic(source, output, arithmetic, cancellation, owned),
         MedianPrice => FillPointwiseKernel(source, output, indicator, new MedianPriceKernel(), cancellation, owned),
@@ -89,12 +89,12 @@ internal static partial class ValuesBarExecution
     }
 
     private static Bar FillPointwise<TMath, TDomain>(Bar[] source, double[][] output, IIndicator indicator,
-        CancellationToken cancellation, Bar[]? owned, int parallelMinimum = 8192)
+        CancellationToken cancellation, OwnedBarBuffer? owned, int parallelMinimum = 8192)
         where TMath : struct, IPointwiseMath where TDomain : struct, IPointwiseDomain
         => FillPointwiseKernel(source, output, indicator, new UnaryKernel<TMath, TDomain>(), cancellation, owned, parallelMinimum);
 
     private static Bar FillPointwiseKernel<TKernel>(Bar[] source, double[][] output, IIndicator indicator,
-        TKernel kernel, CancellationToken cancellation, Bar[]? owned, int parallelMinimum = 8192)
+        TKernel kernel, CancellationToken cancellation, OwnedBarBuffer? owned, int parallelMinimum = 8192)
         where TKernel : struct, IPointwiseKernel
     {
         cancellation.ThrowIfCancellationRequested();
@@ -110,7 +110,7 @@ internal static partial class ValuesBarExecution
             if (!CanParallelize(source.Length, parallelMinimum) || !Monitor.TryEnter(ParallelBarGate))
             {
                 var region = ComputePointwiseRegion(source, output[0], missing,
-                    owned is null ? Span<Bar>.Empty : owned.AsSpan(), 0, kernel, cancellation);
+                    owned, 0, kernel, cancellation);
                 cancellation.ThrowIfCancellationRequested();
                 ValidatePointwiseInput(in region);
                 ValidatePointwiseOutput(indicator, in region);
@@ -130,7 +130,7 @@ internal static partial class ValuesBarExecution
                     int end = chunk == chunks - 1 ? source.Length : (int)((long)source.Length * (chunk + 1) / chunks / 64) * 64;
                     regions[chunk] = ComputePointwiseRegion(source.AsSpan(start, end - start),
                         output[0].AsSpan(start, end - start), missing,
-                        owned is null ? Span<Bar>.Empty : owned.AsSpan(start, end - start), start, kernel, cancellation);
+                        owned, start, kernel, cancellation);
                 });
                 cancellation.ThrowIfCancellationRequested();
                 // Raw input validation precedes every arithmetic failure, even when
@@ -147,7 +147,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static PointwiseRegion ComputePointwiseRegion<TKernel>(ReadOnlySpan<Bar> source,
-        Span<double> values, ulong[]? missing, Span<Bar> owned, int offset, TKernel kernel, CancellationToken cancellation)
+        Span<double> values, ulong[]? missing, OwnedBarBuffer? owned, int offset, TKernel kernel, CancellationToken cancellation)
         where TKernel : struct, IPointwiseKernel
     {
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };
@@ -165,7 +165,7 @@ internal static partial class ValuesBarExecution
                 missing![index >> 6] |= 1UL << (index & 63);
                 region.HasUndefined = true;
             }
-            if (!owned.IsEmpty) owned[i] = latest;
+            if (owned is not null) owned[offset + i] = latest;
             if (kernel.CanOverflow && !double.IsFinite(value) && region.InvalidOutputIndex < 0)
             {
                 region.InvalidOutputIndex = offset + i;

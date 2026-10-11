@@ -4,7 +4,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static Bar FillArithmetic(Bar[] source, double[][] output, CandleArithmetic indicator,
-        CancellationToken cancellation, Bar[]? owned) => indicator.Operation switch
+        CancellationToken cancellation, OwnedBarBuffer? owned) => indicator.Operation switch
     {
         CandleArithmeticOperation.Add => FillArithmetic<Add>(source, output, indicator, cancellation, owned),
         CandleArithmeticOperation.Subtract => FillArithmetic<Subtract>(source, output, indicator, cancellation, owned),
@@ -14,7 +14,7 @@ internal static partial class ValuesBarExecution
     };
 
     private static Bar FillArithmetic<TMath>(Bar[] source, double[][] output, CandleArithmetic indicator,
-        CancellationToken cancellation, Bar[]? owned) where TMath : struct, IBinaryMath =>
+        CancellationToken cancellation, OwnedBarBuffer? owned) where TMath : struct, IBinaryMath =>
         FillPointwiseKernel(source, output, indicator, new BinaryKernel<TMath>(indicator.Left, indicator.Right),
             cancellation, owned);
 
