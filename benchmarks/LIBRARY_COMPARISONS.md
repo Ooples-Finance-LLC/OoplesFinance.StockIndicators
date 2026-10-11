@@ -2487,10 +2487,23 @@ order-statistic/rational and staged-native references cover odd/even periods,
 negative/zero medians, threshold neighbors, extreme prices, huge periods, fresh
 calls, prefixes and output/threshold mutations. Archive: 1,548 arms /387 pairs.
 
+## Seeded ATR shared allocation reduction (timing pending)
+
+`SeededAtrWindow` now reuses the existing compact exact true-range helper and a
+cached smoothing coefficient instead of constructing padded minimum-unit integers
+for every candle. Seed rounding, extended unpublished ranges, inverted candles,
+reset and presence are unchanged. This shared window also serves ATR bands,
+trailing/chandelier/volatility stops, directional measures and ATR Renko.
+
+Five focused tests passed, including zero managed allocation for 4,000 ordinary
+streaming updates after warmup. All 118 selected comparison tests passed across
+the shared consumers. This is a state-allocation result, not a measured builder
+latency win or direct competitor qualification. Timing remains pending.
+
 ## Triangular CPU and GPU execution (timing pending)
 
 `TriangularWindowAverage` now reuses the pilot's exact-sum certificate for its
-unrounded box-sum convolution. Certified CPU states use double sums; rejection
+unrounded box-sum convolution. Certified modern-.NET CPU states use double sums; rejection
 promotes every retained sum before including the new value. A concrete typed
 kernel uses P-1 replay bars in the shared bounded parallel loop. Reset, startup
 zeros, signed-zero canonicalization and extreme-value fallback remain intact.
