@@ -6,6 +6,24 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 public sealed class PositiveStrengthPublicationTests
 {
+    [Fact]
+    public void IntegerPercentageGuardPreservesShiftAndProductBoundaries()
+    {
+        foreach (long up in new[] { 1L, (1L << 52) + 1, (1L << 53) - 1 })
+        foreach (long down in new[] { 1L, (1L << 52) - 1, (1L << 53) - 1 })
+        foreach (int gap in new[] { -57, -56, -4, -3, 0, 3, 4, 56, 57 })
+        {
+            var a = Exact(up, gap);
+            var b = Exact(down, 0);
+            foreach (bool signed in new[] { false, true })
+            {
+                var numerator = signed ? a - b : a;
+                Bits((new ReferenceFraction(100) * numerator / (a + b)).ToDouble(),
+                    PositiveStrengthValue.Percent(new(up, -5000 + gap), new(down, -5000), signed));
+            }
+        }
+    }
+
     private static ReferenceFraction Exact(long mantissa, int exponent)
     {
         var value = new ReferenceFraction(mantissa);

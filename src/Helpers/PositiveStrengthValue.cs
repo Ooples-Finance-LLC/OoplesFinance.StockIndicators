@@ -33,6 +33,19 @@ internal readonly record struct PositiveStrengthValue(long Mantissa, long Expone
     internal static bool TryDifference(double current, double previous, out double difference)
     {
 #if !NETFRAMEWORK
+        // Sterbenz subtraction is exact for same-sign finite operands within a
+        // factor of two. Subnormal operands also subtract exactly on their grid.
+        if ((current > 0 && previous > 0) || (current < 0 && previous < 0))
+        {
+            var a = Math.Abs(current);
+            var b = Math.Abs(previous);
+            var maximum = Math.Max(a, b);
+            if (double.IsFinite(maximum) && Math.Min(a, b) >= maximum * .5)
+            {
+                difference = current - previous;
+                return true;
+            }
+        }
         var exact = JurikDyadic.FromDouble(current);
         exact.Subtract(JurikDyadic.FromDouble(previous));
         return exact.TryDouble(out difference);
@@ -227,6 +240,19 @@ internal readonly record struct PositiveStrengthValue(long Mantissa, long Expone
         if (gap < -4096)
             return signed ? -100 : 0;
         var exponent = Math.Min(gain.Exponent, loss.Exponent);
+        var gainShift = gain.Exponent - exponent;
+        var lossShift = loss.Exponent - exponent;
+        // At most 56 aligned bits leave room for the exact sum and for the
+        // signed numerator times 100. Keep the final division once-rounded.
+        if (gainShift <= 56 && lossShift <= 56
+            && Bits(gain.Mantissa) + gainShift <= 56
+            && Bits(loss.Mantissa) + lossShift <= 56)
+        {
+            long gainUnits = gain.Mantissa << (int)gainShift;
+            long lossUnits = loss.Mantissa << (int)lossShift;
+            long numerator = signed ? gainUnits - lossUnits : gainUnits;
+            return ExactMeanAccumulator.ScaledRatio(numerator * 100, gainUnits + lossUnits, 0);
+        }
         var up = Exact(gain, exponent);
         var down = Exact(loss, exponent);
         var denominator = up;

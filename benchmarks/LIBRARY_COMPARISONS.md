@@ -2856,3 +2856,14 @@ Ordinary positive-strength weighted sums now use a guarded signed-64-bit path an
 ## Seeded ATR trailing-band allocation follow-up
 
 The seeded ATR trailing-stop layer now keeps rounded widths and candidate bands in compact exact arithmetic instead of padding them to minimum-subnormal units. Exact comparison signs preserve ties and reversals; midpoint arithmetic is skipped for the other basis modes. Production/benchmark builds, eight focused unit tests and ten independent comparison tests passed. All three price-basis modes allocate zero bytes over 4,000 ordinary state updates including startup after reset, while extreme unpublished bands retain the wide fallback. End-to-end timing and allocation qualification remain pending; coverage stays 176/401.
+
+
+### RSI timing and guarded strength arithmetic
+
+The completed four-arm 10k RSI campaign on production commit `3d07822e` measured Full 3,562.19 us / 644,383 bytes, LatestOnly 3,409.84 us / 163,518 bytes, TA-Lib serial 126.24 us / 79,903 bytes, and TA-Lib parallel 179.09 us / 439,744 bytes. LatestOnly remains about 27 times slower than the fastest native arm. Direct timing qualification is now **177/401 APIs**, not a win count. Raw results and machine observations are in `results/shared-rollout/wilder-strength-cpu/`.
+
+One unprivileged sampled-thread-time trace located active work in `ValuesBarExecution.Node.Append`; waiting worker threads dominate the overall totals. A JIT disassembly check confirmed that the 11,801-byte Tier1 method includes inlined RSI arithmetic, so this does not isolate dispatch overhead. The profile context and compressed disassembly are retained beside the timing evidence.
+
+The subsequent shared strength helper change certifies same-sign, nearby-price subtraction directly and uses guarded integer percentage numerators and denominators when aligned operands fit 56 bits. Both retain exact fallback, unpublished extended exponents and once-rounded publication. These paths serve nullable and Wilder strength indicators. The archived timing predates these guards; no post-change speedup is claimed.
+
+Validation: net10.0 production and benchmark builds passed; all 26 focused strength unit tests, 34 nullable/Wilder comparison and fixture tests, and 54 inventory checks passed. The profiling CLI smoke check passed. Existing ordinary-state allocation assertions still pass. PR #255 has five review threads, all resolved.

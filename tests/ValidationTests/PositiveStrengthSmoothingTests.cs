@@ -6,6 +6,28 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class PositiveStrengthSmoothingTests
 {
     [Fact]
+    public void CertifiedDifferencesAreExactAtSterbenzAndSubnormalBoundaries()
+    {
+        double[] values = [0, -0d, double.Epsilon, 3 * double.Epsilon,
+            double.BitDecrement(1), 1, double.BitIncrement(1), 2,
+            double.BitIncrement(2), double.MaxValue / 2, double.MaxValue];
+        foreach (var a in values)
+        foreach (var b in values)
+        foreach (var signA in new[] { -1, 1 })
+        foreach (var signB in new[] { -1, 1 })
+        {
+            double current = signA * a, previous = signB * b;
+            var exact = ExactVarianceWindow.Units(current) - ExactVarianceWindow.Units(previous);
+            if (PositiveStrengthValue.TryDifference(current, previous, out var difference))
+            {
+                Assert.True(double.IsFinite(difference));
+                Assert.Equal(exact, ExactVarianceWindow.Units(difference));
+                if (exact.IsZero) Assert.Equal(0L, BitConverter.DoubleToInt64Bits(difference));
+            }
+        }
+    }
+
+    [Fact]
     public void GuardedIntegerRecurrencesPreserveProductShiftAndSumBoundaries()
     {
         foreach (int period in new[] { 1, 2, 3, 20, 1024, 1025, 4096, int.MaxValue })

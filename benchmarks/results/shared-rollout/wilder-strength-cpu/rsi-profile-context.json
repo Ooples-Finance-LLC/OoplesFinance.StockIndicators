@@ -1,0 +1,24 @@
+{
+  "production_commit": "3d07822e",
+  "profile": "dotnet-sampled-thread-time",
+  "workload": "--profile-strength TaLib.Functions.Rsi 10000 5000",
+  "warmup_builds": 100,
+  "scope": "One unprivileged EventPipe trace, including setup and warmup; not an ETW CPU utilization measurement or a benchmark.",
+  "exclusive_percent_all_sampled_thread_time": {
+    "Monitor.Wait": 95.12,
+    "ValuesBarExecution.Node.Append": 2.11,
+    "Gen2GcCallback.Finalize": 1.6,
+    "ValuesBarExecution.Execute": 0.76
+  },
+  "interpretation": "Waiting worker threads dominate totals. Append includes inlined RSI arithmetic, so attribution does not isolate dispatch cost.",
+  "jit_check": {
+    "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append",
+    "tier": "Tier1",
+    "code_bytes": 11801,
+    "pgo_inlinees": 87,
+    "single_block_inlinees": 193,
+    "other_inlinees": 5,
+    "workload": "--profile-strength TaLib.Functions.Rsi 10000 1"
+  },
+  "followup": "Guarded exact subtraction and integer percentage publication implemented afterward; no post-change timing claim."
+}

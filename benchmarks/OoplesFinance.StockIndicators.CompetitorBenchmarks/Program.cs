@@ -1,6 +1,24 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+if (args.Length == 4 && args[0] == "--profile-strength")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1 || args[1] is not ("TaLib.Functions.Rsi" or "TaLib.Functions.Cmo"))
+        throw new ArgumentException("Expected RSI/CMO, at least 64 bars, and a positive iteration count.");
+    var benchmark = new SharedWilderStrengthBenchmarks { Operation = args[1], Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("Strength warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
 if (args.Length == 4 && args[0] == "--profile-directional")
 {
     var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
