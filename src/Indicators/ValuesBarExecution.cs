@@ -132,7 +132,9 @@ internal static partial class ValuesBarExecution
                     cancellation.ThrowIfCancellationRequested();
                     // Asin and proven SMA ranges produce finite outputs by construction.
                     // Unproven guarded SMA and other states still validate every output.
-                    if (!finiteByConstruction)
+                    // Deviation bands can overflow secondary slots while their mean stays finite.
+                    // Keep slot-major validation after every input has been checked.
+                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands)
                     for (int i = 0; i < source.Length; i++)
                     {
                         cancellation.ThrowIfCancellationRequested();
@@ -549,6 +551,7 @@ internal static partial class ValuesBarExecution
             Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
                 indicator is WindowAroon && slot >= 4
                     || indicator is StandardDeviationWithDetails && slot == 5
+                    || indicator is WindowDeviationBands && slot is 7 or 8
                     || slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
@@ -557,6 +560,7 @@ internal static partial class ValuesBarExecution
             // series expose read-only spans, so one run-owned column serves all three.
             if (indicator is WindowAroon) Values[4] = Values[5] = Values[3];
             if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
+            if (indicator is WindowDeviationBands) Values[7] = Values[8] = Values[6];
             _scratch = pointwise ? Array.Empty<double>() : new double[indicator.Outputs.Count];
             _state = indicator switch
             {

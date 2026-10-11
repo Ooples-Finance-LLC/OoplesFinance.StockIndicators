@@ -78,7 +78,7 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
-    private sealed class State(WindowDeviationBands owner) : IMultiOutputState
+    internal sealed class State(WindowDeviationBands owner) : IMultiOutputState
     {
         private static readonly BigInteger Grid = BigInteger.One << 1074;
         private readonly WindowDispersion.State _window = new(
