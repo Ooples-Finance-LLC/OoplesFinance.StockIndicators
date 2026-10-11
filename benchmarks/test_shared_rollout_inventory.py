@@ -82,6 +82,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_trady_momentum_qualification_preserves_aliases(self):
+        self.write()
+        for name in ('Momentum', 'Difference', 'UpMomentum', 'PositiveDifference', 'DownMomentum', 'NegativeDifference'):
+            path = self.qualification(f'SharedTradyMomentumBenchmarks.BuilderFull(Operation: "{name}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_alma_preserves_competitor_identity(self):
         self.write()
         for api in ('QuanTAlib.Alma', 'Skender.GetAlma'):
