@@ -24,7 +24,7 @@ internal static class RoundedBalanceOfPower
 #if !NETFRAMEWORK
     // Legacy Framework JITs may retain extended floating intermediates; keep
     // their existing accumulator route instead of assuming binary64 evaluation.
-    private static bool TryExactDifference(double left, double right, out double difference)
+    internal static bool TryExactDifference(double left, double right, out double difference)
     {
         difference = left - right;
         if (double.IsInfinity(difference) || double.IsNaN(difference)) return false;

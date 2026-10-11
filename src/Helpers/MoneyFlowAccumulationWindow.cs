@@ -20,6 +20,9 @@ internal sealed class MoneyFlowAccumulationWindow
         if (high != low)
 #pragma warning restore S1244
         {
+#if !NETFRAMEWORK
+            if (TryExactFlow(high, low, close, volume, out var ordinary)) return new RocBankValue(ordinary);
+#endif
             var numerator = new ExactMeanAccumulator();
             numerator.AddProduct(close, volume, 2); numerator.AddProduct(high, volume, -1); numerator.AddProduct(low, volume, -1);
             for (var shift = 0; ; shift += 1024)
@@ -32,6 +35,27 @@ internal sealed class MoneyFlowAccumulationWindow
         }
         return flow;
     }
+#if !NETFRAMEWORK
+    private static bool TryExactFlow(double high, double low, double close, double volume, out double flow)
+    {
+        flow = 0;
+        if (!RoundedBalanceOfPower.TryExactDifference(close, low, out var buying)
+            || !RoundedBalanceOfPower.TryExactDifference(high, close, out var selling)
+            || !RoundedBalanceOfPower.TryExactDifference(buying, selling, out var balance)
+            || !RoundedBalanceOfPower.TryExactDifference(high, low, out var range)) return false;
+        var product = balance * volume;
+        var magnitude = Math.Abs(product);
+        // A binary64 product has at most 106 significand bits. Above 2^-968,
+        // even its lowest possible nonzero residual is representable. Below
+        // this conservative bound FMA could round a nonzero residual to zero.
+        const double minimumCertifiedProduct = 4.008336720017946e-292; // 2^-968
+        if (magnitude < minimumCertifiedProduct || !double.IsFinite(product)
+            || Math.FusedMultiplyAdd(balance, volume, -product) != 0) return false; // NOSONAR: S1244 - Only an exactly zero residual certifies the product.
+        flow = product / range;
+        // Unpublished overflow uses RocBankValue's extended exponent instead.
+        return double.IsFinite(flow);
+    }
+#endif
     internal void Reset() => _total = default;
 }
 
