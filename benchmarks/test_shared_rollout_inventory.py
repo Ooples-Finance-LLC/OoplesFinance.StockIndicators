@@ -48,6 +48,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_seeded_ema_qualification_keeps_native_seed_modes_separate(self):
+        self.write()
+        for api in ('Skender.GetDema', 'Skender.GetTema', 'TaLib.Functions.Dema', 'TaLib.Functions.Tema'):
+            path = self.qualification(f'SharedSeededEmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_gpu_fixed_weighted_average_maps_native_api(self):
         self.write()
         path = self.qualification('SharedGpuFixedWmaBenchmarks.BuilderFull(Operation: "Wma", Count: 1000)')
