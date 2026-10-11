@@ -41,6 +41,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(result['measured_current_apis'], 1)
 
+    def test_double_weighted_average_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedWeightedWindowBenchmarks.BuilderFull(Operation: "Dwma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Dwma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_midpoint_qualification_maps_both_price_sources(self):
         self.write()
         for family in ('SharedMidpointBenchmarks', 'SharedGpuMidpointBenchmarks'):

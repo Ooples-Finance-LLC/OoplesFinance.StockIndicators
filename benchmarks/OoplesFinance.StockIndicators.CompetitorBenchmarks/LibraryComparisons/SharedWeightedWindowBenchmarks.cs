@@ -9,17 +9,19 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 public class SharedWeightedWindowBenchmarks
 {
     private const int Period = 20;
-    [Params("Wma", "Convolution", "Gma", "Sinema", "Epma", "Mma")] public string Operation { get; set; } = "";
+    [Params("Wma", "Dwma", "Convolution", "Gma", "Sinema", "Epma", "Mma")] public string Operation { get; set; } = "";
     [Params(1_000, 10_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
     private QuanTAlib.TValue[] _inputs = null!;
     private int _priorDop;
+    private int _seedCount;
 
     [GlobalSetup]
     public void Setup()
     {
         _priorDop = CpuParallelSettings.MaxDegreeOfParallelism;
         CpuParallelSettings.MaxDegreeOfParallelism = 8;
+        _seedCount = (Operation == "Dwma" ? 2 : 1) * (Period - 1);
         var close = Enumerable.Range(0, Count).Select(i => (i * 13 % 101 - 50) / 8d).ToArray();
         _bars = close.Select(v => new Bar(default, v, v + 1, v - 1, v, 1)).ToArray();
         _inputs = close.Select(v => new QuanTAlib.TValue(default, v, true, false)).ToArray();
@@ -58,9 +60,9 @@ public class SharedWeightedWindowBenchmarks
     private void Native(int start, int end, double[] result)
     {
         // QuanTAlib 1.0.0 exposes Calc(TValue), with fixed-kernel convolution.
-        // Replay only P-1 inputs and write disjoint outputs without adapters.
+        // Double WMA needs both stages' P-1 seeds; other kernels need one window.
         var state = CreateNative();
-        for (int i = Math.Max(0, start - Period + 1); i < start; i++) state.Calc(_inputs[i]);
+        for (int i = Math.Max(0, start - _seedCount); i < start; i++) state.Calc(_inputs[i]);
         for (int i = start; i < end; i++) result[i] = state.Calc(_inputs[i]).Value;
     }
     private QuanTAlib.AbstractBase CreateNative() => Operation switch
@@ -68,6 +70,7 @@ public class SharedWeightedWindowBenchmarks
         "Epma" => new QuanTAlib.Epma(Period),
         "Mma" => new QuanTAlib.Mma(Period),
         "Wma" => new QuanTAlib.Wma(Period),
+        "Dwma" => new QuanTAlib.Dwma(Period),
         "Convolution" => new QuanTAlib.Convolution(Kernel()),
         "Gma" => new QuanTAlib.Gma(Period),
         "Sinema" => new QuanTAlib.Sinema(Period),
@@ -78,6 +81,7 @@ public class SharedWeightedWindowBenchmarks
         "Epma" => new EndpointWeightedAverage(Period),
         "Mma" => new EndpointWeightedAverage(Period, true),
         "Wma" => new FixedPeriodWma(Period),
+        "Dwma" => new FixedPeriodWma(Period).Of(new FixedPeriodWma(Period)),
         "Convolution" => new NormalizedConvolution(Kernel()),
         "Gma" => new GaussianWeightedAverage(Period),
         "Sinema" => new SineWeightedAverage(Period),

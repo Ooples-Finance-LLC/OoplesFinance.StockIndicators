@@ -18,7 +18,7 @@ internal static partial class ValuesBarExecution
         && (SharedCpuStates.Contains(indicator) || IsGeneratedState(indicator));
 
     internal static bool SupportsOwned(IReadOnlyList<IIndicator> indicators) =>
-        indicators.Count > 0 && indicators.All(IsPointwise)
+        IsWeightedChain(indicators) || indicators.Count > 0 && indicators.All(IsPointwise)
         || indicators.Count > 0 && indicators.All(IsSharedState);
 
     internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
@@ -53,6 +53,8 @@ internal static partial class ValuesBarExecution
     {
         if (gpu is not null && (!SupportsGpu(indicators) || source.Length == 0))
             throw new NotSupportedException("Required GPU pointwise execution needs a nonempty supported indicator configuration.");
+        if (IsWeightedChain(indicators))
+            return ExecuteWeightedChain(source, (FixedPeriodWma)indicators[0], cancellation, history);
         var nodes = new List<Node>();
         try
         {
