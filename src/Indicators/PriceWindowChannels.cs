@@ -48,7 +48,9 @@ public sealed class WindowPriceRange : IndicatorBase, IIndicatorValidationContra
             _low.Add(bar.Low);
             // IEEE subtraction rounds this two-value difference once. Exact zero
             // is positive by contract, including opposite signed-zero inputs.
+#pragma warning disable S1244 // Exact equality alone defines canonical positive zero; no tolerance is valid.
             return _high.Value == _low.Value ? 0 : _high.Value - _low.Value;
+#pragma warning restore S1244
         }
     }
 }

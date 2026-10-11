@@ -8,8 +8,8 @@ public sealed class TensorsCloseExtremeGpuExecutionTests
     private static void RequireGpu() => Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
 
     [SkippableTheory]
-    [InlineData(false)] [InlineData(true)]
-    public async Task DeviceCloseExtremaMatchIndependentReferencesAcrossPeriodsAndOwnership(bool maximum)
+    [InlineData(false, false)] [InlineData(true, false)] [InlineData(false, true)] [InlineData(true, true)]
+    public async Task DeviceCloseExtremaMatchIndependentReferencesAcrossPeriodsAndOwnership(bool maximum, bool candle)
     {
         RequireGpu();
         foreach (int period in new[] { 1, 3, 20, int.MaxValue })
@@ -17,8 +17,8 @@ public sealed class TensorsCloseExtremeGpuExecutionTests
         {
             var bars = Fixture(period == int.MaxValue ? 41 : 1025);
             var original = bars.ToArray();
-            var expected = Reference(bars, period, maximum).ToArray();
-            var indicator = new DecayingWindowExtreme(period, maximum);
+            var expected = Reference(bars, period, maximum, candle).ToArray();
+            var indicator = Create(period, maximum, candle);
             var builder = Build(bars, indicator, history);
             using var cpu = await builder.ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync();
             using var gpu = await builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync();
@@ -51,20 +51,21 @@ public sealed class TensorsCloseExtremeGpuExecutionTests
         Bits(bars.Select(b => b.Close).ToArray(), run[indicator].ToArray());
     }
 
-    [SkippableFact]
-    public async Task DeviceCloseExtremaPreserveWorkspaceIsolationAndFailureRecovery()
+    [SkippableTheory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task DeviceCloseExtremaPreserveWorkspaceIsolationAndFailureRecovery(bool candle)
     {
         RequireGpu();
         var bars = Fixture(513);
-        var first = new DecayingWindowExtreme(7);
-        var second = new DecayingWindowExtreme(11, true);
+        var first = Create(7, false, candle);
+        var second = Create(11, true, candle);
         var a = Build(bars, first, IndicatorHistoryMode.LatestOnly).ConfigureExecution(IndicatorExecutionBackend.Gpu);
         var b = Build(bars, second, IndicatorHistoryMode.Full).ConfigureExecution(IndicatorExecutionBackend.Gpu);
         var runs = await Task.WhenAll(Task.Run(() => a.BuildAsync()), Task.Run(() => b.BuildAsync()));
         using var left = runs[0]; using var right = runs[1];
         var saved = left[first].ToArray();
-        Bits(Reference(bars, 7, false).ToArray(), saved);
-        Bits(Reference(bars, 11, true).ToArray(), right[second].ToArray());
+        Bits(Reference(bars, 7, false, candle).ToArray(), saved);
+        Bits(Reference(bars, 11, true, candle).ToArray(), right[second].ToArray());
         var original = bars[256];
         for (int field = 0; field < 5; field++)
         {
@@ -99,15 +100,40 @@ public sealed class TensorsCloseExtremeGpuExecutionTests
         Assert.Null(builder.LastExecution);
     }
 
-    private static double[] Reference(IReadOnlyList<Bar> bars, int period, bool maximum)
+    [Fact]
+    public async Task CandleExtremaRejectNonpositivePeriodsAndSourcedOrEmptyRequiredGpu()
+    {
+        foreach (int period in new[] { -1, 0, 3 })
+        foreach (bool maximum in new[] { false, true })
+        {
+            var indicator = Create(period, maximum, true);
+            Assert.Equal(period > 0, ValuesBarExecution.SupportsGpu([indicator]));
+            var builder = Build([], indicator, IndicatorHistoryMode.Full).ConfigureExecution(IndicatorExecutionBackend.Gpu);
+            await Assert.ThrowsAsync<NotSupportedException>(() => builder.BuildAsync());
+            if (period <= 0)
+                await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureSource(Bars.From(Fixture(41))).BuildAsync());
+        }
+        var sourced = new HighestHigh(3).Of(new Sma(3));
+        Assert.False(ValuesBarExecution.SupportsGpu([sourced]));
+    }
+
+    private static IIndicator Create(int period, bool maximum, bool candle) => candle
+        ? maximum ? new HighestHigh(period) : new LowestLow(period) : new DecayingWindowExtreme(period, maximum);
+
+    private static double[] Reference(IReadOnlyList<Bar> bars, int period, bool maximum, bool candle = false)
     {
         var result = new double[bars.Count];
         for (int i = 0; i < result.Length; i++)
         {
-            // Reverse scan with strict comparison independently selects newest ties.
-            double best = bars[i].Close;
-            for (int j = i - 1; j >= Math.Max(0, i - period + 1); j--)
-                if (maximum ? bars[j].Close > best : bars[j].Close < best) best = bars[j].Close;
+            // Scan direction independently selects newest close ties or oldest candle ties.
+            double Read(int at) => candle ? maximum ? bars[at].High : bars[at].Low : bars[at].Close;
+            int start = Math.Max(0, i - period + 1);
+            double best = Read(candle ? start : i);
+            for (int j = 1; j <= i - start; j++)
+            {
+                double next = Read(candle ? start + j : i - j);
+                if (maximum ? next > best : next < best) best = next;
+            }
             result[i] = best;
         }
         return result;

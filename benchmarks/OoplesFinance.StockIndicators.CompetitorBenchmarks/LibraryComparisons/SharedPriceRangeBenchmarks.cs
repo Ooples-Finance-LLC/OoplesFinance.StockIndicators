@@ -47,7 +47,7 @@ public class SharedPriceRangeBenchmarks
     {
         if (values.Count != expected.Length) throw new InvalidOperationException("Unexpected native range length.");
         for (int i = 0; i < values.Count; i++)
-            if (i < Period - 1 ? values[i].HasValue : !values[i].HasValue || (double)values[i]!.Value != expected[i])
+            if (i < Period - 1 ? values[i].HasValue : !values[i].HasValue || BitConverter.DoubleToInt64Bits((double)values[i]!.Value) != BitConverter.DoubleToInt64Bits(expected[i]))
                 throw new InvalidOperationException("Native range value or presence differs.");
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
