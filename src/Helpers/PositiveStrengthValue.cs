@@ -15,6 +15,15 @@ internal readonly record struct PositiveStrengthValue(long Mantissa, long Expone
     internal static PositiveStrengthValue Seed(BigInteger units, int period) =>
         Combine(units, -1074, 0, 0, period);
 
+    internal static PositiveStrengthValue Seed(ExactMeanAccumulator sum, int period)
+    {
+        var (rounded, exponent) = sum.NormalizedMean(period);
+        if (rounded == 0) return default;
+        var (mantissa, power) = ExactMeanAccumulator.DecomposeFinite(rounded);
+        var padding = 53 - Bits(mantissa);
+        return new(mantissa << padding, (long)exponent + power - padding);
+    }
+
     internal PositiveStrengthValue Update(BigInteger change, int period) =>
         Combine((BigInteger)Mantissa * (period - 1), Exponent, change, -1074, period);
 

@@ -336,6 +336,18 @@ internal struct ExactMeanAccumulator
     internal static double SquaredUnitMean(BigInteger numerator, long count)
         => new ExactMeanAccumulator { _wide = true, _large = numerator, _scale = -1074 }.Mean(count);
 
+    internal (double Mantissa, int Exponent) NormalizedMean(long count)
+    {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+        if (IsZero) return (0, 0);
+        var magnitude = _small < 0 ? unchecked((ulong)(~_small)) + 1 : (ulong)_small;
+        var bits = _wide ? BitLength(BigInteger.Abs(_large)) : BitLength(magnitude);
+        var exponent = checked(_scale - 1074 + bits - 1);
+        var normalized = this;
+        normalized._scale = 1075 - bits;
+        return (normalized.Mean(count), exponent);
+    }
+
     internal double Mean(long count)
     {
         if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
