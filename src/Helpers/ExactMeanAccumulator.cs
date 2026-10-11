@@ -442,7 +442,7 @@ internal struct ExactMeanAccumulator
             UInt128 top = magnitude, bottom = divisor;
             if (shift < 0) top <<= -shift;
             else bottom <<= shift;
-            var (mantissa, remainder) = UInt128.DivRem(top, bottom);
+            var (mantissa, remainder) = CompactDivRem(top, bottom);
             var otherHalf = bottom - remainder;
             if (remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0) mantissa++;
             value = Encode((ulong)mantissa, grid, _small < 0);
@@ -452,6 +452,30 @@ internal struct ExactMeanAccumulator
         value = 0;
         return false;
     }
+
+#if !NETFRAMEWORK
+    internal static (UInt128 Quotient, UInt128 Remainder) CompactDivRem(UInt128 numerator, UInt128 denominator)
+    {
+        // x64 DIV returns both halves of the rounding decision directly. Its
+        // quotient must fit ulong: upper < divisor proves that precondition and
+        // also excludes division by zero. Other cases use the portable runtime.
+        if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported
+            && denominator <= ulong.MaxValue)
+        {
+            ulong divisor = (ulong)denominator;
+            ulong upper = (ulong)(numerator >> 64);
+            if (upper < divisor)
+            {
+#pragma warning disable SYSLIB5004 // Operands are runtime values; quotient overflow is guarded above.
+                var (quotient, remainder) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(
+                    unchecked((ulong)numerator), upper, divisor);
+#pragma warning restore SYSLIB5004
+                return (quotient, remainder);
+            }
+        }
+        return UInt128.DivRem(numerator, denominator);
+    }
+#endif
 
     internal static double Encode(ulong mantissa, int grid, bool negative)
     {
