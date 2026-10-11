@@ -23,8 +23,14 @@ internal static partial class ValuesBarExecution
 
     internal static bool SupportsGpu(IReadOnlyList<IIndicator> indicators) => indicators.Count == 1
         && indicators[0].Source is null && indicators[0].Components.Count == 0
-        && (indicators[0] is CandleArithmetic or PriceRoundingTransform or EngulfingPattern or BullishCandle or BearishCandle or WindowRangeMidpoint or DecayingWindowExtreme { Decay: 0 }
-            || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]));
+        && (indicators[0] is CandleArithmetic or PriceRoundingTransform or EngulfingPattern or BullishCandle or BearishCandle or WindowRangeMidpoint or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+            || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]))
+        || IsGpuIndexPair(indicators);
+
+    private static bool IsGpuIndexPair(IReadOnlyList<IIndicator> indicators) => indicators.Count == 2
+        && indicators[0] is WindowExtremeIndex first && indicators[1] is WindowExtremeIndex second
+        && first.Source is null && second.Source is null && first.Components.Count == 0 && second.Components.Count == 0
+        && first.Period == second.Period && first.Maximum != second.Maximum;
 
     internal static bool IsGpuCandleWindow(IIndicator indicator) => indicator is
         StrictHaramiCandle or BullishHaramiPattern or BearishHaramiPattern or UpsideTasukiGapPattern or DownsideTasukiGapPattern;
@@ -42,7 +48,7 @@ internal static partial class ValuesBarExecution
         OwnedBarHistory? history = null, TensorsGpuExecution? gpu = null)
     {
         if (gpu is not null && (!SupportsGpu(indicators) || source.Length == 0))
-            throw new NotSupportedException("Required GPU pointwise execution needs a nonempty supported standalone indicator.");
+            throw new NotSupportedException("Required GPU pointwise execution needs a nonempty supported indicator configuration.");
         var nodes = new List<Node>();
         try
         {
@@ -74,6 +80,13 @@ internal static partial class ValuesBarExecution
             else if (nodes.Count == 1 && (IsPointwise(nodes[0].Indicator) || gpu is not null))
                 latest = gpu is null ? FillPointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned)
                     : gpu.ExecutePointwise(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
+            else if (gpu is not null && IsGpuIndexPair(indicators))
+            {
+                var minimum = nodes.First(n => !((WindowExtremeIndex)n.Indicator).Maximum);
+                var maximum = nodes.First(n => ((WindowExtremeIndex)n.Indicator).Maximum);
+                latest = gpu.ExecutePointwise(source, [minimum.Values[0], maximum.Values[0]],
+                    minimum.Indicator, cancellation, owned, maximum.Indicator);
+            }
             else if (pointwiseBatch)
                 latest = FillPointwiseBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is TrueRange)

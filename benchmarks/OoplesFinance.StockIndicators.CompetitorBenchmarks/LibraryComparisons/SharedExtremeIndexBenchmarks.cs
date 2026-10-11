@@ -87,12 +87,19 @@ public class SharedExtremeIndexBenchmarks
     }
     private static double[] Values(NativeResult result, int slot) => result.Index is not null
         ? result.Index.Select(i => (double)i).ToArray() : slot == 0 ? result.Min! : result.Max!;
-    private WindowExtremeIndex[] Create() => Operation == "MinMaxIndex"
+    internal WindowExtremeIndex[] Create() => Operation == "MinMaxIndex"
         ? [new(Period), new(Period, true)] : [new(Period, Operation == "MaxIndex")];
-    private IIndicatorRun Build(WindowExtremeIndex[] indicators, IndicatorHistoryMode history, bool reference = false)
+    internal IIndicatorRun Build(WindowExtremeIndex[] indicators, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
-        return builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Index benchmark did not execute on the GPU.");
+        }
+        return run;
     }
 }

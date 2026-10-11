@@ -6,11 +6,11 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Eighteen fixed keys; window/lag periods are arguments, never new compiled programs.
+    // Twenty-one fixed keys; window/lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
-        CancellationToken cancellation, OwnedBarBuffer? owned)
+        CancellationToken cancellation, OwnedBarBuffer? owned, IIndicator? secondary = null)
     {
         if (ValuesBarExecution.IsGpuCandleWindow(indicator))
             return ExecuteCandleWindow(source, output[0], indicator, cancellation, owned);
@@ -19,11 +19,15 @@ internal sealed partial class TensorsGpuExecution
         var lagged = indicator as LaggedPriceChange;
         var midpoint = indicator as WindowRangeMidpoint;
         var extreme = indicator as DecayingWindowExtreme;
+        var index = indicator as WindowExtremeIndex;
+        if (secondary is not null && (index is not { Maximum: false }
+            || secondary is not WindowExtremeIndex { Maximum: true } maximum || maximum.Period != index.Period))
+            throw new NotSupportedException("GPU index pairs require matching minimum and maximum periods.");
         bool engulfing = indicator is EngulfingPattern;
         bool polarity = indicator is BullishCandle or BearishCandle;
         bool body = engulfing || polarity;
         if (source.Length == 0 || extreme is { Decay: not 0 }
-            || arithmetic is null && rounding is null && midpoint is null && extreme is null && !body && !ValuesBarExecution.IsGpuLagged(indicator))
+            || arithmetic is null && rounding is null && midpoint is null && extreme is null && index is null && !body && !ValuesBarExecution.IsGpuLagged(indicator))
             throw new NotSupportedException("Unqualified GPU pointwise kernel.");
         int operation = lagged is not null ? lagged.Kind switch
         {
@@ -32,7 +36,8 @@ internal sealed partial class TensorsGpuExecution
             PriceChangeKind.Loss => 10,
             PriceChangeKind.Ratio => 11,
             _ => throw new NotSupportedException("Unqualified GPU lagged operation.")
-        } : extreme is not null ? extreme.Maximum ? 17 : 16
+        } : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
+            : extreme is not null ? extreme.Maximum ? 17 : 16
             : midpoint is not null ? midpoint.CandleRanges ? 15 : 14
             : polarity ? indicator is BullishCandle ? 12 : 13
             : engulfing ? 7 : arithmetic is not null ? (int)arithmetic.Operation : 4 + (int)rounding!.Operation;
@@ -95,16 +100,20 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(1, deviceRight.Handle);
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
-                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? 0);
+                kernel.SetArg(4, lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? 0);
+                if (secondary is not null) kernel.SetArg(5, work.Right.Handle);
                 cancellation.ThrowIfCancellationRequested();
                 kernel.Enqueue(new[] { (ulong)source.Length });
                 deviceOutput.CopyToHost(output[0]);
+                if (secondary is not null) work.Right.CopyToHost(output[1]);
                 for (int i = 0; i < source.Length; i++)
                 {
                     cancellation.ThrowIfCancellationRequested();
                     if (!double.IsFinite(output[0][i])) IndicatorOutputPolicy.Validate(indicator, 0, i, output[0][i]);
+                    if (secondary is not null && !double.IsFinite(output[1][i]))
+                        IndicatorOutputPolicy.Validate(secondary, 0, i, output[1][i]);
                 }
-                if (output.Length > 1)
+                if (output.Length > 1 && secondary is null)
                     output[1] = presence ?? ValuesBarExecution.CompletePointwisePresence(source.Length, null, false, cancellation);
                 cancellation.ThrowIfCancellationRequested();
                 return latest;
@@ -157,6 +166,7 @@ internal sealed partial class TensorsGpuExecution
             // Only an exact zero sum is canonicalized; underflow keeps its sign.
             14 or 15 => "total == 0.0 ? 0.0 : isinf(total) ? x * 0.5 + y * 0.5 : total * 0.5",
             16 or 17 => "x",
+            18 or 19 or 20 => "(double)bestIndex",
             _ => throw new NotSupportedException("Unqualified GPU pointwise operation.")
         };
         var previous = operation == 7
@@ -182,12 +192,13 @@ internal sealed partial class TensorsGpuExecution
                     // Equal extrema select the newest bits, including signed zero.
                     if (next {{(operation == 17 ? ">=" : "<=")}} x) x = next;
                 }
-                """ : "";
+                """
+            : operation is >= 18 and <= 20 ? IndexWindowSource(operation) : "";
         var source = $$"""
             #pragma OPENCL EXTENSION cl_khr_fp64 : enable
             #pragma OPENCL FP_CONTRACT OFF
             __kernel void pointwise(__global const double* left, __global const double* right,
-                __global double* output, int count, int period)
+                __global double* output, int count, int period{{(operation == 20 ? ", __global double* secondary" : "")}})
             {
                 size_t i = get_global_id(0);
                 if (i >= (size_t)count) return;
@@ -195,6 +206,7 @@ internal sealed partial class TensorsGpuExecution
                 double y = right[i];
                 {{previous}}
                 output[i] = {{expression}};
+                {{(operation == 20 ? "secondary[i] = (double)maxIndex;" : "")}}
             }
             """;
         var program = new OpenClProgram(_context, source);
@@ -204,6 +216,24 @@ internal sealed partial class TensorsGpuExecution
             return new CompiledKernel(program, new OpenClKernel(_context, program, "pointwise"));
         }
         catch { program.Dispose(); throw; }
+    }
+
+    private static string IndexWindowSource(int operation)
+    {
+        // One dispatch and one window traversal for the two-output case.
+        string comparison = operation == 19 ? ">=" : "<=";
+        return $$"""
+            size_t start = i + 1 > (size_t)period ? i + 1 - (size_t)period : 0;
+            size_t bestIndex = start;
+            x = left[start];
+            {{(operation == 20 ? "size_t maxIndex = start; double high = x;" : "")}}
+            for (size_t j = start + 1; j <= i; j++)
+            {
+                double next = left[j];
+                if (next {{comparison}} x) { x = next; bestIndex = j; }
+                {{(operation == 20 ? "if (next >= high) { high = next; maxIndex = j; }" : "")}}
+            }
+            """;
     }
 }
 #endif
