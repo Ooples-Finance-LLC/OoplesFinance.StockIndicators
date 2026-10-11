@@ -74,6 +74,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['QuanTAlib.Afirma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_sma_qualification_updates_each_prior_pilot_api(self):
+        self.write()
+        for api in ('QuanTAlib.Sma', 'Skender.GetSma', 'TaLib.Functions.Sma', 'Trady.Indicator.SimpleMovingAverage'):
+            path = self.qualification(f'SharedSmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_gpu_fixed_weighted_average_maps_native_api(self):
         self.write()
         path = self.qualification('SharedGpuFixedWmaBenchmarks.BuilderFull(Operation: "Wma", Count: 1000)')

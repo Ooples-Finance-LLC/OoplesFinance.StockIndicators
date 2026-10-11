@@ -2487,6 +2487,24 @@ order-statistic/rational and staged-native references cover odd/even periods,
 negative/zero medians, threshold neighbors, extreme prices, huge periods, fresh
 calls, prefixes and output/threshold mutations. Archive: 1,548 arms /387 pairs.
 
+## Shared SMA builder qualification
+
+`SharedSmaBenchmarks` compares Full/LatestOnly with native serial and parallel
+QuanTAlib, Skender tuple, TA-Lib packed-array, and Trady tuple paths at 1k/10k.
+An integer-grid oracle checks every published value, startup presence, packed
+ranges, and worker replay. No native result mapping is timed. The 32-case
+qualification and original native rows are preserved in `sma-cpu`.
+
+The existing fused SMA dispatch now starts at 8,192 rather than 65,536 bars.
+Its worker caps, certificates, fallback replay and arithmetic are unchanged.
+All eight affected 10k builder cases clearly improved: Full 75-88 us versus
+109-113 us before; LatestOnly 19-20 us versus about 52 us. LatestOnly allocation
+increased from 81.10 to 81.68 KiB. Both modes beat QuanTAlib, Skender and Trady
+at both measured sizes; TA-Lib remains faster and smaller (10k parallel 11.56 us,
+78.45 KiB). The follow-up builder rows are in `sma-threshold`; 1k and native rows
+remain selected from the original campaign. Validation passed 107 execution
+tests, four comparison tests spanning seven sizes, and 50 inventory checks.
+
 ## Exact Fibonacci and oldest-first sinc kernels
 
 `FibonacciWeightedSnapshot` normalizes exact integer Fibonacci weights over the

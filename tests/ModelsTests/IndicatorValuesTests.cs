@@ -9,15 +9,16 @@ public sealed class IndicatorValuesDispatchCollection { }
 [Collection("IndicatorValuesDispatch")]
 public sealed class IndicatorValuesTests
 {
-    [Fact]
-    public void FusedSmaReportsCapturedBoundaryValidationBeforeLaterErrorsAndRecovers()
+    [Theory]
+    [InlineData(8192)] [InlineData(8193)] [InlineData(65537)]
+    public void FusedSmaReportsCapturedBoundaryValidationBeforeLaterErrorsAndRecovers(int count)
     {
         int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
         try
         {
             AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 4;
             if (Environment.ProcessorCount < 2) return;
-            var bars = Data(65537);
+            var bars = Data(count);
             int chunks = Math.Min(4, Environment.ProcessorCount);
             int boundary = 20 + ((bars.Length - 20) / 20 / chunks) * 20 - 1;
             bars[boundary] = new Bar(default, double.NaN, 1, 1, 1, 1);
@@ -51,8 +52,9 @@ public sealed class IndicatorValuesTests
         {
             AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 4;
             foreach (bool full in new[] { false, true })
+            foreach (int count in new[] { Math.Max(8193, period * 64 + 1), Math.Max(65537, period * 64 + 1) }.Distinct())
             {
-                var bars = Data(Math.Max(65537, period * 64 + 1), mode);
+                var bars = Data(count, mode);
                 var original = bars.ToArray();
                 var expected = new double[bars.Length];
                 OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
@@ -105,6 +107,8 @@ public sealed class IndicatorValuesTests
     }
 
     [Theory]
+    [InlineData(8191, 0)] [InlineData(8192, 0)] [InlineData(8193, 0)]
+    [InlineData(8193, 1)] [InlineData(8193, 2)]
     [InlineData(65535, 0)] [InlineData(65536, 0)] [InlineData(65537, 0)]
     [InlineData(65537, 1)] [InlineData(65537, 2)]
     public async Task FullParallelSmaMatchesGuardedValuesAndOwnsReplay(int count, int mode)

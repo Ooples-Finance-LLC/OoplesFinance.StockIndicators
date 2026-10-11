@@ -173,7 +173,7 @@ internal static partial class ValuesBarExecution
     {
         latest = default;
         finite = certified = false;
-        if (period is < 2 or > 4096 || !CanParallelize(source.Length)) return false;
+        if (period is < 2 or > 4096 || !CanParallelize(source.Length, 8192)) return false;
         int chunks = Math.Min(WorkerCount(owned is null ? 8 : 4), source.Length / (16 * period));
         if (chunks < 2 || !Monitor.TryEnter(ParallelBarGate)) return false;
         double[]? closes = null;
