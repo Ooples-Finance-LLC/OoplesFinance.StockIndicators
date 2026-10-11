@@ -5,6 +5,27 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class SharedBalanceOfPowerTests
 {
+    [Fact]
+    public async Task PeriodOnePreservesFirstNegativeZeroSignalNormalization()
+    {
+        var bars = new[]
+        {
+            new Bar(default, double.Epsilon, double.MaxValue, 0, 0, 1),
+            new Bar(default, double.Epsilon, double.MaxValue, 0, 0, 1),
+            new Bar(default, 0, 1, 0, 1, 1)
+        };
+        var power = new BalanceOfPower(1);
+        using var expected = await Build(bars, [power]).ConfigureBehavior(_ => { }).BuildAsync();
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            using var actual = await Build(bars, [power]).ConfigureHistory(history).BuildAsync();
+            Compare(expected, actual, power);
+            Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(actual[power][0]));
+            Assert.Equal(0, BitConverter.DoubleToInt64Bits(actual[power.BopSignal][0]));
+            Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(actual[power.BopSignal][1]));
+        }
+    }
+
     [Theory]
     [InlineData(-1)] [InlineData(1)] [InlineData(3)] [InlineData(14)] [InlineData(int.MaxValue)]
     public async Task BothOutputsRetainEvaluatorBitsStartupAndOwnedHistory(int period)

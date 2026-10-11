@@ -24,6 +24,18 @@ internal static partial class ValuesBarExecution
         // ratio through the parallel pointwise engine, then smooth its owned array.
         var latest = FillPointwiseKernel(source, new[] { output[0] }, indicator,
             new BalanceOfPowerKernel(), cancellation, owned);
+        if (indicator.Length <= 1)
+        {
+            // EMA(1) returns its input after startup. Its first exact mean alone
+            // canonicalizes negative zero; otherwise both immutable outputs share.
+            output[1] = output[0];
+            if (output[0].Length > 0 && BitConverter.DoubleToInt64Bits(output[0][0]) == long.MinValue)
+            {
+                output[1] = (double[])output[0].Clone();
+                output[1][0] = 0;
+            }
+            return latest;
+        }
         using var smoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, indicator.Length));
         for (int i = 0; i < source.Length; i++)
         {

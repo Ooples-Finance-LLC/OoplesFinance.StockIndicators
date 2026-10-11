@@ -86,7 +86,11 @@ internal static partial class ValuesBarExecution
             {
                 cancellation.ThrowIfCancellationRequested();
                 node.Failure?.Throw();
-                bool finiteByConstruction = nodes.Count == 1 && (IsPointwise(node.Indicator) || node.Indicator is TrueRange);
+                // Standalone BOP validates raw ratios before smoothing; its default
+                // EMA is an exactly rounded convex mean of finite values. Neither
+                // output needs the generic scan (including shared EMA(1) arrays).
+                bool finiteByConstruction = nodes.Count == 1 && (IsPointwise(node.Indicator)
+                    || node.Indicator is TrueRange or BalanceOfPower);
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
                         : ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
@@ -511,7 +515,8 @@ internal static partial class ValuesBarExecution
             Indicator = indicator;
             bool pointwise = singleRoot && IsPointwise(indicator);
             Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
-                slot == 1 && pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine }
+                slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
+                    || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
                     : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
             _scratch = new double[indicator.Outputs.Count];
