@@ -89,6 +89,9 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
                 _grid = parts.Scale;
                 _hasGrid = true;
             }
+#if !NETFRAMEWORK
+            if (TrySmallAdd(parts, sign)) return;
+#endif
             // The same power of two cancels from numerator and denominator of
             // both statistics. Preserve exact moments without minimum-unit padding.
             var x = parts.Mantissa == 0 ? BigInteger.Zero
@@ -100,6 +103,29 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
             if (kurtosis)
                 _s4 += sign * x2 * x2;
         }
+
+#if !NETFRAMEWORK
+        private bool TrySmallAdd(ExactMeanAccumulator.ProductFactor parts, int sign)
+        {
+            if (parts.Mantissa == 0) return true;
+            int shift = parts.Scale - _grid;
+            if (shift is < 0 or > 8 || Math.Abs(parts.Mantissa) > (256L >> shift)
+                || _s1.GetBitLength() > 31 || _s2.GetBitLength() > 31
+                || _s3.GetBitLength() > 31 || kurtosis && _s4.GetBitLength() > 31) return false;
+            // |x| <= 256, so even x^4 is at most 2^32. Adding/subtracting
+            // it from a 31-bit moment fits Int64; retain the same exact fields
+            // so a subsequent wider price or grid change can use the fallback.
+            checked
+            {
+                long x = parts.Mantissa << shift, square = x * x;
+                _s1 = (long)_s1 + sign * x;
+                _s2 = (long)_s2 + sign * square;
+                _s3 = (long)_s3 + sign * square * x;
+                if (kurtosis) _s4 = (long)_s4 + sign * square * square;
+            }
+            return true;
+        }
+#endif
 
         public void Update(in Bar bar, Span<double> outputs)
         {

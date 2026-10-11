@@ -40,6 +40,8 @@ public sealed class SharedSampleShapeTests
     {
         double[][] fixtures = [
             [0, -0d, 1, 2, 3, 4, 4, 4, 4, 4, 0, -1, -2, -3],
+            [1, 255, 256, 257, -255, -256, -257, 0, 1, 2, 3, 4, 5, 6, 7, 8],
+            [1, 1.5, 1.25, 128, 128.5, -128.5, 0, 1, 2, 3, 4, 5, 6, 7, 8],
             [1, 1.25, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue, 1, 2, 3, 4, 5, 6],
             Enumerable.Range(0, 18).Select(i => Math.ScaleB((i % 7 - 3) * 1.23456789012345, 1000 - i * 110)).ToArray()
         ];
