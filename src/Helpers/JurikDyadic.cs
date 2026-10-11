@@ -342,17 +342,39 @@ internal struct JurikDyadic
         if (exponent < -1075) { result = negative ? -0d : 0d; return true; }
         var grid = Math.Max(exponent - 52, -1074);
         var shift = scale - grid;
+        UInt128 quotient, remainder;
         if (shift >= 0)
         {
-            if (shift >= 128 || Bits(top) + shift > 128) return false;
-            top <<= shift;
+            if (shift < 128 && Bits(top) + shift <= 128)
+            {
+                top <<= shift;
+                quotient = top / bottom; remainder = top % bottom;
+            }
+            else
+            {
+                // Produce the rounding-grid quotient without materializing the
+                // shifted numerator. Each remainder stays below the denominator;
+                // comparing with its complement avoids overflowing a doubled value.
+                quotient = top / bottom; remainder = top % bottom;
+                for (int bit = 0; bit < shift; bit++)
+                {
+                    quotient <<= 1;
+                    var complement = bottom - remainder;
+                    if (remainder >= complement)
+                    {
+                        remainder -= complement;
+                        quotient++;
+                    }
+                    else remainder += remainder;
+                }
+            }
         }
         else
         {
             if (-shift >= 128 || Bits(bottom) - shift > 128) return false;
             bottom <<= -shift;
+            quotient = top / bottom; remainder = top % bottom;
         }
-        var quotient = top / bottom; var remainder = top % bottom;
         var otherHalf = bottom - remainder;
         if (remainder > otherHalf || remainder == otherHalf && (quotient & 1) != 0) quotient++;
         result = Math.ScaleB((double)quotient, grid);

@@ -47,6 +47,20 @@ public sealed class ReturnBetaExecutionTests
     }
 
     [Fact]
+    public void ScalarPublicationAllocatesNoPerBarObjectsOnBenchmarkPrices()
+    {
+        var bars = Enumerable.Range(0, 10000).Select(i => new Bar(default,
+            8 + (i * 7 % 97) / 16d, 0, 0, 10 + (i * 13 % 101) / 8d, 1)).ToArray();
+        var state = (IMultiOutputState)new WindowReturnBeta(20).CreateState();
+        var output = new double[2];
+        for (int i = 0; i < 1000; i++) state.Update(in bars[i], output);
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 1000; i < 5000; i++) state.Update(in bars[i], output);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(1d, output[1]);
+    }
+
+    [Fact]
     public void OrdinaryRollingMomentsAllocateNoPerBarObjects()
     {
         var window = new ReturnBetaWindow(20, ReturnBetaSelection.All);
