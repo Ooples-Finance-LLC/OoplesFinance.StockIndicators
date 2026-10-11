@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -54,7 +53,7 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
 
     private sealed class State(int period) : IMultiOutputState
     {
-        private readonly Queue<BigInteger> _prices = new();
+        private readonly Queue<double> _prices = new();
 
         public void Reset() => _prices.Clear();
 
@@ -63,20 +62,38 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
             output.Clear();
             if (_prices.Count == period)
                 _prices.Dequeue();
-            _prices.Enqueue(ExactVarianceWindow.Units(bar.Close));
+            double value = bar.Close;
+            if (!FrameworkCompatibility.IsFinite(value))
+                throw new ArgumentOutOfRangeException(nameof(value));
+            _prices.Enqueue(value);
             if (_prices.Count < period)
                 return;
-            var peak = BigInteger.Zero;
-            var squares = BigInteger.Zero;
+            double peak = 0;
+            var squares = new JurikDyadic();
             foreach (var price in _prices)
             {
-                peak = BigInteger.Max(peak, price);
-                if (peak.IsZero)
+                peak = Math.Max(peak, price);
+                if (peak == 0)
                     return;
-                var drawdown = RocBankValue.RoundUnits((100 * (price - peak)) << 1074, peak);
-                squares += drawdown * drawdown;
+                var numerator = JurikDyadic.FromDouble(price);
+                numerator.Subtract(JurikDyadic.FromDouble(peak));
+                numerator.Multiply(100);
+                double ratio = numerator.Ratio(JurikDyadic.FromDouble(peak));
+                JurikDyadic drawdown;
+                if (double.IsInfinity(ratio))
+                {
+                    // An unpublished percentage can exceed binary64 even when
+                    // the final RMS is finite. Retain its rounded significand
+                    // and extended exponent before squaring exactly.
+                    var extended = RocBankValue.Return(price, peak);
+                    drawdown = JurikDyadic.FromDouble(extended.Mantissa);
+                    drawdown.ScaleByPowerOfTwo(extended.UpperShift);
+                }
+                else drawdown = JurikDyadic.FromDouble(ratio);
+                drawdown.Square();
+                squares.AddExact(drawdown);
             }
-            output[0] = ExactPopulationDeviation.RootRatio(squares, period);
+            output[0] = squares.SqrtMean(period);
             output[1] = 1;
         }
     }
