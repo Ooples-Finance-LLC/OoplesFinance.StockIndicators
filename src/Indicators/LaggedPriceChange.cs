@@ -131,8 +131,16 @@ public sealed class LaggedPriceChange
         if (kind == PriceChangeKind.Loss) return current >= previous ? 0 : previous - current;
         if (kind == PriceChangeKind.Ratio) return current == 0 || previous == 0 ? 0 : current / previous;
         if (kind == PriceChangeKind.Fraction && previous != 0
-            && RoundedBalanceOfPower.TryExactDifference(current, previous, out var change))
+            && Binary64ArithmeticCertificate.TryDifference(current, previous, out var change))
             return change == 0 ? 0 : change / previous;
+        if (kind is PriceChangeKind.Percent or PriceChangeKind.RatioPercent && previous != 0)
+        {
+            double value = current;
+            bool exact = kind == PriceChangeKind.RatioPercent
+                || Binary64ArithmeticCertificate.TryDifference(current, previous, out value);
+            if (exact && Binary64ArithmeticCertificate.TryProduct(value, 100, out var scaled))
+                return scaled / previous;
+        }
 #endif
         if (kind is PriceChangeKind.Gain or PriceChangeKind.Loss)
         {

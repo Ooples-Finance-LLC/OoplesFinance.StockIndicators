@@ -39,18 +39,11 @@ internal sealed class MoneyFlowAccumulationWindow
     private static bool TryExactFlow(double high, double low, double close, double volume, out double flow)
     {
         flow = 0;
-        if (!RoundedBalanceOfPower.TryExactDifference(close, low, out var buying)
-            || !RoundedBalanceOfPower.TryExactDifference(high, close, out var selling)
-            || !RoundedBalanceOfPower.TryExactDifference(buying, selling, out var balance)
-            || !RoundedBalanceOfPower.TryExactDifference(high, low, out var range)) return false;
-        var product = balance * volume;
-        var magnitude = Math.Abs(product);
-        // A binary64 product has at most 106 significand bits. Above 2^-968,
-        // even its lowest possible nonzero residual is representable. Below
-        // this conservative bound FMA could round a nonzero residual to zero.
-        const double minimumCertifiedProduct = 4.008336720017946e-292; // 2^-968
-        if (magnitude < minimumCertifiedProduct || !double.IsFinite(product)
-            || Math.FusedMultiplyAdd(balance, volume, -product) != 0) return false; // NOSONAR: S1244 - Only an exactly zero residual certifies the product.
+        if (!Binary64ArithmeticCertificate.TryDifference(close, low, out var buying)
+            || !Binary64ArithmeticCertificate.TryDifference(high, close, out var selling)
+            || !Binary64ArithmeticCertificate.TryDifference(buying, selling, out var balance)
+            || !Binary64ArithmeticCertificate.TryDifference(high, low, out var range)
+            || !Binary64ArithmeticCertificate.TryProduct(balance, volume, out var product)) return false;
         flow = product / range;
         // Unpublished overflow uses RocBankValue's extended exponent instead.
         return double.IsFinite(flow);
