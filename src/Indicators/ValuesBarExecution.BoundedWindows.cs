@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
         || AroonWindow(indicator) > 0
@@ -78,7 +78,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or RateOfChangeWithValidity) return 512;
+        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or RateOfChangeWithValidity) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
@@ -274,8 +274,19 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
-    // Exact modal means are independent of dictionary insertion order, including
-    // the representative chosen for equal signed zeros. P-1 seeds suffice.
+    // Exact moments remain equivalent on any binary grid, so worker state
+    // need not retain a finer grid from observations before its seed window.
+    private readonly struct DispersionKernel(WindowDispersion.State state) : IBoundedKernel<DispersionKernel>
+    {
+        public static DispersionKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var dispersion = (WindowDispersion)indicator;
+            return new(new(period, dispersion.Output, dispersion.Sample, dispersion.Multiplier));
+        }
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
+    // Exact modal means ignore dictionary ordering, including signed-zero keys.
     private readonly struct ModeKernel(WindowMode.State state) : IBoundedKernel<ModeKernel>
     {
         public static ModeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period));
@@ -434,6 +445,7 @@ internal static partial class ValuesBarExecution
         WindowAroon when AroonWindow(indicator) > 0 => FillBoundedWindow<AroonKernel>(source, output, indicator, AroonWindow(indicator), cancellation, owned),
         RollingPercentile { HasFractionalFullRank: true } percentile => FillBoundedWindow<PercentileKernel>(source, output, indicator, percentile.Period, cancellation, owned),
         RateOfChangeWithValidity { Period: < int.MaxValue } change => FillBoundedWindow<ValidReturnKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
+        WindowDispersion dispersion => FillBoundedWindow<DispersionKernel>(source, output, indicator, dispersion.Period, cancellation, owned),
         WindowMode mode => FillBoundedWindow<ModeKernel>(source, output, indicator, mode.Period, cancellation, owned),
         WindowPriceRange range => FillBoundedWindow<PriceRangeKernel>(source, output, indicator, range.Period, cancellation, owned),
         WindowRangeMidpoint midpoint => FillBoundedWindow<MidpointKernel>(source, output, indicator, midpoint.Period, cancellation, owned),

@@ -110,6 +110,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_native_dispersion_qualification_keeps_library_identity(self):
+        self.write()
+        for api in ('QuanTAlib.Variance', 'QuanTAlib.Stddev', 'QuanTAlib.Zscore', 'Trady.Indicator.StandardDeviation'):
+            path = self.qualification(f'SharedNativeDispersionBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_mode_qualification_keeps_native_namespace(self):
         self.write()
         api = 'QuanTAlib.Mode'
