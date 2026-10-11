@@ -21,17 +21,9 @@ public class SharedDetailedDeviationBenchmarks
     public void Setup()
     {
         _priorDop = CpuParallelSettings.MaxDegreeOfParallelism; CpuParallelSettings.MaxDegreeOfParallelism = 8;
-        var values = Enumerable.Range(0, Count).Select(i => 10 + i % 101 / 8d).ToArray();
-        _bars = values.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v + 1, v - 1, v, 1)).ToArray();
-        _tuples = _bars.Select(b => (b.Time, b.Close)).ToArray();
-        int chunks = Math.Min(8, Environment.ProcessorCount);
-        _chunks = new (DateTime, double)[chunks][]; _skip = new int[chunks];
-        for (int chunk = 0; chunk < chunks; chunk++)
-        {
-            int start = Count * chunk / chunks, end = Count * (chunk + 1) / chunks, seed = Math.Max(0, start - Period - Smooth + 2);
-            _skip[chunk] = start - seed; _chunks[chunk] = _tuples[seed..end];
-        }
-        var data = CompetitorData.FromCloses(values); var pair = SkenderDeviationComparison.Create(Smooth);
+        var input = SkenderWindowBenchmarkInput.Create(Count, Period + Smooth - 2);
+        _bars = input.Bars; _tuples = input.Tuples; _chunks = input.Chunks; _skip = input.Skip;
+        var data = CompetitorData.FromCloses(input.Prices); var pair = SkenderDeviationComparison.Create(Smooth);
         var expected = pair.Reference!(data, Period); var native = pair.CompetitorReference!(data, Period);
         CheckNative(NativeSingle(), native); CheckNative(NativeParallel(), native);
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
