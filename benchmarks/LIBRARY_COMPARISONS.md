@@ -2789,3 +2789,8 @@ or raise the 176/401 direct qualification count. The targeted queued volatility
 campaign selects `*SharedLogVolatilityBenchmarks.BuilderLatestOnly(*Count: 10000)`
 and `*SharedLogVolatilityBenchmarks.Native*(*Count: 10000)` (six cases), avoiding
 unnecessary reruns of unrelated sizes and methods.
+
+
+## Sum-seeded directional allocation follow-up
+
+The Skender-compatible sum-seeded directional engine now uses the existing compact exact dyadic arithmetic for movement selection, smoothed sums, DI/DX and ADX. Extended unpublished values, once-rounded recurrences, missed seeds and period-delayed rating presence are preserved. Five focused unit tests and ten independent comparison tests passed, including bitwise reference/reset checks over ordinary, extreme and mixed-exponent inputs. After warmup, 4,000 ordinary state updates allocate zero managed bytes. Production and benchmark builds passed. This is state-level allocation evidence, not an end-to-end timing win; the timing qualification count remains 176/401.

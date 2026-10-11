@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -86,7 +85,8 @@ public sealed class SumSeededDirectionalIndex
         private readonly Queue<double?> _history = new();
         private Bar _previous;
         private long _index = -1;
-        private BigInteger _positive,
+        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble(period);
+        private JurikDyadic _positive,
             _negative,
             _range,
             _seedDx;
@@ -97,14 +97,40 @@ public sealed class SumSeededDirectionalIndex
             _history.Clear();
             _previous = default;
             _index = -1;
-            _positive = _negative = _range = _seedDx = 0;
+            _positive = _negative = _range = _seedDx = default;
             _average = null;
         }
 
-        private static BigInteger U(double x) => ExactVarianceWindow.Units(x);
+        private static JurikDyadic Difference(double left, double right)
+        {
+            var result = JurikDyadic.FromDouble(left);
+            result.Subtract(JurikDyadic.FromDouble(right));
+            return result;
+        }
 
-        private static BigInteger R(BigInteger x, BigInteger divisor) =>
-            RocBankValue.RoundUnits(x, divisor);
+        private static JurikDyadic DivideRounded(JurikDyadic numerator, JurikDyadic denominator)
+        {
+            // Keep unpublished sums and DI finite in the extended exponent domain.
+            for (var shift = 0; ; shift += 1024)
+            {
+                var value = numerator.Ratio(denominator);
+                if (!double.IsInfinity(value))
+                {
+                    var result = JurikDyadic.FromDouble(value);
+                    if (shift != 0) result.ScaleByPowerOfTwo(shift);
+                    return result;
+                }
+                numerator.ScaleByPowerOfTwo(-1024);
+            }
+        }
+
+        private JurikDyadic Smooth(JurikDyadic previous, JurikDyadic current)
+        {
+            previous.Multiply(period - 1);
+            current.Multiply(period);
+            previous.AddExact(current);
+            return DivideRounded(previous, _divisor);
+        }
 
         private static void Publish(double? value, int slot, Span<double> output)
         {
@@ -122,74 +148,72 @@ public sealed class SumSeededDirectionalIndex
             double? averageOutput = null;
             if (++_index > 0)
             {
-                var up = U(bar.High) - U(_previous.High);
-                var down = U(_previous.Low) - U(bar.Low);
-                var positive = R(up > 0 && up > down ? up : BigInteger.Zero, 1);
-                var negative = R(down > 0 && down > up ? down : BigInteger.Zero, 1);
-                var range = R(
-                    BigInteger.Max(
-                        U(bar.High) - U(bar.Low),
-                        BigInteger.Max(
-                            BigInteger.Abs(U(bar.High) - U(_previous.Close)),
-                            BigInteger.Abs(U(bar.Low) - U(_previous.Close))
-                        )
-                    ),
-                    1
-                );
+                var up = Difference(bar.High, _previous.High);
+                var down = Difference(_previous.Low, bar.Low);
+                var dominance = up;
+                dominance.Subtract(down);
+                var positive = up.Sign > 0 && dominance.Sign > 0 ? up.Rounded() : default;
+                var negative = down.Sign > 0 && dominance.Sign < 0 ? down.Rounded() : default;
+                var trueRange = FearGreedWindow.TrueRange(bar.High, bar.Low, _previous.Close);
+                var range = JurikDyadic.FromDouble(trueRange.Mantissa);
+                if (trueRange.UpperShift != 0) range.ScaleByPowerOfTwo(trueRange.UpperShift);
                 if (_index <= period)
                 {
-                    _positive += positive;
-                    _negative += negative;
-                    _range += range;
+                    _positive.AddExact(positive);
+                    _negative.AddExact(negative);
+                    _range.AddExact(range);
                     if (_index == period)
                     {
-                        _positive = R(_positive, 1);
-                        _negative = R(_negative, 1);
-                        _range = R(_range, 1);
+                        _positive = _positive.Rounded();
+                        _negative = _negative.Rounded();
+                        _range = _range.Rounded();
                     }
                 }
                 else
                 {
-                    _positive = R(_positive * (period - 1) + positive * period, period);
-                    _negative = R(_negative * (period - 1) + negative * period, period);
-                    _range = R(_range * (period - 1) + range * period, period);
+                    _positive = Smooth(_positive, positive);
+                    _negative = Smooth(_negative, negative);
+                    _range = Smooth(_range, range);
                 }
-                if (_index >= period && !_range.IsZero)
+                if (_index >= period && _range.Sign != 0)
                 {
-                    var pdi = R((100 * _positive) << 1074, _range);
-                    var mdi = R((100 * _negative) << 1074, _range);
-                    var dx = (pdi + mdi).IsZero
-                        ? 0
-                        : ExactMeanAccumulator.UnitRatio(
-                            (100 * BigInteger.Abs(pdi - mdi)) << 1074,
-                            pdi + mdi
-                        );
-                    Publish(ExactMeanAccumulator.UnitRatio(pdi, 1), 0, output);
-                    Publish(ExactMeanAccumulator.UnitRatio(mdi, 1), 1, output);
+                    var pdi = _positive;
+                    var mdi = _negative;
+                    pdi.Multiply(100);
+                    mdi.Multiply(100);
+                    pdi = DivideRounded(pdi, _range);
+                    mdi = DivideRounded(mdi, _range);
+                    var total = pdi;
+                    total.AddExact(mdi);
+                    var delta = pdi;
+                    delta.Subtract(mdi);
+                    delta.Multiply(delta.Sign < 0 ? -100 : 100);
+                    var dx = total.Sign == 0 ? 0 : delta.Ratio(total);
+                    Publish(pdi.Mean(1), 0, output);
+                    Publish(mdi.Mean(1), 1, output);
                     Publish(dx, 2, output);
                     var seedIndex = 2L * period - 1;
                     if (_index <= seedIndex)
                     {
-                        _seedDx += U(dx);
+                        _seedDx.Add(dx);
                         if (_index == seedIndex)
-                            _average = ExactMeanAccumulator.UnitRatio(_seedDx, period);
+                            _average = _seedDx.Ratio(_divisor);
                     }
                     else if (_average.HasValue)
-                        _average = ExactMeanAccumulator.UnitRatio(
-                            U(_average.Value) * (period - 1) + U(dx),
-                            period
-                        );
+                    {
+                        var sum = JurikDyadic.FromDouble(_average.Value);
+                        sum.Multiply(period - 1);
+                        sum.Add(dx);
+                        _average = sum.Ratio(_divisor);
+                    }
                     averageOutput = _average;
                     Publish(averageOutput, 3, output);
                     if (prior.HasValue && averageOutput.HasValue)
-                        Publish(
-                            ExactMeanAccumulator.UnitRatio(
-                                U(prior.Value) + U(averageOutput.Value),
-                                2
-                            ),
-                            4,
-                            output
-                        );
+                    {
+                        var midpoint = JurikDyadic.FromDouble(prior.Value);
+                        midpoint.Add(averageOutput.Value);
+                        Publish(midpoint.Ratio(JurikDyadic.FromDouble(2)), 4, output);
+                    }
                 }
             }
             _previous = bar;
