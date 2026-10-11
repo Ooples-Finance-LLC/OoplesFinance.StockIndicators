@@ -79,7 +79,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
                            ('SharedGeneratedStateBenchmarks.BuilderFull(Operation: "MinMax", Count: 10000)', 'MinMax'),
                            ('SharedGeneratedStateBenchmarks.BuilderFull(Operation: "TRange", Count: 10000)', 'TRange'),
                            ('SharedRecursiveStateBenchmarks.BuilderFull(Operation: "Ema", Count: 10000)', 'Ema'),
-                           ('SharedRecursiveStateBenchmarks.BuilderFull(Operation: "Ad", Count: 10000)', 'Ad')]:
+                           ('SharedRecursiveStateBenchmarks.BuilderFull(Operation: "Ad", Count: 10000)', 'Ad'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "Mom", Count: 10000)', 'Mom'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "RocP", Count: 10000)', 'RocP'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "Roc", Count: 10000)', 'Roc'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "RocR", Count: 10000)', 'RocR'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "RocR100", Count: 10000)', 'RocR100')]:
             with self.subTest(pair=pair):
                 result = inventory(self.root, [self.qualification(name)])
                 row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.' + pair)

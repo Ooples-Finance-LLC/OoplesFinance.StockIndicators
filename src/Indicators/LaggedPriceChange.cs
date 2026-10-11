@@ -116,33 +116,50 @@ public sealed class LaggedPriceChange
             }
             var previous = _history.Dequeue();
             _history.Enqueue(bar.Close);
-            if (kind is PriceChangeKind.Gain or PriceChangeKind.Loss)
-            {
-                var positive = kind == PriceChangeKind.Gain;
-                if (positive ? bar.Close <= previous : bar.Close >= previous)
-                    return 0;
-                var difference = new ExactMeanAccumulator();
-                difference.Add(bar.Close, positive ? 1 : -1);
-                difference.Add(previous, positive ? -1 : 1);
-                return difference.Mean(1);
-            }
-            if (kind != PriceChangeKind.Difference && previous == 0)
-                return 0;
-            var scale = kind is PriceChangeKind.Percent or PriceChangeKind.RatioPercent ? 100 : 1;
-            var numerator = new ExactMeanAccumulator();
-            numerator.Add(bar.Close, scale);
-            if (
-                kind
-                is PriceChangeKind.Difference
-                    or PriceChangeKind.Fraction
-                    or PriceChangeKind.Percent
-            )
-                numerator.Add(previous, -scale);
-            if (kind == PriceChangeKind.Difference)
-                return numerator.Mean(1);
-            var denominator = new ExactMeanAccumulator();
-            denominator.Add(previous);
-            return numerator.Ratio(denominator);
+            return Calculate(bar.Close, previous, kind);
         }
+    }
+
+    internal static double Calculate(double current, double previous, PriceChangeKind kind)
+    {
+#if !NETFRAMEWORK
+        // A difference or quotient of two finite doubles already rounds the
+        // complete formula once. Exact cancellation has canonical positive zero.
+        if (kind == PriceChangeKind.Difference)
+            return current == previous ? 0 : current - previous; // NOSONAR: S1244 - Exact equality defines canonical zero.
+        if (kind == PriceChangeKind.Gain) return current <= previous ? 0 : current - previous;
+        if (kind == PriceChangeKind.Loss) return current >= previous ? 0 : previous - current;
+        if (kind == PriceChangeKind.Ratio) return current == 0 || previous == 0 ? 0 : current / previous;
+        if (kind == PriceChangeKind.Fraction && previous != 0
+            && RoundedBalanceOfPower.TryExactDifference(current, previous, out var change))
+            return change == 0 ? 0 : change / previous;
+#endif
+        if (kind is PriceChangeKind.Gain or PriceChangeKind.Loss)
+        {
+            var positive = kind == PriceChangeKind.Gain;
+            if (positive ? current <= previous : current >= previous)
+                return 0;
+            var difference = new ExactMeanAccumulator();
+            difference.Add(current, positive ? 1 : -1);
+            difference.Add(previous, positive ? -1 : 1);
+            return difference.Mean(1);
+        }
+        if (kind != PriceChangeKind.Difference && previous == 0)
+            return 0;
+        var scale = kind is PriceChangeKind.Percent or PriceChangeKind.RatioPercent ? 100 : 1;
+        var numerator = new ExactMeanAccumulator();
+        numerator.Add(current, scale);
+        if (
+            kind
+            is PriceChangeKind.Difference
+                or PriceChangeKind.Fraction
+                or PriceChangeKind.Percent
+        )
+            numerator.Add(previous, -scale);
+        if (kind == PriceChangeKind.Difference)
+            return numerator.Mean(1);
+        var denominator = new ExactMeanAccumulator();
+        denominator.Add(previous);
+        return numerator.Ratio(denominator);
     }
 }

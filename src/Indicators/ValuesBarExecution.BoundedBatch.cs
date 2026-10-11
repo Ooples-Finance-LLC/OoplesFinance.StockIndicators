@@ -10,6 +10,7 @@ internal static partial class ValuesBarExecution
         Wma average => Math.Max(1, average.Length),
         WilliamsR range => Math.Max(1, range.Length),
         RollingPriceSum sum => sum.Period,
+        LaggedPriceChange change => change.Period + 1,
         EngulfingPattern => 3,
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
@@ -21,6 +22,7 @@ internal static partial class ValuesBarExecution
         Wma average => new WmaValueState(Math.Max(1, average.Length), count),
         WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
         RollingPriceSum sum => new SumValueState(sum.Period, count),
+        LaggedPriceChange change => new LaggedValueState(change.Period, count, change.Kind),
         EngulfingPattern => new EngulfingPattern.State(),
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
