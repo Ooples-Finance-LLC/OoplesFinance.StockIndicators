@@ -124,6 +124,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_hull_qualification_preserves_quan_identity(self):
+        self.write()
+        api = 'QuanTAlib.Hma'
+        path = self.qualification(f'SharedHullBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_mode_qualification_keeps_native_namespace(self):
         self.write()
         api = 'QuanTAlib.Mode'

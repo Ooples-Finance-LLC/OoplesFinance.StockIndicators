@@ -10,12 +10,20 @@ internal static partial class ValuesBarExecution
             or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
+        || HullReplayWindow(indicator) > 0
         || DetailedDeviationWindow(indicator) > 0
         || AroonWindow(indicator) > 0
         || WeightedWindowPeriod(indicator) > 0
         || PercentileCandlePeriod(indicator) > 0
         || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0
         || TrendReversalWindow(indicator) > 0;
+
+    private static int HullReplayWindow(IIndicator indicator)
+    {
+        if (indicator is not HullWindow hull) return 0;
+        long size = (long)hull.Period + hull.RootPeriod - 1;
+        return size <= int.MaxValue ? (int)size : 0;
+    }
 
     private static int DetailedDeviationWindow(IIndicator indicator)
     {
@@ -86,7 +94,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or StandardDeviationWithDetails or RateOfChangeWithValidity) return 512;
+        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or StandardDeviationWithDetails or HullWindow or RateOfChangeWithValidity) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
@@ -417,6 +425,27 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private struct HullKernel(HullWindow.State state, BoundedOutput target) : IBoundedKernel<HullKernel>
+    {
+        private readonly double[] _scratch = new double[2];
+        private int _index = target.Origin;
+        public static HullKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var hull = (HullWindow)indicator;
+            return new(new(hull.Period, hull.HalfPeriod, hull.RootPeriod,
+                hull.Convention == HullWindowConvention.ExpandingFloor), target);
+        }
+        public double Update(in Bar bar)
+        {
+            state.Update(in bar, _scratch);
+            int index = _index++;
+            // Only the primary value can overflow; the secondary is a presence bit.
+            // Seeded synthetic prefixes have expired before the first published bar.
+            if (index >= target.WriteStart) target.Values[1][index] = _scratch[1];
+            return _scratch[0];
+        }
+    }
+
     private struct DetailedDeviationKernel(StandardDeviationWithDetails.State state, BoundedOutput target) : IBoundedKernel<DetailedDeviationKernel>
     {
         private readonly double[] _scratch = new double[8];
@@ -475,6 +504,8 @@ internal static partial class ValuesBarExecution
         WindowAroon when AroonWindow(indicator) > 0 => FillBoundedWindow<AroonKernel>(source, output, indicator, AroonWindow(indicator), cancellation, owned),
         RollingPercentile { HasFractionalFullRank: true } percentile => FillBoundedWindow<PercentileKernel>(source, output, indicator, percentile.Period, cancellation, owned),
         RateOfChangeWithValidity { Period: < int.MaxValue } change => FillBoundedWindow<ValidReturnKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
+        HullWindow when HullReplayWindow(indicator) > 0 =>
+            FillBoundedWindow<HullKernel>(source, output, indicator, HullReplayWindow(indicator), cancellation, owned),
         StandardDeviationWithDetails when DetailedDeviationWindow(indicator) > 0 =>
             FillBoundedWindow<DetailedDeviationKernel>(source, output, indicator, DetailedDeviationWindow(indicator), cancellation, owned),
         WindowDispersion dispersion => FillBoundedWindow<DispersionKernel>(source, output, indicator, dispersion.Period, cancellation, owned),
