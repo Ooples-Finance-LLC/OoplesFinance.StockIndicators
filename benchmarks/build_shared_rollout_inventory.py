@@ -70,6 +70,9 @@ def inventory(root: Path, qualifications=()):
             if operation and any(name in row['FullName'] for name in ('SharedShadowDojiBenchmarks.', 'SharedBasicCandleBenchmarks.', 'SharedTrendCandleBenchmarks.')):
                 api = operation[1]
                 prefix = 'Trady.Candlestick.'
+            elif operation and 'SharedBodyShadowBenchmarks.' in row['FullName']:
+                api = operation[1]
+                prefix = 'TaLib.Candles.'
             elif operation and any(name in row['FullName'] for name in
                                  ('SharedPointwiseBenchmarks.', 'SharedRegressionBenchmarks.', 'SharedPairInputBenchmarks.',
                                   'SharedPriceProjectionBenchmarks.', 'SharedGeneratedStateBenchmarks.',

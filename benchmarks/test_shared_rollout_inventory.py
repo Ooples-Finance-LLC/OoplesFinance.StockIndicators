@@ -99,6 +99,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         self.assertEqual(4, len(row['current'][0]['methods']))
         self.assertFalse(row['current'][0]['full_clear_win'])
 
+    def test_body_shadow_qualification_uses_talib_candles_namespace(self):
+        self.write()
+        for operation in ('BeltHold', 'Marubozu', 'ClosingMarubozu', 'SpinningTop', 'HighWave', 'LongLine', 'ShortLine'):
+            path = self.qualification(f'SharedBodyShadowBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Candles.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
     def test_candle_qualification_uses_trady_namespace(self):
         self.write()
         for operation in ('DragonflyDoji', 'GravestoneDoji', 'Doji', 'Bullish', 'Bearish', 'UpTrend', 'DownTrend', 'BullishEngulfingPattern', 'BearishEngulfingPattern'):

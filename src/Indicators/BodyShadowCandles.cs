@@ -215,12 +215,21 @@ internal sealed class BodyShadowCandleState(int period, BodyShadowCandleKind kin
         var bottom = Math.Min(bar.Open, bar.Close);
         _bodySum.Add(top, direction);
         _bodySum.Add(bottom, -direction);
-        _rangeSum.Add(bar.High, direction);
-        _rangeSum.Add(bar.Low, -direction);
-        _shadowSum.Add(bar.High, direction);
-        _shadowSum.Add(top, -direction);
-        _shadowSum.Add(bottom, direction);
-        _shadowSum.Add(bar.Low, -direction);
+        // Only maintain the statistic read by this fixed pattern. In particular,
+        // spinning-top/high-wave compare current shadows with the current body;
+        // neither needs a rolling range or shadow sum.
+        if (kind is BodyShadowCandleKind.Marubozu or BodyShadowCandleKind.ClosingMarubozu or BodyShadowCandleKind.BeltHold)
+        {
+            _rangeSum.Add(bar.High, direction);
+            _rangeSum.Add(bar.Low, -direction);
+        }
+        else if (kind is BodyShadowCandleKind.LongLine or BodyShadowCandleKind.ShortLine)
+        {
+            _shadowSum.Add(bar.High, direction);
+            _shadowSum.Add(top, -direction);
+            _shadowSum.Add(bottom, direction);
+            _shadowSum.Add(bar.Low, -direction);
+        }
     }
 
     private bool Matches(in Bar bar)
