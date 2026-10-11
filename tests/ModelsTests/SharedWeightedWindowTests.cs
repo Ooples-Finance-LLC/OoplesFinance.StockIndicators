@@ -1,6 +1,7 @@
 using AiDotNet.Tensors.Helpers;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
+using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
@@ -10,6 +11,24 @@ public sealed class SharedWeightedWindowTests : IDisposable
     private readonly int _priorDop = CpuParallelSettings.MaxDegreeOfParallelism;
     public SharedWeightedWindowTests() => CpuParallelSettings.MaxDegreeOfParallelism = 8;
     public void Dispose() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
+
+    [Fact]
+    public void CachedKernelResetMatchesIndependentPrefixAndZeroMassReferences()
+    {
+        var bars = Fixture(41);
+        foreach (double[] weights in new double[][] { [1, -1], [0, -0d, 1, -1, double.Epsilon, .75, double.MaxValue], [.25, 3, -.5] })
+        {
+            var expected = NormalizedKernelReference.Values(bars, weights.Length,
+                lag => ReferenceFraction.FromDouble(weights[lag]));
+            var state = new NormalizedKernelState(weights.Length, lag => weights[lag]);
+            for (int replay = 0; replay < 3; replay++)
+            {
+                state.Reset();
+                for (int i = 0; i < bars.Length; i++)
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i]), BitConverter.DoubleToInt64Bits(state.Update(in bars[i])));
+            }
+        }
+    }
 
     [Theory]
     [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)]

@@ -78,24 +78,33 @@ internal struct ExactMeanAccumulator
         AddLarge(new BigInteger(term._small) * weight, term._scale);
     }
 
-    internal void AddProduct(double left, double right, int weight = 1)
+    internal readonly struct ProductFactor
     {
-        static (long Mantissa, int Scale) Decode(double value)
+        internal readonly long Mantissa;
+        internal readonly int Scale;
+
+        internal ProductFactor(double value)
         {
             var bits = BitConverter.DoubleToInt64Bits(value);
             var exponent = (int)((bits >> 52) & 2047);
             if (exponent == 2047) throw new ArithmeticException("An exact finite product requires finite inputs.");
             var mantissa = (bits & ((1L << 52) - 1)) + (exponent == 0 ? 0 : 1L << 52);
-            return (bits < 0 ? -mantissa : mantissa, Math.Max(0, exponent - 1));
+            if (mantissa == 0) { Mantissa = 0; Scale = 0; return; }
+            // Fixed coefficients and retained prices can reuse this exact decoding.
+            var zeros = TrailingBinaryZeros(mantissa);
+            Mantissa = (bits < 0 ? -mantissa : mantissa) >> zeros;
+            Scale = Math.Max(0, exponent - 1) + zeros;
         }
-        var a = Decode(left); var b = Decode(right);
+    }
+
+    internal void AddFactor(ProductFactor value) => AddSmall(value.Mantissa, value.Scale);
+
+    internal void AddProduct(double left, double right, int weight = 1) =>
+        AddProduct(new ProductFactor(left), new ProductFactor(right), weight);
+
+    internal void AddProduct(ProductFactor a, ProductFactor b, int weight = 1)
+    {
         if (a.Mantissa == 0 || b.Mantissa == 0 || weight == 0) return;
-        // Removing powers of two is exact and lets ordinary prices times integral
-        // volume stay in the allocation-free signed-integer representation.
-        var zeros = TrailingBinaryZeros(a.Mantissa);
-        a.Mantissa >>= zeros; a.Scale += zeros;
-        zeros = TrailingBinaryZeros(b.Mantissa);
-        b.Mantissa >>= zeros; b.Scale += zeros;
         var scale = a.Scale + b.Scale - 1074;
         if (Math.Abs(a.Mantissa) <= long.MaxValue / Math.Abs(b.Mantissa))
         {

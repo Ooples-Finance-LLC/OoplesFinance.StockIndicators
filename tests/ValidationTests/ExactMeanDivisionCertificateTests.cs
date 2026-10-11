@@ -7,6 +7,21 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactMeanDivisionCertificateTests
 {
     [Fact]
+    public void ExtendedCompactDivisionRoundsBothSignsOfHalfwayCasesToEven()
+    {
+        foreach (int sign in new[] { -1, 1 })
+        foreach (int offset in new[] { 0, 1 })
+        {
+            var sum = new ExactMeanAccumulator();
+            sum.Add(sign * (1 + offset * Math.ScaleB(1, -52)));
+            sum.Add(sign * Math.ScaleB(1, -53));
+            // A 54-bit numerator shifted by 19 bits cannot use ulong division.
+            var expected = Math.ScaleB(sign * (1 + (offset == 0 ? 0 : Math.ScaleB(1, -51))), -20);
+            Bits(expected, sum.Mean(1 << 20));
+        }
+    }
+
+    [Fact]
     public void ExtendedCompactDivisionDoesNotAllocate()
     {
         static double Run() => ExactMeanAccumulator.ScaledRatio(305235, long.MaxValue - 24, 0);

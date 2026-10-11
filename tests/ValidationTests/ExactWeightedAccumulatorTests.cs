@@ -6,6 +6,39 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactWeightedAccumulatorTests
 {
     [Fact]
+    public void CachedProductFactorsPreserveWideProductsSignsAndIntegerWeights()
+    {
+        double[] inputs = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,
+            Math.BitIncrement(1d), -Math.BitDecrement(1d), .125];
+        foreach (double left in inputs)
+        foreach (double right in inputs)
+        foreach (int weight in new[] { int.MinValue, -1, 0, 1, int.MaxValue })
+        {
+            var sum = new ExactMeanAccumulator();
+            sum.AddProduct(new ExactMeanAccumulator.ProductFactor(left), new ExactMeanAccumulator.ProductFactor(right), weight);
+            var exact = ReferenceFraction.FromDouble(left) * ReferenceFraction.FromDouble(right) * new ReferenceFraction(weight);
+            Assert.Equal(BitConverter.DoubleToInt64Bits((exact / new ReferenceFraction(17)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(sum.Mean(17)));
+            sum.AddFactor(new ExactMeanAccumulator.ProductFactor(.1));
+            exact += ReferenceFraction.FromDouble(.1);
+            Assert.Equal(BitConverter.DoubleToInt64Bits((exact / new ReferenceFraction(17)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(sum.Mean(17)));
+        }
+    }
+
+    [Fact]
+    public void NonfiniteProductOperandsAreRejectedEvenWithZeroFactorsOrWeight()
+    {
+        foreach (double invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        foreach (int weight in new[] { 0, 1 })
+        {
+            var sum = new ExactMeanAccumulator();
+            Assert.Throws<ArithmeticException>(() => sum.AddProduct(0d, invalid, weight));
+            Assert.Throws<ArithmeticException>(() => sum.AddProduct(invalid, 0d, weight));
+        }
+    }
+
+    [Fact]
     public void CompactScaledRatiosDoNotAllocate()
     {
         // Cancel denominator powers of two before sizing the division workspace.
