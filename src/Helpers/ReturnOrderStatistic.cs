@@ -33,7 +33,7 @@ internal sealed class ReturnOrderStatistic : IDisposable
 
     public void Dispose() { _window.Clear(); _root = null; }
 
-    private readonly struct ReturnKey : IComparable<ReturnKey>
+    internal readonly struct ReturnKey : IComparable<ReturnKey>
     {
         private readonly double _current, _previous;
         internal ReturnKey(double current, double previous)
@@ -46,9 +46,11 @@ internal sealed class ReturnOrderStatistic : IDisposable
         }
         public int CompareTo(ReturnKey other)
         {
-            var difference = new ExactMeanAccumulator();
-            difference.AddProduct(_current, other._previous);
-            difference.AddProduct(other._current, _previous, -1);
+            var difference = JurikDyadic.FromDouble(_current);
+            difference.Multiply(other._previous);
+            var right = JurikDyadic.FromDouble(other._current);
+            right.Multiply(_previous);
+            difference.Subtract(right);
             return difference.Sign;
         }
     }
