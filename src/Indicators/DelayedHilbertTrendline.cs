@@ -69,8 +69,8 @@ public sealed class DelayedHilbertTrendline : MultiOutputIndicatorBase, IIndicat
         {
             output.Clear();
             _index++;
-            var price = ExactVarianceWindow.Units(bar.Close);
-            _phase.Update(bar.Close);
+            var price = JurikDyadic.FromDouble(bar.Close);
+            _phase.Update(price);
             if (_index >= 37)
             {
                 _period = .33 * _phase.Period + .67 * _period;
@@ -78,7 +78,7 @@ public sealed class DelayedHilbertTrendline : MultiOutputIndicatorBase, IIndicat
                 _trend.Update(price, count);
                 if (_index >= 63L + suppression)
                 {
-                    output[0] = ExactMeanAccumulator.UnitRatio(_trend.RoundedUnits, 1);
+                    output[0] = _trend.Average.Mean(1);
                     output[1] = 1;
                 }
             }
