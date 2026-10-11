@@ -43,7 +43,7 @@ class InventoryDiagnosticsTests(unittest.TestCase):
 
     def test_native_ema_qualification_keeps_both_namespaces(self):
         self.write()
-        for api in ('QuanTAlib.Ema', 'Skender.GetEma'):
+        for api in ('QuanTAlib.Ema', 'Skender.GetEma', 'QuanTAlib.Dema', 'QuanTAlib.Tema'):
             path = self.qualification(f'SharedNativeEmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
