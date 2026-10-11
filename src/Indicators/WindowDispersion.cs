@@ -115,27 +115,45 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
     ) : IIndicatorState
     {
         private readonly Queue<double> _history = new();
-        private readonly BigInteger _scale = ExactVarianceWindow.Units(multiplier);
+        private readonly (long Integer, int Exponent) _scale = Decompose(multiplier);
+        // Exact integer moments on the finest grid observed since reset. The
+        // exponent is separate: 12.5 needs integer 25, not 1,078 integer bits.
+        private int _grid;
+        private bool _hasGrid;
         private BigInteger _sum,
             _squares,
             _current;
 
         internal int Count => _history.Count;
-        internal double Mean => Count == 0 ? 0 : ExactMeanAccumulator.UnitRatio(_sum, Count);
+        internal double Mean => Count == 0 ? 0 : ExactMeanAccumulator.ScaledRatio(_sum, Count, _grid);
         internal bool HasVariance => Count > 1 && Count * _squares > _sum * _sum;
 
         public void Reset()
         {
             _history.Clear();
             _sum = _squares = _current = 0;
+            _grid = 0;
+            _hasGrid = false;
         }
 
         public double Update(in Bar bar)
         {
-            var value = ExactVarianceWindow.Units(bar.Close);
+            var parts = Decompose(bar.Close);
+            if (parts.Integer != 0 && (!_hasGrid || parts.Exponent < _grid))
+            {
+                if (_hasGrid)
+                {
+                    var shift = _grid - parts.Exponent;
+                    _sum <<= shift;
+                    _squares <<= 2 * shift;
+                }
+                _grid = parts.Exponent;
+                _hasGrid = true;
+            }
+            var value = OnGrid(parts);
             if (_history.Count == period)
             {
-                var expired = ExactVarianceWindow.Units(_history.Dequeue());
+                var expired = OnGrid(Decompose(_history.Dequeue()));
                 _sum -= expired;
                 _squares -= expired * expired;
             }
@@ -148,27 +166,33 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
 
         internal double Reading(WindowDispersionOutput selected)
         {
-            if (_history.Count < 2 || _scale.IsZero)
+            if (_history.Count < 2 || _scale.Integer == 0)
                 return 0;
             var n = new BigInteger(_history.Count);
             var variance = n * _squares - _sum * _sum;
             var denominator = n * (sample ? n - 1 : n);
             if (selected == WindowDispersionOutput.Variance)
-                return ExactMeanAccumulator.UnitRatio(variance * _scale, denominator << 2148);
+                return ExactMeanAccumulator.ScaledRatio(variance * _scale.Integer, denominator,
+                    2 * _grid + _scale.Exponent);
             if (selected == WindowDispersionOutput.StandardDeviation)
-                return _scale.Sign
-                    * ExactPopulationDeviation.RootRatio(
-                        variance * _scale * _scale,
-                        denominator << 2148
+                return Math.Sign(_scale.Integer)
+                    * ExactPopulationDeviation.ScaledRootRatio(
+                        variance * _scale.Integer * _scale.Integer,
+                        denominator, 2 * (_grid + _scale.Exponent)
                     );
             if (variance.IsZero)
                 return 0;
-            var deviation = (n * _current - _sum) * _scale;
+            var deviation = (n * _current - _sum) * _scale.Integer;
             return deviation.Sign
-                * ExactPopulationDeviation.RootRatio(
+                * ExactPopulationDeviation.ScaledRootRatio(
                     deviation * deviation * denominator,
-                    n * n * variance
+                    n * n * variance, 2 * _scale.Exponent
                 );
         }
+
+        private BigInteger OnGrid((long Integer, int Exponent) value) => value.Integer == 0
+            ? BigInteger.Zero : new BigInteger(value.Integer) << (value.Exponent - _grid);
+
+        private static (long Integer, int Exponent) Decompose(double value) => ExactMeanAccumulator.DecomposeFinite(value);
     }
 }

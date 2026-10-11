@@ -1,0 +1,44 @@
+[
+  {
+    "Pair": "Skender.GetFractal",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 32465.5662109375,
+    "AllocatedBytes": 189741
+  },
+  {
+    "Pair": "Skender.GetFractal",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 25461.86669921875,
+    "AllocatedBytes": 36942
+  },
+  {
+    "Pair": "Skender.GetFractal",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 277912.3232421875,
+    "AllocatedBytes": 108395
+  },
+  {
+    "Pair": "Skender.GetFractal",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 443000.098046875,
+    "AllocatedBytes": 1846238
+  },
+  {
+    "Pair": "Skender.GetFractal",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 323537.357421875,
+    "AllocatedBytes": 324950
+  },
+  {
+    "Pair": "Skender.GetFractal",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 3904805.34375,
+    "AllocatedBytes": 1080580
+  }
+]

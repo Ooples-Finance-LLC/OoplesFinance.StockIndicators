@@ -69,6 +69,10 @@ public sealed class StockIndicatorBuilder
         var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
         if (!source.IsFinite) return await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
 #if !NETFRAMEWORK
+        if (_executionBackend == IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
+            && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } gpuSource
+            && Indicators.ValuesBarExecution.SupportsGpu(_configuredIndicators))
+            return ExecutePointwiseGpu(gpuSource, null, cancellationToken);
         if (_executionBackend != IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
             && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } direct
             && Indicators.ValuesBarExecution.Supports(_configuredIndicators))
@@ -77,9 +81,31 @@ public sealed class StockIndicatorBuilder
             LastExecution = new(IndicatorExecutionBackend.Cpu, null, "CPU values execution without retained bar history.");
             return values;
         }
+        if (CanUseDirectFusedExecution
+            && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } fusedSource
+            && Indicators.FusedBarExecution.TryCreate(_configuredIndicators, fusedSource.Length) is { } plan)
+        {
+            var execution = plan.Execute(fusedSource, null, cancellationToken, _executionBackend);
+            var outputs = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+            int warmup = 0;
+            foreach (var indicator in _configuredIndicators)
+            {
+                var values = plan.Values(indicator);
+                for (int slot = 0; slot < indicator.Outputs.Count; slot++)
+                    outputs[indicator.Outputs[slot]] = values[slot];
+                warmup = Math.Max(warmup, Math.Max(indicator.WarmupBars, indicator.Source?.WarmupBars ?? 0));
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+            Indicators.IBarSnapshot? latest = fusedSource.Length == 0 ? null
+                : new Indicators.BarSnapshot(plan.LatestBar, fusedSource.Length - 1, outputs,
+                    fusedSource.Length >= warmup && outputs.Values.All(v => !double.IsNaN(v[fusedSource.Length - 1])));
+            var result = new Indicators.LatestOnlyIndicatorRun(outputs, fusedSource.Length, latest);
+            LastExecution = execution;
+            return result;
+        }
 #endif
         // Preserve the established route for arbitrary graphs, sources, warmup and
-        // required GPU execution. Do not keep its temporary history in this builder.
+        // unsupported execution plans. Do not keep temporary history in this builder.
         var previousSource = _configuredSource;
         try
         {
@@ -89,6 +115,20 @@ public sealed class StockIndicatorBuilder
         catch { LastExecution = null; throw; }
         finally { _configuredSource = previousSource; }
     }
+#if !NETFRAMEWORK
+    private Indicators.IIndicatorRun ExecutePointwiseGpu(Indicators.Bar[] source, Indicators.OwnedBarHistory? history,
+        CancellationToken cancellation)
+    {
+        cancellation.ThrowIfCancellationRequested();
+        if (source.Length == 0) throw new NotSupportedException("An empty run has no device work to execute.");
+        if (!Indicators.TensorsGpuExecution.TryGet(out var gpu, out var reason))
+            throw new NotSupportedException(reason);
+        var result = Indicators.ValuesBarExecution.Execute(source, _configuredIndicators, cancellation, history, gpu);
+        LastExecution = new(IndicatorExecutionBackend.Gpu, gpu!.DeviceName,
+            "Fused FP64 pointwise kernel executed through AiDotNet.Tensors OpenCL.");
+        return result;
+    }
+#endif
     private int _nextId;
 
     // Legacy execution can invoke customer callbacks which change the typed
@@ -275,9 +315,26 @@ public sealed class StockIndicatorBuilder
         {
             execution = fused.Execute(direct!, bars, cancellationToken, _executionBackend);
         }
+#if !NETFRAMEWORK
+        else if (_executionBackend == IndicatorExecutionBackend.Gpu && warmupCount == 0 && direct is not null
+            && CanUseDirectFusedExecution && Indicators.ValuesBarExecution.SupportsGpu(_configuredIndicators))
+        {
+            var result = ExecutePointwiseGpu(direct, bars, cancellationToken);
+            _configuredSource = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() => CreateOwnedBatch(bars)), bars);
+            return result;
+        }
+        else if (_executionBackend != IndicatorExecutionBackend.Gpu && warmupCount == 0 && direct is not null
+            && CanUseDirectFusedExecution && Indicators.ValuesBarExecution.SupportsOwned(_configuredIndicators))
+        {
+            var result = Indicators.ValuesBarExecution.Execute(direct, _configuredIndicators, cancellationToken, bars);
+            _configuredSource = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() => CreateOwnedBatch(bars)), bars);
+            LastExecution = new(IndicatorExecutionBackend.Cpu, null, "Fused CPU values execution with owned history.");
+            return result;
+        }
+#endif
         else if (_executionBackend == IndicatorExecutionBackend.Gpu)
         {
-            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin and Asin.Of(Sma) runs without warmup sources or legacy callbacks.");
+            throw new NotSupportedException("GPU execution currently supports plain typed array-backed SMA, Asin, Asin.Of(Sma), and standalone candle arithmetic, rounding transforms or engulfing patterns without warmup sources or legacy callbacks.");
         }
         else if (source is Indicators.ISynchronousBarSource synchronous)
         {
@@ -371,6 +428,26 @@ public sealed class StockIndicatorBuilder
             }
 
             handles[indicator] = slots;
+        }
+
+        // Only reviewed, sealed state families can omit the legacy runtime. Check
+        // the entire graph: a source/component can carry callbacks or require the
+        // built-in evaluator even when the configured root does not.
+        if (warmupCount == 0 && direct is not null && CanUseDirectFusedExecution
+            && reachable.Count != 0 && reachable.All(CanExecuteWithoutLegacyRuntime))
+        {
+            var engine = new Indicators.CustomIndicatorEngine(bars, _ => null, finiteInputValidated: true);
+            var outputs = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+            foreach (var indicator in _configuredIndicators)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var values = engine.Compute(indicator);
+                for (var slot = 0; slot < indicator.Outputs.Count; slot++)
+                    outputs[indicator.Outputs[slot]] = values[slot];
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+            LastExecution = new(IndicatorExecutionBackend.Cpu, null, "CPU state graph execution without legacy runtime.");
+            return new Indicators.IndicatorRun(null, outputs, bars, 0, reachable.Max(indicator => indicator.WarmupBars));
         }
 
         var runtime = Build();
@@ -476,6 +553,9 @@ public sealed class StockIndicatorBuilder
             throw;
         }
     }
+
+    private static bool CanExecuteWithoutLegacyRuntime(Indicators.IIndicator indicator) =>
+        indicator is Indicators.RollingPriceSum || Indicators.SharedCpuStates.Contains(indicator);
 
     private static StockData CreateOwnedBatch(IReadOnlyList<Indicators.Bar> bars)
     {

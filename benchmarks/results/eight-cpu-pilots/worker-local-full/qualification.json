@@ -1,0 +1,103 @@
+{
+  "baselineCommit": "95c52e0d",
+  "environment": "Windows, .NET 10, AMD Ryzen 9 3950X (16 physical / 32 logical cores)",
+  "tests": {
+    "focusedPassed": 261,
+    "additionalConcurrentOwnershipPassed": 1,
+    "hardwareIntrinsicsDisabledPassed": 213,
+    "failed": 0,
+    "skipped": 0
+  },
+  "benchmarkRows": 180,
+  "runs": [
+    {
+      "label": "ring-candidate",
+      "rows": 64
+    },
+    {
+      "label": "scratch-candidate",
+      "rows": 68
+    },
+    {
+      "label": "policy-builder-check",
+      "rows": 16
+    },
+    {
+      "label": "policy-paired-final",
+      "rows": 32
+    }
+  ],
+  "dependency": "Published AiDotNet.Tensors 0.134.4",
+  "reuse": [
+    "CpuParallelSettings.LightweightParallel<TLocal> manages worker scratch lifetime",
+    "System.Buffers.ArrayPool<double> supplies private scratch; published series are never pooled"
+  ],
+  "policy": {
+    "smaLatestCap": 8,
+    "smaFullCap": 4,
+    "asinCap": 8,
+    "smaMinimumCount": 65536,
+    "asinMinimumCount": 8192,
+    "globalMaxDopRespected": true,
+    "longPeriodsReduceParticipants": true
+  },
+  "result": "Shared kernels now accelerate independent Full-history SMA and Asin. Worker-local scratch improves SMA over the rejected direct-ring prototype. LatestOnly SMA remains behind the strongest parallel native result in the final paired sweep.",
+  "pairedSmaSummary": [
+    {
+      "case": "SmaGrid",
+      "method": "BuilderFull",
+      "workerBudget": 8,
+      "actualCap": 4,
+      "milliseconds": 0.7720309375,
+      "bytes": 5605789
+    },
+    {
+      "case": "SmaGrid",
+      "method": "BuilderLatestOnly",
+      "workerBudget": 8,
+      "actualCap": 8,
+      "milliseconds": 0.17312076171875,
+      "bytes": 806311
+    },
+    {
+      "case": "SmaGrid",
+      "method": "BestNativeParallel",
+      "parameters": "Count=100000&Workers=8&Case=SmaGrid",
+      "milliseconds": 0.1378834228515625,
+      "bytes": 804080
+    },
+    {
+      "case": "SmaDecimal",
+      "method": "BuilderFull",
+      "workerBudget": 8,
+      "actualCap": 4,
+      "milliseconds": 0.798571875,
+      "bytes": 5605549
+    },
+    {
+      "case": "SmaDecimal",
+      "method": "BuilderLatestOnly",
+      "workerBudget": 8,
+      "actualCap": 8,
+      "milliseconds": 0.1782656005859375,
+      "bytes": 806288
+    },
+    {
+      "case": "SmaDecimal",
+      "method": "BestNativeParallel",
+      "parameters": "Count=100000&Workers=4&Case=SmaDecimal",
+      "milliseconds": 0.14849943359375,
+      "bytes": 802248
+    }
+  ],
+  "limitations": [
+    "Steady-state short runs; earlier builder-only SMA means were lower and do not establish a strongest-native win.",
+    "At 100k/period20 the scratch pool needs roughly 1 MiB of capacity per active SMA dispatch. It can retain buffers across sizes/threads; allocation-per-operation excludes warmed retained scratch and cold pool growth.",
+    "Full history retains an owned bar array; LatestOnly and native values-only payloads are smaller.",
+    "Native arms omit validation, snapshots, and Asin presence. Native parallel decimal SMA permits 1e-10 tolerance; builder output is checked against its existing bitwise contract.",
+    "Asin presence remains a fully materialized double column. No deferred-output allocation is counted as a win.",
+    "GPU regression checks passed; this batch adds no GPU crossover claim or general indicator rollout.",
+    "Worker policy is measured on this CPU, not universal hardware qualification. Pool initialization and external dispatch contention are excluded.",
+    "Ring-candidate SMA rows are rejected evidence. Its Asin implementation is retained; final SMA conclusions use policy-paired-final rows."
+  ]
+}

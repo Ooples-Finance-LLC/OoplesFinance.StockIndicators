@@ -1,0 +1,254 @@
+[
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7993.438269042968,
+    "AllocatedBytes": 58506
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7126.265701293945,
+    "AllocatedBytes": 10913
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 851164.8828125,
+    "AllocatedBytes": 772940
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 94485.64575195312,
+    "AllocatedBytes": 563052
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 56268.20146484375,
+    "AllocatedBytes": 82919
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 9161628.181818184,
+    "AllocatedBytes": 7638241
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7874.475622558593,
+    "AllocatedBytes": 58602
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7100.9991455078125,
+    "AllocatedBytes": 11009
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 462283.9765625,
+    "AllocatedBytes": 493701
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 101872.0361328125,
+    "AllocatedBytes": 563132
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 56863.596875,
+    "AllocatedBytes": 83015
+  },
+  {
+    "Pair": "Trady.Indicator.SimpleMovingAverage.Tuple",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 5267425.48125,
+    "AllocatedBytes": 4839788
+  },
+  {
+    "Pair": "Skender.GetSma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7691.7242431640625,
+    "AllocatedBytes": 58506
+  },
+  {
+    "Pair": "Skender.GetSma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 6867.772415161133,
+    "AllocatedBytes": 10913
+  },
+  {
+    "Pair": "Skender.GetSma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 51765.770263671875,
+    "AllocatedBytes": 84548
+  },
+  {
+    "Pair": "Skender.GetSma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 108230.55849609376,
+    "AllocatedBytes": 562962
+  },
+  {
+    "Pair": "Skender.GetSma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 56727.16748046875,
+    "AllocatedBytes": 82919
+  },
+  {
+    "Pair": "Skender.GetSma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 647731.6123046875,
+    "AllocatedBytes": 840920
+  },
+  {
+    "Pair": "Skender.GetSma.Tuple",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7927.335339355469,
+    "AllocatedBytes": 58562
+  },
+  {
+    "Pair": "Skender.GetSma.Tuple",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7108.7186279296875,
+    "AllocatedBytes": 10969
+  },
+  {
+    "Pair": "Skender.GetSma.Tuple",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 54155.81579589844,
+    "AllocatedBytes": 92404
+  },
+  {
+    "Pair": "Skender.GetSma.Tuple",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 94430.70908203124,
+    "AllocatedBytes": 563003
+  },
+  {
+    "Pair": "Skender.GetSma.Tuple",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 56578.21496582031,
+    "AllocatedBytes": 82975
+  },
+  {
+    "Pair": "Skender.GetSma.Tuple",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 739957.03359375,
+    "AllocatedBytes": 920903
+  },
+  {
+    "Pair": "TaLib.Functions.Sma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 8102.048986816406,
+    "AllocatedBytes": 58506
+  },
+  {
+    "Pair": "TaLib.Functions.Sma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7066.813342285156,
+    "AllocatedBytes": 10913
+  },
+  {
+    "Pair": "TaLib.Functions.Sma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 2562.9964385986327,
+    "AllocatedBytes": 8056
+  },
+  {
+    "Pair": "TaLib.Functions.Sma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 90460.03356933594,
+    "AllocatedBytes": 562989
+  },
+  {
+    "Pair": "TaLib.Functions.Sma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 56599.78056640625,
+    "AllocatedBytes": 82919
+  },
+  {
+    "Pair": "TaLib.Functions.Sma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 23760.38654785156,
+    "AllocatedBytes": 80057
+  },
+  {
+    "Pair": "QuanTAlib.Sma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 20942.18857421875,
+    "AllocatedBytes": 58506
+  },
+  {
+    "Pair": "QuanTAlib.Sma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 7104.466857910156,
+    "AllocatedBytes": 10914
+  },
+  {
+    "Pair": "QuanTAlib.Sma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 54409.1279296875,
+    "AllocatedBytes": 219825
+  },
+  {
+    "Pair": "QuanTAlib.Sma",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 95398.82348632812,
+    "AllocatedBytes": 563070
+  },
+  {
+    "Pair": "QuanTAlib.Sma",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 55793.79423828125,
+    "AllocatedBytes": 82919
+  },
+  {
+    "Pair": "QuanTAlib.Sma",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 576603.59375,
+    "AllocatedBytes": 2225029
+  }
+]

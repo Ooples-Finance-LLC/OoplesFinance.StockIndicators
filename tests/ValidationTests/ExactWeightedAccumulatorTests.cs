@@ -6,6 +6,35 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactWeightedAccumulatorTests
 {
     [Fact]
+    public void CompactScaledRatiosDoNotAllocate()
+    {
+        // Cancel denominator powers of two before sizing the division workspace.
+        static double Run() => ExactMeanAccumulator.ScaledRatio(305235, 31920, 0);
+        for (var i = 0; i < 100; i++) Run();
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        double total = 0;
+        for (var i = 0; i < 1000; i++) total += Run();
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(9562.5, total);
+    }
+
+    [Fact]
+    public void ScaledRatiosMatchIndependentRationalsAtSignedIntegerBoundaries()
+    {
+        var boundary = System.Numerics.BigInteger.One << 63;
+        foreach (var numerator in new[] { -boundary - 1, -boundary, -boundary + 1, -1, 0, 1, boundary - 1, boundary, boundary + 1 })
+        foreach (var denominator in new[] { System.Numerics.BigInteger.One, 3, boundary - 1, boundary, boundary + 1 })
+        foreach (var power in new[] { -2149, -1075, -1074, -63, 0, 63, 1023, 2047 })
+        {
+            var expected = new ReferenceFraction(numerator) / new ReferenceFraction(denominator);
+            var scale = new ReferenceFraction(System.Numerics.BigInteger.One << Math.Abs(power));
+            expected = power < 0 ? expected / scale : expected * scale;
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected.ToDouble()),
+                BitConverter.DoubleToInt64Bits(ExactMeanAccumulator.ScaledRatio(numerator, denominator, power)));
+        }
+    }
+
+    [Fact]
     public void WideWeightedMeansRoundMidpointsToEven()
     {
         // Multiplication by this odd divisor forces a >64-bit significand,
@@ -80,5 +109,51 @@ public sealed class ExactWeightedAccumulatorTests
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
         Assert.Equal(0, allocated);
         Assert.Equal(100031.25, result);
+    }
+
+    [Fact]
+    public void NormalizedProductsAndRatioDenominatorsDoNotAllocate()
+    {
+        static double Run()
+        {
+            var numerator = new ExactMeanAccumulator();
+            var denominator = new ExactMeanAccumulator();
+            numerator.AddProduct(10.125, 3); numerator.AddProduct(11.25, -1);
+            denominator.Add(3); denominator.Add(-1);
+            return numerator.Ratio(denominator);
+        }
+        for (var i = 0; i < 100; i++) Run();
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        double total = 0;
+        for (var i = 0; i < 1000; i++) total += Run();
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(9562.5, total);
+    }
+
+    [Fact]
+    public void CanonicalOperandsPreserveProductsBigWeightsAndMultiplication()
+    {
+        var random = new Random(517);
+        for (var trial = 0; trial < 256; trial++)
+        {
+            var actual = new ExactMeanAccumulator();
+            var expected = new ReferenceFraction(0);
+            for (var term = 0; term < 8; term++)
+            {
+                var left = Math.ScaleB(random.Next(-4096, 4097) / 8d, random.Next(-1000, 1001));
+                var right = Math.ScaleB(random.Next(-4096, 4097) / 8d, random.Next(-1000, 1001));
+                var weight = term % 2 == 0 ? int.MinValue : int.MaxValue;
+                actual.AddProduct(left, right, weight);
+                expected += ReferenceFraction.FromDouble(left) * ReferenceFraction.FromDouble(right) * new ReferenceFraction(weight);
+            }
+            var bigWeight = (System.Numerics.BigInteger.One << 90) + 3;
+            actual.Add(.125, bigWeight);
+            expected += ReferenceFraction.FromDouble(.125) * new ReferenceFraction(bigWeight);
+            actual.Multiply(-.5);
+            expected *= ReferenceFraction.FromDouble(-.5);
+            var divisor = trial + 1;
+            Assert.Equal(BitConverter.DoubleToInt64Bits((expected / new ReferenceFraction(divisor)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(actual.Mean(divisor)));
+        }
     }
 }

@@ -12,20 +12,31 @@ internal sealed class OwnedBarHistory : IReadOnlyList<Bar>
     private readonly List<Bar[]> _chunks = new();
     private int _expectedCount;
     private Bar[]? _contiguous;
+    private bool _complete;
     public int Count { get; private set; }
     internal int ChunkCount => _contiguous is null ? _chunks.Count : Count == 0 ? 0 : ((Count - 1) >> ChunkShift) + 1;
 
     // The fused caller transfers a fresh fully initialized array; it is never pooled.
     internal void TakeOwnedArray(Bar[] owned)
     {
-        if (Count != 0 || _contiguous is not null) throw new InvalidOperationException("History already owns bars.");
+        if (Count != 0 || _complete) throw new InvalidOperationException("History already owns bars.");
         _contiguous = owned;
         Count = owned.Length;
+        _complete = true;
+    }
+
+    // Fixed chunks are filled privately by fused workers before publication.
+    internal void TakeOwnedChunks(Bar[][] chunks, int count)
+    {
+        if (Count != 0 || _complete) throw new InvalidOperationException("History already owns bars.");
+        _chunks.AddRange(chunks);
+        Count = count;
+        _complete = true;
     }
 
     private void RequireAppendable()
     {
-        if (_contiguous is not null) throw new InvalidOperationException("Contiguous history is complete.");
+        if (_complete) throw new InvalidOperationException("Owned history is complete.");
     }
 
     // Only the fused drain transfers newly allocated, fully initialized chunks.

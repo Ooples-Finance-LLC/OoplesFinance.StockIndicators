@@ -1,0 +1,447 @@
+{
+  "baselineCommit": "05156457",
+  "focus": "Independent SMA and Asin through BuildAsync with LatestOnly",
+  "tests": {
+    "focusedPassed": 242,
+    "focusedSkipped": 0,
+    "scalarFallbackPassed": 194,
+    "scalarFallbackSkipped": 0
+  },
+  "benchmarkRows": 60,
+  "maxParticipants": 4,
+  "asinThreshold": 8192,
+  "smaThreshold": 65536,
+  "scheduler": "AiDotNet.Tensors 0.134.4 CpuParallelSettings.LightweightParallel",
+  "limitations": [
+    "Full history remains default and does not receive these independent LatestOnly CPU speedups.",
+    "Native arms allocate values only; builder also validates bars and retains latest snapshot. Asin adds a full presence column.",
+    "Caller-parallelized TALib is still faster for both indicators; no strongest-competitor victory is claimed.",
+    "Decimal SMA at 100k varied from 0.224 to 0.300 ms across these runs; single-call wins are not reliable.",
+    "Parallel native SMA repeats lookback at boundaries and allows 1e-10 decimal comparison tolerance; builder is independently checked bitwise against its guarded contract.",
+    "Up to four workers and steady-state timings; tensor pool/GPU auto-detection cold initialization is excluded.",
+    "GPU behavior is regression-tested, but this batch establishes no GPU crossover.",
+    "Elevated PerfView launch was canceled; earlier non-elevated EventPipe sample identifies bounded-positive arithmetic as the main managed caller cost, not an exclusive CPU attribution."
+  ],
+  "measurements": [
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 47642.021484375,
+      "bytes": 163525
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 93273.0712890625,
+      "bytes": 80063
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 29779.501953125,
+      "bytes": 80314
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=10000&Shape=Random",
+      "nanoseconds": 46904.7998046875,
+      "bytes": 163527
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=10000&Shape=Random",
+      "nanoseconds": 150792.1484375,
+      "bytes": 80064
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=10000&Shape=Random",
+      "nanoseconds": 39947.8515625,
+      "bytes": 80314
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=65536&Shape=Grid",
+      "nanoseconds": 327350.830078125,
+      "bytes": 1053635
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=65536&Shape=Grid",
+      "nanoseconds": 636413.359375,
+      "bytes": 525894
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=65536&Shape=Grid",
+      "nanoseconds": 243421.07421875,
+      "bytes": 527718
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=65536&Shape=Random",
+      "nanoseconds": 456675.546875,
+      "bytes": 1053986
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=65536&Shape=Random",
+      "nanoseconds": 1061611.71875,
+      "bytes": 525888
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=65536&Shape=Random",
+      "nanoseconds": 328817.67578125,
+      "bytes": 528028
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 490513.59375,
+      "bytes": 1604736
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 961172.34375,
+      "bytes": 801723
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 329459.0234375,
+      "bytes": 803742
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=100000&Shape=Random",
+      "nanoseconds": 574871.09375,
+      "bytes": 1605064
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=100000&Shape=Random",
+      "nanoseconds": 1531920.1171875,
+      "bytes": 801720
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=100000&Shape=Random",
+      "nanoseconds": 477403.59375,
+      "bytes": 803800
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=1000000&Shape=Grid",
+      "nanoseconds": 4095375.78125,
+      "bytes": 16006053
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=1000000&Shape=Grid",
+      "nanoseconds": 9327563.636363637,
+      "bytes": 8000728
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=1000000&Shape=Grid",
+      "nanoseconds": 3314016.796875,
+      "bytes": 8003506
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Builder",
+      "parameters": "Count=1000000&Shape=Random",
+      "nanoseconds": 5396100,
+      "bytes": 16006243
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeOwned",
+      "parameters": "Count=1000000&Shape=Random",
+      "nanoseconds": 15187789.285714285,
+      "bytes": 8001057
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=1000000&Shape=Random",
+      "nanoseconds": 4412158.75,
+      "bytes": 8003056
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuBuilder",
+      "parameters": "Count=10000&Case=SmaDecimal",
+      "nanoseconds": 285173.0078125,
+      "bytes": 563804
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuLatestOnlyBuilder",
+      "parameters": "Count=10000&Case=SmaDecimal",
+      "nanoseconds": 56886.572265625,
+      "bytes": 82968
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Competitor",
+      "parameters": "Count=10000&Case=SmaDecimal",
+      "nanoseconds": 25000.550537109375,
+      "bytes": 80057
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuBuilder",
+      "parameters": "Count=10000&Case=SmaGrid",
+      "nanoseconds": 96620.25390625,
+      "bytes": 563240
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuLatestOnlyBuilder",
+      "parameters": "Count=10000&Case=SmaGrid",
+      "nanoseconds": 44710.443115234375,
+      "bytes": 82969
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Competitor",
+      "parameters": "Count=10000&Case=SmaGrid",
+      "nanoseconds": 25387.392578125,
+      "bytes": 80057
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuBuilder",
+      "parameters": "Count=100000&Case=SmaDecimal",
+      "nanoseconds": 3077026.875,
+      "bytes": 5606590
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuLatestOnlyBuilder",
+      "parameters": "Count=100000&Case=SmaDecimal",
+      "nanoseconds": 224239.296875,
+      "bytes": 805849
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Competitor",
+      "parameters": "Count=100000&Case=SmaDecimal",
+      "nanoseconds": 274959.0625,
+      "bytes": 801655
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuBuilder",
+      "parameters": "Count=100000&Case=SmaGrid",
+      "nanoseconds": 984459.375,
+      "bytes": 5605471
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "CpuLatestOnlyBuilder",
+      "parameters": "Count=100000&Case=SmaGrid",
+      "nanoseconds": 274794.53125,
+      "bytes": 804516
+    },
+    {
+      "run": "candidate-as-initial",
+      "method": "Competitor",
+      "parameters": "Count=100000&Case=SmaGrid",
+      "nanoseconds": 252144.140625,
+      "bytes": 801623
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "Builder",
+      "parameters": "Count=10000&Shape=Decimal",
+      "nanoseconds": 57416.93359375,
+      "bytes": 82940
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeOwned",
+      "parameters": "Count=10000&Shape=Decimal",
+      "nanoseconds": 22700.6103515625,
+      "bytes": 80057
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=10000&Shape=Decimal",
+      "nanoseconds": 11642.840576171875,
+      "bytes": 80312
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "Builder",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 44651.4453125,
+      "bytes": 82942
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeOwned",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 23056.9091796875,
+      "bytes": 80057
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 13079.7900390625,
+      "bytes": 80312
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "Builder",
+      "parameters": "Count=100000&Shape=Decimal",
+      "nanoseconds": 272504.453125,
+      "bytes": 805955
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeOwned",
+      "parameters": "Count=100000&Shape=Decimal",
+      "nanoseconds": 266451.2890625,
+      "bytes": 801739
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=100000&Shape=Decimal",
+      "nanoseconds": 154044.8046875,
+      "bytes": 803190
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "Builder",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 247418.45703125,
+      "bytes": 804430
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeOwned",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 278114.5703125,
+      "bytes": 801737
+    },
+    {
+      "run": "sma-serial-grid",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 146013.203125,
+      "bytes": 803248
+    },
+    {
+      "run": "sma-final",
+      "method": "Builder",
+      "parameters": "Count=10000&Shape=Decimal",
+      "nanoseconds": 56754.58984375,
+      "bytes": 82940
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeOwned",
+      "parameters": "Count=10000&Shape=Decimal",
+      "nanoseconds": 22740.130615234375,
+      "bytes": 80057
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=10000&Shape=Decimal",
+      "nanoseconds": 11524.505615234375,
+      "bytes": 80312
+    },
+    {
+      "run": "sma-final",
+      "method": "Builder",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 44756.048583984375,
+      "bytes": 82942
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeOwned",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 22925.5859375,
+      "bytes": 80058
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=10000&Shape=Grid",
+      "nanoseconds": 11591.30859375,
+      "bytes": 80312
+    },
+    {
+      "run": "sma-final",
+      "method": "Builder",
+      "parameters": "Count=100000&Shape=Decimal",
+      "nanoseconds": 300489.453125,
+      "bytes": 805903
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeOwned",
+      "parameters": "Count=100000&Shape=Decimal",
+      "nanoseconds": 253135.859375,
+      "bytes": 801655
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=100000&Shape=Decimal",
+      "nanoseconds": 155387.548828125,
+      "bytes": 803259
+    },
+    {
+      "run": "sma-final",
+      "method": "Builder",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 225016.25,
+      "bytes": 805896
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeOwned",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 264622.75390625,
+      "bytes": 801708
+    },
+    {
+      "run": "sma-final",
+      "method": "NativeParallelOwned",
+      "parameters": "Count=100000&Shape=Grid",
+      "nanoseconds": 127032.861328125,
+      "bytes": 803133
+    }
+  ]
+}

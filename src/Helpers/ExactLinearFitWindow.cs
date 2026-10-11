@@ -8,44 +8,78 @@ internal sealed class ExactLinearFitWindow : IDisposable
     private readonly PooledRingBuffer<double>? _window;
     private readonly Queue<double>? _observed;
     private readonly int _length;
+    private readonly bool _compact;
+    private int _grid;
+    private bool _hasGrid;
     private BigInteger _sum, _weighted, _index;
 
-    internal ExactLinearFitWindow(int length, bool observedHistory = false)
+    internal ExactLinearFitWindow(int length, bool observedHistory = false, bool compact = false)
     {
         _length = Math.Max(1, length);
+        _compact = compact;
         if (observedHistory) _observed = new(); else _window = new PooledRingBuffer<double>(_length);
     }
 
     internal Fit Next(double value, bool isFinal)
     {
-        var current = ExactVarianceWindow.Units(value);
+        var grid = _grid;
+        var hasGrid = _hasGrid;
+        BigInteger current;
+        if (_compact)
+        {
+            var parts = Parts(value);
+            if (parts.Integer != 0 && (!hasGrid || parts.Grid < grid))
+            { grid = parts.Grid; hasGrid = true; }
+            current = parts.Integer == 0 ? BigInteger.Zero : new BigInteger(parts.Integer) << (parts.Grid - grid);
+        }
+        else current = ExactVarianceWindow.Units(value);
+        // Preview can discover a finer grid, but must not commit it or rescale
+        // the stored moments until isFinal is true.
+        var shift = _hasGrid ? _grid - grid : 0;
+        var priorSum = _sum << shift;
+        var priorWeighted = _weighted << shift;
         var observed = _observed?.Count ?? _window!.Count;
         var full = observed == _length;
-        var expired = full ? ExactVarianceWindow.Units(_observed is null ? _window![0] : _observed.Peek()) : BigInteger.Zero;
+        var expired = BigInteger.Zero;
+        if (full)
+        {
+            var old = _observed is null ? _window![0] : _observed.Peek();
+            if (_compact)
+            {
+                var parts = Parts(old);
+                expired = parts.Integer == 0 ? BigInteger.Zero : new BigInteger(parts.Integer) << (parts.Grid - grid);
+            }
+            else expired = ExactVarianceWindow.Units(old);
+        }
         var count = full ? observed : observed + 1;
-        var sum = _sum + current - expired;
-        var weighted = full ? _weighted - _sum + expired + (count - 1) * current : _weighted + (count - 1) * current;
+        var sum = priorSum + current - expired;
+        var weighted = full ? priorWeighted - priorSum + expired + (count - 1) * current : priorWeighted + (count - 1) * current;
         var n = new BigInteger(count);
         var spread = n * n - 1;
         var covariance = 2 * weighted - (n - 1) * sum;
-        var fit = new Fit(sum, covariance, n, spread, _index);
+        var fit = new Fit(sum, covariance, n, spread, _index, grid);
         if (isFinal)
         {
             _window?.TryAdd(value, out _);
             if (_observed is not null) { if (full) _observed.Dequeue(); _observed.Enqueue(value); }
             _sum = sum; _weighted = weighted; _index++;
+            _grid = grid; _hasGrid = hasGrid;
         }
         return fit;
     }
 
     internal readonly struct Fit
     {
-        private readonly BigInteger _sum, _covariance, _n, _spread, _index;
-        internal Fit(BigInteger sum, BigInteger covariance, BigInteger n, BigInteger spread, BigInteger index)
-        { _sum = sum; _covariance = covariance; _n = n; _spread = spread; _index = index; }
+        private readonly BigInteger _compactSum, _compactCovariance, _n, _spread, _index;
+        private readonly int _grid;
+        // Existing compound consumers explicitly request minimum-unit arithmetic.
+        private BigInteger _sum => _compactSum << _grid;
+        private BigInteger _covariance => _compactCovariance << _grid;
+        internal Fit(BigInteger sum, BigInteger covariance, BigInteger n, BigInteger spread, BigInteger index, int grid = 0)
+        { _compactSum = sum; _compactCovariance = covariance; _n = n; _spread = spread; _index = index; _grid = grid; }
         private double At(BigInteger twiceCenteredPosition) => _n.IsOne
-            ? ExactMeanAccumulator.UnitRatio(_sum, BigInteger.One)
-            : ExactMeanAccumulator.UnitRatio(_sum * _spread + 3 * _covariance * twiceCenteredPosition, _n * _spread);
+            ? ExactMeanAccumulator.ScaledRatio(_compactSum, BigInteger.One, _grid - 1074)
+            : ExactMeanAccumulator.ScaledRatio(_compactSum * _spread + 3 * _compactCovariance * twiceCenteredPosition, _n * _spread, _grid - 1074);
         // Exact endpoint gap, retained as minimum-unit numerator / denominator for normalization.
         internal (BigInteger Numerator, BigInteger Denominator) Difference(Fit other)
         {
@@ -83,7 +117,7 @@ internal sealed class ExactLinearFitWindow : IDisposable
             return RocBankValue.RoundUnits(numerator, denominator << 2148);
         }
         internal int Count => (int)_n;
-        internal double Slope => _n.IsOne ? 0 : ExactMeanAccumulator.UnitRatio(6 * _covariance, _n * _spread);
+        internal double Slope => _n.IsOne ? 0 : ExactMeanAccumulator.ScaledRatio(6 * _compactCovariance, _n * _spread, _grid - 1074);
         internal double Last => At(_n - 1);
         // The endpoint's coefficient absolute sum is below two. Round with one
         // extra exponent bit only when publication as a double would overflow.
@@ -106,9 +140,9 @@ internal sealed class ExactLinearFitWindow : IDisposable
         internal double WindowPosition(int position) => At(2 * new BigInteger(position) - (_n - 1));
         internal double EndpointWeights(int period, bool averageDuringWarmup)
         {
-            if (averageDuringWarmup && _n < period) return ExactMeanAccumulator.UnitRatio(_sum, _n);
+            if (averageDuringWarmup && _n < period) return ExactMeanAccumulator.ScaledRatio(_compactSum, _n, _grid - 1074);
             var massFactor = 4 * new BigInteger(period) + 1 - 3 * _n;
-            return ExactMeanAccumulator.UnitRatio(_sum * massFactor + 3 * _covariance, _n * massFactor);
+            return ExactMeanAccumulator.ScaledRatio(_compactSum * massFactor + 3 * _compactCovariance, _n * massFactor, _grid - 1074);
         }
         internal double GlobalIntercept => At(_n - 1 - 2 * _index);
         // Normalize the exact residual before rounding, even when the hidden endpoint overflows.
@@ -133,6 +167,20 @@ internal sealed class ExactLinearFitWindow : IDisposable
 
     }
 
-    internal void Reset() { _window?.Clear(); _observed?.Clear(); _sum = default; _weighted = default; _index = default; }
+    private static (long Integer, int Grid) Parts(double value)
+    {
+        var bits = BitConverter.DoubleToInt64Bits(value);
+        var exponent = (int)((bits >> 52) & 2047);
+        if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
+        var integer = bits & ((1L << 52) - 1);
+        if (exponent != 0) integer |= 1L << 52;
+        if (integer == 0) return (0, 0);
+        var grid = exponent == 0 ? 0 : exponent - 1;
+        var zeros = ExactMeanAccumulator.TrailingBinaryZeros(integer);
+        integer >>= zeros; grid += zeros;
+        return (bits < 0 ? -integer : integer, grid);
+    }
+
+    internal void Reset() { _window?.Clear(); _observed?.Clear(); _sum = default; _weighted = default; _index = default; _grid = 0; _hasGrid = false; }
     public void Dispose() { _window?.Dispose(); _observed?.Clear(); }
 }

@@ -111,7 +111,7 @@ public sealed class WindowLinearRegression : IndicatorBase, IIndicatorValidation
         : IIndicatorState,
             IDisposable
     {
-        private readonly ExactLinearFitWindow _fit = new(period, observedHistory: true);
+        private readonly ExactLinearFitWindow _fit = new(period, observedHistory: true, compact: true);
 
         public void Reset() => _fit.Reset();
 

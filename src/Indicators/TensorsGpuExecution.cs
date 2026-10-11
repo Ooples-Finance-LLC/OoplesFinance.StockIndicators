@@ -5,13 +5,13 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 // Reuses the published Tensors OpenCL runtime and typed FP64 buffers. Financial
 // semantics stay here; no private backend access or duplicated native bindings.
-internal sealed class TensorsGpuExecution
+internal sealed partial class TensorsGpuExecution
 {
     private static readonly Lazy<(TensorsGpuExecution? Engine, string Reason)> Shared = new(Create);
     private readonly OpenClContext _context;
     private readonly object _gate = new();
     private readonly Dictionary<(int Period, bool Sma, bool Asin, bool FromMean, bool Presence), CompiledKernel> _kernels = new();
-    // One reusable workspace, bounded to 40 MiB (host input + up to four FP64 buffers).
+    // One reusable workspace, bounded to 56 MiB (two host inputs + five FP64 buffers).
     // Published host arrays are never cached or pooled.
     private const int MaxRetainedCount = 1_048_576;
     private Workspace? _workspace;
@@ -50,7 +50,7 @@ internal sealed class TensorsGpuExecution
         }
     }
 
-    internal void Execute(FusedBarExecution plan, Bar[] source, OwnedBarHistory history,
+    internal void Execute(FusedBarExecution plan, Bar[] source, OwnedBarHistory? history,
         bool fromMean, CancellationToken cancellation)
     {
         // Binding, reusable scratch and readback share the package's in-order queue.
@@ -122,14 +122,17 @@ internal sealed class TensorsGpuExecution
     {
         internal int Count => count;
         internal double[] Input { get; } = GC.AllocateUninitializedArray<double>(count);
-        private OpenClBuffer<double>? _input, _sma, _asin, _presence;
+        private double[]? _rightInput;
+        internal double[] RightInput => _rightInput ??= GC.AllocateUninitializedArray<double>(count);
+        private OpenClBuffer<double>? _input, _sma, _asin, _presence, _right;
         internal OpenClBuffer<double> DeviceInput => _input ??= new(context, count);
         internal OpenClBuffer<double> Sma => _sma ??= new(context, count);
         internal OpenClBuffer<double> Asin => _asin ??= new(context, count);
         internal OpenClBuffer<double> Presence => _presence ??= new(context, count);
+        internal OpenClBuffer<double> Right => _right ??= new(context, count);
         public void Dispose()
         {
-            _input?.Dispose(); _sma?.Dispose(); _asin?.Dispose(); _presence?.Dispose();
+            _input?.Dispose(); _sma?.Dispose(); _asin?.Dispose(); _presence?.Dispose(); _right?.Dispose();
         }
     }
 
