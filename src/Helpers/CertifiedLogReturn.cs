@@ -34,6 +34,10 @@ internal static class CertifiedLogReturn
             sumHigh += Ceiling(powerHigh, odd);
             powerLow = powerLow * squareLow / scale;
             powerHigh = Ceiling(powerHigh * squareHigh, scale);
+            // Once the next power is at most one fixed-point unit, further
+            // rounded terms add no useful precision. The same geometric tail
+            // bound remains valid at this earlier truncation point.
+            if (powerHigh <= BigInteger.One) { terms = j + 1; break; }
         }
         var tail = Ceiling(powerHigh * scale, (2 * terms + 1) * (scale - squareHigh));
         return (2 * sumLow, 2 * (sumHigh + tail));
@@ -41,26 +45,27 @@ internal static class CertifiedLogReturn
 
     internal static double Of(double current, double previous)
     {
-        var n = ExactVarianceWindow.Units(Math.Abs(current));
-        var d = ExactVarianceWindow.Units(Math.Abs(previous));
-        if (n == d)
-            return 0;
-        var exponent = (int)(FrameworkCompatibility.GetBitLength(n) - FrameworkCompatibility.GetBitLength(d));
-        if (exponent >= 0 ? n < (d << exponent) : (n << -exponent) < d)
-            exponent--;
-        if (exponent < 0)
-            n <<= -exponent;
-        else
-            d <<= exponent;
-        for (var bits = 192; ; bits *= 2)
+        var currentFactor = new ExactMeanAccumulator.ProductFactor(Math.Abs(current));
+        var previousFactor = new ExactMeanAccumulator.ProductFactor(Math.Abs(previous));
+        var n = new BigInteger(currentFactor.Mantissa);
+        var d = new BigInteger(previousFactor.Mantissa);
+        int exponent = currentFactor.Scale - previousFactor.Scale;
+        if (n == d && exponent == 0) return 0;
+        // Normalize only the mantissas. Their common minimum-subnormal padding
+        // cancels, and the binary scale difference contributes exponent*log(2).
+        int adjustment = (int)(FrameworkCompatibility.GetBitLength(n) - FrameworkCompatibility.GetBitLength(d));
+        if (adjustment >= 0 ? n < (d << adjustment) : (n << -adjustment) < d) adjustment--;
+        if (adjustment < 0) n <<= -adjustment;
+        else d <<= adjustment;
+        exponent += adjustment;
+        for (var bits = 96; ; bits *= 2)
         {
-            var scale = BigInteger.One << bits;
             var core = Series(n - d, n + d, bits);
             var two = LogTwo.GetOrAdd(bits, b => Series(1, 3, b));
             var lower = core.Low + exponent * (exponent < 0 ? two.High : two.Low);
             var upper = core.High + exponent * (exponent < 0 ? two.Low : two.High);
-            var a = ExactMeanAccumulator.UnitRatio(lower << 1074, scale);
-            var b = ExactMeanAccumulator.UnitRatio(upper << 1074, scale);
+            var a = ExactMeanAccumulator.ScaledRatio(lower, BigInteger.One, -bits);
+            var b = ExactMeanAccumulator.ScaledRatio(upper, BigInteger.One, -bits);
             if (a == b) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
                 return a;
         }
