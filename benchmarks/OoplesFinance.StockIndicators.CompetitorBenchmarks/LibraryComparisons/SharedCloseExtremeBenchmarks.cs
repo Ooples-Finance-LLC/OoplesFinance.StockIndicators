@@ -74,11 +74,18 @@ public class SharedCloseExtremeBenchmarks
     }
     private QuanTAlib.AbstractBase CreateNative() => Operation == "Max"
         ? new QuanTAlib.Max(Period, 0) : new QuanTAlib.Min(Period, 0);
-    private IIndicator Create() => new DecayingWindowExtreme(Period, Operation == "Max");
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
+    internal IIndicator Create() => new DecayingWindowExtreme(Period, Operation == "Max");
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
-        return builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Close-extreme benchmark did not dispatch GPU work.");
+        }
+        return run;
     }
 }

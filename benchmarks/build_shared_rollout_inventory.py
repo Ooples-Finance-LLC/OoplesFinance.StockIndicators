@@ -76,7 +76,7 @@ def inventory(root: Path, qualifications=()):
             elif operation and 'SharedAlmaWindowBenchmarks.' in row['FullName']:
                 api = operation[1]
                 prefix = ''
-            elif operation and any(name in row['FullName'] for name in ('SharedWeightedWindowBenchmarks.', 'SharedCloseExtremeBenchmarks.')):
+            elif operation and any(name in row['FullName'] for name in ('SharedWeightedWindowBenchmarks.', 'SharedCloseExtremeBenchmarks.', 'SharedGpuCloseExtremeBenchmarks.')):
                 api = operation[1]
                 prefix = 'QuanTAlib.'
             elif operation and any(name in row['FullName'] for name in
