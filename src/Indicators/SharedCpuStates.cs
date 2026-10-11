@@ -64,6 +64,7 @@ internal static class SharedCpuStates
         typeof(ElderRayWithDetails),
         typeof(EmaDifferenceSignal),
         typeof(EndpointWeightedAverage),
+        typeof(EngulfingPattern),
         typeof(EveningDojiStarCandle),
         typeof(EveningStarCandle),
         typeof(ExpandingRegularizedEma),

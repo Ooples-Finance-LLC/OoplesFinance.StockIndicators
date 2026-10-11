@@ -64,6 +64,7 @@ def inventory(root: Path, qualifications=()):
             qualified = json.load(stream)
         cases = {}
         for row in qualified['Benchmarks']:
+            prefix = 'TaLib.Functions.'
             operation = re.search(r'Operation: "([^"]+)"', row['FullName'])
             count = re.search(r'Count: (\d+)', row['FullName'])
             if operation and any(name in row['FullName'] for name in
@@ -77,11 +78,14 @@ def inventory(root: Path, qualifications=()):
                 api = 'Var' if variance[1] == 'True' else 'StdDev'
             elif 'SharedRollingSumBenchmarks.' in row['FullName']:
                 api = 'Sum'
+            elif 'SharedEngulfingBenchmarks.' in row['FullName']:
+                api = 'Engulfing'
+                prefix = 'TaLib.Candles.'
             else:
                 raise ValueError(f'Unknown qualification format: {row["FullName"]}')
             if not count:
                 raise ValueError(f'Missing count: {row["FullName"]}')
-            key = ('TaLib.Functions.' + api, int(count[1]))
+            key = (prefix + api, int(count[1]))
             methods = cases.setdefault(key, {})
             if row['Method'] in methods:
                 raise ValueError(f'Duplicate qualification: {key}: {row["Method"]}')

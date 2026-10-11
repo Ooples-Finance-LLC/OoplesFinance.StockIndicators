@@ -144,6 +144,57 @@ public sealed class SharedBoundedWindowTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
+    [Fact]
+    public async Task EngulfingExhaustsBodyEndpointsAcrossWorkerBoundariesAndRetainsOwnership()
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            double[] endpoints = [-double.MaxValue, -1, -double.Epsilon, -0d, 0d, double.Epsilon, 1, double.MaxValue];
+            var list = new List<Bar>();
+            foreach (var a in endpoints) foreach (var b in endpoints)
+            foreach (var c in endpoints) foreach (var d in endpoints)
+            {
+                list.Add(new Bar(default, a, 1, -1, b, 1));
+                list.Add(new Bar(default, c, 1, -1, d, 1));
+            }
+            list.Add(list[0]);
+            var bars = list.ToArray();
+            var pattern = new EngulfingPattern();
+            foreach (int workers in new[] { 1, 2, 8 })
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                await CompareRoutes(bars, [pattern]);
+                await CompareRoutes(bars, [pattern, new HighestHigh(3)]);
+            }
+            foreach (int count in new[] { 0, 1, 2, 3 })
+                await CompareRoutes(bars.Take(count).ToArray(), [pattern]);
+            var builder = Build(bars, [pattern]);
+            using var saved = await builder.BuildAsync();
+            Assert.Contains("Fused CPU values", builder.LastExecution!.Reason);
+            var values = saved[pattern].ToArray();
+            var original = bars.ToArray();
+            foreach (int index in new[] { 1022, 1023, 1024, 8192 })
+            {
+                bars[index] = new Bar(default, 0, 1, 0, 1, double.NaN);
+                await CompareRoutes(bars, [pattern]);
+                bars[index] = original[index];
+            }
+            Array.Fill(bars, new Bar(default, 0, 0, 0, 0, 0));
+            using var again = await Build(bars, [pattern]).BuildAsync();
+            Assert.Equal(values, saved[pattern].ToArray());
+            int position = 0;
+            await foreach (var snapshot in saved) Assert.Equal(original[position++], snapshot.Bar);
+            using var cancel = new CancellationTokenSource(); cancel.Cancel();
+            builder = Build(bars, [pattern]);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancel.Token));
+            Assert.Null(builder.LastExecution);
+            await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
+            Assert.Null(builder.LastExecution);
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
     private static async Task CompareRoutes(Bar[] bars, IIndicator[] indicators)
     {
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())

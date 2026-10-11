@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
-        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum;
+        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern;
 
     private sealed class SumValueState(int period, int count) : IIndicatorState
     {
@@ -92,6 +92,11 @@ internal static partial class ValuesBarExecution
         public static SumKernel Create(int period, int count) => new(new(period, count));
         public double Update(in Bar bar) => state.Update(in bar);
     }
+    private readonly struct EngulfingKernel(EngulfingPattern.State state) : IBoundedKernel<EngulfingKernel>
+    {
+        public static EngulfingKernel Create(int period, int count) => new(new());
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     private static Bar FillBoundedWindow(Bar[] source, double[] output, IIndicator indicator,
         CancellationToken cancellation, Bar[]? owned) => indicator switch
@@ -101,6 +106,8 @@ internal static partial class ValuesBarExecution
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
+        // Two seed bars preserve the pattern's two-bar startup in every worker.
+        EngulfingPattern => FillBoundedWindow<EngulfingKernel>(source, output, indicator, 3, cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 
