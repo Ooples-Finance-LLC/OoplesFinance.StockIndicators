@@ -2756,3 +2756,32 @@ input fits 128 bits, retaining arbitrary precision for larger values. This
 follow-up passed 91 focused unit tests and ten volatility comparison tests. Its
 iterations allocate no scratch objects over 4,000 warmed-up calls; conversion
 and final midpoint arithmetic can still allocate. Latency remains unmeasured.
+
+
+## Allocation-only observations after shared CPU updates
+
+`--alloc-shared <operation> 10000 5` reuses the existing independently validated
+benchmark methods, prebuilt inputs and native serial/parallel implementations.
+It warms each arm ten times, counts managed allocations across all process threads,
+and retains each result through the sample before disposing it outside the sample.
+No timing is collected. Seven probe tests passed, including worker allocation
+accounting and result disposal; all five 10k fixture setups verified their outputs.
+
+Median KiB per call (five samples; production commit `24fc7e30`):
+
+| Operation | Builder Full | Builder LatestOnly | Native serial | Native parallel |
+|---|---:|---:|---:|---:|
+| Quan DEMA | 550.96 | 81.21 | 469.06 | 1838.43 |
+| Quan TEMA | 551.01 | 81.26 | 469.08 | 1838.55 |
+| Quan QEMA | 850.45 | 380.70 | 2033.41 | 8884.43 |
+| Quan Historical | 4060.05 | 3590.30 | 4200.43 | 4211.11 |
+| Quan Realized | 4097.91 | 3628.16 | 469.39 | 1840.87 |
+
+Full retains additional OHLCV history. Realized volatility remains an allocation
+loss despite the shared improvements. The raw samples, including observed
+variation, are in `results/shared-rollout/allocation-probes/recent-cpu.json`.
+These allocation-only observations do not replace BenchmarkDotNet timing evidence
+or raise the 176/401 direct qualification count. The targeted queued volatility
+campaign selects `*SharedLogVolatilityBenchmarks.BuilderLatestOnly(*Count: 10000)`
+and `*SharedLogVolatilityBenchmarks.Native*(*Count: 10000)` (six cases), avoiding
+unnecessary reruns of unrelated sizes and methods.
