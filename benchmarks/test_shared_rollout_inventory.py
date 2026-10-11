@@ -55,6 +55,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_wilder_qualification_preserves_all_native_mappings(self):
+        self.write()
+        for api in ('QuanTAlib.Smma', 'Skender.GetSmma', 'Trady.Indicator.ModifiedMovingAverage'):
+            path = self.qualification(f'SharedWilderAverageBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_gpu_fixed_weighted_average_maps_native_api(self):
         self.write()
         path = self.qualification('SharedGpuFixedWmaBenchmarks.BuilderFull(Operation: "Wma", Count: 1000)')
