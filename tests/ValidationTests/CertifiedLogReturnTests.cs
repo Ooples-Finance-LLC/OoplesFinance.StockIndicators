@@ -6,6 +6,20 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class CertifiedLogReturnTests
 {
     [Fact]
+    public void SignedReductionBoundariesPreserveExactRoundingAcrossBinaryScales()
+    {
+        foreach (double boundary in new[] { .75, 1.5 })
+        foreach (double value in new[] { Math.BitDecrement(boundary), boundary, Math.BitIncrement(boundary) })
+        foreach (int exponent in new[] { -1000, 0, 900 })
+        {
+            var current = Math.ScaleB(value, exponent);
+            var previous = Math.ScaleB(1, exponent);
+            Check(current, previous);
+            Check(previous, current);
+        }
+    }
+
+    [Fact]
     public void CompactNormalizationAndAdaptiveIntervalsMatchIndependentRationalLog()
     {
         double[] values = [double.Epsilon, 3 * double.Epsilon, Math.ScaleB(1, -1022),

@@ -67,12 +67,24 @@ internal static class CertifiedLogReturn
         if (adjustment < 0) n <<= -adjustment;
         else d <<= adjustment;
         exponent += adjustment;
+        // Move [1, 2) to [3/4, 3/2). The atanh argument then has magnitude
+        // at most 1/5, and small decreases no longer cancel a large log(2).
+        if (2 * n >= 3 * d) { d <<= 1; exponent++; }
+        var difference = n - d;
+        var denominator = n + d;
+        var negative = difference.Sign < 0;
+        difference = BigInteger.Abs(difference);
         for (var bits = 96; ; bits *= 2)
         {
-            var core = Series(n - d, n + d, bits);
-            var two = LogTwo.GetOrAdd(bits, b => Series(1, 3, b));
-            var lower = core.Low + exponent * (exponent < 0 ? two.High : two.Low);
-            var upper = core.High + exponent * (exponent < 0 ? two.Low : two.High);
+            var core = Series(difference, denominator, bits);
+            var lower = negative ? -core.High : core.Low;
+            var upper = negative ? -core.Low : core.High;
+            if (exponent != 0)
+            {
+                var two = LogTwo.GetOrAdd(bits, b => Series(1, 3, b));
+                lower += exponent * (exponent < 0 ? two.High : two.Low);
+                upper += exponent * (exponent < 0 ? two.Low : two.High);
+            }
             var a = ExactMeanAccumulator.ScaledRatio(lower, BigInteger.One, -bits);
             var b = ExactMeanAccumulator.ScaledRatio(upper, BigInteger.One, -bits);
             if (a == b) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
