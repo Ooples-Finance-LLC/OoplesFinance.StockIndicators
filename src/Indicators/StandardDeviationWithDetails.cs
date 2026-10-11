@@ -110,7 +110,7 @@ public sealed class StandardDeviationWithDetails
         return result;
     }
 
-    private sealed class State(int period, int? smoothingPeriod) : IMultiOutputState
+    internal sealed class State(int period, int? smoothingPeriod) : IMultiOutputState
     {
         private readonly WindowDispersion.State _statistics = new(
             period,

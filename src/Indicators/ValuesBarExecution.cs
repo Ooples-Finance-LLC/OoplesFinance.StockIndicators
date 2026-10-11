@@ -548,6 +548,7 @@ internal static partial class ValuesBarExecution
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
             Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
                 indicator is WindowAroon && slot >= 4
+                    || indicator is StandardDeviationWithDetails && slot == 5
                     || slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
@@ -555,6 +556,7 @@ internal static partial class ValuesBarExecution
             // These three presence outputs are identical by contract. Completed
             // series expose read-only spans, so one run-owned column serves all three.
             if (indicator is WindowAroon) Values[4] = Values[5] = Values[3];
+            if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
             _scratch = pointwise ? Array.Empty<double>() : new double[indicator.Outputs.Count];
             _state = indicator switch
             {
