@@ -7,7 +7,20 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue };
+            or LaggedPriceChange { Period: < int.MaxValue }
+        || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue;
+
+    private static int BodyShadowPeriod(IIndicator indicator) => indicator switch
+    {
+        MarubozuCandle c => c.Period,
+        ClosingMarubozuCandle c => c.Period,
+        BeltHoldCandle c => c.Period,
+        SpinningTopCandle c => c.Period,
+        HighWaveCandle c => c.Period,
+        LongLineCandle c => c.Period,
+        ShortLineCandle c => c.Period,
+        _ => 0
+    };
 
     private sealed class LaggedValueState(int period, int count, PriceChangeKind kind) : IIndicatorState
     {
@@ -122,6 +135,12 @@ internal static partial class ValuesBarExecution
         }
         public double Update(in Bar bar) => state.Update(in bar);
     }
+    private readonly struct BodyShadowKernel(BodyShadowCandleState state) : IBoundedKernel<BodyShadowKernel>
+    {
+        public static BodyShadowKernel Create(int period, int count, IIndicator indicator) =>
+            new((BodyShadowCandleState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     private static Bar FillBoundedWindow(Bar[] source, double[] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
@@ -134,6 +153,9 @@ internal static partial class ValuesBarExecution
         LaggedPriceChange change => FillBoundedWindow<LaggedKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
         // Two seed bars preserve the pattern's two-bar startup in every worker.
         EngulfingPattern => FillBoundedWindow<EngulfingKernel>(source, output, indicator, 3, cancellation, owned),
+        // Each predicate reads the preceding P candles, excluding the current bar.
+        _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue =>
+            FillBoundedWindow<BodyShadowKernel>(source, output, indicator, BodyShadowPeriod(indicator) + 1, cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 

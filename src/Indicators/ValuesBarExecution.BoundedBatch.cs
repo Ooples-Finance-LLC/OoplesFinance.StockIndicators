@@ -12,6 +12,7 @@ internal static partial class ValuesBarExecution
         RollingPriceSum sum => sum.Period,
         LaggedPriceChange change => change.Period + 1,
         EngulfingPattern => 3,
+        _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue => BodyShadowPeriod(indicator) + 1,
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
@@ -24,6 +25,8 @@ internal static partial class ValuesBarExecution
         RollingPriceSum sum => new SumValueState(sum.Period, count),
         LaggedPriceChange change => new LaggedValueState(change.Period, count, change.Kind),
         EngulfingPattern => new EngulfingPattern.State(),
+        _ when BodyShadowPeriod(indicator) is > 0 and < int.MaxValue =>
+            (BodyShadowCandleState)((IndicatorBase)indicator).CreateState()!,
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
