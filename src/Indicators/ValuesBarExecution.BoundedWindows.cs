@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
         || HullReplayWindow(indicator) > 0
@@ -95,7 +95,7 @@ internal static partial class ValuesBarExecution
     {
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
-        if (indicator is EndpointWeightedAverage or FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
+        if (indicator is EndpointWeightedAverage or FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
@@ -484,6 +484,22 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private struct ClassicBandsKernel(ClassicDeviationBands.SmaState state, BoundedOutput target) : IBoundedKernel<ClassicBandsKernel>
+    {
+        private readonly double[] _scratch = new double[6];
+        private int _index = target.Origin;
+        public static ClassicBandsKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new((ClassicDeviationBands)indicator), target);
+        public double Update(in Bar bar)
+        {
+            state.Update(in bar, _scratch);
+            int index = _index++;
+            if (index >= target.WriteStart)
+                for (int slot = 1; slot < _scratch.Length; slot++) target.Values[slot][index] = _scratch[slot];
+            return _scratch[0];
+        }
+    }
+
     private struct DeviationBandsKernel(WindowDeviationBands.State state, BoundedOutput target) : IBoundedKernel<DeviationBandsKernel>
     {
         private readonly double[] _scratch = new double[12];
@@ -572,6 +588,8 @@ internal static partial class ValuesBarExecution
         RateOfChangeWithValidity { Period: < int.MaxValue } change => FillBoundedWindow<ValidReturnKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
         HullWindow when HullReplayWindow(indicator) > 0 =>
             FillBoundedWindow<HullKernel>(source, output, indicator, HullReplayWindow(indicator), cancellation, owned),
+        ClassicDeviationBands { Method: ClassicAverageMethod.Sma } bands =>
+            FillBoundedWindow<ClassicBandsKernel>(source, output, indicator, bands.Period, cancellation, owned),
         WindowDeviationBands bands =>
             FillBoundedWindow<DeviationBandsKernel>(source, output, indicator, bands.Period, cancellation, owned),
         StandardDeviationWithDetails when DetailedDeviationWindow(indicator) > 0 =>

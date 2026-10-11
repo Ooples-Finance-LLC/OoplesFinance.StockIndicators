@@ -323,6 +323,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             row = next(r for r in result['pairs'] if r['pair_id'] == api)
             self.assertEqual(4, len(row['current'][0]['methods']))
 
+    def test_classic_bands_qualification_uses_explicit_native_api(self):
+        self.write()
+        api = 'TaLib.Functions.Bbands'
+        path = self.qualification(f'SharedClassicBandsBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        row = next(r for r in result['pairs'] if r['pair_id'] == api)
+        self.assertEqual(4, len(row['current'][0]['methods']))
+
     def test_qualification_paths_use_one_benchmark_root(self):
         self.write()
         path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')

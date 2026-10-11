@@ -68,7 +68,7 @@ public sealed class ClassicDeviationBands : MultiOutputIndicatorBase, IIndicator
     public override int WarmupBars => Math.Max(Period - 1, Average.WarmupBars);
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(this);
+    protected internal override object CreateState() => Method == ClassicAverageMethod.Sma ? new SmaState(this) : new State(this);
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -89,6 +89,38 @@ public sealed class ClassicDeviationBands : MultiOutputIndicatorBase, IIndicator
                     IndicatorErrorBudget.Exact
                 )
             );
+
+    // The SMA center and population deviation share the same exact window.
+    internal sealed class SmaState(ClassicDeviationBands owner) : IMultiOutputState
+    {
+        private readonly WindowDispersion.State _window = new(owner.Period, WindowDispersionOutput.StandardDeviation, false, 1);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            double deviation = _window.Update(bar);
+            if (_window.Count < owner.Period) return;
+            double center = _window.Mean;
+            // Classical averages publish their rounded integer units, canonicalizing zero.
+            output[1] = center == 0 ? 0 : center;
+            output[0] = Band(center, deviation, owner.UpperFactor, false);
+            output[2] = Band(center, deviation, owner.LowerFactor, true);
+            output[3] = output[4] = output[5] = 1;
+        }
+        private static double Band(double center, double deviation, double factor, bool lower)
+        {
+            double half = deviation * factor;
+            if (FrameworkCompatibility.IsFinite(half))
+            {
+                double value = lower ? center - half : center + half;
+                return value == 0 ? 0 : value;
+            }
+            // Extended scaled deviations can cancel with the center before publication.
+            var units = RocBankValue.RoundUnits(ExactVarianceWindow.Units(deviation)
+                * ExactVarianceWindow.Units(factor), BigInteger.One << 1074);
+            return ExactMeanAccumulator.UnitRatio(ExactVarianceWindow.Units(center) + (lower ? -units : units), 1);
+        }
+    }
 
     private sealed class State : IMultiOutputState, IDisposable
     {
