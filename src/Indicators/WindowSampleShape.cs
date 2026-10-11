@@ -111,6 +111,7 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
             outputs[1] = 1;
             if (_history.Count < (kurtosis ? 4 : 3))
                 return;
+            if (kurtosis && TrySmallKurtosis(outputs)) return;
             var n = new BigInteger(_history.Count);
             var a = n * _s2 - _s1 * _s1;
             if (a.IsZero)
@@ -138,6 +139,29 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
                         b * b * n * (n - 1),
                         a * a * a * (n - 2) * (n - 2), 0
                     );
+            }
+        }
+
+        private bool TrySmallKurtosis(Span<double> outputs)
+        {
+            if (_history.Count > 32 || _s1 < -512 || _s1 > 512 || _s2 > 8192
+                || _s3 < -131072 || _s3 > 131072 || _s4 > 2097152) return false;
+            // These moment bounds give |a| < 2^19 and |c| < 2^41. Thus
+            // |top| < 2^52 and bottom < 2^48: all integer intermediates fit
+            // Int64 and both division operands are exact binary64 integers.
+            // One hardware division therefore rounds the exact rational once.
+            checked
+            {
+                long n = _history.Count, s1 = (long)_s1, s2 = (long)_s2,
+                    s3 = (long)_s3, s4 = (long)_s4;
+                long square = s1 * s1, a = n * s2 - square;
+                if (a == 0) { outputs[1] = 0; return true; }
+                long c = n * n * n * s4 - 4 * n * s1 * (n * s3)
+                    + 6 * n * square * s2 - 3 * square * square;
+                long top = (n * n - 1) * c - 3 * (n - 1) * (n - 1) * a * a;
+                long bottom = a * a * (n - 2) * (n - 3);
+                outputs[0] = (double)top / bottom;
+                return true;
             }
         }
     }

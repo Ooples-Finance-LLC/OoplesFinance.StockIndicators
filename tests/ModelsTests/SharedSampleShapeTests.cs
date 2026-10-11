@@ -9,6 +9,32 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class SharedSampleShapeTests
 {
     [Theory]
+    [InlineData(4)] [InlineData(20)] [InlineData(32)] [InlineData(33)]
+    public void SmallKurtosisBoundsFallbackAndReentryMatchCenteredReference(int period)
+    {
+        foreach (int sign in new[] { -1, 1 })
+        foreach (int exponent in new[] { -900, 0, 900 })
+        {
+            // First 1 pins the integer grid. Runs of 16 reach the inclusive
+            // 32-bar moment bounds; 17 exceeds them, then expires from history.
+            var values = new[] { 1d }.Concat(Enumerable.Repeat(16d, 34))
+                .Concat(Enumerable.Repeat(17d, 34))
+                .Concat(Enumerable.Range(0, 40).Select(i => (double)(i % 31 - 15)))
+                .Select(v => sign * Math.ScaleB(v, exponent));
+            var bars = values.Select(v => new Bar(default, 0, 1, -1, v, 1)).ToArray();
+            var expected = SampleShapeReference.Calculate(bars, period, true);
+            var state = new WindowSampleShape.State(period, true);
+            var output = new double[2];
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(output[0]));
+                Assert.Equal(expected[i].HasValue ? 1d : 0, output[1]);
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(false)] [InlineData(true)]
     public void CompactMomentsMatchIndependentCenteredFractions(bool kurtosis)
     {
