@@ -174,6 +174,16 @@ internal static partial class ValuesBarExecution
         static abstract T Create(int period, int count, IIndicator indicator, in BoundedOutput target);
         double Update(in Bar bar);
     }
+    private readonly struct PrefixHighKernel(PrefixPriceExtremeState state) : IBoundedKernel<PrefixHighKernel>
+    {
+        public static PrefixHighKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(true));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+    private readonly struct PrefixLowKernel(PrefixPriceExtremeState state) : IBoundedKernel<PrefixLowKernel>
+    {
+        public static PrefixLowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(false));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
     private readonly struct HighKernel(PriceExtremeState state) : IBoundedKernel<HighKernel>
     {
         public static HighKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count, true));
@@ -379,6 +389,8 @@ internal static partial class ValuesBarExecution
     private static Bar FillBoundedWindow(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
+        HighestHigh high when high.Length >= source.Length => FillBoundedWindow<PrefixHighKernel>(source, output, indicator, high.Length, cancellation, owned),
+        LowestLow low when low.Length >= source.Length => FillBoundedWindow<PrefixLowKernel>(source, output, indicator, low.Length, cancellation, owned),
         HighestHigh high => FillBoundedWindow<HighKernel>(source, output, indicator, high.Length, cancellation, owned),
         LowestLow low => FillBoundedWindow<LowKernel>(source, output, indicator, low.Length, cancellation, owned),
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),

@@ -75,6 +75,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_historical_extrema_qualification_keeps_expanding_identity(self):
+        self.write()
+        for name in ('HistoricalHighest', 'HistoricalLowest', 'HistoricalHighestClose', 'HistoricalLowestClose', 'HistoricalHighestHigh', 'HistoricalLowestLow'):
+            path = self.qualification(f'SharedHistoricalExtremaBenchmarks.BuilderFull(Operation: "{name}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_alma_preserves_competitor_identity(self):
         self.write()
         for api in ('QuanTAlib.Alma', 'Skender.GetAlma'):

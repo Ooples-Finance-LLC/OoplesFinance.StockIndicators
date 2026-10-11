@@ -70,7 +70,7 @@ def inventory(root: Path, qualifications=()):
             if operation and any(name in row['FullName'] for name in ('SharedShadowDojiBenchmarks.', 'SharedBasicCandleBenchmarks.', 'SharedTrendCandleBenchmarks.', 'SharedPercentileCandleBenchmarks.', 'SharedContainmentGapBenchmarks.', 'SharedGpuContainmentGapBenchmarks.', 'SharedTrendReversalBenchmarks.')):
                 api = operation[1]
                 prefix = 'Trady.Candlestick.'
-            elif operation and 'SharedTradyExtremaBenchmarks.' in row['FullName']:
+            elif operation and any(name in row['FullName'] for name in ('SharedTradyExtremaBenchmarks.', 'SharedHistoricalExtremaBenchmarks.')):
                 api = operation[1]
                 prefix = 'Trady.Indicator.'
             elif operation and 'SharedBodyShadowBenchmarks.' in row['FullName']:

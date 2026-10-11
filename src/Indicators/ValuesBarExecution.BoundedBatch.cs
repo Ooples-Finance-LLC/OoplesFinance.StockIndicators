@@ -27,6 +27,8 @@ internal static partial class ValuesBarExecution
 
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
+        HighestHigh high when high.Length >= count => new PrefixPriceExtremeState(true),
+        LowestLow low when low.Length >= count => new PrefixPriceExtremeState(false),
         HighestHigh high => new PriceExtremeState(high.Length, count, true),
         LowestLow low => new PriceExtremeState(low.Length, count, false),
         Wma average => new WmaValueState(Math.Max(1, average.Length), count),

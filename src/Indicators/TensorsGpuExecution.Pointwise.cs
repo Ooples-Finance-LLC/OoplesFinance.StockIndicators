@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Twenty-five fixed keys; window/lag periods are arguments, never new compiled programs.
+    // Twenty-seven fixed keys; window/lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -39,7 +39,8 @@ internal sealed partial class TensorsGpuExecution
             PriceChangeKind.Loss => 10,
             PriceChangeKind.Ratio => 11,
             _ => throw new NotSupportedException("Unqualified GPU lagged operation.")
-        } : candleExtremePeriod > 0 ? indicator is HighestHigh ? 24 : 23 : priceRange is not null ? 22 : aroon is not null ? 21 : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
+        } : candleExtremePeriod >= source.Length ? indicator is HighestHigh ? 26 : 25
+            : candleExtremePeriod > 0 ? indicator is HighestHigh ? 24 : 23 : priceRange is not null ? 22 : aroon is not null ? 21 : index is not null ? secondary is not null ? 20 : index.Maximum ? 19 : 18
             : extreme is not null ? extreme.Maximum ? 17 : 16
             : midpoint is not null ? midpoint.CandleRanges ? 15 : 14
             : polarity ? indicator is BullishCandle ? 12 : 13
@@ -111,7 +112,18 @@ internal sealed partial class TensorsGpuExecution
                     kernel.SetArg(7, aroon.IncludeExtraBar ? 1 : 0); kernel.SetArg(8, aroon.OldestTie ? 1 : 0);
                 }
                 cancellation.ThrowIfCancellationRequested();
-                kernel.Enqueue(new[] { (ulong)source.Length });
+                if (operation is 25 or 26)
+                {
+                    // In-order queue: local prefixes and immutable block summaries finish
+                    // before the second dispatch combines preceding blocks.
+                    ulong blocks = ((ulong)source.Length + 255) / 256;
+                    kernel.SetArg(5, work.Sma.Handle); kernel.SetArg(6, 0);
+                    kernel.Enqueue(new[] { blocks });
+                    cancellation.ThrowIfCancellationRequested();
+                    kernel.SetArg(6, 1);
+                    kernel.Enqueue(new[] { blocks });
+                }
+                else kernel.Enqueue(new[] { (ulong)source.Length });
                 deviceOutput.CopyToHost(output[0]);
                 if (secondary is not null) work.Right.CopyToHost(output[1]);
                 if (aroon is not null)
@@ -160,6 +172,7 @@ internal sealed partial class TensorsGpuExecution
 
     private CompiledKernel CompilePointwise(int operation)
     {
+        if (operation is 25 or 26) return CompilePrefixExtreme(operation == 26);
         // OpenCL C table-ulp-double requires correctly rounded FP64 arithmetic,
         // ceil, floor and sqrt. Never enable relaxed math or flush denormals.
         var expression = operation switch

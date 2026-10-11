@@ -10,6 +10,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
+        HighestHigh high when high.Length >= count => new PrefixPriceExtremeState(true),
+        LowestLow low when low.Length >= count => new PrefixPriceExtremeState(false),
         HighestHigh high => new PriceExtremeState(high.Length, count, true),
         LowestLow low => new PriceExtremeState(low.Length, count, false),
         TrueRange => new TrueRangeValueState(),
@@ -40,6 +42,20 @@ internal static partial class ValuesBarExecution
             output[1] = _signal.Next(value, true).Publish();
         }
         public void Dispose() => _signal.Dispose();
+    }
+
+    private sealed class PrefixPriceExtremeState(bool maximum) : IIndicatorState
+    {
+        private bool _started;
+        private double _best;
+        public void Reset() { _started = false; _best = 0; }
+        public double Update(in Bar bar)
+        {
+            double value = maximum ? bar.High : bar.Low;
+            if (!_started || (maximum ? value > _best : value < _best)) _best = value;
+            _started = true;
+            return _best;
+        }
     }
 
     private sealed class PriceExtremeState(int period, int count, bool maximum) : IIndicatorState
