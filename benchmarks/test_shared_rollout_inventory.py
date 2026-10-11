@@ -35,6 +35,14 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         path.write_text(json.dumps({'Benchmarks': rows}))
         return path
 
+    def test_alma_preserves_competitor_identity(self):
+        self.write()
+        for api in ('QuanTAlib.Alma', 'Skender.GetAlma'):
+            path = self.qualification(f'SharedAlmaWindowBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
+            self.assertEqual([api], qualified)
+
     def test_missing_bars_names_file_and_benchmark(self):
         self.rows[0]['FullName'] = self.rows[0]['FullName'].replace('Bars: 1000', 'MissingCount')
         self.write()

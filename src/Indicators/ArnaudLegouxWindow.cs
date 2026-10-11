@@ -113,12 +113,14 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             ExactVarianceWindow.Units(sigma),
             2
         );
-        private double[] _weights = [];
+        private ExactMeanAccumulator.ProductCoefficient[] _weights = [];
+        private ExactMeanAccumulator _denominator;
 
         public void Reset()
         {
             _history.Clear();
             _weights = [];
+            _denominator = default;
         }
 
         private void PrepareWeights(int n)
@@ -131,17 +133,20 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                 : center >= (n - 1) * Grid ? n - 1
                 : (int)((center + Grid / 2) / Grid);
             var divisor = new BigInteger(2L * n * n) << 4296;
-            _weights = new double[n];
+            _weights = new ExactMeanAccumulator.ProductCoefficient[n];
+            _denominator = default;
             for (var i = 0; i < n; i++)
             {
                 // Difference of squares factored before multiplication: no rounded
                 // center or overflowing squared distance can create a false tie.
                 var difference = (i - peak) * Grid * ((i + (long)peak) * Grid - 2 * center);
                 var numerator = difference * _sigmaSquared;
-                _weights[i] =
+                var weight =
                     numerator >= 746 * divisor
                         ? 0
                         : Math.Exp(-ExactMeanAccumulator.UnitRatio(numerator << 1074, divisor));
+                _weights[i] = new ExactMeanAccumulator.ProductCoefficient(weight);
+                _denominator.AddFactor(_weights[i].Factor);
             }
         }
 
@@ -155,14 +160,13 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                 return;
             PrepareWeights(_history.Count);
             var numerator = new ExactMeanAccumulator();
-            var denominator = new ExactMeanAccumulator();
             var i = 0;
             foreach (var price in _history)
             {
-                numerator.AddProduct(price, _weights[i]);
-                denominator.Add(_weights[i++]);
+                var factor = new ExactMeanAccumulator.ProductFactor(price);
+                numerator.AddProduct(in factor, in _weights[i++]);
             }
-            output[0] = numerator.Ratio(denominator);
+            output[0] = numerator.Ratio(_denominator);
             output[1] = 1;
         }
     }

@@ -1,0 +1,17 @@
+{
+  "base_commit": "48b981d7",
+  "verification": {
+    "focused_tests": 15,
+    "skipped": 0,
+    "inventory_tests": 16,
+    "benchmark_cases": 20,
+    "warmups": 5,
+    "measured_iterations": 15
+  },
+  "change": "Cache decoded ProductCoefficient entries and their exact denominator when ALMA prepares a kernel. Expanding startup prepares a new kernel for each retained count; full-window startup still skips all output computation until the period fills. Reset clears both cache and history. Oldest-first accumulation and coefficient-generation arithmetic are unchanged.",
+  "adversarial_review": "Independent reference checks cover expanding/full startup, both output slots, period one and maximum period, zero/negative sigma, out-of-range finite offsets, subnormals, extrema, signed zeros and repeated full/partial resets. Builder checks cover both history modes and shared/reference evaluation. Cached denominator is passed by value to Ratio and remains unchanged between updates.",
+  "native_source": "Inspected Skender Alma.Api.cs and Alma.Series.cs at checkout afc5b9af8c9aad81aa1a773219a5256b2198cc77 and the saved QuanTAlib 1.0.0 Alma source. Skender's public tuple overload avoids quote-to-double conversion in timing. Quan recomputes weights per update; Skender computes them once. Parallel arms use the same public algorithms with P-1 seeds and validate bitwise against serial. Setup validates each library against its independent rounding contract and validates both builder outputs.",
+  "comparison": "Native prepared arrays and seed slices are outside timing. Native outputs retain raw values only; builder also returns validity flags and owned snapshots. LatestOnly retains only the latest snapshot but still returns all values/flags. BuilderReference is the current ordinary evaluator, not a pre-change baseline. No pre-change latency improvement is claimed from this campaign.",
+  "result": "Both ALMA mappings lose to native serial and parallel in both history modes at 1k and 10k. At 10k the expanding builder is about 24 ms / 26 MiB versus Quan parallel 0.92 ms / 480 KiB; full-window builder is about 23 ms / 25 MiB versus Skender parallel 0.22 ms / 994 KiB. The weighted product loop still reaches allocating BigInteger arithmetic when the exact span exceeds the 64-bit accumulator. Direct qualification rises from 87 to 89 APIs; qualification is not a performance-win claim.",
+  "remaining": "The coefficient cache does not solve the arithmetic or parallel-execution gaps. Shared 128-bit dot-product expansion awaits the requested scope decision. No GPU route is added by this batch."
+}
