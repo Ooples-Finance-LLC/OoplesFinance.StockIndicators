@@ -10,7 +10,7 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 public class SharedRollingSumBenchmarks
 {
     private const int Period = 20;
-    [Params(1_000, 10_000)] public int Count { get; set; }
+    [Params(1_000, 10_000, 100_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
     private double[] _closes = null!;
     private int _previousDop;
@@ -24,9 +24,10 @@ public class SharedRollingSumBenchmarks
         var expected = NativeSingle();
         AsinFeasibilityBenchmarks.RequireSame(expected, NativeParallel());
         foreach (var mode in new[] { IndicatorHistoryMode.Full, IndicatorHistoryMode.LatestOnly })
+        foreach (bool gpu in new[] { false, true })
         {
             var indicator = new RollingPriceSum(Period);
-            using var run = Build(indicator, mode);
+            using var run = Build(indicator, mode, gpu);
             AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].Slice(Period - 1).ToArray());
             if (run[indicator].Slice(0, Period - 1).ToArray().Any(v => v != 0))
                 throw new InvalidOperationException("Unexpected sum startup.");
@@ -35,6 +36,8 @@ public class SharedRollingSumBenchmarks
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _previousDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new RollingPriceSum(Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new RollingPriceSum(Period), IndicatorHistoryMode.LatestOnly);
+    [Benchmark] public IIndicatorRun GpuFull() => Build(new RollingPriceSum(Period), IndicatorHistoryMode.Full, true);
+    [Benchmark] public IIndicatorRun GpuLatestOnly() => Build(new RollingPriceSum(Period), IndicatorHistoryMode.LatestOnly, true);
     [Benchmark(Baseline = true)] public double[] NativeSingle()
     {
         var output = GC.AllocateUninitializedArray<double>(Count - Period + 1);
@@ -58,7 +61,15 @@ public class SharedRollingSumBenchmarks
         if (status != TALib.Core.RetCode.Success || range.Start.Value != Period - 1
             || range.End.Value - range.Start.Value != output.Length) throw new InvalidOperationException("Native sum failed.");
     }
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+            .ConfigureHistory(mode).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution!.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose(); throw new InvalidOperationException("Required GPU sum did not execute on the device.");
+        }
+        return run;
+    }
 }
