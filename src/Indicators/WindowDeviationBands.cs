@@ -135,10 +135,11 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
         private void FillFinite(double center, double half, double close, Span<double> output)
         {
             output[0] = center;
-            var upper = new ExactMeanAccumulator(); upper.Add(center); upper.Add(half);
-            var lower = new ExactMeanAccumulator(); lower.Add(center); lower.Add(half, -1);
-            output[1] = upper.Mean(1);
-            output[2] = lower.Mean(1);
+            // Each band is one correctly rounded binary64 addition. Exact zero
+            // is canonical in the accumulator contract, including signed inputs.
+            double upper = center + half, lower = center - half;
+            output[1] = upper == 0 ? 0 : upper;
+            output[2] = lower == 0 ? 0 : lower;
             output[6] = output[7] = output[8] = 1;
             if (half != 0)
             {
@@ -150,9 +151,18 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
             }
             if (center != 0)
             {
-                var width = new ExactMeanAccumulator(); width.Add(half, owner.WidthAsPercent ? 200 : 2);
-                var mean = new ExactMeanAccumulator(); mean.Add(center);
-                output[5] = width.Ratio(mean);
+                // Doubling a finite binary64 value is exact when it stays finite.
+                // A single division then rounds the ratio once. Percent scaling
+                // and overflowing doubles keep the exact numerator path.
+                double widthValue = half * 2;
+                if (!owner.WidthAsPercent && FrameworkCompatibility.IsFinite(widthValue))
+                    output[5] = widthValue == 0 ? 0 : widthValue / center;
+                else
+                {
+                    var width = new ExactMeanAccumulator(); width.Add(half, owner.WidthAsPercent ? 200 : 2);
+                    var mean = new ExactMeanAccumulator(); mean.Add(center);
+                    output[5] = width.Ratio(mean);
+                }
                 output[11] = 1;
             }
         }
