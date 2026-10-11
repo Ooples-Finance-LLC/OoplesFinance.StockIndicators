@@ -70,10 +70,13 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
+        // Exact weighted recurrences still perform several accumulator updates
+        // per bar. The 1k native-worker comparison justifies scheduling at 512.
+        if (indicator is FixedPeriodWma or NormalizedConvolution { HasAffineKernel: true }) return 512;
         // Fixed convolutions perform one exact product per coefficient per bar.
-        // Keep the existing threshold for constant-work kernels; for convolutions
+        // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
-        int terms = indicator is NormalizedConvolution or GaussianWeightedAverage or SineWeightedAverage
+        int terms = indicator is NormalizedConvolution { HasAffineKernel: false } or GaussianWeightedAverage or SineWeightedAverage
             ? WeightedWindowPeriod(indicator) : 1;
         return Math.Max(512, 1 + 8191 / terms);
     }

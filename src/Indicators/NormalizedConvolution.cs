@@ -10,6 +10,8 @@ namespace OoplesFinance.StockIndicators.Indicators;
 public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationContract
 {
     private readonly double[] _kernel;
+    private readonly int _firstWeight, _weightStep;
+    internal bool HasAffineKernel { get; }
 
     /// <summary>Creates a filter from a nonempty finite newest-first kernel.</summary>
     public NormalizedConvolution(IEnumerable<double> kernel)
@@ -22,6 +24,7 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
                 nameof(kernel)
             );
         Kernel = Array.AsReadOnly(_kernel);
+        HasAffineKernel = TryIntegerProgression(_kernel, out _firstWeight, out _weightStep);
     }
 
     /// <summary>Immutable newest-first weights supplied at construction.</summary>
@@ -31,8 +34,26 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
     public override int WarmupBars => _kernel.Length - 1;
 
     /// <inheritdoc/>
-    protected internal override object CreateState() =>
-        new NormalizedKernelState(_kernel.Length, lag => _kernel[lag]);
+    protected internal override object CreateState() => HasAffineKernel
+        ? new AffineConvolutionState(_kernel.Length, _firstWeight, _weightStep)
+        : new NormalizedKernelState(_kernel.Length, lag => _kernel[lag]);
+
+    private static bool TryIntegerProgression(double[] kernel, out int first, out int step)
+    {
+        first = step = 0;
+        if (kernel[0] < int.MinValue || kernel[0] > int.MaxValue || kernel[0] != Math.Truncate(kernel[0])) return false;
+        first = (int)kernel[0];
+        if (kernel.Length == 1) return true;
+        double difference = kernel[1] - first;
+        if (difference < int.MinValue || difference > int.MaxValue || difference != Math.Truncate(difference)) return false;
+        step = (int)difference;
+        for (int i = 1; i < kernel.Length; i++)
+        {
+            long expected = first + (long)step * i;
+            if (expected < int.MinValue || expected > int.MaxValue || kernel[i] != expected) return false;
+        }
+        return true;
+    }
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -115,6 +136,54 @@ public sealed class EndpointWeightedAverage
 
         public double Update(in Bar bar) =>
             _fit.Next(bar.Close, true).EndpointWeights(period, averageDuringWarmup);
+    }
+}
+
+// Exact FIR recurrence for integer arithmetic progressions, newest coefficient first.
+// Shifting the old window adds step*sum; the evicted sample then has coefficient
+// first+step*length. Partial windows retain the same coefficients and exact mass.
+internal sealed class AffineConvolutionState(int length, int first, int step) : IIndicatorState
+{
+    private readonly Queue<double> _history = new();
+    private ExactMeanAccumulator _sum, _weighted;
+    private long _mass;
+    private readonly long _evictionWeight = -(first + (long)step * length);
+
+    public void Reset()
+    {
+        _history.Clear();
+        _sum = _weighted = default;
+        _mass = 0;
+    }
+
+    public double Update(in Bar bar)
+    {
+        if (step == 1) _weighted.AddExact(_sum);
+        else if (step == -1) _weighted.Subtract(_sum);
+        else if (step != 0)
+        {
+            var shift = _sum;
+            shift.Multiply(step);
+            _weighted.AddExact(shift);
+        }
+        if (_history.Count == length)
+        {
+            double oldest = _history.Dequeue();
+            if (_evictionWeight is >= int.MinValue and <= int.MaxValue)
+                _weighted.Add(oldest, (int)_evictionWeight);
+            else _weighted.Add(oldest, new System.Numerics.BigInteger(_evictionWeight));
+            _sum.Add(oldest, -1);
+        }
+        else _mass += first + (long)step * _history.Count;
+        _history.Enqueue(bar.Close);
+        _sum.Add(bar.Close);
+        _weighted.Add(bar.Close, first);
+        if (_mass == 0) return _weighted.Mean(_history.Count);
+        // The mass fits long: every retained coefficient is an Int32 and there
+        // are at most Int32.MaxValue of them. Preserve the existing zero sign.
+        if (_mass > 0) return _weighted.Mean(_mass);
+        if (_weighted.IsExactlyZero) return 0;
+        return -_weighted.Mean(-_mass);
     }
 }
 
