@@ -22,17 +22,9 @@ public class SharedPriorChannelBenchmarks
     {
         _priorDop = CpuParallelSettings.MaxDegreeOfParallelism;
         CpuParallelSettings.MaxDegreeOfParallelism = 8;
-        var close = Enumerable.Range(0, Count).Select(i => 10 + i % 101 / 8d).ToArray();
-        var data = CompetitorData.FromOhlc(close, close.Select(v => v + 1).ToArray(), close.Select(v => v - 1).ToArray(), close);
-        _quotes = data.Quotes; _bars = data.IndicatorBars;
-        int workers = Math.Min(8, Environment.ProcessorCount);
-        _chunks = new List<Quote>[workers]; _skip = new int[workers];
-        for (int worker = 0; worker < workers; worker++)
-        {
-            int start = Count * worker / workers, end = Count * (worker + 1) / workers;
-            int seed = Math.Max(0, start - Period);
-            _skip[worker] = start - seed; _chunks[worker] = _quotes.GetRange(seed, end - seed);
-        }
+        var input = SkenderOhlcWindowBenchmarkInput.Create(Count, Period);
+        var data = input.Data;
+        _quotes = data.Quotes; _bars = data.IndicatorBars; _chunks = input.Chunks; _skip = input.Skip;
         var pair = PriceWindowChannelComparison.Pairs[0];
         var native = pair.CompetitorReference!(data, Period); var exact = pair.Reference!(data, Period);
         CheckNative(NativeSingle(), native); CheckNative(NativeParallel(), native);
