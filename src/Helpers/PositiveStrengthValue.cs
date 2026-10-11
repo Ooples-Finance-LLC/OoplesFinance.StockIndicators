@@ -40,9 +40,17 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
         if (gap < -4096)
             return 0;
         var exponent = Math.Min(numerator.Exponent, denominator.Exponent);
-        var top = numerator.Mantissa << (int)(numerator.Exponent - exponent);
-        var bottom = denominator.Mantissa << (int)(denominator.Exponent - exponent);
-        return ExactMeanAccumulator.UnitRatio(top << 1074, bottom);
+        return Exact(numerator, exponent).Ratio(Exact(denominator, exponent));
+    }
+
+    private static JurikDyadic Exact(PositiveStrengthValue value, long commonExponent)
+    {
+        // Published ratios cancel the absolute exponent, including exponents
+        // below the binary64 floor. Stored mantissas have at most 53 bits.
+        var result = JurikDyadic.FromDouble((double)(long)value.Mantissa);
+        var shift = (int)(value.Exponent - commonExponent);
+        if (shift != 0) result.ScaleByPowerOfTwo(shift);
+        return result;
     }
 
     private static PositiveStrengthValue Combine(
@@ -132,9 +140,12 @@ internal readonly record struct PositiveStrengthValue(BigInteger Mantissa, long 
         if (gap < -4096)
             return signed ? -100 : 0;
         var exponent = Math.Min(gain.Exponent, loss.Exponent);
-        var up = gain.Mantissa << (int)(gain.Exponent - exponent);
-        var down = loss.Mantissa << (int)(loss.Exponent - exponent);
-        // UnitRatio accepts a numerator on the binary64 subnormal grid.
-        return ExactMeanAccumulator.UnitRatio((100 * (signed ? up - down : up)) << 1074, up + down);
+        var up = Exact(gain, exponent);
+        var down = Exact(loss, exponent);
+        var denominator = up;
+        denominator.AddExact(down);
+        if (signed) up.Subtract(down);
+        up.Multiply(100);
+        return up.Ratio(denominator);
     }
 }
