@@ -15,7 +15,7 @@ public static class SharedAllocationProbe
         bool gpuRegression = operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
             or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.Tsf";
         bool gpuPathRatio = operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio";
-        if (includeGpu && !gpuPathRatio && !gpuRegression && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution"))
+        if (includeGpu && !gpuPathRatio && !gpuRegression && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex"))
             throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
         Action setup, cleanup;
         Func<object>[] methods;
@@ -31,6 +31,14 @@ public static class SharedAllocationProbe
         else if (includeGpu && gpuPathRatio)
         {
             var fixture = new SharedGpuPathRatioBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && operation == "Skender.GetVortex")
+        {
+            var fixture = new SharedGpuVortexBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
                 fixture.NativeSingle, fixture.NativeParallel];
