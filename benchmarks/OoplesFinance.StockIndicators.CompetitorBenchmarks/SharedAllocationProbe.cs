@@ -102,6 +102,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "QuanTAlib.Rema" or "QuanTAlib.Zlema")
+        {
+            var fixture = new SharedExpandingRecurrenceBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "QuanTAlib.Hwma")
         {
             var fixture = new SharedHoltWinterBenchmarks { Operation = operation, Count = count };
