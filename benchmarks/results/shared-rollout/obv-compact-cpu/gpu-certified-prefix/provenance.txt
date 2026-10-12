@@ -1,0 +1,9 @@
+Base ad55bd59 plus the GPU OBV benchmark fixture and allocation routing. The tested production binary also includes the pending CPU midpoint experiment in CertifiedCompactRatio/JurikDyadic; OBV uses neither publisher. No source dependency or version changes.
+
+The fixture validates every output bit for both history modes against the CPU fixture, which validates native serial, native parallel, and the reference builder. Each GPU call asserts actual device execution. All six measured arms return eager results. The benchmark build succeeded (60 existing warnings); all 62 focused fixture/allocation-probe tests passed. Production and OBV CPU/GPU correctness were verified in the preceding batch (29 focused cases without skips and 12 competitor/fixture cases).
+
+Commands: --alloc-shared-gpu TaLib.Functions.Obv 1000 3 and --alloc-shared-gpu TaLib.Functions.Obv 10000 3 through the Release net10 benchmark DLL. Reports retain every sample, including Full CPU variability. At 10k: GPU LatestOnly 161600 B / Full 642728 B; CPU LatestOnly 161408 B / Full 642536-643768 B; TA serial 80056 B / parallel 80648 B. At 1k: GPU LatestOnly 17600 B / Full 66392 B; CPU LatestOnly 17408 B / Full 66200 B; TA serial 8056 B / parallel 8648 B.
+
+Managed per-call allocations include owned result columns and exclude retained workspace capacity: 24*N host bytes plus 48*N device bytes, retained only within the existing 56 MiB budget. LatestOnly preserves all three public columns, with the two inactive columns sharing one owned array. Native OBV retains one output column. These figures do not establish an allocation win or latency qualification. Latency was not run while external meshbench and AiDotNet tests were active.
+
+Production DLL SHA256: 6c7367fe5a4771e5335b3965a71cbc4b94c8b402400320a2b6b92e5b54c9858f

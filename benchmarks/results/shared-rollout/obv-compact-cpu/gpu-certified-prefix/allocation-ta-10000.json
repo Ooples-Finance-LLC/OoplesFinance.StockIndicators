@@ -1,0 +1,55 @@
+{
+  "Operation": "TaLib.Functions.Obv",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        642872,
+        643768,
+        642536
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        161408,
+        161408,
+        161408
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        642728,
+        642728,
+        642728
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        161600,
+        161600,
+        161600
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        80056,
+        80056,
+        80056
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        80648,
+        80648,
+        80648
+      ]
+    }
+  ]
+}

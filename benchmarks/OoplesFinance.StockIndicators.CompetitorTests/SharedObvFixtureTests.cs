@@ -29,11 +29,15 @@ public sealed class SharedObvFixtureTests
     }
 
     [Fact]
-    public void AllocationProbeRetainsAllFourArmsAndRejectsUnsupportedGpu()
+    public void AllocationProbeRetainsAllFourCpuArms()
     {
         var result = SharedAllocationProbe.Run("TaLib.Functions.Obv", 64, 1);
         Assert.Equal(new[] { "BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel" }, result.Arms.Select(x => x.Method));
         Assert.All(result.Arms, arm => Assert.True(Assert.Single(arm.Bytes) > 0));
-        Assert.Throws<ArgumentException>(() => SharedAllocationProbe.Run("TaLib.Functions.Obv", 64, 1, includeGpu: true));
     }
+
+    [Fact]
+    public void GpuFixtureRetainsEagerResultsForTiming() =>
+        Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+            BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedGpuObvBenchmarks))));
 }
