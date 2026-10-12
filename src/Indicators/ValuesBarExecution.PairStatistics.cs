@@ -22,6 +22,7 @@ internal static partial class ValuesBarExecution
         {
             var prices = rented.AsSpan(0, 2 * count);
             int grid = int.MaxValue;
+            double maximum = 0;
             for (int i = 0; i < count; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
@@ -36,6 +37,7 @@ internal static partial class ValuesBarExecution
                 }
                 double a = PairStatisticsWindow.Select(in bar, left), b = PairStatisticsWindow.Select(in bar, right);
                 prices[2 * i] = a; prices[2 * i + 1] = b;
+                maximum = Math.Max(maximum, Math.Max(Math.Abs(a), Math.Abs(b)));
                 var da = ExactMeanAccumulator.DecomposeFinite(a);
                 var db = ExactMeanAccumulator.DecomposeFinite(b);
                 if (da.Integer != 0) grid = Math.Min(grid, da.Exponent);
@@ -45,13 +47,9 @@ internal static partial class ValuesBarExecution
             // The common grid is exact. Bounding P*|integer| by 2^30 proves
             // that sums, products and centered moments fit signed Int64.
             long bound = (1L << 30) / period;
-            bool certified = true;
-            foreach (double price in prices)
-            {
-                if (cancellation.IsCancellationRequested) return region;
-                double scaled = Math.ScaleB(price, -grid);
-                if (Math.Abs(scaled) > bound) { certified = false; break; }
-            }
+            // Scaling is monotone. The largest magnitude certifies the whole
+            // column without another pass over every captured price.
+            bool certified = Math.ScaleB(maximum, -grid) <= bound;
             if (!certified)
             {
                 // Replay captured values, never the mutable caller source.
@@ -73,10 +71,13 @@ internal static partial class ValuesBarExecution
             }
             // Normalize once in the captured buffer; every stored integer is
             // exactly representable, so eviction needs neither decoding nor a queue.
+            double factor = grid >= -1023 ? Math.ScaleB(1d, -grid) : 0;
             for (int i = 0; i < prices.Length; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
-                prices[i] = Math.ScaleB(prices[i], -grid);
+                // A finite power-of-two multiplier gives the same exact integer.
+                // Subnormal source grids may require a factor beyond binary64.
+                prices[i] = factor == 0 ? Math.ScaleB(prices[i], -grid) : prices[i] * factor;
             }
             long x = 0, y = 0, xx = 0, yy = 0, xy = 0;
             for (int i = 0; i < count; i++)
@@ -84,10 +85,10 @@ internal static partial class ValuesBarExecution
                 if (cancellation.IsCancellationRequested) return region;
                 if (i >= period)
                 {
-                    long oldA = (long)prices[2 * (i - period)], oldB = (long)prices[2 * (i - period) + 1];
+                    long oldA = unchecked((long)prices[2 * (i - period)]), oldB = unchecked((long)prices[2 * (i - period) + 1]);
                     x -= oldA; y -= oldB; xx -= oldA * oldA; yy -= oldB * oldB; xy -= oldA * oldB;
                 }
-                long a = (long)prices[2 * i], b = (long)prices[2 * i + 1];
+                long a = unchecked((long)prices[2 * i]), b = unchecked((long)prices[2 * i + 1]);
                 x += a; y += b; xx += a * a; yy += b * b; xy += a * b;
                 if (i < seed.Length) continue;
                 int row = start + i - seed.Length;

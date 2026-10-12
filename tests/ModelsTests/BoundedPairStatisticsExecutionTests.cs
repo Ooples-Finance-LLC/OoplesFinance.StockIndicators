@@ -75,7 +75,8 @@ public sealed class BoundedPairStatisticsExecutionTests
     }
 
     [Theory]
-    [InlineData(-1074)] [InlineData(-400)] [InlineData(0)] [InlineData(400)]
+    [InlineData(-1074)] [InlineData(-1024)] [InlineData(-1023)] [InlineData(-1022)]
+    [InlineData(-400)] [InlineData(0)] [InlineData(400)]
     public async Task CertifiedColumnsPreserveEveryOutputAcrossBinaryScales(int exponent)
     {
         int prior = CpuParallelSettings.MaxDegreeOfParallelism;

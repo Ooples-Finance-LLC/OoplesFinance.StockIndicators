@@ -1,0 +1,11 @@
+{
+  "production_commit": "8a4d7383",
+  "tool": "dotnet-trace",
+  "profile": "dotnet-sampled-thread-time",
+  "operation": "Correl",
+  "count": 10000,
+  "warmup_calls": 100,
+  "measured_loop_calls": 30000,
+  "command": "--profile-pair Correl 10000 30000",
+  "interpretation": "Sampled thread wall time includes waits and runtime pauses. Concurrent AiDotNet and Tensors work was active. Not a latency qualification or CPU-utilization measurement."
+}
