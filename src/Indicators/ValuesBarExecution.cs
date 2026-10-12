@@ -575,6 +575,8 @@ internal static partial class ValuesBarExecution
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
             bool inactiveObvAverage = indicator is SeededOnBalanceVolume obv
                 && (obv.AveragePeriod is null || obv.AveragePeriod >= count);
+            bool smoothed = indicator is SmoothedAccumulationOscillator;
+            bool smoothedDetails = indicator is SmoothedAccumulationOscillator { IncludeDetails: true };
             Values = new double[indicator.Outputs.Count][];
             for (int slot = 0; slot < Values.Length; slot++)
                 Values[slot] = indicator is RegressionWithChannels && slot is 5 or 6
@@ -586,6 +588,7 @@ internal static partial class ValuesBarExecution
                     || indicator is ClassicDeviationBands && slot is 4 or 5
                     || indicator is PriorPriceChannel && slot is 5 or 6
                     || inactiveObvAverage && slot == 2
+                    || smoothed && (slot >= 6 || !smoothedDetails && slot is 2 or 3 or 5)
                     || slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
@@ -603,6 +606,13 @@ internal static partial class ValuesBarExecution
             // Disabled/all-warmup OBV average and presence are both constant zero.
             // Keep both public columns while sharing their run-owned storage.
             if (inactiveObvAverage) Values[2] = Values[1];
+            // Chaikin detail presence is identical across all three columns.
+            // With details disabled, all six detail value/presence columns are zero.
+            if (smoothed)
+            {
+                if (smoothedDetails) Values[6] = Values[7] = Values[5];
+                else Values[2] = Values[3] = Values[5] = Values[6] = Values[7] = Values[1];
+            }
             _state = indicator switch
             {
                 RegressionWithFinalLine r => new RegressionWithFinalLine.Writer(r.Period, count),

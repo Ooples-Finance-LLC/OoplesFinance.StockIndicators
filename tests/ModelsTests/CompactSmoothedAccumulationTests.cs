@@ -9,6 +9,41 @@ public sealed class CompactSmoothedAccumulationTests
 {
     [Theory]
     [InlineData(false)] [InlineData(true)]
+    public async Task MixedDetailModesKeepEveryOwnedColumnIndependentAcrossRuns(bool full)
+    {
+        foreach (int count in new[] { 0, 1, 9, 10, 513 })
+        {
+            var bars = OrdinaryBars()[..count];
+            SmoothedAccumulationOscillator[] indicators = [new(3, 10, false, includeDetails: false),
+                new(3, 10, false, includeDetails: true), new(3, 10, true, includeDetails: false),
+                new(3, 10, true, includeDetails: true)];
+            var expected = indicators.Select(i => SmoothedAccumulationReference.Values(bars, i)).ToArray();
+            var input = bars.ToArray();
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(input))
+                .ConfigureIndicators(indicators)
+                .ConfigureHistory(full ? IndicatorHistoryMode.Full : IndicatorHistoryMode.LatestOnly).BuildAsync();
+            Array.Clear(input);
+            run.Dispose();
+            // A subsequent run must not reuse the prior run's shared constant
+            // arrays. Both detail conventions coexist in the same values graph.
+            using var next = await new StockIndicatorBuilder().ConfigureSource(Bars.From(OrdinaryBars()[..17]))
+                .ConfigureIndicators(indicators).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync();
+            for (int owner = 0; owner < indicators.Length; owner++)
+            for (int slot = 0; slot < 8; slot++)
+                Assert.Equal(expected[owner][slot % 4].Select(v => Bits(slot < 4 ? v ?? 0 : v.HasValue ? 1 : 0)),
+                    run[indicators[owner].Outputs[slot]].ToArray().Select(BitConverter.DoubleToInt64Bits));
+            if (count > 0) Assert.Equal(bars[^1], run.Latest.Bar);
+            if (full)
+            {
+                int row = 0;
+                await foreach (var snapshot in run) Assert.Equal(bars[row++], snapshot.Bar);
+                Assert.Equal(count, row);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
     public void ExactStagesMatchIndependentFractionsAcrossScalesAndReset(bool first)
     {
         var random = new Random(71421);
