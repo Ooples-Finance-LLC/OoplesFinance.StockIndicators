@@ -52,6 +52,7 @@ public sealed class SharedAllocationProbeTests
     [InlineData("TaLib.Functions.Cci")]
     [InlineData("TaLib.Functions.Mfi")]
     [InlineData("Skender.GetMfi")]
+    [InlineData("Skender.GetVortex")]
     [InlineData("TaLib.Functions.Rsi")]
     [InlineData("TaLib.Functions.Cmo")]
     [InlineData("TaLib.Functions.HtDcPeriod")]
@@ -68,6 +69,17 @@ public sealed class SharedAllocationProbeTests
             Assert.Equal(2, arm.Bytes.Length);
             Assert.All(arm.Bytes, bytes => Assert.True(bytes >= 0));
         });
+    }
+
+    [Theory]
+    [InlineData(15)] [InlineData(513)]
+    public void VortexFixtureHandlesSmallAndPartitionedInputsAndRestoresSettings(int count)
+    {
+        int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        var fixture = new SharedVortexBenchmarks { Count = count };
+        try { fixture.Setup(); }
+        finally { fixture.Cleanup(); }
+        Assert.Equal(prior, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);
     }
 
     [Fact]
