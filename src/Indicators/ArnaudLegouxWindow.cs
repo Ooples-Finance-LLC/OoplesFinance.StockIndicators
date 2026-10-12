@@ -109,16 +109,24 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
         private static readonly BigInteger Grid = BigInteger.One << 1074;
         private readonly Queue<double> _history = new();
         private readonly BigInteger _offset = ExactVarianceWindow.Units(offset);
+#if NETFRAMEWORK
         private readonly BigInteger _sigmaSquared = BigInteger.Pow(
             ExactVarianceWindow.Units(sigma),
             2
         );
-#if NETFRAMEWORK
         private ExactMeanAccumulator.ProductCoefficient[] _weights = [];
         private ExactMeanAccumulator _denominator;
 #else
+        private readonly JurikDyadic _sigmaSquared = Square(sigma);
         private JurikDyadic[] _weights = [];
         private JurikDyadic _denominator;
+
+        private static JurikDyadic Square(double value)
+        {
+            var result = JurikDyadic.FromDouble(value);
+            result.Square();
+            return result;
+        }
 #endif
 
         public void Reset()
@@ -137,15 +145,23 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                 center.Sign <= 0 ? 0
                 : center >= (n - 1) * Grid ? n - 1
                 : (int)((center + Grid / 2) / Grid);
-            var divisor = new BigInteger(2L * n * n) << 4296;
 #if NETFRAMEWORK
+            var divisor = new BigInteger(2L * n * n) << 4296;
             _weights = new ExactMeanAccumulator.ProductCoefficient[n];
 #else
+            // The same factored squared-distance formula on an unscaled exact
+            // dyadic grid avoids thousands of zero bits in each coefficient.
+            var twiceCenter = JurikDyadic.FromDouble(offset);
+            twiceCenter.Multiply(n - 1);
+            twiceCenter.Multiply(2);
+            var divisor = Square(n);
+            divisor.Multiply(2);
             _weights = new JurikDyadic[n];
 #endif
             _denominator = default;
             for (var i = 0; i < n; i++)
             {
+#if NETFRAMEWORK
                 // Difference of squares factored before multiplication: no rounded
                 // center or overflowing squared distance can create a false tie.
                 var difference = (i - peak) * Grid * ((i + (long)peak) * Grid - 2 * center);
@@ -154,10 +170,14 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                     numerator >= 746 * divisor
                         ? 0
                         : Math.Exp(-ExactMeanAccumulator.UnitRatio(numerator << 1074, divisor));
-#if NETFRAMEWORK
                 _weights[i] = new ExactMeanAccumulator.ProductCoefficient(weight);
                 _denominator.AddFactor(_weights[i].Factor);
 #else
+                var numerator = JurikDyadic.FromDouble(i + (long)peak);
+                numerator.Subtract(twiceCenter);
+                numerator.Multiply(i - peak);
+                numerator.Multiply(_sigmaSquared);
+                var weight = Math.Exp(-numerator.Ratio(divisor));
                 var factor = new ExactMeanAccumulator.ProductFactor(weight);
                 _weights[i] = JurikDyadic.FromFactor(in factor);
                 _denominator.AddExact(_weights[i]);
