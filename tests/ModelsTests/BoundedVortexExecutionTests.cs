@@ -48,6 +48,36 @@ public sealed class BoundedVortexExecutionTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
     }
 
+    [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(14)] [InlineData(64)] [InlineData(4096)]
+    public async Task CertifiedWindowsMatchExactStateIncludingFlatAndInvertedCandles(int period)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (int count in new[] { 1, 511, 512, 513, 4097 })
+            {
+                var bars = Enumerable.Range(0, count).Select(i =>
+                {
+                    double value = (i * 13 % 101 - 50) / 8d;
+                    return i % 128 < 64 ? new Bar(default, 0, -0d, 0, 0, 1)
+                        : new Bar(default, value, value + (i % 7 - 3), value - (i % 5), value, 1);
+                }).ToArray();
+                var indicator = new WindowVortex(period);
+                using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                    foreach (var output in indicator.Outputs)
+                        Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                            actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
     [Fact]
     public async Task SecondaryOverflowPreservesInputPrecedenceAndCancellation()
     {
