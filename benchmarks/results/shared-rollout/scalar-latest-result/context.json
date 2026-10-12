@@ -1,0 +1,20 @@
+{
+  "parentRevision": "342e7d1a",
+  "productionRevision": "accompanying commit",
+  "date": "2026-10-12",
+  "period": 20,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "verification": "Production net10.0 build: zero warnings/errors; 81 focused unit tests passed, zero skips. Covers scalar result lookup, duplicates, empty/startup/warm histories, disposal, cancellation, CPU fallback and GPU regression. Allocation setup checks actual GPU backend and both-history exact outputs.",
+  "observations": [
+    "LatestOnly allocates 280 fewer bytes versus lazy-legacy-setup/slope-gpu-1k.json; Full and native unchanged.",
+    "CPU LatestOnly 9264 B, GPU LatestOnly 9064 B; native parallel 8288 B, serial 7904 B."
+  ],
+  "limits": [
+    "No timing or qualification increase.",
+    "Previously reported stale RollingPriceSum GPU rejection assertion remains unchanged and outside this selection.",
+    "All managed threads counted; owned results retained during each sample; disposal afterwards.",
+    "Cached GPU/workspace memory excluded.",
+    "Native returns 981 completed-window values; builder retains 1000 including startup. Full owns OHLCV."
+  ]
+}

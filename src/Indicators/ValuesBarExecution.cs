@@ -126,7 +126,8 @@ internal static partial class ValuesBarExecution
             }
             int outputCount = 0;
             foreach (var node in nodes) outputCount += node.Values.Length;
-            var published = new Dictionary<IIndicatorOutput, double[]>(outputCount);
+            bool scalarLatest = history is null && source.Length != 0 && nodes.Count == 1 && outputCount == 1;
+            var published = scalarLatest ? null : new Dictionary<IIndicatorOutput, double[]>(outputCount);
             foreach (var node in nodes)
             {
                 cancellation.ThrowIfCancellationRequested();
@@ -154,23 +155,25 @@ internal static partial class ValuesBarExecution
                         if (!double.IsFinite(node.Values[slot][i]))
                             IndicatorOutputPolicy.Validate(node.Indicator, slot, i, node.Values[slot][i]);
                     }
-                    published.Add(node.Indicator.Outputs[slot], node.Values[slot]);
+                    published?.Add(node.Indicator.Outputs[slot], node.Values[slot]);
                 }
             }
             int warmup = 0;
             foreach (var node in nodes) warmup = Math.Max(warmup, node.Indicator.WarmupBars);
+            if (scalarLatest)
+                return new ScalarLatestOnlyIndicatorRun(nodes[0].Indicator.Outputs[0], nodes[0].Values[0], latest, warmup);
             if (history is not null)
             {
                 owned!.TransferTo(history);
-                return new IndicatorRun(null, published, history, 0, warmup);
+                return new IndicatorRun(null, published!, history, 0, warmup);
             }
             bool ready = source.Length >= warmup;
             if (source.Length != 0 && ready)
-                foreach (var values in published.Values)
+                foreach (var values in published!.Values)
                     if (double.IsNaN(values[source.Length - 1])) { ready = false; break; }
             IBarSnapshot? snapshot = source.Length == 0 ? null
-                : new BarSnapshot(latest, source.Length - 1, published, ready);
-            return new LatestOnlyIndicatorRun(published, source.Length, snapshot);
+                : new BarSnapshot(latest, source.Length - 1, published!, ready);
+            return new LatestOnlyIndicatorRun(published!, source.Length, snapshot);
         }
         finally { foreach (var node in nodes) node.Dispose(); }
     }
