@@ -89,6 +89,14 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
             return double.IsInfinity(ratio) ? RocBankValue.Return(price, peak) : new RocBankValue(ratio);
         }
 
+        private void ReplaceContribution(ref Entry entry, double peak)
+        {
+            AccumulateSquare(entry.Drawdown, false);
+            entry.Peak = peak;
+            entry.Drawdown = Drawdown(entry.Price, peak);
+            AccumulateSquare(entry.Drawdown, true);
+        }
+
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
@@ -105,14 +113,16 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
             if (_prices.Count < period) return;
 
             double peak = 0;
-            bool defined = true;
             int index = _start;
+            int last = _start == 0 ? period - 1 : _start - 1;
 #if !NETFRAMEWORK
             // All ring growth is complete for this update. Borrow entries only
             // until the scan ends; no helper can resize or retain this span.
             var entries = System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_prices);
 #endif
-            for (int offset = 0; offset < period; offset++)
+            // Repair only the surviving prefix affected by expiration. Once an
+            // old/new prefix peak agrees, every later surviving peak also agrees.
+            for (int offset = 0; offset < period - 1; offset++)
             {
 #if !NETFRAMEWORK
                 ref var entry = ref entries[index];
@@ -120,24 +130,36 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
                 var entry = _prices[index];
 #endif
                 peak = Math.Max(peak, entry.Price);
-                if (peak == 0) defined = false;
-                if (entry.Peak != peak)
+                if (entry.Peak == peak)
                 {
-                    // Changes to the left boundary can lower the prefix peak.
-                    // Remove the old exact contribution before installing its replacement.
-                    AccumulateSquare(entry.Drawdown, false);
-                    entry.Peak = peak;
-                    entry.Drawdown = Drawdown(entry.Price, peak);
-                    AccumulateSquare(entry.Drawdown, true);
-#if NETFRAMEWORK
-                    _prices[index] = entry;
+                    int priorLast = last == 0 ? period - 1 : last - 1;
+#if !NETFRAMEWORK
+                    peak = entries[priorLast].Peak;
+#else
+                    peak = _prices[priorLast].Peak;
 #endif
+                    break;
                 }
+                ReplaceContribution(ref entry, peak);
+#if NETFRAMEWORK
+                _prices[index] = entry;
+#endif
                 if (++index == period) index = 0;
             }
-            // Even absent windows maintain their defined suffix contributions,
-            // so expiration of a nonpositive prefix recovers without stale squares.
-            if (!defined) return;
+#if !NETFRAMEWORK
+            ref var latest = ref entries[last];
+#else
+            var latest = _prices[last];
+#endif
+            // The appended entry is always new, even when the surviving suffix
+            // was skipped. On the initial full window no sentinel peak can match.
+            ReplaceContribution(ref latest, Math.Max(peak, latest.Price));
+#if NETFRAMEWORK
+            _prices[last] = latest;
+#endif
+            // A positive first price guarantees positive peaks in every prefix.
+            // Absent windows still repair their suffix for subsequent recovery.
+            if (_prices[_start].Price <= 0) return;
             output[0] = _squares.SqrtMean(period);
             output[1] = 1;
         }
