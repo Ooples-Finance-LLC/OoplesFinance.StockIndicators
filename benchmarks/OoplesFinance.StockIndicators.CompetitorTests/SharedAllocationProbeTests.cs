@@ -28,6 +28,8 @@ public sealed class SharedAllocationProbeTests
     [InlineData("TaLib.Functions.LinearRegIntercept")]
     [InlineData("TaLib.Functions.LinearRegAngle")]
     [InlineData("TaLib.Functions.Tsf")]
+    [InlineData("Skender.GetCmo")]
+    [InlineData("Trady.Indicator.EfficiencyRatio")]
     [InlineData("Skender.GetFisherTransform")]
     [InlineData("QuanTAlib.Slope")]
     [InlineData("Skender.GetSlope")]

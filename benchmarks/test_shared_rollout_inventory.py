@@ -54,6 +54,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual(['TaLib.Functions.' + operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_path_ratio_explicit_operations(self):
+        self.write()
+        for operation in ('Skender.GetCmo', 'Trady.Indicator.EfficiencyRatio'):
+            path = self.qualification(f'SharedPathRatioBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_fisher_explicit_operation(self):
         self.write()
         path = self.qualification('SharedFisherBenchmarks.BuilderFull(Operation: "Skender.GetFisherTransform", Count: 1000)')
