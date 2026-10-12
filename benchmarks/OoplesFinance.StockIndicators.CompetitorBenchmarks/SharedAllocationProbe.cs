@@ -81,6 +81,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "QuanTAlib.Slope" or "Skender.GetSlope")
+        {
+            var fixture = new SharedRegressionStatisticsBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "Skender.GetStc")
         {
             var fixture = new SharedSchaffCycleBenchmarks { Operation = operation, Count = count };

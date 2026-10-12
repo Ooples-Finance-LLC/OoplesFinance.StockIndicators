@@ -23,6 +23,8 @@ public sealed class SharedAllocationProbeTests
     }
 
     [Theory]
+    [InlineData("QuanTAlib.Slope")]
+    [InlineData("Skender.GetSlope")]
     [InlineData("QuanTAlib.Historical")]
     [InlineData("QuanTAlib.Realized")]
     [InlineData("QuanTAlib.Dema")]

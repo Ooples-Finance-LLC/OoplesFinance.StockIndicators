@@ -47,6 +47,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['QuanTAlib.Epma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_regression_statistics_explicit_operations(self):
+        self.write()
+        for operation in ('QuanTAlib.Slope', 'Skender.GetSlope'):
+            path = self.qualification(f'SharedRegressionStatisticsBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_schaff_explicit_operation(self):
         self.write()
         path = self.qualification('SharedSchaffCycleBenchmarks.BuilderFull(Operation: "Skender.GetStc", Count: 1000)')
