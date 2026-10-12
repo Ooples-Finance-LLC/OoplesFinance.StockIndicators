@@ -8,6 +8,21 @@ public sealed class SharedAlmaWindowTests
 {
     [Theory]
     [InlineData(true)] [InlineData(false)]
+    public void OrdinaryCompleteWindowsAllocateNoPerBarObjects(bool fullWindow)
+    {
+        var state = (IMultiOutputState)new ArnaudLegouxWindow(20, fullWindowOnly: fullWindow).CreateState();
+        var bars = Enumerable.Range(0, 97).Select(i => new Bar(default, 0, 1, 0,
+            (i * 17 % 97 - 48) / 8d, 1)).ToArray();
+        var output = new double[2];
+        for (int i = 0; i < 1000; i++) state.Update(in bars[i % bars.Length], output);
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 1000; i++) state.Update(in bars[i % bars.Length], output);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(1d, output[1]);
+    }
+
+    [Theory]
+    [InlineData(true)] [InlineData(false)]
     public void CachedWeightsPreserveExactReferenceAndReset(bool fullWindow)
     {
         double[] values = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue,
