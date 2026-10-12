@@ -8,6 +8,28 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactForceIndexTests
 {
     [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(4)] [InlineData(13)] [InlineData(14)]
+    public void CertifiedProductsAndHalfIntegerRecurrencesMatchIndependentAccumulator(int period)
+    {
+        var random = new Random(74582);
+        foreach (int scale in new[] { -1070, -960, -500, 0, 500, 1000 })
+        {
+            var bars = Enumerable.Range(0, 400).Select(i =>
+            {
+                double close = Math.ScaleB((i / 2 * 13 % 101) / 8d, scale);
+                double volume = i % 7 == 0 ? 0 : random.Next(-17, 18);
+                return new Bar(default, 0, close, close, close, volume);
+            }).ToArray();
+            CheckState(bars, period);
+        }
+        // Reducing the recurrence by two must not round a subnormal weighted
+        // term away before the final division, including negative zero.
+        var tiny = Enumerable.Range(0, 40).Select(i => new Bar(default, 0, 0, 0,
+            i < 4 ? -i * double.Epsilon : -4 * double.Epsilon, 1)).ToArray();
+        CheckState(tiny, period);
+    }
+
+    [Theory]
     [InlineData(3)] [InlineData(13)]
     public void WideExponentGapsSurviveSeedCancellationAndRecurrence(int period)
     {

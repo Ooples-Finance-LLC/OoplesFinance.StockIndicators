@@ -89,7 +89,9 @@ public sealed class SeededForceIndex
 #if !NETFRAMEWORK
     private sealed class CompactState(int period) : IMultiOutputState
     {
-        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble((long)period + 1);
+        private readonly double _weight = ((long)period - 1) * .5;
+        private readonly double _denominator = ((long)period + 1) * .5;
+        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble(((long)period + 1) * .5);
         private JurikDyadic _seed;
         private double _previousPrice, _value;
         private bool _started;
@@ -112,9 +114,7 @@ public sealed class SeededForceIndex
             // takes precedence over the captured arithmetic failure.
             if (_changes == period && !double.IsFinite(_value))
                 throw new ArithmeticException("An exact finite mean requires finite inputs.");
-            var raw = JurikDyadic.FromDouble(bar.Close);
-            raw.Add(-_previousPrice);
-            raw.Multiply(bar.Volume);
+            var raw = Raw(bar.Close, _previousPrice, bar.Volume);
             if (_changes < period)
             {
                 _seed.AddExact(raw);
@@ -127,16 +127,38 @@ public sealed class SeededForceIndex
             }
             else
             {
-                var next = JurikDyadic.FromDouble(_value);
-                next.Multiply(period - 1);
-                raw.Multiply(2);
-                next.AddExact(raw);
-                // Canonicalize exact zero only; a negative nonzero result that
-                // underflows during publication must retain its negative zero.
-                _value = next.Sign == 0 ? 0 : next.Ratio(_divisor);
+                if (raw.TryDouble(out var force)
+                    && Binary64ArithmeticCertificate.TryProduct(_value, _weight, out var weighted)
+                    && Binary64ArithmeticCertificate.TryDifference(weighted, -force, out var numerator))
+                    _value = numerator == 0 ? 0 : numerator / _denominator;
+                else
+                {
+                    // Cancel the exact factor two before constructing the
+                    // numerator. Half-integer weights/divisors are exact too.
+                    var next = JurikDyadic.FromDouble(_value);
+                    next.Multiply(_weight);
+                    next.AddExact(raw);
+                    // Canonicalize exact zero only; negative nonzero underflow
+                    // during publication must retain its negative zero.
+                    _value = next.Sign == 0 ? 0 : next.Ratio(_divisor);
+                }
                 output[0] = _value; output[1] = 1;
             }
             _previousPrice = bar.Close;
+        }
+
+        private static JurikDyadic Raw(double price, double previous, double volume)
+        {
+            if (Binary64ArithmeticCertificate.TryDifference(price, previous, out var difference))
+            {
+                if (difference == 0 || volume == 0) return default;
+                if (Binary64ArithmeticCertificate.TryProduct(difference, volume, out var product))
+                    return JurikDyadic.FromDouble(product);
+            }
+            var raw = JurikDyadic.FromDouble(price);
+            raw.Add(-previous);
+            raw.Multiply(volume);
+            return raw;
         }
     }
 #else
