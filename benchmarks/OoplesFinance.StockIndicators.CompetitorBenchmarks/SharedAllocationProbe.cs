@@ -114,6 +114,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "QuanTAlib.Trima" or "TaLib.Functions.Trima")
+        {
+            var fixture = new SharedTriangularBenchmarks { Operation = operation, Count = count, IncludeGpuValidation = false };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "QuanTAlib.Ltma")
         {
             var fixture = new SharedZeroSeedLaguerreBenchmarks { Operation = operation, Count = count };

@@ -9,6 +9,26 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class TriangularWindowExecutionTests
 {
     [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(20)]
+    [InlineData(21)] [InlineData(80)] [InlineData(81)] [InlineData(int.MaxValue)]
+    public void CompactWorkerMatchesExactConvolutionAcrossRejectionAndReset(int period)
+    {
+        foreach (int rejection in new[] { -1, 0, 5, 10, 19, 47, 79 })
+        {
+            var values = Enumerable.Range(0, 80).Select(i => (i % 19 - 9) / 8d).ToArray();
+            if (rejection >= 0) values[rejection] = double.Epsilon;
+            var state = new ValuesBarExecution.TriangularValueState(period, values.Length);
+            foreach (var input in new[] { values, values.Reverse().ToArray(), new double[80] })
+            {
+                state.Reset();
+                var expected = Reference(input, period);
+                for (int i = 0; i < input.Length; i++)
+                    Bits(expected[i], state.Update(new Bar(default, 0, 1, 0, input[i], 1)));
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
