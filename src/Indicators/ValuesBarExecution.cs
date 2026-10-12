@@ -122,6 +122,7 @@ internal static partial class ValuesBarExecution
             {
                 cancellation.ThrowIfCancellationRequested();
                 node.Failure?.Throw();
+                node.Complete(cancellation);
                 // Standalone BOP validates raw ratios before smoothing; its default
                 // EMA is an exactly rounded convex mean of finite values. Neither
                 // output needs the generic scan (including shared EMA(1) arrays).
@@ -552,7 +553,8 @@ internal static partial class ValuesBarExecution
             Indicator = indicator;
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
             Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
-                indicator is WindowAroon && slot >= 4
+                indicator is RegressionWithFinalLine && slot is 6 or 7
+                    || indicator is WindowAroon && slot >= 4
                     || indicator is StandardDeviationWithDetails && slot == 5
                     || indicator is WindowDeviationBands && slot is 7 or 8
                     || indicator is ClassicDeviationBands && slot is 4 or 5
@@ -563,6 +565,7 @@ internal static partial class ValuesBarExecution
                     : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
             // These three presence outputs are identical by contract. Completed
             // series expose read-only spans, so one run-owned column serves all three.
+            if (indicator is RegressionWithFinalLine) Values[6] = Values[7] = Values[5];
             if (indicator is WindowAroon) Values[4] = Values[5] = Values[3];
             if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
             if (indicator is WindowDeviationBands) Values[7] = Values[8] = Values[6];
@@ -571,6 +574,7 @@ internal static partial class ValuesBarExecution
             _scratch = pointwise ? Array.Empty<double>() : new double[indicator.Outputs.Count];
             _state = indicator switch
             {
+                RegressionWithFinalLine r => new RegressionWithFinalLine.Writer(r.Period, count),
                 Sma => null,
                 _ when pointwise => null,
                 BalanceOfPower when singleRoot => null,
@@ -588,7 +592,8 @@ internal static partial class ValuesBarExecution
             if (Failure is not null || Indicator is Sma) return;
             try
             {
-                if (Indicator is PriceCircularTransform)
+                if (_state is RegressionWithFinalLine.Writer regression) regression.Append(in bar, index, Values, _scratch);
+                else if (Indicator is PriceCircularTransform)
                 {
                     bool defined = bar.Close is >= -1 and <= 1;
                     Values[0][index] = defined ? Math.Asin(bar.Close) : 0;
@@ -671,6 +676,10 @@ internal static partial class ValuesBarExecution
                 catch (Exception error) { Failure = ExceptionDispatchInfo.Capture(error); }
             }
             return latest;
+        }
+        internal void Complete(CancellationToken cancellation)
+        {
+            if (_state is RegressionWithFinalLine.Writer regression) regression.Complete(Values, cancellation);
         }
         public void Dispose() => (_state as IDisposable)?.Dispose();
     }

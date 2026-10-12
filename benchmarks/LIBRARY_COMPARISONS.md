@@ -3551,3 +3551,12 @@ The benchmark build, 13 shared allocation-probe regression cases and 64 inventor
 | Native parallel | 231,440 (all three) |
 
 The 432-byte CPU Full variation is preserved without attribution. These totals include all managed threads and retained results; they exclude cached kernel/workspace creation, setup and post-sample disposal, and do not measure total device/native memory. Raw/parsed evidence and exact revisions are under `results/shared-rollout/affine-convolution-gpu/allocation-1k*`. Other build/test processes remained active (25% CPU at inspection), so no timing run was started. Timing qualification remains181/401; device parity and managed-allocation savings do not prove a speedup.
+
+
+### Retrospective regression builder integration
+
+`RegressionWithFinalLine` routes the `Skender.GetSlope` comparison through `BuildAsync()`. The shared CPU path writes rolling statistics and explicit presence directly into run-owned columns, aliases the three identical full-window presence columns, and completes only the final fitted-line window after all raw inputs are validated. The existing historical fallback preserves selected sources and warmup coordinates; live sources reject this retrospective calculation. `RegressionSnapshot` remains unchanged.
+
+Focused checks cover independent rational references, all ten outputs, repainting, flat windows, subnormal variance, incomplete/maximum periods, mixed roots, chaining, warmup, input-before-output validation, cancellation and ownership after disposal. This batch removes snapshot row objects but retains the existing exact regression arithmetic. It adds no timing or allocation measurement and establishes no speed win; the 181/401 timing-qualified count is unchanged.
+
+Verification: net10.0 production and comparison builds passed; 13 focused unit cases, 8 regression comparison cases and 64 inventory checks passed, with no skipped tests.

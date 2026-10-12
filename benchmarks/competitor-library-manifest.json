@@ -1741,7 +1741,7 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.SlopeResult] GetSlope[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "RegressionSnapshot",
+    "OoplesIndicator": "RegressionWithFinalLine",
     "Outputs": [
       "Slope",
       "Intercept",
@@ -1750,7 +1750,7 @@
       "Line"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "All five outputs and presence flags are verified. RegressionSnapshot supplies global one-based intercepts and the retrospective final-window Line overlay: Line can be present on rows whose own rolling statistics are still in startup, and repaints when input is appended. The causal WindowRegressionStatistics API is separate. Exact Ooples moments avoid overflowing intermediate arithmetic; Skender publishes Line as decimal."
+    "CompetitorLimitation": "All five outputs and presence flags are verified. RegressionWithFinalLine supplies global one-based intercepts and the retrospective final-window Line overlay through BuildAsync: Line can be present on rows whose own rolling statistics are still in startup, and repaints when input is appended. The causal WindowRegressionStatistics API is separate. Exact Ooples moments avoid overflowing intermediate arithmetic; Skender publishes Line as decimal."
   },
   {
     "Id": "Skender.GetSma",

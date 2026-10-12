@@ -16,6 +16,7 @@ public static partial class IndicatorValidationDiscovery
             || type == typeof(StandardDeviationWithDetails) || type == typeof(SumSeededDirectionalIndex)
             || type == typeof(WindowChoppinessIndex) || type == typeof(WindowLogVolatility)
             || type == typeof(WindowMoneyFlowIndex) || type == typeof(WindowRegressionStatistics)
+            || type == typeof(RegressionWithFinalLine)
             ? 2 : 1;
     }
 
