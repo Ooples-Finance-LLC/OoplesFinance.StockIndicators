@@ -1,0 +1,16 @@
+{
+  "production_commit": "e76348e0",
+  "fixture_commit": "30a3eae4",
+  "fixture_sha256": "0faee0efb4b3a87d22d3616adcddc1a766034c1e86ccb877161fac3777396ea6",
+  "commands": [
+    "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared QuanTAlib.Slope 1000 3",
+    "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared Skender.GetSlope 1000 3"
+  ],
+  "period": 20,
+  "prices": "100 + (i * 13 % 101) / 8",
+  "warmups_per_arm": 10,
+  "samples_per_arm": 3,
+  "scope": "Full/LatestOnly BuildAsync versus direct native serial/parallel calls. Includes construction, all output values/presence and managed allocations on all process threads. QuanTAlib returns packed retained rows; Skender serial retains its eager public tuple result collection. Parallel includes native construction and seed/prefix calculations. Skender parallel preserves global intercepts and reapplies only the complete-input decimal Line overlay.",
+  "validation": "Fixture build, 23 focused comparison/probe cases, and 65 inventory cases passed with zero skips. Setup checks independent centered references, native serial/parallel bit parity, decimal Line and dates, startup and all presence masks.",
+  "limitations": "Allocation only; setup and post-sample disposal excluded. QuanTAlib P-1 replay is sufficient on this nonconstant benchmark fixture; native retained correlation can require additional history on flat data. Skender uses complete prefixes because its public API exposes global coordinates without an offset. CPU load was 18 percent and an AiDotNet build was active at pre-probe inspection. No timing measurement or qualification change."
+}
