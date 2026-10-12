@@ -56,27 +56,37 @@ internal static partial class ValuesBarExecution
                 }
                 return region;
             }
+            // A 16-byte interval replaces each consumed 48-byte Bar in the
+            // same rental. Its write cannot reach the next unread raw bar.
+            var intervals = System.Runtime.InteropServices.MemoryMarshal.Cast<Bar, UltimateIntegerPair>(captured.AsSpan(0, count));
+            long previousClose = 0;
             Span<int> periods = stackalloc int[] { indicator.ShortPeriod, indicator.MiddlePeriod, indicator.LongPeriod };
             Span<long> pressures = stackalloc long[3]; pressures.Clear();
             Span<long> ranges = stackalloc long[3]; ranges.Clear();
             for (int i = 0; i < count; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
-                // Normalize and consume in one traversal. Earlier slots are
-                // already normalized when used for predecessors or eviction.
-                // The exact common price scale cancels from every ratio.
                 var bar = captured[i];
-                captured[i] = new Bar(default, 0, Math.ScaleB(bar.High, -grid),
-                    Math.ScaleB(bar.Low, -grid), Math.ScaleB(bar.Close, -grid), 0);
+                long high = (long)Math.ScaleB(bar.High, -grid);
+                long low = (long)Math.ScaleB(bar.Low, -grid);
+                long close = (long)Math.ScaleB(bar.Close, -grid);
+                UltimateIntegerPair current = default;
                 if (i > 0)
                 {
-                    var current = UltimateIntegerInterval(in captured[i], in captured[i - 1], indicator.ZeroRangeContribution);
+                    current.Range = indicator.ZeroRangeContribution
+                        ? Math.Max(high - low, Math.Max(Math.Abs(high - previousClose), Math.Abs(low - previousClose)))
+                        : Math.Max(high, previousClose) - Math.Min(low, previousClose);
+                    current.Pressure = close - Math.Min(low, previousClose);
+                }
+                previousClose = close;
+                intervals[i] = current;
+                if (i > 0)
+                {
                     for (int k = 0; k < 3; k++)
                     {
                         if (i > periods[k])
                         {
-                            int old = i - periods[k];
-                            var expired = UltimateIntegerInterval(in captured[old], in captured[old - 1], indicator.ZeroRangeContribution);
+                            var expired = intervals[i - periods[k]];
                             pressures[k] -= expired.Pressure; ranges[k] -= expired.Range;
                         }
                         pressures[k] += current.Pressure; ranges[k] += current.Range;
@@ -113,12 +123,10 @@ internal static partial class ValuesBarExecution
         if (factor.Integer != 0) grid = Math.Min(grid, factor.Exponent);
     }
 
-    private static (long Pressure, long Range) UltimateIntegerInterval(in Bar current, in Bar previous, bool zero)
+    private struct UltimateIntegerPair
     {
-        long high = (long)current.High, low = (long)current.Low, prior = (long)previous.Close;
-        long range = zero ? Math.Max(high - low, Math.Max(Math.Abs(high - prior), Math.Abs(low - prior)))
-            : Math.Max(high, prior) - Math.Min(low, prior);
-        return ((long)current.Close - Math.Min(low, prior), range);
+        internal long Pressure;
+        internal long Range;
     }
 }
 #endif

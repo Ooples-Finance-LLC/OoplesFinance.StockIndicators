@@ -71,23 +71,40 @@ internal static partial class ValuesBarExecution
             // retain ScaleB for those grids instead of multiplying by infinity.
             double priceFactor = priceGrid >= -1023 ? Math.ScaleB(1d, -priceGrid) : 0;
             double volumeFactor = volumeGrid >= -1023 ? Math.ScaleB(1d, -volumeGrid) : 0;
+            // Reuse the capture as compact contributions after certification.
+            // Each 32-byte pair ends before the next unread 48-byte Bar. Read
+            // the current bar completely before writing its pair; owned history
+            // and fallback decisions have already been handled above.
+            var flows = System.Runtime.InteropServices.MemoryMarshal.Cast<Bar, MoneyFlowIntegerPair>(captured.AsSpan(0, count));
             Int128 positive = 0, negative = 0;
+            long previousPrice = 0;
             int scale = priceGrid + volumeGrid;
             for (int i = 0; i < count; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
-                // Normalize immediately before consumption. All predecessor and
-                // eviction slots have already been normalized in this traversal.
                 var bar = captured[i];
-                captured[i] = new Bar(default,
-                    priceFactor == 0 ? Math.ScaleB(bar.Open, -priceGrid) : bar.Open * priceFactor, 0, 0, 0,
-                    volumeFactor == 0 ? Math.ScaleB(bar.Volume, -volumeGrid) : bar.Volume * volumeFactor);
-                if (i > indicator.Period)
+                long price = (long)(priceFactor == 0 ? Math.ScaleB(bar.Open, -priceGrid) : bar.Open * priceFactor);
+                long volume = (long)(volumeFactor == 0 ? Math.ScaleB(bar.Volume, -volumeGrid) : bar.Volume * volumeFactor);
+                MoneyFlowIntegerPair current = default;
+                if (i > 0)
                 {
-                    int old = i - indicator.Period;
-                    AccumulateIntegerFlow(in captured[old], in captured[old - 1], -1, ref positive, ref negative);
+                    Int128 flow = unchecked((Int128)price * volume);
+                    if (price > previousPrice) current.Positive = flow;
+                    else if (price < previousPrice) current.Negative = flow;
                 }
-                if (i > 0) AccumulateIntegerFlow(in captured[i], in captured[i - 1], 1, ref positive, ref negative);
+                previousPrice = price;
+                flows[i] = current;
+                // The certificate bounds every product and P-term sum with
+                // 100-fold publication headroom, including signed volumes.
+                unchecked
+                {
+                    if (i > indicator.Period)
+                    {
+                        var expired = flows[i - indicator.Period];
+                        positive -= expired.Positive; negative -= expired.Negative;
+                    }
+                    positive += current.Positive; negative += current.Negative;
+                }
                 if (i < seed.Length) continue;
                 int row = start + i - seed.Length;
                 bool defined = i >= indicator.Period && row >= (long)indicator.Period + indicator.SuppressedBars;
@@ -109,17 +126,10 @@ internal static partial class ValuesBarExecution
         finally { System.Buffers.ArrayPool<Bar>.Shared.Return(captured); }
     }
 
-    private static void AccumulateIntegerFlow(in Bar current, in Bar previous, int sign, ref Int128 positive, ref Int128 negative)
+    private struct MoneyFlowIntegerPair
     {
-        // The caller certifies every product and P-term sum, with 100-fold
-        // publication headroom. No operation here can wrap under that proof.
-        unchecked
-        {
-            Int128 flow = (Int128)(long)current.Open * (long)current.Volume;
-            if (sign < 0) flow = -flow;
-            if (current.Open > previous.Open) positive += flow;
-            else if (current.Open < previous.Open) negative += flow;
-        }
+        internal Int128 Positive;
+        internal Int128 Negative;
     }
 
     private static void RecordMoneyFlowOutput(ref PointwiseRegion region, int index, double value)
