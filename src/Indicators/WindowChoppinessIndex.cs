@@ -31,7 +31,12 @@ public sealed class WindowChoppinessIndex : MultiOutputIndicatorBase, IIndicator
     public IIndicatorOutput IsDefined => Outputs[1];
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(Period);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period);
+#else
+        new State(Period);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -53,6 +58,46 @@ public sealed class WindowChoppinessIndex : MultiOutputIndicatorBase, IIndicator
                 )
             );
 
+#if !NETFRAMEWORK
+    internal sealed class CompactState(int period, int count = 0) : IMultiOutputState
+    {
+        private readonly Queue<(double High, double Low)> _intervals = new(Math.Min(period, Math.Max(0, count - 1)));
+        private readonly double _logPeriod = Math.Log(period);
+        private JurikDyadic _sum;
+        private double _previous;
+        private bool _started;
+
+        public void Reset()
+        {
+            _intervals.Clear(); _sum = default; _previous = 0; _started = false;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (!_started) { _previous = bar.Close; _started = true; return; }
+            double high = Math.Max(bar.High, _previous), low = Math.Min(bar.Low, _previous);
+            _previous = bar.Close;
+            if (_intervals.Count == period)
+            {
+                var old = _intervals.Dequeue();
+                _sum.Subtract(ExactTrueInterval.Difference(old.High, old.Low));
+            }
+            _intervals.Enqueue((high, low));
+            _sum.AddExact(ExactTrueInterval.Difference(high, low));
+            if (_intervals.Count < period) return;
+            foreach (var interval in _intervals)
+            {
+                high = Math.Max(high, interval.High); low = Math.Min(low, interval.Low);
+            }
+            var span = ExactTrueInterval.Difference(high, low);
+            if (span.Sign == 0) return;
+            output[0] = _sum.Sign == 0 ? double.NegativeInfinity
+                : 100 * (ExactIntervalLogRatio.Calculate(_sum, span) / _logPeriod);
+            output[1] = 1;
+        }
+    }
+#else
     private sealed class State(int period) : IMultiOutputState
     {
         private readonly Queue<(BigInteger High, BigInteger Low)> _intervals = new();
@@ -104,4 +149,5 @@ public sealed class WindowChoppinessIndex : MultiOutputIndicatorBase, IIndicator
             output[1] = 1;
         }
     }
+#endif
 }
