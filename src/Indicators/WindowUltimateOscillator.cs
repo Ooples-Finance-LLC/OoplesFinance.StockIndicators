@@ -90,17 +90,19 @@ public sealed class WindowUltimateOscillator
 #if !NETFRAMEWORK
     internal sealed class CompactState(int[] periods, bool zero, int count = 0) : IMultiOutputState
     {
-        private readonly Queue<(JurikDyadic Pressure, JurikDyadic Range)>[] _windows =
-            periods.Select(p => new Queue<(JurikDyadic, JurikDyadic)>(Math.Min(p, Math.Max(0, count - 1)))).ToArray();
+        // All three windows refer to the same observations. Retain each exact
+        // interval once and evict independently at each configured lag.
+        private (JurikDyadic Pressure, JurikDyadic Range)[] _history =
+            new (JurikDyadic, JurikDyadic)[Math.Min(periods[2], Math.Max(0, count - 1))];
+        private int _next, _seen;
         private readonly JurikDyadic[] _pressure = new JurikDyadic[3], _range = new JurikDyadic[3];
         private double _previous;
         private bool _started;
 
         public void Reset()
         {
-            foreach (var window in _windows) window.Clear();
-            Array.Clear(_pressure); Array.Clear(_range);
-            _previous = 0; _started = false;
+            Array.Clear(_history); Array.Clear(_pressure); Array.Clear(_range);
+            _next = _seen = 0; _previous = 0; _started = false;
         }
 
         public void Update(in Bar bar, Span<double> output)
@@ -112,17 +114,29 @@ public sealed class WindowUltimateOscillator
             var range = zero ? ExactTrueInterval.Range(bar.High, bar.Low, _previous)
                 : ExactTrueInterval.Difference(Math.Max(bar.High, _previous), low);
             _previous = bar.Close;
+            if (_seen == _history.Length && _history.Length < periods[2])
+            {
+                // Before the longest window fills, storage is chronological;
+                // no old observation has been overwritten. Grow lazily for streams.
+                int capacity = (int)Math.Min(periods[2], Math.Max(4L, 2L * _history.Length));
+                Array.Resize(ref _history, capacity);
+                _next = _seen;
+            }
             for (int k = 0; k < 3; k++)
             {
-                if (_windows[k].Count == periods[k])
+                if (_seen >= periods[k])
                 {
-                    var old = _windows[k].Dequeue();
+                    int index = _next - periods[k];
+                    if (index < 0) index += _history.Length;
+                    var old = _history[index];
                     _pressure[k].Subtract(old.Pressure); _range[k].Subtract(old.Range);
                 }
-                _windows[k].Enqueue((pressure, range));
                 _pressure[k].AddExact(pressure); _range[k].AddExact(range);
             }
-            if (_windows[2].Count < periods[2]) return;
+            _history[_next] = (pressure, range);
+            if (++_next == _history.Length) _next = 0;
+            if (_seen < periods[2]) _seen++;
+            if (_seen < periods[2]) return;
             var numerator = new JurikDyadic();
             var denominator = JurikDyadic.FromDouble(1);
             for (int k = 0; k < 3; k++)
