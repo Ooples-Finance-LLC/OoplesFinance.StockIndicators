@@ -35,7 +35,12 @@ public sealed class SeededForceIndex
     public override IIndicatorOutput PrimaryOutput => Value;
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(Period);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period);
+#else
+        new State(Period);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -81,6 +86,60 @@ public sealed class SeededForceIndex
         return result;
     }
 
+#if !NETFRAMEWORK
+    private sealed class CompactState(int period) : IMultiOutputState
+    {
+        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble((long)period + 1);
+        private JurikDyadic _seed;
+        private double _previousPrice, _value;
+        private bool _started;
+        private int _changes;
+
+        public void Reset()
+        {
+            _seed = default;
+            _previousPrice = _value = 0;
+            _started = false;
+            _changes = 0;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (!_started) { _previousPrice = bar.Close; _started = true; return; }
+            // Match the original state if a caller continues after an
+            // unrepresentable published value. Builder input validation still
+            // takes precedence over the captured arithmetic failure.
+            if (_changes == period && !double.IsFinite(_value))
+                throw new ArithmeticException("An exact finite mean requires finite inputs.");
+            var raw = JurikDyadic.FromDouble(bar.Close);
+            raw.Add(-_previousPrice);
+            raw.Multiply(bar.Volume);
+            if (_changes < period)
+            {
+                _seed.AddExact(raw);
+                _changes++;
+                if (_changes == period)
+                {
+                    _value = _seed.Sign == 0 ? 0 : _seed.Mean(period);
+                    output[0] = _value; output[1] = 1;
+                }
+            }
+            else
+            {
+                var next = JurikDyadic.FromDouble(_value);
+                next.Multiply(period - 1);
+                raw.Multiply(2);
+                next.AddExact(raw);
+                // Canonicalize exact zero only; a negative nonzero result that
+                // underflows during publication must retain its negative zero.
+                _value = next.Sign == 0 ? 0 : next.Ratio(_divisor);
+                output[0] = _value; output[1] = 1;
+            }
+            _previousPrice = bar.Close;
+        }
+    }
+#else
     private sealed class State(int period) : IMultiOutputState
     {
         private ExactMeanAccumulator _seed;
@@ -131,4 +190,5 @@ public sealed class SeededForceIndex
             _previousPrice = bar.Close;
         }
     }
+#endif
 }
