@@ -15,7 +15,12 @@ public sealed class SharedPathRatioStateTests
             Enumerable.Range(0, 100).Select(i => (double?)(i % 17 / 8d)).ToArray(),
             Enumerable.Range(0, 100).Select(i => i % 13 == 0 ? null : (double?)(random.NextDouble() * 200 - 100)).ToArray(),
             [double.MaxValue, -double.MaxValue, 0, double.Epsilon, -double.Epsilon, -0d, 1, 1, 1, 1],
-            [1, null, 9, 10, 10, null, 11, 12, 12, 12]
+            [1, null, 9, 10, 10, null, 11, 12, 12, 12],
+            // Rounded percent products must fall back before dividing; overflowing
+            // products can still have finite ratios. Include subnormal residuals.
+            [0, Math.BitIncrement(1), 0, Math.BitDecrement(1), -Math.BitIncrement(1), 0],
+            [0, double.MaxValue / 2, 0, -double.MaxValue / 2, 0],
+            [0, double.Epsilon, 0, -double.Epsilon, double.Epsilon * 3, 0]
         ];
         foreach (var convention in Enum.GetValues<PathRatioConvention>())
         foreach (var values in cases)

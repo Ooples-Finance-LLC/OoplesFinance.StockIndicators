@@ -3661,3 +3661,7 @@ One eight-case timing batch on production `143fe7ad` / fixture `71af8461` comple
 | Trady.Indicator.EfficiencyRatio | 297.38 / 653,045 | 267.20 / 171,907 | parallel 2,099.99 / 5,529,251 | Both builder modes win with nonoverlapping intervals |
 
 EfficiencyRatio LatestOnly is about 7.86x faster than the fastest tested native arm; CMO LatestOnly remains 1.50x slower despite lower allocation. This qualifies the two 10k workloads only; all previous catalog entries are preserved. Coverage rises to 183/401 APIs, not a win count. Raw report, process samples and context: `results/shared-rollout/path-ratio-cpu/cpu-native-10k*`. No rerun was performed.
+
+### Guarded CMO percentage publication (2026-10-12)
+
+The signed path-ratio convention now avoids integer promotion for multiplication by 100 only when both numerator and denominator are exactly representable binary64 values and a finite product passes an exact FMA residual check. Because the integer factor keeps the residual on the binary64 subnormal grid, a nonzero residual cannot round to zero. Inexact/overflowing products and wide operands use the previous exact path. Thirteen state/worker cases and 41 comparison/probe cases passed, including rounded products, overflowing products with finite ratios, subnormals, nullable gaps and worker seeds. Production net10.0 build is clean. The earlier CMO timing loss remains the saved checkpoint; this change is not retimed and adds no qualification or speed claim.
