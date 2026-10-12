@@ -21,6 +21,36 @@ internal sealed partial class TensorsGpuExecution
                         output[i] = input[i] == 0.0 ? 0.0 : input[i];
                     return;
                 }
+                if (normalize_available >= 3) {
+                    // Newest-first weights 2P-1, 2P-4, ..., 2-P. Maintain
+                    // exact sum and weighted sum, rounding only the final quotient.
+                    double sum = 0.0, weighted = 0.0;
+                    size_t first = start >= (size_t)(period - 1) ? start - (size_t)(period - 1) : 0;
+                    for (size_t j = first; j < start; j++) {
+                        double value = input[j];
+                        sum += value;
+                        weighted += value * (double)(2 * period - 1 - 3 * (int)(start - j));
+                    }
+                    for (size_t i = start; i < end; i++) {
+                        weighted += input[i] * (2 * period - 1);
+                        sum += input[i];
+                        int available = (int)min(i + 1, (size_t)period);
+                        if (normalize_available == 4 && available < period)
+                            output[i] = sum == 0.0 ? 0.0 : sum / available;
+                        else {
+                            double mass = (double)available * (2 * period - 1)
+                                - 3.0 * available * (available - 1) / 2.0;
+                            output[i] = weighted == 0.0 ? 0.0 : weighted / mass;
+                        }
+                        weighted -= 3.0 * sum;
+                        if (i >= (size_t)(period - 1)) {
+                            double expired = input[i - (size_t)(period - 1)];
+                            weighted += expired * (period + 1);
+                            sum -= expired;
+                        }
+                    }
+                    return;
+                }
                 if (normalize_available == 2) {
                     size_t i = start;
                     for (; i < end && i < (size_t)(period - 1); i++) output[i] = 0.0;
