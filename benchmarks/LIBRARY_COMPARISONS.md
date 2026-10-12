@@ -3114,3 +3114,22 @@ first direct timing run around that cost rather than using routine long warmups.
 The tuple result type and range behavior were verified against the pinned NuGet
 package; source inspected in the saved Trady DynamicMomentumIndex and
 AnalyzableBase files explains repeated volatility histories and per-output RSI.
+
+
+### Deferred RSI output calculation during Dynamic Momentum replay (2026-10-11)
+
+Dynamic Momentum now advances skipped RSI bars without computing their discarded
+final ratios. The original gain/loss recurrence, exact rounding, seed history,
+lag history and nullable poisoning remain active for every price. Only the last
+bar requested from a selected period computes its output. Other callers publish
+by default. No public configuration or BuildAsync contract changes.
+
+Adversarial review confirmed that final ratio calculation cannot mutate the
+readonly gain/loss values. Five formula cases compare sparsely published outputs
+bit-for-bit against the independent rational reference across ordinary, tiny,
+subnormal and wide prices, nullable seed/later gaps, and reset with different
+publication schedules. Release net10.0 production/benchmark builds passed;
+18 unit cases and 32 fixture/reference comparisons passed, including the warmed
+zero-allocation state replay. Existing benchmark/test warnings remain.
+Logs: `C:/Users/cheat/temp/si-dynamic-deferred-{production,benchmark-build,unit,comparisons}.log`.
+No isolated latency benefit is claimed for this change.
