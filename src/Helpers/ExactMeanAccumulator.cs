@@ -93,7 +93,7 @@ internal struct ExactMeanAccumulator
         internal readonly long Mantissa;
         internal readonly int Scale;
 
-        internal ProductFactor(double value)
+        internal ProductFactor(double value, int binaryExponent = 0)
         {
             var bits = BitConverter.DoubleToInt64Bits(value);
             var exponent = (int)((bits >> 52) & 2047);
@@ -103,7 +103,7 @@ internal struct ExactMeanAccumulator
             // Fixed coefficients and retained prices can reuse this exact decoding.
             var zeros = TrailingBinaryZeros(mantissa);
             Mantissa = (bits < 0 ? -mantissa : mantissa) >> zeros;
-            Scale = Math.Max(0, exponent - 1) + zeros;
+            Scale = checked(Math.Max(0, exponent - 1) + zeros + binaryExponent);
         }
     }
 

@@ -771,7 +771,7 @@ internal static partial class ValuesBarExecution
         public static ReturnBetaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
         {
             var beta = (WindowReturnBeta)indicator;
-            return new(new(beta.Period, beta.Market, beta.Evaluation), target);
+            return new(new(beta.Period, beta.Market, beta.Evaluation, Math.Min(beta.Period, Math.Max(0, count - 1))), target);
         }
         public double Update(in Bar bar)
         {
