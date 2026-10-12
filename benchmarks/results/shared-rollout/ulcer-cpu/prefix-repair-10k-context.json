@@ -1,0 +1,16 @@
+{
+  "production_commit": "40c75e34",
+  "fixture_commit": "2ffd53fc",
+  "fixture_sha256": "3135f1f708302ceba9f76512cfac8231191cb36326598f334784b1bce2c8d330",
+  "warmup_count": 10,
+  "requested_iteration_count": 10,
+  "retained_iterations": {
+    "BuilderFull": 10,
+    "BuilderLatestOnly": 9,
+    "NativeSingle": 10,
+    "NativeParallel": 10
+  },
+  "contention_observation": "CPU 12% preflight, 9% during measured iterations, 8% after. No competing dotnet build/test/run processes observed at these samples. Not continuous isolation.",
+  "scope": "Four CPU arms, 10000 bars, period14. Measures borrowed ring access and prefix-only repair together relative to f7fa53c5. LatestOnly remains slower than native parallel. Native parallel mean moved from 462756ns to 508480ns; do not attribute all ratio improvement to owned changes.",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter \"*SharedUlcerBenchmarks*Count: 10000)\" --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-ulcer-40c75e34"
+}
