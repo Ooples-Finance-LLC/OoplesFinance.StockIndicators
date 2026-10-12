@@ -14,6 +14,7 @@ public static class SharedAllocationProbe
         if (repetitions is < 1 or > 50) throw new ArgumentOutOfRangeException(nameof(repetitions));
         Action setup, cleanup;
         Func<object>[] methods;
+        string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
         if (operation is "QuanTAlib.Historical" or "QuanTAlib.Realized")
         {
             var fixture = new SharedLogVolatilityBenchmarks { Operation = operation, Count = count };
@@ -86,9 +87,16 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "QuanTAlib.Epma" or "QuanTAlib.Mma")
+        {
+            var fixture = new SharedGpuEndpointBenchmarks { Operation = operation == "QuanTAlib.Epma" ? "Epma" : "Mma", Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
         else throw new ArgumentException("Unsupported shared allocation operation.", nameof(operation));
 
-        string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
         var arms = new Arm[methods.Length];
         try
         {
