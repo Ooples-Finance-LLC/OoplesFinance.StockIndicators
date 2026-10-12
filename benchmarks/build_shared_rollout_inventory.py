@@ -88,7 +88,7 @@ def inventory(root: Path, qualifications=()):
                                   'SharedRecursiveStateBenchmarks.', 'SharedLaggedChangeBenchmarks.')):
                 api = operation[1]
             elif operation and any(name in row['FullName'] for name in
-                                   ('SharedCommodityChannelBenchmarks.', 'SharedMoneyFlowIndexBenchmarks.', 'SharedVortexBenchmarks.', 'SharedUltimateBenchmarks.')):
+                                   ('SharedCommodityChannelBenchmarks.', 'SharedMoneyFlowIndexBenchmarks.', 'SharedVortexBenchmarks.', 'SharedUltimateBenchmarks.', 'SharedChoppinessBenchmarks.')):
                 api = operation[1]
                 prefix = ''
             elif 'SharedDispersionBenchmarks.' in row['FullName']:
