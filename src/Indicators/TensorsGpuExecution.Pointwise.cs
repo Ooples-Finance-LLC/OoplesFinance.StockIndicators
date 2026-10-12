@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Thirty-five fixed keys; window/lag periods are arguments, never new compiled programs.
+    // Thirty-eight fixed keys; window/lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -20,6 +20,8 @@ internal sealed partial class TensorsGpuExecution
             return ExecutePackedUltimate(source, output, ultimate, cancellation, owned);
         if (indicator is WindowMoneyFlowIndex moneyFlow)
             return ExecutePackedMoneyFlow(source, output, moneyFlow, cancellation, owned);
+        if (indicator is SeededOnBalanceVolume obv)
+            return ExecutePackedObv(source, output, obv, cancellation, owned);
         var arithmetic = indicator as CandleArithmetic;
         var rounding = indicator as PriceRoundingTransform;
         var lagged = indicator as LaggedPriceChange;
