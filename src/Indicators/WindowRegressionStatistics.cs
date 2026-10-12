@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -118,64 +117,99 @@ public sealed class WindowRegressionStatistics
 
     internal sealed class State(int period) : IMultiOutputState, IDisposable
     {
-        private readonly ExactLinearFitWindow _fit = new(period, observedHistory: true);
         private readonly Queue<double> _history = new();
-        private BigInteger _sum,
-            _squares,
-            _weighted;
-        private ExactLinearFitWindow.Fit _latest;
-        internal double GlobalIntercept => _latest.OneBasedGlobalIntercept;
+        private JurikDyadic _sum, _squares, _weighted, _seen;
+        private JurikDyadic _base, _threeCovariance, _denominator;
 
-        internal double LineAt(int position) => _latest.WindowPosition(position);
+        internal double GlobalIntercept
+        {
+            get
+            {
+                var position = _seen;
+                position.Multiply(-2);
+                position.Add(_history.Count - 1d);
+                return At(position);
+            }
+        }
+
+        internal double LineAt(int position) => At(JurikDyadic.FromDouble(2L * position - (_history.Count - 1L)));
+
+        private double At(JurikDyadic twiceCenteredPosition)
+        {
+            if (_history.Count < 2) return _sum.Mean(1);
+            var numerator = _threeCovariance;
+            numerator.Multiply(twiceCenteredPosition);
+            numerator.AddExact(_base);
+            return numerator.Ratio(_denominator);
+        }
 
         public void Reset()
         {
-            _fit.Reset();
             _history.Clear();
-            _sum = _squares = _weighted = 0;
-            _latest = default;
+            _sum = _squares = _weighted = _seen = default;
+            _base = _threeCovariance = _denominator = default;
         }
 
-        public void Dispose()
-        {
-            _fit.Dispose();
-            _history.Clear();
-        }
+        public void Dispose() => _history.Clear();
 
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
             output[5] = 1;
-            var value = ExactVarianceWindow.Units(bar.Close);
+            var current = JurikDyadic.FromDouble(bar.Close);
             if (_history.Count == period)
             {
-                var expired = ExactVarianceWindow.Units(_history.Dequeue());
-                _weighted -= _sum - expired;
-                _sum -= expired;
-                _squares -= expired * expired;
+                var expired = JurikDyadic.FromDouble(_history.Dequeue());
+                _sum.Subtract(expired);
+                _weighted.Subtract(_sum);
+                expired.Square();
+                _squares.Subtract(expired);
             }
-            _weighted += _history.Count * value;
-            _sum += value;
-            _squares += value * value;
+            var weighted = current;
+            weighted.Multiply(_history.Count);
+            _weighted.AddExact(weighted);
+            _sum.AddExact(current);
+            current.Square();
+            _squares.AddExact(current);
             _history.Enqueue(bar.Close);
-            var fit = _fit.Next(bar.Close, true);
-            _latest = fit;
-            if (_history.Count < 2)
-                return;
-            var n = new BigInteger(_history.Count);
-            var variance = n * _squares - _sum * _sum;
-            output[0] = fit.Slope;
-            output[1] = fit.OneBasedWindowIntercept;
-            output[2] = ExactPopulationDeviation.RootRatio(variance, n * n);
-            output[4] = fit.Last;
+            _seen.Add(1);
+            int count = _history.Count;
+            if (count < 2) return;
+
+            // Centered moments remain exact. Ordinary prices fit the existing
+            // fixed-width dyadic engine; wide exponent spans retain its fallback.
+            var variance = _squares;
+            variance.Multiply(count);
+            var sumSquared = _sum;
+            sumSquared.Square();
+            variance.Subtract(sumSquared);
+            var covariance = _weighted;
+            covariance.Multiply(2);
+            var centeredSum = _sum;
+            centeredSum.Multiply(count - 1);
+            covariance.Subtract(centeredSum);
+            var spread = JurikDyadic.FromDouble(count);
+            spread.Multiply(count);
+            spread.Add(-1);
+            _denominator = spread;
+            _denominator.Multiply(count);
+            _base = _sum;
+            _base.Multiply(spread);
+            _threeCovariance = covariance;
+            _threeCovariance.Multiply(3);
+
+            var slope = _threeCovariance;
+            slope.Multiply(2);
+            output[0] = slope.Ratio(_denominator);
+            output[1] = At(JurikDyadic.FromDouble(-1L - count));
+            output[2] = variance.SqrtMean((long)count * count);
+            output[4] = At(JurikDyadic.FromDouble(count - 1));
             output[6] = output[7] = output[9] = 1;
-            if (variance.IsZero)
-                return;
-            var covariance = 2 * _weighted - (n - 1) * _sum;
-            output[3] = ExactMeanAccumulator.UnitRatio(
-                (3 * covariance * covariance) << 1074,
-                (n * n - 1) * variance
-            );
+            if (variance.Sign == 0) return;
+            covariance.Square();
+            covariance.Multiply(3);
+            variance.Multiply(spread);
+            output[3] = covariance.Ratio(variance);
             output[8] = 1;
         }
     }

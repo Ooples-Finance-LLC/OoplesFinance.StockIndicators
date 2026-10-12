@@ -3560,3 +3560,10 @@ The 432-byte CPU Full variation is preserved without attribution. These totals i
 Focused checks cover independent rational references, all ten outputs, repainting, flat windows, subnormal variance, incomplete/maximum periods, mixed roots, chaining, warmup, input-before-output validation, cancellation and ownership after disposal. This batch removes snapshot row objects but retains the existing exact regression arithmetic. It adds no timing or allocation measurement and establishes no speed win; the 181/401 timing-qualified count is unchanged.
 
 Verification: net10.0 production and comparison builds passed; 13 focused unit cases, 8 regression comparison cases and 64 inventory checks passed, with no skipped tests.
+
+
+### Compact shared regression moments
+
+`WindowRegressionStatistics.State` now keeps one observed-history queue and reuses the existing exact dyadic accumulator for sums, squares, weighted moments and fitted coordinates. This removes the duplicate fit-window history and routine minimum-subnormal-unit BigInteger expansion for both rolling statistics and retrospective regression consumers. Wide exponent spans retain arbitrary-precision fallback; no rounded slope or intercept is reused to derive another output.
+
+The net10.0 production/comparison builds, 15 focused unit cases and 12 independent regression/channel comparison cases passed with no skips. Differential tests matched the previous state bit-for-bit across resets, full/partial windows, random fractions, extreme magnitudes, signed zero and subnormals. A warmed 1,000-bar eighth-unit price fixture, including final-line reads, allocated zero managed bytes on the current thread. This excludes state construction, history growth and result columns, and does not establish total BuildAsync allocations or a latency win. No timing benchmark was rerun; qualification remains 181/401.
