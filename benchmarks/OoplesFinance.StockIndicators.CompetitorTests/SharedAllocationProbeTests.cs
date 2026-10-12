@@ -31,6 +31,7 @@ public sealed class SharedAllocationProbeTests
     [InlineData("Skender.GetCmo")]
     [InlineData("Trady.Indicator.EfficiencyRatio")]
     [InlineData("Skender.GetFisherTransform")]
+    [InlineData("QuanTAlib.Hwma")]
     [InlineData("QuanTAlib.Ltma")]
     [InlineData("QuanTAlib.Slope")]
     [InlineData("Skender.GetSlope")]

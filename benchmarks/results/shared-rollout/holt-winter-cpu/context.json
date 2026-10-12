@@ -1,0 +1,25 @@
+{
+  "revision": "accompanying commit",
+  "date": "2026-10-12",
+  "period": 20,
+  "count": 1000,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "nativePackage": "QuanTAlib 1.0.0",
+  "sourceInspected": "https://github.com/mihakralj/QuanTAlib/blob/a2af99711d22a2833af2eb18054f0049a3fb0224/lib/averages/Hwma.cs",
+  "sourceSha256": "4d3b33f1fc73b995e216741582e53f7f293ed8b5e311a804506a5db53e789ec4",
+  "contracts": [
+    "Prepared matching eighth-unit inputs. Native public Calc results retained in arrays; state construction measured.",
+    "Native recursive level/velocity/acceleration require full-prefix replay in each parallel worker, included in measurement.",
+    "Setup checks independent native/exact references, bitwise native serial/parallel agreement, both builder histories and 1e-9 native/exact fixture agreement."
+  ],
+  "verification": [
+    "Production and benchmark builds passed. Final 11 state tests and 21 comparison/fixture tests passed; initial fixture/probe batch passed 50 cases; 71 inventory checks passed.",
+    "Initial compact-only state failed zero-allocation check (5712 bytes per 1000 period-20 updates). Guarded complete-stage sums removed these allocations; original assertion retained and passed."
+  ],
+  "limits": [
+    "No latency measured; qualification stays 186/401.",
+    "All managed threads counted; prepared inputs and post-sample disposal excluded. Results retained during sample.",
+    "Three samples identical per arm. Full still allocates more than native serial."
+  ]
+}
