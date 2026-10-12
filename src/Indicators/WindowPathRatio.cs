@@ -118,36 +118,41 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
         return output;
     }
 
-    private sealed class Calculator(int period, PathRatioConvention convention)
+    internal sealed class Calculator(int period, PathRatioConvention convention)
     {
         private readonly Queue<double?> _prices = new();
-        private readonly Queue<JurikDyadic> _steps = new();
         private JurikDyadic _path;
-        private double? _previous;
+        private double? _previous, _beforeWindow;
 
         internal void Reset()
         {
             _prices.Clear();
-            _steps.Clear();
             _path = default;
-            _previous = null;
+            _previous = _beforeWindow = null;
+        }
+
+        private static JurikDyadic Distance(double? left, double? right)
+        {
+            if (!left.HasValue || !right.HasValue) return default;
+            var result = JurikDyadic.FromDouble(Math.Max(left.Value, right.Value));
+            result.Subtract(JurikDyadic.FromDouble(Math.Min(left.Value, right.Value)));
+            return result;
         }
 
         internal double? Next(double? value)
         {
-            var step = new JurikDyadic();
-            if (value.HasValue && _previous.HasValue)
-            {
-                step.Add(Math.Max(value.Value, _previous.Value));
-                step.Subtract(JurikDyadic.FromDouble(Math.Min(value.Value, _previous.Value)));
-            }
-            if (_steps.Count == period)
-                _path.Subtract(_steps.Dequeue());
-            _steps.Enqueue(step);
-            _path.AddExact(step);
-            _previous = value;
+            var step = Distance(value, _previous);
             var mature = _prices.Count == period;
             var first = mature ? _prices.Dequeue() : null;
+            if (mature)
+            {
+                // Prices already retain the outgoing step's endpoints. Recompute
+                // it exactly instead of retaining a second queue of wide structs.
+                _path.Subtract(Distance(first, _beforeWindow));
+                _beforeWindow = first;
+            }
+            _path.AddExact(step);
+            _previous = value;
             _prices.Enqueue(value);
             if (!mature || !value.HasValue || !first.HasValue || _path.Sign == 0)
                 return null;
