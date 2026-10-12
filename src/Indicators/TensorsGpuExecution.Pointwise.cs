@@ -186,7 +186,7 @@ internal sealed partial class TensorsGpuExecution
                 if (trueRange) kernel.SetArg(5, work.Sma.Handle);
                 if (vortex is not null)
                 {
-                    kernel.SetArg(5, work.Sma.Handle); kernel.SetArg(6, work.Presence.Handle); kernel.SetArg(7, 0);
+                    kernel.SetArg(5, work.Sma.Handle); kernel.SetArg(6, work.Presence.Handle); kernel.SetArg(7, work.SecondaryOutput.Handle);
                 }
                 if (secondary is not null) kernel.SetArg(5, work.Right.Handle);
                 if (aroon is not null)
@@ -210,11 +210,9 @@ internal sealed partial class TensorsGpuExecution
                 deviceOutput.CopyToHost(output[0]);
                 if (vortex is not null)
                 {
-                    // Reuse the output buffer for the second ratio. Inputs remain
-                    // immutable; both passes produce their own device presence.
+                    // Both ratios share one certified range sum and one dispatch.
                     cancellation.ThrowIfCancellationRequested();
-                    kernel.SetArg(7, 1); kernel.Enqueue(new[] { ((ulong)source.Length + 63) / 64 });
-                    deviceOutput.CopyToHost(output[1]); work.Presence.CopyToHost(output[2]);
+                    work.SecondaryOutput.CopyToHost(output[1]); work.Presence.CopyToHost(output[2]);
                     Array.Copy(output[2], output[3], source.Length);
                 }
                 if (pathRatio is not null) work.Right.CopyToHost(output[1]);

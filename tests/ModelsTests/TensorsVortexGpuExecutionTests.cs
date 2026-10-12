@@ -57,6 +57,30 @@ public sealed class TensorsVortexGpuExecutionTests
     }
 
     [SkippableFact]
+    public async Task FusedOutputsSurviveWorkspaceReuseByOtherKernelsAndMissingWindows()
+    {
+        Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
+        var bars = Data(257);
+        var vortex = new WindowVortex(14);
+        using var expected = await Build(bars, vortex).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync();
+        using var retained = await Build(bars, vortex).BuildAsync();
+        foreach (IIndicator indicator in new IIndicator[] { new TrueRange(14), new WindowVortex(4096), vortex })
+        {
+            var builder = Build(bars, indicator, IndicatorHistoryMode.LatestOnly);
+            using var actual = await builder.BuildAsync();
+            Assert.Equal(IndicatorExecutionBackend.Gpu, builder.LastExecution!.Backend);
+            using var cpu = await Build(bars, indicator).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync();
+            foreach (var output in indicator.Outputs)
+                Assert.Equal(cpu[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                    actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+        }
+        retained.Dispose();
+        foreach (var output in vortex.Outputs)
+            Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                retained[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+    }
+
+    [SkippableFact]
     public async Task RequiredGpuValidatesAllFieldsRejectsUncertifiedInputsAndRecovers()
     {
         Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);

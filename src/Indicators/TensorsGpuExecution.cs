@@ -130,14 +130,16 @@ internal sealed partial class TensorsGpuExecution
         internal double[] HighInput => _highInput ??= GC.AllocateUninitializedArray<double>(count);
         internal double[] LowInput => _lowInput ??= GC.AllocateUninitializedArray<double>(count);
         internal double[] RightInput => _rightInput ??= GC.AllocateUninitializedArray<double>(count);
-        private OpenClBuffer<double>? _input, _sma, _asin, _presence, _right;
+        private OpenClBuffer<double>? _input, _sma, _asin, _presence, _right, _secondaryOutput;
         internal OpenClBuffer<double> DeviceInput => _input ??= new(context, count);
         internal OpenClBuffer<double> Sma => _sma ??= new(context, count);
         internal OpenClBuffer<double> Asin => _asin ??= new(context, count);
         internal OpenClBuffer<double> Presence => _presence ??= new(context, count);
         internal OpenClBuffer<double> Right => _right ??= new(context, count);
+        internal OpenClBuffer<double> SecondaryOutput => _secondaryOutput ??= new(context, count);
         public void Dispose()
         {
+            _secondaryOutput?.Dispose();
             _input?.Dispose(); _sma?.Dispose(); _asin?.Dispose(); _presence?.Dispose(); _right?.Dispose();
         }
     }
