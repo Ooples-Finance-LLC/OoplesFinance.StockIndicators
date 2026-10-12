@@ -63,13 +63,16 @@ public sealed class WindowChoppinessIndex : MultiOutputIndicatorBase, IIndicator
     {
         private readonly Queue<(double High, double Low)> _intervals = new(Math.Min(period, Math.Max(0, count - 1)));
         private readonly double _logPeriod = Math.Log(period);
+        private readonly WindowExtremeDeque _highs = new(period, maximum: true);
+        private readonly WindowExtremeDeque _lows = new(period, maximum: false);
         private JurikDyadic _sum;
         private double _previous;
         private bool _started;
 
         public void Reset()
         {
-            _intervals.Clear(); _sum = default; _previous = 0; _started = false;
+            _intervals.Clear(); _highs.Reset(); _lows.Reset();
+            _sum = default; _previous = 0; _started = false;
         }
 
         public void Update(in Bar bar, Span<double> output)
@@ -85,12 +88,9 @@ public sealed class WindowChoppinessIndex : MultiOutputIndicatorBase, IIndicator
             }
             _intervals.Enqueue((high, low));
             _sum.AddExact(ExactTrueInterval.Difference(high, low));
+            _highs.Add(high); _lows.Add(low);
             if (_intervals.Count < period) return;
-            foreach (var interval in _intervals)
-            {
-                high = Math.Max(high, interval.High); low = Math.Min(low, interval.Low);
-            }
-            var span = ExactTrueInterval.Difference(high, low);
+            var span = ExactTrueInterval.Difference(_highs.Value, _lows.Value);
             if (span.Sign == 0) return;
             output[0] = _sum.Sign == 0 ? double.NegativeInfinity
                 : 100 * (ExactIntervalLogRatio.Calculate(_sum, span) / _logPeriod);
