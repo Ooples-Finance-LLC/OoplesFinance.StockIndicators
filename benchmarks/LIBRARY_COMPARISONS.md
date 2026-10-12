@@ -3504,3 +3504,21 @@ Newest-first coefficients are `2P-1-3*lag`. After publication, subtracting three
 The net10.0 Release production build passed with zero warnings/errors. The focused unit command filtered `TensorsEndpointWeightedGpuExecutionTests|TensorsWeightedAverageGpuExecutionTests|TensorsTriangularGpuExecutionTests|TensorsRollingSumGpuExecutionTests`; **39 cases passed, zero skipped** on the available GPU. Coverage includes both history modes, both startup conventions, periods1/2/3/20/65/4096/32767, 64-output block boundaries, signed zeros, period-one subnormal identity, exact CPU bit comparisons, invalid-input precedence, unsupported periods/inputs, cancellation, recovery and retained owned bars after disposal. Existing WMA/triangular/sum kernels passed shared-dispatch regressions. Test builds retain preexisting framework/analyzer warnings.
 
 No latency or allocation benchmark was run for the new GPU path while other repositories' test jobs were active. Device execution is verified, but comparison against the best native CPU path, other devices and graph fusion remain pending. Timing qualification remains 181/401 and the full rollout is incomplete.
+
+
+### Endpoint GPU six-path allocation comparison (`c2f66129`)
+
+`SharedGpuEndpointBenchmarks` reuses the existing independent Epma/Mma CPU/native checks and adds GPU Full/LatestOnly. The complete GPU `BuildAsync()` call includes input staging, device transfer, dispatch and readback. Setup requires actual GPU execution and exact parity with the independently validated CPU output. Native serial retains its direct value array; native parallel measures construction, P-1 seed replay and output writes. The period is20. The shared allocation probe now reports all six methods for these two APIs; its existing four-method cases are unchanged.
+
+The benchmark build, 13 shared allocation-probe regression cases and 63 inventory checks passed. Both actual GPU allocation probes passed setup/reference/backend assertions and all six methods. At 1,000 bars, ten warmups followed by three samples per method produced identical values in every sample:
+
+| Method | Epma bytes | Mma bytes |
+|---|---:|---:|
+| CPU Full | 66,424 | 66,424 |
+| CPU LatestOnly | 17,736 | 17,736 |
+| GPU Full | 59,744 | 59,744 |
+| GPU LatestOnly | 11,056 | 11,056 |
+| Native serial | 262,408 | 219,808 |
+| Native parallel | 293,848 | 227,728 |
+
+These are warmed-workspace **managed allocations**, including worker threads and retained results. They exclude setup, cached kernel/workspace creation and disposal after each sample; they do not measure total device/resident/native memory. Raw/parsed evidence and context are archived under `results/shared-rollout/endpoint-gpu/*-allocation-1k*`. CPU was71% during fixture inspection with other repository test jobs active, so no latency campaign was started. No GPU speedup or new timing qualification is claimed; coverage stays181/401. Only the selected four CPU/native methods of this fixture can be fed to the current timing-qualification parser; six-method GPU reports require separate comparison evidence.

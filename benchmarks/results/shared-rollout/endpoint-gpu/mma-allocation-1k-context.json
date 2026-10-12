@@ -1,0 +1,11 @@
+{
+  "production_commit": "2541d9a6",
+  "fixture_commit": "c2f66129",
+  "fixture_sha256": "8ba75ecbb84c42c440b1ba853fbb175c37590f91128f6de0a1d077a8ac086e77",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared QuanTAlib.Mma 1000 3",
+  "period": 20,
+  "warmups_per_arm": 10,
+  "samples_per_arm": 3,
+  "scope": "Six paths with retained results: CPU Full/LatestOnly, GPU Full/LatestOnly, native serial/parallel. Managed allocation counts include all process threads. GPU BuildAsync includes host staging, transfer, kernel dispatch and readback; setup, cached kernel/workspace creation and post-measurement disposal are excluded. Native replay includes P-1 seed bars, state creation and result writes. Setup verifies independent owned/native references, exact native serial/parallel parity and exact device versus CPU results with explicit GPU backend assertion.",
+  "limitations": "Warmed-workspace managed allocations, not total GPU/resident/native memory. No elapsed-time measurement or speedup claim. CPU observed at 71 percent during fixture inspection; other repository test jobs remain active. GPU timing qualification pending."
+}
