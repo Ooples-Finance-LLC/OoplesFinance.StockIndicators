@@ -15,6 +15,34 @@ public sealed class MoneyFlowSettingsCollection { }
 [Collection("TA MFI settings")]
 public sealed class MoneyFlowIndexComparisonTests
 {
+    [Theory]
+    [InlineData(15)]
+    [InlineData(64)]
+    [InlineData(513)]
+    public void DirectFixtureRestoresGlobalSettings(int count)
+    {
+        var old = TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Mfi);
+        var oldDop = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        var fixture = new SharedMoneyFlowIndexBenchmarks { Count = count };
+        try
+        {
+            TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Mfi, 7);
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 2;
+            fixture.Setup();
+            Assert.Equal(0, TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Mfi));
+            fixture.Cleanup();
+            fixture.Cleanup();
+            Assert.Equal(7, TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Mfi));
+            Assert.Equal(2, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);
+        }
+        finally
+        {
+            fixture.Cleanup();
+            TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Mfi, old);
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = oldDop;
+        }
+    }
+
     private static Bar[] Raw(double[] prices, double[]? volumes = null) =>
         prices
             .Select((v, i) => new Bar(DateTime.UnixEpoch.AddDays(i), v, v, v, v, volumes?[i] ?? 1))
