@@ -570,6 +570,8 @@ internal static partial class ValuesBarExecution
         {
             Indicator = indicator;
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
+            bool inactiveObvAverage = indicator is SeededOnBalanceVolume obv
+                && (obv.AveragePeriod is null || obv.AveragePeriod >= count);
             Values = new double[indicator.Outputs.Count][];
             for (int slot = 0; slot < Values.Length; slot++)
                 Values[slot] = indicator is RegressionWithChannels && slot is 5 or 6
@@ -580,6 +582,7 @@ internal static partial class ValuesBarExecution
                     || indicator is WindowDeviationBands && slot is 7 or 8
                     || indicator is ClassicDeviationBands && slot is 4 or 5
                     || indicator is PriorPriceChannel && slot is 5 or 6
+                    || inactiveObvAverage && slot == 2
                     || slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
@@ -594,6 +597,9 @@ internal static partial class ValuesBarExecution
             if (indicator is WindowDeviationBands) Values[7] = Values[8] = Values[6];
             if (indicator is ClassicDeviationBands) Values[4] = Values[5] = Values[3];
             if (indicator is PriorPriceChannel) Values[5] = Values[6] = Values[4];
+            // Disabled/all-warmup OBV average and presence are both constant zero.
+            // Keep both public columns while sharing their run-owned storage.
+            if (inactiveObvAverage) Values[2] = Values[1];
             _state = indicator switch
             {
                 RegressionWithFinalLine r => new RegressionWithFinalLine.Writer(r.Period, count),
