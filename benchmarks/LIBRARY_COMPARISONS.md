@@ -3464,3 +3464,14 @@ One allocation-only probe at 1,000 bars (defaults 34/55/13, ten warmups, three m
 | Native parallel | 967,832 |
 
 LatestOnly allocates **83.03% less than native serial**. These totals include all managed process threads and retained outputs, excluding setup/disposal. The probe preceded the validation-only correction; execution state and benchmark methods did not change. Raw output, parsed results and context are archived in `results/shared-rollout/klinger-cpu/compact-state-allocation-1k*`. No timing run was added while other repositories' tests were active. Timing qualification stays **181/401** and GPU support remains pending; these allocation figures are not performance-win qualifications.
+
+
+### Single-stochastic Schaff cycle shared builder
+
+`SingleStochasticCycle` replaces the Schaff comparison's snapshot adapter with shared CPU `BuildAsync()` state. It reuses the compact SMA-seeded dyadic EMA arithmetic extracted from Klinger without changing the recurrence. Two lazy monotonic queues replace repeated minimum/maximum scans of arbitrary-precision MACD history. Each candidate is inserted/removed once; equal candidates keep the newest position because only the extreme value matters. A three-element smoothing ring preserves the complete-window SMA and independent presence output. Extended unpublished MACD values never need a finite double proxy for comparisons.
+
+Skender.Stock.Indicators 2.7.3 `src/s-z/Stc/Stc.Series.cs` was reviewed: it materializes MACD results, transformed quotes, stochastic results and final STC results. The builder fuses these stages into one state update. The original `SchaffTrendCycleSnapshot` remains an independent BigInteger batch reference, and the generated Schaff indicators retain their existing APIs.
+
+Production net10.0 Release and benchmark builds passed; the benchmark/test builds retain existing framework/analyzer warnings. Eighteen focused unit cases (`SingleStochasticCycleBuilderTests|KlingerVolumeWithSignalBuilderTests`), 17 independent comparison/fixture cases (`SchaffCycleComparisonTests|KlingerComparisonTests|SharedKlingerBenchmarkTests`) and 61 inventory checks passed. Verification covers Full/LatestOnly value/presence retention after disposal, owned bars, exact startup, flat/tied windows, queue growth/wrap/eviction, reversed replay after reset, maximum periods, invalid inputs, cancellation and explicit GPU rejection. Independent wide/subnormal comparisons passed. Both cycle and Klinger state replays allocate zero bytes over 1,000 ordinary updates after reset/capacity warmup.
+
+The manifest/catalog now map `Skender.GetStc` to `SingleStochasticCycle`; existing qualification evidence was preserved. No direct STC timing fixture or CPU/GPU win is claimed in this batch. Timing coverage remains 181/401; the full rollout is incomplete.

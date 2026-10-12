@@ -1844,12 +1844,12 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.StcResult] GetStc[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32, Int32, Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "SchaffTrendCycleSnapshot",
+    "OoplesIndicator": "SingleStochasticCycle",
     "Outputs": [
       "Stc"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "SchaffTrendCycleSnapshot retains Skender\u0027s single-stochastic STC convention: independently mean-seeded fast/slow EMAs, complete cycle window on MACD, then three-value SMA. Flat windows contribute zero; all startup masks are explicit. Reuses the verified EMA arithmetic with extended upper exponents and lazy cycle history, so overflowing unpublished MACD cannot poison bounded output. Independent rational-grid and native staged references cover configurations, startup, tiny/wide inputs, quote/tuple routes, repeat/prefix calls and output/presence mutations. Native zero cycle fails in its nested stochastic despite permissive outer validation; owned rejects nonpositive cycles immediately."
+    "CompetitorLimitation": "SingleStochasticCycle executes through shared CPU BuildAsync with compact SMA-seeded EMA arithmetic and lazy exact monotonic extrema queues. SchaffTrendCycleSnapshot remains the batch reference. It retains Skender\u0027s single-stochastic STC convention: independently mean-seeded fast/slow EMAs, complete cycle window on MACD, then three-value SMA. Flat windows contribute zero; all startup masks are explicit. Reuses the verified EMA arithmetic with extended upper exponents and lazy cycle history, so overflowing unpublished MACD cannot poison bounded output. Independent rational-grid and native staged references cover configurations, startup, tiny/wide inputs, quote/tuple routes, repeat/prefix calls and output/presence mutations. Native zero cycle fails in its nested stochastic despite permissive outer validation; owned rejects nonpositive cycles immediately."
   },
   {
     "Id": "Skender.GetStdDev",
