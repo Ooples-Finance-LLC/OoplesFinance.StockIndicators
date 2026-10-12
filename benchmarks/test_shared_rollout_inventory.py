@@ -93,6 +93,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['Skender.GetKvo'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_zero_seed_laguerre_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedZeroSeedLaguerreBenchmarks.BuilderFull(Operation: "QuanTAlib.Ltma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Ltma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_median_adaptive_explicit_operation(self):
         self.write()
         path = self.qualification('SharedMedianAdaptiveBenchmarks.BuilderFull(Operation: "QuanTAlib.Maaf", Count: 1000)')

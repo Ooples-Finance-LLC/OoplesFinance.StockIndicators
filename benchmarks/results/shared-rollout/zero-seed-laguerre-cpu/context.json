@@ -1,0 +1,22 @@
+{
+  "revision": "accompanying commit",
+  "date": "2026-10-12",
+  "gamma": 0.1,
+  "count": 1000,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "nativePackage": "QuanTAlib 1.0.0",
+  "sourceInspected": "https://github.com/mihakralj/QuanTAlib/blob/a2af99711d22a2833af2eb18054f0049a3fb0224/lib/averages/Ltma.cs",
+  "sourceSha256": "1cb01a06b5c55caaa3eecd7224b92ef08411b9610460309a78e11706401cf340",
+  "contracts": [
+    "Prepared matching eighth-unit inputs. Native public Calc results retained in double arrays; native state construction is measured.",
+    "Four recursive zero-seeded stages require full-prefix replay for each native worker; all prefix work and state construction are measured.",
+    "Setup checks native bit patterns against independent native reference, parallel equality, and both builder history modes against independent exact reference. Native/exact benchmark-input agreement tolerance is 1e-9."
+  ],
+  "verification": "Production build clean; benchmark build succeeded; 11 state tests, 46 comparison/probe cases and 70 inventory tests passed. Warmed ordinary state updates including reset allocate zero bytes.",
+  "limits": [
+    "No latency measurement or new qualification; coverage stays 183/401.",
+    "All managed threads counted; prepared inputs and post-sample disposal excluded. Results retained during sample.",
+    "Three samples identical in each arm. Full allocation exceeds native serial despite lower LatestOnly allocation."
+  ]
+}
