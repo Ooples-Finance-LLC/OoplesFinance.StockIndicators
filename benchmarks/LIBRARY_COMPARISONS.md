@@ -3444,3 +3444,23 @@ One combined ten-warmup/ten-iteration timing campaign covered both new CPU fixtu
 | Relative Volatility | Native parallel | 3.890 | 10,474,968 |
 
 These are diagnostics, not newly qualified wins. CPU samples before/during/after were 50/43/90%; no competing dotnet build/test/run appeared in the first two samples, but an AiDotNet.Tensors build appeared after the run. Its creation time was unavailable when rechecked, so overlap is unknown. No continuous isolation is claimed. Relative Volatility intervals overlap (LatestOnly 1.498-5.056ms, native parallel 2.110-5.669ms) and it received minimum-iteration-time warnings. All arms retained ten samples. Reports and context are archived as `initial-10k-diagnostic*` in each indicator's CPU folder and validated with the inventory parser; neither report was merged into timing qualifications. Coverage remains 181/401, not a win count. GPU support and further performance work remain pending.
+
+
+### Klinger compact shared builder (`d904dee4`)
+
+`KlingerVolumeWithSignal` replaces the Klinger comparison's snapshot adapter with shared CPU `BuildAsync()` execution. Compact exact running state and three SMA-seeded EMA states publish oscillator, signal and independent presence outputs. State retains no bar history or intermediate trajectories. Exact HLC comparisons, cancelling/zero range branches, extended unpublished force/averages, output rounding and maximum-period startup match the batch reference. The existing generated `KlingerVolumeOscillator` API is unchanged. The public snapshot still rejects unrepresentable outputs; its internal reference path exposes signed infinities so the validation framework can verify finite prefixes and runtime rejection.
+
+Reviewed Skender.Stock.Indicators **2.7.3** source: `GetKvo` eagerly converts quotes and calls `CalcKvo`; the latter allocates seven full-length intermediate arrays and result objects. The direct serial fixture retains that result collection without a normalization copy. Native workers call the public API on full prefixes because all three EMAs retain recursive state; prefix arrays/results, quote conversion and output writes remain measured. Setup compares both outputs and their independent masks against the owned rational and staged-native references, including startup and uneven worker boundaries.
+
+Production/benchmark builds, eight focused `KlingerVolumeWithSignalBuilderTests`, 12 `KlingerComparisonTests|SharedKlingerBenchmarkTests` cases and 61 inventory checks passed. Tests cover Full/LatestOnly retention after disposal, wide/tiny inputs, exact force cancellation above binary64 range, maximum periods, invalid-input precedence, cancellation/recovery, reset and zero allocations across 1,000 ordinary warmed state updates. An initial lifecycle failure exposed the throwing-reference contract mismatch; the internal reference correction passed the rerun and preserves public snapshot overflow tests. Existing framework/analyzer warnings remain in test builds.
+
+One allocation-only probe at 1,000 bars (defaults 34/55/13, ten warmups, three measured samples per arm) produced identical totals in every sample:
+
+| Arm | Allocated bytes |
+|---|---:|
+| Builder Full | 84,776 |
+| Builder LatestOnly | 36,088 |
+| Native serial | 212,608 |
+| Native parallel | 967,832 |
+
+LatestOnly allocates **83.03% less than native serial**. These totals include all managed process threads and retained outputs, excluding setup/disposal. The probe preceded the validation-only correction; execution state and benchmark methods did not change. Raw output, parsed results and context are archived in `results/shared-rollout/klinger-cpu/compact-state-allocation-1k*`. No timing run was added while other repositories' tests were active. Timing qualification stays **181/401** and GPU support remains pending; these allocation figures are not performance-win qualifications.
