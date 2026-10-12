@@ -158,6 +158,19 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
                 return null;
             var numerator = JurikDyadic.FromDouble(value.Value);
             numerator.Subtract(JurikDyadic.FromDouble(first.Value));
+#if !NETFRAMEWORK
+            if (convention == PathRatioConvention.SignedPercent && numerator.TryDouble(out var net)
+                && _path.TryDouble(out var distance))
+            {
+                double scaled = net * 100;
+                // Both operands are exact binary64 values. Since 100 is an integer,
+                // the product residual is a multiple of the smallest subnormal:
+                // FMA cannot round a nonzero residual to zero. Only a proven exact,
+                // finite numerator may bypass the extended arithmetic ratio.
+                if (double.IsFinite(scaled) && Math.FusedMultiplyAdd(net, 100, -scaled) == 0)
+                    return scaled == 0 ? 0 : scaled / distance;
+            }
+#endif
             if (convention == PathRatioConvention.SignedPercent) numerator.Multiply(100);
             var ratio = numerator.Ratio(_path);
             return convention == PathRatioConvention.AbsoluteFraction ? Math.Abs(ratio) : ratio;
