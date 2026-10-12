@@ -3190,3 +3190,33 @@ nine compact arithmetic/allocation cases, 15 fixture/reference cases and 58
 inventory tests passed. Existing benchmark/test warnings remain. The four-arm
 fixture is registered in the allocation probe and qualification parser.
 Logs: `C:/Users/cheat/temp/si-ulcer-direct-{production,benchmark-build,unit,comparisons}.log`.
+
+
+### Ulcer Index direct CPU checkpoint, 10,000 bars (2026-10-11)
+
+Production/fixture `2ffd53fc`, period 14, three warmups and five requested iterations.
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 15,948,168.75 | 11,362,814.63 / 20,533,522.87 | 644,628 |
+| LatestOnly | 16,184,630.00 | 14,603,152.07 / 17,766,107.93 | 164,837 |
+| Native serial | 1,692,545.00 | 1,595,554.10 / 1,789,535.90 | 921,023 |
+| Native parallel | 444,929.98 | 430,077.96 / 459,782.01 | 1,011,806 |
+
+LatestOnly allocates 83.7% less than the fastest native path but its mean latency
+is 36.4 times higher. Both builder intervals are above both native intervals.
+This is a loss; zero steady-state allocation does not establish a speed win.
+The next optimization target is CPU execution, including repeated exact
+percentage arithmetic and window-level parallel execution, preserving the
+existing once-rounded percentage and exact sum-of-squares contract.
+
+Short-run limitations: Full and NativeParallel each retained four samples after
+one outlier removal. BDN warned about minimum iterations of 61.921 ms (Full) and
+94.869 ms (LatestOnly). CPU was 16% before and 14% after; no competing dotnet
+build/test/run processes were seen at those samples. The 16.6-second run finished
+before the next process sample, so no during-run or continuous-isolation claim.
+No isolated benefit is attributed to the positive-peak shortcut.
+
+Raw report/context: `results/shared-rollout/ulcer-cpu/positive-peak-10k*`.
+Log: `C:/Users/cheat/temp/si-ulcer-2ffd53fc.log`. The qualification parser accepted
+all four arms. Only this pair was added; coverage is 181/401 APIs, not a win count.
