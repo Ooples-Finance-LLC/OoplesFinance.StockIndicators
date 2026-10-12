@@ -36,6 +36,40 @@ public sealed class CompactMoneyFlowExecutionTests
         }
     }
 
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public void CompactProductsPreserveFullMantissasAndExtremeExponentEvictions(bool minimum)
+    {
+        var random = new Random(927);
+        var bars = Enumerable.Range(0, 600).Select(i =>
+        {
+            double price = Math.ScaleB(1 + random.NextDouble(), (i % 6) switch
+            {
+                0 => 1000, 1 => -1070, 2 => 500, 3 => -500, _ => 0
+            });
+            double volume = Math.ScaleB(1 + random.NextDouble(), (i % 5) switch
+            {
+                0 => 1000, 1 => -1070, 2 => -500, _ => 0
+            });
+            if (i % 7 == 0) volume = -volume;
+            if (i % 11 == 0) volume = 0;
+            return new Bar(default, price, price, price, price, volume);
+        }).ToArray();
+        var expected = WindowMoneyFlowReference.Calculate(bars, 7, minimum, 0);
+        var state = (IMultiOutputState)new WindowMoneyFlowIndex(7, minimum).CreateState();
+        Span<double> output = stackalloc double[2];
+        for (int replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(output[0]));
+                Assert.Equal(expected[i].HasValue ? 1d : 0d, output[1]);
+            }
+        }
+    }
+
     [Fact]
     public void ExactlyZeroPositiveFlowRetainsPositiveZeroWithNegativeTotal()
     {

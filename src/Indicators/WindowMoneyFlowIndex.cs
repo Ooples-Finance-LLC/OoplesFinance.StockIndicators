@@ -79,7 +79,28 @@ public sealed class WindowMoneyFlowIndex
 #if !NETFRAMEWORK
     internal sealed class CompactState(int period, bool minimumTotalOne, int suppressed, int count = 0) : IMultiOutputState
     {
-        private readonly Queue<(JurikDyadic Value, int Direction)> _flows = new(Math.Min(period, Math.Max(0, count - 1)));
+        private readonly Queue<Flow> _flows = new(Math.Min(period, Math.Max(0, count - 1)));
+        private readonly struct Flow
+        {
+            private readonly Int128 _product;
+            private readonly int _exponent;
+            internal readonly int Direction;
+
+            internal Flow(double price, double volume, int direction)
+            {
+                Direction = direction;
+                if (direction == 0) { _product = 0; _exponent = 0; return; }
+                var a = ExactMeanAccumulator.DecomposeFinite(price);
+                var b = ExactMeanAccumulator.DecomposeFinite(volume);
+                // Each finite binary64 factor has at most 53 significant bits.
+                // Keep the exact product even when hardware multiplication would
+                // overflow or underflow. Nonzero decomposed factors are odd.
+                _product = (Int128)a.Integer * b.Integer;
+                _exponent = a.Exponent + b.Exponent;
+            }
+
+            internal JurikDyadic Value => JurikDyadic.FromBinaryProduct(_product, _exponent);
+        }
         private JurikDyadic _positive, _negative;
         private double _previous;
         private bool _started;
@@ -98,17 +119,16 @@ public sealed class WindowMoneyFlowIndex
             if (!_started) { _previous = typical; _started = true; return; }
             int direction = typical.CompareTo(_previous);
             _previous = typical;
-            var flow = JurikDyadic.FromDouble(typical);
-            flow.Multiply(bar.Volume);
+            var flow = new Flow(typical, bar.Volume, direction);
             if (_flows.Count == period)
             {
                 var old = _flows.Dequeue();
                 if (old.Direction > 0) _positive.Subtract(old.Value);
                 else if (old.Direction < 0) _negative.Subtract(old.Value);
             }
-            _flows.Enqueue((direction == 0 ? default : flow, direction));
-            if (direction > 0) _positive.AddExact(flow);
-            else if (direction < 0) _negative.AddExact(flow);
+            _flows.Enqueue(flow);
+            if (direction > 0) _positive.AddExact(flow.Value);
+            else if (direction < 0) _negative.AddExact(flow.Value);
             if (_changes < (long)period + suppressed) _changes++;
             if (_changes < (long)period + suppressed) return;
             var total = _positive;

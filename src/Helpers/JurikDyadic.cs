@@ -31,6 +31,11 @@ internal struct JurikDyadic
 #endif
     }
 #if !NETFRAMEWORK
+    // Callers supply an exact signed product with at most 106 significant bits.
+    // Its odd factors are already normalized; zero has no meaningful exponent.
+    internal static JurikDyadic FromBinaryProduct(Int128 product, int exponent) =>
+        new() { _fixed = true, _integer = product, _exponent = product == 0 ? 0 : exponent };
+
     internal static JurikDyadic FromFactor(in ExactMeanAccumulator.ProductFactor factor) =>
         new() { _fixed = true, _integer = factor.Mantissa, _exponent = factor.Scale - 1074 };
 #endif
