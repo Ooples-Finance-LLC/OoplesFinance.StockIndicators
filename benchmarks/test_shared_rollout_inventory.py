@@ -89,6 +89,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
             result = inventory(self.root, [path])
             self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_connors_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedConnorsBenchmarks.BuilderFull(Operation: "Skender.GetConnorsRsi", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetConnorsRsi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_triangular_builder_maps_both_native_apis(self):
         self.write()
         for api in ('QuanTAlib.Trima', 'TaLib.Functions.Trima'):

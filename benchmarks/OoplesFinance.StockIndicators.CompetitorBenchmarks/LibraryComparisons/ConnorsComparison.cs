@@ -13,7 +13,7 @@ internal static class ConnorsComparison
     internal static ComparisonPair Pair(int rsi = 3, int streak = 2, int rank = 100) =>
         new(
             "Skender.GetConnorsRsi",
-            nameof(ConnorsStrengthSnapshot),
+            nameof(ConnorsStrength),
             (d, _) => Native(d, rsi, streak, rank),
             (d, _) => Owned(d.IndicatorBars, rsi, streak, rank),
             (d, _) => Series(Reference(d.Closes, rsi, streak, rank, false)),
