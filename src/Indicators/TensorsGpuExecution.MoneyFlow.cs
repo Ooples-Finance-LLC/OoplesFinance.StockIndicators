@@ -53,13 +53,9 @@ internal sealed partial class TensorsGpuExecution
                 {
                     double priceBound = Math.ScaleB(maximumPrice, -priceGrid);
                     double volumeBound = Math.ScaleB(maximumVolume, -volumeGrid);
-                    const double longExclusiveLimit = 9223372036854775808d;
-                    // The P directional flows partition one window, so their
-                    // combined magnitude is bounded by P*maxPrice*maxVolume.
-                    bool certified = priceBound < longExclusiveLimit && volumeBound < longExclusiveLimit;
-                    if (certified) certified = (UInt128)(ulong)priceBound * (ulong)volumeBound
-                        <= (UInt128)long.MaxValue / (uint)indicator.Period;
-                    if (!certified) throw new NotSupportedException("Money flow inputs do not satisfy the exact GPU signed-integer certificate.");
+                    if (!Core.MoneyFlowIntegerCertificate.TryGetProduct(priceBound, volumeBound, out var product)
+                        || !Core.MoneyFlowIntegerCertificate.FitsInt64(product, indicator.Period))
+                        throw new NotSupportedException("Money flow inputs do not satisfy the exact GPU signed-integer certificate.");
                     for (int i = 0; i < count; i++)
                     {
                         cancellation.ThrowIfCancellationRequested();

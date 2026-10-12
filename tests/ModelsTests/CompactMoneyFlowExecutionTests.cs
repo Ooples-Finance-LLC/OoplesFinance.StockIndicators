@@ -183,6 +183,39 @@ public sealed class CompactMoneyFlowExecutionTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
     }
 
+    [Theory]
+    [InlineData(17)] [InlineData(513)]
+    public async Task CertifiedAccumulatorWidthBoundaryPreservesSignedSumsAndPublication(int count)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (double magnitude in new[] { Math.BitDecrement(Math.ScaleB(1d, 62)), Math.ScaleB(1d, 62) })
+            foreach (int sign in new[] { -1, 1 })
+            foreach (bool minimum in new[] { false, true })
+            {
+                // Odd unit volumes force grid zero. Two large flows straddle
+                // Int64 capacity; publication's factor 100 exceeds it on both sides.
+                var bars = Enumerable.Range(0, count).Select(i =>
+                {
+                    double price = i % 2 == 0 ? 1 : -1;
+                    return new Bar(default, 123, price, price, price, sign * price * (i % 17 == 0 ? 1 : magnitude));
+                }).ToArray();
+                var indicator = new WindowMoneyFlowIndex(2, minimum);
+                using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                    foreach (var output in indicator.Outputs)
+                        Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                            actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
     [Fact]
     public async Task CertifiedFullMantissaProductsRoundOnce()
     {

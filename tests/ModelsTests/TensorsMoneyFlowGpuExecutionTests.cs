@@ -66,6 +66,28 @@ public sealed class TensorsMoneyFlowGpuExecutionTests
     }
 
     [SkippableFact]
+    public async Task SignedWindowCapacityBoundaryExecutesOrRejects()
+    {
+        Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
+        foreach (double magnitude in new[] { Math.BitDecrement(Math.ScaleB(1d, 62)), Math.ScaleB(1d, 62) })
+        {
+            var bars = Enumerable.Range(0, 257).Select(i =>
+            {
+                double price = i % 2 == 0 ? 1 : -1;
+                return new Bar(default, 123, price, price, price, price * (i % 17 == 0 ? 1 : magnitude));
+            }).ToArray();
+            var indicator = new WindowMoneyFlowIndex(2);
+            if (magnitude < Math.ScaleB(1d, 62)) await Check(bars, indicator);
+            else
+            {
+                var builder = Build(bars, indicator);
+                await Assert.ThrowsAsync<NotSupportedException>(() => builder.BuildAsync());
+                Assert.Null(builder.LastExecution);
+            }
+        }
+    }
+
+    [SkippableFact]
     public async Task SignedCancellationRatiosThresholdsAndZeroMatchExactCpu()
     {
         Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
