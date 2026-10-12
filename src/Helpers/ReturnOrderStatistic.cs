@@ -41,6 +41,7 @@ internal sealed class ReturnOrderStatistic : IDisposable
         private readonly double _current, _previous;
 #else
         private readonly ExactMeanAccumulator.ProductFactor _current, _previous;
+        private readonly double _roundedRatio;
 #endif
         internal ReturnKey(double current, double previous)
         {
@@ -53,11 +54,29 @@ internal sealed class ReturnOrderStatistic : IDisposable
             _current = numerator; _previous = denominator;
 #else
             _current = new(numerator); _previous = new(denominator);
+            _roundedRatio = numerator / denominator;
 #endif
         }
         public int CompareTo(ReturnKey other)
         {
 #if !NETFRAMEWORK
+            // IEEE division is monotone. Distinct rounded ratios prove the
+            // exact order; equal rounded values do not prove an exact tie.
+            if (_roundedRatio < other._roundedRatio) return -1;
+            if (_roundedRatio > other._roundedRatio) return 1;
+            return CompareExact(in other);
+#else
+            var difference = JurikDyadic.FromDouble(_current);
+            difference.Multiply(other._previous);
+            var right = JurikDyadic.FromDouble(other._current);
+            right.Multiply(_previous);
+            difference.Subtract(right);
+            return difference.Sign;
+#endif
+        }
+#if !NETFRAMEWORK
+        private int CompareExact(in ReturnKey other)
+        {
             int sign = Math.Sign(_current.Mantissa), otherSign = Math.Sign(other._current.Mantissa);
             if (sign != otherSign) return sign.CompareTo(otherSign);
             if (sign == 0) return 0;
@@ -73,16 +92,8 @@ internal sealed class ReturnOrderStatistic : IDisposable
             if (leftScale > rightScale) left <<= leftScale - rightScale;
             else right <<= rightScale - leftScale;
             return sign * left.CompareTo(right);
-#else
-            var difference = JurikDyadic.FromDouble(_current);
-            difference.Multiply(other._previous);
-            var right = JurikDyadic.FromDouble(other._current);
-            right.Multiply(_previous);
-            difference.Subtract(right);
-            return difference.Sign;
-#endif
         }
-#if !NETFRAMEWORK
+
         private static int Bits(UInt128 value)
         {
             ulong upper = (ulong)(value >> 64);
