@@ -80,7 +80,13 @@ public sealed class SharedAllocationProbeTests
     {
         int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
         var fixture = new SharedVortexBenchmarks { Count = count };
-        try { fixture.Setup(); }
+        try
+        {
+            fixture.Setup();
+            Assert.IsType<List<Skender.Stock.Indicators.VortexResult>>(fixture.NativeSingle());
+            Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+                BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedVortexBenchmarks))));
+        }
         finally { fixture.Cleanup(); }
         Assert.Equal(prior, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);
     }
@@ -91,7 +97,13 @@ public sealed class SharedAllocationProbeTests
     {
         int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
         var fixture = new SharedChoppinessBenchmarks { Count = count };
-        try { fixture.Setup(); }
+        try
+        {
+            fixture.Setup();
+            Assert.IsType<List<Skender.Stock.Indicators.ChopResult>>(fixture.NativeSingle());
+            Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+                BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedChoppinessBenchmarks))));
+        }
         finally { fixture.Cleanup(); }
         Assert.Equal(prior, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);
     }

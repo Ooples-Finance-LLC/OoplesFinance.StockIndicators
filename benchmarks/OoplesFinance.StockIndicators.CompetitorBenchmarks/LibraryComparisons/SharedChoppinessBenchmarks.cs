@@ -44,7 +44,7 @@ public class SharedChoppinessBenchmarks
                 int end = (Count - Period) * (chunk + 1) / _chunks;
                 return _quotes[start..(end + Period)];
             }).ToArray();
-            var native = NativeValues([NativeSingle()]);
+            var native = NativeValues([(IEnumerable<ChopResult>)NativeSingle()]);
             Check(native, NativeValues(NativeParallel()));
             var expected = ChoppinessComparison.Reference(_bars, Period);
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
@@ -79,7 +79,7 @@ public class SharedChoppinessBenchmarks
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 
     // Native eager results are retained directly; normalization is setup-only.
-    [Benchmark(Baseline = true)] public IEnumerable<ChopResult> NativeSingle() => _quotes.GetChop(Period);
+    [Benchmark(Baseline = true)] public object NativeSingle() => _quotes.GetChop(Period);
     [Benchmark] public IEnumerable<ChopResult>[] NativeParallel()
     {
         var results = new IEnumerable<ChopResult>[_chunks];
