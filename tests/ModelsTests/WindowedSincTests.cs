@@ -8,6 +8,20 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class WindowedSincTests
 {
     [Theory]
+    [InlineData(14)] [InlineData(20)]
+    public void OrdinarySincStateReusesCompactExactStorageAfterWarmupAndReset(int period)
+    {
+        var state = (IIndicatorState)new WindowedSinc(period).CreateState();
+        var bars = Enumerable.Range(0, 97).Select(i => new Bar(default, 0, 1, 0,
+            (i * 17 % 97 - 48) / 8d, 1)).ToArray();
+        for (int i = 0; i < 1000; i++) state.Update(in bars[i % bars.Length]);
+        state.Reset();
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 1000; i++) state.Update(in bars[i % bars.Length]);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+    }
+
+    [Theory]
     [InlineData(SincWindow.Rectangular)]
     [InlineData(SincWindow.Hann)]
     [InlineData(SincWindow.Hamming)]

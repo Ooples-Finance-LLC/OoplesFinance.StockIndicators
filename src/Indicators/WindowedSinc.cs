@@ -9,15 +9,33 @@ namespace OoplesFinance.StockIndicators.Indicators;
 /// each state retains its own rolling history. Kernel storage grows with taps.</remarks>
 public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
 {
+#if NETFRAMEWORK
     private readonly ExactMeanAccumulator.ProductCoefficient[] _coefficients;
     private readonly ExactMeanAccumulator _mass;
+#else
+    private readonly JurikDyadic[] _compactCoefficients;
+    private readonly JurikDyadic _compactMass;
+#endif
 
     /// <summary>Creates a defined, nonzero sinc kernel with positive period and taps.</summary>
     public WindowedSinc(int period = 14, int taps = 21, SincWindow window = SincWindow.Hann)
     {
         WindowedSincSnapshot.ValidateParameters(period, taps, window);
-        var weights = WindowedSincSnapshot.CreateWeights(period, taps, window, out _mass);
+        var weights = WindowedSincSnapshot.CreateWeights(period, taps, window, out var mass);
+#if NETFRAMEWORK
+        _mass = mass;
         _coefficients = weights.Select(w => new ExactMeanAccumulator.ProductCoefficient(w)).ToArray();
+#else
+        _compactCoefficients = new JurikDyadic[weights.Length];
+        var compactMass = new JurikDyadic();
+        for (int i = 0; i < weights.Length; i++)
+        {
+            var factor = new ExactMeanAccumulator.ProductFactor(weights[i]);
+            _compactCoefficients[i] = JurikDyadic.FromFactor(in factor);
+            compactMass.AddExact(_compactCoefficients[i]);
+        }
+        _compactMass = compactMass;
+#endif
         Period = period;
         Taps = taps;
         Window = window;
@@ -32,12 +50,18 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
     /// <inheritdoc/>
     public override int WarmupBars => Taps - 1;
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(_coefficients, _mass);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(_compactCoefficients, _compactMass);
+#else
+        new State(_coefficients, _mass);
+#endif
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
         [IndicatorValidationRule.ReferenceWithOverflowRejection(0,
             bars => WindowedSincSnapshot.Calculate(bars, Period, Taps, Window), IndicatorErrorBudget.Exact)];
 
+#if NETFRAMEWORK
     private sealed class State(ExactMeanAccumulator.ProductCoefficient[] coefficients, ExactMeanAccumulator mass) : IIndicatorState
     {
         private ExactMeanAccumulator.ProductFactor[] _history = [];
@@ -73,4 +97,46 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
             return sum.Ratio(mass);
         }
     }
+
+#else
+    private sealed class CompactState(JurikDyadic[] coefficients, JurikDyadic mass) : IIndicatorState
+    {
+        private JurikDyadic[] _history = [];
+        private int _count, _position;
+
+        public void Reset() => _count = _position = 0;
+
+        public double Update(in Bar bar)
+        {
+            if (_count < coefficients.Length)
+            {
+                if (_count == _history.Length)
+                {
+                    int capacity = _count == 0 ? Math.Min(coefficients.Length, 4)
+                        : _count <= coefficients.Length / 2 ? _count * 2 : coefficients.Length;
+                    Array.Resize(ref _history, capacity);
+                    _position = _count;
+                }
+                _count++;
+            }
+            var factor = new ExactMeanAccumulator.ProductFactor(bar.Close);
+            var newest = JurikDyadic.FromFactor(in factor);
+            _history[_position] = newest;
+            if (++_position == _history.Length) _position = 0;
+            int oldest = _count == coefficients.Length ? _position : 0, coefficient = 0;
+            var sum = new JurikDyadic();
+            for (int i = oldest; i < _count; i++) Add(in _history[i], in coefficients[coefficient++], ref sum);
+            for (int i = 0; i < oldest; i++) Add(in _history[i], in coefficients[coefficient++], ref sum);
+            for (; coefficient < coefficients.Length; coefficient++) Add(in newest, in coefficients[coefficient], ref sum);
+            return sum.Ratio(mass);
+        }
+
+        private static void Add(in JurikDyadic value, in JurikDyadic coefficient, ref JurikDyadic sum)
+        {
+            var product = value;
+            product.Multiply(coefficient);
+            sum.AddExact(product);
+        }
+    }
+#endif
 }

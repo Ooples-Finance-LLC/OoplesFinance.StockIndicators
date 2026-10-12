@@ -35,6 +35,7 @@ public sealed class SharedAllocationProbeTests
     [InlineData("QuanTAlib.Zlema")]
     [InlineData("QuanTAlib.Hwma")]
     [InlineData("QuanTAlib.Ltma")]
+    [InlineData("QuanTAlib.Afirma")]
     [InlineData("QuanTAlib.Trima")]
     [InlineData("TaLib.Functions.Trima")]
     [InlineData("QuanTAlib.Slope")]
