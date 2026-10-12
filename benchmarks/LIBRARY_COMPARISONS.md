@@ -3267,3 +3267,31 @@ periods 1/14/4096/4097/int.MaxValue, invalid captured tails versus earlier overf
 cancellation, later-run recovery and owned data after disposal/source mutation.
 Logs: `C:/Users/cheat/temp/si-ulcer-parallel-{production,benchmark-build,unit,comparisons}.log`.
 Existing benchmark/test warnings remain. No scheduler policy or public API changed.
+
+
+### Ulcer cached/parallel CPU checkpoint, 10,000 bars (2026-10-11)
+
+Production `f7fa53c5`, unchanged fixture `2ffd53fc`, period14, ten warmups and ten
+requested measured iterations. Full/LatestOnly/native serial retained ten;
+native parallel retained eight. No minimum-iteration-time warning was emitted.
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 1,173,533.13 | 1,109,888.23 / 1,237,178.02 | 653,627 |
+| LatestOnly | 1,107,439.45 | 1,100,926.47 / 1,113,952.43 | 172,670 |
+| Native serial | 1,791,964.38 | 1,634,578.73 / 1,949,350.02 | 921,116 |
+| Native parallel | 462,756.05 | 456,512.26 / 468,999.85 | 1,011,809 |
+
+LatestOnly latency fell about 93.2% from the initial 16.18ms checkpoint. Both
+builder intervals are below native serial but above native parallel. LatestOnly
+still loses by 2.4 times against the fastest measured native mean while allocating
+82.9% less. Allocation is higher than the initial serial builder due to bounded
+cached/worker storage. This measures the cache and parallel integration together;
+no isolated attribution or overall Ulcer win is claimed.
+
+CPU was 6% before, 9% in one during-run sample, and 11% after. No competing dotnet
+build/test/run processes were observed at those samples; not continuous isolation.
+All four setup validations passed. Raw/context are archived at
+`results/shared-rollout/ulcer-cpu/cached-parallel-10k*`; log is
+`C:/Users/cheat/temp/si-ulcer-f7fa53c5.log`. Only Ulcer current evidence was replaced,
+retaining the original checkpoint. Coverage remains 181/401 APIs, not a win count.
