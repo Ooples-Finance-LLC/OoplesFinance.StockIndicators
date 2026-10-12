@@ -3390,3 +3390,24 @@ chained results survive disposal; LatestOnly saves at least 40 bytes/bar on the
 `C:/Users/cheat/temp/si-rvi-builder-{production,benchmark-build,unit,comparisons}.log`.
 No native timing was run and no performance win is claimed. Direct fixture,
 timing and GPU work remain; measured coverage stays 181/401 APIs.
+
+
+### Relative Volatility direct CPU fixture (2026-10-11)
+
+`SharedRelativeVolatilityBenchmarks` compares Full/LatestOnly BuildAsync against
+QuanTAlib 1.0.0 Rvi serial and up-to-eight-worker public-API composition. All arms
+retain the value column; native calls write directly into the retained array.
+Input TValue preparation is setup-only, while state construction, native nested
+allocations, overlap calculation and output storage are timed. Each worker gets
+2P-1 preceding prices: P smoothed deviations need P changes each, and the oldest
+change needs its preceding price. The synthetic first change expires before the
+first assigned output. Rvi, Stddev and Sma source was inspected; runtime setup
+checks exact serial/parallel parity against the independent native reference.
+
+Setup also checks builder bits against the independent pairwise-distance/root
+reference and cross-library agreement within 1e-9. Counts 1/13/14/27/28/65/127
+exercise startup and uneven worker boundaries at period14. Benchmark build,
+15 fixture/reference cases and 59 inventory checks passed, with existing warnings.
+The fixture is registered in the allocation probe and qualification parser.
+Logs: `C:/Users/cheat/temp/si-rvi-fixture-{build,tests}.log`.
+No production change or timing campaign in this batch; coverage stays 181/401.
