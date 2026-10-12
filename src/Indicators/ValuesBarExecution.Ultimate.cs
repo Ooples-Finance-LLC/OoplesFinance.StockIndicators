@@ -38,7 +38,8 @@ internal static partial class ValuesBarExecution
             // three-ratio numerator, including weights and 100, is bounded by
             // 700 * 2^114 < 2^124; the denominator is <= 7 * 2^114.
             long bound = (1L << 38) / (2L * indicator.LongPeriod);
-            bool certified = Math.ScaleB(maximum, -grid) <= bound;
+            double integerMaximum = Math.ScaleB(maximum, -grid);
+            bool certified = integerMaximum <= bound;
             if (!certified)
             {
                 var state = new WindowUltimateOscillator.CompactState(
@@ -56,6 +57,13 @@ internal static partial class ValuesBarExecution
                 }
                 return region;
             }
+            // Every sum is bounded by M = max(1, 2*P*maxPrice). The complete
+            // weighted numerator is at most 700*M^3 and the denominator 7*M^3.
+            // If both fit 53 bits, integer recurrence and double division are
+            // exact until the final rounding. M <= 2^38 also bounds this proof.
+            UInt128 sumBound = (UInt128)(ulong)integerMaximum * (ulong)(2L * indicator.LongPeriod);
+            if (sumBound == 0) sumBound = 1; // Zero-range windows retain denominator one.
+            bool narrow = 700 * sumBound * sumBound * sumBound <= ((UInt128)1 << 53);
             // A 16-byte interval replaces each consumed 48-byte Bar in the
             // same rental. Its write cannot reach the next unread raw bar.
             var intervals = System.Runtime.InteropServices.MemoryMarshal.Cast<Bar, UltimateIntegerPair>(captured.AsSpan(0, count));
@@ -95,20 +103,44 @@ internal static partial class ValuesBarExecution
                 if (i < seed.Length) continue;
                 int row = start + i - seed.Length;
                 bool defined = i >= indicator.LongPeriod;
-                Int128 numerator = 0, denominator = 1;
-                if (defined)
-                for (int k = 0; k < 3; k++)
+                if (narrow)
                 {
-                    if (ranges[k] == 0)
+                    long numerator = 0, denominator = 1;
+                    // The stronger worker certificate proves all of these
+                    // products and sums fit 53 bits, including signed pressure.
+                    unchecked
                     {
-                        if (!indicator.ZeroRangeContribution) { defined = false; break; }
-                        continue;
+                        if (defined)
+                        for (int k = 0; k < 3; k++)
+                        {
+                            if (ranges[k] == 0)
+                            {
+                                if (!indicator.ZeroRangeContribution) { defined = false; break; }
+                                continue;
+                            }
+                            numerator = numerator * ranges[k] + (4L >> k) * pressures[k] * denominator;
+                            denominator *= ranges[k];
+                        }
+                        output[0][row] = defined ? (double)(100 * numerator) / (7 * denominator) : 0;
                     }
-                    // Certified above: the complete scaled numerator fits 124 bits.
-                    numerator = unchecked(numerator * ranges[k] + (Int128)(4 >> k) * pressures[k] * denominator);
-                    denominator = unchecked(denominator * ranges[k]);
                 }
-                output[0][row] = defined ? JurikDyadic.FromInteger(unchecked(100 * numerator)).Ratio(JurikDyadic.FromInteger(unchecked(7 * denominator))) : 0;
+                else
+                {
+                    Int128 numerator = 0, denominator = 1;
+                    if (defined)
+                    for (int k = 0; k < 3; k++)
+                    {
+                        if (ranges[k] == 0)
+                        {
+                            if (!indicator.ZeroRangeContribution) { defined = false; break; }
+                            continue;
+                        }
+                        // Certified above: the complete scaled numerator fits 124 bits.
+                        numerator = unchecked(numerator * ranges[k] + (Int128)(4 >> k) * pressures[k] * denominator);
+                        denominator = unchecked(denominator * ranges[k]);
+                    }
+                    output[0][row] = defined ? JurikDyadic.FromInteger(unchecked(100 * numerator)).Ratio(JurikDyadic.FromInteger(unchecked(7 * denominator))) : 0;
+                }
                 output[1][row] = defined ? 1 : 0;
             }
             return region;

@@ -86,6 +86,42 @@ public sealed class BoundedUltimateExecutionTests
     }
 
     [Theory]
+    [InlineData(1, 1, 1, 11716)] [InlineData(1, 2, 3, 3905)] [InlineData(7, 14, 28, 418)]
+    public async Task NarrowRatioCertificateBoundaryPreservesSignedPressureAndMissingWindows(int a, int b, int c, int boundary)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            // Values straddle the exact 53-bit numerator certificate. Odd prices
+            // force the common grid; inverted candles exercise signed pressure.
+            foreach (int limit in new[] { boundary, boundary + 1 })
+            foreach (int scale in new[] { -1074, 0, 900 })
+            foreach (bool zero in a == b ? new[] { true } : new[] { false, true })
+            {
+                var bars = Enumerable.Range(0, 513).Select(i =>
+                {
+                    if (i % 128 < 64) return new Bar(default, 123, 0, 0, 0, 1);
+                    double high = i % 3 == 0 ? -limit : limit;
+                    double low = i % 3 == 0 ? limit : -limit;
+                    double close = i % 5 == 0 ? 1 : i % 2 == 0 ? limit : -limit;
+                    return new Bar(default, 123, Math.ScaleB(high, scale), Math.ScaleB(low, scale), Math.ScaleB(close, scale), 1);
+                }).ToArray();
+                var indicator = new WindowUltimateOscillator(a, b, c, zero);
+                using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                    foreach (var output in indicator.Outputs)
+                        Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                            actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Theory]
     [InlineData(false)] [InlineData(true)]
     public async Task OverflowPreservesInputPrecedenceAndCancellation(bool zero)
     {
