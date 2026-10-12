@@ -63,10 +63,17 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
         private readonly List<Entry> _prices = new();
         private int _start;
         private JurikDyadic _squares;
+#if !NETFRAMEWORK
+        private Core.SmaCpuKernel.Certificate _drawdownProof = new(200);
+        private bool _drawdownCertified = true;
+#endif
 
         public void Reset()
         {
             _prices.Clear(); _start = 0; _squares = default;
+#if !NETFRAMEWORK
+            _drawdownProof = new(200); _drawdownCertified = true;
+#endif
         }
 
         private void AccumulateSquare(RocBankValue drawdown, bool add)
@@ -78,9 +85,15 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
             if (add) _squares.AddExact(square); else _squares.Subtract(square);
         }
 
-        private static RocBankValue Drawdown(double price, double peak)
+        private RocBankValue Drawdown(double price, double peak)
         {
             if (peak == 0 || price == peak) return default;
+#if !NETFRAMEWORK
+            // Every peak is a retained price. The 200-term common-grid proof
+            // makes subtraction and multiplication by 100 exact; only division
+            // rounds. A rejected proof leaves all cached contributions valid.
+            if (_drawdownCertified) return new RocBankValue((price - peak) * 100 / peak);
+#endif
             var numerator = JurikDyadic.FromDouble(price);
             numerator.Subtract(JurikDyadic.FromDouble(peak));
             numerator.Multiply(100);
@@ -103,6 +116,9 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
             double value = bar.Close;
             if (!FrameworkCompatibility.IsFinite(value))
                 throw new ArgumentOutOfRangeException(nameof(value));
+#if !NETFRAMEWORK
+            if (_drawdownCertified) _drawdownCertified = _drawdownProof.Include(value);
+#endif
             if (_prices.Count == period)
             {
                 AccumulateSquare(_prices[_start].Drawdown, false);

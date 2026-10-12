@@ -7,6 +7,38 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactUlcerTests
 {
+    [Theory]
+    [InlineData(3)]
+    [InlineData(14)]
+    public void CertifiedPercentagesAndLateProofFailureMatchIndependentRoots(int period)
+    {
+        var state = new WindowUlcerIndex.State(period);
+        var output = new double[2];
+        foreach (int exponent in new[] { -400, 0, 400 })
+        foreach (bool reject in new[] { false, true })
+        {
+            state.Reset();
+            var bars = Enumerable.Range(0, 96).Select(i =>
+            {
+                double price = i < 30 ? 100 - i / 8d : 100 + (i * 13 % 101) / 8d;
+                // Begin with a certified ring; invalidate the common grid only
+                // after cached contributions and expiring peaks are established.
+                if (reject && i == 43) price = Math.BitIncrement(price);
+                if (i is 61 or 62) price = -0d;
+                price = Math.ScaleB(price, exponent);
+                return new Bar(default, price, price, price, price, 0);
+            }).ToArray();
+            var expected = WindowUlcerReference.Calculate(bars, period);
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(bars[i], output);
+                Assert.Equal(expected[i].HasValue ? 1d : 0, output[1]);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0),
+                    BitConverter.DoubleToInt64Bits(output[0]));
+            }
+        }
+    }
+
     [Fact]
     public void PrefixRepairMatchesIndependentWindowsForEverySmallPricePattern()
     {
