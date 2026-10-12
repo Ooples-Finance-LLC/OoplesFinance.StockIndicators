@@ -3327,3 +3327,18 @@ the decompressed trace with `dotnet-trace convert --format Speedscope` to inspec
 all stacks, or use `dotnet-trace report <trace> topN --verbose` for global totals.
 Logs: `C:/Users/cheat/temp/si-ulcer-trace-collect.log` and
 `C:/Users/cheat/temp/si-ulcer-borrow-{production,benchmark-build,unit,comparisons}.log`.
+
+
+### Ulcer prefix-only cache repair (2026-10-11)
+
+On expiration, repair stops when a surviving prefix peak equals its cached peak:
+all subsequent surviving peaks are then unchanged. The new last entry is always
+computed separately. Initial sentinel peaks prevent premature stopping on the
+first full window; period one has no surviving prefix. Presence is equivalent
+to the first price being positive. Exact contributions and absent suffix recovery
+retain their contracts; descending windows can still require O(period) repair.
+Production/benchmark Release net10.0 builds, 22 unit cases and 15 fixture/reference
+cases passed. The new test exhausts 1,024 five-price patterns at each of periods
+2, 3 and 4 against the independent reference. Existing tests cover extreme values,
+reset, zero-allocation replay and parallel boundaries. Logs:
+`C:/Users/cheat/temp/si-ulcer-prefix-{production,benchmark-build,unit,comparisons}.log`.

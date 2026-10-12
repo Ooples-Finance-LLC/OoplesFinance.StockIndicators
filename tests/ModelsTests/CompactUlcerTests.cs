@@ -7,6 +7,32 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactUlcerTests
 {
+    [Fact]
+    public void PrefixRepairMatchesIndependentWindowsForEverySmallPricePattern()
+    {
+        double[] alphabet = [-1, 0, 1, 2];
+        foreach (int period in new[] { 2, 3, 4 })
+        for (int pattern = 0; pattern < 1024; pattern++)
+        {
+            int encoded = pattern;
+            var bars = new Bar[5];
+            for (int i = 0; i < bars.Length; i++)
+            {
+                double price = alphabet[encoded & 3]; encoded >>= 2;
+                bars[i] = new Bar(default, price, price, price, price, 0);
+            }
+            var expected = WindowUlcerReference.Calculate(bars, period);
+            var state = new WindowUlcerIndex.State(period);
+            var output = new double[2];
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(bars[i], output);
+                Assert.Equal(expected[i].HasValue ? 1d : 0, output[1]);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(output[0]));
+            }
+        }
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(3)]
