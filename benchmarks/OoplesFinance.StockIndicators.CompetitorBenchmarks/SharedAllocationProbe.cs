@@ -107,6 +107,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "Skender.GetChaikinOsc" or "TaLib.Functions.AdOsc")
+        {
+            var fixture = new SharedSmoothedAccumulationBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "Skender.GetForceIndex")
         {
             var fixture = new SharedForceIndexBenchmarks { Operation = operation, Count = count };
