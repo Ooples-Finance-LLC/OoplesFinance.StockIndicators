@@ -264,7 +264,9 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
 internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection)
 {
     private readonly Queue<(RocBankValue X, RocBankValue Y)> _history = new();
-    private readonly Moments[] _moments = [new(), new(), new()];
+    private readonly Moments? _standard = selection is ReturnBetaSelection.Standard or ReturnBetaSelection.All ? new() : null;
+    private readonly Moments? _up = selection is ReturnBetaSelection.Up or ReturnBetaSelection.All ? new() : null;
+    private readonly Moments? _down = selection is ReturnBetaSelection.Down or ReturnBetaSelection.All ? new() : null;
     private bool _started;
     private double _previousMarket,
         _previousEvaluation;
@@ -279,8 +281,9 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
     internal void Reset()
     {
         _history.Clear();
-        foreach (var m in _moments)
-            m.Reset();
+        _standard?.Reset();
+        _up?.Reset();
+        _down?.Reset();
         _started = false;
         _previousMarket = _previousEvaluation = 0;
         _marketReturn = _evaluationReturn = default;
@@ -318,29 +321,32 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
         return rounded.Mantissa == 0 ? default : rounded;
     }
 
-    private bool Included(int slot) =>
-        selection == ReturnBetaSelection.All || (int)selection == slot;
-
     private void Accumulate(RocBankValue x, RocBankValue y, int sign)
     {
         static JurikDyadic Compact(RocBankValue value)
         {
+#if !NETFRAMEWORK
+            // Products and sums all need the exact integer form. Decode it once
+            // instead of promoting separate copies of the same return repeatedly.
+            var factor = new ExactMeanAccumulator.ProductFactor(value.Mantissa);
+            var result = JurikDyadic.FromFactor(in factor);
+#else
             var result = JurikDyadic.FromDouble(value.Mantissa);
+#endif
             if (value.UpperShift != 0) result.ScaleByPowerOfTwo(value.UpperShift);
             return result;
         }
         var left = Compact(x);
         var right = Compact(y);
-        if (Included(0))
-            _moments[0].Add(left, right, sign);
-        if (x.Mantissa > 0 && Included(1))
-            _moments[1].Add(left, right, sign);
-        if (x.Mantissa < 0 && Included(2))
-            _moments[2].Add(left, right, sign);
+        _standard?.Add(left, right, sign);
+        if (x.Mantissa > 0)
+            _up?.Add(left, right, sign);
+        if (x.Mantissa < 0)
+            _down?.Add(left, right, sign);
     }
 
     internal double? Beta(int slot, bool flatZero) =>
-        _history.Count < period || !Included(slot) ? null : _moments[slot].Beta(flatZero);
+        _history.Count < period ? null : (slot switch { 0 => _standard, 1 => _up, 2 => _down, _ => null })?.Beta(flatZero);
 
     private sealed class Moments
     {
