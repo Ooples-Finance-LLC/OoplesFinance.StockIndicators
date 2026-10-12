@@ -62,6 +62,13 @@ public sealed class SharedAllocationProbeTests
         Assert.Throws<ArgumentOutOfRangeException>(() => SharedAllocationProbe.Run("QuanTAlib.Dema", 64, 0));
     }
 
+    [Theory]
+    [InlineData("TaLib.Functions.LinearRegAngle")]
+    [InlineData("TaLib.Functions.Rsi")]
+    [InlineData("unknown")]
+    public void ExplicitGpuRequestRejectsUnsupportedOperations(string operation) =>
+        Assert.Throws<ArgumentException>(() => SharedAllocationProbe.Run(operation, 64, 1, includeGpu: true));
+
     private sealed class OwnedResult : IDisposable
     {
         internal byte[]? Values;

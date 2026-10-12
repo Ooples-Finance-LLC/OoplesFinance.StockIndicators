@@ -1,0 +1,55 @@
+{
+  "Operation": "TaLib.Functions.LinearRegIntercept",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        59992,
+        59992,
+        59992
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        11304,
+        11304,
+        11304
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        59792,
+        59792,
+        59792
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        11104,
+        11104,
+        11104
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        7904,
+        7904,
+        7904
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        8288,
+        8288,
+        8288
+      ]
+    }
+  ]
+}

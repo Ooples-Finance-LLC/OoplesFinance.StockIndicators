@@ -129,15 +129,22 @@ internal static class WindowRegressionComparison
     )
     {
         var result = new double[data.Count];
-        var n = new BigInteger(period);
-        var spread = n * n - 1;
-        for (var i = period - 1; i < data.Count; i++)
+        for (var i = 0; i < data.Count; i++)
         {
+            int count = Math.Min(period, i + 1);
+            if (count == 1)
+            {
+                result[i] = kind is WindowRegressionOutput.Slope or WindowRegressionOutput.Angle
+                    ? 0 : data.Closes[i] == 0 ? 0 : data.Closes[i];
+                continue;
+            }
+            var n = new BigInteger(count);
+            var spread = n * n - 1;
             var sum = BigInteger.Zero;
             var weighted = BigInteger.Zero;
-            for (var j = 0; j < period; j++)
+            for (var j = 0; j < count; j++)
             {
-                var value = Units(data.Closes[i - period + 1 + j]);
+                var value = Units(data.Closes[i - count + 1 + j]);
                 sum += value;
                 weighted += j * value;
             }

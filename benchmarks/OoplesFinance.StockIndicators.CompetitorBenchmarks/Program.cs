@@ -176,11 +176,11 @@ if (args.Length > 0 && args[0].Equals("--verify-workloads", StringComparison.Ord
     return;
 }
 
-if (args.Length == 4 && args[0] == "--alloc-shared")
+if (args.Length == 4 && args[0] is "--alloc-shared" or "--alloc-shared-gpu")
 {
     SharedAllocationProbe.Write(Console.Out, args[1],
         int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture),
-        int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
+        int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture), includeGpu: args[0] == "--alloc-shared-gpu");
     return;
 }
 
