@@ -55,7 +55,7 @@ public sealed class BoundedPairStatisticsExecutionTests
     [Fact]
     public async Task SecondaryOverflowRetainsSlotOrderAndRawInputPrecedence()
     {
-        var bars = Enumerable.Range(0, 513).Select(i => new Bar(default, 1, 0, 0,
+        var bars = Enumerable.Range(0, 4097).Select(i => new Bar(default, 1, 0, 0,
             i % 2 == 0 ? double.MaxValue : -double.MaxValue, 1)).ToArray();
         var indicator = new WindowPairStatistics(2);
         foreach (bool invalidInput in new[] { false, true })
@@ -72,5 +72,31 @@ public sealed class BoundedPairStatisticsExecutionTests
         }
         using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Build(bars, indicator).BuildAsync(cancellation.Token));
+    }
+
+    [Theory]
+    [InlineData(-1074)] [InlineData(-400)] [InlineData(0)] [InlineData(400)]
+    public async Task CertifiedColumnsPreserveEveryOutputAcrossBinaryScales(int exponent)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Enumerable.Range(0, 4097).Select(i => new Bar(default,
+                Math.ScaleB(i % 29 - 14, exponent), 0, 0,
+                Math.ScaleB(i % 31 - 15, exponent), 1)).ToArray();
+            foreach (IIndicator indicator in new IIndicator[] { new WindowCorrelation(20), new WindowPairStatistics(20) })
+            {
+                using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                    foreach (var output in indicator.Outputs)
+                        Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                            actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
     }
 }
