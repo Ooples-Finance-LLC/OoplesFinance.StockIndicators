@@ -1,0 +1,9 @@
+Production 451fdbd2 plus the still-pending CPU midpoint experiment (not used by ADL), and the SharedAdlDetails benchmark fixture. Period 20; zero-range and signed-flow candles vary on an exactly convertible dyadic price grid. Inputs are prepared once; no flow, prefix, average, or output is prepared for measured calls.
+
+Setup compares all five owned columns and native serial/parallel results with the unoptimized exact builder for Full and LatestOnly. Native serial retains the eager GetAdl collection without an adapter copy. Parallel replays complete native prefixes and publishes each worker's suffix; replay, native result allocations and publication are timed. This is one tested parallel strategy, not a claim of optimal native parallelization. Fixture tests cover counts 1,19,20,21,513,1000,10000, cleanup restoration and eager result semantics. All 12 focused fixture/unsupported-GPU checks passed. The benchmark build passed with 60 existing warnings. The preceding production batch passed a clean net10 build plus eight focused unit and 23 competitor cases.
+
+Command: --alloc-shared Skender.GetAdl 10000 3 through the Release net10 benchmark DLL. All three samples per arm are identical: CPU Full 882800 B / LatestOnly 401672 B; Skender serial 1800440 B / prefix-replay parallel 8184464 B. LatestOnly retains all five columns. Per-call managed allocations include worker allocations; retained pool/runtime capacity is excluded.
+
+Latency was not run while the external AiDotNet net471 build was active. These allocation observations do not establish a latency win. Detailed ADL GPU execution remains unsupported. The other ADL competitor mappings use different indicators/contracts and are not qualified by this fixture.
+
+Production DLL SHA256: b9b664e643e56572a243907a4b71e0e1cd31f68399756ac59314774ec2efc53f
