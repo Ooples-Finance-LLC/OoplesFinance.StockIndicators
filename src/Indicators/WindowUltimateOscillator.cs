@@ -57,7 +57,11 @@ public sealed class WindowUltimateOscillator
 
     /// <inheritdoc/>
     protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState([ShortPeriod, MiddlePeriod, LongPeriod], ZeroRangeContribution);
+#else
         new State([ShortPeriod, MiddlePeriod, LongPeriod], ZeroRangeContribution);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -83,6 +87,63 @@ public sealed class WindowUltimateOscillator
                 )
             );
 
+#if !NETFRAMEWORK
+    internal sealed class CompactState(int[] periods, bool zero, int count = 0) : IMultiOutputState
+    {
+        private readonly Queue<(JurikDyadic Pressure, JurikDyadic Range)>[] _windows =
+            periods.Select(p => new Queue<(JurikDyadic, JurikDyadic)>(Math.Min(p, Math.Max(0, count - 1)))).ToArray();
+        private readonly JurikDyadic[] _pressure = new JurikDyadic[3], _range = new JurikDyadic[3];
+        private double _previous;
+        private bool _started;
+
+        public void Reset()
+        {
+            foreach (var window in _windows) window.Clear();
+            Array.Clear(_pressure); Array.Clear(_range);
+            _previous = 0; _started = false;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (!_started) { _started = true; _previous = bar.Close; return; }
+            double low = Math.Min(bar.Low, _previous);
+            var pressure = ExactTrueInterval.Difference(bar.Close, low);
+            var range = zero ? ExactTrueInterval.Range(bar.High, bar.Low, _previous)
+                : ExactTrueInterval.Difference(Math.Max(bar.High, _previous), low);
+            _previous = bar.Close;
+            for (int k = 0; k < 3; k++)
+            {
+                if (_windows[k].Count == periods[k])
+                {
+                    var old = _windows[k].Dequeue();
+                    _pressure[k].Subtract(old.Pressure); _range[k].Subtract(old.Range);
+                }
+                _windows[k].Enqueue((pressure, range));
+                _pressure[k].AddExact(pressure); _range[k].AddExact(range);
+            }
+            if (_windows[2].Count < periods[2]) return;
+            var numerator = new JurikDyadic();
+            var denominator = JurikDyadic.FromDouble(1);
+            for (int k = 0; k < 3; k++)
+            {
+                if (_range[k].Sign == 0)
+                {
+                    if (!zero) return;
+                    continue;
+                }
+                numerator.Multiply(_range[k]);
+                var term = _pressure[k];
+                term.Multiply(4 >> k); term.Multiply(denominator);
+                numerator.AddExact(term);
+                denominator.Multiply(_range[k]);
+            }
+            numerator.Multiply(100); denominator.Multiply(7);
+            output[0] = numerator.Ratio(denominator);
+            output[1] = 1;
+        }
+    }
+#else
     private sealed class State(int[] periods, bool zero) : IMultiOutputState
     {
         private readonly Queue<(BigInteger Pressure, BigInteger Range)>[] _windows =
@@ -157,4 +218,5 @@ public sealed class WindowUltimateOscillator
             output[1] = 1;
         }
     }
+#endif
 }
