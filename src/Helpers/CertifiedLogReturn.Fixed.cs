@@ -42,10 +42,11 @@ internal static partial class CertifiedLogReturn
         if (numerator == 0) return (0, 0);
         // Divide in two stages so a 55-bit numerator never needs a 151-bit shift.
         UInt128 scaled = (UInt128)numerator << 64;
-        UInt128 first = scaled / denominator, remainder = scaled % denominator;
+        var (first, remainder) = ExactMeanAccumulator.CompactDivRem(scaled, denominator);
         scaled = remainder << 32;
-        UInt128 low = (first << 32) + scaled / denominator;
-        UInt128 high = low + (scaled % denominator == 0 ? (UInt128)0 : 1);
+        var (second, tail) = ExactMeanAccumulator.CompactDivRem(scaled, denominator);
+        UInt128 low = (first << 32) + second;
+        UInt128 high = low + (tail == 0 ? (UInt128)0 : 1);
         UInt128 squareLow = FixedProduct(low, low, false);
         UInt128 squareHigh = FixedProduct(high, high, true);
         UInt128 powerLow = low, powerHigh = high, sumLow = 0, sumHigh = 0;
