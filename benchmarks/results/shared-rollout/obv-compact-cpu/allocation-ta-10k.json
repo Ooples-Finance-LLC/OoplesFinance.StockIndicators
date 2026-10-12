@@ -1,0 +1,1 @@
+{"Operation":"TaLib.Functions.Obv","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[642536,642536,642536]},{"Method":"BuilderLatestOnly","Bytes":[161408,161408,161408]},{"Method":"NativeSingle","Bytes":[80056,80056,80056]},{"Method":"NativeParallel","Bytes":[80648,80648,80648]}]}
