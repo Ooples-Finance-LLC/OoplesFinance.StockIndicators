@@ -103,7 +103,7 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
         return output;
     }
 
-    private sealed class State(int period, double offset, double sigma, bool fullWindowOnly)
+    internal sealed class State(int period, double offset, double sigma, bool fullWindowOnly)
         : IMultiOutputState
     {
         private static readonly BigInteger Grid = BigInteger.One << 1074;

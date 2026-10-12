@@ -94,6 +94,7 @@ internal static partial class ValuesBarExecution
         FixedPeriodWma average => average.Period,
         FibonacciWeightedAverage average => average.Period,
         TriangularWindowAverage average => average.Period,
+        ArnaudLegouxWindow average => average.Period,
         NormalizedConvolution convolution => convolution.Kernel.Count,
         GaussianWeightedAverage average => average.Period,
         SineWeightedAverage average => average.Period,
@@ -110,7 +111,7 @@ internal static partial class ValuesBarExecution
         // Fixed convolutions perform one exact product per coefficient per bar.
         // Keep the existing threshold for the other constant-work kernels; for convolutions
         // use an 8192-term work estimate and at least 512 bars for scheduling.
-        int terms = indicator is NormalizedConvolution { HasAffineKernel: false } or GaussianWeightedAverage or SineWeightedAverage or WindowedSinc
+        int terms = indicator is NormalizedConvolution { HasAffineKernel: false } or GaussianWeightedAverage or SineWeightedAverage or WindowedSinc or ArnaudLegouxWindow
             ? WeightedWindowPeriod(indicator) : 1;
         return Math.Max(512, 1 + 8191 / terms);
     }
@@ -725,6 +726,29 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private struct AlmaKernel(ArnaudLegouxWindow.State state, BoundedOutput target) : IBoundedKernel<AlmaKernel>
+    {
+        private int _index = target.Origin;
+        public static AlmaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var alma = (ArnaudLegouxWindow)indicator;
+            // Later workers never publish incomplete seed windows. Suppressing
+            // those values also avoids rebuilding every expanding weight prefix.
+            return new(new(alma.Period, alma.Offset, alma.Sigma,
+                alma.FullWindowOnly || target.WriteStart > 0), target);
+        }
+        public double Update(in Bar bar)
+        {
+            Span<double> values = stackalloc double[2];
+            state.Update(in bar, values);
+            int index = _index++;
+            // P-1 raw prices seed each worker. Their presence outputs belong
+            // to its predecessor; the first owned row has a complete window.
+            if (index >= target.WriteStart) target.Values[1][index] = values[1];
+            return values[0];
+        }
+    }
+
     private static Bar FillBoundedWindow(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
@@ -735,6 +759,7 @@ internal static partial class ValuesBarExecution
         Wma average => FillBoundedWindow<WmaKernel>(source, output, indicator, Math.Max(1, average.Length), cancellation, owned),
         FixedPeriodWma average => FillBoundedWindow<WmaKernel>(source, output, indicator, average.Period, cancellation, owned),
         TriangularWindowAverage average => FillBoundedWindow<TriangularKernel>(source, output, indicator, average.Period, cancellation, owned),
+        ArnaudLegouxWindow average => FillBoundedWindow<AlmaKernel>(source, output, indicator, average.Period, cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         WindowLinearRegression regression => FillBoundedWindow<RegressionKernel>(source, output, indicator, regression.Period, cancellation, owned),
         // P changes require P preceding prices plus the assigned output bar.
