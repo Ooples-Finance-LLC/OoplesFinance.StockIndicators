@@ -1,6 +1,11 @@
 using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
+#if !NETFRAMEWORK
+using BetaHistoryValue = OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.ProductFactor;
+#else
+using BetaHistoryValue = OoplesFinance.StockIndicators.Helpers.RocBankValue;
+#endif
 
 namespace OoplesFinance.StockIndicators.Indicators;
 
@@ -80,10 +85,10 @@ public sealed class WindowReturnBeta : MultiOutputIndicatorBase, IIndicatorValid
                 )
             );
 
-    internal sealed class State(int period, CandlePriceField market, CandlePriceField evaluation)
+    internal sealed class State(int period, CandlePriceField market, CandlePriceField evaluation, int capacity = 0)
         : IMultiOutputState
     {
-        private readonly ReturnBetaWindow _window = new(period, ReturnBetaSelection.Standard);
+        private readonly ReturnBetaWindow _window = new(period, ReturnBetaSelection.Standard, capacity);
 
         public void Reset() => _window.Reset();
 
@@ -261,9 +266,9 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
     }
 }
 
-internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection)
+internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection, int capacity = 0)
 {
-    private readonly Queue<(RocBankValue X, RocBankValue Y)> _history = new();
+    private readonly Queue<(BetaHistoryValue X, BetaHistoryValue Y)> _history = new(Math.Min(period, capacity));
     private readonly Moments? _standard = selection is ReturnBetaSelection.Standard or ReturnBetaSelection.All ? new() : null;
     private readonly Moments? _up = selection is ReturnBetaSelection.Up or ReturnBetaSelection.All ? new() : null;
     private readonly Moments? _down = selection is ReturnBetaSelection.Down or ReturnBetaSelection.All ? new() : null;
@@ -305,8 +310,12 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
             var old = _history.Dequeue();
             Accumulate(old.X, old.Y, -1);
         }
-        _history.Enqueue((_marketReturn, _evaluationReturn));
-        Accumulate(_marketReturn, _evaluationReturn, 1);
+        // The compact history entry has the same size as a rounded return and
+        // reuses its exact decoding when it is evicted from the rolling window.
+        var marketReturn = new BetaHistoryValue(_marketReturn.Mantissa, _marketReturn.UpperShift);
+        var evaluationReturn = new BetaHistoryValue(_evaluationReturn.Mantissa, _evaluationReturn.UpperShift);
+        _history.Enqueue((marketReturn, evaluationReturn));
+        Accumulate(marketReturn, evaluationReturn, 1);
     }
 
     private static RocBankValue Return(double current, double previous)
@@ -321,20 +330,17 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
         return rounded.Mantissa == 0 ? default : rounded;
     }
 
-    private void Accumulate(RocBankValue x, RocBankValue y, int sign)
+    private void Accumulate(BetaHistoryValue x, BetaHistoryValue y, int sign)
     {
-        static JurikDyadic Compact(RocBankValue value)
+        static JurikDyadic Compact(BetaHistoryValue value)
         {
 #if !NETFRAMEWORK
-            // Products and sums all need the exact integer form. Decode it once
-            // instead of promoting separate copies of the same return repeatedly.
-            var factor = new ExactMeanAccumulator.ProductFactor(value.Mantissa);
-            var result = JurikDyadic.FromFactor(in factor);
+            return JurikDyadic.FromFactor(in value);
 #else
             var result = JurikDyadic.FromDouble(value.Mantissa);
-#endif
             if (value.UpperShift != 0) result.ScaleByPowerOfTwo(value.UpperShift);
             return result;
+#endif
         }
         var left = Compact(x);
         var right = Compact(y);
