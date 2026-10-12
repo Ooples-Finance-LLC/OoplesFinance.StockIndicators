@@ -5,7 +5,7 @@ internal static partial class ValuesBarExecution
 {
     // Same integer-weight proof as the GPU regression recurrence. The private
     // ring also provides exact fallback seeding when a later input fails proof.
-    internal sealed class RegressionValueState(WindowLinearRegression indicator, int count) : IIndicatorState
+    internal struct RegressionValueState(WindowLinearRegression indicator, int count) : IIndicatorState
     {
         private Core.SmaCpuKernel.Certificate _proof = new(checked((int)(2L * indicator.Period * indicator.Period)));
         private double[]? _window;
@@ -23,6 +23,13 @@ internal static partial class ValuesBarExecution
         }
 
         public double Update(in Bar bar)
+        {
+            if (_fallback is not null) return _fallback.Update(in bar);
+            var weights = Weights(indicator.Period, indicator.Output);
+            return Update(in bar, in weights);
+        }
+
+        internal double Update(in Bar bar, in (double First, double Step, double Denominator) full)
         {
             if (_fallback is not null) return _fallback.Update(in bar);
             if (indicator.Period == 1)
@@ -45,30 +52,14 @@ internal static partial class ValuesBarExecution
             if (++_position == _window.Length) _position = 0;
             if (_seen < indicator.Period) _seen++;
             _sum += bar.Close;
-            double n = _seen, value;
+            double value;
             if (_seen == 1)
                 value = indicator.Output is WindowRegressionOutput.Slope or WindowRegressionOutput.Angle ? 0 : _sum;
             else
             {
-                double numerator, denominator;
-                switch (indicator.Output)
-                {
-                    case WindowRegressionOutput.Slope:
-                    case WindowRegressionOutput.Angle:
-                        numerator = (n - 1) * _sum - 2 * _lagged;
-                        denominator = n * (n * n - 1) / 6;
-                        break;
-                    case WindowRegressionOutput.Intercept:
-                        numerator = (2 - n) * _sum + 3 * _lagged;
-                        denominator = n * (n + 1) / 2;
-                        break;
-                    default:
-                        bool forecast = indicator.Output == WindowRegressionOutput.Forecast;
-                        numerator = (2 * n - (forecast ? 2 : 1)) * _sum - 3 * _lagged;
-                        denominator = n * (n + (forecast ? -1 : 1)) / 2;
-                        break;
-                }
-                value = numerator == 0 ? 0 : numerator / denominator;
+                var weights = _seen == indicator.Period ? full : Weights(_seen, indicator.Output);
+                double numerator = weights.First * _sum + weights.Step * _lagged;
+                value = numerator == 0 ? 0 : numerator / weights.Denominator;
                 if (indicator.Output == WindowRegressionOutput.Angle) value = Math.Atan(value) * (180 / Math.PI);
             }
             _lagged += _sum;
@@ -80,13 +71,30 @@ internal static partial class ValuesBarExecution
             }
             return value == 0 ? 0 : value;
         }
+
+        internal static (double First, double Step, double Denominator) Weights(int count, WindowRegressionOutput output)
+        {
+            double n = count;
+            return output switch
+            {
+                WindowRegressionOutput.Slope or WindowRegressionOutput.Angle => (n - 1, -2, n * (n * n - 1) / 6),
+                WindowRegressionOutput.Intercept => (2 - n, 3, n * (n + 1) / 2),
+                WindowRegressionOutput.Forecast => (2 * n - 2, -3, n * (n - 1) / 2),
+                _ => (2 * n - 1, -3, n * (n + 1) / 2)
+            };
+        }
+
     }
 
-    private readonly struct RegressionKernel(RegressionValueState state) : IBoundedKernel<RegressionKernel>
+    // Mutable value storage prevents a heap state per worker. In particular,
+    // this must not be readonly: Update advances the embedded ring and moments.
+    private struct RegressionKernel(RegressionValueState state,
+        (double First, double Step, double Denominator) full) : IBoundedKernel<RegressionKernel>
     {
         public static RegressionKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
-            new(new((WindowLinearRegression)indicator, count));
-        public double Update(in Bar bar) => state.Update(in bar);
+            new(new((WindowLinearRegression)indicator, count),
+                RegressionValueState.Weights(period, ((WindowLinearRegression)indicator).Output));
+        public double Update(in Bar bar) => state.Update(in bar, in full);
     }
 }
 #endif

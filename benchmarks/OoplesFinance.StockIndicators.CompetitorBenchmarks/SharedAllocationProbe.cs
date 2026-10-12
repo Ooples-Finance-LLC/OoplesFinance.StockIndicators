@@ -81,6 +81,13 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
+            or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.LinearRegAngle" or "TaLib.Functions.Tsf")
+        {
+            var fixture = new SharedRegressionBenchmarks { Operation = operation[(operation.LastIndexOf('.') + 1)..], Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation is "QuanTAlib.Slope" or "Skender.GetSlope")
         {
             var fixture = new SharedRegressionStatisticsBenchmarks { Operation = operation, Count = count };
