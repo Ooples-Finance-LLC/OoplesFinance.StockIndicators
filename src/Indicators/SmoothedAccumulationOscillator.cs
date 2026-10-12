@@ -112,7 +112,10 @@ public sealed class SmoothedAccumulationOscillator
 #if !NETFRAMEWORK
     private sealed class CompactMean(int period, bool first)
     {
-        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble((long)period + 1);
+        private readonly double _weight = ((long)period - 1) * .5;
+        private readonly double _denominator = ((long)period + 1) * .5;
+        private readonly bool _powerOfTwoDivisor = (((long)period + 1) & period) == 0;
+        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble(((long)period + 1) * .5);
         private int _count;
         private JurikDyadic _sum;
         internal JurikDyadic Value { get; private set; }
@@ -133,9 +136,35 @@ public sealed class SmoothedAccumulationOscillator
             }
             else
             {
+                if (Value.TryDouble(out var previous) && value.TryDouble(out var input))
+                {
+                    if (_powerOfTwoDivisor)
+                    {
+                        // Integer weight, one FMA rounding, then exact normal
+                        // power-of-two scaling. Subnormals could double-round;
+                        // overflowing numerators may still have finite means.
+                        double numerator = Math.FusedMultiplyAdd(previous, _weight, input);
+                        double mean = numerator / _denominator;
+                        if (double.IsNormal(mean) || numerator == 0)
+                        {
+                            Value = JurikDyadic.FromDouble(mean);
+                            return;
+                        }
+                    }
+                    if (Binary64ArithmeticCertificate.TryProduct(previous, _weight, out var weighted)
+                        && Binary64ArithmeticCertificate.TryDifference(weighted, -input, out var exactNumerator))
+                    {
+                        double mean = exactNumerator / _denominator;
+                        if (double.IsFinite(mean))
+                        {
+                            Value = JurikDyadic.FromDouble(mean);
+                            return;
+                        }
+                    }
+                }
                 var next = Value;
-                next.Multiply(period - 1);
-                value.Multiply(2);
+                // Divide numerator and denominator by two without rounding.
+                next.Multiply(_weight);
                 next.AddExact(value);
                 Value = SeededDyadicEma.RoundedRatio(next, _divisor);
             }
@@ -169,20 +198,28 @@ public sealed class SmoothedAccumulationOscillator
         {
             output.Clear();
             _index++;
-            var range = JurikDyadic.FromDouble(bar.High);
-            range.Add(-bar.Low);
             JurikDyadic multiplier = default, flow = default;
-            if (owner.FirstValue ? range.Sign > 0 : range.Sign != 0)
+            if (owner.FirstValue ? bar.High > bar.Low : bar.High != bar.Low)
             {
-                var numerator = JurikDyadic.FromDouble(bar.Close);
-                numerator.Multiply(2);
-                numerator.Add(-bar.High);
-                numerator.Add(-bar.Low);
-                if (owner.IncludeDetails)
-                    multiplier = SeededDyadicEma.RoundedRatio(numerator, range);
-                // Round the complete flow independently of the multiplier.
-                numerator.Multiply(bar.Volume);
-                flow = SeededDyadicEma.RoundedRatio(numerator, range);
+                if (TryOrdinaryFlow(in bar, owner.IncludeDetails, out var ordinaryMultiplier, out var ordinaryFlow))
+                {
+                    multiplier = JurikDyadic.FromDouble(ordinaryMultiplier);
+                    flow = JurikDyadic.FromDouble(ordinaryFlow);
+                }
+                else
+                {
+                    var range = JurikDyadic.FromDouble(bar.High);
+                    range.Add(-bar.Low);
+                    var numerator = JurikDyadic.FromDouble(bar.Close);
+                    numerator.Multiply(2);
+                    numerator.Add(-bar.High);
+                    numerator.Add(-bar.Low);
+                    if (owner.IncludeDetails)
+                        multiplier = SeededDyadicEma.RoundedRatio(numerator, range);
+                    // Round the complete flow independently of the multiplier.
+                    numerator.Multiply(bar.Volume);
+                    flow = SeededDyadicEma.RoundedRatio(numerator, range);
+                }
             }
             _total.AddExact(flow);
             var line = _total.Rounded();
@@ -200,6 +237,22 @@ public sealed class SmoothedAccumulationOscillator
                 oscillator.Subtract(_slow.Value);
                 Publish(oscillator.Rounded(), 0, output);
             }
+        }
+
+        private static bool TryOrdinaryFlow(in Bar bar, bool details, out double multiplier, out double flow)
+        {
+            multiplier = flow = 0;
+            if (!Binary64ArithmeticCertificate.TryDifference(bar.Close, bar.Low, out var buying)
+                || !Binary64ArithmeticCertificate.TryDifference(bar.High, bar.Close, out var selling)
+                || !Binary64ArithmeticCertificate.TryDifference(buying, selling, out var balance)
+                || !Binary64ArithmeticCertificate.TryDifference(bar.High, bar.Low, out var range)) return false;
+            double product;
+            if (balance == 0 || bar.Volume == 0) product = 0;
+            else if (!Binary64ArithmeticCertificate.TryProduct(balance, bar.Volume, out product)) return false;
+            // Complete flow and multiplier have separate once-rounded divisions.
+            if (details) multiplier = balance / range;
+            flow = product / range;
+            return double.IsFinite(multiplier) && double.IsFinite(flow);
         }
     }
 #else
