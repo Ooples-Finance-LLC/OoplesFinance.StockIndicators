@@ -39,6 +39,10 @@ internal struct JurikDyadic
     // Exact bounded integer, normalized for the existing rational publisher.
     internal static JurikDyadic FromInteger(Int128 value)
     {
+        // Preserve the simple representation when binary64 is exact, allowing
+        // the existing simple/simple ratio path to use correctly rounded division.
+        const long exactLimit = 1L << 53;
+        if (value != 0 && value >= -exactLimit && value <= exactLimit) return FromDouble((double)value);
         var result = new JurikDyadic { _fixed = true, _integer = value };
         result.Normalize();
         return result;

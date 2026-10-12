@@ -1,10 +1,27 @@
 using OoplesFinance.StockIndicators.Indicators;
+using OoplesFinance.StockIndicators.Helpers;
+using System.Numerics;
 using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactUltimateOscillatorTests
 {
+    [Fact]
+    public void IntegerPublisherPreservesRoundingAcrossExactDoubleBoundary()
+    {
+        Int128[] operands = [0, 1, -1, ((Int128)1 << 53) - 1, (Int128)1 << 53,
+            ((Int128)1 << 53) + 1, -(((Int128)1 << 53) + 1), ((Int128)1 << 120) + 1];
+        foreach (Int128 numerator in operands)
+        foreach (Int128 denominator in operands.Where(x => x != 0))
+        {
+            var top = new ExactMeanAccumulator(); top.Add(1, (BigInteger)numerator);
+            var bottom = new ExactMeanAccumulator(); bottom.Add(1, (BigInteger)denominator);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(top.Ratio(bottom)),
+                BitConverter.DoubleToInt64Bits(JurikDyadic.FromInteger(numerator).Ratio(JurikDyadic.FromInteger(denominator))));
+        }
+    }
+
     [Theory]
     [InlineData(1, 2, 3, false)] [InlineData(7, 14, 28, false)]
     [InlineData(1, 1, 1, true)] [InlineData(4, 2, 4, true)]
