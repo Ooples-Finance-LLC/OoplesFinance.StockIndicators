@@ -20,6 +20,32 @@ public sealed class CompactChoppinessTests
         }
     }
 
+    [Fact]
+    public void NearOneCorrectionMatchesExactGridWithoutAllocations()
+    {
+        var random = new Random(219);
+        var inputs = Enumerable.Range(0, 1000).Select(_ =>
+        {
+            double denominator = 1 + random.NextDouble();
+            double numerator = denominator * (.5 + random.NextDouble());
+            return (numerator, denominator);
+        }).ToArray();
+        var expected = inputs.Select(p => JrcWindow.LogRatio(
+            ExactVarianceWindow.Units(p.numerator), ExactVarianceWindow.Units(p.denominator))).ToArray();
+        var actual = new double[inputs.Length];
+        for (int replay = 0; replay < 2; replay++)
+        {
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < inputs.Length; i++)
+                actual[i] = ExactIntervalLogRatio.Calculate(JurikDyadic.FromDouble(inputs[i].numerator),
+                    JurikDyadic.FromDouble(inputs[i].denominator));
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            if (replay > 0) Assert.Equal(0, allocated);
+            for (int i = 0; i < inputs.Length; i++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i]), BitConverter.DoubleToInt64Bits(actual[i]));
+        }
+    }
+
     [Theory]
     [InlineData(2)] [InlineData(14)] [InlineData(int.MaxValue)]
     public void CompactWindowsPreserveExtremesPresenceAndReset(int period)
