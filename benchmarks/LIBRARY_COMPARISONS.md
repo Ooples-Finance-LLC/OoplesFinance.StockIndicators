@@ -3342,3 +3342,28 @@ cases passed. The new test exhausts 1,024 five-price patterns at each of periods
 2, 3 and 4 against the independent reference. Existing tests cover extreme values,
 reset, zero-allocation replay and parallel boundaries. Logs:
 `C:/Users/cheat/temp/si-ulcer-prefix-{production,benchmark-build,unit,comparisons}.log`.
+
+
+### Ulcer prefix-repair checkpoint, 10,000 bars (2026-10-11)
+
+Production `40c75e34`, unchanged fixture `2ffd53fc`, period14; ten warmups and ten
+requested measured iterations (LatestOnly retained nine, other arms ten).
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 984,848.83 | 978,148.68 / 991,548.98 | 653,627 |
+| LatestOnly | 953,642.19 | 949,474.52 / 957,809.86 | 172,670 |
+| Native serial | 1,950,154.06 | 1,856,617.43 / 2,043,690.70 | 921,067 |
+| Native parallel | 508,480.39 | 501,987.70 / 514,973.08 | 1,011,808 |
+
+LatestOnly improved about 13.9% from 1.107ms with unchanged allocation, but remains
+1.9 times slower than native parallel. Native parallel also moved from 0.463ms to
+0.508ms; not all ratio improvement is attributable to owned changes. This combines
+borrowed ring access and prefix repair. Both builders beat serial but lose to
+parallel with nonoverlapping intervals. No minimum-iteration warning was emitted.
+CPU samples before/during/after were 12%/9%/8%; no competing dotnet build/test/run
+processes were observed at those points, not continuous isolation.
+Raw/context: `results/shared-rollout/ulcer-cpu/prefix-repair-10k*`;
+log: `C:/Users/cheat/temp/si-ulcer-40c75e34.log`. All setup validations passed.
+Only Ulcer current evidence was updated; previous checkpoints remain archived.
+Coverage remains 181/401 APIs, not a win count.
