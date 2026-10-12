@@ -21,6 +21,36 @@ public sealed class CompactChoppinessTests
     }
 
     [Fact]
+    public void ExponentCorrectionMatchesExactGridAcrossWideRatios()
+    {
+        var random = new Random(814);
+        for (int i = 0; i < 2000; i++)
+        {
+            double numerator = Math.ScaleB(1 + random.NextDouble(), random.Next(-1074, 1023));
+            double denominator = Math.ScaleB(1 + random.NextDouble(), random.Next(-1074, 1023));
+            double expected = JrcWindow.LogRatio(ExactVarianceWindow.Units(numerator), ExactVarianceWindow.Units(denominator));
+            double actual = ExactIntervalLogRatio.Calculate(JurikDyadic.FromDouble(numerator), JurikDyadic.FromDouble(denominator));
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+        }
+    }
+
+    [Fact]
+    public void DoubleLogNormalizationPreservesPowerOfTwoBoundaries()
+    {
+        foreach (int exponent in new[] { -499, -20, -1, 0, 1, 20, 499 })
+        foreach (double denominator in new[] { .5, 1, 1.5, 2 })
+        {
+            double boundary = Math.ScaleB(denominator, exponent);
+            foreach (double numerator in new[] { Math.BitDecrement(boundary), boundary, Math.BitIncrement(boundary) })
+            {
+                double expected = JrcWindow.LogRatio(ExactVarianceWindow.Units(numerator), ExactVarianceWindow.Units(denominator));
+                double actual = ExactIntervalLogRatio.Calculate(JurikDyadic.FromDouble(numerator), JurikDyadic.FromDouble(denominator));
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+            }
+        }
+    }
+
+    [Fact]
     public void NearOneCorrectionMatchesExactGridWithoutAllocations()
     {
         var random = new Random(219);
