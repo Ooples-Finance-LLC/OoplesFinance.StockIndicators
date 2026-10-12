@@ -90,9 +90,7 @@ public sealed class WindowCommodityChannelIndex
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var typical = new ExactMeanAccumulator();
-            typical.Add(bar.High); typical.Add(bar.Low); typical.Add(bar.Close);
-            double value = typical.Mean(3);
+            double value = ExactTypicalPrice.Calculate(bar.High, bar.Low, bar.Close);
             if (_prices.Count == period) _sum.Subtract(JurikDyadic.FromDouble(_prices.Dequeue()));
             _prices.Enqueue(value);
             _sum.Add(value);

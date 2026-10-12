@@ -94,9 +94,7 @@ public sealed class WindowMoneyFlowIndex
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var mean = new ExactMeanAccumulator();
-            mean.Add(bar.High); mean.Add(bar.Low); mean.Add(bar.Close);
-            double typical = mean.Mean(3);
+            double typical = ExactTypicalPrice.Calculate(bar.High, bar.Low, bar.Close);
             if (!_started) { _previous = typical; _started = true; return; }
             int direction = typical.CompareTo(_previous);
             _previous = typical;
