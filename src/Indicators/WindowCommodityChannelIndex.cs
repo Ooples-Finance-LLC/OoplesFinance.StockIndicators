@@ -97,7 +97,8 @@ public sealed class WindowCommodityChannelIndex
             _prices.Enqueue(value);
             _sum.Add(value);
             if (_prices.Count < period) return;
-            var mean = JurikDyadic.FromDouble(_sum.Mean(period));
+            double meanValue = _sum.Mean(period);
+            var mean = JurikDyadic.FromDouble(meanValue);
             var distance = JurikDyadic.FromDouble(value);
             distance.Subtract(mean);
             JurikDyadic deviation;
@@ -113,14 +114,24 @@ public sealed class WindowCommodityChannelIndex
             }
             else
             {
-                deviation = default;
+                var below = new JurikDyadic();
+                int belowCount = 0;
                 foreach (double price in _prices)
                 {
-                    var absolute = JurikDyadic.FromDouble(price);
-                    absolute.Subtract(mean);
-                    if (absolute.Sign < 0) absolute.Multiply(-1);
-                    deviation.AddExact(absolute);
+                    if (price >= meanValue) continue;
+                    below.Add(price);
+                    belowCount++;
                 }
+                // Sum |price-mean| = sum(price) - 2*sum(price<mean)
+                //                       + (2*count(price<mean)-P)*mean.
+                // Keep the rounded mean from the contract, but evaluate this
+                // identity exactly instead of forming every dyadic distance.
+                below.Multiply(2);
+                deviation = _sum;
+                deviation.Subtract(below);
+                var center = mean;
+                center.Multiply(2L * belowCount - period);
+                deviation.AddExact(center);
             }
             if (deviation.Sign == 0) { output[1] = flatZero ? 1 : 0; return; }
             // The integer coefficient is exactly representable as a double for
