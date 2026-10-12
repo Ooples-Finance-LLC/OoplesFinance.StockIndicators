@@ -80,7 +80,7 @@ public sealed class WindowReturnBeta : MultiOutputIndicatorBase, IIndicatorValid
                 )
             );
 
-    private sealed class State(int period, CandlePriceField market, CandlePriceField evaluation)
+    internal sealed class State(int period, CandlePriceField market, CandlePriceField evaluation)
         : IMultiOutputState
     {
         private readonly ReturnBetaWindow _window = new(period, ReturnBetaSelection.Standard);

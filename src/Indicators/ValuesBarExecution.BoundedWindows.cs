@@ -8,6 +8,7 @@ internal static partial class ValuesBarExecution
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
             or WindowPathRatio { Period: < int.MaxValue } or WindowLinearRegression { Period: <= 32767 } or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+        || indicator is WindowReturnBeta { Period: < int.MaxValue }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
         || RelativeVolatilityWindow(indicator) > 0
@@ -104,7 +105,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
-        if (indicator is TriangularWindowAverage) return 512;
+        if (indicator is TriangularWindowAverage or WindowReturnBeta) return 512;
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
         if (indicator is Wma or WilliamsR or EndpointWeightedAverage or FixedPeriodWma or FibonacciWeightedAverage or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or PriorPriceChannel or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
@@ -726,6 +727,24 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private struct ReturnBetaKernel(WindowReturnBeta.State state, BoundedOutput target) : IBoundedKernel<ReturnBetaKernel>
+    {
+        private int _index = target.Origin;
+        public static ReturnBetaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var beta = (WindowReturnBeta)indicator;
+            return new(new(beta.Period, beta.Market, beta.Evaluation), target);
+        }
+        public double Update(in Bar bar)
+        {
+            Span<double> values = stackalloc double[2];
+            state.Update(in bar, values);
+            int index = _index++;
+            if (index >= target.WriteStart) target.Values[1][index] = values[1];
+            return values[0];
+        }
+    }
+
     private struct AlmaKernel(ArnaudLegouxWindow.State state, BoundedOutput target) : IBoundedKernel<AlmaKernel>
     {
         private int _index = target.Origin;
@@ -760,6 +779,9 @@ internal static partial class ValuesBarExecution
         FixedPeriodWma average => FillBoundedWindow<WmaKernel>(source, output, indicator, average.Period, cancellation, owned),
         TriangularWindowAverage average => FillBoundedWindow<TriangularKernel>(source, output, indicator, average.Period, cancellation, owned),
         ArnaudLegouxWindow average => FillBoundedWindow<AlmaKernel>(source, output, indicator, average.Period, cancellation, owned),
+        // P returns need P preceding prices and the current output price.
+        WindowReturnBeta { Period: < int.MaxValue } beta =>
+            FillBoundedWindow<ReturnBetaKernel>(source, output, indicator, beta.Period + 1, cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         WindowLinearRegression regression => FillBoundedWindow<RegressionKernel>(source, output, indicator, regression.Period, cancellation, owned),
         // P changes require P preceding prices plus the assigned output bar.
