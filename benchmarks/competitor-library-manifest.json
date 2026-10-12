@@ -501,12 +501,12 @@
       "QuanTAlib.Rvi"
     ],
     "Status": "paired",
-    "OoplesIndicator": "RelativeVolatilitySnapshot",
+    "OoplesIndicator": "RelativeVolatilityStrength",
     "Outputs": [
       "Value"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "RelativeVolatilitySnapshot uses sample deviations of up/down changes, then available-history simple averages and a bounded ratio; previous close starts at zero. Exact changes and once-rounded deviation/mean stages use extended upper exponents, preserving finite ratios after unpublished overflow. An independent pairwise squared-distance/root oracle and native scalar-deviation/SIMD-mean oracle verify every output, period/startup boundaries, huge periods, wide/subnormal changes and corruption. Native squared deviations can underflow to zero and inherited reset retains nested histories; both limitations have explicit regressions. Owned calls start fresh and histories grow lazily."
+    "CompetitorLimitation": "RelativeVolatilityStrength executes through BuildAsync with compact exact rolling states: sample deviations of up/down changes, then available-history simple averages and a bounded ratio; previous close starts at zero. RelativeVolatilitySnapshot remains the batch reference. Exact changes and once-rounded deviation/mean stages use extended upper exponents, preserving finite ratios after unpublished overflow. An independent pairwise squared-distance/root oracle and native scalar-deviation/SIMD-mean oracle verify every output, period/startup boundaries, huge periods, wide/subnormal changes and corruption. Native squared deviations can underflow to zero and inherited reset retains nested histories; both limitations have explicit regressions. Owned calls start fresh and histories grow lazily."
   },
   {
     "Id": "QuanTAlib.Sinema",

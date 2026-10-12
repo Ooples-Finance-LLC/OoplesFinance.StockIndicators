@@ -7,6 +7,23 @@ namespace OoplesFinance.StockIndicators.CompetitorTests;
 
 public sealed class RelativeVolatilityComparisonTests
 {
+    [Theory]
+    [InlineData(2)]
+    [InlineData(14)]
+    [InlineData(int.MaxValue)]
+    public void CompactBuilderMatchesIndependentReferenceThroughWideAndTinyEvictions(int period)
+    {
+        double[] extremes = [double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon,
+            1, 3, 2, 5, 1, 0, 0, 0, 0, 0, 1e-200, -1e-200];
+        var prices = extremes.Concat(Enumerable.Range(0, 45).Select(i => 100 + (i * 13 % 101) / 8d)).ToArray();
+        foreach (var sequence in new[] { prices, prices.Reverse().ToArray() })
+        {
+            var bars = sequence.Select(p => new Bar(default, p, p, p, p, 0)).ToArray();
+            ComparisonVerifier.Compare(new(0, RelativeVolatilityComparison.Reference(sequence, period)),
+                new(0, RelativeVolatilityComparison.Owned(bars, period)), "compact RVI", IndicatorErrorBudget.Exact);
+        }
+    }
+
     [Fact]
     public void SampleDeviationAvailableHistoryAndZeroSeedHaveGoldens()
     {
