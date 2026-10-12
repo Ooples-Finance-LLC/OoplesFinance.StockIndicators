@@ -62,7 +62,7 @@ public sealed class ExpandingZeroLagEma
         return values;
     }
 
-    private sealed class State(int period) : IIndicatorState
+    internal sealed class State(int period) : IIndicatorState
     {
         private readonly Queue<double> _history = new();
         private int _count;
@@ -82,11 +82,15 @@ public sealed class ExpandingZeroLagEma
             _history.Enqueue(bar.Close);
             if (_count < period)
                 _count++;
-            var sum = new ExactMeanAccumulator();
-            sum.Add(bar.Close, 4);
-            sum.Add(_history.Peek(), -2);
-            sum.Add(_previous, _count - 1);
-            _previous = sum.Mean((long)_count + 1);
+            var sum = JurikDyadic.FromDouble(bar.Close);
+            sum.Multiply(4);
+            var lagged = JurikDyadic.FromDouble(_history.Peek());
+            lagged.Multiply(2);
+            sum.Subtract(lagged);
+            var previous = JurikDyadic.FromDouble(_previous);
+            previous.Multiply(_count - 1);
+            sum.AddExact(previous);
+            _previous = sum.Ratio(JurikDyadic.FromDouble((double)_count + 1));
             return _previous;
         }
     }

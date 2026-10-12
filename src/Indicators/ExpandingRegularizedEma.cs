@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -74,15 +73,17 @@ public sealed class ExpandingRegularizedEma
         return values;
     }
 
-    private sealed class State(int period, double lambda) : IIndicatorState
+    internal sealed class State(int period, double lambda) : IIndicatorState
     {
-        private int _count;
+        private int _count, _denominatorPeriod;
+        private JurikDyadic _denominator;
         private double _previous,
             _older;
 
         public void Reset()
         {
-            _count = 0;
+            _count = _denominatorPeriod = 0;
+            _denominator = default;
             _previous = _older = 0;
         }
 
@@ -94,22 +95,25 @@ public sealed class ExpandingRegularizedEma
             if (_count > 2)
             {
                 var effective = Math.Min(_count, period);
-                var sum = new ExactMeanAccumulator();
-                sum.Add(_previous, effective - 1);
-                sum.Add(bar.Close, 2);
-                // Multiply by effective+1 without narrowing a maximum-period divisor.
-                for (var copy = 0; copy < 2; copy++)
+                if (_denominatorPeriod != effective)
                 {
-                    sum.AddProduct(_previous, lambda, effective);
-                    sum.AddProduct(_previous, lambda);
+                    _denominator = JurikDyadic.FromDouble(lambda);
+                    _denominator.Add(1);
+                    _denominator.Multiply((double)effective + 1);
+                    _denominatorPeriod = effective;
                 }
-                sum.AddProduct(_older, lambda, -effective);
-                sum.AddProduct(_older, lambda, -1);
-                var denominator = new ExactMeanAccumulator();
-                var divisor = new BigInteger(effective) + 1;
-                denominator.Add(1, divisor);
-                denominator.Add(lambda, divisor);
-                result = sum.Ratio(denominator);
+                var sum = JurikDyadic.FromDouble(_previous);
+                sum.Multiply(effective - 1);
+                var current = JurikDyadic.FromDouble(bar.Close);
+                current.Multiply(2);
+                sum.AddExact(current);
+                var regularization = JurikDyadic.FromDouble(_previous);
+                regularization.Multiply(2);
+                regularization.Subtract(JurikDyadic.FromDouble(_older));
+                regularization.Multiply(lambda);
+                regularization.Multiply((double)effective + 1);
+                sum.AddExact(regularization);
+                result = sum.Ratio(_denominator);
             }
             _older = _previous;
             _previous = result;
