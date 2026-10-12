@@ -53,6 +53,7 @@ public sealed class SharedAllocationProbeTests
     [InlineData("TaLib.Functions.Mfi")]
     [InlineData("Skender.GetMfi")]
     [InlineData("Skender.GetVortex")]
+    [InlineData("Skender.GetChop")]
     [InlineData("TaLib.Functions.UltOsc")]
     [InlineData("Skender.GetUltimate")]
     [InlineData("TaLib.Functions.Rsi")]
@@ -79,6 +80,17 @@ public sealed class SharedAllocationProbeTests
     {
         int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
         var fixture = new SharedVortexBenchmarks { Count = count };
+        try { fixture.Setup(); }
+        finally { fixture.Cleanup(); }
+        Assert.Equal(prior, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);
+    }
+
+    [Theory]
+    [InlineData(15)] [InlineData(513)]
+    public void ChoppinessFixtureHandlesSmallAndPartitionedInputsAndRestoresSettings(int count)
+    {
+        int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        var fixture = new SharedChoppinessBenchmarks { Count = count };
         try { fixture.Setup(); }
         finally { fixture.Cleanup(); }
         Assert.Equal(prior, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);

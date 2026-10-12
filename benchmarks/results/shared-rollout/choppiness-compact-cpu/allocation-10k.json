@@ -1,0 +1,41 @@
+{
+  "Operation": "Skender.GetChop",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        646384,
+        646384,
+        646384
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        165256,
+        165256,
+        165256
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1640512,
+        1640512,
+        1640512
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1660416,
+        1660416,
+        1660416
+      ]
+    }
+  ],
+  "ProductionCommit": "b8b625a7",
+  "Evidence": "Allocation-only warmed process-wide measurements. Native eager results retained without normalization; prepared inputs/overlap and agreement checks outside measured calls. No latency qualification."
+}
