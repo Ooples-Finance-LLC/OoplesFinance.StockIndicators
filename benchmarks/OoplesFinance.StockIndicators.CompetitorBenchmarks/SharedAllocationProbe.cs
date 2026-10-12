@@ -50,6 +50,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation == "Trady.Indicator.DynamicMomentumIndex")
+        {
+            var fixture = new SharedDynamicMomentumBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else throw new ArgumentException("Unsupported shared allocation operation.", nameof(operation));
 
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
