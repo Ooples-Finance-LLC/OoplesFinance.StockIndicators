@@ -1011,7 +1011,7 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.ConnorsRsiResult] GetConnorsRsi[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32, Int32, Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "ConnorsStrengthSnapshot",
+    "OoplesIndicator": "ConnorsStrength",
     "Outputs": [
       "Rsi",
       "RsiStreak",
