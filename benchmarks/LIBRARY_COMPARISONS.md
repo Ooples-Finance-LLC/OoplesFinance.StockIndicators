@@ -3411,3 +3411,12 @@ exercise startup and uneven worker boundaries at period14. Benchmark build,
 The fixture is registered in the allocation probe and qualification parser.
 Logs: `C:/Users/cheat/temp/si-rvi-fixture-{build,tests}.log`.
 No production change or timing campaign in this batch; coverage stays 181/401.
+
+
+### Relative Volatility shared parallel CPU execution
+
+RelativeVolatilityStrength now uses the existing bounded-window CPU executor for standalone and mixed scalar roots. Each worker replays 2P-1 preceding prices; its deviation/smoothing states retain the original period P. Replay windows above 4096 stay serial, and periods whose doubled window would overflow use the generic shared-state route. Scheduler thresholds are unchanged.
+
+Adversarial review checked synthetic first-change expiry, mixed-root dispatch, replay-length versus state-period separation and overflow-safe routing. Production and benchmark builds passed; 31 focused unit cases and 16 independent comparison/fixture cases passed. Coverage includes 1/8 workers, both history modes, exact wide-value seams, periods 2/14/2048/2049 and near integer limits, empty/one inputs, captured invalid tails, cancellation, recovery and retained ownership. The direct fixture now checks 8,193 bars against its independent reference.
+
+Commands: production net10.0 Release build; benchmark net10.0 Release build with BuildProjectReferences=false; focused unit filter SharedRelativeVolatilityWindowTests|RelativeVolatilityStrengthBuilderTests|SharedUlcerWindowTests; competitor filter RelativeVolatilityComparisonTests|SharedRelativeVolatilityBenchmarkTests. Existing framework/analyzer warnings remain in the test build. Timing is deferred while competing jobs remain active; no new timing qualification, speedup or GPU support is claimed.

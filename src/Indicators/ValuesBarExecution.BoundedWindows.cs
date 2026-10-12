@@ -10,6 +10,7 @@ internal static partial class ValuesBarExecution
             or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
+        || RelativeVolatilityWindow(indicator) > 0
         || HullReplayWindow(indicator) > 0
         || DetailedDeviationWindow(indicator) > 0
         || AroonWindow(indicator) > 0
@@ -17,6 +18,12 @@ internal static partial class ValuesBarExecution
         || PercentileCandlePeriod(indicator) > 0
         || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0
         || TrendReversalWindow(indicator) > 0;
+
+    // P smoothed deviations each require P changes and their preceding price:
+    // 2P prices in total, including the assigned output bar.
+    private static int RelativeVolatilityWindow(IIndicator indicator) =>
+        indicator is RelativeVolatilityStrength { Period: <= int.MaxValue / 2 } relative
+            ? 2 * relative.Period : 0;
 
     private static int HullReplayWindow(IIndicator indicator)
     {
@@ -489,6 +496,13 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private readonly struct RelativeVolatilityKernel(RelativeVolatilityStrength.State state) : IBoundedKernel<RelativeVolatilityKernel>
+    {
+        public static RelativeVolatilityKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(((RelativeVolatilityStrength)indicator).Period));
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
     private struct UlcerKernel(WindowUlcerIndex.State state, BoundedOutput target) : IBoundedKernel<UlcerKernel>
     {
         private int _index = target.Origin;
@@ -672,6 +686,8 @@ internal static partial class ValuesBarExecution
         StandardDeviationWithDetails when DetailedDeviationWindow(indicator) > 0 =>
             FillBoundedWindow<DetailedDeviationKernel>(source, output, indicator, DetailedDeviationWindow(indicator), cancellation, owned),
         WindowSampleShape shape => FillBoundedWindow<SampleShapeKernel>(source, output, indicator, shape.Period, cancellation, owned),
+        RelativeVolatilityStrength when RelativeVolatilityWindow(indicator) > 0 =>
+            FillBoundedWindow<RelativeVolatilityKernel>(source, output, indicator, RelativeVolatilityWindow(indicator), cancellation, owned),
         WindowUlcerIndex ulcer => FillBoundedWindow<UlcerKernel>(source, output, indicator, ulcer.Period, cancellation, owned),
         WindowDispersion dispersion => FillBoundedWindow<DispersionKernel>(source, output, indicator, dispersion.Period, cancellation, owned),
         WindowMode mode => FillBoundedWindow<ModeKernel>(source, output, indicator, mode.Period, cancellation, owned),
