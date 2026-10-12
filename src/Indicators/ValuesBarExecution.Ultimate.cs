@@ -29,9 +29,9 @@ internal static partial class ValuesBarExecution
                     region.Last = bar;
                     if (owned is not null) owned[row] = bar;
                 }
-                IncludeUltimateGrid(bar.High, ref grid, ref maximum);
-                IncludeUltimateGrid(bar.Low, ref grid, ref maximum);
-                IncludeUltimateGrid(bar.Close, ref grid, ref maximum);
+                IncludeIntegerGrid(bar.High, ref grid, ref maximum);
+                IncludeIntegerGrid(bar.Low, ref grid, ref maximum);
+                IncludeIntegerGrid(bar.Close, ref grid, ref maximum);
             }
             if (grid == int.MaxValue) grid = 0;
             // Every pressure/range sum has magnitude <= 2^38. Therefore the
@@ -108,7 +108,7 @@ internal static partial class ValuesBarExecution
         finally { System.Buffers.ArrayPool<Bar>.Shared.Return(captured); }
     }
 
-    private static void IncludeUltimateGrid(double value, ref int grid, ref double maximum)
+    private static void IncludeIntegerGrid(double value, ref int grid, ref double maximum)
     {
         maximum = Math.Max(maximum, Math.Abs(value));
         var factor = ExactMeanAccumulator.DecomposeFinite(value);

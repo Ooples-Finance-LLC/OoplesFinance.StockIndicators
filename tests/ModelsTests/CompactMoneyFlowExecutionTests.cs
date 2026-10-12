@@ -149,6 +149,83 @@ public sealed class CompactMoneyFlowExecutionTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
     }
 
+    [Theory]
+    [InlineData(false, 0)] [InlineData(true, 0)] [InlineData(false, 250)] [InlineData(true, 512)]
+    [InlineData(true, int.MaxValue)]
+    public async Task CertifiedProductsPreserveRoundedTypicalPricesSignedVolumesAndSuppression(bool minimum, int suppressed)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (int scale in new[] { -900, 0, 900 })
+            foreach (int sign in new[] { -1, 1 })
+            {
+                var bars = Enumerable.Range(0, 513).Select(i =>
+                {
+                    double value = 10 + (i * 13 % 101) / 8d;
+                    return new Bar(default, 123, Math.ScaleB(value + 1 + i % 5 / 16d, scale),
+                        Math.ScaleB(value - 1 - i % 7 / 16d, scale), Math.ScaleB(value, scale), sign * (i % 13 + 1));
+                }).ToArray();
+                var indicator = new WindowMoneyFlowIndex(14, minimum, suppressed);
+                using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                    foreach (var output in indicator.Outputs)
+                        Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                            actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Fact]
+    public async Task CertifiedFullMantissaProductsRoundOnce()
+    {
+        var random = new Random(718);
+        var bars = Enumerable.Range(0, 513).Select(_ =>
+        {
+            double price = 1 + random.NextDouble();
+            return new Bar(default, 123, price, price, price, 1 + random.NextDouble());
+        }).ToArray();
+        foreach (bool minimum in new[] { false, true })
+        {
+            var indicator = new WindowMoneyFlowIndex(7, minimum);
+            using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                foreach (var output in indicator.Outputs)
+                    Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                        actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+            }
+        }
+    }
+
+    [Fact]
+    public async Task CertifiedTotalThresholdAndSignedZeroMatchExactState()
+    {
+        foreach (double volume in new[] { Math.BitDecrement(1d), 1d, Math.BitIncrement(1d), -1d })
+        foreach (bool minimum in new[] { false, true })
+        {
+            var bars = new[] { new Bar(default, 7, 0, 0, 0, volume),
+                new Bar(default, 7, 1, 1, 1, volume), new Bar(default, 7, 0, 0, 0, volume) };
+            var indicator = new WindowMoneyFlowIndex(2, minimum);
+            using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+            using var actual = await Build(bars, indicator).BuildAsync();
+            foreach (var output in indicator.Outputs)
+                Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                    actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+        }
+        var zeroBars = new[] { new Bar(default, 2, 2, 2, 2, 1),
+            new Bar(default, 1, 1, 1, 1, -1), new Bar(default, 0, 0, 0, 0, 1) };
+        var zeroIndicator = new WindowMoneyFlowIndex(2);
+        using var zeroRun = await Build(zeroBars, zeroIndicator).BuildAsync();
+        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(zeroRun[zeroIndicator.Value][2]));
+    }
+
     [Fact]
     public async Task NonfiniteOutputsDoNotMaskLaterInvalidInputOrCancellation()
     {

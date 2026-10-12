@@ -1041,6 +1041,8 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
+        if (typeof(T) == typeof(MoneyFlowKernel))
+            return ComputeMoneyFlowColumn(source, output, owned, start, end, (WindowMoneyFlowIndex)indicator, seed, tail, cancellation);
         if (typeof(T) == typeof(UltimateKernel))
             return ComputeUltimateColumn(source, output, owned, start, end, (WindowUltimateOscillator)indicator, seed, tail, cancellation);
         if (typeof(T) == typeof(ChoppinessKernel))

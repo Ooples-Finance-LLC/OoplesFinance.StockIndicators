@@ -1,0 +1,33 @@
+```
+
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.26220.9606)
+AMD Ryzen 9 3950X 3.70GHz, 1 CPU, 32 logical and 16 physical cores
+.NET SDK 10.0.401
+  [Host] : .NET 10.0.12 (10.0.12, 10.0.1226.42308), X64 RyuJIT x86-64-v3
+
+Job=ShortRun  MinIterationTime=100ms  Toolchain=InProcessEmitToolchain  
+IterationCount=10  LaunchCount=1  UnrollFactor=1  
+WarmupCount=10  
+
+```
+| Method            | Operation           | Count | Mean       | Error      | StdDev     | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
+|------------------ |-------------------- |------ |-----------:|-----------:|-----------:|------:|--------:|---------:|---------:|-----------:|------------:|
+| **BuilderFull**       | **Skender.GetMfi**      | **1000**  |  **55.867 μs** |  **3.0401 μs** |  **2.0108 μs** |  **0.67** |    **0.03** |   **7.8125** |        **-** |   **65.38 KB** |        **0.42** |
+| BuilderLatestOnly | Skender.GetMfi      | 1000  |  46.228 μs |  1.7776 μs |  1.1758 μs |  0.56 |    0.02 |   1.9531 |        - |   17.77 KB |        0.11 |
+| NativeSingle      | Skender.GetMfi      | 1000  |  83.328 μs |  4.6387 μs |  3.0682 μs |  1.00 |    0.05 |  19.0430 |   3.9063 |  156.75 KB |        1.00 |
+| NativeParallel    | Skender.GetMfi      | 1000  |  33.284 μs |  3.1038 μs |  1.8470 μs |  0.40 |    0.03 |  22.2168 |   6.8359 |  175.88 KB |        1.12 |
+|                   |                     |       |            |            |            |       |         |          |          |            |             |
+| **BuilderFull**       | **Skender.GetMfi**      | **10000** | **428.581 μs** |  **7.2660 μs** |  **4.8060 μs** |  **0.43** |    **0.01** |  **74.2188** |  **31.2500** |  **628.28 KB** |        **0.40** |
+| BuilderLatestOnly | Skender.GetMfi      | 10000 | 384.486 μs |  1.1922 μs |  0.7886 μs |  0.39 |    0.01 |  17.5781 |   3.9063 |  158.42 KB |        0.10 |
+| NativeSingle      | Skender.GetMfi      | 10000 | 990.553 μs | 37.4912 μs | 22.3104 μs |  1.00 |    0.03 | 187.5000 | 140.6250 | 1563.07 KB |        1.00 |
+| NativeParallel    | Skender.GetMfi      | 10000 | 423.615 μs | 52.0693 μs | 34.4406 μs |  0.43 |    0.03 | 203.1250 | 144.5313 | 1582.13 KB |        1.01 |
+|                   |                     |       |            |            |            |       |         |          |          |            |             |
+| **BuilderFull**       | **TaLib.Functions.Mfi** | **1000**  |  **52.392 μs** |  **2.0587 μs** |  **1.3617 μs** |  **6.55** |    **0.23** |   **7.8125** |   **0.9766** |   **65.38 KB** |        **8.16** |
+| BuilderLatestOnly | TaLib.Functions.Mfi | 1000  |  45.461 μs |  0.5418 μs |  0.2833 μs |  5.68 |    0.14 |   1.9531 |        - |   17.77 KB |        2.22 |
+| NativeSingle      | TaLib.Functions.Mfi | 1000  |   8.003 μs |  0.3117 μs |  0.2062 μs |  1.00 |    0.03 |   0.9766 |        - |    8.01 KB |        1.00 |
+| NativeParallel    | TaLib.Functions.Mfi | 1000  |   5.864 μs |  0.6060 μs |  0.4008 μs |  0.73 |    0.05 |   1.2512 |   0.0305 |   10.13 KB |        1.27 |
+|                   |                     |       |            |            |            |       |         |          |          |            |             |
+| **BuilderFull**       | **TaLib.Functions.Mfi** | **10000** | **424.933 μs** |  **9.6610 μs** |  **6.3902 μs** |  **5.67** |    **0.09** |  **74.2188** |  **31.2500** |  **628.28 KB** |        **8.02** |
+| BuilderLatestOnly | TaLib.Functions.Mfi | 10000 | 386.307 μs |  4.7309 μs |  2.8153 μs |  5.16 |    0.06 |  17.5781 |   3.9063 |  158.42 KB |        2.02 |
+| NativeSingle      | TaLib.Functions.Mfi | 10000 |  74.900 μs |  1.1157 μs |  0.6640 μs |  1.00 |    0.01 |   9.2773 |   1.4648 |   78.32 KB |        1.00 |
+| NativeParallel    | TaLib.Functions.Mfi | 10000 |  21.878 μs |  0.6313 μs |  0.4175 μs |  0.29 |    0.01 |   9.8877 |   1.9531 |   80.45 KB |        1.03 |

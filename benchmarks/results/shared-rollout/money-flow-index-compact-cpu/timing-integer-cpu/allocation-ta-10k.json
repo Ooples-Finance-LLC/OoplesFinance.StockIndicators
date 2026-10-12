@@ -1,0 +1,39 @@
+{
+  "Operation": "TaLib.Functions.Mfi",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        643320,
+        643320,
+        643320
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        162192,
+        162192,
+        162192
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        80200,
+        80200,
+        80200
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        82376,
+        82376,
+        82376
+      ]
+    }
+  ]
+}
