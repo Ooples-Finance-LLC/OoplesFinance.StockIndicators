@@ -51,15 +51,15 @@ internal static partial class ValuesBarExecution
             }
         }
         if (indicator.AveragePeriod is int period && period < contributions.Length)
-            FillOnBalanceVolumeAverage(contributions.AsSpan(1), output[1].AsSpan(1), output[2].AsSpan(1), period, cancellation);
+            FillPublishedAverage(contributions.AsSpan(1), output[1].AsSpan(1), output[2].AsSpan(1), period, cancellation);
         return latest;
     }
 
-    private static void FillOnBalanceVolumeAverage(ReadOnlySpan<double> values, Span<double> average,
+    private static void FillPublishedAverage(ReadOnlySpan<double> values, Span<double> average,
         Span<double> presence, int period, CancellationToken cancellation)
     {
-        // The average excludes the seed and uses rounded published OBV values.
-        // Its independent certificate must bound those values, not input volumes.
+        // Callers select the published values included in their average (OBV
+        // excludes its seed). The certificate bounds values, not input volumes.
         var summary = new Core.SmaCpuKernel.GridSummary();
         foreach (double value in values)
         {
