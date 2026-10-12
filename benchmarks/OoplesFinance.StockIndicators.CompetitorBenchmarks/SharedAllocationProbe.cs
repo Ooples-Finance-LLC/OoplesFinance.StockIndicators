@@ -48,6 +48,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "TaLib.Functions.UltOsc" or "Skender.GetUltimate")
+        {
+            var fixture = new SharedUltimateBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "Skender.GetVortex")
         {
             var fixture = new SharedVortexBenchmarks { Operation = operation, Count = count };

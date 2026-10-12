@@ -65,6 +65,18 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['Skender.GetVortex'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_ultimate_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedUltimateBenchmarks.BuilderFull(Operation: "TaLib.Functions.UltOsc", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['TaLib.Functions.UltOsc'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_skender_ultimate_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedUltimateBenchmarks.BuilderFull(Operation: "Skender.GetUltimate", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetUltimate'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_endpoint_gpu_fixture_cpu_arms(self):
         self.write()
         path = self.qualification('SharedGpuEndpointBenchmarks.BuilderFull(Operation: "Epma", Count: 1000)')
