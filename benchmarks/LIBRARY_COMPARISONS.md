@@ -3037,3 +3037,17 @@ Production/benchmark net10.0 builds, 262 focused unit cases and ten fixture/refe
 ReturnKey caches the rounded current/previous ratio once per retained key on modern runtimes. IEEE division is monotone, so strictly different rounded values prove the exact ordering. Equal rounded values never prove equality: they fall through to the fixed-width exact cross-product comparator. The hot public comparison stays small; exact comparison remains separate. A cached double adds bounded storage per key.
 
 Adversarial coverage includes two distinct finite rational ratios that round to the same binary64 value, shared positive infinity after overflow, shared zero after underflow, opposite signs at underflow, and the existing full-significand/exponent integer-reference tests. Production/benchmark net10.0 builds, 263 focused unit cases and ten fixture/reference comparisons passed. Builds/tests retain the prior framework and BuildProjectReferences restrictions. Logs: `C:/Users/cheat/temp/si-return-key-monotone-*`. Timing remains a separate checkpoint; correctness and zero-allocation comparison tests do not establish a speedup.
+
+
+### Connors combined routing/comparator timing checkpoint (2026-10-11)
+
+One unchanged four-arm 10000-bar fixture run on production 4f12c9cc completed after shared CPU registration, fixed-width exact products and monotone ratio certificates. It used 20 warmups and 15 requested iterations. Preflight/completion CPU samples were 5%/7%, with no competing dotnet builds/tests observed; the run completed before the next process sample, so there is no during-run contention observation. Raw report: `results/shared-rollout/connors-cpu/certified-order-10k.json.gz`, with adjacent source/context metadata.
+
+| Arm | Mean ns | CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 15731235.00 | 14885415.08 / 16577054.92 | 1138650 |
+| LatestOnly | 14379008.33 | 14272908.78 / 14485107.88 | 658639 |
+| Native serial | 2115466.05 | 2044725.30 / 2186206.80 | 3081968 |
+| Native parallel | 8815172.73 | 8257947.59 / 9372397.87 | 13952775 |
+
+LatestOnly latency fell about 90.3% from the initial 147.74 ms baseline, but remains 6.8 times slower than native serial. Allocation is about 78.6% lower than native serial; the Full/LatestOnly storage distinction is now visible. This measures the three changes together and does not attribute a separate speedup to each. Only Connors's current catalog entry is replaced; both raw reports remain archived and coverage remains 179/401 APIs, not wins. No further timing campaign ran.
