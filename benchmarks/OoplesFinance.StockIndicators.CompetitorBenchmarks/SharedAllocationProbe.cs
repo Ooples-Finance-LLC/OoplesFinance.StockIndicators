@@ -48,6 +48,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation == "TaLib.Functions.Mfi")
+        {
+            var fixture = new SharedMoneyFlowIndexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "TaLib.Functions.Cci")
         {
             var fixture = new SharedCommodityChannelBenchmarks { Operation = operation, Count = count };
