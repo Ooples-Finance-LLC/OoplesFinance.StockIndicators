@@ -141,6 +141,7 @@ internal static class SharedCpuStates
         typeof(RollingPriceSum),
         typeof(RelativeVolatilityStrength),
         typeof(RegressionWithFinalLine),
+        typeof(RegressionWithChannels),
         typeof(ScaledTrueRange),
         typeof(SeededAdaptiveAverage),
         typeof(SeededAtrTrailingStop),

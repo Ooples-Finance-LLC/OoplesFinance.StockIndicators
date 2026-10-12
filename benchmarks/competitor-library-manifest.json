@@ -1879,7 +1879,7 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.StdDevChannelsResult] GetStdDevChannels[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], System.Nullable\u00601[System.Int32], Double)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "RegressionChannelSnapshot",
+    "OoplesIndicator": "RegressionWithChannels",
     "Outputs": [
       "Centerline",
       "UpperChannel",
@@ -1887,7 +1887,7 @@
       "BreakPoint"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "RegressionChannelSnapshot fits nonoverlapping blocks backward from the last row; leading incomplete rows are absent and BreakPoint remains a defined false value there. Null period fits the entire input, requiring at least two rows. Reuses the verified regression-moment engine with exact fitted positions, rounded population deviation and wide channel arithmetic. Native global-coordinate binary64 regressions and the unused final-line decimal cast inside CalcSlope have separate references; that cast can reject prices whose channels would otherwise be finite. Block shifts on append, all outputs, quote/tuple/reusable routes, extreme inputs, genuine final overflow and mutations are verified."
+    "CompetitorLimitation": "RegressionWithChannels uses BuildAsync to fit nonoverlapping blocks aligned backward from the last row; leading incomplete rows are absent and BreakPoint remains a defined false value there. Null period fits the entire input, requiring at least two rows. Reuses the verified regression-moment engine with exact fitted positions, rounded population deviation and wide channel arithmetic. Native global-coordinate binary64 regressions and the unused final-line decimal cast inside CalcSlope have separate references; that cast can reject prices whose channels would otherwise be finite. Block shifts on append, all outputs, quote/tuple/reusable routes, extreme inputs, genuine final overflow and mutations are verified."
   },
   {
     "Id": "Skender.GetStoch",
