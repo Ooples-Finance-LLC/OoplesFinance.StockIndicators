@@ -3246,3 +3246,24 @@ Ordinary warmed state replay still allocates zero bytes. Existing benchmark/test
 warnings remain. Logs: `C:/Users/cheat/temp/si-ulcer-cache-{production,benchmark-build,unit,comparisons}.log`.
 No new timing run was performed; the 2ffd53fc latency-loss checkpoint remains the
 latest measured result. This cache change is not claimed as a measured win.
+
+
+### Ulcer bounded CPU worker integration (2026-10-11)
+
+Standalone Ulcer now uses the existing bounded-window executor and published
+AiDotNet.Tensors worker scheduler. Each worker owns an exact cached state seeded
+with P-1 captured bars, writes disjoint values/presence, and retains the existing
+input-before-output validation and cancellation order. The default 8,192-bar
+threshold, up-to-eight-worker limit, shared scheduling gate and serial fallback
+for periods above 4,096 remain unchanged. Chained/mixed configurations keep their
+existing routes. Required GPU still rejects unsupported Ulcer execution.
+
+Adversarial review confirmed that seed outputs are not published, presence is
+finite by construction, only the primary RMS needs overflow validation, and
+exact cache eviction is independent of preceding history after P-1 seeds.
+Production/benchmark Release net10.0 builds, 21 unit cases and 15 fixture/reference
+cases passed. Tests compare one/eight workers, Full/LatestOnly, zero/one inputs,
+periods 1/14/4096/4097/int.MaxValue, invalid captured tails versus earlier overflow,
+cancellation, later-run recovery and owned data after disposal/source mutation.
+Logs: `C:/Users/cheat/temp/si-ulcer-parallel-{production,benchmark-build,unit,comparisons}.log`.
+Existing benchmark/test warnings remain. No scheduler policy or public API changed.

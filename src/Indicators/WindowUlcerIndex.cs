@@ -51,7 +51,7 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private struct Entry(double price)
         {

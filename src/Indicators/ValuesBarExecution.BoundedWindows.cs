@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
         || HullReplayWindow(indicator) > 0
@@ -489,6 +489,22 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private struct UlcerKernel(WindowUlcerIndex.State state, BoundedOutput target) : IBoundedKernel<UlcerKernel>
+    {
+        private int _index = target.Origin;
+        public static UlcerKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(period), target);
+        public double Update(in Bar bar)
+        {
+            Span<double> scratch = stackalloc double[2];
+            state.Update(in bar, scratch);
+            int index = _index++;
+            // Seed bars initialize the cached exact window but belong to another worker.
+            if (index >= target.WriteStart) target.Values[1][index] = scratch[1];
+            return scratch[0];
+        }
+    }
+
     private struct SampleShapeKernel(WindowSampleShape.State state, BoundedOutput target) : IBoundedKernel<SampleShapeKernel>
     {
         private readonly double[] _scratch = new double[2];
@@ -656,6 +672,7 @@ internal static partial class ValuesBarExecution
         StandardDeviationWithDetails when DetailedDeviationWindow(indicator) > 0 =>
             FillBoundedWindow<DetailedDeviationKernel>(source, output, indicator, DetailedDeviationWindow(indicator), cancellation, owned),
         WindowSampleShape shape => FillBoundedWindow<SampleShapeKernel>(source, output, indicator, shape.Period, cancellation, owned),
+        WindowUlcerIndex ulcer => FillBoundedWindow<UlcerKernel>(source, output, indicator, ulcer.Period, cancellation, owned),
         WindowDispersion dispersion => FillBoundedWindow<DispersionKernel>(source, output, indicator, dispersion.Period, cancellation, owned),
         WindowMode mode => FillBoundedWindow<ModeKernel>(source, output, indicator, mode.Period, cancellation, owned),
         WindowPriceRange range => FillBoundedWindow<PriceRangeKernel>(source, output, indicator, range.Period, cancellation, owned),
