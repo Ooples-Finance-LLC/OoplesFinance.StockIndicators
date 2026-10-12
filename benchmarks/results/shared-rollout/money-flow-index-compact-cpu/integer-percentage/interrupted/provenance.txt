@@ -1,0 +1,1 @@
+Final CPU/native timing interrupted after external contention appeared. Observed PID 29128: dotnet build src\AiDotNet.Tensors\AiDotNet.Tensors.csproj -v q -nologo. Iteration timings became unstable. Stopped only our verified benchmark PID 2268 (process exit -1). No external job was stopped. Partial log is diagnostic only; no catalog qualification or timing claim uses it.
