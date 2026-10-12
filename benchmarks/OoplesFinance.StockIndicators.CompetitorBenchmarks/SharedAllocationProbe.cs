@@ -48,7 +48,7 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
-        else if (operation == "TaLib.Functions.Mfi")
+        else if (operation is "TaLib.Functions.Mfi" or "Skender.GetMfi")
         {
             var fixture = new SharedMoneyFlowIndexBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;

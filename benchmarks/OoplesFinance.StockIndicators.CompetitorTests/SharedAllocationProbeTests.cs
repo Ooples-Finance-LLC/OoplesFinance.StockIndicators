@@ -51,6 +51,7 @@ public sealed class SharedAllocationProbeTests
     [InlineData("TaLib.Functions.Correl")]
     [InlineData("TaLib.Functions.Cci")]
     [InlineData("TaLib.Functions.Mfi")]
+    [InlineData("Skender.GetMfi")]
     [InlineData("TaLib.Functions.Rsi")]
     [InlineData("TaLib.Functions.Cmo")]
     [InlineData("TaLib.Functions.HtDcPeriod")]

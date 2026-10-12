@@ -53,6 +53,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['TaLib.Functions.Mfi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_skender_money_flow_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedMoneyFlowIndexBenchmarks.BuilderFull(Operation: "Skender.GetMfi", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetMfi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_endpoint_gpu_fixture_cpu_arms(self):
         self.write()
         path = self.qualification('SharedGpuEndpointBenchmarks.BuilderFull(Operation: "Epma", Count: 1000)')

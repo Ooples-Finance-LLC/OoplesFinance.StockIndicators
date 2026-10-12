@@ -16,14 +16,17 @@ public sealed class MoneyFlowSettingsCollection { }
 public sealed class MoneyFlowIndexComparisonTests
 {
     [Theory]
-    [InlineData(15)]
-    [InlineData(64)]
-    [InlineData(513)]
-    public void DirectFixtureRestoresGlobalSettings(int count)
+    [InlineData(15, "TaLib.Functions.Mfi")]
+    [InlineData(64, "TaLib.Functions.Mfi")]
+    [InlineData(513, "TaLib.Functions.Mfi")]
+    [InlineData(15, "Skender.GetMfi")]
+    [InlineData(64, "Skender.GetMfi")]
+    [InlineData(513, "Skender.GetMfi")]
+    public void DirectFixtureRestoresGlobalSettings(int count, string operation)
     {
         var old = TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Mfi);
         var oldDop = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
-        var fixture = new SharedMoneyFlowIndexBenchmarks { Count = count };
+        var fixture = new SharedMoneyFlowIndexBenchmarks { Count = count, Operation = operation };
         try
         {
             TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Mfi, 7);
