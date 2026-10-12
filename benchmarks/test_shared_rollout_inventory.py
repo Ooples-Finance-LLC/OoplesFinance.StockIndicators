@@ -35,6 +35,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         path.write_text(json.dumps({'Benchmarks': rows}))
         return path
 
+    def test_median_adaptive_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedMedianAdaptiveBenchmarks.BuilderFull(Operation: "QuanTAlib.Maaf", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Maaf'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_gpu_weighted_average_explicit_operation(self):
         self.write()
         path = self.qualification('SharedWeightedAverageBenchmarks.BuilderFull(Operation: "TaLib.Functions.Wma", Count: 1000)')
