@@ -44,7 +44,7 @@ public class SharedVortexBenchmarks
                 int end = (Count - Period) * (chunk + 1) / _chunks;
                 return _quotes[start..(end + Period)];
             }).ToArray();
-            var native = NativeValues([NativeSingle()]);
+            var native = NativeValues([(IEnumerable<VortexResult>)NativeSingle()]);
             Check(native, NativeValues(NativeParallel()));
             var expected = TrueRangeRatioComparison.VortexReference(_bars, Period, false);
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
@@ -78,7 +78,7 @@ public class SharedVortexBenchmarks
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 
     // Native eager results are retained directly; normalization is setup-only.
-    [Benchmark(Baseline = true)] public IEnumerable<VortexResult> NativeSingle() => _quotes.GetVortex(Period);
+    [Benchmark(Baseline = true)] public object NativeSingle() => _quotes.GetVortex(Period);
     [Benchmark] public IEnumerable<VortexResult>[] NativeParallel()
     {
         var results = new IEnumerable<VortexResult>[_chunks];
