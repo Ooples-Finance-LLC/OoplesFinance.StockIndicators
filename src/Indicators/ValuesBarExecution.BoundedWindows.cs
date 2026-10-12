@@ -936,6 +936,9 @@ internal static partial class ValuesBarExecution
     {
         if (typeof(T) == typeof(TriangularKernel) && period is >= 2 and <= 4096 && end - start + seed.Length >= 512)
             return ComputeTriangularColumn(source, output[0], owned, start, end, period, seed, tail, cancellation);
+        if ((typeof(T) == typeof(CorrelationKernel) || typeof(T) == typeof(PairStatisticsKernel))
+            && period <= 4096 && end - start + seed.Length is >= 512 and <= int.MaxValue / 2)
+            return ComputePairColumn(source, output, owned, start, end, period, seed, tail, cancellation, indicator);
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };
         var target = new BoundedOutput(output, start - seed.Length, start);
         var kernel = T.Create(period, end - start + seed.Length, indicator, in target);

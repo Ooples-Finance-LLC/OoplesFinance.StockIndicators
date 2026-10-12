@@ -372,31 +372,37 @@ internal sealed class PairStatisticsWindow(int period)
         if (_history.Count < period)
             return null;
         if (!_wide)
-        {
-            if (slot >= 2)
-                return ExactMeanAccumulator.ScaledRatio(slot == 2 ? _smallC : slot == 3 ? _smallA : _smallB,
-                    (long)period * period, 2 * _grid);
-            if (_smallA == 0 || _smallB == 0) return flatZero ? 0 : null;
-            if (_smallC == 0) return 0;
-            if (_smallA <= int.MaxValue && _smallB <= int.MaxValue && Math.Abs(_smallC) <= int.MaxValue && slot == 1)
-                return ExactMeanAccumulator.ScaledRatio(_smallC * _smallC, _smallA * _smallB, 0);
+            return ReadSmall(_smallA, _smallB, _smallC, period, _grid, slot, flatZero);
+        return ReadWide(_a, _b, _c, period, _grid, slot, flatZero);
+    }
+
+    internal static double? ReadSmall(long a, long b, long c, int period, int grid, int slot, bool flatZero)
+    {
+        if (slot >= 2)
+            return ExactMeanAccumulator.ScaledRatio(slot == 2 ? c : slot == 3 ? a : b,
+                (long)period * period, 2 * grid);
+        if (a == 0 || b == 0) return flatZero ? 0 : null;
+        if (c == 0) return 0;
+        if (a <= int.MaxValue && b <= int.MaxValue && Math.Abs(c) <= int.MaxValue && slot == 1)
+            return ExactMeanAccumulator.ScaledRatio(c * c, a * b, 0);
 #if !NETFRAMEWORK
-            if (slot == 0 && _smallA <= uint.MaxValue && _smallB <= uint.MaxValue && Math.Abs(_smallC) <= uint.MaxValue
-                && ExactPopulationDeviation.TryWideScaledRoot((ulong)Math.Abs(_smallC) * (ulong)Math.Abs(_smallC),
-                    (ulong)_smallA * (ulong)_smallB, 0, out var root)) return _smallC < 0 ? -root : root;
+        if (slot == 0 && a <= uint.MaxValue && b <= uint.MaxValue && Math.Abs(c) <= uint.MaxValue
+            && ExactPopulationDeviation.TryWideScaledRoot((ulong)Math.Abs(c) * (ulong)Math.Abs(c),
+                (ulong)a * (ulong)b, 0, out var root)) return c < 0 ? -root : root;
 #endif
-        }
-        var a = _wide ? _a : new BigInteger(_smallA);
-        var b = _wide ? _b : new BigInteger(_smallB);
-        var c = _wide ? _c : new BigInteger(_smallC);
+        return ReadWide(new BigInteger(a), new BigInteger(b), new BigInteger(c), period, grid, slot, flatZero);
+    }
+
+    private static double? ReadWide(BigInteger a, BigInteger b, BigInteger c, int period, int grid, int slot, bool flatZero)
+    {
         if (slot >= 2)
         {
-            var n = new BigInteger(_history.Count);
+            var n = new BigInteger(period);
             return ExactMeanAccumulator.ScaledRatio(
                 slot == 2 ? c
                     : slot == 3 ? a
                     : b,
-                n * n, 2 * _grid
+                n * n, 2 * grid
             );
         }
         if (a.IsZero || b.IsZero)

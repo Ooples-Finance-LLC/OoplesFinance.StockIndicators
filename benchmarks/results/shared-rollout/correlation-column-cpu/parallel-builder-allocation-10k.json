@@ -1,0 +1,39 @@
+{
+  "Operation": "TaLib.Functions.Correl",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        643416,
+        643416,
+        643416
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        162288,
+        162288,
+        163296
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        79904,
+        79904,
+        79904
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        80288,
+        80288,
+        80288
+      ]
+    }
+  ]
+}
