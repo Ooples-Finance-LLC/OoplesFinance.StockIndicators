@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
-            or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+            or WindowLinearRegression { Period: <= 32767 } or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
         || RelativeVolatilityWindow(indicator) > 0
@@ -671,6 +671,7 @@ internal static partial class ValuesBarExecution
         FixedPeriodWma average => FillBoundedWindow<WmaKernel>(source, output, indicator, average.Period, cancellation, owned),
         TriangularWindowAverage average => FillBoundedWindow<TriangularKernel>(source, output, indicator, average.Period, cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
+        WindowLinearRegression regression => FillBoundedWindow<RegressionKernel>(source, output, indicator, regression.Period, cancellation, owned),
         RollingPriceSum sum => FillBoundedWindow<SumKernel>(source, output, indicator, sum.Period, cancellation, owned),
         WindowAroon when AroonWindow(indicator) > 0 => FillBoundedWindow<AroonKernel>(source, output, indicator, AroonWindow(indicator), cancellation, owned),
         RollingPercentile { HasFractionalFullRank: true } percentile => FillBoundedWindow<PercentileKernel>(source, output, indicator, percentile.Period, cancellation, owned),
