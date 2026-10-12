@@ -15,6 +15,7 @@ public sealed class SharedRelativeVolatilityBenchmarkTests
     [InlineData(28)]
     [InlineData(65)]
     [InlineData(127)]
+    [InlineData(8193)]
     public void SetupChecksStartupAndBoundedNativeReplayAtUnevenWorkerBoundaries(int count)
     {
         int prior = CpuParallelSettings.MaxDegreeOfParallelism;
