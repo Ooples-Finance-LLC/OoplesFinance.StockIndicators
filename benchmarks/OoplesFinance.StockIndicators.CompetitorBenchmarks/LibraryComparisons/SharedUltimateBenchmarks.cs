@@ -76,9 +76,19 @@ public class SharedUltimateBenchmarks
     }
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new WindowUltimateOscillator(7, 14, Period, zeroRangeContribution: IsTa), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new WindowUltimateOscillator(7, 14, Period, zeroRangeContribution: IsTa), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+            .ConfigureIndicators(indicator).ConfigureHistory(history)
+            .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Required GPU Ultimate did not execute on the device.");
+        }
+        return run;
+    }
 
     [Benchmark(Baseline = true)]
     public object NativeSingle()

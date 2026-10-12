@@ -57,13 +57,7 @@ internal static partial class ValuesBarExecution
                 }
                 return region;
             }
-            // Every sum is bounded by M = max(1, 2*P*maxPrice). The complete
-            // weighted numerator is at most 700*M^3 and the denominator 7*M^3.
-            // If both fit 53 bits, integer recurrence and double division are
-            // exact until the final rounding. M <= 2^38 also bounds this proof.
-            UInt128 sumBound = (UInt128)(ulong)integerMaximum * (ulong)(2L * indicator.LongPeriod);
-            if (sumBound == 0) sumBound = 1; // Zero-range windows retain denominator one.
-            bool narrow = 700 * sumBound * sumBound * sumBound <= ((UInt128)1 << 53);
+            bool narrow = Core.UltimateRatioCertificate.FitsDouble(integerMaximum, indicator.LongPeriod);
             // A 16-byte interval replaces each consumed 48-byte Bar in the
             // same rental. Its write cannot reach the next unread raw bar.
             var intervals = System.Runtime.InteropServices.MemoryMarshal.Cast<Bar, UltimateIntegerPair>(captured.AsSpan(0, count));
@@ -148,7 +142,7 @@ internal static partial class ValuesBarExecution
         finally { System.Buffers.ArrayPool<Bar>.Shared.Return(captured); }
     }
 
-    private static void IncludeIntegerGrid(double value, ref int grid, ref double maximum)
+    internal static void IncludeIntegerGrid(double value, ref int grid, ref double maximum)
     {
         maximum = Math.Max(maximum, Math.Abs(value));
         var factor = ExactMeanAccumulator.DecomposeFinite(value);

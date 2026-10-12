@@ -62,7 +62,7 @@ internal sealed partial class TensorsGpuExecution
             Workspace work;
             if (retain)
             {
-                if (_workspace is not null && (_workspace.Count != source.Length || _workspace.IsPackedVortex))
+                if (_workspace is not null && (_workspace.Count != source.Length || _workspace.IsPackedBars))
                 {
                     _workspace.Dispose();
                     _workspace = null;
@@ -122,10 +122,10 @@ internal sealed partial class TensorsGpuExecution
         }
     }
 
-    private sealed class Workspace(OpenClContext context, int count, bool packedVortex = false) : IDisposable
+    private sealed class Workspace(OpenClContext context, int count, bool packedBars = false) : IDisposable
     {
         internal int Count => count;
-        internal bool IsPackedVortex => packedVortex;
+        internal bool IsPackedBars => packedBars;
         private double[]? _inputHost, _packedHost;
         internal double[] Input => _inputHost ??= GC.AllocateUninitializedArray<double>(count);
         internal double[] PackedHost => _packedHost ??= GC.AllocateUninitializedArray<double>(checked(3 * count));

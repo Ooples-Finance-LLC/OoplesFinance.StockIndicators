@@ -18,13 +18,13 @@ internal sealed partial class TensorsGpuExecution
             Workspace work;
             if (retain)
             {
-                if (_workspace is not null && (_workspace.Count != source.Length || !_workspace.IsPackedVortex))
+                if (_workspace is not null && (_workspace.Count != source.Length || !_workspace.IsPackedBars))
                 {
                     _workspace.Dispose(); _workspace = null;
                 }
-                work = _workspace ??= new Workspace(_context, source.Length, packedVortex: true);
+                work = _workspace ??= new Workspace(_context, source.Length, packedBars: true);
             }
-            else work = new Workspace(_context, source.Length, packedVortex: true);
+            else work = new Workspace(_context, source.Length, packedBars: true);
             try
             {
                 int count = source.Length;
