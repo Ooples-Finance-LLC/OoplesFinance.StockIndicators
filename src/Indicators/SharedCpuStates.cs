@@ -156,6 +156,7 @@ internal static class SharedCpuStates
         typeof(ShortBodyCandle),
         typeof(ShortLineCandle),
         typeof(SineWeightedAverage),
+        typeof(SingleStochasticCycle),
         typeof(SmoothedAccumulationOscillator),
         typeof(SmoothedStochasticRsi),
         typeof(SpinningTopCandle),

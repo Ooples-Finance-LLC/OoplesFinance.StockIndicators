@@ -45,50 +45,9 @@ public sealed class KlingerVolumeWithSignal : MultiOutputIndicatorBase, IVolumeI
                 _ => value.Signal.HasValue ? 1d : 0
             }).ToArray(), IndicatorErrorBudget.Exact));
 
-    // Preserve binary64 significands above its exponent range. Scaling only occurs
-    // after overflow; the first finite quotient is normal, so restoration adds no rounding.
-    private static JurikDyadic RoundedRatio(JurikDyadic numerator, JurikDyadic denominator)
-    {
-        int shift = 0;
-        while (true)
-        {
-            double value = numerator.Ratio(denominator);
-            if (FrameworkCompatibility.IsFinite(value))
-            {
-                var result = JurikDyadic.FromDouble(value);
-                result.ScaleByPowerOfTwo(shift); return result;
-            }
-            numerator.ScaleByPowerOfTwo(-32); shift += 32;
-        }
-    }
-
-    private sealed class Average(int period)
-    {
-        private int _count;
-        private JurikDyadic _sum, _value;
-        internal void Reset() { _count = 0; _sum = _value = default; }
-        internal bool Add(JurikDyadic input, out JurikDyadic value)
-        {
-            if (_count < period)
-            {
-                _sum.AddExact(input); _count++;
-                if (_count < period) { value = default; return false; }
-                _value = RoundedRatio(_sum, JurikDyadic.FromDouble(period));
-                _sum = default;
-            }
-            else
-            {
-                var next = _value; next.Multiply(period - 1);
-                input.Multiply(2); next.AddExact(input);
-                _value = RoundedRatio(next, JurikDyadic.FromDouble((long)period + 1));
-            }
-            value = _value; return true;
-        }
-    }
-
     internal sealed class State(int fastPeriod, int slowPeriod, int signalPeriod) : IMultiOutputState
     {
-        private readonly Average _fast = new(fastPeriod), _slow = new(slowPeriod), _signal = new(signalPeriod);
+        private readonly SeededDyadicEma.State _fast = new(fastPeriod), _slow = new(slowPeriod), _signal = new(signalPeriod);
         private JurikDyadic _previousBasis, _previousRange, _cumulative, _force;
         private int _seen, _direction;
         public void Reset()
@@ -126,7 +85,7 @@ public sealed class KlingerVolumeWithSignal : MultiOutputIndicatorBase, IVolumeI
                     var denominator = _cumulative;
                     if (denominator.Sign < 0) denominator.Multiply(-1);
                     residual.Multiply(volume); residual.Multiply(200 * direction);
-                    _force = RoundedRatio(residual, denominator);
+                    _force = SeededDyadicEma.RoundedRatio(residual, denominator);
                 }
                 // A zero cumulative range otherwise retains the preceding force.
                 bool fastReady = _fast.Add(_force, out var fast);
