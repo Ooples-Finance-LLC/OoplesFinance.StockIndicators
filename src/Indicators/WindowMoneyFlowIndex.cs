@@ -50,7 +50,11 @@ public sealed class WindowMoneyFlowIndex
 
     /// <inheritdoc/>
     protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period, MinimumTotalOne, SuppressedBars);
+#else
         new State(Period, MinimumTotalOne, SuppressedBars);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -72,6 +76,63 @@ public sealed class WindowMoneyFlowIndex
                 )
             );
 
+#if !NETFRAMEWORK
+    internal sealed class CompactState(int period, bool minimumTotalOne, int suppressed, int count = 0) : IMultiOutputState
+    {
+        private readonly Queue<(JurikDyadic Value, int Direction)> _flows = new(Math.Min(period, Math.Max(0, count - 1)));
+        private JurikDyadic _positive, _negative;
+        private double _previous;
+        private bool _started;
+        private long _changes;
+
+        public void Reset()
+        {
+            _flows.Clear(); _positive = _negative = default;
+            _previous = 0; _started = false; _changes = 0;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            var mean = new ExactMeanAccumulator();
+            mean.Add(bar.High); mean.Add(bar.Low); mean.Add(bar.Close);
+            double typical = mean.Mean(3);
+            if (!_started) { _previous = typical; _started = true; return; }
+            int direction = typical.CompareTo(_previous);
+            _previous = typical;
+            var flow = JurikDyadic.FromDouble(typical);
+            flow.Multiply(bar.Volume);
+            if (_flows.Count == period)
+            {
+                var old = _flows.Dequeue();
+                if (old.Direction > 0) _positive.Subtract(old.Value);
+                else if (old.Direction < 0) _negative.Subtract(old.Value);
+            }
+            _flows.Enqueue((direction == 0 ? default : flow, direction));
+            if (direction > 0) _positive.AddExact(flow);
+            else if (direction < 0) _negative.AddExact(flow);
+            if (_changes < (long)period + suppressed) _changes++;
+            if (_changes < (long)period + suppressed) return;
+            var total = _positive;
+            total.AddExact(_negative);
+            output[1] = 1;
+            if (minimumTotalOne)
+            {
+                var threshold = total;
+                threshold.Add(-1);
+                if (threshold.Sign < 0) return;
+            }
+            else if (_negative.Sign == 0) { output[0] = 100; return; }
+            if (total.Sign == 0) { output[0] = double.NegativeInfinity; return; }
+            // The exact-integer contract canonicalizes an exactly zero numerator,
+            // including when signed volume makes the denominator negative.
+            if (_positive.Sign == 0) return;
+            var numerator = _positive;
+            numerator.Multiply(100);
+            output[0] = numerator.Ratio(total);
+        }
+    }
+#else
     private sealed class State(int period, bool minimumTotalOne, int suppressed) : IMultiOutputState
     {
         private readonly Queue<(BigInteger Positive, BigInteger Negative)> _flows = new();
@@ -137,4 +198,5 @@ public sealed class WindowMoneyFlowIndex
                 );
         }
     }
+#endif
 }
