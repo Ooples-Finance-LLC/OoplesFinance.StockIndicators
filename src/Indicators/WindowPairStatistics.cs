@@ -67,7 +67,7 @@ public sealed class WindowCorrelation : MultiOutputIndicatorBase, IIndicatorVali
                 )
             );
 
-    private sealed class State(
+    internal sealed class State(
         int period,
         CandlePriceField left,
         CandlePriceField right,
@@ -175,7 +175,7 @@ public sealed class WindowPairStatistics : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
-    private sealed class State(int period, CandlePriceField left, CandlePriceField right)
+    internal sealed class State(int period, CandlePriceField left, CandlePriceField right)
         : IMultiOutputState
     {
         private readonly PairStatisticsWindow _window = new(period);

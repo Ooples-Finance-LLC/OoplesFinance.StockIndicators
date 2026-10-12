@@ -48,6 +48,7 @@ public sealed class SharedAllocationProbeTests
     [InlineData("QuanTAlib.Tema")]
     [InlineData("QuanTAlib.Qema")]
     [InlineData("TaLib.Functions.Beta")]
+    [InlineData("TaLib.Functions.Correl")]
     [InlineData("TaLib.Functions.Rsi")]
     [InlineData("TaLib.Functions.Cmo")]
     [InlineData("TaLib.Functions.HtDcPeriod")]
