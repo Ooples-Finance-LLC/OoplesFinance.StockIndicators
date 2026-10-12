@@ -1,0 +1,16 @@
+{
+  "productionRevision": "764993f1",
+  "fixtureRevision": "accompanying commit",
+  "date": "2026-10-12",
+  "period": 20,
+  "count": 1000,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "device": "AMD gfx1012:xnack- OpenCL",
+  "verification": "Benchmark build succeeded; 42 comparison/probe tests and 69 inventory tests passed. Both real-device probes check exact values and presence in both histories and require GPU backend.",
+  "limits": [
+    "All managed threads counted; prepared input and post-sample disposal excluded; results retained through sample.",
+    "Cached device/workspace memory excluded. Allocation evidence only; GPU latency unmeasured and qualification unchanged at 183/401.",
+    "All samples retained, including Efficiency CPU Full and native parallel variation."
+  ]
+}

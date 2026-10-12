@@ -116,8 +116,18 @@ public class SharedPathRatioBenchmarks
         });
         return rows;
     }
-    private WindowPathRatio Create() => new(Period, Absolute ? PathRatioConvention.AbsoluteFraction : PathRatioConvention.SignedPercent);
-    private IIndicatorRun Build(WindowPathRatio indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    internal WindowPathRatio Create() => new(Period, Absolute ? PathRatioConvention.AbsoluteFraction : PathRatioConvention.SignedPercent);
+    internal IIndicatorRun Build(WindowPathRatio indicator, IndicatorHistoryMode history, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+            .ConfigureIndicators(indicator).ConfigureHistory(history)
+            .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Required GPU path ratio did not execute on the device.");
+        }
+        return run;
+    }
 }
