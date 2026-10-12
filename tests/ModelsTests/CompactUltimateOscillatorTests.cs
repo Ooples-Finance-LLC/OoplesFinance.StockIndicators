@@ -22,6 +22,34 @@ public sealed class CompactUltimateOscillatorTests
         }
     }
 
+    [Fact]
+    public void DirectIntegerPublisherMatchesExactRatiosAcrossFullSignedRange()
+    {
+        Int128[] boundaries = [0, 1, -1, Int128.MinValue, Int128.MaxValue,
+            ((Int128)1 << 53) - 1, (Int128)1 << 53, ((Int128)1 << 53) + 1,
+            ((Int128)1 << 120) + 1, -(((Int128)1 << 120) + 1),
+            (Int128)3 << 100, -((Int128)7 << 90)];
+        foreach (var numerator in boundaries)
+        foreach (var denominator in boundaries) Check(numerator, denominator);
+        var random = new Random(97231);
+        for (int i = 0; i < 2000; i++)
+        {
+            Int128 numerator = ((Int128)random.NextInt64() << 64) | random.NextInt64();
+            Int128 denominator = ((Int128)random.NextInt64() << 64) | random.NextInt64();
+            if ((i & 1) != 0) numerator = -numerator;
+            if ((i & 2) != 0) denominator = -denominator;
+            Check(numerator, denominator);
+            Check(numerator >> (i % 127), denominator >> ((i * 17) % 127));
+        }
+        static void Check(Int128 numerator, Int128 denominator)
+        {
+            var top = new ExactMeanAccumulator(); top.Add(1, (BigInteger)numerator);
+            var bottom = new ExactMeanAccumulator(); bottom.Add(1, (BigInteger)denominator);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(top.Ratio(bottom)),
+                BitConverter.DoubleToInt64Bits(JurikDyadic.IntegerRatio(numerator, denominator)));
+        }
+    }
+
     [Theory]
     [InlineData(1, 2, 3, false)] [InlineData(7, 14, 28, false)]
     [InlineData(1, 1, 1, true)] [InlineData(4, 2, 4, true)]
