@@ -121,8 +121,8 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
     private sealed class Calculator(int period, PathRatioConvention convention)
     {
         private readonly Queue<double?> _prices = new();
-        private readonly Queue<ExactMeanAccumulator> _steps = new();
-        private ExactMeanAccumulator _path;
+        private readonly Queue<JurikDyadic> _steps = new();
+        private JurikDyadic _path;
         private double? _previous;
 
         internal void Reset()
@@ -135,11 +135,11 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
 
         internal double? Next(double? value)
         {
-            var step = new ExactMeanAccumulator();
+            var step = new JurikDyadic();
             if (value.HasValue && _previous.HasValue)
             {
                 step.Add(Math.Max(value.Value, _previous.Value));
-                step.Add(Math.Min(value.Value, _previous.Value), -1);
+                step.Subtract(JurikDyadic.FromDouble(Math.Min(value.Value, _previous.Value)));
             }
             if (_steps.Count == period)
                 _path.Subtract(_steps.Dequeue());
@@ -149,12 +149,11 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
             var mature = _prices.Count == period;
             var first = mature ? _prices.Dequeue() : null;
             _prices.Enqueue(value);
-            if (!mature || !value.HasValue || !first.HasValue || _path.IsExactlyZero)
+            if (!mature || !value.HasValue || !first.HasValue || _path.Sign == 0)
                 return null;
-            var numerator = new ExactMeanAccumulator();
-            var scale = convention == PathRatioConvention.SignedPercent ? 100 : 1;
-            numerator.Add(value.Value, scale);
-            numerator.Add(first.Value, -scale);
+            var numerator = JurikDyadic.FromDouble(value.Value);
+            numerator.Subtract(JurikDyadic.FromDouble(first.Value));
+            if (convention == PathRatioConvention.SignedPercent) numerator.Multiply(100);
             var ratio = numerator.Ratio(_path);
             return convention == PathRatioConvention.AbsoluteFraction ? Math.Abs(ratio) : ratio;
         }

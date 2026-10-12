@@ -1,0 +1,12 @@
+{
+  "revision": "a6ed67b6",
+  "productionRevision": "4b244e81",
+  "date": "2026-10-12",
+  "qualification": "excluded",
+  "reason": "Another AiDotNet.Tensors net471 Release build was active at completion; no continuous contention trace, so overlap cannot be ruled out.",
+  "preflight": "CPU 15%; preceding process snapshot showed only dotnet --version and reusable MSBuild nodes.",
+  "completion": "CPU 36%; dotnet build tests/AiDotNet.Tensors.Tests -f net471 -c Release active (PID 29840).",
+  "requestedWarmups": 10,
+  "requestedIterations": 10,
+  "interpretation": "Diagnostic only. No native speed win or qualification increase is established."
+}
