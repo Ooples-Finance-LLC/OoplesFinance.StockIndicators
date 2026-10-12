@@ -66,14 +66,16 @@ public sealed class WindowFisherTransform : MultiOutputIndicatorBase, IIndicator
 
     private sealed class State(int period, bool midpoint) : IMultiOutputState
     {
-        private readonly Queue<double> _prices = new();
+        private readonly WindowExtremeDeque _minimum = new(period, false);
+        private readonly WindowExtremeDeque _maximum = new(period, true);
         private double _position,
             _fisher;
         private bool _started;
 
         public void Reset()
         {
-            _prices.Clear();
+            _minimum.Reset();
+            _maximum.Reset();
             _position = _fisher = 0;
             _started = false;
         }
@@ -82,30 +84,27 @@ public sealed class WindowFisherTransform : MultiOutputIndicatorBase, IIndicator
         {
             output.Clear();
             output[2] = 1;
-            var price = midpoint
-                ? ExactMeanAccumulator.UnitRatio(
-                    ExactVarianceWindow.Units(bar.High) + ExactVarianceWindow.Units(bar.Low),
-                    2
-                )
-                : bar.Close;
-            if (_prices.Count == period)
-                _prices.Dequeue();
-            _prices.Enqueue(price);
+            var price = bar.Close;
+            if (midpoint)
+            {
+                var sum = JurikDyadic.FromDouble(bar.High);
+                sum.Add(bar.Low);
+                price = sum.Mean(2);
+            }
+            _minimum.Add(price);
+            _maximum.Add(price);
             if (!_started)
             {
                 _started = true;
                 return;
             }
-            var low = _prices.Min();
-            var high = _prices.Max();
-            var range = ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low);
-            var ratio = range.IsZero
-                ? 0
-                : ExactMeanAccumulator.UnitRatio(
-                    (ExactVarianceWindow.Units(price) - ExactVarianceWindow.Units(low)) << 1074,
-                    range
-                );
-            _position = range.IsZero ? 0 : .33 * 2 * (ratio - .5) + .67 * _position;
+            var low = JurikDyadic.FromDouble(_minimum.Value);
+            var range = JurikDyadic.FromDouble(_maximum.Value);
+            range.Subtract(low);
+            var difference = JurikDyadic.FromDouble(price);
+            difference.Subtract(low);
+            var ratio = range.Sign == 0 ? 0 : difference.Ratio(range);
+            _position = range.Sign == 0 ? 0 : .33 * 2 * (ratio - .5) + .67 * _position;
             if (_position > .99)
                 _position = .999;
             if (_position < -.99)
