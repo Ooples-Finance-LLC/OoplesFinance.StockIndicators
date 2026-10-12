@@ -23,6 +23,7 @@ internal sealed partial class TensorsGpuExecution
             Wma weighted => Math.Max(1, weighted.Length),
             FixedPeriodWma weighted => weighted.Period,
             TriangularWindowAverage weighted => weighted.Period,
+            EndpointWeightedAverage weighted => weighted.Period,
             _ => 0
         };
         var midpoint = indicator as WindowRangeMidpoint;
@@ -77,12 +78,17 @@ internal sealed partial class TensorsGpuExecution
                 var lowColumn = trueRange ? work.LowInput : null;
                 double[]? presence = null;
                 Bar latest = default;
-                // Weighted totals never exceed P(P+1)/2 times the price bound.
-                // Keep that weight within the existing certificate's Int32 domain.
+                // Positive weighted totals are bounded by P(P+1)/2. Endpoint
+                // coefficients can be negative; 2P^2 also bounds the intermediate
+                // shifted window before eviction. Keep the bound in Int32.
+                bool endpoint = indicator is EndpointWeightedAverage;
+                int certifiedLimit = endpoint ? 32767 : 65535;
                 int certifiedTerms = weightedPeriod == 0 ? rollingSum?.Period ?? 1
-                    : weightedPeriod <= 65535 ? (int)((long)weightedPeriod * (weightedPeriod + 1) / 2) : int.MaxValue;
+                    : weightedPeriod > certifiedLimit ? int.MaxValue
+                    : endpoint ? (int)(2L * weightedPeriod * weightedPeriod)
+                    : (int)((long)weightedPeriod * (weightedPeriod + 1) / 2);
                 var sumProof = new Core.SmaCpuKernel.Certificate(certifiedTerms);
-                bool sumCertified = weightedPeriod <= 65535;
+                bool sumCertified = weightedPeriod <= certifiedLimit;
                 var medianProof = new Core.SmaCpuKernel.Certificate(Math.Max(1, (median?.Period ?? 1) - 1));
                 bool medianCertified = true;
                 var percentileProof = new Core.SmaCpuKernel.Certificate(4);
@@ -139,7 +145,9 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
                 kernel.SetArg(4, weightedPeriod > 0 ? weightedPeriod : rollingSum?.Period ?? lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
-                if (weightedPeriod > 0) kernel.SetArg(5, indicator is TriangularWindowAverage ? 2 : indicator is FixedPeriodWma ? 1 : 0);
+                if (weightedPeriod > 0) kernel.SetArg(5, indicator is EndpointWeightedAverage endAverage
+                    ? endAverage.AverageDuringWarmup ? 4 : 3
+                    : indicator is TriangularWindowAverage ? 2 : indicator is FixedPeriodWma ? 1 : 0);
                 if (median is not null)
                 {
                     kernel.SetArg(5, median.AverageDuringWarmup ? 1 : 0);

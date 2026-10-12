@@ -3493,3 +3493,14 @@ At 1,000 bars, the allocation-only probe used ten warmups and three samples per 
 | Native parallel (tuple prefixes) | 2,466,832 |
 
 LatestOnly allocates **96.16% less than native serial**. Counts include all managed threads and retained results, excluding setup/disposal. Parsed/raw evidence and source hashes are in `results/shared-rollout/schaff-cycle-cpu/compact-state-allocation-1k*`. Other repository tests were active and CPU was 87% at inspection, so no timing campaign was started. This does not establish a latency or GPU win; timing qualification remains 181/401.
+
+
+### Certified endpoint-weighted GPU execution
+
+`EndpointWeightedAverage` now executes through the published AiDotNet.Tensors 0.134.4 OpenCL runtime, reusing the existing weighted-average kernel, cached program and bounded workspace. This covers the `QuanTAlib.Epma` and `QuanTAlib.Mma` mappings, including fixed-weight and available-mean startup. Each device work item handles 64 outputs, seeds its preceding window, then maintains sum and signed weighted sum without a host-computed output series. Auto remains CPU; explicit GPU requests execute on-device or reject.
+
+Newest-first coefficients are `2P-1-3*lag`. After publication, subtracting three times the window sum shifts all weights; evicting the oldest coefficient then adds `(P+1)*expired`. Every numerator/intermediate is bounded by `2P^2` times the certified input bound (period one is identity). This stricter certificate replaces the positive-weight triangular mass for endpoint requests only. Periods above 32,767 reject because the certificate's term count must fit Int32. Off-grid/wide inputs reject rather than silently using CPU; complete finite-input validation still precedes certificate rejection. The final quotient rounds once.
+
+The net10.0 Release production build passed with zero warnings/errors. The focused unit command filtered `TensorsEndpointWeightedGpuExecutionTests|TensorsWeightedAverageGpuExecutionTests|TensorsTriangularGpuExecutionTests|TensorsRollingSumGpuExecutionTests`; **39 cases passed, zero skipped** on the available GPU. Coverage includes both history modes, both startup conventions, periods1/2/3/20/65/4096/32767, 64-output block boundaries, signed zeros, period-one subnormal identity, exact CPU bit comparisons, invalid-input precedence, unsupported periods/inputs, cancellation, recovery and retained owned bars after disposal. Existing WMA/triangular/sum kernels passed shared-dispatch regressions. Test builds retain preexisting framework/analyzer warnings.
+
+No latency or allocation benchmark was run for the new GPU path while other repositories' test jobs were active. Device execution is verified, but comparison against the best native CPU path, other devices and graph fusion remain pending. Timing qualification remains 181/401 and the full rollout is incomplete.
