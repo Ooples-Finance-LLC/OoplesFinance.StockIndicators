@@ -102,4 +102,38 @@ public sealed class CompactRatioArithmeticTests
         Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
         Assert.Equal(1d, value);
     }
+
+    [Fact]
+    public void CertifiedDivisionMatchesIndependentRationalsAndExactMidpointTies()
+    {
+        var random = new Random(91473);
+        int accepted = 0;
+        for (int i = 0; i < 4000; i++)
+        {
+            UInt128 Number() => ((UInt128)(ulong)random.NextInt64() << 64) | (ulong)random.NextInt64() | 1;
+            UInt128 top = (Number() >> random.Next(0, 127)) | 1;
+            UInt128 bottom = (Number() >> random.Next(0, 127)) | 1;
+            int scale = random.Next(-1100, 1100);
+            if (!CertifiedCompactRatio.TryDivide(top, bottom, scale, out double actual)) continue;
+            accepted++;
+            var expected = new ReferenceFraction((BigInteger)top) / new ReferenceFraction((BigInteger)bottom);
+            var factor = new ReferenceFraction(BigInteger.One << Math.Abs(scale));
+            expected = scale >= 0 ? expected * factor : expected / factor;
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected.ToDouble()), BitConverter.DoubleToInt64Bits(actual));
+        }
+        Assert.True(accepted > 2000);
+        UInt128 common = ((UInt128)1 << 70) + 3;
+        foreach (int delta in new[] { -1, 0, 1, 2, 3 })
+        {
+            UInt128 top = (UInt128)((1L << 54) + delta) * common;
+            UInt128 bottom = ((UInt128)1 << 54) * common;
+            Assert.True(CertifiedCompactRatio.TryDivide(top, bottom, 0, out double actual));
+            var expected = (new ReferenceFraction((BigInteger)top) / new ReferenceFraction((BigInteger)bottom)).ToDouble();
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+        }
+        Assert.False(CertifiedCompactRatio.TryDivide(1, 1, -1074, out _));
+        Assert.False(CertifiedCompactRatio.TryDivide(1, 1, 1024, out _));
+        Assert.False(CertifiedCompactRatio.TryDivide(0, 1, 0, out _));
+        Assert.False(CertifiedCompactRatio.TryDivide(1, 0, 0, out _));
+    }
 }
