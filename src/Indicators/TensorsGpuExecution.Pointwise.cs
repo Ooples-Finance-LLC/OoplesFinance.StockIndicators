@@ -19,12 +19,14 @@ internal sealed partial class TensorsGpuExecution
         var lagged = indicator as LaggedPriceChange;
         var rollingSum = indicator as RollingPriceSum;
         var affine = indicator as NormalizedConvolution;
+        var regression = indicator as WindowLinearRegression;
         int weightedPeriod = indicator switch
         {
             Wma weighted => Math.Max(1, weighted.Length),
             FixedPeriodWma weighted => weighted.Period,
             TriangularWindowAverage weighted => weighted.Period,
             EndpointWeightedAverage weighted => weighted.Period,
+            WindowLinearRegression { Output: not WindowRegressionOutput.Angle } fit => fit.Period,
             NormalizedConvolution { HasAffineKernel: true } convolution => convolution.Kernel.Count,
             _ => 0
         };
@@ -80,10 +82,10 @@ internal sealed partial class TensorsGpuExecution
                 var lowColumn = trueRange ? work.LowInput : null;
                 double[]? presence = null;
                 Bar latest = default;
-                // Positive weighted totals are bounded by P(P+1)/2. Endpoint
-                // coefficients can be negative; 2P^2 also bounds the intermediate
-                // shifted window before eviction. Keep the bound in Int32.
-                bool endpoint = indicator is EndpointWeightedAverage;
+                // Positive weighted totals are bounded by P(P+1)/2. Signed endpoint
+                // and regression products/totals fit 2P^2, including the shifted
+                // lag sum before eviction. Keep the certificate bound in Int32.
+                bool endpoint = indicator is EndpointWeightedAverage || regression is not null;
                 int certifiedLimit = endpoint ? 32767 : 65535;
                 int affineTerms = affine is null ? 0 : AffineGpuTerms(affine);
                 int certifiedTerms = affine is not null ? Math.Max(1, affineTerms)
@@ -151,7 +153,8 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(4, weightedPeriod > 0 ? weightedPeriod : rollingSum?.Period ?? lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
                 if (weightedPeriod > 0)
                 {
-                    kernel.SetArg(5, affine is not null ? 5 : indicator is EndpointWeightedAverage endAverage
+                    kernel.SetArg(5, regression is not null ? 6 + (int)regression.Output
+                        : affine is not null ? 5 : indicator is EndpointWeightedAverage endAverage
                         ? endAverage.AverageDuringWarmup ? 4 : 3
                         : indicator is TriangularWindowAverage ? 2 : indicator is FixedPeriodWma ? 1 : 0);
                     kernel.SetArg(6, affine?.AffineFirstWeight ?? (indicator is EndpointWeightedAverage ? 2 * weightedPeriod - 1 : 0));

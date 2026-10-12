@@ -18,8 +18,47 @@ internal sealed partial class TensorsGpuExecution
                 size_t end = min(start + (size_t)64, (size_t)count);
                 if (period == 1) {
                     for (size_t i = start; i < end; i++)
-                        output[i] = normalize_available == 5 && first_weight == 0 ? 0.0
+                        output[i] = normalize_available == 8 || normalize_available == 5 && first_weight == 0 ? 0.0
                             : input[i] == 0.0 ? 0.0 : input[i];
+                    return;
+                }
+                if (normalize_available >= 6) {
+                    // Exact centered regression from S=sum(y), L=sum(lag*y),
+                    // where newest lag is zero. All products and totals are
+                    // certified on the same binary grid under 2*P*P terms.
+                    double sum = 0.0, lagged = 0.0;
+                    size_t first = start >= (size_t)(period - 1) ? start - (size_t)(period - 1) : 0;
+                    for (size_t j = first; j < start; j++) {
+                        sum += input[j];
+                        lagged += input[j] * (double)(start - j);
+                    }
+                    for (size_t i = start; i < end; i++) {
+                        sum += input[i];
+                        double n = (double)min(i + 1, (size_t)period);
+                        if (n == 1.0) output[i] = normalize_available == 8 || sum == 0.0 ? 0.0 : sum;
+                        else {
+                            double numerator, denominator;
+                            if (normalize_available == 8) {
+                                numerator = (n - 1.0) * sum - 2.0 * lagged;
+                                // P <= 32767 makes n*(n*n-1) an exactly
+                                // representable integer; it is divisible by six.
+                                denominator = n * (n * n - 1.0) / 6.0;
+                            } else if (normalize_available == 9) {
+                                numerator = (2.0 - n) * sum + 3.0 * lagged;
+                                denominator = n * (n + 1.0) / 2.0;
+                            } else {
+                                numerator = (2.0 * n - (normalize_available == 7 ? 2.0 : 1.0)) * sum - 3.0 * lagged;
+                                denominator = n * (n + (normalize_available == 7 ? -1.0 : 1.0)) / 2.0;
+                            }
+                            output[i] = numerator == 0.0 ? 0.0 : numerator / denominator;
+                        }
+                        lagged += sum;
+                        if (i >= (size_t)(period - 1)) {
+                            double expired = input[i - (size_t)(period - 1)];
+                            lagged -= expired * period;
+                            sum -= expired;
+                        }
+                    }
                     return;
                 }
                 if (normalize_available >= 3) {
