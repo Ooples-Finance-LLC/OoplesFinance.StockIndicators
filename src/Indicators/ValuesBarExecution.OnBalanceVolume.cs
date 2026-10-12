@@ -7,7 +7,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static Bar FillOnBalanceVolume(Bar[] source, double[][] output, SeededOnBalanceVolume indicator,
-        CancellationToken cancellation, OwnedBarBuffer? owned)
+        CancellationToken cancellation, OwnedBarBuffer? owned, out bool finiteByConstruction)
     {
         var contributions = output[0];
         var summary = new Core.SmaCpuKernel.GridSummary();
@@ -24,13 +24,16 @@ internal static partial class ValuesBarExecution
             previous = latest.Close;
             contributions[i] = contribution;
             summary.Include(contribution);
-            output[1][i] = 0;
-            output[2][i] = 0;
         }
+        // Node owns zero-initialized average/presence columns. Leave warmup and
+        // disabled-average slots untouched instead of clearing them again.
         // The full-count certificate bounds every signed prefix. All input has
         // been validated and captured before replacing contributions with sums.
-        // Generic slot-major publication retains overflow validation afterward.
-        if (source.Length != 0 && summary.Certifies(source.Length))
+        // A certified prefix is finite; its average is a convex mean of finite
+        // published values even when the average needs the exact accumulator.
+        // Uncertified prefixes retain generic slot-major overflow validation.
+        finiteByConstruction = source.Length != 0 && summary.Certifies(source.Length);
+        if (finiteByConstruction)
         {
             double total = 0;
             for (int i = 0; i < contributions.Length; i++)
