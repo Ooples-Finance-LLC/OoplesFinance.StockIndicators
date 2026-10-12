@@ -282,9 +282,9 @@ internal static partial class ValuesBarExecution
             new(new(period, count, indicator is FixedPeriodWma));
         public double Update(in Bar bar) => state.Update(in bar);
     }
-    private readonly struct TriangularKernel(TriangularWindowAverage.State state) : IBoundedKernel<TriangularKernel>
+    private struct TriangularKernel(TriangularValueState state) : IBoundedKernel<TriangularKernel>
     {
-        public static TriangularKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period));
+        public static TriangularKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => new(new(period, count));
         public double Update(in Bar bar) => state.Update(in bar);
     }
     private readonly struct WilliamsKernel(WilliamsValueState state) : IBoundedKernel<WilliamsKernel>

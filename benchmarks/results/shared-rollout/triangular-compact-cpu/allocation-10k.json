@@ -1,0 +1,80 @@
+[OpenClBackend] Creating DirectOpenClContext for device 0...
+[OpenClBackend] Context created: Device=gfx1012:xnack-, Vendor=Advanced Micro Devices, Inc.
+[OpenClBackend] GPU Capabilities:
+[OpenClBackend]   Compute Units: 11
+[OpenClBackend]   Max Work Group Size: 256
+[OpenClBackend]   Max Work Item Sizes: [1024, 1024, 1024]
+[OpenClBackend]   Local Memory: 64 KB
+[OpenClBackend]   Supports FP16: True
+[OpenClBackend]   Supports Subgroups: True
+[OpenClBackend] Default command queue wrapper initialized.
+[OpenClBackend] Compiling kernels...
+[OpenClBackend] Compiling GEMM kernels...
+[OpenClBackend] GEMM kernels: loaded from cache
+[OpenClBackend] GEMM kernels: gemm_double_buffered, gemm_low_register, gemm_tiled_simple, gemm_small, gemm_vectorized, gemm_batched_persistent, gemm_small_tile, gemm_medium_tile, gemm_coalesced, gemm_vectorized_tile, gemm_kreg4, gemm_prefetch, gemm_wide_vec, gemm_clblast_rdna1
+[OpenClBackend] Quant dequant-GEMM kernels: loaded from cache
+[OpenClBackend] Quant GEMM kernels: dequant_gemm_int8, dequant_gemm_int4, dequant_gemm_fp8_e4m3
+[OpenClBackend] Paged attention kernels: loaded from cache
+[OpenClBackend] Paged attention kernels: paged_attention_decode, paged_attention_prefill, paged_attention_decode_gqa, paged_attention_prefill_gqa
+[OpenClBackend] Flash decode kernels: loaded from cache
+[OpenClBackend] Flash decode kernels: flash_decode_partial, flash_decode_reduce
+[OpenClBackend] Activation kernels: loaded from cache
+[OpenClBackend] Fused kernels: loaded from cache
+[OpenClBackend] DotProduct kernels: loaded from cache
+[OpenClBackend] Reduction kernels: loaded from cache
+[OpenClBackend] Packing kernels: loaded from cache
+[OpenClBackend] Sparse GEMM kernels: loaded from cache
+[OpenClBackend] CSR sparse kernels: loaded from cache
+[OpenClBackend] Convolution kernels: loaded from cache
+[OpenClBackend] Fused convolution kernels: loaded from cache
+[OpenClBackend] Pooling kernels: loaded from cache
+[OpenClBackend] Normalization kernels: loaded from cache
+[OpenClBackend] Neural network kernels: loaded from cache
+[OpenClBackend] Optimizer kernels: loaded from cache
+[OpenClBackend] Mixed precision kernels: loaded from cache
+[OpenClBackend] Mixed precision kernels compiled: 5 kernels
+[OpenClBackend] Attention kernels: loaded from cache
+[OpenClBackend] FFT kernels: loaded from cache
+[OpenClBackend] Spectral perf kernels: loaded from cache
+[OpenClBackend] Spatial transformer kernels: loaded from cache
+[OpenClBackend] Spatial transformer kernels compiled: 4 kernels
+[OpenClBackend] Locally connected kernels: loaded from cache
+[OpenClBackend] Deformable conv kernels: loaded from cache
+[OpenClBackend] Random number kernels: loaded from cache
+[OpenClBackend] Categorical sampling kernels: loaded from cache
+[OpenClBackend] Specialized kernels: loaded from cache
+[OpenClBackend] FP16 conversion kernels: loaded from cache
+[OpenClBackend] Loss function kernels: loaded from cache
+[OpenClBackend] LSTM sequence kernels: loaded from cache
+[OpenClBackend] GLA scan kernels: loaded from cache
+[OpenClBackend] xLSTM scan kernels: loaded from cache
+[OpenClBackend] Gated DeltaNet scan kernels: loaded from cache
+[OpenClBackend] RG-LRU scan kernels: loaded from cache
+[OpenClBackend] RWKV-4 WKV scan kernels: loaded from cache
+[OpenClBackend] Mamba selective scan kernels: loaded from cache
+[OpenClBackend] Mamba-2 SSD scan kernels: loaded from cache
+[OpenClBackend] Fused linear cross-entropy kernels: loaded from cache
+[OpenClBackend] GRU sequence kernels: loaded from cache
+[OpenClBackend] Capsule network kernels: loaded from cache
+[OpenClBackend] Broadcast kernels: loaded from cache
+[OpenClBackend] Gated activation kernels: loaded from cache
+[OpenClBackend] Shape kernels: loaded from cache
+[OpenClBackend] Loss forward kernels: loaded from cache
+[OpenClBackend] Fused linear kernels: loaded from cache
+[OpenClBackend] fused-advanced kernels: loaded from cache
+[OpenClBackend] IoU loss kernels: loaded from cache
+[OpenClBackend] Softmax variant kernels: loaded from cache
+[OpenClBackend] Complex kernels: loaded from cache
+[OpenClBackend] Parity-210 kernels: loaded from cache
+[OpenClBackend] Detection kernels: loaded from cache
+[OpenClBackend] ANN kernels: loaded from cache
+[OpenClBackend] Geometry kernels: loaded from cache
+[OpenClBackend] RoI kernels: loaded from cache
+[OpenClBackend] Audio kernels: loaded from cache
+[OpenClBackend] Linalg kernels: loaded from cache
+[OpenClBackend] Kernels compiled successfully. Total: 753
+[OpenClBackend] Dynamic GEMM kernel generator initialized.
+[OpenClBackend] Half-precision GEMM kernels: loaded from cache
+[OpenClBackend] CLBlast MinIndirectSize threshold: 448 (use INDIRECT for M/N >= 448)
+[OpenClBackend] CLBlast direct kernels: loaded from cache
+{"Operation":"TaLib.Functions.Trima","Count":10000,"Repetitions":5,"Arms":[{"Method":"BuilderFull","Bytes":[565608,565608,565608,565608,565608]},{"Method":"BuilderLatestOnly","Bytes":[84200,84200,84200,84200,84200]},{"Method":"NativeSingle","Bytes":[79904,79904,79904,79904,79904]},{"Method":"NativeParallel","Bytes":[80328,80328,80328,80328,80328]}]}
