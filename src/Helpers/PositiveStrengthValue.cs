@@ -288,6 +288,10 @@ internal readonly record struct PositiveStrengthValue(long Mantissa, long Expone
             long gainUnits = gain.Mantissa << (int)gainShift;
             long lossUnits = loss.Mantissa << (int)lossShift;
             long numerator = signed ? gainUnits - lossUnits : gainUnits;
+#if !NETFRAMEWORK
+            if (StrengthRoundedRatio.TryDivide(numerator * 100, gainUnits + lossUnits, out double rounded))
+                return rounded;
+#endif
             return ExactMeanAccumulator.ScaledRatio(numerator * 100, gainUnits + lossUnits, 0);
         }
         var up = Exact(gain, exponent);
