@@ -3166,3 +3166,27 @@ Raw JSON and run context are archived in
 Log: `C:/Users/cheat/temp/si-dynamic-a84f3926.log`.
 The inventory parser accepted all four arms. Only this pair's current evidence
 was added to the catalog; measured coverage is now 180/401 APIs, not a win count.
+
+
+### Ulcer Index direct fixture and exact peak shortcut (2026-10-11)
+
+The shared CPU state skips percentage arithmetic at a new/equal positive peak:
+its drawdown is exactly zero. The zero-peak absence check precedes this shortcut.
+Extended unpublished drawdowns, exact squares and final RMS rounding remain.
+
+`SharedUlcerBenchmarks` compares BuildAsync Full/LatestOnly with Skender 2.7.3's
+public tuple serial API and up to eight independent native workers. Each worker
+has P-1 input overlap; full-prefix replay is unnecessary for window-local peaks.
+Native eager lists retain dates and nullable UI values directly. Native sorting,
+calculation, overlap outputs and output assembly are timed; tuple/chunk preparation
+is setup-only. This parallel arm composes public native calls; it is not a claim
+that Skender ships a parallel Ulcer API.
+
+Setup checks native bits/dates/presence against the staged native reference,
+owned bits/presence against the independent exact reference, and cross-library
+agreement within 1e-9. Fixture counts 1, 13, 14, 15, 31 and 65 exercise startup,
+full windows and uneven overlap. Production/benchmark Release net10.0 builds,
+nine compact arithmetic/allocation cases, 15 fixture/reference cases and 58
+inventory tests passed. Existing benchmark/test warnings remain. The four-arm
+fixture is registered in the allocation probe and qualification parser.
+Logs: `C:/Users/cheat/temp/si-ulcer-direct-{production,benchmark-build,unit,comparisons}.log`.

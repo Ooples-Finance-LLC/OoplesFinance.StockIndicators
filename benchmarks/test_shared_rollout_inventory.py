@@ -101,6 +101,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['Trady.Indicator.DynamicMomentumIndex'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_ulcer_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedUlcerBenchmarks.BuilderFull(Operation: "Skender.GetUlcerIndex", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetUlcerIndex'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_triangular_builder_maps_both_native_apis(self):
         self.write()
         for api in ('QuanTAlib.Trima', 'TaLib.Functions.Trima'):
