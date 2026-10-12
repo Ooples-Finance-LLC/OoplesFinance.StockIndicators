@@ -1,0 +1,55 @@
+{
+  "Operation": "QuanTAlib.Convolution",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        66928,
+        66928,
+        67360
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        18240,
+        18240,
+        18240
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        60248,
+        60248,
+        60248
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        11560,
+        11560,
+        11560
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        220272,
+        220272,
+        220272
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        231440,
+        231440,
+        231440
+      ]
+    }
+  ]
+}
