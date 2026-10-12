@@ -30,6 +30,10 @@ internal struct JurikDyadic
         var result = new JurikDyadic(); result.Add(value); return result;
 #endif
     }
+#if !NETFRAMEWORK
+    internal static JurikDyadic FromFactor(in ExactMeanAccumulator.ProductFactor factor) =>
+        new() { _fixed = true, _integer = factor.Mantissa, _exponent = factor.Scale - 1074 };
+#endif
     internal static JurikDyadic FromUnits(BigInteger units)
     {
         if (units.IsZero) return default;
