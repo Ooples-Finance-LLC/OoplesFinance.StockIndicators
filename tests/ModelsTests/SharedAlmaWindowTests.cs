@@ -6,6 +6,28 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SharedAlmaWindowTests
 {
+    [Fact]
+    public void CompactWeightGenerationPreservesPeakTiesAndExponentialUnderflow()
+    {
+        var bars = new[] { 0d, double.MaxValue, -double.MaxValue, double.Epsilon, 1d }
+            .Select(v => new Bar(default, v, v, v, v, 1)).ToArray();
+        double edge = Math.Sqrt(8 * 745d);
+        foreach (double sigma in new[] { Math.BitDecrement(edge), edge, Math.BitIncrement(edge), Math.Sqrt(8 * 746d), double.MaxValue })
+        foreach (double offset in new[] { 0d, .5, Math.BitIncrement(.5), Math.BitDecrement(.5), 1d })
+        {
+            var indicator = new ArnaudLegouxWindow(2, offset, sigma, false);
+            var expected = indicator.Reference(bars);
+            var state = (IMultiOutputState)indicator.CreateState();
+            var output = new double[2];
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                for (int slot = 0; slot < 2; slot++)
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[slot][i]), BitConverter.DoubleToInt64Bits(output[slot]));
+            }
+        }
+    }
+
     [Theory]
     [InlineData(true)] [InlineData(false)]
     public void OrdinaryCompleteWindowsAllocateNoPerBarObjects(bool fullWindow)
