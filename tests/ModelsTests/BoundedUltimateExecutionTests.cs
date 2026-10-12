@@ -52,6 +52,40 @@ public sealed class BoundedUltimateExecutionTests
     }
 
     [Theory]
+    [InlineData(1, 2, 3, false)] [InlineData(1, 2, 3, true)]
+    [InlineData(7, 14, 28, false)] [InlineData(7, 14, 28, true)]
+    [InlineData(1, 1, 1, true)] [InlineData(14, 7, 14, true)]
+    public async Task CertifiedIntegerRatiosPreserveWideProductsAndZeroConventions(int a, int b, int c, bool zero)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            long bound = (1L << 38) / (4L * Math.Max(a, Math.Max(b, c)));
+            foreach (int scale in new[] { -900, 0, 900 })
+            {
+                var bars = Enumerable.Range(0, 513).Select(i =>
+                {
+                    double value = (i % 2 == 0 ? bound : -bound) + (i % 11);
+                    return i % 128 < 64 ? new Bar(default, 0, -0d, 0, 0, 1)
+                        : new Bar(default, 0, Math.ScaleB(value + (i % 7 - 3), scale),
+                            Math.ScaleB(value - (i % 5), scale), Math.ScaleB(value, scale), 1);
+                }).ToArray();
+                var indicator = new WindowUltimateOscillator(a, b, c, zero);
+                using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                    foreach (var output in indicator.Outputs)
+                        Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                            actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Theory]
     [InlineData(false)] [InlineData(true)]
     public async Task OverflowPreservesInputPrecedenceAndCancellation(bool zero)
     {
