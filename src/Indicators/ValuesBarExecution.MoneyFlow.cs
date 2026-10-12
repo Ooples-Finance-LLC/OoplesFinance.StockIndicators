@@ -118,12 +118,15 @@ internal static partial class ValuesBarExecution
             double value = 0;
             if (defined)
             {
-                Int128 total = Int128.CreateChecked(unchecked(positive + negative));
+                T sum = unchecked(positive + negative);
+                Int128 total = Int128.CreateChecked(sum);
                 bool belowOne = total <= 0 || scale < 0 && (-scale >= 127 || total < (Int128.One << -scale));
                 if (indicator.MinimumTotalOne && belowOne) value = 0;
                 else if (!indicator.MinimumTotalOne && negative == T.Zero) value = 100;
                 else if (total == 0) value = double.NegativeInfinity;
-                else if (positive != T.Zero) value = JurikDyadic.IntegerRatio(unchecked(100 * Int128.CreateChecked(positive)), total);
+                else if (positive != T.Zero) value = typeof(T) == typeof(long)
+                    ? MoneyFlowPercentage.Calculate(long.CreateChecked(positive), long.CreateChecked(sum))
+                    : JurikDyadic.IntegerRatio(unchecked(100 * Int128.CreateChecked(positive)), total);
             }
             output[0][row] = value; output[1][row] = defined ? 1 : 0;
             RecordMoneyFlowOutput(ref region, row, value);
