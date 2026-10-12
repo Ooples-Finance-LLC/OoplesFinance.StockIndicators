@@ -33,6 +33,7 @@ public sealed class SharedAdlDetailsFixtureTests
         Assert.Equal(new[] { "BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel" },
             report.Arms.Select(a => a.Method));
         Assert.All(report.Arms, arm => Assert.True(Assert.Single(arm.Bytes) > 0));
-        Assert.Throws<ArgumentException>(() => SharedAllocationProbe.Run("Skender.GetAdl", 64, 1, includeGpu: true));
+        Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+            BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedGpuAdlDetailsBenchmarks))));
     }
 }
