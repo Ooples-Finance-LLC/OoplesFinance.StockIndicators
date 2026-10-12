@@ -1,0 +1,11 @@
+Source: be67d0fc plus SeededForceIndex certified product/recurrence changes and tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedForceIndexBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-force-certified
+All eight cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. All 16 Force Index unit cases and 23 volume recurrence/Force Index fixture cases passed. Harness build: 60 existing warnings, zero errors.
+Exact product and numerator fast paths use error-free certificates. Uncertified values retain exact dyadic arithmetic; reduction by two uses exact half-integer factors, including even periods.
+Before/after compares sequential runs with force-adl-mfi-qualification. Current wins use only same-run native serial/parallel confidence bounds. Prior catalog current rows are preserved here.
+Native parallel uses measured full-prefix replay, not a claim of optimal native parallel implementation. Managed allocation excludes retained buffers. Warnings/outliers remain in raw log.
+Parallel builder execution and GPU support remain outstanding. Coverage remains 195/401 APIs; coverage is not wins.
+OoplesFinance.StockIndicators.dll SHA256 3b1b35569f54f01eaf90d74b33086e95f7ad85de034b5a8fd3de59fd8c349f92
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 fa29caa563b06a72f455ecf6d3d05a896e57dc7bd48744e41b4e52361b726817
+BenchmarkDotNet warning: BuilderFull minimum observed iteration 17.843 ms, below the 100 ms recommendation; duplicate CSV exporter warning and outlier removals retained. Native serial timing also changed between runs, so same-run comparisons remain authoritative for wins.
