@@ -62,7 +62,7 @@ internal sealed partial class TensorsGpuExecution
             Workspace work;
             if (retain)
             {
-                if (_workspace is not null && _workspace.Count != source.Length)
+                if (_workspace is not null && (_workspace.Count != source.Length || _workspace.IsPackedVortex))
                 {
                     _workspace.Dispose();
                     _workspace = null;
@@ -122,24 +122,28 @@ internal sealed partial class TensorsGpuExecution
         }
     }
 
-    private sealed class Workspace(OpenClContext context, int count) : IDisposable
+    private sealed class Workspace(OpenClContext context, int count, bool packedVortex = false) : IDisposable
     {
         internal int Count => count;
-        internal double[] Input { get; } = GC.AllocateUninitializedArray<double>(count);
+        internal bool IsPackedVortex => packedVortex;
+        private double[]? _inputHost, _packedHost;
+        internal double[] Input => _inputHost ??= GC.AllocateUninitializedArray<double>(count);
+        internal double[] PackedHost => _packedHost ??= GC.AllocateUninitializedArray<double>(checked(3 * count));
         private double[]? _rightInput, _highInput, _lowInput;
         internal double[] HighInput => _highInput ??= GC.AllocateUninitializedArray<double>(count);
         internal double[] LowInput => _lowInput ??= GC.AllocateUninitializedArray<double>(count);
         internal double[] RightInput => _rightInput ??= GC.AllocateUninitializedArray<double>(count);
-        private OpenClBuffer<double>? _input, _sma, _asin, _presence, _right, _secondaryOutput;
+        private OpenClBuffer<double>? _input, _sma, _asin, _presence, _right, _packedInput, _packedOutput;
         internal OpenClBuffer<double> DeviceInput => _input ??= new(context, count);
         internal OpenClBuffer<double> Sma => _sma ??= new(context, count);
         internal OpenClBuffer<double> Asin => _asin ??= new(context, count);
         internal OpenClBuffer<double> Presence => _presence ??= new(context, count);
         internal OpenClBuffer<double> Right => _right ??= new(context, count);
-        internal OpenClBuffer<double> SecondaryOutput => _secondaryOutput ??= new(context, count);
+        internal OpenClBuffer<double> PackedInput => _packedInput ??= new(context, checked(3 * count));
+        internal OpenClBuffer<double> PackedOutput => _packedOutput ??= new(context, checked(3 * count));
         public void Dispose()
         {
-            _secondaryOutput?.Dispose();
+            _packedInput?.Dispose(); _packedOutput?.Dispose();
             _input?.Dispose(); _sma?.Dispose(); _asin?.Dispose(); _presence?.Dispose(); _right?.Dispose();
         }
     }

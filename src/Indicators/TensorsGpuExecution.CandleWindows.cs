@@ -32,7 +32,7 @@ internal sealed partial class TensorsGpuExecution
             Workspace work;
             if (retain)
             {
-                if (_workspace is not null && _workspace.Count != source.Length)
+                if (_workspace is not null && (_workspace.Count != source.Length || _workspace.IsPackedVortex))
                 {
                     _workspace.Dispose();
                     _workspace = null;

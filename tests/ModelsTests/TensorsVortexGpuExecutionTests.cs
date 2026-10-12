@@ -64,7 +64,7 @@ public sealed class TensorsVortexGpuExecutionTests
         var vortex = new WindowVortex(14);
         using var expected = await Build(bars, vortex).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync();
         using var retained = await Build(bars, vortex).BuildAsync();
-        foreach (IIndicator indicator in new IIndicator[] { new TrueRange(14), new WindowVortex(4096), vortex })
+        foreach (IIndicator indicator in new IIndicator[] { new TrueRange(14), vortex, new Sma(14), vortex, new StrictHaramiCandle(), new WindowVortex(4096), vortex })
         {
             var builder = Build(bars, indicator, IndicatorHistoryMode.LatestOnly);
             using var actual = await builder.BuildAsync();
