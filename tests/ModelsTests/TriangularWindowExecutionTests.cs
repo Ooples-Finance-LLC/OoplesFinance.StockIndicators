@@ -9,6 +9,41 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class TriangularWindowExecutionTests
 {
     [Theory]
+    [InlineData(1, false)] [InlineData(8, false)]
+    [InlineData(1, true)] [InlineData(8, true)]
+    public async Task CapturedColumnMatchesIndependentConvolution(int workers, bool rejectCertificate)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = workers;
+            var values = Enumerable.Range(0, 8193).Select(i => (i % 97 - 48) / 8d).ToArray();
+            if (rejectCertificate)
+            {
+                values[17] = .1;
+                values[2047] = double.MaxValue;
+                values[2048] = -double.MaxValue;
+                values[4095] = double.Epsilon;
+                values[8192] = -double.Epsilon;
+            }
+            var bars = values.Select(v => new Bar(default, 0, 1, 0, v, 1)).ToArray();
+            foreach (int period in new[] { 2, 3, 20, 21 })
+            {
+                var expected = Reference(values, period);
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    var indicator = new TriangularWindowAverage(period);
+                    using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                        .ConfigureIndicators(indicator).ConfigureHistory(history).BuildAsync();
+                    Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits),
+                        run[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Theory]
     [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(20)]
     [InlineData(21)] [InlineData(80)] [InlineData(81)] [InlineData(int.MaxValue)]
     public void CompactWorkerMatchesExactConvolutionAcrossRejectionAndReset(int period)

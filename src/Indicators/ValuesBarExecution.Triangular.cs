@@ -3,6 +3,98 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal static partial class ValuesBarExecution
 {
+    private static PointwiseRegion ComputeTriangularColumn(Bar[] source, double[] output, OwnedBarBuffer? owned,
+        int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail, CancellationToken cancellation)
+    {
+        var region = new PointwiseRegion { InvalidOutputIndex = -1 };
+        int count = seed.Length + end - start;
+        var rented = System.Buffers.ArrayPool<double>.Shared.Rent(count);
+        try
+        {
+            var prices = rented.AsSpan(0, count);
+            for (int i = 0; i < seed.Length; i++)
+            {
+                if (cancellation.IsCancellationRequested) return region;
+                var bar = seed[i];
+                if (!AllFieldsFinite(in bar))
+                    return new PointwiseRegion { InvalidInput = true, Last = bar, InvalidOutputIndex = -1 };
+                prices[i] = bar.Close;
+            }
+            int tailStart = end - tail.Length;
+            for (int i = start; i < end; i++)
+            {
+                if (cancellation.IsCancellationRequested) return region;
+                var bar = i >= tailStart ? tail[i - tailStart] : source[i];
+                region.Last = bar;
+                if (!AllFieldsFinite(in bar)) { region.InvalidInput = true; return region; }
+                prices[seed.Length + i - start] = bar.Close;
+                if (owned is not null) owned[i] = bar;
+            }
+            int firstLength = (period + 1) / 2, secondLength = period - firstLength + 1;
+            int mass = firstLength * secondLength;
+            Core.SmaCpuKernel.Summarize(prices, out var grid, out _, cancellation);
+            bool certified = grid.Certifies(mass);
+            if (!certified && grid.CanRefine)
+            {
+                var proof = new Core.SmaCpuKernel.Certificate(mass);
+                certified = true;
+                foreach (double value in prices)
+                {
+                    if (cancellation.IsCancellationRequested) return region;
+                    if (!proof.Include(value)) { certified = false; break; }
+                }
+            }
+            if (!certified)
+            {
+                var state = new TriangularWindowAverage.State(period);
+                for (int i = 0; i < count; i++)
+                {
+                    if (cancellation.IsCancellationRequested) return region;
+                    var bar = new Bar(default, 0, 0, 0, prices[i], 0);
+                    double value = state.Update(in bar);
+                    if (i >= seed.Length)
+                    {
+                        int row = start + i - seed.Length;
+                        output[row] = value;
+                        if (!double.IsFinite(value) && region.InvalidOutputIndex < 0)
+                        {
+                            region.InvalidOutputIndex = row;
+                            region.InvalidOutputValue = value;
+                        }
+                    }
+                }
+                return region;
+            }
+            // Two box sums form the triangle. Direct column indexing removes
+            // ring storage; the common-grid proof makes every sum exact.
+            double first = 0, expired = 0, total = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (cancellation.IsCancellationRequested) return region;
+                if (i >= firstLength) first -= prices[i - firstLength];
+                first += prices[i];
+                if (i == firstLength - 1) expired = first;
+                if (i >= firstLength - 1)
+                {
+                    // Subtract first so intermediate coefficient mass never
+                    // exceeds the certified full triangular denominator.
+                    if (i >= period) total -= expired;
+                    total += first;
+                    if (i >= period)
+                    {
+                        expired -= prices[i - period];
+                        expired += prices[i - secondLength + 1];
+                    }
+                }
+                if (i >= seed.Length)
+                    output[start + i - seed.Length] = i < period - 1 || total == 0 ? 0 : total / mass;
+            }
+            return region;
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { return region; }
+        finally { System.Buffers.ArrayPool<double>.Shared.Return(rented); }
+    }
+
     internal struct TriangularValueState(int period, int count) : IIndicatorState
     {
         private readonly int _firstLength = (int)((period + 1L) / 2);
