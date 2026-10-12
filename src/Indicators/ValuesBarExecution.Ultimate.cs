@@ -97,10 +97,11 @@ internal static partial class ValuesBarExecution
                         if (!indicator.ZeroRangeContribution) { defined = false; break; }
                         continue;
                     }
-                    numerator = numerator * ranges[k] + (Int128)(4 >> k) * pressures[k] * denominator;
-                    denominator *= ranges[k];
+                    // Certified above: the complete scaled numerator fits 124 bits.
+                    numerator = unchecked(numerator * ranges[k] + (Int128)(4 >> k) * pressures[k] * denominator);
+                    denominator = unchecked(denominator * ranges[k]);
                 }
-                output[0][row] = defined ? JurikDyadic.FromInteger(100 * numerator).Ratio(JurikDyadic.FromInteger(7 * denominator)) : 0;
+                output[0][row] = defined ? JurikDyadic.FromInteger(unchecked(100 * numerator)).Ratio(JurikDyadic.FromInteger(unchecked(7 * denominator))) : 0;
                 output[1][row] = defined ? 1 : 0;
             }
             return region;

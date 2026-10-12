@@ -90,12 +90,12 @@ internal static partial class ValuesBarExecution
                 double value = 0;
                 if (defined)
                 {
-                    Int128 total = positive + negative;
+                    Int128 total = unchecked(positive + negative);
                     bool belowOne = total <= 0 || scale < 0 && (-scale >= 127 || total < (Int128.One << -scale));
                     if (indicator.MinimumTotalOne && belowOne) value = 0;
                     else if (!indicator.MinimumTotalOne && negative == 0) value = 100;
                     else if (total == 0) value = double.NegativeInfinity;
-                    else if (positive != 0) value = JurikDyadic.FromInteger(100 * positive).Ratio(JurikDyadic.FromInteger(total));
+                    else if (positive != 0) value = JurikDyadic.FromInteger(unchecked(100 * positive)).Ratio(JurikDyadic.FromInteger(total));
                 }
                 output[0][row] = value; output[1][row] = defined ? 1 : 0;
                 RecordMoneyFlowOutput(ref region, row, value);
@@ -107,9 +107,15 @@ internal static partial class ValuesBarExecution
 
     private static void AccumulateIntegerFlow(in Bar current, in Bar previous, int sign, ref Int128 positive, ref Int128 negative)
     {
-        Int128 flow = (Int128)(long)current.Open * (long)current.Volume * sign;
-        if (current.Open > previous.Open) positive += flow;
-        else if (current.Open < previous.Open) negative += flow;
+        // The caller certifies every product and P-term sum, with 100-fold
+        // publication headroom. No operation here can wrap under that proof.
+        unchecked
+        {
+            Int128 flow = (Int128)(long)current.Open * (long)current.Volume;
+            if (sign < 0) flow = -flow;
+            if (current.Open > previous.Open) positive += flow;
+            else if (current.Open < previous.Open) negative += flow;
+        }
     }
 
     private static void RecordMoneyFlowOutput(ref PointwiseRegion region, int index, double value)
