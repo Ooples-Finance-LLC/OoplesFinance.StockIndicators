@@ -3567,3 +3567,17 @@ Verification: net10.0 production and comparison builds passed; 13 focused unit c
 `WindowRegressionStatistics.State` now keeps one observed-history queue and reuses the existing exact dyadic accumulator for sums, squares, weighted moments and fitted coordinates. This removes the duplicate fit-window history and routine minimum-subnormal-unit BigInteger expansion for both rolling statistics and retrospective regression consumers. Wide exponent spans retain arbitrary-precision fallback; no rounded slope or intercept is reused to derive another output.
 
 The net10.0 production/comparison builds, 15 focused unit cases and 12 independent regression/channel comparison cases passed with no skips. Differential tests matched the previous state bit-for-bit across resets, full/partial windows, random fractions, extreme magnitudes, signed zero and subnormals. A warmed 1,000-bar eighth-unit price fixture, including final-line reads, allocated zero managed bytes on the current thread. This excludes state construction, history growth and result columns, and does not establish total BuildAsync allocations or a latency win. No timing benchmark was rerun; qualification remains 181/401.
+
+
+### Direct regression statistics allocation comparison
+
+`SharedRegressionStatisticsBenchmarks` retains all five native outputs and presence for QuanTAlib.Slope and Skender.GetSlope. QuanTAlib uses packed rows and P-1 seed replay on the nonconstant fixture; Skender uses its public tuple collection, full prefixes for global intercepts, and only the final prefix's decimal line overlay. Setup checks independent centered references and serial/parallel parity outside measurement.
+
+At 1,000 bars and period 20, all three warmed samples agreed:
+
+| API | Builder Full bytes | Builder LatestOnly bytes | Native serial bytes | Native parallel bytes |
+|---|---:|---:|---:|---:|
+| QuanTAlib.Slope | 134,160 | 85,472 | 442,600 | 466,576 |
+| Skender.GetSlope | 118,144 | 69,456 | 164,400 | 750,680 |
+
+These process-wide managed allocations include construction and retained outputs; setup and post-sample disposal are excluded. Production revision e76348e0, fixture revision 30a3eae4, raw samples and limitations are archived in `results/shared-rollout/regression-statistics-cpu/`. The fixture build, 23 focused tests and 65 inventory checks passed with no skips. An AiDotNet build was active at pre-probe inspection; no timing benchmark was run and qualification remains 181/401.
