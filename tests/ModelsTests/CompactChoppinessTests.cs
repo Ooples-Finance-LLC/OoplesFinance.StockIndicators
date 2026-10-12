@@ -71,6 +71,32 @@ public sealed class CompactChoppinessTests
         }
     }
 
+    [Theory]
+    [InlineData(2)] [InlineData(14)] [InlineData(65)] [InlineData(257)]
+    public void ExtremaExpireAcrossMonotonicRunsTiesAndReset(int period)
+    {
+        var random = new Random(981);
+        var bars = Enumerable.Range(0, 2000).Select(i =>
+        {
+            double close = i < 500 ? i : i < 1000 ? 1000 - i : i < 1300 ? 0 : random.Next(-100, 100);
+            return new Bar(default, close, close + (i % 7), close - (i % 11), close, 1);
+        }).ToArray();
+        var expected = WindowChoppinessReference.Calculate(bars, period);
+        var state = (IMultiOutputState)new WindowChoppinessIndex(period).CreateState();
+        Span<double> output = stackalloc double[2];
+        for (int replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                double value = expected[i] ?? 0;
+                Assert.True(value.Equals(output[0]) || Math.Abs(value - output[0]) <= 4e-15 * Math.Abs(value));
+                Assert.Equal(expected[i].HasValue ? 1d : 0d, output[1]);
+            }
+        }
+    }
+
     [Fact]
     public void WarmedOrdinaryWindowsAllocateNoPerBarObjects()
     {
