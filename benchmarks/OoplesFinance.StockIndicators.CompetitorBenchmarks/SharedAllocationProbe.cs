@@ -15,7 +15,8 @@ public static class SharedAllocationProbe
         bool gpuRegression = operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
             or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.Tsf";
         bool gpuPathRatio = operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio";
-        if (includeGpu && !gpuPathRatio && !gpuRegression && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "TaLib.Functions.Obv"))
+        bool obv = operation is "TaLib.Functions.Obv" or "Skender.GetObv" or "Trady.Indicator.OnBalanceVolume";
+        if (includeGpu && !gpuPathRatio && !gpuRegression && !obv && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi"))
             throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
         Action setup, cleanup;
         Func<object>[] methods;
@@ -60,7 +61,7 @@ public static class SharedAllocationProbe
                 fixture.NativeSingle, fixture.NativeParallel];
             names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
         }
-        else if (includeGpu && operation == "TaLib.Functions.Obv")
+        else if (includeGpu && obv)
         {
             var fixture = new SharedGpuObvBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
@@ -98,7 +99,7 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
-        else if (operation == "TaLib.Functions.Obv")
+        else if (obv)
         {
             var fixture = new SharedObvBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;

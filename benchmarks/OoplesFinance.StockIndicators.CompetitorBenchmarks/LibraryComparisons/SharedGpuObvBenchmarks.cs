@@ -7,7 +7,8 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
 public class SharedGpuObvBenchmarks
 {
-    [Params("TaLib.Functions.Obv")] public string Operation { get; set; } = "TaLib.Functions.Obv";
+    [Params("TaLib.Functions.Obv", "Skender.GetObv", "Trady.Indicator.OnBalanceVolume")]
+    public string Operation { get; set; } = "TaLib.Functions.Obv";
     [Params(1_000, 10_000)] public int Count { get; set; }
     private SharedObvBenchmarks _cpu = null!;
 
@@ -18,7 +19,7 @@ public class SharedGpuObvBenchmarks
         try
         {
             _cpu.Setup();
-            var indicator = new SeededOnBalanceVolume();
+            var indicator = _cpu.Indicator();
             using var expected = _cpu.Build(indicator, IndicatorHistoryMode.Full);
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
             {
@@ -41,8 +42,8 @@ public class SharedGpuObvBenchmarks
     [GlobalCleanup] public void Cleanup() => _cpu?.Cleanup();
     [Benchmark] public IIndicatorRun BuilderFull() => _cpu.BuilderFull();
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => _cpu.BuilderLatestOnly();
-    [Benchmark] public IIndicatorRun GpuFull() => _cpu.Build(new SeededOnBalanceVolume(), IndicatorHistoryMode.Full, gpu: true);
-    [Benchmark] public IIndicatorRun GpuLatestOnly() => _cpu.Build(new SeededOnBalanceVolume(), IndicatorHistoryMode.LatestOnly, gpu: true);
+    [Benchmark] public IIndicatorRun GpuFull() => _cpu.Build(_cpu.Indicator(), IndicatorHistoryMode.Full, gpu: true);
+    [Benchmark] public IIndicatorRun GpuLatestOnly() => _cpu.Build(_cpu.Indicator(), IndicatorHistoryMode.LatestOnly, gpu: true);
     [Benchmark(Baseline = true)] public object NativeSingle() => _cpu.NativeSingle();
     [Benchmark] public object NativeParallel() => _cpu.NativeParallel();
 }
