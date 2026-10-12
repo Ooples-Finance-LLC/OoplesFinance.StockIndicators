@@ -107,9 +107,18 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
             double peak = 0;
             bool defined = true;
             int index = _start;
+#if !NETFRAMEWORK
+            // All ring growth is complete for this update. Borrow entries only
+            // until the scan ends; no helper can resize or retain this span.
+            var entries = System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_prices);
+#endif
             for (int offset = 0; offset < period; offset++)
             {
+#if !NETFRAMEWORK
+                ref var entry = ref entries[index];
+#else
                 var entry = _prices[index];
+#endif
                 peak = Math.Max(peak, entry.Price);
                 if (peak == 0) defined = false;
                 if (entry.Peak != peak)
@@ -120,7 +129,9 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
                     entry.Peak = peak;
                     entry.Drawdown = Drawdown(entry.Price, peak);
                     AccumulateSquare(entry.Drawdown, true);
+#if NETFRAMEWORK
                     _prices[index] = entry;
+#endif
                 }
                 if (++index == period) index = 0;
             }
