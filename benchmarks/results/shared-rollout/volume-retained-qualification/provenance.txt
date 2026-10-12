@@ -1,0 +1,9 @@
+Source commit: aaec6251 (retained production code; rejected midpoint experiment removed).
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedGpuUltimateBenchmarks* *SharedGpuObvBenchmarks* *SharedAdlDetailsBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-volume-retained-qualification
+Completed: 68/68 cases, process exit 0. No competing build/test observed in sampled process checks.
+Warnings and outliers remain in benchmark.log.gz, including short iteration times and duplicate CSV exporter.
+Native parallel ADL/Skender OBV use prefix replay to retain exact native mean rounding; this is a measured strategy, not proof of optimal native parallelism.
+GPU setup checks require actual device execution. Device/retained workspace memory is excluded from per-call managed allocation.
+Clear wins require nonoverlapping reported 99.9% intervals against both measured native methods. Coverage is not a win count.
+OoplesFinance.StockIndicators.dll SHA256 edc194526a9726ae047a7f6fda8a938614a98dbe9027d74f596fc70541777852
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 1534310afdebe3e0d343fce1740f5cc67ac326f263ae355802061a5b5b6332af
