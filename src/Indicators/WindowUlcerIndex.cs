@@ -75,6 +75,9 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
                 peak = Math.Max(peak, price);
                 if (peak == 0)
                     return;
+                // A new/equal positive peak has exactly zero drawdown.
+                if (price == peak)
+                    continue;
                 var numerator = JurikDyadic.FromDouble(price);
                 numerator.Subtract(JurikDyadic.FromDouble(peak));
                 numerator.Multiply(100);
