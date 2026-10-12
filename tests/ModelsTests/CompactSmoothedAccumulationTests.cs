@@ -9,6 +9,30 @@ public sealed class CompactSmoothedAccumulationTests
 {
     [Theory]
     [InlineData(false)] [InlineData(true)]
+    public void CertifiedFlowsAndPowerOfTwoMeansPreserveEveryRoundingStage(bool first)
+    {
+        var random = new Random(24736);
+        foreach (int scale in new[] { -1074, -1022, -1000, 0, 1000, 1020 })
+        {
+            var bars = Enumerable.Range(0, 80).Select(i =>
+            {
+                double close = i % 11 == 0 ? 2 : 4 * random.NextDouble();
+                double volume = i % 13 == 0 ? 0 : Math.ScaleB(1 + random.NextDouble(), scale);
+                return new Bar(default, 0, i % 7 == 0 ? 0 : 4, i % 7 == 0 ? 4 : 0, close, volume);
+            }).ToArray();
+            foreach (var periods in new[] { (1, 3), (3, 7), (7, 15), (15, 3), (2, 4), (3, 10) })
+            foreach (bool details in new[] { false, true })
+                CheckState(bars, new(periods.Item1, periods.Item2, first, includeDetails: details));
+        }
+        // A rounded FMA numerator can overflow even though division by its
+        // power-of-two denominator would bring the exact mean back into range.
+        Bar[] highLine = Enumerable.Range(0, 20).Select(i =>
+            new Bar(default, 0, 2, 0, 2, i == 0 ? double.MaxValue * .75 : 0)).ToArray();
+        CheckState(highLine, new(3, 7, first, includeDetails: true));
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
     public async Task MixedDetailModesKeepEveryOwnedColumnIndependentAcrossRuns(bool full)
     {
         foreach (int count in new[] { 0, 1, 9, 10, 513 })
