@@ -148,7 +148,7 @@ public sealed class NullableStrengthOscillator
             _poisoned = false;
         }
 
-        internal double? Next(double? price)
+        internal double? Next(double? price, bool publish = true)
         {
             if (_poisoned)
                 return null;
@@ -209,8 +209,10 @@ public sealed class NullableStrengthOscillator
                         : _loss.Update(down, period);
                 }
             }
+            // Historical replay needs the recurrence and poisoning behavior,
+            // but only the requested bar needs a rounded output ratio.
             if (
-                _loss.IsZero
+                !publish || _loss.IsZero
                 || convention == NullableStrengthConvention.RelativeMomentumIndex && _gain.IsZero
             )
                 return null;

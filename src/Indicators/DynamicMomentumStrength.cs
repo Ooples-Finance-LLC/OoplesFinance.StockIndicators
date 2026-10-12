@@ -113,7 +113,10 @@ internal sealed class DynamicMomentumStrengthState(int deviationPeriod, int smoo
         // An unselected period catches up only when needed, including every
         // intervening price. Restarting at selection would change Wilder seeding.
         while (trajectory.Consumed < count)
-            result = trajectory.Calculator.Next(_prices[trajectory.Consumed++]);
+        {
+            int index = trajectory.Consumed++;
+            result = trajectory.Calculator.Next(_prices[index], publish: index == count - 1);
+        }
         output[0] = result ?? 0;
         output[1] = result.HasValue ? 1 : 0;
     }
