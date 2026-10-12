@@ -14,16 +14,28 @@ public sealed class StockIndicatorBuilder
     private IndicatorDataSource? _configuredSource;
     private Indicators.IBarSource? _barSource;
     private readonly List<Indicators.IIndicator> _configuredIndicators = new();
-    private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
-    private readonly Dictionary<IndicatorNodeKey, SeriesHandle> _indicatorNodes;
-    private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
-    private readonly Dictionary<SeriesKey, SeriesHandle> _baseSeries;
-    private readonly Dictionary<string, IndicatorDataSource> _namedSources;
-    private readonly IndicatorCatalog _indicators;
-    private readonly SignalCatalog _signals;
-    private readonly NotificationCatalog _notifications;
-    private readonly AutoTradingCatalog _autoTrading;
-    private readonly BehaviorOptions _behavior;
+    // Typed fused builds do not need the legacy graph or callback catalogs.
+    // Keep per-builder instances when a legacy configuration first uses them.
+    private Dictionary<SeriesHandle, SeriesNode>? _nodes;
+    private Dictionary<SeriesHandle, SeriesNode> Nodes => _nodes ??= new();
+    private Dictionary<IndicatorNodeKey, SeriesHandle>? _indicatorNodes;
+    private Dictionary<IndicatorNodeKey, SeriesHandle> IndicatorNodes => _indicatorNodes ??= new();
+    private Dictionary<IndicatorKey, SeriesHandle>? _keys;
+    private Dictionary<IndicatorKey, SeriesHandle> Keys => _keys ??= new();
+    private Dictionary<SeriesKey, SeriesHandle>? _baseSeries;
+    private Dictionary<SeriesKey, SeriesHandle> BaseSeries => _baseSeries ??= new();
+    private Dictionary<string, IndicatorDataSource>? _namedSources;
+    private Dictionary<string, IndicatorDataSource> NamedSources => _namedSources ??= new(StringComparer.OrdinalIgnoreCase);
+    private IndicatorCatalog? _indicators;
+    private IndicatorCatalog IndicatorsCatalog => _indicators ??= new(this);
+    private SignalCatalog? _signals;
+    private SignalCatalog Signals => _signals ??= new();
+    private NotificationCatalog? _notifications;
+    private NotificationCatalog Notifications => _notifications ??= new();
+    private AutoTradingCatalog? _autoTrading;
+    private AutoTradingCatalog AutoTrading => _autoTrading ??= new();
+    private BehaviorOptions? _behavior;
+    private BehaviorOptions Behavior => _behavior ??= new();
     private IndicatorOptions? _indicatorOptions;
     private SignalOptions? _signalOptions;
     private SymbolOptions? _symbolOptions;
@@ -133,8 +145,9 @@ public sealed class StockIndicatorBuilder
 
     // Legacy execution can invoke customer callbacks which change the typed
     // configuration. Pilot fusion is restricted to runs without that boundary.
-    private bool CanUseDirectFusedExecution => !_requiresRuntime && _nodes.Count == 0 && _keys.Count == 0
-        && _namedSources.Count == 0 && _indicatorOptions is null && _signalOptions is null
+    private bool CanUseDirectFusedExecution => !_requiresRuntime && (_nodes is null || _nodes.Count == 0)
+        && (_keys is null || _keys.Count == 0) && (_namedSources is null || _namedSources.Count == 0)
+        && _indicatorOptions is null && _signalOptions is null
         && _symbolOptions is null && _dataOptions is null && _backtestOptions is null && _benchmarkOptions is null;
 
     /// <summary>
@@ -158,16 +171,6 @@ public sealed class StockIndicatorBuilder
     {
         _ = deferred;
         _configuredSource = source;
-        _nodes = new Dictionary<SeriesHandle, SeriesNode>();
-        _indicatorNodes = new Dictionary<IndicatorNodeKey, SeriesHandle>();
-        _keys = new Dictionary<IndicatorKey, SeriesHandle>();
-        _baseSeries = new Dictionary<SeriesKey, SeriesHandle>();
-        _namedSources = new Dictionary<string, IndicatorDataSource>(StringComparer.OrdinalIgnoreCase);
-        _behavior = new BehaviorOptions();
-        _signals = new SignalCatalog();
-        _notifications = new NotificationCatalog();
-        _autoTrading = new AutoTradingCatalog();
-        _indicators = new IndicatorCatalog(this);
         _nextId = 1;
     }
 
@@ -188,7 +191,7 @@ public sealed class StockIndicatorBuilder
         if (source is null)
             throw new ArgumentNullException(nameof(source));
 
-        _namedSources[name] = source;
+        NamedSources[name] = source;
         return this;
     }
 
@@ -197,7 +200,7 @@ public sealed class StockIndicatorBuilder
     /// </summary>
     internal IndicatorDataSource? GetNamedSource(string name)
     {
-        return _namedSources.TryGetValue(name, out var source) ? source : null;
+        return NamedSources.TryGetValue(name, out var source) ? source : null;
     }
 
     /// <summary>
@@ -410,7 +413,7 @@ public sealed class StockIndicatorBuilder
                 continue;
             }
 
-            var series = _indicators.Price();
+            var series = IndicatorsCatalog.Price();
             var seriesKey = ResolveSeriesKey(series);
             var slots = new SeriesHandle[indicator.Outputs.Count];
 
@@ -766,7 +769,7 @@ public sealed class StockIndicatorBuilder
         _indicatorOptions = options ?? new IndicatorOptions();
         _defaultsApplied = false;
         ApplyIndicatorDefaults();
-        configure?.Invoke(_indicators);
+        configure?.Invoke(IndicatorsCatalog);
         return this;
     }
 
@@ -788,7 +791,7 @@ public sealed class StockIndicatorBuilder
     public StockIndicatorBuilder ConfigureSignals(SignalOptions? options = null, Action<SignalCatalog>? configure = null)
     {
         _signalOptions = options ?? new SignalOptions();
-        configure?.Invoke(_signals);
+        configure?.Invoke(Signals);
         return this;
     }
 
@@ -806,7 +809,7 @@ public sealed class StockIndicatorBuilder
     public StockIndicatorBuilder ConfigureNotifications(Action<NotificationCatalog>? configure = null)
     {
         _requiresRuntime = true;
-        configure?.Invoke(_notifications);
+        configure?.Invoke(Notifications);
         return this;
     }
 
@@ -816,7 +819,7 @@ public sealed class StockIndicatorBuilder
     public StockIndicatorBuilder ConfigureAutoTrading(Action<AutoTradingCatalog>? configure = null)
     {
         _requiresRuntime = true;
-        configure?.Invoke(_autoTrading);
+        configure?.Invoke(AutoTrading);
         return this;
     }
 
@@ -844,7 +847,7 @@ public sealed class StockIndicatorBuilder
     public StockIndicatorBuilder ConfigureBehavior(Action<BehaviorOptions> configure)
     {
         _requiresRuntime = true;
-        configure?.Invoke(_behavior);
+        configure?.Invoke(Behavior);
         return this;
     }
 
@@ -872,21 +875,21 @@ public sealed class StockIndicatorBuilder
 
         return new IndicatorRuntime(
             Source,
-            new Dictionary<SeriesHandle, SeriesNode>(_nodes),
-            new Dictionary<IndicatorKey, SeriesHandle>(_keys),
-            _signals.Build(),
-            _signals.BuildGroups(),
-            _signals.BuildRangeRules(),
-            _notifications.Build(),
-            _autoTrading.Build(),
-            _behavior,
+            new Dictionary<SeriesHandle, SeriesNode>(Nodes),
+            new Dictionary<IndicatorKey, SeriesHandle>(Keys),
+            Signals.Build(),
+            Signals.BuildGroups(),
+            Signals.BuildRangeRules(),
+            Notifications.Build(),
+            AutoTrading.Build(),
+            Behavior,
             activeSeries,
             symbols,
             streamingOptions,
             _signalOptions,
             _backtestOptions,
             _benchmarkOptions,
-            Source.Kind == IndicatorSourceKind.Batch ? _namedSources.ToDictionary(
+            Source.Kind == IndicatorSourceKind.Batch ? NamedSources.ToDictionary(
                 pair => new SeriesKey(new SymbolId(pair.Key), timeframe),
                 pair => pair.Value.BatchData ?? throw new InvalidOperationException("Batch evaluation requires batch data for named source '"+pair.Key+"'.")) : null,
             computePool);
@@ -967,26 +970,26 @@ public sealed class StockIndicatorBuilder
             ? IndicatorNodeKey.TryCreate(seriesKey, input, spec)
             : null;
 
-        if (nodeKey is not null && _indicatorNodes.TryGetValue(nodeKey, out var existing))
+        if (nodeKey is not null && IndicatorNodes.TryGetValue(nodeKey, out var existing))
         {
             if (key.HasValue)
             {
-                _keys[key.Value] = existing;
+                Keys[key.Value] = existing;
             }
 
             return existing;
         }
 
         var handle = NewHandle();
-        _nodes[handle] = SeriesNode.Indicator(seriesKey, input, spec);
+        Nodes[handle] = SeriesNode.Indicator(seriesKey, input, spec);
         if (key.HasValue)
         {
-            _keys[key.Value] = handle;
+            Keys[key.Value] = handle;
         }
 
         if (nodeKey is not null)
         {
-            _indicatorNodes[nodeKey] = handle;
+            IndicatorNodes[nodeKey] = handle;
         }
 
         return handle;
@@ -995,17 +998,17 @@ public sealed class StockIndicatorBuilder
     internal SeriesHandle AddFormula(SeriesHandle left, SeriesHandle right, Func<double, double, double> formula)
     {
         var handle = NewHandle();
-        _nodes[handle] = SeriesNode.CreateFormula(ResolveSeriesKey(left), left, right, formula);
+        Nodes[handle] = SeriesNode.CreateFormula(ResolveSeriesKey(left), left, right, formula);
         return handle;
     }
 
     internal SeriesHandle AddMultiStockIndicator(IndicatorSpec spec, SeriesHandle stockInput, SeriesHandle marketInput, SeriesKey seriesKey, IndicatorKey? key)
     {
         var handle = NewHandle();
-        _nodes[handle] = SeriesNode.MultiStockIndicator(seriesKey, stockInput, marketInput, spec);
+        Nodes[handle] = SeriesNode.MultiStockIndicator(seriesKey, stockInput, marketInput, spec);
         if (key.HasValue)
         {
-            _keys[key.Value] = handle;
+            Keys[key.Value] = handle;
         }
 
         return handle;
@@ -1013,7 +1016,7 @@ public sealed class StockIndicatorBuilder
 
     internal SeriesHandle GetHandle(IndicatorKey key)
     {
-        if (_keys.TryGetValue(key, out var handle))
+        if (Keys.TryGetValue(key, out var handle))
         {
             return handle;
         }
@@ -1029,14 +1032,14 @@ public sealed class StockIndicatorBuilder
 
     internal SeriesHandle GetOrCreateBaseSeries(SeriesKey key)
     {
-        if (_baseSeries.TryGetValue(key, out var handle))
+        if (BaseSeries.TryGetValue(key, out var handle))
         {
             return handle;
         }
 
         handle = NewHandle();
-        _baseSeries[key] = handle;
-        _nodes[handle] = SeriesNode.Base(key);
+        BaseSeries[key] = handle;
+        Nodes[handle] = SeriesNode.Base(key);
         return handle;
     }
 
@@ -1060,7 +1063,7 @@ public sealed class StockIndicatorBuilder
 
     internal SeriesKey ResolveSeriesKey(SeriesHandle handle)
     {
-        if (_nodes.TryGetValue(handle, out var node))
+        if (Nodes.TryGetValue(handle, out var node))
         {
             return node.SeriesKey;
         }
@@ -1087,7 +1090,7 @@ public sealed class StockIndicatorBuilder
 
         // Default to None for optimal performance - only compute explicitly configured indicators
         var selection = _indicatorOptions?.Selection ?? IndicatorSelection.None();
-        _indicators.ApplyDefaults(selection);
+        IndicatorsCatalog.ApplyDefaults(selection);
         _defaultsApplied = true;
     }
 
@@ -1149,11 +1152,11 @@ public sealed class StockIndicatorBuilder
     {
         if (_indicatorOptions?.ComputePolicy == IndicatorComputePolicy.Eager)
         {
-            return _nodes.Keys;
+            return Nodes.Keys;
         }
 
         var active = new HashSet<SeriesHandle>();
-        var signalRules = _signals.Build();
+        var signalRules = Signals.Build();
         for (var i = 0; i < signalRules.Count; i++)
         {
             var series = signalRules[i].Series;
@@ -1162,14 +1165,14 @@ public sealed class StockIndicatorBuilder
                 active.Add(series.Handle.Value);
                 AddDependencies(series.Handle.Value, active);
             }
-            else if (series.Key.HasValue && _keys.TryGetValue(series.Key.Value, out var handle))
+            else if (series.Key.HasValue && Keys.TryGetValue(series.Key.Value, out var handle))
             {
                 active.Add(handle);
                 AddDependencies(handle, active);
             }
         }
 
-        var groupRules = _signals.BuildGroups();
+        var groupRules = Signals.BuildGroups();
         for (var i = 0; i < groupRules.Count; i++)
         {
             var conditions = groupRules[i].Conditions;
@@ -1182,7 +1185,7 @@ public sealed class StockIndicatorBuilder
 
         if (active.Count == 0)
         {
-            return _nodes.Keys;
+            return Nodes.Keys;
         }
 
         return active;
@@ -1190,7 +1193,7 @@ public sealed class StockIndicatorBuilder
 
     private void AddDependencies(SeriesHandle handle, HashSet<SeriesHandle> active)
     {
-        if (!_nodes.TryGetValue(handle, out var node))
+        if (!Nodes.TryGetValue(handle, out var node))
         {
             return;
         }
