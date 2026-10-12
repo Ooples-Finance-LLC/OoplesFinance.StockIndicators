@@ -1,0 +1,7 @@
+{
+  "status": "interrupted-excluded-diagnostic",
+  "production_commit": "5b3ca435",
+  "reason": "AiDotNet build PID 8272 and AiDotNet.Tensors build PID 38788 started during the run. Only benchmark process 35172 was stopped; other jobs were left running.",
+  "catalog_updated": false,
+  "filter_note": "Use the full TaLib.Functions.Trima identifier: a TaLib substring also matches QuanTAlib."
+}

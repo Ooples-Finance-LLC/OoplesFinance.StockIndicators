@@ -48,7 +48,11 @@ public sealed class WindowCommodityChannelIndex
 
     /// <inheritdoc/>
     protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period, RollingDeviations, FlatZero);
+#else
         new State(Period, RollingDeviations, FlatZero);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -70,6 +74,64 @@ public sealed class WindowCommodityChannelIndex
                 )
             );
 
+#if !NETFRAMEWORK
+    private sealed class CompactState(int period, bool rollingDeviations, bool flatZero) : IMultiOutputState
+    {
+        private readonly Queue<double> _prices = new();
+        private readonly Queue<JurikDyadic> _deviations = new();
+        private JurikDyadic _sum, _deviationSum;
+
+        public void Reset()
+        {
+            _prices.Clear(); _deviations.Clear();
+            _sum = _deviationSum = default;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            var typical = new ExactMeanAccumulator();
+            typical.Add(bar.High); typical.Add(bar.Low); typical.Add(bar.Close);
+            double value = typical.Mean(3);
+            if (_prices.Count == period) _sum.Subtract(JurikDyadic.FromDouble(_prices.Dequeue()));
+            _prices.Enqueue(value);
+            _sum.Add(value);
+            if (_prices.Count < period) return;
+            var mean = JurikDyadic.FromDouble(_sum.Mean(period));
+            var distance = JurikDyadic.FromDouble(value);
+            distance.Subtract(mean);
+            JurikDyadic deviation;
+            if (rollingDeviations)
+            {
+                if (_deviations.Count == period) _deviationSum.Subtract(_deviations.Dequeue());
+                var absolute = distance;
+                if (absolute.Sign < 0) absolute.Multiply(-1);
+                _deviations.Enqueue(absolute);
+                _deviationSum.AddExact(absolute);
+                if (_deviations.Count < period) return;
+                deviation = _deviationSum;
+            }
+            else
+            {
+                deviation = default;
+                foreach (double price in _prices)
+                {
+                    var absolute = JurikDyadic.FromDouble(price);
+                    absolute.Subtract(mean);
+                    if (absolute.Sign < 0) absolute.Multiply(-1);
+                    deviation.AddExact(absolute);
+                }
+            }
+            if (deviation.Sign == 0) { output[1] = flatZero ? 1 : 0; return; }
+            // The integer coefficient is exactly representable as a double for
+            // every supported Int32 period; all products remain exact dyadics.
+            distance.Multiply(200L * period);
+            deviation.Multiply(3);
+            output[0] = distance.Ratio(deviation);
+            output[1] = 1;
+        }
+    }
+#else
     private sealed class State(int period, bool rollingDeviations, bool flatZero)
         : IMultiOutputState
     {
@@ -131,4 +193,5 @@ public sealed class WindowCommodityChannelIndex
             output[1] = 1;
         }
     }
+#endif
 }
