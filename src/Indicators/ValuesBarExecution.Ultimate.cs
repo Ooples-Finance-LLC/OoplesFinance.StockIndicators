@@ -56,21 +56,18 @@ internal static partial class ValuesBarExecution
                 }
                 return region;
             }
-            // Normalize the owned capture once. Each integer fits exactly in
-            // binary64; the common price scale cancels from every ratio.
-            for (int i = 0; i < count; i++)
-            {
-                if (cancellation.IsCancellationRequested) return region;
-                var bar = captured[i];
-                captured[i] = new Bar(default, 0, Math.ScaleB(bar.High, -grid),
-                    Math.ScaleB(bar.Low, -grid), Math.ScaleB(bar.Close, -grid), 0);
-            }
             Span<int> periods = stackalloc int[] { indicator.ShortPeriod, indicator.MiddlePeriod, indicator.LongPeriod };
             Span<long> pressures = stackalloc long[3]; pressures.Clear();
             Span<long> ranges = stackalloc long[3]; ranges.Clear();
             for (int i = 0; i < count; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
+                // Normalize and consume in one traversal. Earlier slots are
+                // already normalized when used for predecessors or eviction.
+                // The exact common price scale cancels from every ratio.
+                var bar = captured[i];
+                captured[i] = new Bar(default, 0, Math.ScaleB(bar.High, -grid),
+                    Math.ScaleB(bar.Low, -grid), Math.ScaleB(bar.Close, -grid), 0);
                 if (i > 0)
                 {
                     var current = UltimateIntegerInterval(in captured[i], in captured[i - 1], indicator.ZeroRangeContribution);

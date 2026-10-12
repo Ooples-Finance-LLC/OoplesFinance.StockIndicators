@@ -158,6 +158,7 @@ public sealed class CompactMoneyFlowExecutionTests
         try
         {
             CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (int period in new[] { 2, 14, 128 })
             foreach (var (scale, volumeScale) in new[] { (-1074, 0), (-1023, 0), (-900, 0), (0, 0), (900, 0),
                 (0, -1074), (0, -1023), (0, 900) })
             foreach (int sign in new[] { -1, 1 })
@@ -168,7 +169,7 @@ public sealed class CompactMoneyFlowExecutionTests
                     return new Bar(default, 123, Math.ScaleB(value + 1 + i % 5 / 16d, scale),
                         Math.ScaleB(value - 1 - i % 7 / 16d, scale), Math.ScaleB(value, scale), Math.ScaleB(sign * (i % 13 + 1), volumeScale));
                 }).ToArray();
-                var indicator = new WindowMoneyFlowIndex(14, minimum, suppressed);
+                var indicator = new WindowMoneyFlowIndex(period, minimum, suppressed);
                 using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
                 foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
                 {
