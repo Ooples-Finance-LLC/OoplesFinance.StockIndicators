@@ -1,0 +1,105 @@
+{
+  "revision": "5450bd1c",
+  "date": "2026-10-12",
+  "count": 10000,
+  "requestedWarmups": 10,
+  "requestedIterations": 10,
+  "preflightCpuPercent": 6,
+  "completionCpuPercent": 74,
+  "qualification": "diagnostic-only-excluded-from-catalog",
+  "processSamples": {
+    "before": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 18212,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 30360,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      }
+    ],
+    "during": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 18212,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 30360,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 10180,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedExpandingRecurrenceBenchmarks*10000* *SharedHoltWinterBenchmarks*10000* *SharedZeroSeedLaguerreBenchmarks*10000* *SharedUlcerBenchmarks*10000* --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-recursive-rollout-10k"
+      }
+    ],
+    "during2": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 18212,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 30360,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 31708,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" build src/AiDotNet.Tensors/AiDotNet.Tensors.csproj -c Debug -v q -nologo"
+      }
+    ],
+    "after": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 18212,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 30360,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      }
+    ]
+  },
+  "limits": [
+    "Initial load was 24% immediately after testing, then 6% before timing. No competing build/test seen in initial or first mid-run samples.",
+    "Completion sample contained dotnet build src/AiDotNet.Tensors/AiDotNet.Tensors.csproj -c Debug -v q -nologo. Overlap cannot be ruled out; exclude all timing from qualification, retain previous catalog unchanged at 186/401.",
+    "All 20 cases completed setup validation and measurement; no retry.",
+    "BDN minimum-iteration warnings and outlier removals retained verbatim in raw log.",
+    "Managed allocations count benchmark process threads; prepared inputs and post-sample disposal excluded."
+  ],
+  "sourceHashes": {
+    "src/Indicators/ExpandingRegularizedEma.cs": "9de3ff0f909983170c9198e8d311be434c446aefc58e031b0e792124a4ac27f5",
+    "src/Indicators/ExpandingZeroLagEma.cs": "daa242f218725dd8aa5cac57df6388e8fceaf6e0cb494da0fc40d73ad5095c09",
+    "src/Indicators/HoltWinterForecast.cs": "de5ad1693266f3b2a80f3c63e5372d78e2375a71132641a4034cfc0fcc05e62f",
+    "src/Helpers/HoltWinterRoundedKernel.cs": "6aaa921a3ee97ffd7f06043544e7042bfa1f5ecef10d3195294f7d2e7926b83b",
+    "src/Helpers/LaguerreRoundedKernel.cs": "cba44d6cbdcdbf91578aa8c1cc35aeb978b1b5b9616102140269c87f16db6025",
+    "src/Indicators/WindowUlcerIndex.cs": "940f461b723b2bf3b1d31f096d0dc167f4ef7d5ba48ab15210e1158a701c7fee"
+  }
+}
