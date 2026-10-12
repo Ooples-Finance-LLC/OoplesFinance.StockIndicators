@@ -82,7 +82,12 @@ public sealed class SmoothedAccumulationOscillator
     public IIndicatorOutput LineIsDefined => Outputs[7];
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(this);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(this);
+#else
+        new State(this);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -104,6 +109,100 @@ public sealed class SmoothedAccumulationOscillator
                 )
             );
 
+#if !NETFRAMEWORK
+    private sealed class CompactMean(int period, bool first)
+    {
+        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble((long)period + 1);
+        private int _count;
+        private JurikDyadic _sum;
+        internal JurikDyadic Value { get; private set; }
+
+        internal void Reset() { _count = 0; _sum = Value = default; }
+
+        internal void Add(JurikDyadic value)
+        {
+            int seedLength = first ? 1 : period;
+            if (_count < seedLength)
+            {
+                _sum.AddExact(value);
+                if (++_count == seedLength)
+                {
+                    Value = SeededDyadicEma.RoundedRatio(_sum, JurikDyadic.FromDouble(seedLength));
+                    _sum = default;
+                }
+            }
+            else
+            {
+                var next = Value;
+                next.Multiply(period - 1);
+                value.Multiply(2);
+                next.AddExact(value);
+                Value = SeededDyadicEma.RoundedRatio(next, _divisor);
+            }
+        }
+    }
+
+    private sealed class CompactState(SmoothedAccumulationOscillator owner) : IMultiOutputState
+    {
+        private readonly CompactMean _fast = new(owner.FastPeriod, owner.FirstValue),
+            _slow = new(owner.SlowPeriod, owner.FirstValue);
+        private JurikDyadic _total;
+        private long _index = -1;
+
+        public void Reset()
+        {
+            _fast.Reset();
+            _slow.Reset();
+            _total = default;
+            _index = -1;
+        }
+
+        private static void Publish(JurikDyadic value, int slot, Span<double> output)
+        {
+            // Each stage was already rounded. The original integer-unit state
+            // canonicalizes both exact and underflowed zero before publication.
+            output[slot] = value.Sign == 0 ? 0 : value.Mean(1);
+            output[slot + 4] = 1;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            _index++;
+            var range = JurikDyadic.FromDouble(bar.High);
+            range.Add(-bar.Low);
+            JurikDyadic multiplier = default, flow = default;
+            if (owner.FirstValue ? range.Sign > 0 : range.Sign != 0)
+            {
+                var numerator = JurikDyadic.FromDouble(bar.Close);
+                numerator.Multiply(2);
+                numerator.Add(-bar.High);
+                numerator.Add(-bar.Low);
+                if (owner.IncludeDetails)
+                    multiplier = SeededDyadicEma.RoundedRatio(numerator, range);
+                // Round the complete flow independently of the multiplier.
+                numerator.Multiply(bar.Volume);
+                flow = SeededDyadicEma.RoundedRatio(numerator, range);
+            }
+            _total.AddExact(flow);
+            var line = _total.Rounded();
+            _fast.Add(line);
+            _slow.Add(line);
+            if (owner.IncludeDetails)
+            {
+                Publish(multiplier, 1, output);
+                Publish(flow, 2, output);
+                Publish(line, 3, output);
+            }
+            if (_index >= (long)Math.Max(owner.FastPeriod, owner.SlowPeriod) - 1 + owner.Suppression)
+            {
+                var oscillator = _fast.Value;
+                oscillator.Subtract(_slow.Value);
+                Publish(oscillator.Rounded(), 0, output);
+            }
+        }
+    }
+#else
     private sealed class Mean(int period, bool first)
     {
         private long _count;
@@ -191,4 +290,5 @@ public sealed class SmoothedAccumulationOscillator
                 Publish(RocBankValue.RoundUnits(_fast.Value - _slow.Value, 1), 0, output);
         }
     }
+#endif
 }
