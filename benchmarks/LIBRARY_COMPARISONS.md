@@ -3367,3 +3367,26 @@ Raw/context: `results/shared-rollout/ulcer-cpu/prefix-repair-10k*`;
 log: `C:/Users/cheat/temp/si-ulcer-40c75e34.log`. All setup validations passed.
 Only Ulcer current evidence was updated; previous checkpoints remain archived.
 Coverage remains 181/401 APIs, not a win count.
+
+
+### Relative Volatility shared builder integration (2026-10-11)
+
+`RelativeVolatilityStrength` now executes through BuildAsync and SharedCpuStates;
+the competitor adapter and mapping use that path. Two bounded legs retain exact
+price changes, sample-deviation moments and smoothed deviations with JurikDyadic.
+Ordinary arithmetic avoids padded BigInteger values. Previous close starts at
+zero; available-history windows, singleton zero deviation and once-rounded stages
+remain unchanged. Overflowed unpublished roots/means retain extended exponents
+before the final bounded percentage. The snapshot API stays unchanged as a batch
+reference; pairwise squared-distance/reference-root tests remain independent.
+
+Adversarial review covered exact rather than rounded changes, squared exponent
+scaling for overflowed roots, lazy maximum periods, and reset of all four queues.
+Release net10.0 production/benchmark builds, nine unit cases, eight independent
+comparison cases and 58 inventory checks passed. Ordinary 1,000-bar state replay
+including reset allocates zero bytes after capacity warmup. Full/LatestOnly and
+chained results survive disposal; LatestOnly saves at least 40 bytes/bar on the
+1,000-bar regression. Existing benchmark/test warnings remain. Logs:
+`C:/Users/cheat/temp/si-rvi-builder-{production,benchmark-build,unit,comparisons}.log`.
+No native timing was run and no performance win is claimed. Direct fixture,
+timing and GPU work remain; measured coverage stays 181/401 APIs.

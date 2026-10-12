@@ -137,6 +137,7 @@ internal static class SharedCpuStates
         typeof(RisingThreeMethodsPattern),
         typeof(RollingPercentile),
         typeof(RollingPriceSum),
+        typeof(RelativeVolatilityStrength),
         typeof(ScaledTrueRange),
         typeof(SeededAdaptiveAverage),
         typeof(SeededAtrTrailingStop),
