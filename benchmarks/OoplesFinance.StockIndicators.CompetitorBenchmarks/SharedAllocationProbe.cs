@@ -57,6 +57,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation == "Skender.GetFisherTransform")
+        {
+            var fixture = new SharedFisherBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "Skender.GetConnorsRsi")
         {
             var fixture = new SharedConnorsBenchmarks { Operation = operation, Count = count };
