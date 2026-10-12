@@ -3624,3 +3624,7 @@ Shared values execution skips single-root deduplication, creates filtered nodes 
 ### Lazy legacy builder setup (2026-10-12)
 
 The facade now creates legacy graph dictionaries and callback catalogs on first use, instead of on every typed build. Existing per-builder identity, callback fallback and named-source behavior are retained. One six-arm slope probe (1k/P20; three identical samples) saves another 928 B in every builder arm: CPU Full 58,336 B, LatestOnly 9,544 B; GPU Full 58,136 B, LatestOnly 9,344 B; native serial 7,904 B, parallel 8,288 B. Evidence: `results/shared-rollout/lazy-legacy-setup/`. Production net10.0 build is clean; 107 focused unit cases passed, zero skips. The previously reported stale GPU rejection test is unchanged and outside this selection. No timing run or coverage increase.
+
+### Compact scalar LatestOnly result (2026-10-12)
+
+Nonempty single-output shared runs now retain their output array and latest bar in one owner implementing both result and snapshot interfaces. This removes the output dictionary and separate snapshot allocation while preserving lookup errors, replay rejection, warmup and disposal lifetime. Three identical 1k/P20 slope samples show another 280 B saved for CPU/GPU LatestOnly: 9,264 B / 9,064 B respectively, versus native serial 7,904 B and parallel 8,288 B. Full allocation is unchanged. Evidence: `results/shared-rollout/scalar-latest-result/`. Production net10.0 build clean; 81 focused tests passed with zero skips. No timing run or qualification increase.
