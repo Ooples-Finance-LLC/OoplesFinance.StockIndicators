@@ -47,6 +47,13 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['QuanTAlib.Epma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_regression_gpu_fixture_cpu_arms(self):
+        self.write()
+        for operation in ('LinearReg', 'LinearRegSlope', 'LinearRegIntercept', 'Tsf'):
+            path = self.qualification(f'SharedGpuRegressionBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['TaLib.Functions.' + operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_regression_statistics_explicit_operations(self):
         self.write()
         for operation in ('QuanTAlib.Slope', 'Skender.GetSlope'):

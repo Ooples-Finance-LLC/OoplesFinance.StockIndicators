@@ -8,14 +8,26 @@ public static class SharedAllocationProbe
     public sealed record Arm(string Method, long[] Bytes);
     public sealed record Report(string Operation, int Count, int Repetitions, Arm[] Arms);
 
-    public static Report Run(string operation, int count, int repetitions)
+    public static Report Run(string operation, int count, int repetitions, bool includeGpu = false)
     {
         if (count < 64) throw new ArgumentOutOfRangeException(nameof(count));
         if (repetitions is < 1 or > 50) throw new ArgumentOutOfRangeException(nameof(repetitions));
+        bool gpuRegression = operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
+            or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.Tsf";
+        if (includeGpu && !gpuRegression && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution"))
+            throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation is "QuanTAlib.Historical" or "QuanTAlib.Realized")
+        if (includeGpu && gpuRegression)
+        {
+            var fixture = new SharedGpuRegressionBenchmarks { Operation = operation[(operation.LastIndexOf('.') + 1)..], Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (operation is "QuanTAlib.Historical" or "QuanTAlib.Realized")
         {
             var fixture = new SharedLogVolatilityBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
@@ -153,6 +165,6 @@ public static class SharedAllocationProbe
         finally { (result as IDisposable)?.Dispose(); }
     }
 
-    public static void Write(TextWriter output, string operation, int count, int repetitions) =>
-        output.WriteLine(JsonSerializer.Serialize(Run(operation, count, repetitions)));
+    public static void Write(TextWriter output, string operation, int count, int repetitions, bool includeGpu = false) =>
+        output.WriteLine(JsonSerializer.Serialize(Run(operation, count, repetitions, includeGpu)));
 }

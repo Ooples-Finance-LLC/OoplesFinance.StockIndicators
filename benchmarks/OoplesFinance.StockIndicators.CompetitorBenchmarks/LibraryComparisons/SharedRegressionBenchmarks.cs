@@ -26,6 +26,16 @@ public class SharedRegressionBenchmarks
         _previousDop = CpuParallelSettings.MaxDegreeOfParallelism;
         CpuParallelSettings.MaxDegreeOfParallelism = 8;
         (_closes, _bars) = PackedWindowBenchmarkExecution.Input(Count);
+        var pair = WindowRegressionComparison.Pairs.Single(p => p.Id == "TaLib.Functions." + Operation);
+        var expected = pair.Reference!(CompetitorData.FromCloses(_closes), Period).Outputs["Value"].Values;
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            var indicator = Create();
+            using var run = Build(indicator, history);
+            var actual = run[indicator].ToArray();
+            if (actual.Length != expected.Length) throw new InvalidOperationException("Regression output length mismatch.");
+            AsinFeasibilityBenchmarks.RequireSame(expected, actual);
+        }
         PackedWindowBenchmarkChecks.Verify(Period, NativeSingle(), NativeParallel(),
             () => Create(), Build);
     }
@@ -66,7 +76,7 @@ public class SharedRegressionBenchmarks
             || range.End.Value - range.Start.Value != output.Length)
             throw new InvalidOperationException("Unexpected native regression output range.");
     }
-    private WindowLinearRegression Create() => new(Period, Operation switch
+    internal WindowLinearRegression Create() => new(Period, Operation switch
     {
         "LinearRegSlope" => WindowRegressionOutput.Slope,
         "LinearRegIntercept" => WindowRegressionOutput.Intercept,
@@ -74,7 +84,19 @@ public class SharedRegressionBenchmarks
         "Tsf" => WindowRegressionOutput.Forecast,
         _ => WindowRegressionOutput.Endpoint
     });
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => Build(indicator, mode, false, false);
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode, bool reference = false, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
+            .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        if (reference) builder.ConfigureBehavior(_ => { });
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Required GPU regression did not execute on the device.");
+        }
+        return run;
+    }
 }
