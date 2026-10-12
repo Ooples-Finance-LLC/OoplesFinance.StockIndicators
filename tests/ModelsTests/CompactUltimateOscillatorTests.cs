@@ -34,6 +34,34 @@ public sealed class CompactUltimateOscillatorTests
     }
 
     [Theory]
+    [InlineData(1, 2, 5, false)] [InlineData(3, 3, 9, true)]
+    [InlineData(7, 14, 28, false)] [InlineData(1, 1, 1, true)]
+    public void SharedHistoryPreservesEvictionAcrossGrowthWrapAndReset(int a, int b, int c, bool zero)
+    {
+        var bars = Enumerable.Range(0, 137).Select(i =>
+        {
+            double price = (i * 19 % 53 - 26) / 8d;
+            return new Bar(default, price, price + 1, price - .5, price, 1);
+        }).ToArray();
+        var expected = TrueRangeRatioReference.Ultimate(bars, [a, b, c], zero);
+        foreach (int capacity in new[] { 0, 2, bars.Length })
+        {
+            var state = new WindowUltimateOscillator.CompactState([a, b, c], zero, capacity);
+            var output = new double[2];
+            for (int replay = 0; replay < 2; replay++)
+            {
+                state.Reset();
+                for (int i = 0; i < bars.Length; i++)
+                {
+                    state.Update(in bars[i], output);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(output[0]));
+                    Assert.Equal(expected[i].HasValue ? 1d : 0d, output[1]);
+                }
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(false)] [InlineData(true)]
     public void WarmedOrdinaryWindowsAllocateNoPerBarObjects(bool zero)
     {
