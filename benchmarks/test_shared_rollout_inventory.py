@@ -41,6 +41,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['QuanTAlib.Convolution'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_commodity_channel_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedCommodityChannelBenchmarks.BuilderFull(Operation: "TaLib.Functions.Cci", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['TaLib.Functions.Cci'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_endpoint_gpu_fixture_cpu_arms(self):
         self.write()
         path = self.qualification('SharedGpuEndpointBenchmarks.BuilderFull(Operation: "Epma", Count: 1000)')

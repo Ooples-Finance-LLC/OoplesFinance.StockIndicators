@@ -87,6 +87,9 @@ def inventory(root: Path, qualifications=()):
                                   'SharedPriceProjectionBenchmarks.', 'SharedGeneratedStateBenchmarks.',
                                   'SharedRecursiveStateBenchmarks.', 'SharedLaggedChangeBenchmarks.')):
                 api = operation[1]
+            elif operation and 'SharedCommodityChannelBenchmarks.' in row['FullName']:
+                api = operation[1]
+                prefix = ''
             elif 'SharedDispersionBenchmarks.' in row['FullName']:
                 variance = re.search(r'Variance: (True|False)', row['FullName'])
                 if not variance:
