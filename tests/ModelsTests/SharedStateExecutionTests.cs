@@ -54,6 +54,34 @@ public sealed class SharedStateExecutionTests
         AssertBits(Input(count).Select(b => b.Close).ToArray(), legacy.GetSeries(price).ToArray());
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(31)]
+    public async Task MixedScalarAndMultiOutputRootsPreserveIdentityAndReadiness(int count)
+    {
+        var bars = Input(count);
+        var scalar = new FirstValueEma(7);
+        var sameSettings = new FirstValueEma(7);
+        var statistics = new WindowRegressionStatistics(7);
+        IIndicator[] roots = [scalar, statistics, sameSettings, scalar, statistics];
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            StockIndicatorBuilder Builder() => new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(roots).ConfigureHistory(history);
+            using var expected = await Builder().ConfigureBehavior(_ => { }).BuildAsync();
+            using var actual = await Builder().BuildAsync();
+            foreach (var indicator in roots)
+            foreach (var output in indicator.Outputs)
+                AssertBits(expected[output].ToArray(), actual[output].ToArray());
+            if (count != 0)
+            {
+                Assert.Equal(expected.Latest.IsWarmedUp, actual.Latest.IsWarmedUp);
+                Assert.Equal(expected.Latest.Bar, actual.Latest.Bar);
+            }
+        }
+    }
+
     [Fact]
     public async Task EveryLegacyConfigurationKeepsRuntime()
     {

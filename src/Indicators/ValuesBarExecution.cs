@@ -56,7 +56,7 @@ internal static partial class ValuesBarExecution
             throw new NotSupportedException("Required GPU pointwise execution needs a nonempty supported indicator configuration.");
         if (IsWeightedChain(indicators))
             return ExecuteWeightedChain(source, (FixedPeriodWma)indicators[0], cancellation, history);
-        var nodes = new List<Node>();
+        var nodes = new List<Node>(indicators.Count);
         try
         {
             if (history is not null && !SupportsOwned(indicators))
@@ -64,14 +64,16 @@ internal static partial class ValuesBarExecution
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
             bool boundedBatch = indicators.Count > 1 && indicators.All(i => i.Outputs.Count == 1 && IsSharedState(i) && IsBoundedWindowIndicator(i));
             bool pointwiseBatch = indicators.Count > 1 && indicators.All(IsPointwise);
-            foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
-                nodes.Add(new Node(indicator, source.Length, indicators.Count == 1, boundedBatch, pointwiseBatch));
+            if (indicators.Count == 1)
+                nodes.Add(new Node(indicators[0], source.Length, true, false, false));
+            else
+                foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
+                    nodes.Add(new Node(indicator, source.Length, false, boundedBatch, pointwiseBatch));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
             bool singleSma = nodes.Count == 1 && nodes[0].Indicator is Sma;
             double[]? close = singleSma ? nodes[0].Values[0]
                 : nodes.Any(n => n.Indicator is Sma) ? new double[source.Length] : null;
-            var active = nodes.Where(n => n.Indicator is not Sma).ToArray();
             var summary = new Core.SmaCpuKernel.GridSummary();
             var positiveRange = new Core.SmaCpuKernel.PositiveRangeSummary();
             Bar latest = default;
@@ -106,18 +108,25 @@ internal static partial class ValuesBarExecution
                 latest = FillBoundedBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
-            else for (int i = 0; i < source.Length; i++)
+            else
             {
-                cancellation.ThrowIfCancellationRequested();
-                var bar = source[i];
-                latest = bar;
-                if (owned is not null) owned[i] = bar;
-                if (!AllFieldsFinite(in bar))
-                    IndicatorInputDomain.Finite.Validate(in bar);
-                if (close is not null) { close[i] = bar.Close; summary.Include(bar.Close); }
-                foreach (var node in active) node.Append(in bar, i, cancellation);
+                // Only the row-wise mixed/state route needs this filtered list.
+                var active = nodes.Where(n => n.Indicator is not Sma).ToArray();
+                for (int i = 0; i < source.Length; i++)
+                {
+                    cancellation.ThrowIfCancellationRequested();
+                    var bar = source[i];
+                    latest = bar;
+                    if (owned is not null) owned[i] = bar;
+                    if (!AllFieldsFinite(in bar))
+                        IndicatorInputDomain.Finite.Validate(in bar);
+                    if (close is not null) { close[i] = bar.Close; summary.Include(bar.Close); }
+                    foreach (var node in active) node.Append(in bar, i, cancellation);
+                }
             }
-            var published = new Dictionary<IIndicatorOutput, double[]>();
+            int outputCount = 0;
+            foreach (var node in nodes) outputCount += node.Values.Length;
+            var published = new Dictionary<IIndicatorOutput, double[]>(outputCount);
             foreach (var node in nodes)
             {
                 cancellation.ThrowIfCancellationRequested();
@@ -155,9 +164,12 @@ internal static partial class ValuesBarExecution
                 owned!.TransferTo(history);
                 return new IndicatorRun(null, published, history, 0, warmup);
             }
+            bool ready = source.Length >= warmup;
+            if (source.Length != 0 && ready)
+                foreach (var values in published.Values)
+                    if (double.IsNaN(values[source.Length - 1])) { ready = false; break; }
             IBarSnapshot? snapshot = source.Length == 0 ? null
-                : new BarSnapshot(latest, source.Length - 1, published,
-                    source.Length >= warmup && published.Values.All(v => !double.IsNaN(v[source.Length - 1])));
+                : new BarSnapshot(latest, source.Length - 1, published, ready);
             return new LatestOnlyIndicatorRun(published, source.Length, snapshot);
         }
         finally { foreach (var node in nodes) node.Dispose(); }
@@ -552,8 +564,9 @@ internal static partial class ValuesBarExecution
         {
             Indicator = indicator;
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
-            Values = Enumerable.Range(0, indicator.Outputs.Count).Select(slot =>
-                indicator is RegressionWithChannels && slot is 5 or 6
+            Values = new double[indicator.Outputs.Count][];
+            for (int slot = 0; slot < Values.Length; slot++)
+                Values[slot] = indicator is RegressionWithChannels && slot is 5 or 6
                     || indicator is WindowRegressionStatistics && slot is 7 or 9
                     || indicator is RegressionWithFinalLine && slot is 6 or 7
                     || indicator is WindowAroon && slot >= 4
@@ -564,7 +577,7 @@ internal static partial class ValuesBarExecution
                     || slot == 1 && (singleRoot && indicator is BalanceOfPower { Length: <= 1 }
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
-                    : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count]).ToArray();
+                    : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count];
             // These three presence outputs are identical by contract. Completed
             // series expose read-only spans, so one run-owned column serves all three.
             if (indicator is RegressionWithChannels) Values[5] = Values[6] = Values[4];
@@ -575,7 +588,6 @@ internal static partial class ValuesBarExecution
             if (indicator is WindowDeviationBands) Values[7] = Values[8] = Values[6];
             if (indicator is ClassicDeviationBands) Values[4] = Values[5] = Values[3];
             if (indicator is PriorPriceChannel) Values[5] = Values[6] = Values[4];
-            _scratch = pointwise ? Array.Empty<double>() : new double[indicator is RegressionWithChannels ? 10 : indicator.Outputs.Count];
             _state = indicator switch
             {
                 RegressionWithFinalLine r => new RegressionWithFinalLine.Writer(r.Period, count),
@@ -591,6 +603,9 @@ internal static partial class ValuesBarExecution
                 MultiOutputIndicatorBase multi => multi.CreateState(),
                 _ => throw new InvalidOperationException("Unqualified values plan.")
             };
+            // Scalar and fused kernels never use a per-node output scratch buffer.
+            _scratch = _state is null or IIndicatorState ? Array.Empty<double>()
+                : new double[indicator is RegressionWithChannels ? 10 : indicator.Outputs.Count];
         }
         internal void Append(in Bar bar, int index, CancellationToken cancellation)
         {
