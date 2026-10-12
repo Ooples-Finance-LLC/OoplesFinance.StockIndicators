@@ -62,7 +62,7 @@ public sealed class BoundedUltimateExecutionTests
         {
             CpuParallelSettings.MaxDegreeOfParallelism = 8;
             long bound = (1L << 38) / (4L * Math.Max(a, Math.Max(b, c)));
-            foreach (int scale in new[] { -900, 0, 900 })
+            foreach (int scale in new[] { -1074, -1023, -900, 0, 900 })
             {
                 var bars = Enumerable.Range(0, 513).Select(i =>
                 {

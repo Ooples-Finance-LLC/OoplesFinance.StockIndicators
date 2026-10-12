@@ -66,12 +66,18 @@ internal static partial class ValuesBarExecution
                 }
                 return region;
             }
+            // A representable power-of-two multiplier preserves these certified
+            // integers exactly. Subnormal grids can require an infinite inverse;
+            // retain ScaleB for those grids instead of multiplying by infinity.
+            double priceFactor = priceGrid >= -1023 ? Math.ScaleB(1d, -priceGrid) : 0;
+            double volumeFactor = volumeGrid >= -1023 ? Math.ScaleB(1d, -volumeGrid) : 0;
             for (int i = 0; i < count; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
                 var bar = captured[i];
-                captured[i] = new Bar(default, Math.ScaleB(bar.Open, -priceGrid), 0, 0, 0,
-                    Math.ScaleB(bar.Volume, -volumeGrid));
+                captured[i] = new Bar(default,
+                    priceFactor == 0 ? Math.ScaleB(bar.Open, -priceGrid) : bar.Open * priceFactor, 0, 0, 0,
+                    volumeFactor == 0 ? Math.ScaleB(bar.Volume, -volumeGrid) : bar.Volume * volumeFactor);
             }
             Int128 positive = 0, negative = 0;
             int scale = priceGrid + volumeGrid;

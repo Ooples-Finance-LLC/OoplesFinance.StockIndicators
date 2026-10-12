@@ -158,14 +158,15 @@ public sealed class CompactMoneyFlowExecutionTests
         try
         {
             CpuParallelSettings.MaxDegreeOfParallelism = 8;
-            foreach (int scale in new[] { -900, 0, 900 })
+            foreach (var (scale, volumeScale) in new[] { (-1074, 0), (-1023, 0), (-900, 0), (0, 0), (900, 0),
+                (0, -1074), (0, -1023), (0, 900) })
             foreach (int sign in new[] { -1, 1 })
             {
                 var bars = Enumerable.Range(0, 513).Select(i =>
                 {
                     double value = 10 + (i * 13 % 101) / 8d;
                     return new Bar(default, 123, Math.ScaleB(value + 1 + i % 5 / 16d, scale),
-                        Math.ScaleB(value - 1 - i % 7 / 16d, scale), Math.ScaleB(value, scale), sign * (i % 13 + 1));
+                        Math.ScaleB(value - 1 - i % 7 / 16d, scale), Math.ScaleB(value, scale), Math.ScaleB(sign * (i % 13 + 1), volumeScale));
                 }).ToArray();
                 var indicator = new WindowMoneyFlowIndex(14, minimum, suppressed);
                 using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
