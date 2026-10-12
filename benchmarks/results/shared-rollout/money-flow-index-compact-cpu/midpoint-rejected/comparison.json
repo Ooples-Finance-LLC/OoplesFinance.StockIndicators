@@ -1,0 +1,210 @@
+[
+  {
+    "method": "BuilderFull",
+    "parameters": "Operation=Skender.GetMfi&Count=1000",
+    "baseline_mean_ns": 27685.625,
+    "candidate_mean_ns": 31858.734809027777,
+    "candidate_over_baseline": 1.1507320065567521,
+    "baseline_interval": {
+      "N": 10,
+      "Mean": 27685.625,
+      "StandardError": 834.569383194512,
+      "Level": 12,
+      "Margin": 3990.0032668510053,
+      "Lower": 23695.621733148993,
+      "Upper": 31675.628266851007
+    },
+    "candidate_interval": {
+      "N": 9,
+      "Mean": 31858.734809027777,
+      "StandardError": 406.06720002347873,
+      "Level": 12,
+      "Margin": 2047.1087806792493,
+      "Lower": 29811.626028348528,
+      "Upper": 33905.84358970703
+    },
+    "clear_regression": false
+  },
+  {
+    "method": "BuilderLatestOnly",
+    "parameters": "Operation=Skender.GetMfi&Count=1000",
+    "baseline_mean_ns": 22856.68212890625,
+    "candidate_mean_ns": 28540.81298828125,
+    "candidate_over_baseline": 1.248685737821345,
+    "baseline_interval": {
+      "N": 10,
+      "Mean": 22856.68212890625,
+      "StandardError": 306.0170601497409,
+      "Level": 12,
+      "Margin": 1463.0408139775093,
+      "Lower": 21393.64131492874,
+      "Upper": 24319.72294288376
+    },
+    "candidate_interval": {
+      "N": 10,
+      "Mean": 28540.81298828125,
+      "StandardError": 357.6625084087575,
+      "Level": 12,
+      "Margin": 1709.9531874972474,
+      "Lower": 26830.859800784,
+      "Upper": 30250.7661757785
+    },
+    "clear_regression": true
+  },
+  {
+    "method": "BuilderFull",
+    "parameters": "Operation=Skender.GetMfi&Count=10000",
+    "baseline_mean_ns": 217583.73046875,
+    "candidate_mean_ns": 260530.2734375,
+    "candidate_over_baseline": 1.1973793852887273,
+    "baseline_interval": {
+      "N": 10,
+      "Mean": 217583.73046875,
+      "StandardError": 1295.7995080325356,
+      "Level": 12,
+      "Margin": 6195.104175093757,
+      "Lower": 211388.62629365624,
+      "Upper": 223778.83464384376
+    },
+    "candidate_interval": {
+      "N": 10,
+      "Mean": 260530.2734375,
+      "StandardError": 1183.184843820843,
+      "Level": 12,
+      "Margin": 5656.703309751615,
+      "Lower": 254873.5701277484,
+      "Upper": 266186.97674725164
+    },
+    "clear_regression": true
+  },
+  {
+    "method": "BuilderLatestOnly",
+    "parameters": "Operation=Skender.GetMfi&Count=10000",
+    "baseline_mean_ns": 172037.3046875,
+    "candidate_mean_ns": 240246.9921875,
+    "candidate_over_baseline": 1.396481958514176,
+    "baseline_interval": {
+      "N": 8,
+      "Mean": 172037.3046875,
+      "StandardError": 462.2596307573701,
+      "Level": 12,
+      "Margin": 2499.8457759146445,
+      "Lower": 169537.45891158536,
+      "Upper": 174537.15046341464
+    },
+    "candidate_interval": {
+      "N": 10,
+      "Mean": 240246.9921875,
+      "StandardError": 1111.9644687512039,
+      "Level": 12,
+      "Margin": 5316.204922300007,
+      "Lower": 234930.7872652,
+      "Upper": 245563.1971098
+    },
+    "clear_regression": true
+  },
+  {
+    "method": "BuilderFull",
+    "parameters": "Operation=TaLib.Functions.Mfi&Count=1000",
+    "baseline_mean_ns": 27177.254231770832,
+    "candidate_mean_ns": 34509.74365234375,
+    "candidate_over_baseline": 1.2698024369217207,
+    "baseline_interval": {
+      "N": 9,
+      "Mean": 27177.254231770832,
+      "StandardError": 354.8077163455946,
+      "Level": 12,
+      "Margin": 1788.694067242621,
+      "Lower": 25388.56016452821,
+      "Upper": 28965.948299013453
+    },
+    "candidate_interval": {
+      "N": 10,
+      "Mean": 34509.74365234375,
+      "StandardError": 1024.9642550718293,
+      "Level": 12,
+      "Margin": 4900.264505855884,
+      "Lower": 29609.479146487865,
+      "Upper": 39410.008158199635
+    },
+    "clear_regression": true
+  },
+  {
+    "method": "BuilderLatestOnly",
+    "parameters": "Operation=TaLib.Functions.Mfi&Count=1000",
+    "baseline_mean_ns": 25440.474853515625,
+    "candidate_mean_ns": 27355.732421875,
+    "candidate_over_baseline": 1.075283876554478,
+    "baseline_interval": {
+      "N": 10,
+      "Mean": 25440.474853515625,
+      "StandardError": 438.42580185438663,
+      "Level": 12,
+      "Margin": 2096.0754335066017,
+      "Lower": 23344.399420009024,
+      "Upper": 27536.550287022226
+    },
+    "candidate_interval": {
+      "N": 10,
+      "Mean": 27355.732421875,
+      "StandardError": 234.20517443617044,
+      "Level": 12,
+      "Margin": 1119.7144658443954,
+      "Lower": 26236.017956030606,
+      "Upper": 28475.446887719394
+    },
+    "clear_regression": false
+  },
+  {
+    "method": "BuilderFull",
+    "parameters": "Operation=TaLib.Functions.Mfi&Count=10000",
+    "baseline_mean_ns": 207921.73394097222,
+    "candidate_mean_ns": 259514.2578125,
+    "candidate_over_baseline": 1.2481343479281228,
+    "baseline_interval": {
+      "N": 9,
+      "Mean": 207921.73394097222,
+      "StandardError": 1528.3988742848908,
+      "Level": 12,
+      "Margin": 7705.125545101829,
+      "Lower": 200216.6083958704,
+      "Upper": 215626.85948607404
+    },
+    "candidate_interval": {
+      "N": 10,
+      "Mean": 259514.2578125,
+      "StandardError": 1502.8982538587088,
+      "Level": 12,
+      "Margin": 7185.225175272583,
+      "Lower": 252329.0326372274,
+      "Upper": 266699.48298777256
+    },
+    "clear_regression": true
+  },
+  {
+    "method": "BuilderLatestOnly",
+    "parameters": "Operation=TaLib.Functions.Mfi&Count=10000",
+    "baseline_mean_ns": 172806.025390625,
+    "candidate_mean_ns": 233971.2890625,
+    "candidate_over_baseline": 1.3539533041953369,
+    "baseline_interval": {
+      "N": 10,
+      "Mean": 172806.025390625,
+      "StandardError": 715.7653777596161,
+      "Level": 12,
+      "Margin": 3422.0117021643596,
+      "Lower": 169384.01368846063,
+      "Upper": 176228.03709278937
+    },
+    "candidate_interval": {
+      "N": 10,
+      "Mean": 233971.2890625,
+      "StandardError": 525.8461786505758,
+      "Level": 12,
+      "Margin": 2514.0246130834953,
+      "Lower": 231457.2644494165,
+      "Upper": 236485.3136755835
+    },
+    "clear_regression": true
+  }
+]
