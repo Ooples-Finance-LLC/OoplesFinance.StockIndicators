@@ -78,7 +78,7 @@ internal static partial class ValuesBarExecution
             var summary = new Core.SmaCpuKernel.GridSummary();
             var positiveRange = new Core.SmaCpuKernel.PositiveRangeSummary();
             Bar latest = default;
-            bool fusedSma = false, fusedFinite = false;
+            bool fusedSma = false, fusedFinite = false, obvFinite = false;
             if (singleSma)
             {
                 int period = Math.Max(1, ((Sma)nodes[0].Indicator).Length);
@@ -104,7 +104,7 @@ internal static partial class ValuesBarExecution
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is SeededOnBalanceVolume obv)
-                latest = FillOnBalanceVolume(source, nodes[0].Values, obv, cancellation, owned);
+                latest = FillOnBalanceVolume(source, nodes[0].Values, obv, cancellation, owned, out obvFinite);
             else if (nodes.Count == 1 && nodes[0].Indicator is AccumulationDistributionWithAverage adl)
                 latest = FillAccumulationDistribution(source, nodes[0].Values, adl, cancellation, owned);
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
@@ -142,7 +142,7 @@ internal static partial class ValuesBarExecution
                 // EMA is an exactly rounded convex mean of finite values. Neither
                 // output needs the generic scan (including shared EMA(1) arrays).
                 bool finiteByConstruction = boundedBatch || pointwiseBatch || nodes.Count == 1 && (IsPointwise(node.Indicator)
-                    || node.Indicator is TrueRange or BalanceOfPower || IsBoundedWindowIndicator(node.Indicator));
+                    || node.Indicator is TrueRange or BalanceOfPower || obvFinite || IsBoundedWindowIndicator(node.Indicator));
                 if (node.Indicator is Sma sma)
                     finiteByConstruction = fusedSma ? fusedFinite
                         : ComputeSma(close!, node.Values[0], Math.Max(1, sma.Length), summary, cancellation, singleSma, positiveRange.Certifies(Math.Max(1, sma.Length)));
