@@ -47,6 +47,7 @@ internal static class SharedCpuStates
         typeof(ClosingMarubozuCandle),
         typeof(CompensatedExponentialAverage),
         typeof(ConcealingBabySwallowCandle),
+        typeof(ConnorsStrength),
         typeof(CounterattackCandle),
         typeof(DarkCloudCoverCandle),
         typeof(DecayingWindowExtreme),

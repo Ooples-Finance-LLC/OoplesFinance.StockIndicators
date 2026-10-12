@@ -6,6 +6,29 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class ConnorsStrengthBuilderTests
 {
+    [Fact]
+    public void LatestOnlyAvoidsFullBarStorageOnTheSharedCpuPath()
+    {
+        var bars = Enumerable.Range(0, 1000).Select(i =>
+        {
+            double price = 100 + (i * 13 % 101) / 8d;
+            return new Bar(default, price, price, price, price, 0);
+        }).ToArray();
+        long Measure(IndicatorHistoryMode history)
+        {
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(new ConnorsStrength()).ConfigureHistory(history)
+                .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            GC.KeepAlive(run);
+            return allocated;
+        }
+        for (int i = 0; i < 3; i++) { Measure(IndicatorHistoryMode.Full); Measure(IndicatorHistoryMode.LatestOnly); }
+        long full = Measure(IndicatorHistoryMode.Full), latest = Measure(IndicatorHistoryMode.LatestOnly);
+        Assert.True(full - latest >= 40L * bars.Length, $"Full={full}, LatestOnly={latest}");
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]

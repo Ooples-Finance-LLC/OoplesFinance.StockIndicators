@@ -3001,3 +3001,23 @@ State retains the verified compact return-key ranking, inclusive window, initial
 The competitor comparison now executes BuildAsync and checks every value/presence pair. The manifest and catalog map Skender.GetConnorsRsi to ConnorsStrength; archived measurements remain historical, and direct four-arm timing qualification is still pending. Coverage remains 178/401 APIs.
 
 Validation: net10.0 production/benchmark builds, ten builder/arithmetic/allocation tests, five competitor comparison tests and 55 inventory checks passed. Builder tests cover Full/LatestOnly, close-input chaining, all eight columns after disposal, reset, lifecycle validation and maximum periods. The shared state allocated zero bytes over 1000 ordinary updates after capacity warmup, including startup after reset. Production used `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark/test projects used `-p:BuildProjectReferences=false`. Unit filters: ConnorsStrengthBuilderTests and CompactConnorsTests; comparison filter: ConnorsComparisonTests; inventory: `python -m unittest discover -s benchmarks -p test_shared_rollout_inventory.py`. Logs: `C:/Users/cheat/temp/si-connors-builder-*`, with final benchmark/unit logs suffixed `-final`. No timing campaign ran.
+
+
+### Direct Connors CPU comparison and shared-route registration (2026-10-11)
+
+SharedConnorsBenchmarks retains all four native nullable outputs directly from Skender 2.7.3's eager tuple API List, avoiding quote conversion and measured normalization/copying. The native parallel arm joins result references after complete-prefix replay in up to eight chunks, including all temporary native work. Source inspection covered ConnorsRsi.Api.cs, ConnorsRsi.Series.cs and tuple sorting in the local Stock.Indicators checkout; setup verifies the actual package's outputs and eager result type. Independent native/owned references, dates, all values/masks, minimal startup and uneven prefix boundaries are checked outside measurement. The allocation probe and inventory parser recognize the fixture.
+
+One four-arm run at 10000 bars used 20 warmups and 15 requested measurement iterations on production d2f1e196 / fixture 02f617e4. Preflight CPU was 4%, completion 8%; process samples before, during and after found no competing dotnet builds/tests. Raw report and source/context metadata: `results/shared-rollout/connors-cpu/initial-10k.json.gz` and adjacent context JSON.
+
+| Arm | Mean ns | CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 146784482.69 | 145219861.86 / 148349103.52 | 1136682 |
+| LatestOnly | 147742092.86 | 146645938.06 / 148838247.65 | 1139194 |
+| Native serial | 2112779.91 | 2016747.47 / 2208812.35 | 3081824 |
+| Native parallel | 9174206.06 | 8507527.39 / 9840884.73 | 13952993 |
+
+LatestOnly allocated about 63% less than native serial but took about 70 times as long. Similar Full/LatestOnly allocations exposed a missing ConnorsStrength entry in SharedCpuStates: the new builder indicator used the general route. The registration is now added, with a regression asserting that LatestOnly avoids full bar storage. This routing correction is NOT included in the report above. The first attempt collected no measurements because BDN rejected an IEnumerable return signature; the fixture now declares the native List type without adding a copy. No second timing campaign was run after the routing correction.
+
+The catalog retains other evidence and adds Connors qualification: 179/401 APIs timing-qualified, not wins. Remaining Connors latency costs still require optimization; neither the storage regression nor the allocation advantage establishes a latency win.
+
+Verification: final production/benchmark net10.0 builds, eleven builder/arithmetic/allocation tests, ten fixture/reference comparison tests and 56 inventory checks passed. The new Full-versus-LatestOnly storage regression passed after registration. Builds use `-f net10.0 --no-restore` and benchmark/test projects use `-p:BuildProjectReferences=false`. Unit filters: ConnorsStrengthBuilderTests and CompactConnorsTests; comparison filters: SharedConnorsBenchmarkTests and ConnorsComparisonTests. Logs: `C:/Users/cheat/temp/si-connors-fixture-*` and `si-connors-routing-*`.
