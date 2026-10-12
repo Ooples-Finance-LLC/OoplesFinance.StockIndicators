@@ -3475,3 +3475,21 @@ Skender.Stock.Indicators 2.7.3 `src/s-z/Stc/Stc.Series.cs` was reviewed: it mate
 Production net10.0 Release and benchmark builds passed; the benchmark/test builds retain existing framework/analyzer warnings. Eighteen focused unit cases (`SingleStochasticCycleBuilderTests|KlingerVolumeWithSignalBuilderTests`), 17 independent comparison/fixture cases (`SchaffCycleComparisonTests|KlingerComparisonTests|SharedKlingerBenchmarkTests`) and 61 inventory checks passed. Verification covers Full/LatestOnly value/presence retention after disposal, owned bars, exact startup, flat/tied windows, queue growth/wrap/eviction, reversed replay after reset, maximum periods, invalid inputs, cancellation and explicit GPU rejection. Independent wide/subnormal comparisons passed. Both cycle and Klinger state replays allocate zero bytes over 1,000 ordinary updates after reset/capacity warmup.
 
 The manifest/catalog now map `Skender.GetStc` to `SingleStochasticCycle`; existing qualification evidence was preserved. No direct STC timing fixture or CPU/GPU win is claimed in this batch. Timing coverage remains 181/401; the full rollout is incomplete.
+
+
+### Schaff direct native fixture and allocation checkpoint (`8af126b4`)
+
+`SharedSchaffCycleBenchmarks` measures Full/LatestOnly `BuildAsync()` and direct Skender serial/parallel execution, with defaults cycle10/fast23/slow50. The pinned 2.7.3 tuple API eagerly sorts/materializes its input and executes STC; its result collection is retained directly. This values-only route avoids decimal quote conversion. Setup verifies the quote overload gives identical values/presence, verifies serial versus full-prefix parallel replay exactly, and checks independent owned/native references. This route choice is based on avoiding conversion work, not a claim of universal fastest-overload timing. Input preparation and reference checks are outside measurement; native constructor/collection work, prefix replay and result writes remain inside.
+
+Benchmark build and 13 focused `SchaffCycleComparisonTests|SharedSchaffCycleBenchmarkTests` cases passed, including counts1/49/50/58/59/60/61/127 around independent EMA, stochastic and final smoothing startup. The 62 inventory checks passed. Existing production binaries from `f958a4da` were reused; no unchanged production rebuild or unit-suite rerun was needed.
+
+At 1,000 bars, the allocation-only probe used ten warmups and three samples per arm, with identical totals in each sample:
+
+| Arm | Allocated bytes |
+|---|---:|
+| Builder Full | 69,704 |
+| Builder LatestOnly | 21,016 |
+| Native serial (tuple) | 547,256 |
+| Native parallel (tuple prefixes) | 2,466,832 |
+
+LatestOnly allocates **96.16% less than native serial**. Counts include all managed threads and retained results, excluding setup/disposal. Parsed/raw evidence and source hashes are in `results/shared-rollout/schaff-cycle-cpu/compact-state-allocation-1k*`. Other repository tests were active and CPU was 87% at inspection, so no timing campaign was started. This does not establish a latency or GPU win; timing qualification remains 181/401.

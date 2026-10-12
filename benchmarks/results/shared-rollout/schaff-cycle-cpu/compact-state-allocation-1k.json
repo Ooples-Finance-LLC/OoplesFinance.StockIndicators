@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetStc",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        69704,
+        69704,
+        69704
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        21016,
+        21016,
+        21016
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        547256,
+        547256,
+        547256
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        2466832,
+        2466832,
+        2466832
+      ]
+    }
+  ]
+}
