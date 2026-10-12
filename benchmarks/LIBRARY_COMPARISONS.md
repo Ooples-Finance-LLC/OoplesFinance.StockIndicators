@@ -3595,3 +3595,10 @@ The net10.0 production/comparison builds, 25 focused unit cases, 21 regression/c
 `WindowLinearRegression` now runs endpoint, forecast, slope and oldest-candle intercept on the existing cached weighted GPU kernel. Each 64-row worker maintains exact sum and newest-first lag sum; the selected rational output is rounded once. Available-history startup and period-one zero slope are preserved. The 2P^2 term certificate bounds numerator products, signed totals and lag shifts through period 32767; slope denominators remain exactly representable integers. Unsupported periods, off-certificate inputs and Angle reject required GPU execution rather than silently using CPU. Auto remains CPU.
 
 The net10.0 production build and 62 real-device regression/weighted-family cases passed with zero skips. Checks cover bitwise CPU parity, startup, worker boundaries, largest-period eviction, ownership after disposal, input-before-certificate validation, rejection/recovery and cancellation. No timing or allocation probe was run for this extension; no GPU speedup is claimed and timing qualification remains 181/401.
+
+
+### Certified CPU linear regression recurrence
+
+The finite builder now specializes WindowLinearRegression periods through 32767 using the same certified sum/lag recurrence as the GPU. Endpoint, forecast, slope, intercept and CPU angle avoid general exact-state updates while the input certificate holds. A failed certificate seeds the existing exact state from the retained chronological window, preserving arbitrary finite inputs and selected-output overflow behavior. The existing AiDotNet.Tensors bounded engine supplies parallel overlap replay and mixed-root execution; larger periods keep the original path.
+
+The net10.0 production/comparison builds, 21 focused CPU/GPU cases and 10 independent regression comparisons passed with zero skips. Checks include late certificate failure after ring wrap, mixed parallel roots, large-period fallback, signed zero, unpublished overflow, raw validation priority, cancellation and owned results. A warmed 1,000-bar certified state replay allocated zero managed bytes, excluding construction and output storage.
