@@ -3533,3 +3533,21 @@ For period P, first coefficient F and step S, the certificate uses `P * max(1, a
 The net10.0 Release production build passed with zero warnings/errors. The focused filter `TensorsAffineConvolutionGpuExecutionTests|TensorsEndpointWeightedGpuExecutionTests|TensorsWeightedAverageGpuExecutionTests|TensorsTriangularGpuExecutionTests|TensorsRollingSumGpuExecutionTests` passed **53 cases with zero skips** on the available GPU. Coverage includes exact CPU bit comparisons, both history modes, 64-output block boundaries, ascending/descending/negative/zero weights, zero prefix/full mass, large coefficients, one-element subnormal identity, unsupported coefficients/inputs, validation precedence, cancellation and workspace recovery. All preexisting weighted-family device cases passed after the kernel signature change. Test builds retain existing framework/analyzer warnings.
 
 This extends actual GPU execution for the affine subset of the QuanTAlib.Convolution mapping; it does not claim arbitrary convolution support or a GPU speedup. No new benchmark campaign was started under concurrent machine load. Timing qualification remains181/401 and broader GPU/graph rollout is incomplete.
+
+
+### Affine convolution six-path GPU comparison (`4ee6d76c`)
+
+`SharedGpuConvolutionBenchmarks` reuses independent weighted-window CPU/native references and verifies actual GPU execution with exact output parity. It measures complete CPU/GPU Full/LatestOnly builds against direct native serial and P-1-seeded native parallel calls. The fixture uses twenty newest-first coefficients1..20; coefficient arrays and indicator construction are inside measured methods, while source preparation and reference checks are setup-only.
+
+The benchmark build, 13 shared allocation-probe regression cases and 64 inventory checks passed. The real six-path GPU probe completed all backend/reference assertions. At 1,000 bars after ten warmups, three managed-allocation samples yielded:
+
+| Method | Allocated bytes |
+|---|---:|
+| CPU Full | 66,928 / 66,928 / 67,360 |
+| CPU LatestOnly | 18,240 (all three) |
+| GPU Full | 60,248 (all three) |
+| GPU LatestOnly | 11,560 (all three) |
+| Native serial | 220,272 (all three) |
+| Native parallel | 231,440 (all three) |
+
+The 432-byte CPU Full variation is preserved without attribution. These totals include all managed threads and retained results; they exclude cached kernel/workspace creation, setup and post-sample disposal, and do not measure total device/native memory. Raw/parsed evidence and exact revisions are under `results/shared-rollout/affine-convolution-gpu/allocation-1k*`. Other build/test processes remained active (25% CPU at inspection), so no timing run was started. Timing qualification remains181/401; device parity and managed-allocation savings do not prove a speedup.
