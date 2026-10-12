@@ -16,9 +16,10 @@ internal static class ExactIntervalLogRatio
             double relative = difference.Ratio(denominator);
             double argument = 1 + relative;
             if (argument == 1) return relative;
-            var top = new ExactMeanAccumulator(); top.AddProduct(Math.Log(argument), relative);
-            var bottom = new ExactMeanAccumulator(); bottom.Add(argument - 1);
-            return top.Ratio(bottom);
+            // Two binary64 factors require at most 106 significant bits.
+            // Keep their product exact without the general accumulator's heap storage.
+            var top = JurikDyadic.FromDouble(Math.Log(argument)); top.Multiply(relative);
+            return top.Ratio(JurikDyadic.FromDouble(argument - 1));
         }
         double estimate = numerator.Ratio(denominator);
         int exponent = double.IsInfinity(estimate) ? 1024 : estimate == 0 ? -1074 : Math.ILogB(estimate);
