@@ -1,11 +1,40 @@
 using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
+using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactUlcerTests
 {
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    [InlineData(14)]
+    public void CachedContributionsFollowExpiringPeaksAbsentPrefixesAndExtremeRecovery(int period)
+    {
+        double[] extremes = [double.Epsilon, 2 * double.Epsilon, 0, -1, double.MaxValue,
+            -double.MaxValue, 1, -double.MaxValue / 80, 1, 1, 0, 1, 1, 1, 100, 90];
+        var prices = Enumerable.Range(0, 160).Select(i => i < extremes.Length ? extremes[i]
+            : i < 64 ? 100d - i // Repeated expiration of the highest peak.
+            : i < 112 ? i % 11 == 0 ? 0d : 50d // Plateau and missing-prefix recovery.
+            : 100d + (i * 13 % 101) / 8d).ToArray();
+        var state = (IMultiOutputState)new WindowUlcerIndex(period).CreateState();
+        var output = new double[2];
+        foreach (var sequence in new[] { prices, prices.Reverse().ToArray() })
+        {
+            state.Reset();
+            var bars = sequence.Select(p => new Bar(default, p, p, p, p, 0)).ToArray();
+            var expected = WindowUlcerReference.Calculate(bars, period);
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(bars[i], output);
+                Assert.Equal(expected[i].HasValue ? 1d : 0, output[1]);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(output[0]));
+            }
+        }
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(3)]
