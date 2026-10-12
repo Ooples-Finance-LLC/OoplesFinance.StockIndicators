@@ -8,6 +8,25 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactConnorsTests(Xunit.Abstractions.ITestOutputHelper log)
 {
     [Fact]
+    public void FullSignificandsAndFiniteExponentRangeMatchIntegerProducts()
+    {
+        var random = new Random(10591);
+        double Next() => BitConverter.Int64BitsToDouble(random.NextInt64(1L << 52)
+            | ((long)random.Next(2047) << 52) | (random.Next(2) == 0 ? 0 : long.MinValue));
+        for (int i = 0; i < 2000; i++)
+        {
+            double a = Next(), b = Math.Abs(Next()), c = Next(), d = Math.Abs(Next());
+            if (b == 0) b = double.Epsilon;
+            if (d == 0) d = double.Epsilon;
+            int expected = (ExactVarianceWindow.Units(a) * ExactVarianceWindow.Units(d)
+                - ExactVarianceWindow.Units(c) * ExactVarianceWindow.Units(b)).Sign;
+            Assert.Equal(expected, new ReturnKey(a, b).CompareTo(new ReturnKey(c, d)));
+            Assert.Equal(-expected, new ReturnKey(c, d).CompareTo(new ReturnKey(a, b)));
+            Assert.Equal(0, new ReturnKey(a, b).CompareTo(new ReturnKey(a, b)));
+        }
+    }
+
+    [Fact]
     public void KeysMatchExactCrossProductsIncludingOverflowAndFalseTies()
     {
         double[] values = [0, -0d, 1, -1, Math.BitIncrement(1d), Math.BitDecrement(1d),
@@ -29,14 +48,17 @@ public sealed class CompactConnorsTests(Xunit.Abstractions.ITestOutputHelper log
     }
 
     [Fact]
-    public void OrdinaryKeyComparisonsAllocateNothing()
+    public void KeyComparisonsAllocateNothingIncludingExtremeExponents()
     {
         var keys = Enumerable.Range(0, 100)
-            .Select(i => new ReturnKey(100 + i / 8d, 100 + (i * 13 % 101) / 8d)).ToArray();
+            .Select(i => new ReturnKey(100 + i / 8d, 100 + (i * 13 % 101) / 8d))
+            .Concat(new[] { new ReturnKey(double.MaxValue, double.Epsilon),
+                new ReturnKey(double.Epsilon, double.MaxValue), new ReturnKey(-double.MaxValue, double.Epsilon),
+                new ReturnKey(-double.Epsilon, double.MaxValue), new ReturnKey(0, 1), new ReturnKey(1, 0) }).ToArray();
         int Run()
         {
             int total = 0;
-            for (int i = 0; i < 4000; i++) total += keys[i % 100].CompareTo(keys[(i * 7) % 100]);
+            for (int i = 0; i < 4000; i++) total += keys[i % keys.Length].CompareTo(keys[(i * 7) % keys.Length]);
             return total;
         }
         int expected = 0;
