@@ -35,6 +35,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         path.write_text(json.dumps({'Benchmarks': rows}))
         return path
 
+    def test_schaff_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedSchaffCycleBenchmarks.BuilderFull(Operation: "Skender.GetStc", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetStc'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_klinger_explicit_operation(self):
         self.write()
         path = self.qualification('SharedKlingerBenchmarks.BuilderFull(Operation: "Skender.GetKvo", Count: 1000)')
