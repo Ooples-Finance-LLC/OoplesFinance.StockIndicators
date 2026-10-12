@@ -1,0 +1,39 @@
+{
+  "Operation": "TaLib.Functions.LinearRegSlope",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        566416,
+        566416,
+        566416
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        85392,
+        85392,
+        85392
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        79904,
+        79904,
+        79904
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        80288,
+        80288,
+        80288
+      ]
+    }
+  ]
+}
