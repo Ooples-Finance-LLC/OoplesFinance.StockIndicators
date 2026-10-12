@@ -75,10 +75,10 @@ public sealed class WindowCommodityChannelIndex
             );
 
 #if !NETFRAMEWORK
-    private sealed class CompactState(int period, bool rollingDeviations, bool flatZero) : IMultiOutputState
+    internal sealed class CompactState(int period, bool rollingDeviations, bool flatZero, int count = 0) : IMultiOutputState
     {
-        private readonly Queue<double> _prices = new();
-        private readonly Queue<JurikDyadic> _deviations = new();
+        private readonly Queue<double> _prices = new(Math.Min(period, count));
+        private readonly Queue<JurikDyadic> _deviations = new(rollingDeviations ? Math.Min(period, Math.Max(0, count - period + 1)) : 0);
         private JurikDyadic _sum, _deviationSum;
 
         public void Reset()
