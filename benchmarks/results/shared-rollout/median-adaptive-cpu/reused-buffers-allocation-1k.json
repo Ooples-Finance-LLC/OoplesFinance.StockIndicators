@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Maaf",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        61264,
+        61264,
+        61264
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        12576,
+        12576,
+        12576
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        3466992,
+        3466992,
+        3466992
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        15673112,
+        15673112,
+        15673112
+      ]
+    }
+  ]
+}
