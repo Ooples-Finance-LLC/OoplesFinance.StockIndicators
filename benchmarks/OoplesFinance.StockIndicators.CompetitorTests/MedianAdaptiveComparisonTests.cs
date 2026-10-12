@@ -85,6 +85,7 @@ public sealed class MedianAdaptiveComparisonTests
                 .ToArray();
             var values = MedianAdaptiveSnapshot.Calculate(bars, 5);
             Assert.Equal(MedianAdaptiveComparison.Reference(prices, 5, .002, false), values);
+            Assert.Equal(values, MedianAdaptiveComparison.Owned(bars, 5, .002));
             Assert.All(values, v => Assert.True(double.IsFinite(v)));
             Assert.Equal(values, MedianAdaptiveSnapshot.Calculate(bars, 5));
             Assert.Equal(

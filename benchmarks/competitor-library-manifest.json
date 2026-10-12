@@ -318,12 +318,12 @@
       "QuanTAlib.Maaf"
     ],
     "Status": "paired",
-    "OoplesIndicator": "MedianAdaptiveSnapshot",
+    "OoplesIndicator": "MedianAdaptiveAverage",
     "Outputs": [
       "Value"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "MedianAdaptiveSnapshot preserves raw first-three prices, four-price 1/2/2/1 smoothing, descending-by-two upper-median windows and a signed median error denominator. The final filter length is at least three; finite signed thresholds are supported. Complete smoothing updates round once and error thresholds compare exact ratios, preserving wide and tiny distinctions. Independent order-statistic/rational and staged-native references cover odd/even periods, startup, negative/zero medians, threshold neighbors, wide/subnormal inputs, huge periods, fresh/prefix calls and corrupted outputs. Native staged differences/products can overflow; owned history grows lazily."
+    "CompetitorLimitation": "MedianAdaptiveAverage executes through BuildAsync with reusable ring and sorted buffers, sorting once per mature bar and deleting the two oldest occurrences for each shorter candidate. MedianAdaptiveSnapshot remains the batch reference. It preserves raw first-three prices, four-price 1/2/2/1 smoothing, descending-by-two upper-median windows and a signed median error denominator. The final filter length is at least three; finite signed thresholds are supported. Complete smoothing updates round once and error thresholds compare exact ratios, preserving wide and tiny distinctions. Independent order-statistic/rational and staged-native references cover odd/even periods, startup, negative/zero medians, threshold neighbors, wide/subnormal inputs, huge periods, fresh/prefix calls and corrupted outputs. Native staged differences/products can overflow; owned history grows lazily."
   },
   {
     "Id": "QuanTAlib.Mama",

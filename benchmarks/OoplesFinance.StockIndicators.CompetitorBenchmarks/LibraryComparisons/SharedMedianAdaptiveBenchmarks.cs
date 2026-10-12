@@ -1,0 +1,71 @@
+using AiDotNet.Tensors.Helpers;
+using BenchmarkDotNet.Attributes;
+using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Indicators;
+
+namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
+
+[MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
+public class SharedMedianAdaptiveBenchmarks
+{
+    private const int Period = 39;
+    [Params("QuanTAlib.Maaf")] public string Operation { get; set; } = "QuanTAlib.Maaf";
+    [Params(1_000, 10_000)] public int Count { get; set; }
+    private Bar[] _bars = null!;
+    private QuanTAlib.TValue[] _input = null!;
+    private int _priorDop;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        _priorDop = CpuParallelSettings.MaxDegreeOfParallelism;
+        if (Count < 1) throw new ArgumentOutOfRangeException(nameof(Count));
+        if (Operation != "QuanTAlib.Maaf") throw new ArgumentException("Unknown median adaptive operation.");
+        CpuParallelSettings.MaxDegreeOfParallelism = 8;
+        var prices = Enumerable.Range(0, Count).Select(i => 100 + (i * 13 % 101) / 8d).ToArray();
+        _bars = prices.Select((p, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), p, p + 1, p - 1, p, 1)).ToArray();
+        _input = prices.Select((p, i) => new QuanTAlib.TValue(_bars[i].Time, p, true, false)).ToArray();
+        var expected = MedianAdaptiveComparison.Reference(prices, Period, .002, false);
+        var nativeExpected = MedianAdaptiveComparison.Reference(prices, Period, .002, true);
+        var serial = NativeSingle();
+        AsinFeasibilityBenchmarks.RequireSame(nativeExpected, serial);
+        AsinFeasibilityBenchmarks.RequireSame(serial, NativeParallel());
+        for (int i = 0; i < Count; i++)
+            if (Math.Abs(serial[i] - expected[i]) > 1e-9)
+                throw new InvalidOperationException("Native and owned median adaptive disagree on benchmark inputs.");
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            var indicator = new MedianAdaptiveAverage(Period);
+            using var run = Build(indicator, history);
+            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+        }
+    }
+
+    [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
+    [Benchmark] public IIndicatorRun BuilderFull() => Build(new MedianAdaptiveAverage(Period), IndicatorHistoryMode.Full);
+    [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new MedianAdaptiveAverage(Period), IndicatorHistoryMode.LatestOnly);
+    [Benchmark(Baseline = true)] public double[] NativeSingle()
+    {
+        var result = new double[Count]; Calculate(0, Count, result); return result;
+    }
+    [Benchmark] public double[] NativeParallel()
+    {
+        var result = new double[Count];
+        int workers = Math.Min(Count, Math.Min(8, Environment.ProcessorCount));
+        CpuParallelSettings.LightweightParallel(workers, workers, worker =>
+            Calculate(Count * worker / workers, Count * (worker + 1) / workers, result));
+        return result;
+    }
+    private void Calculate(int start, int end, double[] result)
+    {
+        var state = new QuanTAlib.Maaf(Period);
+        // The filter and candidate are recursive. Exact worker outputs require
+        // replay from the beginning; all prefix work and allocations are measured.
+        int seed = 0;
+        for (int i = seed; i < start; i++) state.Calc(_input[i]);
+        for (int i = start; i < end; i++) result[i] = state.Calc(_input[i]).Value;
+    }
+    private IIndicatorRun Build(MedianAdaptiveAverage indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
+        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+}

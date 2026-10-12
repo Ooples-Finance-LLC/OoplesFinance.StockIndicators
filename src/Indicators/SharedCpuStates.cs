@@ -106,6 +106,7 @@ internal static class SharedCpuStates
         typeof(MassNormalizedQuadrupleEma),
         typeof(MatHoldCandle),
         typeof(MatchingLowCandle),
+        typeof(MedianAdaptiveAverage),
         typeof(ModifiedHikkakeCandle),
         typeof(MoneyFlowWithDetails),
         typeof(MorningDojiStarCandle),
