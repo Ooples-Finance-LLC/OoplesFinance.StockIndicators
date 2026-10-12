@@ -10,6 +10,7 @@ internal static partial class ValuesBarExecution
             or WindowPathRatio { Period: < int.MaxValue } or WindowLinearRegression { Period: <= 32767 } or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || indicator is WindowReturnBeta { Period: < int.MaxValue }
         || indicator is WindowCorrelation or WindowPairStatistics
+        || CommodityReplayWindow(indicator) > 0
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
         || RelativeVolatilityWindow(indicator) > 0
@@ -20,6 +21,14 @@ internal static partial class ValuesBarExecution
         || PercentileCandlePeriod(indicator) > 0
         || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0
         || TrendReversalWindow(indicator) > 0;
+
+    private static int CommodityReplayWindow(IIndicator indicator)
+    {
+        if (indicator is not WindowCommodityChannelIndex commodity) return 0;
+        // P distances each use their own P-price mean: 2P-1 prices total.
+        long size = commodity.RollingDeviations ? 2L * commodity.Period - 1 : commodity.Period;
+        return size <= int.MaxValue ? (int)size : 0;
+    }
 
     // P smoothed deviations each require P changes and their preceding price:
     // 2P prices in total, including the assigned output bar.
@@ -106,7 +115,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
-        if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics) return 512;
+        if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex) return 512;
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
         if (indicator is Wma or WilliamsR or EndpointWeightedAverage or FixedPeriodWma or FibonacciWeightedAverage or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or PriorPriceChannel or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
@@ -728,6 +737,24 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    private struct CommodityKernel(WindowCommodityChannelIndex.CompactState state, BoundedOutput target) : IBoundedKernel<CommodityKernel>
+    {
+        private int _index = target.Origin;
+        public static CommodityKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var commodity = (WindowCommodityChannelIndex)indicator;
+            return new(new(commodity.Period, commodity.RollingDeviations, commodity.FlatZero, count), target);
+        }
+        public double Update(in Bar bar)
+        {
+            Span<double> values = stackalloc double[2];
+            state.Update(in bar, values);
+            int index = _index++;
+            if (index >= target.WriteStart) target.Values[1][index] = values[1];
+            return values[0];
+        }
+    }
+
     private struct CorrelationKernel(WindowCorrelation.State state, BoundedOutput target) : IBoundedKernel<CorrelationKernel>
     {
         private int _index = target.Origin;
@@ -822,6 +849,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<ReturnBetaKernel>(source, output, indicator, beta.Period + 1, cancellation, owned),
         WindowCorrelation correlation => FillBoundedWindow<CorrelationKernel>(source, output, indicator, correlation.Period, cancellation, owned),
         WindowPairStatistics pair => FillBoundedWindow<PairStatisticsKernel>(source, output, indicator, pair.Period, cancellation, owned),
+        WindowCommodityChannelIndex commodity when CommodityReplayWindow(commodity) > 0 =>
+            FillBoundedWindow<CommodityKernel>(source, output, indicator, CommodityReplayWindow(commodity), cancellation, owned),
         WilliamsR range => FillBoundedWindow<WilliamsKernel>(source, output, indicator, Math.Max(1, range.Length), cancellation, owned),
         WindowLinearRegression regression => FillBoundedWindow<RegressionKernel>(source, output, indicator, regression.Period, cancellation, owned),
         // P changes require P preceding prices plus the assigned output bar.
