@@ -12,6 +12,8 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
     private readonly double[] _kernel;
     private readonly int _firstWeight, _weightStep;
     internal bool HasAffineKernel { get; }
+    internal int AffineFirstWeight => _firstWeight;
+    internal int AffineWeightStep => _weightStep;
 
     /// <summary>Creates a filter from a nonempty finite newest-first kernel.</summary>
     public NormalizedConvolution(IEnumerable<double> kernel)

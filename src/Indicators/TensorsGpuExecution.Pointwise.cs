@@ -18,12 +18,14 @@ internal sealed partial class TensorsGpuExecution
         var rounding = indicator as PriceRoundingTransform;
         var lagged = indicator as LaggedPriceChange;
         var rollingSum = indicator as RollingPriceSum;
+        var affine = indicator as NormalizedConvolution;
         int weightedPeriod = indicator switch
         {
             Wma weighted => Math.Max(1, weighted.Length),
             FixedPeriodWma weighted => weighted.Period,
             TriangularWindowAverage weighted => weighted.Period,
             EndpointWeightedAverage weighted => weighted.Period,
+            NormalizedConvolution { HasAffineKernel: true } convolution => convolution.Kernel.Count,
             _ => 0
         };
         var midpoint = indicator as WindowRangeMidpoint;
@@ -83,12 +85,14 @@ internal sealed partial class TensorsGpuExecution
                 // shifted window before eviction. Keep the bound in Int32.
                 bool endpoint = indicator is EndpointWeightedAverage;
                 int certifiedLimit = endpoint ? 32767 : 65535;
-                int certifiedTerms = weightedPeriod == 0 ? rollingSum?.Period ?? 1
+                int affineTerms = affine is null ? 0 : AffineGpuTerms(affine);
+                int certifiedTerms = affine is not null ? Math.Max(1, affineTerms)
+                    : weightedPeriod == 0 ? rollingSum?.Period ?? 1
                     : weightedPeriod > certifiedLimit ? int.MaxValue
                     : endpoint ? (int)(2L * weightedPeriod * weightedPeriod)
                     : (int)((long)weightedPeriod * (weightedPeriod + 1) / 2);
                 var sumProof = new Core.SmaCpuKernel.Certificate(certifiedTerms);
-                bool sumCertified = weightedPeriod <= certifiedLimit;
+                bool sumCertified = affine is not null ? affineTerms > 0 : weightedPeriod <= certifiedLimit;
                 var medianProof = new Core.SmaCpuKernel.Certificate(Math.Max(1, (median?.Period ?? 1) - 1));
                 bool medianCertified = true;
                 var percentileProof = new Core.SmaCpuKernel.Certificate(4);
@@ -145,9 +149,14 @@ internal sealed partial class TensorsGpuExecution
                 kernel.SetArg(2, deviceOutput.Handle);
                 kernel.SetArg(3, source.Length);
                 kernel.SetArg(4, weightedPeriod > 0 ? weightedPeriod : rollingSum?.Period ?? lagged?.Period ?? midpoint?.Period ?? extreme?.Period ?? index?.Period ?? aroon?.Period ?? priceRange?.Period ?? median?.Period ?? candleExtremePeriod);
-                if (weightedPeriod > 0) kernel.SetArg(5, indicator is EndpointWeightedAverage endAverage
-                    ? endAverage.AverageDuringWarmup ? 4 : 3
-                    : indicator is TriangularWindowAverage ? 2 : indicator is FixedPeriodWma ? 1 : 0);
+                if (weightedPeriod > 0)
+                {
+                    kernel.SetArg(5, affine is not null ? 5 : indicator is EndpointWeightedAverage endAverage
+                        ? endAverage.AverageDuringWarmup ? 4 : 3
+                        : indicator is TriangularWindowAverage ? 2 : indicator is FixedPeriodWma ? 1 : 0);
+                    kernel.SetArg(6, affine?.AffineFirstWeight ?? (indicator is EndpointWeightedAverage ? 2 * weightedPeriod - 1 : 0));
+                    kernel.SetArg(7, affine?.AffineWeightStep ?? (indicator is EndpointWeightedAverage ? -3 : 0));
+                }
                 if (median is not null)
                 {
                     kernel.SetArg(5, median.AverageDuringWarmup ? 1 : 0);
@@ -209,6 +218,17 @@ internal sealed partial class TensorsGpuExecution
             }
             finally { if (!retain) work.Dispose(); }
         }
+    }
+
+    private static int AffineGpuTerms(NormalizedConvolution convolution)
+    {
+        int period = convolution.Kernel.Count;
+        long first = convolution.AffineFirstWeight, step = convolution.AffineWeightStep;
+        // Include the shifted oldest weight (lag P), and step*sum itself.
+        // Division before multiplication also rejects bounds that exceed Int64.
+        long coefficient = Math.Max(1, Math.Max(Math.Abs(step),
+            Math.Max(Math.Abs(first), Math.Abs(first + step * period))));
+        return coefficient > int.MaxValue / period ? 0 : (int)(coefficient * period);
     }
 
     private static double Select(in Bar bar, CandlePriceField field) => field switch
