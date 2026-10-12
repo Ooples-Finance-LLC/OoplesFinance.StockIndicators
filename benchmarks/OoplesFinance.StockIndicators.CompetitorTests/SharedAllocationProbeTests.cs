@@ -79,6 +79,11 @@ public sealed class SharedAllocationProbeTests
         Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
             BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedGpuVortexBenchmarks))));
 
+    [Fact]
+    public void GpuUltimateFixtureRetainsEagerResultsForTiming() =>
+        Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+            BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedGpuUltimateBenchmarks))));
+
     [Theory]
     [InlineData(15)] [InlineData(513)]
     public void VortexFixtureHandlesSmallAndPartitionedInputsAndRestoresSettings(int count)

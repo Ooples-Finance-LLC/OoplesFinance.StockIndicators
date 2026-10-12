@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed partial class TensorsGpuExecution
 {
-    // Thirty-three fixed keys; window/lag periods are arguments, never new compiled programs.
+    // Thirty-four fixed keys; window/lag periods are arguments, never new compiled programs.
     private readonly Dictionary<int, CompiledKernel> _pointwiseKernels = new();
 
     internal Bar ExecutePointwise(Bar[] source, double[][] output, IIndicator indicator,
@@ -16,6 +16,8 @@ internal sealed partial class TensorsGpuExecution
             return ExecuteCandleWindow(source, output[0], indicator, cancellation, owned);
         if (indicator is WindowVortex vortex)
             return ExecutePackedVortex(source, output, vortex, cancellation, owned);
+        if (indicator is WindowUltimateOscillator ultimate)
+            return ExecutePackedUltimate(source, output, ultimate, cancellation, owned);
         var arithmetic = indicator as CandleArithmetic;
         var rounding = indicator as PriceRoundingTransform;
         var lagged = indicator as LaggedPriceChange;
@@ -70,7 +72,7 @@ internal sealed partial class TensorsGpuExecution
             Workspace work;
             if (retain)
             {
-                if (_workspace is not null && (_workspace.Count != source.Length || _workspace.IsPackedVortex))
+                if (_workspace is not null && (_workspace.Count != source.Length || _workspace.IsPackedBars))
                 {
                     _workspace.Dispose();
                     _workspace = null;
@@ -267,6 +269,7 @@ internal sealed partial class TensorsGpuExecution
         if (operation == 30) return CompileWeightedAverage();
         if (operation == 31) return CompilePathRatio();
         if (operation == 32) return CompileVortex();
+        if (operation == 33) return CompileUltimate();
         // OpenCL C table-ulp-double requires correctly rounded FP64 arithmetic,
         // ceil, floor and sqrt. Never enable relaxed math or flush denormals.
         var expression = operation switch
