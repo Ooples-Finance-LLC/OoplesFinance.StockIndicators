@@ -74,6 +74,11 @@ public sealed class SharedAllocationProbeTests
         });
     }
 
+    [Fact]
+    public void GpuVortexFixtureRetainsEagerResultsForTiming() =>
+        Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+            BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedGpuVortexBenchmarks))));
+
     [Theory]
     [InlineData(15)] [InlineData(513)]
     public void VortexFixtureHandlesSmallAndPartitionedInputsAndRestoresSettings(int count)
