@@ -95,6 +95,14 @@ public static class SharedAllocationProbe
                 fixture.NativeSingle, fixture.NativeParallel];
             names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
         }
+        else if (operation == "QuanTAlib.Convolution")
+        {
+            var fixture = new SharedGpuConvolutionBenchmarks { Operation = "Convolution", Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
         else throw new ArgumentException("Unsupported shared allocation operation.", nameof(operation));
 
         var arms = new Arm[methods.Length];
