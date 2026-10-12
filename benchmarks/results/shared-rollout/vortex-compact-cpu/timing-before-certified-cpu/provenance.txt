@@ -1,0 +1,1 @@
+Production 2f25969e. 10 warmups, 10 measured iterations. No competing dotnet/testhost jobs observed before/after. BDN short-iteration warnings remain. Both CPU histories and GPU lose to native parallel at both counts. No winning qualification.
