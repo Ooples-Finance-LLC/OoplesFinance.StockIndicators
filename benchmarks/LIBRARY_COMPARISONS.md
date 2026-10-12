@@ -3295,3 +3295,35 @@ All four setup validations passed. Raw/context are archived at
 `results/shared-rollout/ulcer-cpu/cached-parallel-10k*`; log is
 `C:/Users/cheat/temp/si-ulcer-f7fa53c5.log`. Only Ulcer current evidence was replaced,
 retaining the original checkpoint. Coverage remains 181/401 APIs, not a win count.
+
+
+### Ulcer sampled profile and borrowed ring entries (2026-10-11)
+
+Added benchmark-only `--profile-ulcer <bars> <iterations>`, using the validated
+four-arm fixture setup, 100 LatestOnly warmups and a disposing builder loop.
+An unprivileged `dotnet-trace` dotnet-sampled-thread-time capture at production
+`f7fa53c5` ran 10,000 bars / 2,000 iterations and exited successfully. Global
+thread-time samples were 73.47% Monitor.Wait; treating that as arithmetic cost
+would misdiagnose the idle worker pool.
+
+Filtering sampled stacks containing UlcerKernel gives about 20,148.71 ms summed
+across threads: State.Update has 42.89% exclusive, SqrtMean 20.86% exclusive /
+24.70% inclusive, Drawdown 12.98% exclusive / 18.95% inclusive, and the kernel
+adapter 6.47% exclusive. These include inlined callees; State.Update's samples
+are not all dispatch or storage overhead. Setup and warmup remain in the trace,
+while the kernel filter excludes unrelated idle/startup stacks. This is sampled
+stack time, not a new latency result or proof of benefit from a later change.
+
+The modern CPU state now borrows ring entries by reference for its scan, after
+all List growth is complete. Helpers cannot resize or retain the span. The
+NETFRAMEWORK path keeps indexed copies. No arithmetic or rounding changes.
+Production/benchmark Release net10.0 builds, 21 unit cases and 15 fixture/reference
+cases passed; existing benchmark/test warnings remain. No timing rerun: the
+f7fa53c5 checkpoint remains authoritative and still loses to native parallel.
+
+Trace and filtered summary: `results/shared-rollout/ulcer-cpu/cached-parallel-profile*`.
+The summary records the exact capture command and trace/runner hashes. Convert
+the decompressed trace with `dotnet-trace convert --format Speedscope` to inspect
+all stacks, or use `dotnet-trace report <trace> topN --verbose` for global totals.
+Logs: `C:/Users/cheat/temp/si-ulcer-trace-collect.log` and
+`C:/Users/cheat/temp/si-ulcer-borrow-{production,benchmark-build,unit,comparisons}.log`.
