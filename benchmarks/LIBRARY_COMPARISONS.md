@@ -3581,3 +3581,10 @@ At 1,000 bars and period 20, all three warmed samples agreed:
 | Skender.GetSlope | 118,144 | 69,456 | 164,400 | 750,680 |
 
 These process-wide managed allocations include construction and retained outputs; setup and post-sample disposal are excluded. Production revision e76348e0, fixture revision 30a3eae4, raw samples and limitations are archived in `results/shared-rollout/regression-statistics-cpu/`. The fixture build, 23 focused tests and 65 inventory checks passed with no skips. An AiDotNet build was active at pre-probe inspection; no timing benchmark was run and qualification remains 181/401.
+
+
+### Retrospective regression channels through BuildAsync
+
+`RegressionWithChannels` now supplies the Skender.GetStdDevChannels builder comparison. Complete blocks align to the final input length; appending bars can repaint all blocks. The shared writer uses compact regression moments and extended rounded widths, publishing directly into five owned columns for seven outputs (the three presence outputs share storage). The historical fallback handles selected sources and warmup. Null period fits the complete input and requires at least two bars; explicit periods preserve absent leading rows. Live sources reject retrospective execution. `RegressionChannelSnapshot` keeps its public behavior. Rolling `WindowRegressionStatistics` also shares its three identical presence columns.
+
+The net10.0 production/comparison builds, 25 focused unit cases, 21 regression/channel/fixture comparison cases and 65 inventory checks passed with zero skips. Coverage includes independent references, block shifts, whole-input fits, all values/presence, ownership after disposal, validation order, cancellation inside block publication, warmup and selected sources. No allocation or timing probe was repeated for this batch; prior allocation checkpoints retain their recorded revisions. Timing qualification remains 181/401 and this is not a latency-win claim.

@@ -9,6 +9,16 @@ namespace OoplesFinance.StockIndicators.CompetitorTests;
 public sealed class RegressionChannelComparisonTests
 {
     [Fact]
+    public void BuilderChannelsMatchIndependentReferencesForBlocksAndWholeInputs()
+    {
+        foreach (int period in new[] { 2, 3, 20 })
+        foreach (bool whole in new[] { false, true })
+            ComparisonVerifier.Check(RegressionChannelComparison.Pair(whole, 1.5), CompetitorData.Create(90), period);
+        ComparisonVerifier.Check(RegressionChannelComparison.Pair(), CompetitorData.FromCloses([1]), 3);
+        ComparisonVerifier.Check(RegressionChannelComparison.Pair(), CompetitorData.FromCloses([0, 0, 0, 0]), 2);
+    }
+
+    [Fact]
     public void ExactBlockGoldensAndAppendRealignmentAreExplicit()
     {
         var bars = BarsOf([1, 3, 5, 10, 20]);

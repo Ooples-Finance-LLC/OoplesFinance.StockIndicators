@@ -1,4 +1,5 @@
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 using Skender.Stock.Indicators;
@@ -19,7 +20,7 @@ internal static class RegressionChannelComparison
     internal static ComparisonPair Pair(bool whole = false, double deviations = 2) =>
         new(
             "Skender.GetStdDevChannels",
-            nameof(RegressionChannelSnapshot),
+            nameof(RegressionWithChannels),
             (d, p) => Native(d.Closes, whole ? null : p, deviations),
             (d, p) => Owned(d.IndicatorBars, whole ? null : p, deviations),
             (d, p) => Series(Reference(d.Closes, whole ? null : p, deviations, false)),
@@ -49,13 +50,18 @@ internal static class RegressionChannelComparison
 
     internal static ComparisonSeries Owned(Bar[] bars, int? period, double deviations)
     {
-        var rows = RegressionChannelSnapshot.Calculate(bars, period, deviations);
-        return Series([
-            rows.Select(r => r.Centerline).ToArray(),
-            rows.Select(r => r.UpperChannel).ToArray(),
-            rows.Select(r => r.LowerChannel).ToArray(),
-            rows.Select(r => (double?)(r.BreakPoint ? 1 : 0)).ToArray(),
-        ]);
+        var indicator = new RegressionWithChannels(period, deviations);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+            .BuildAsync().GetAwaiter().GetResult();
+        var values = new double?[4][];
+        for (int slot = 0; slot < 3; slot++)
+        {
+            var column = run[indicator.Outputs[slot]].ToArray();
+            var mask = run[indicator.Outputs[slot + 4]].ToArray();
+            values[slot] = column.Select((value, i) => mask[i] > 0 ? (double?)value : null).ToArray();
+        }
+        values[3] = run[indicator.BreakPoint].ToArray().Select(value => (double?)value).ToArray();
+        return Series(values);
     }
 
     internal static double?[][] Reference(
