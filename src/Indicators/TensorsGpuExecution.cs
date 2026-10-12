@@ -13,6 +13,7 @@ internal sealed partial class TensorsGpuExecution
     private readonly Dictionary<(int Period, bool Sma, bool Asin, bool FromMean, bool Presence), CompiledKernel> _kernels = new();
     // One reusable workspace, bounded to 56 MiB. Four-column candle execution
     // uses a lower count cap to allow two extra host inputs within the same budget.
+    // Packed kernels likewise lower the cap for their three- or five-column layouts.
     // Published host arrays are never cached or pooled.
     private const int MaxRetainedCount = 1_048_576;
     private Workspace? _workspace;
@@ -122,13 +123,14 @@ internal sealed partial class TensorsGpuExecution
         }
     }
 
-    private sealed class Workspace(OpenClContext context, int count, bool packedBars = false) : IDisposable
+    private sealed class Workspace(OpenClContext context, int count, bool packedBars = false, int packedColumns = 3) : IDisposable
     {
         internal int Count => count;
         internal bool IsPackedBars => packedBars;
+        internal int PackedColumns => packedColumns;
         private double[]? _inputHost, _packedHost;
         internal double[] Input => _inputHost ??= GC.AllocateUninitializedArray<double>(count);
-        internal double[] PackedHost => _packedHost ??= GC.AllocateUninitializedArray<double>(checked(3 * count));
+        internal double[] PackedHost => _packedHost ??= GC.AllocateUninitializedArray<double>(checked(packedColumns * count));
         private double[]? _rightInput, _highInput, _lowInput;
         internal double[] HighInput => _highInput ??= GC.AllocateUninitializedArray<double>(count);
         internal double[] LowInput => _lowInput ??= GC.AllocateUninitializedArray<double>(count);
@@ -139,8 +141,8 @@ internal sealed partial class TensorsGpuExecution
         internal OpenClBuffer<double> Asin => _asin ??= new(context, count);
         internal OpenClBuffer<double> Presence => _presence ??= new(context, count);
         internal OpenClBuffer<double> Right => _right ??= new(context, count);
-        internal OpenClBuffer<double> PackedInput => _packedInput ??= new(context, checked(3 * count));
-        internal OpenClBuffer<double> PackedOutput => _packedOutput ??= new(context, checked(3 * count));
+        internal OpenClBuffer<double> PackedInput => _packedInput ??= new(context, checked(packedColumns * count));
+        internal OpenClBuffer<double> PackedOutput => _packedOutput ??= new(context, checked(packedColumns * count));
         public void Dispose()
         {
             _packedInput?.Dispose(); _packedOutput?.Dispose();

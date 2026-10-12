@@ -17,7 +17,7 @@ internal sealed partial class TensorsGpuExecution
             Workspace work;
             if (retain)
             {
-                if (_workspace is not null && (_workspace.Count != source.Length || !_workspace.IsPackedBars))
+                if (_workspace is not null && (_workspace.Count != source.Length || !_workspace.IsPackedBars || _workspace.PackedColumns != 3))
                 {
                     _workspace.Dispose(); _workspace = null;
                 }
