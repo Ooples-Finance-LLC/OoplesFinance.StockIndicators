@@ -3650,3 +3650,14 @@ Standalone `WindowPathRatio` now uses the shared bounded CPU engine, with P prec
 ### Direct path-ratio fixtures and allocation evidence (2026-10-12)
 
 `SharedPathRatioBenchmarks` compares builder Full/LatestOnly with Skender CMO and Trady EfficiencyRatio public tuple APIs. Serial arms retain native lists. Parallel arms seed P preceding prices and retain assigned native outputs, including local input/result costs; Trady uses its public output-range API. Setup checks independent references, nullable/presence contracts, Skender dates/bit patterns and exact Trady decimals. All 41 comparison/probe tests and 68 inventory checks passed. Three warmed 1k/P20 samples: CMO Full 67,432 B, LatestOnly 18,640 B, native serial 108,456 B, native parallel 135,880 B. Efficiency Full 67,432 B, LatestOnly 18,640-19,536 B, native serial 556,704 B, native parallel 554,136-554,472 B; all samples are retained. Source/context and raw evidence: `results/shared-rollout/path-ratio-cpu/`. These are allocation observations; no timing was run and qualification stays 181/401.
+
+### Path-ratio 10k timing qualification (2026-10-12)
+
+One eight-case timing batch on production `143fe7ad` / fixture `71af8461` completed with no competing build/test observed before, in two mid-run samples, or after. CPU was 6% before and 17% after; reusable MSBuild nodes and a dotnet --version process were present. Sampling is not a continuous exclusivity trace. Ten warmups and ten measurement iterations were requested; retained sample counts and 99.9% confidence intervals are in the raw report.
+
+| API / 10k, P20 | Full mean us / bytes | LatestOnly mean us / bytes | Fastest tested native mean us / bytes | Result |
+|---|---:|---:|---:|---|
+| Skender.GetCmo | 414.20 / 653,108 | 372.74 / 171,906 | parallel 247.95 / 1,179,864 | Both builder modes lose latency |
+| Trady.Indicator.EfficiencyRatio | 297.38 / 653,045 | 267.20 / 171,907 | parallel 2,099.99 / 5,529,251 | Both builder modes win with nonoverlapping intervals |
+
+EfficiencyRatio LatestOnly is about 7.86x faster than the fastest tested native arm; CMO LatestOnly remains 1.50x slower despite lower allocation. This qualifies the two 10k workloads only; all previous catalog entries are preserved. Coverage rises to 183/401 APIs, not a win count. Raw report, process samples and context: `results/shared-rollout/path-ratio-cpu/cpu-native-10k*`. No rerun was performed.
