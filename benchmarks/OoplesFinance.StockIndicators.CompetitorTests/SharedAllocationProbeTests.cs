@@ -53,6 +53,8 @@ public sealed class SharedAllocationProbeTests
     [InlineData("TaLib.Functions.Mfi")]
     [InlineData("Skender.GetMfi")]
     [InlineData("Skender.GetVortex")]
+    [InlineData("TaLib.Functions.UltOsc")]
+    [InlineData("Skender.GetUltimate")]
     [InlineData("TaLib.Functions.Rsi")]
     [InlineData("TaLib.Functions.Cmo")]
     [InlineData("TaLib.Functions.HtDcPeriod")]
@@ -77,6 +79,18 @@ public sealed class SharedAllocationProbeTests
     {
         int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
         var fixture = new SharedVortexBenchmarks { Count = count };
+        try { fixture.Setup(); }
+        finally { fixture.Cleanup(); }
+        Assert.Equal(prior, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);
+    }
+
+    [Theory]
+    [InlineData(29, "TaLib.Functions.UltOsc")] [InlineData(513, "TaLib.Functions.UltOsc")]
+    [InlineData(29, "Skender.GetUltimate")] [InlineData(513, "Skender.GetUltimate")]
+    public void UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(int count, string operation)
+    {
+        int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        var fixture = new SharedUltimateBenchmarks { Count = count, Operation = operation };
         try { fixture.Setup(); }
         finally { fixture.Cleanup(); }
         Assert.Equal(prior, AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism);
