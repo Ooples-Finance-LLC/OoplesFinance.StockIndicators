@@ -3220,3 +3220,29 @@ No isolated benefit is attributed to the positive-peak shortcut.
 Raw report/context: `results/shared-rollout/ulcer-cpu/positive-peak-10k*`.
 Log: `C:/Users/cheat/temp/si-ulcer-2ffd53fc.log`. The qualification parser accepted
 all four arms. Only this pair was added; coverage is 181/401 APIs, not a win count.
+
+
+### Ulcer rolling contribution cache (2026-10-11)
+
+The shared Ulcer state now retains each price's last prefix peak and rounded
+extended drawdown in a lazily grown ring. Unchanged peaks reuse their exact
+contribution. Expiration removes the outgoing contribution; changed peaks remove
+and replace their drawdown squares in the exact running sum. The final RMS still
+rounds once. Windows with a nonpositive prefix remain absent but maintain valid
+suffix contributions so expiration recovers correctly. Reset clears the sum,
+ring position and entries while retaining capacity.
+
+Storage increases from one double per retained price to a price/peak/extended
+contribution entry, bounded by O(period). This avoids repeated division and
+squaring at unchanged peaks; it is not an O(1) worst-case window algorithm.
+A descending sequence can still change every prefix peak. No public API,
+rounding contract or GPU behavior changes.
+
+Adversarial review covered expiring maxima, plateaus, absent-prefix recovery,
+overflowed unpublished percentages, tiny inputs, maximum periods and reversed
+replay after reset. Production/benchmark Release net10.0 builds passed, along
+with 12 compact arithmetic/allocation cases and 15 fixture/reference cases.
+Ordinary warmed state replay still allocates zero bytes. Existing benchmark/test
+warnings remain. Logs: `C:/Users/cheat/temp/si-ulcer-cache-{production,benchmark-build,unit,comparisons}.log`.
+No new timing run was performed; the 2ffd53fc latency-loss checkpoint remains the
+latest measured result. This cache change is not claimed as a measured win.
