@@ -1,4 +1,5 @@
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 using Skender.Stock.Indicators;
@@ -14,7 +15,7 @@ internal static class KlingerComparison
     internal static ComparisonPair Pair(int fast = 34, int slow = 55, int signal = 13) =>
         new(
             "Skender.GetKvo",
-            nameof(KlingerVolumeSnapshot),
+            nameof(KlingerVolumeWithSignal),
             (d, _) =>
             {
                 var r = d.Quotes.GetKvo(fast, slow, signal).ToArray();
@@ -36,8 +37,13 @@ internal static class KlingerComparison
 
     internal static ComparisonSeries Owned(Bar[] bars, int fast, int slow, int signal)
     {
-        var r = KlingerVolumeSnapshot.Calculate(bars, fast, slow, signal);
-        return Series([r.Select(v => v.Oscillator).ToArray(), r.Select(v => v.Signal).ToArray()]);
+        var indicator = new KlingerVolumeWithSignal(fast, slow, signal);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
+        var values = new[] { run[indicator.Oscillator].ToArray(), run[indicator.Signal].ToArray() };
+        var present = new[] { run[indicator.OscillatorIsDefined].ToArray(), run[indicator.SignalIsDefined].ToArray() };
+        return Series(values.Select((row, slot) => row.Select((value, index) =>
+            present[slot][index] == 1 ? (double?)value : null).ToArray()).ToArray());
     }
 
     private static BigInteger?[] Average(BigInteger?[] values, int period)

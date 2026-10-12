@@ -1391,13 +1391,13 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.KvoResult] GetKvo[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32, Int32, Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "KlingerVolumeSnapshot",
+    "OoplesIndicator": "KlingerVolumeWithSignal",
     "Outputs": [
       "Oscillator",
       "Signal"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "KlingerVolumeSnapshot preserves the two-bar force startup, direction/range branches and independently mean-seeded fast/slow/signal EMAs. Exact HLC comparisons and ranges avoid intermediate overflow; complete force and EMA stages round once with extended upper exponents. Both nullable outputs, startup, configurations, zero/cancelling ranges, wide/subnormal candles, final overflow and mutations have independent references. Native double-stage and quote conversion behavior are modeled separately. Maximum periods use constant storage; native derived period arithmetic can overflow."
+    "CompetitorLimitation": "KlingerVolumeWithSignal executes through shared CPU BuildAsync with compact exact state and explicit output presence. KlingerVolumeSnapshot remains the batch reference. It preserves the two-bar force startup, direction/range branches and independently mean-seeded fast/slow/signal EMAs. Exact HLC comparisons and ranges avoid intermediate overflow; complete force and EMA stages round once with extended upper exponents. Both nullable outputs, startup, configurations, zero/cancelling ranges, wide/subnormal candles, final overflow and mutations have independent references. Native double-stage and quote conversion behavior are modeled separately. Maximum periods use constant storage; native derived period arithmetic can overflow."
   },
   {
     "Id": "Skender.GetMaEnvelopes",
