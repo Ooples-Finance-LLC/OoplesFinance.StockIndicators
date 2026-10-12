@@ -69,6 +69,7 @@ public sealed class SharedAllocationProbeTests
     [InlineData("TaLib.Functions.LinearRegAngle")]
     [InlineData("TaLib.Functions.Rsi")]
     [InlineData("unknown")]
+    [InlineData("TaLib.Functions.Cmo")]
     public void ExplicitGpuRequestRejectsUnsupportedOperations(string operation) =>
         Assert.Throws<ArgumentException>(() => SharedAllocationProbe.Run(operation, 64, 1, includeGpu: true));
 

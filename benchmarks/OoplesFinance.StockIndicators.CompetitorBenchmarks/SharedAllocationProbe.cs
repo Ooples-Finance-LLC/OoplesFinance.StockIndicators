@@ -14,7 +14,8 @@ public static class SharedAllocationProbe
         if (repetitions is < 1 or > 50) throw new ArgumentOutOfRangeException(nameof(repetitions));
         bool gpuRegression = operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
             or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.Tsf";
-        if (includeGpu && !gpuRegression && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution"))
+        bool gpuPathRatio = operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio";
+        if (includeGpu && !gpuPathRatio && !gpuRegression && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution"))
             throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
         Action setup, cleanup;
         Func<object>[] methods;
@@ -22,6 +23,14 @@ public static class SharedAllocationProbe
         if (includeGpu && gpuRegression)
         {
             var fixture = new SharedGpuRegressionBenchmarks { Operation = operation[(operation.LastIndexOf('.') + 1)..], Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && gpuPathRatio)
+        {
+            var fixture = new SharedGpuPathRatioBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
                 fixture.NativeSingle, fixture.NativeParallel];
