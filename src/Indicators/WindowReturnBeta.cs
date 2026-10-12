@@ -322,6 +322,19 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
     {
         if (previous == 0)
             return default;
+#if !NETFRAMEWORK
+        double difference = current - previous;
+        double virtualPrevious = difference - current;
+        double error = (current - (difference - virtualPrevious)) + (-previous - virtualPrevious);
+        // TwoSum certifies an exact subtraction. Hardware division then gives
+        // the required single rounding, including gradual underflow. A rounded
+        // subtraction or an extended-range result retains the accumulator path.
+        if (double.IsFinite(difference) && error == 0)
+        {
+            double value = difference / previous;
+            if (double.IsFinite(value)) return value == 0 ? default : new RocBankValue(value);
+        }
+#endif
         var numerator = new ExactMeanAccumulator();
         numerator.Add(current);
         numerator.Add(previous, -1);

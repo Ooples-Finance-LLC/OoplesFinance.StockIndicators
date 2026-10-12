@@ -148,6 +148,20 @@ public sealed class CompactPairStatisticsTests
         }
     }
 
+    [Theory]
+    [InlineData(1d)] [InlineData(-1d)]
+    public void RoundedSubtractionRetainsTheExactReturnFallback(double sign)
+    {
+        double previous = sign * 3, current = sign * Math.ScaleB(1d, -52);
+        var window = new ReturnBetaWindow(2, ReturnBetaSelection.All);
+        window.Add(previous, previous);
+        window.Add(current, current);
+        var expected = Return(current, previous).ToDouble();
+        Assert.NotEqual((current - previous) / previous, expected);
+        Bits(expected, window.MarketReturnValue);
+        Bits(expected, window.EvaluationReturnValue);
+    }
+
     [Fact]
     public void WideTrailingZeroNormalizationPreservesBothSigns()
     {
