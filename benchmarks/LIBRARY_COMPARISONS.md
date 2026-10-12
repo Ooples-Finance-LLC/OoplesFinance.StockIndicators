@@ -3083,3 +3083,34 @@ Validation (Release, net10.0):
 Logs: `C:/Users/cheat/temp/si-dynamic-builder-{production,benchmark-build,unit,comparisons}.log`.
 No timing campaign was run for this batch. Catalog timing qualification remains
 179/401 APIs; this integration does not establish a performance win or GPU support.
+
+
+### Dynamic Momentum direct benchmark fixture (2026-10-11)
+
+`SharedDynamicMomentumBenchmarks` now compares CPU `BuildAsync()` Full and
+LatestOnly with Trady 3.2.8's native tuple API. Native serial returns the eager
+`List<decimal?>` directly, without result conversion/copying. Native parallel
+uses up to eight independent calculators, full input prefixes for original RSI
+seeding, and public `Compute(startIndex, endIndex)` ranges to avoid producing
+unassigned outputs. Prefix construction, indicator construction, internal native
+work and output assembly remain inside the measured method. Input conversion
+is setup-only for both sides. This parallel arm is our public-API composition,
+not a claim that Trady supplies a built-in parallel DMI method.
+
+Setup checks native serial/parallel against an independent decimal reference,
+owned values and presence against the pairwise-distance/RSI reference, and
+cross-library presence and values (absolute tolerance 1e-9) on the fixture.
+Tests at counts 1, 7, 11, 33, 65 and 127 cover startup, period changes and uneven
+worker ranges. All six fixture tests plus ten Dynamic Momentum comparisons
+passed; benchmark build passed with existing warnings; 57 inventory checks
+passed. No production rebuild was needed. Logs:
+`C:/Users/cheat/temp/si-dynamic-fixture-{build,tests}.log`.
+
+The fixture is registered in the allocation probe and qualification parser.
+No new performance samples were collected; qualification remains 179/401.
+Historical normalized measurements (not this fixture) report about 1.60 GB
+allocated per native 1,000-bar call and 161.85 GB per 10,000-bar call. Plan the
+first direct timing run around that cost rather than using routine long warmups.
+The tuple result type and range behavior were verified against the pinned NuGet
+package; source inspected in the saved Trady DynamicMomentumIndex and
+AnalyzableBase files explains repeated volatility histories and per-output RSI.

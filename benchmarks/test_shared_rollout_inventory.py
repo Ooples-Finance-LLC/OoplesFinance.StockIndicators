@@ -95,6 +95,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         result = inventory(self.root, [path])
         self.assertEqual(['Skender.GetConnorsRsi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
 
+    def test_dynamic_momentum_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedDynamicMomentumBenchmarks.BuilderFull(Operation: "Trady.Indicator.DynamicMomentumIndex", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Trady.Indicator.DynamicMomentumIndex'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_triangular_builder_maps_both_native_apis(self):
         self.write()
         for api in ('QuanTAlib.Trima', 'TaLib.Functions.Trima'):
