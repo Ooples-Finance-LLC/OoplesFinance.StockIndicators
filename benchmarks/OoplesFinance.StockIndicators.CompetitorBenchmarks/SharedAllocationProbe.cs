@@ -114,6 +114,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "QuanTAlib.Alma" or "Skender.GetAlma")
+        {
+            var fixture = new SharedAlmaWindowBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
         else if (operation == "QuanTAlib.Afirma")
         {
             var fixture = new SharedWindowedSincBenchmarks { Operation = operation, Count = count };

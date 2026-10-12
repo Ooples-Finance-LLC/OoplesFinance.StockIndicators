@@ -1,0 +1,1 @@
+{"Operation":"QuanTAlib.Alma","Count":10000,"Repetitions":5,"Arms":[{"Method":"BuilderFull","Bytes":[1231952,1231952,1232360,1231952,1231952]},{"Method":"BuilderLatestOnly","Bytes":[750824,750824,750824,750824,750824]},{"Method":"NativeSingle","Bytes":[480752,480752,480752,480752,480752]},{"Method":"NativeParallel","Bytes":[491320,491320,491320,491320,491320]}]}

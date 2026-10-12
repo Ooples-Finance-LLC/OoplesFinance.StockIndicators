@@ -113,8 +113,13 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             ExactVarianceWindow.Units(sigma),
             2
         );
+#if NETFRAMEWORK
         private ExactMeanAccumulator.ProductCoefficient[] _weights = [];
         private ExactMeanAccumulator _denominator;
+#else
+        private JurikDyadic[] _weights = [];
+        private JurikDyadic _denominator;
+#endif
 
         public void Reset()
         {
@@ -133,7 +138,11 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                 : center >= (n - 1) * Grid ? n - 1
                 : (int)((center + Grid / 2) / Grid);
             var divisor = new BigInteger(2L * n * n) << 4296;
+#if NETFRAMEWORK
             _weights = new ExactMeanAccumulator.ProductCoefficient[n];
+#else
+            _weights = new JurikDyadic[n];
+#endif
             _denominator = default;
             for (var i = 0; i < n; i++)
             {
@@ -145,8 +154,14 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                     numerator >= 746 * divisor
                         ? 0
                         : Math.Exp(-ExactMeanAccumulator.UnitRatio(numerator << 1074, divisor));
+#if NETFRAMEWORK
                 _weights[i] = new ExactMeanAccumulator.ProductCoefficient(weight);
                 _denominator.AddFactor(_weights[i].Factor);
+#else
+                var factor = new ExactMeanAccumulator.ProductFactor(weight);
+                _weights[i] = JurikDyadic.FromFactor(in factor);
+                _denominator.AddExact(_weights[i]);
+#endif
             }
         }
 
@@ -159,12 +174,22 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             if (fullWindowOnly && _history.Count < period)
                 return;
             PrepareWeights(_history.Count);
+#if NETFRAMEWORK
             var numerator = new ExactMeanAccumulator();
+#else
+            var numerator = new JurikDyadic();
+#endif
             var i = 0;
             foreach (var price in _history)
             {
                 var factor = new ExactMeanAccumulator.ProductFactor(price);
+#if NETFRAMEWORK
                 numerator.AddProduct(in factor, in _weights[i++]);
+#else
+                var product = JurikDyadic.FromFactor(in factor);
+                product.Multiply(_weights[i++]);
+                numerator.AddExact(product);
+#endif
             }
             output[0] = numerator.Ratio(_denominator);
             output[1] = 1;
