@@ -48,6 +48,30 @@ internal struct JurikDyadic
         return result;
     }
 
+    // Publish an integer ratio without constructing and promoting two dyadic
+    // wrappers. Factoring powers of two also exposes exactly representable
+    // operands above 2^53. Integer ratios cannot approach binary64 underflow or
+    // overflow, so scaling their rounded quotient introduces no second rounding.
+    internal static double IntegerRatio(Int128 numerator, Int128 denominator)
+    {
+        if (numerator == 0 || denominator == 0) return 0;
+        const long exactLimit = 1L << 53;
+        if (numerator >= -exactLimit && numerator <= exactLimit
+            && denominator >= -exactLimit && denominator <= exactLimit)
+            return (double)numerator / (double)denominator;
+        int numeratorScale = (int)Int128.TrailingZeroCount(numerator);
+        int denominatorScale = (int)Int128.TrailingZeroCount(denominator);
+        numerator >>= numeratorScale;
+        denominator >>= denominatorScale;
+        if (numerator >= -exactLimit && numerator <= exactLimit
+            && denominator >= -exactLimit && denominator <= exactLimit)
+            return Math.ScaleB((double)numerator / (double)denominator, numeratorScale - denominatorScale);
+        if (TryRatio(numerator, numeratorScale, denominator, denominatorScale, out double result)) return result;
+        var top = new ExactMeanAccumulator(); top.Add(Math.ScaleB(1d, numeratorScale), (BigInteger)numerator);
+        var bottom = new ExactMeanAccumulator(); bottom.Add(Math.ScaleB(1d, denominatorScale), (BigInteger)denominator);
+        return top.Ratio(bottom);
+    }
+
     internal static JurikDyadic FromFactor(in ExactMeanAccumulator.ProductFactor factor) =>
         new() { _fixed = true, _integer = factor.Mantissa, _exponent = factor.Scale - 1074 };
 #endif

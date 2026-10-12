@@ -101,7 +101,7 @@ internal static partial class ValuesBarExecution
                     if (indicator.MinimumTotalOne && belowOne) value = 0;
                     else if (!indicator.MinimumTotalOne && negative == 0) value = 100;
                     else if (total == 0) value = double.NegativeInfinity;
-                    else if (positive != 0) value = JurikDyadic.FromInteger(unchecked(100 * positive)).Ratio(JurikDyadic.FromInteger(total));
+                    else if (positive != 0) value = JurikDyadic.IntegerRatio(unchecked(100 * positive), total);
                 }
                 output[0][row] = value; output[1][row] = defined ? 1 : 0;
                 RecordMoneyFlowOutput(ref region, row, value);
