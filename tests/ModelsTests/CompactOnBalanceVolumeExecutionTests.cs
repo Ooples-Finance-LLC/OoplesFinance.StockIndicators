@@ -31,22 +31,25 @@ public sealed class CompactOnBalanceVolumeExecutionTests
 
         async Task Check(Bar[] bars)
         {
-            var indicator = new SeededOnBalanceVolume(seed);
-            using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
-            var input = bars.ToArray();
-            using var actual = await Build(input, indicator)
-                .ConfigureHistory(full ? IndicatorHistoryMode.Full : IndicatorHistoryMode.LatestOnly).BuildAsync();
-            Array.Clear(input);
-            actual.Dispose();
-            foreach (var output in indicator.Outputs)
-                Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
-                    actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
-            Assert.Equal(bars[^1], actual.Latest.Bar);
-            if (full)
+            foreach (int? period in new int?[] { null, 1, 2, 14, bars.Length, int.MaxValue })
             {
-                int row = 0;
-                await foreach (var snapshot in actual) Assert.Equal(bars[row++], snapshot.Bar);
-                Assert.Equal(bars.Length, row);
+                var indicator = new SeededOnBalanceVolume(seed, period);
+                using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                var input = bars.ToArray();
+                using var actual = await Build(input, indicator)
+                    .ConfigureHistory(full ? IndicatorHistoryMode.Full : IndicatorHistoryMode.LatestOnly).BuildAsync();
+                Array.Clear(input);
+                actual.Dispose();
+                foreach (var output in indicator.Outputs)
+                    Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                        actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                Assert.Equal(bars[^1], actual.Latest.Bar);
+                if (full)
+                {
+                    int row = 0;
+                    await foreach (var snapshot in actual) Assert.Equal(bars[row++], snapshot.Bar);
+                    Assert.Equal(bars.Length, row);
+                }
             }
         }
     }
@@ -56,7 +59,7 @@ public sealed class CompactOnBalanceVolumeExecutionTests
     {
         Bar[] bars = [new(default, 0, 0, 0, 0, double.MaxValue),
             new(default, 1, 1, 1, 1, double.MaxValue), new(default, double.NaN, 2, 2, 2, 1)];
-        var indicator = new SeededOnBalanceVolume();
+        var indicator = new SeededOnBalanceVolume(averagePeriod: 1);
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => Build(bars, indicator).BuildAsync());
         await Assert.ThrowsAsync<IndicatorOutputException>(() => Build(bars[..2], indicator).BuildAsync());
         using var cancellation = new CancellationTokenSource();

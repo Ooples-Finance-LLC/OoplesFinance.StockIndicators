@@ -102,7 +102,7 @@ internal static partial class ValuesBarExecution
                 latest = FillTrueRange(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
-            else if (nodes.Count == 1 && nodes[0].Indicator is SeededOnBalanceVolume { AveragePeriod: null } obv)
+            else if (nodes.Count == 1 && nodes[0].Indicator is SeededOnBalanceVolume obv)
                 latest = FillOnBalanceVolume(source, nodes[0].Values, obv, cancellation, owned);
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
                 latest = FillBoundedWindow(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
@@ -601,7 +601,7 @@ internal static partial class ValuesBarExecution
                 Sma => null,
                 _ when pointwise => null,
                 BalanceOfPower when singleRoot => null,
-                SeededOnBalanceVolume { AveragePeriod: null } when singleRoot => null,
+                SeededOnBalanceVolume when singleRoot => null,
                 _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,
                 _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null

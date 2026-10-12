@@ -50,7 +50,49 @@ internal static partial class ValuesBarExecution
                 contributions[i] = total.Mean(1);
             }
         }
+        if (indicator.AveragePeriod is int period && period < contributions.Length)
+            FillOnBalanceVolumeAverage(contributions.AsSpan(1), output[1].AsSpan(1), output[2].AsSpan(1), period, cancellation);
         return latest;
+    }
+
+    private static void FillOnBalanceVolumeAverage(ReadOnlySpan<double> values, Span<double> average,
+        Span<double> presence, int period, CancellationToken cancellation)
+    {
+        // The average excludes the seed and uses rounded published OBV values.
+        // Its independent certificate must bound those values, not input volumes.
+        var summary = new Core.SmaCpuKernel.GridSummary();
+        foreach (double value in values)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            // Value-column validation reports overflow first, after all input.
+            if (!double.IsFinite(value)) return;
+            summary.Include(value);
+        }
+        if (summary.Certifies(period))
+        {
+            var reader = new Core.SmaCpuKernel.DoubleReader();
+            var consumer = new Core.SmaCpuKernel.Identity();
+            Core.SmaCpuKernel.ProcessCertified<double, Core.SmaCpuKernel.DoubleReader, Core.SmaCpuKernel.Identity>(
+                values, average, period, ref reader, ref consumer, cancellation);
+            for (int i = period - 1; i < values.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                presence[i] = 1;
+            }
+        }
+        else
+        {
+            var mean = new ExactMeanAccumulator();
+            for (int i = 0; i < values.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                if (i >= period) mean.Add(values[i - period], -1);
+                mean.Add(values[i]);
+                if (i < period - 1) continue;
+                average[i] = mean.Mean(period);
+                presence[i] = 1;
+            }
+        }
     }
 }
 #endif
