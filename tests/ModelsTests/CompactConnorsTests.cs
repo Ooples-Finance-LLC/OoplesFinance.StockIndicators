@@ -8,6 +8,21 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactConnorsTests(Xunit.Abstractions.ITestOutputHelper log)
 {
     [Fact]
+    public void EqualRoundedRatiosDoNotEraseExactOrder()
+    {
+        double denominator = Math.BitIncrement(1d);
+        double rounded = Math.BitDecrement(Math.BitDecrement(1d));
+        Assert.Equal(rounded, 1 / denominator);
+        Assert.Equal(1, new ReturnKey(1, denominator).CompareTo(new ReturnKey(rounded, 1)));
+        Assert.Equal(-1, new ReturnKey(-1, denominator).CompareTo(new ReturnKey(-rounded, 1)));
+        Assert.Equal(double.PositiveInfinity, (double.MaxValue / 2) / double.Epsilon);
+        Assert.Equal(1, new ReturnKey(double.MaxValue, double.Epsilon).CompareTo(new ReturnKey(double.MaxValue / 2, double.Epsilon)));
+        Assert.Equal(0d, (2 * double.Epsilon) / double.MaxValue);
+        Assert.Equal(-1, new ReturnKey(double.Epsilon, double.MaxValue).CompareTo(new ReturnKey(2 * double.Epsilon, double.MaxValue)));
+        Assert.Equal(1, new ReturnKey(double.Epsilon, double.MaxValue).CompareTo(new ReturnKey(-double.Epsilon, double.MaxValue)));
+    }
+
+    [Fact]
     public void FullSignificandsAndFiniteExponentRangeMatchIntegerProducts()
     {
         var random = new Random(10591);
