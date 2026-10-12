@@ -1,0 +1,25 @@
+{
+  "productionRevision": "4b244e81",
+  "fixtureRevision": "accompanying commit",
+  "date": "2026-10-12",
+  "period": 20,
+  "count": 1000,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "nativeVersion": "Skender.Stock.Indicators 2.7.3",
+  "source": [
+    "https://github.com/DaveSkender/Stock.Indicators/blob/2.7.3/src/e-k/FisherTransform/FisherTransform.Api.cs",
+    "https://github.com/DaveSkender/Stock.Indicators/blob/2.7.3/src/e-k/FisherTransform/FisherTransform.Series.cs"
+  ],
+  "contracts": [
+    "Both arms use prepared close-price inputs: native public tuple overload; builder WindowFisherTransform(20, useMidpoint:false).",
+    "Native serial retains its eager List including Fisher, Trigger and dates. Parallel uses up to eight workers, calculates full prefixes and retains assigned native rows. Prefix preparation/discarded results remain inside the measured operation.",
+    "Builder retains all four value/presence columns; Full additionally owns OHLCV. Independent exact/native references and dates, lengths, bits and presence are checked outside measurement."
+  ],
+  "verification": "32 comparison/probe tests and 67 inventory tests passed; fixture build succeeded.",
+  "limits": [
+    "Allocation only; timing deferred while AiDotNet.Tensors tests remained active.",
+    "All managed threads counted; owned results retained during each sample; disposal afterwards.",
+    "Timing qualification remains 181/401; no new speed claim."
+  ]
+}
