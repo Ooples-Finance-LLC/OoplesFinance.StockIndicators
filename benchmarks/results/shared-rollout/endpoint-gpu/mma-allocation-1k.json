@@ -1,0 +1,55 @@
+{
+  "Operation": "QuanTAlib.Mma",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        66424,
+        66424,
+        66424
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        17736,
+        17736,
+        17736
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        59744,
+        59744,
+        59744
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        11056,
+        11056,
+        11056
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        219808,
+        219808,
+        219808
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        227728,
+        227728,
+        227728
+      ]
+    }
+  ]
+}
