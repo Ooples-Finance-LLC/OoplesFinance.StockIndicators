@@ -390,6 +390,11 @@ internal struct JurikDyadic
             }
             else
             {
+                if (CertifiedCompactRatio.TryDivide(top, bottom, scale, out result))
+                {
+                    if (negative) result = -result;
+                    return true;
+                }
                 // Produce the rounding-grid quotient without materializing the
                 // shifted numerator. Each remainder stays below the denominator;
                 // comparing with its complement avoids overflowing a doubled value.
