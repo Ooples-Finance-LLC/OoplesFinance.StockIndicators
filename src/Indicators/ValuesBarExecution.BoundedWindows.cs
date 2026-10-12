@@ -847,6 +847,8 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
+        if (typeof(T) == typeof(TriangularKernel) && period is >= 2 and <= 4096 && end - start + seed.Length >= 512)
+            return ComputeTriangularColumn(source, output[0], owned, start, end, period, seed, tail, cancellation);
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };
         var target = new BoundedOutput(output, start - seed.Length, start);
         var kernel = T.Create(period, end - start + seed.Length, indicator, in target);
