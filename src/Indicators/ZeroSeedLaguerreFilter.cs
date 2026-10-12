@@ -76,6 +76,14 @@ public sealed class ZeroSeedLaguerreFilter : IndicatorBase, IIndicatorValidation
 
         public double Update(in Bar bar)
         {
+#if !NETFRAMEWORK
+            Span<double> nextStages = stackalloc double[4];
+            if (LaguerreRoundedKernel.TryUpdate(_stages, bar.Close, gamma, nextStages, out double fastOutput))
+            {
+                for (int stage = 0; stage < 4; stage++) _stages[stage] = JurikDyadic.FromDouble(nextStages[stage]);
+                return fastOutput;
+            }
+#endif
             var price = JurikDyadic.FromDouble(bar.Close);
             var difference = _stages[0];
             difference.Subtract(price);

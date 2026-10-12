@@ -5,6 +5,29 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactZeroSeedLaguerreTests
 {
+    [Fact]
+    public void RoundedMeanCertificateAgreesWithExactAccumulatorAcrossCancellationAndExponentRanges()
+    {
+        var random = new Random(77431);
+        var stages = new double[4];
+        int accepted = 0;
+        for (int trial = 0; trial < 4000; trial++)
+        {
+            int exponent = random.Next(-500, 501);
+            for (int i = 0; i < stages.Length; i++)
+                stages[i] = Math.ScaleB((random.Next(2) == 0 ? -1 : 1) * (1 + random.NextDouble()),
+                    trial % 2 == 0 ? exponent : random.Next(-500, 501));
+            if (trial % 3 == 0) stages[3] = -stages[0];
+            if (trial % 5 == 0) stages[2] = -Math.BitIncrement(stages[1]);
+            if (!LaguerreRoundedKernel.TryMean(stages, out double actual)) continue;
+            var exact = new ExactMeanAccumulator();
+            for (int i = 0; i < stages.Length; i++) exact.AddProduct(stages[i], i is 1 or 2 ? 2 : 1);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(exact.Mean(6)), BitConverter.DoubleToInt64Bits(actual));
+            accepted++;
+        }
+        Assert.True(accepted > 0);
+    }
+
     [Theory]
     [InlineData(0)] [InlineData(.1)] [InlineData(.5)] [InlineData(.9)]
     [InlineData(1)] [InlineData(double.Epsilon)] [InlineData(.9999999999999999)]
