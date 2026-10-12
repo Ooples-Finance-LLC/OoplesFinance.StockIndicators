@@ -35,6 +35,12 @@ class InventoryDiagnosticsTests(unittest.TestCase):
         path.write_text(json.dumps({'Benchmarks': rows}))
         return path
 
+    def test_endpoint_gpu_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedGpuEndpointBenchmarks.BuilderFull(Operation: "Epma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Epma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
     def test_schaff_explicit_operation(self):
         self.write()
         path = self.qualification('SharedSchaffCycleBenchmarks.BuilderFull(Operation: "Skender.GetStc", Count: 1000)')
