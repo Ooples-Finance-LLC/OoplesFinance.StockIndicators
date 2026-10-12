@@ -31,6 +31,29 @@ public sealed class CompactCommodityChannelTests
         }
     }
 
+    [Fact]
+    public void PartitionedDeviationsPreserveRoundedMeanTiesAndCancellation()
+    {
+        double[][] fixtures = [[0, double.Epsilon], [1, Math.BitIncrement(1d)],
+            [Math.BitDecrement(1d), 1], [-1, Math.BitDecrement(-1d)],
+            [double.MaxValue, double.MaxValue, -double.MaxValue], [double.MaxValue, -double.MaxValue, 0],
+            [0, 0, double.Epsilon], [0, double.Epsilon, double.Epsilon]];
+        Span<double> output = stackalloc double[2];
+        foreach (var prices in fixtures)
+        {
+            var bars = prices.Concat(prices.Reverse()).Concat(Enumerable.Repeat(prices[0], prices.Length))
+                .Select(v => new Bar(default, v, v, v, v, 1)).ToArray();
+            var expected = CommodityChannelReference.Calculate(bars, prices.Length, false, false);
+            var state = (IMultiOutputState)new WindowCommodityChannelIndex(prices.Length).CreateState();
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(output[0]));
+                Assert.Equal(expected[i].HasValue ? 1d : 0d, output[1]);
+            }
+        }
+    }
+
     [Theory]
     [InlineData(false)] [InlineData(true)]
     public void WarmedOrdinaryWindowsAllocateNoPerBarObjects(bool rolling)
