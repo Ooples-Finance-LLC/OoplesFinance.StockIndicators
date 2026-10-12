@@ -3420,3 +3420,27 @@ RelativeVolatilityStrength now uses the existing bounded-window CPU executor for
 Adversarial review checked synthetic first-change expiry, mixed-root dispatch, replay-length versus state-period separation and overflow-safe routing. Production and benchmark builds passed; 31 focused unit cases and 16 independent comparison/fixture cases passed. Coverage includes 1/8 workers, both history modes, exact wide-value seams, periods 2/14/2048/2049 and near integer limits, empty/one inputs, captured invalid tails, cancellation, recovery and retained ownership. The direct fixture now checks 8,193 bars against its independent reference.
 
 Commands: production net10.0 Release build; benchmark net10.0 Release build with BuildProjectReferences=false; focused unit filter SharedRelativeVolatilityWindowTests|RelativeVolatilityStrengthBuilderTests|SharedUlcerWindowTests; competitor filter RelativeVolatilityComparisonTests|SharedRelativeVolatilityBenchmarkTests. Existing framework/analyzer warnings remain in the test build. Timing is deferred while competing jobs remain active; no new timing qualification, speedup or GPU support is claimed.
+
+
+### Median Adaptive shared builder and combined diagnostic checkpoint (`415d6ed4`)
+
+`MedianAdaptiveAverage` replaces the comparison adapter's snapshot execution with shared CPU `BuildAsync()` state. Lazy history and reusable sorted storage eliminate per-candidate lists/sorts: one sort per mature bar, then deletion of the two oldest occurrences for each shorter suffix. Exact dyadic arithmetic preserves signed median comparisons, once-rounded smoothing, duplicate values and maximum-period startup. The original snapshot and independent count-based order-statistic oracle remain references. QuanTAlib 1.0.0 source (`Maaf.Calculation`) performs `TakeLast(length).OrderBy(...).ToList()` for every candidate. Native parallel requires full prefix replay because both candidate and filter retain recursive state; construction, replay and result writes are inside the measured methods.
+
+Production/benchmark builds passed. Ten focused MedianAdaptiveAverageBuilderTests, 12 comparison/direct-fixture cases and 60 inventory checks passed. The first unit run had four diagnostic-string assertion failures; values passed, and assertions were corrected to each history mode's documented execution reason before the successful rerun. Warmed 1,000-update state replay after reset allocates zero bytes. Test builds retain existing framework/analyzer warnings.
+
+The allocation-only four-arm probe at 1,000 bars returned identical totals across three samples (after ten warmups): Full 61,264 B; LatestOnly 12,576 B; native serial 3,466,992 B; native parallel 15,673,112 B. Allocation counts include all process threads, construction and retained results; setup and disposal are excluded. LatestOnly allocates 99.64% less than native serial on this fixture. This is not timing evidence. Raw output, parsed results and context are in `results/shared-rollout/median-adaptive-cpu/reused-buffers-allocation-1k*`.
+
+One combined ten-warmup/ten-iteration timing campaign covered both new CPU fixtures at 10,000 bars:
+
+| Indicator | Arm | Mean ms | Allocation B |
+|---|---|---:|---:|
+| Median Adaptive | Full | 12.871 | 565,724 |
+| Median Adaptive | LatestOnly | 12.905 | 85,540 |
+| Median Adaptive | Native serial | 23.028 | 34,437,299 |
+| Median Adaptive | Native parallel | 38.802 | 154,793,940 |
+| Relative Volatility | Full | 2.169 | 614,910 |
+| Relative Volatility | LatestOnly | 3.277 | 133,890 |
+| Relative Volatility | Native serial | 14.066 | 10,326,512 |
+| Relative Volatility | Native parallel | 3.890 | 10,474,968 |
+
+These are diagnostics, not newly qualified wins. CPU samples before/during/after were 50/43/90%; no competing dotnet build/test/run appeared in the first two samples, but an AiDotNet.Tensors build appeared after the run. Its creation time was unavailable when rechecked, so overlap is unknown. No continuous isolation is claimed. Relative Volatility intervals overlap (LatestOnly 1.498-5.056ms, native parallel 2.110-5.669ms) and it received minimum-iteration-time warnings. All arms retained ten samples. Reports and context are archived as `initial-10k-diagnostic*` in each indicator's CPU folder and validated with the inventory parser; neither report was merged into timing qualifications. Coverage remains 181/401, not a win count. GPU support and further performance work remain pending.
