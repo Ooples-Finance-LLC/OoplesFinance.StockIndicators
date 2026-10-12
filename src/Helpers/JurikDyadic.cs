@@ -36,6 +36,14 @@ internal struct JurikDyadic
     internal static JurikDyadic FromBinaryProduct(Int128 product, int exponent) =>
         new() { _fixed = true, _integer = product, _exponent = product == 0 ? 0 : exponent };
 
+    // Exact bounded integer, normalized for the existing rational publisher.
+    internal static JurikDyadic FromInteger(Int128 value)
+    {
+        var result = new JurikDyadic { _fixed = true, _integer = value };
+        result.Normalize();
+        return result;
+    }
+
     internal static JurikDyadic FromFactor(in ExactMeanAccumulator.ProductFactor factor) =>
         new() { _fixed = true, _integer = factor.Mantissa, _exponent = factor.Scale - 1074 };
 #endif
