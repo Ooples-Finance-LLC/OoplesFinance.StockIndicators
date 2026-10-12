@@ -5411,12 +5411,12 @@
       "Trady.Analysis.Indicator.DynamicMomentumIndex\u00602"
     ],
     "Status": "paired",
-    "OoplesIndicator": "DynamicMomentumSnapshot",
+    "OoplesIndicator": "DynamicMomentumStrength",
     "Outputs": [
       "Value"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "DynamicMomentumSnapshot selects a fixed-period nullable Wilder RSI from the complete original history for each bar. Population deviation divides by calendar window size while its mean skips missing values; smoothed deviation also skips missing values after calendar startup. Exact moments and once-rounded deviation/mean/volatility stages preserve tiny and wide inputs. Period clamping precedes integer conversion, avoiding native integer overflow. Independent pairwise-distance and decimal references cover selected periods, nullable inputs, output masks and mutations. Native decimal rounding can select different periods; its implementation repeatedly reconstructs volatility histories. Owned requires positive periods and ordered positive limits."
+    "CompetitorLimitation": "DynamicMomentumStrength executes through BuildAsync and selects a fixed-period nullable Wilder RSI from the complete original history for each bar. It retains one close history and lazily catches up per-period states without caching output trajectories; DynamicMomentumSnapshot remains the batch facade. Population deviation divides by calendar window size while its mean skips missing values; smoothed deviation also skips missing values after calendar startup. Exact moments and once-rounded deviation/mean/volatility stages preserve tiny and wide inputs. Period clamping precedes integer conversion, avoiding native integer overflow. Independent pairwise-distance and decimal references cover selected periods, nullable inputs, output masks and mutations. Native decimal rounding can select different periods; its implementation repeatedly reconstructs volatility histories. Owned requires positive periods and ordered positive limits."
   },
   {
     "Id": "Trady.Indicator.EfficiencyRatio",

@@ -62,6 +62,7 @@ internal static class SharedCpuStates
         typeof(DojiStarCandle),
         typeof(DoubleSmoothedStochasticMomentum),
         typeof(DownsideTasukiGapPattern),
+        typeof(DynamicMomentumStrength),
         typeof(ElderRayWithDetails),
         typeof(EmaDifferenceSignal),
         typeof(EndpointWeightedAverage),

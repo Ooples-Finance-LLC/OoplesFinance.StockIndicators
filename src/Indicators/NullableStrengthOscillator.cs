@@ -125,7 +125,7 @@ public sealed class NullableStrengthOscillator
                 )
             );
 
-    private sealed class Calculator(int period, NullableStrengthConvention convention, int lag)
+    internal sealed class Calculator(int period, NullableStrengthConvention convention, int lag)
     {
         private readonly Queue<double?> _history = new();
         private int _seedSteps,

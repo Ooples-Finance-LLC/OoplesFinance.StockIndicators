@@ -3051,3 +3051,35 @@ One unchanged four-arm 10000-bar fixture run on production 4f12c9cc completed af
 | Native parallel | 8815172.73 | 8257947.59 / 9372397.87 | 13952775 |
 
 LatestOnly latency fell about 90.3% from the initial 147.74 ms baseline, but remains 6.8 times slower than native serial. Allocation is about 78.6% lower than native serial; the Full/LatestOnly storage distinction is now visible. This measures the three changes together and does not attribute a separate speedup to each. Only Connors's current catalog entry is replaced; both raw reports remain archived and coverage remains 179/401 APIs, not wins. No further timing campaign ran.
+
+
+### Dynamic Momentum shared builder integration (2026-10-11)
+
+`DynamicMomentumStrength` now runs behind `BuildAsync()` and is registered in
+`SharedCpuStates`. Full and LatestOnly retain value/presence outputs. The state
+keeps one close-price history, a rolling deviation window and one lazily created
+RSI calculator per encountered period. A reselected period catches up from its
+last consumed price; no complete per-period output arrays are retained. History
+is still O(bars), since a previously unseen period needs the original RSI seed.
+The existing nullable snapshot facade remains unchanged.
+
+Adversarial review covered calendar smoothing startup before/after deviation
+startup, full-history seeding across period changes, reset of cached calculators,
+lazy maximum periods, exact wide/tiny arithmetic, chained inputs and retained
+columns after disposal. The competitor adapter now uses the builder; independent
+pairwise-distance and RSI references remain in the comparison tests.
+
+Validation (Release, net10.0):
+- Production build: passed, zero warnings/errors.
+- Benchmark build with `-p:BuildProjectReferences=false`: passed.
+- Unit filter `DynamicMomentumStrengthBuilderTests|CompactDynamicMomentumTests|NullableStrength`: 13 passed.
+- Competitor filter `DynamicMomentumComparisonTests`: 10 passed.
+- `python -m unittest test_shared_rollout_inventory.py` from `benchmarks`: 56 passed.
+- Warmed state replay including reset: zero bytes over 1,000 ordinary bars with
+  selectable RSI periods 1..8. LatestOnly saves at least 40 bytes/bar versus Full
+  on the 1,000-bar default-period regression. These are focused regressions,
+  not competitor timing measurements. Existing benchmark/test warnings remain.
+
+Logs: `C:/Users/cheat/temp/si-dynamic-builder-{production,benchmark-build,unit,comparisons}.log`.
+No timing campaign was run for this batch. Catalog timing qualification remains
+179/401 APIs; this integration does not establish a performance win or GPU support.
