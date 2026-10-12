@@ -625,13 +625,61 @@ internal static partial class ValuesBarExecution
         }
     }
 
-    private struct PathRatioKernel(WindowPathRatio.Calculator state, BoundedOutput target) : IBoundedKernel<PathRatioKernel>
+    private sealed class PathRatioValueState(int period, int count, PathRatioConvention convention)
+    {
+        private readonly double[] _prices = period < count && period <= int.MaxValue / 2 ? new double[period] : [];
+        private Core.SmaCpuKernel.Certificate _proof = new((int)Math.Min(int.MaxValue,
+            Math.Max(2L * period, convention == PathRatioConvention.SignedPercent ? 200 : 2)));
+        private WindowPathRatio.Calculator? _exact;
+        private int _position, _seen;
+        private double _path, _previous;
+
+        internal double? Next(double value)
+        {
+            if (period >= count) return null;
+            if (_exact is not null) return _exact.Next(value);
+            if (period > int.MaxValue / 2 || !_proof.Include(value))
+            {
+                // Replay retained raw prices in order. They reconstruct P-1
+                // changes exactly, including after a certified flat window.
+                _exact = new(period, convention);
+                int first = _seen == period ? _position : 0;
+                for (int i = 0; i < _seen; i++)
+                    _exact.Next(_prices[(int)(((long)first + i) % period)]);
+                return _exact.Next(value);
+            }
+            if (_seen != 0) _path += Math.Abs(value - _previous);
+            bool mature = _seen == period;
+            double? result = null;
+            if (mature)
+            {
+                double oldest = _prices[_position];
+                if (_path != 0)
+                {
+                    double net = value - oldest;
+                    double numerator = convention == PathRatioConvention.SignedPercent ? net * 100 : Math.Abs(net);
+                    result = numerator == 0 ? 0 : numerator / _path;
+                }
+                // Publish P changes, then evict to keep every intermediate
+                // bounded by 2P price terms (200 for the signed numerator).
+                double next = period == 1 ? value : _prices[_position + 1 == period ? 0 : _position + 1];
+                _path -= Math.Abs(next - oldest);
+            }
+            else _seen++;
+            _prices[_position] = value;
+            if (++_position == period) _position = 0;
+            _previous = value;
+            return result;
+        }
+    }
+
+    private struct PathRatioKernel(PathRatioValueState state, BoundedOutput target) : IBoundedKernel<PathRatioKernel>
     {
         private int _index = target.Origin;
         public static PathRatioKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
         {
             var ratio = (WindowPathRatio)indicator;
-            return new(new(ratio.Period, ratio.Convention), target);
+            return new(new(ratio.Period, count, ratio.Convention), target);
         }
         public double Update(in Bar bar)
         {

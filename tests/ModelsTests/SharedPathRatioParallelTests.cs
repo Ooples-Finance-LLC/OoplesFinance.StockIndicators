@@ -8,6 +8,46 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class SharedPathRatioParallelTests
 {
     [Theory]
+    [InlineData(1, 0, 113)] [InlineData(3, 0, 113)] [InlineData(20, 0, 113)]
+    [InlineData(20, 0, 2)] [InlineData(20, 0, 4097)]
+    [InlineData(20, 1, 113)] [InlineData(20, 2, 113)] [InlineData(20, 3, 113)]
+    public async Task CertificateFailureReplaysRawWindowAcrossWorkerBoundaries(int period, int scenario, int firstFailure)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            var bars = Enumerable.Range(0, 8193).Select(i =>
+            {
+                // Fail before maturity, after ring wrap, and around worker seeds;
+                // later flat windows ensure an expired extreme leaves no residue.
+                double close = i % 97 < 30 ? -0d : (i * 13 % 101 - 50) / 8d;
+                if (i >= firstFailure && (i == firstFailure || i is 1023 or 1024 or 4097))
+                    close = scenario switch { 0 => 0.1, 1 => double.Epsilon,
+                        2 => double.MaxValue, _ => -double.MaxValue };
+                if (scenario == 3 && i == 1025) close = double.MaxValue;
+                return new Bar(DateTime.UnixEpoch.AddMinutes(i), 0, 1, 0, close, 1);
+            }).ToArray();
+            foreach (var convention in Enum.GetValues<PathRatioConvention>())
+            {
+                var indicator = new WindowPathRatio(period, convention);
+                StockIndicatorBuilder Builder() => new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(indicator).ConfigureExecution(IndicatorExecutionBackend.Cpu);
+                using var expected = await Builder().ConfigureBehavior(_ => { }).BuildAsync();
+                foreach (int workers in new[] { 1, 8 })
+                foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                {
+                    CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                    using var actual = await Builder().ConfigureHistory(history).BuildAsync();
+                    foreach (var output in indicator.Outputs)
+                        Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                            actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Theory]
     [InlineData(1)] [InlineData(3)] [InlineData(20)] [InlineData(4095)] [InlineData(4096)] [InlineData(int.MaxValue)]
     public async Task ReplayPreservesEveryValuePresenceAndOwnedBar(int period)
     {
