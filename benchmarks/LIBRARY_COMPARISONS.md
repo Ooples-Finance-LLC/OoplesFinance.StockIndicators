@@ -3133,3 +3133,36 @@ publication schedules. Release net10.0 production/benchmark builds passed;
 zero-allocation state replay. Existing benchmark/test warnings remain.
 Logs: `C:/Users/cheat/temp/si-dynamic-deferred-{production,benchmark-build,unit,comparisons}.log`.
 No isolated latency benefit is claimed for this change.
+
+
+### Dynamic Momentum direct CPU checkpoint, 1,000 bars (2026-10-11)
+
+Production `a84f3926`, fixture `f812f96c`, defaults 5/10/14/30/5. One short
+campaign: three warmups, five requested measured iterations. All four arms passed
+setup's native/owned independent references, presence and cross-library checks.
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 3,389,977.78 | 3,021,938.35 / 3,758,017.20 | 88,417 |
+| LatestOnly | 1,521,032.81 | 1,459,014.30 / 1,583,051.33 | 39,724 |
+| Native serial | 827,887,706.25 | 788,728,375.74 / 867,047,036.76 | 1,604,493,684 |
+| Native parallel | 803,154,550.00 | 764,390,738.96 / 841,918,361.04 | 2,923,740,664 |
+
+Full and LatestOnly both have nonoverlapping intervals below both native arms.
+LatestOnly's mean is approximately 528 times faster than the fastest measured
+native mean. Native serial/parallel intervals overlap, so the run does not prove
+parallel is faster than serial. The result combines all prior implementation
+changes and does not isolate the benefit of deferred output calculation.
+
+Limitations: short run; native serial retained four samples after BDN removed
+one outlier. BDN warned that Full's minimum observed iteration was 29.506 ms,
+below its recommended 100 ms. CPU was 6% before and 8% after; no competing dotnet
+build/test/run processes were observed at those samples. The next process sample
+was after the 84-second run completed, so there is no during-run observation or
+claim of continuous isolation. No 10,000-bar or GPU conclusion follows.
+
+Raw JSON and run context are archived in
+`results/shared-rollout/dynamic-momentum-cpu/deferred-output-1k*`.
+Log: `C:/Users/cheat/temp/si-dynamic-a84f3926.log`.
+The inventory parser accepted all four arms. Only this pair's current evidence
+was added to the catalog; measured coverage is now 180/401 APIs, not a win count.
