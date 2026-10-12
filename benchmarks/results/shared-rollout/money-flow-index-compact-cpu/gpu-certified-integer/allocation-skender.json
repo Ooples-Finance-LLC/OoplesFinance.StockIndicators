@@ -1,0 +1,55 @@
+{
+  "Operation": "Skender.GetMfi",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        643976,
+        643320,
+        643320
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        162192,
+        162192,
+        162192
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        642472,
+        642472,
+        642472
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        161344,
+        161344,
+        161344
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1600512,
+        1600512,
+        1600512
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1620072,
+        1620072,
+        1620072
+      ]
+    }
+  ]
+}
