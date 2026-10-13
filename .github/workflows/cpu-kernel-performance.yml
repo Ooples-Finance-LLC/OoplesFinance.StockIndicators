@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
       - run: python -m unittest discover -s scripts -p test_verify_cpu_kernel_performance.py
@@ -46,7 +46,7 @@ jobs:
       COMPARISON_PAIR: ${{ matrix.pair }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
       - uses: actions/download-artifact@v4
@@ -75,7 +75,7 @@ jobs:
       COMPARISON_FAMILY: ${{ matrix.pair }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
       - uses: actions/download-artifact@v4
