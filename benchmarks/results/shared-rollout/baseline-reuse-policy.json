@@ -1,0 +1,11 @@
+{
+  "policy": "Reuse recorded competitor timings by default; benchmark changed builder paths only.",
+  "source": "User instruction, 2026-10-13",
+  "index": "catalog.json.gz",
+  "saved_serial_results": "pairs[].measurements[].saved_competitor",
+  "qualified_results": "pairs[].current[].methods.NativeSingle and NativeParallel, with report paths in each row's evidence",
+  "reuse_checks": ["competitor implementation and package version", "input fixture and parameters", "output materialization and worker count", "runtime and hardware"],
+  "comparison": "Identify saved-baseline comparisons explicitly. Preserve dates, confidence intervals and report provenance. Do not present them as same-run comparisons.",
+  "missing_or_incompatible": "Record the gap; do not silently rerun competitors or claim a qualified win. Establish a new baseline only when required by the agreed scope.",
+  "builder_only_results": "pairs[].builder_only; excluded from measured_current_apis until a compatible comparison is available"
+}
