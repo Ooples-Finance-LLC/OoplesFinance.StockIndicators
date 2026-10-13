@@ -53,14 +53,20 @@ internal sealed class RoundedMeanErrorWindow(int period)
     internal (bool Defined, double Value) SignedRelativeError(double mean)
     {
         var center = ExactVarianceWindow.Units(mean);
+        var centerZeros = center.IsZero ? int.MaxValue : ExactMeanAccumulator.TrailingBinaryZeros(center);
         var numerator = BigInteger.Zero;
         var denominator = BigInteger.One;
         foreach (var value in _values)
         {
             if (value.IsZero)
                 return (false, 0);
-            var top = BigInteger.Abs(value - center) * value.Sign;
-            var bottom = BigInteger.Abs(value);
+            // Cancel the shared binary scale before constructing/reducing the
+            // fraction. Ordinary prices then use significand-sized operands;
+            // mixed exponents retain exactly the same rational value.
+            var shift = Math.Min(centerZeros, ExactMeanAccumulator.TrailingBinaryZeros(value));
+            var scaledValue = value >> shift;
+            var top = BigInteger.Abs(scaledValue - (center >> shift)) * value.Sign;
+            var bottom = BigInteger.Abs(scaledValue);
             var reduce = BigInteger.GreatestCommonDivisor(BigInteger.Abs(top), bottom);
             top /= reduce;
             bottom /= reduce;
