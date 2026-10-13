@@ -17,6 +17,7 @@ public static partial class IndicatorValidationDiscovery
             || type == typeof(WindowChoppinessIndex) || type == typeof(WindowLogVolatility)
             || type == typeof(WindowMoneyFlowIndex) || type == typeof(WindowRegressionStatistics)
             || type == typeof(RegressionWithFinalLine) || type == typeof(RegressionWithChannels)
+            || type == typeof(ConnorsStrength)
             ? 2 : 1;
     }
 

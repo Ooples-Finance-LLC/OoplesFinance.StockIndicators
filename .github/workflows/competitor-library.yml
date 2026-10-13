@@ -6,6 +6,11 @@ on:
       - 'benchmarks/**'
       - '.github/workflows/competitor-library.yml'
       - 'scripts/*competitor*.py'
+      - 'scripts/competitor-gpu-methods.json'
+      - 'Directory.Build.*'
+      - 'Directory.Packages.props'
+      - 'global.json'
+      - '[Nn]u[Gg]et.[Cc]onfig'
   push:
     branches: [master, main]
     paths:
@@ -13,6 +18,11 @@ on:
       - 'benchmarks/**'
       - '.github/workflows/competitor-library.yml'
       - 'scripts/*competitor*.py'
+      - 'scripts/competitor-gpu-methods.json'
+      - 'Directory.Build.*'
+      - 'Directory.Packages.props'
+      - 'global.json'
+      - '[Nn]u[Gg]et.[Cc]onfig'
   workflow_dispatch:
     inputs:
       measure_performance:
@@ -46,7 +56,11 @@ jobs:
         run: >-
           python scripts/run-competitor-contracts.py discover
           benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
-          contract-methods.json
+          all-contract-methods.json
+      - name: Require source-matched local GPU contracts and partition hosted methods
+        run: >-
+          python scripts/verify-competitor-local-gpu.py verify
+          all-contract-methods.json contract-methods.json
       - name: Check committed API inventory
         run: |
           dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --comparison-manifest actual-manifest.json
@@ -74,6 +88,7 @@ jobs:
           path: |
             benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/
             contract-methods.json
+            all-contract-methods.json
           retention-days: 7
   contracts:
     needs: build

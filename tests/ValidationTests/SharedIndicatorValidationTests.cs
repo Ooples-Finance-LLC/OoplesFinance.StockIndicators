@@ -264,6 +264,28 @@ public sealed partial class SharedIndicatorValidationTests
         }
     }
 
+    [Fact]
+    public void ConnorsDiscoveryRetainsIndependentPeriodsAtTheirSupportedMinimum()
+    {
+        var cases = IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
+            .Where(c => c.IndicatorType == typeof(ConnorsStrength)).ToArray();
+        var expected = new (string Name, int Rsi, int Streak, int Rank)[]
+        {
+            ("default", 3, 2, 100), ("minimum-periods", 2, 2, 2),
+            ("shorter-periods", 2, 2, 50), ("longer-periods", 4, 3, 150),
+            ("minimum-rsiPeriod", 2, 2, 100), ("longer-rsiPeriod", 4, 2, 100),
+            ("minimum-streakPeriod", 3, 2, 100), ("longer-streakPeriod", 3, 3, 100),
+            ("minimum-rankPeriod", 3, 2, 2), ("longer-rankPeriod", 3, 2, 150)
+        };
+        Assert.Equal(expected.Length, cases.Length);
+        foreach (var row in expected)
+        {
+            var indicator = Assert.IsType<ConnorsStrength>(Assert.Single(cases, c => c.Name == row.Name).Factory());
+            Assert.Equal((row.Rsi, row.Streak, row.Rank),
+                (indicator.RsiPeriod, indicator.StreakPeriod, indicator.RankPeriod));
+        }
+    }
+
     public sealed class CustomerWithSmoothingPeriods : Identity
     {
         public CustomerWithSmoothingPeriods(int momentumLength = 2, int firstSmooth = 5, int secondSmooth = 25)
