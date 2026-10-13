@@ -6,6 +6,35 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class RegressionWithChannelsBuilderTests
 {
+    [Fact]
+    public void StandaloneChannelsQualifyForSharedHistoricalExecution()
+    {
+        Assert.True(ValuesBarExecution.SupportsOwned([new RegressionWithChannels()]));
+        Assert.True(ValuesBarExecution.SupportsOwned([new RegressionWithChannels(), new PriceRelativeStrength()]));
+        Assert.False(ValuesBarExecution.SupportsOwned([new RegressionWithChannels().Of(new Sma(2))]));
+    }
+
+    [Fact]
+    public async Task LatestRetainsEveryChannelAndPresenceAndGpuRejects()
+    {
+        var bars = Prices(1, 4, 2, 8, 5, 9, 7);
+        foreach (var backend in new[] { IndicatorExecutionBackend.Auto, IndicatorExecutionBackend.Cpu })
+        {
+            var owner = new RegressionWithChannels(3);
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(owner)
+                .ConfigureHistory(IndicatorHistoryMode.LatestOnly).ConfigureExecution(backend).BuildAsync();
+            var row = RegressionChannelSnapshot.Calculate(bars, 3, 2)[^1];
+            double[] expected = [row.Centerline ?? 0, row.UpperChannel ?? 0, row.LowerChannel ?? 0,
+                row.BreakPoint ? 1 : 0, row.Centerline.HasValue ? 1 : 0,
+                row.UpperChannel.HasValue ? 1 : 0, row.LowerChannel.HasValue ? 1 : 0];
+            for (var slot = 0; slot < 7; slot++)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[slot]), BitConverter.DoubleToInt64Bits(run.Latest[owner.Outputs[slot]]));
+        }
+        await Assert.ThrowsAnyAsync<NotSupportedException>(() => new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars)).ConfigureIndicators(new RegressionWithChannels())
+            .ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
+    }
+
     private static Bar[] Prices(params double[] prices) => prices.Select((p, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), p, p, p, p, 1)).ToArray();
     [Theory]
     [InlineData(2)] [InlineData(3)] [InlineData(20)] [InlineData(int.MaxValue)] [InlineData(null)]
