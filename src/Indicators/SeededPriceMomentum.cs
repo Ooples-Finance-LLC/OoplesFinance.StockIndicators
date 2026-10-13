@@ -106,7 +106,7 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
         private static JurikDyadic Smooth(JurikDyadic previous, JurikDyadic current, int priorWeight, long divisor)
         {
             previous.Multiply(priorWeight);
-            current.Multiply(2);
+            current.ScaleByPowerOfTwo(1);
             previous.AddExact(current);
             return R(previous, divisor);
         }

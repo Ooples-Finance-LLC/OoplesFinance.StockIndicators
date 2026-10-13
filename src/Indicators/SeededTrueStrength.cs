@@ -107,7 +107,7 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
         private static JurikDyadic Numerator(JurikDyadic previous, JurikDyadic current, int length)
         {
             previous.Multiply(length - 1);
-            current.Multiply(2);
+            current.ScaleByPowerOfTwo(1);
             previous.AddExact(current);
             return previous;
         }
