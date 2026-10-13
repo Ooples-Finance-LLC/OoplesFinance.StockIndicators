@@ -24,7 +24,13 @@ public static class SharedAllocationProbe
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation is "TaLib.Candles.Harami" or "TaLib.Candles.HaramiCross" or "TaLib.Candles.HomingPigeon" or "TaLib.Candles.DojiStar")
+        if (operation is "TaLib.Candles.OnNeck" or "TaLib.Candles.InNeck" or "TaLib.Candles.Thrusting")
+        {
+            var fixture = new SharedNeckCandleBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.Harami" or "TaLib.Candles.HaramiCross" or "TaLib.Candles.HomingPigeon" or "TaLib.Candles.DojiStar")
         {
             var fixture = new SharedContainmentCandleBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
