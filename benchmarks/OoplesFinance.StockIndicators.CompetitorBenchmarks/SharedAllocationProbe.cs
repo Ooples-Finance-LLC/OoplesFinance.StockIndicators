@@ -24,7 +24,13 @@ public static class SharedAllocationProbe
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation == "QuanTAlib.Frama")
+        if (operation == "QuanTAlib.Dsma")
+        {
+            var fixture = new SharedDeviationAverageBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Frama")
         {
             var fixture = new SharedFractalBenchmarks { Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;

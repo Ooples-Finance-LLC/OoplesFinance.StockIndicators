@@ -644,6 +644,7 @@ internal static partial class ValuesBarExecution
                 _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
                 NormalizedWindowEntropy { Period: <= 4096 } entropy => new EntropyValueState(entropy.Period, count),
                 RangeFractalAverage fractal => new FractalValueState(fractal.Period, count),
+                FilteredDeviationAverage deviation => new DeviationAverageValueState(deviation.Period, deviation.ScaleFactor, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),
@@ -706,6 +707,7 @@ internal static partial class ValuesBarExecution
             if (_state is TrueRangeValueState range) return FillScalar(source, new TrueRangeUpdate(range), cancellation, owned);
             if (_state is EntropyValueState entropy) return FillScalar(source, new EntropyUpdate(entropy), cancellation, owned);
             if (_state is FractalValueState fractal) return FillScalar(source, new FractalUpdate(fractal), cancellation, owned);
+            if (_state is DeviationAverageValueState deviation) return FillScalar(source, new DeviationAverageUpdate(deviation), cancellation, owned);
             return FillScalar(source, new StateUpdate((IIndicatorState)_state!), cancellation, owned);
         }
         private interface IScalarUpdate { double Update(in Bar bar); }
@@ -734,6 +736,10 @@ internal static partial class ValuesBarExecution
             public double Update(in Bar bar) => state.Update(in bar);
         }
         private readonly struct FractalUpdate(FractalValueState state) : IScalarUpdate
+        {
+            public double Update(in Bar bar) => state.Update(in bar);
+        }
+        private readonly struct DeviationAverageUpdate(DeviationAverageValueState state) : IScalarUpdate
         {
             public double Update(in Bar bar) => state.Update(in bar);
         }
