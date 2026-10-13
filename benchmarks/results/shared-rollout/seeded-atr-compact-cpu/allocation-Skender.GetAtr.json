@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetAtr",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        963720,
+        963064,
+        963064
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        482592,
+        481936,
+        481936
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1720480,
+        1720480,
+        1720480
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        7823760,
+        7823760,
+        7823760
+      ]
+    }
+  ]
+}
