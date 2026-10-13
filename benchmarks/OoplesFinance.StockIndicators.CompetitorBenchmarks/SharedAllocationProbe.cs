@@ -24,7 +24,13 @@ public static class SharedAllocationProbe
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation == "Skender.GetFractal")
+        if (operation == "Skender.GetRollingPivots")
+        {
+            var fixture = new SharedPivotBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetFractal")
         {
             var fixture = new SharedRetrospectiveBenchmarks { Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;

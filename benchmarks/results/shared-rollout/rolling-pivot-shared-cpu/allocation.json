@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetRollingPivots",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        1926920,
+        1926264,
+        1926264
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        1445136,
+        1445136,
+        1445136
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        5155592,
+        5155816,
+        5155816
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        5278864,
+        5278584,
+        5278248
+      ]
+    }
+  ]
+}
