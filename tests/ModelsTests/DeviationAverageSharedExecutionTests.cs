@@ -1,11 +1,66 @@
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
+using OoplesFinance.StockIndicators.Helpers;
+using System.Numerics;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 [Collection("IndicatorValuesDispatch")]
 public sealed class DeviationAverageSharedExecutionTests
 {
+    [Fact]
+    public void RootCertificatePreservesMidpointTiesAndPowerOfTwoSpacing()
+    {
+        foreach (ulong midpoint in new[] { (1UL << 53) - 1, (1UL << 53) + 1,
+            (1UL << 53) + 3, (1UL << 54) - 1, (1UL << 54) + 1 })
+        foreach (uint factor in new[] { 1U, 3U, (1U << 17) - 1 })
+        foreach (int power in new[] { -2100, -108, -106, 0, 1900 })
+        {
+            UInt128 numerator = (UInt128)midpoint * midpoint * factor;
+            foreach (int offset in new[] { -1, 0, 1 })
+            {
+                UInt128 top = offset < 0 ? numerator - 1 : numerator + (uint)offset;
+                Assert.True(ValuesBarExecution.TryDeviationRoot(top, factor, power, out double actual));
+                double expected = ExactPopulationDeviation.ScaledRootRatio((BigInteger)top, factor, power);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+            }
+        }
+    }
+
+    [Fact]
+    public void RootCertificateChecksFullWidthProductsAgainstExactRationalRoot()
+    {
+        var random = new Random(98231);
+        var bytes = new byte[32];
+        for (int i = 0; i < 1000; i++)
+        {
+            random.NextBytes(bytes);
+            UInt128 top = ((UInt128)BitConverter.ToUInt64(bytes, 0) << 64) | BitConverter.ToUInt64(bytes, 8);
+            UInt128 bottom = ((UInt128)BitConverter.ToUInt64(bytes, 16) << 64) | BitConverter.ToUInt64(bytes, 24);
+            top |= (UInt128)1 << 126; bottom |= (UInt128)1 << 126;
+            int power = (i % 3 - 1) * 2000;
+            Assert.True(ValuesBarExecution.TryDeviationRoot(top, bottom, power, out double actual));
+            double expected = ExactPopulationDeviation.ScaledRootRatio((BigInteger)top, (BigInteger)bottom, power);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+        }
+        foreach (UInt128 top in new[] { (UInt128)1, (UInt128)1 << 64, UInt128.MaxValue })
+        foreach (UInt128 bottom in new[] { (UInt128)1, (UInt128)1 << 64, UInt128.MaxValue })
+        {
+            Assert.True(ValuesBarExecution.TryDeviationRoot(top, bottom, 0, out double actual));
+            double expected = ExactPopulationDeviation.ScaledRootRatio((BigInteger)top, (BigInteger)bottom, 0);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+        }
+    }
+
+    [Fact]
+    public void RootCertificateRejectsUnsupportedScalingWithoutChangingFallback()
+    {
+        foreach (int power in new[] { -2150, -2046, 1, 2048 })
+            Assert.False(ValuesBarExecution.TryDeviationRoot(1, 1, power, out _));
+        Assert.False(ValuesBarExecution.TryDeviationRoot(0, 1, 0, out _));
+        Assert.False(ValuesBarExecution.TryDeviationRoot(1, 0, 0, out _));
+    }
+
     [Theory]
     [InlineData(1, 0)] [InlineData(1, 1)] [InlineData(1, 513)] [InlineData(2, 513)]
     [InlineData(3, 513)] [InlineData(7, 1025)] [InlineData(20, 19)] [InlineData(20, 20)]
