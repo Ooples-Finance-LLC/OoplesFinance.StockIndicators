@@ -116,6 +116,8 @@ internal static partial class ValuesBarExecution
                 latest = FillClassicStochastic(source, nodes[0].Values, stochastic, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is RateOfChangeWithAverage roc && RateOfChangeWindow(roc) > 0)
                 latest = FillRateOfChange(source, nodes[0].Values, roc, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPowerWithValidity { Period: <= 4096 } bop)
+                latest = FillNullableBalanceOfPower(source, nodes[0].Values, bop, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMovingAverage or ClassicPriceOscillator)
                 latest = FillClassicAverage(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is WindowAverageEnvelope envelope && AverageEnvelopeWindow(envelope) > 0)
@@ -689,6 +691,7 @@ internal static partial class ValuesBarExecution
                 ClassicMacd macdOwner when singleRoot && ClassicMacdWindow(macdOwner) > 0 => null,
                 ClassicStochastic stochastic when singleRoot && ClassicStochasticWindow(stochastic) > 0 => null,
                 RateOfChangeWithAverage roc when singleRoot && RateOfChangeWindow(roc) > 0 => null,
+                BalanceOfPowerWithValidity { Period: <= 4096 } when singleRoot => null,
                 WindowAverageEnvelope envelope when singleRoot && AverageEnvelopeWindow(envelope) > 0 => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
@@ -755,6 +758,21 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is BalanceOfPowerWithValidity.State bop)
+                {
+                    bop.Update(in bar, _scratch);
+                    Values[0][index] = _scratch[0]; Values[1][index] = _scratch[1];
+                }
+                else if (_state is ElderRayWithDetails.State elderRay)
+                {
+                    elderRay.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is PriceAdjustedAccumulationDistribution.State adjustedAdl)
+                {
+                    adjustedAdl.Update(in bar, _scratch);
+                    Values[0][index] = _scratch[0]; Values[1][index] = _scratch[1];
                 }
                 else if (_state is ChandelierState chandelier)
                 {

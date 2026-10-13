@@ -79,7 +79,7 @@ public sealed class ElderRayWithDetails : MultiOutputIndicatorBase, IIndicatorVa
         return result;
     }
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private ExactMeanAccumulator _seed;
         private int _count;

@@ -64,7 +64,7 @@ public sealed class PriceAdjustedAccumulationDistribution
 
     private static ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
 
-    private sealed class State : IMultiOutputState
+    internal sealed class State : IMultiOutputState
     {
         private ExactMeanAccumulator _total;
         private double _previous;
