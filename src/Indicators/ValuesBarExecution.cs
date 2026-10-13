@@ -611,6 +611,8 @@ internal static partial class ValuesBarExecution
                     || macd && MacdColumnOwner(indicator, slot) < slot
                     || indicator is SumSeededDirectionalIndex && slot is 6 or 7
                     || indicator is RateOfChangeWithAverage { AveragePeriod: null } && slot == 4
+                    || indicator is SeededTrueStrength { SignalPeriod: <= 1 } && slot == 3
+                    || indicator is TripleExponentialRate { SignalPeriod: null } && slot == 5
                     || indicator is WindowAroon && slot >= 4
                     || indicator is ClassicStochastic or ClassicStochasticRsi && slot == 3
                     || indicator is WindowStochasticKdj && slot == 5
@@ -639,6 +641,8 @@ internal static partial class ValuesBarExecution
             if (indicator is WindowAroon) Values[4] = Values[5] = Values[3];
             if (indicator is SumSeededDirectionalIndex) Values[6] = Values[7] = Values[5];
             if (indicator is RateOfChangeWithAverage { AveragePeriod: null }) Values[4] = Values[3];
+            if (indicator is SeededTrueStrength { SignalPeriod: <= 1 }) Values[3] = Values[1];
+            if (indicator is TripleExponentialRate { SignalPeriod: null }) Values[5] = Values[2];
             if (indicator is WindowStochasticKdj) Values[5] = Values[4];
             if (indicator is ClassicStochastic or ClassicStochasticRsi) Values[3] = Values[2];
             if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
@@ -688,6 +692,7 @@ internal static partial class ValuesBarExecution
                 SeededAdaptiveAverage adaptive => new SeededAdaptiveValueState(adaptive, count),
                 DeviationRatioAdaptiveAverage ratio => new DeviationRatioValueState(ratio, count),
                 OldestFirstHilbertTrendline => new OldestHilbertValueState(),
+                TripleExponentialRate triple => new TripleRateState(triple.Period, triple.Seed, triple.SignalPeriod, triple.Suppression),
                 JurikAdaptive jurik => new JurikValueState(jurik, count),
                 RollingPivotLevels pivots => new PivotValueState(pivots, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
@@ -739,6 +744,21 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is TripleRateState tripleRate)
+                {
+                    tripleRate.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is SeededPriceMomentum.State priceMomentum)
+                {
+                    priceMomentum.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is SeededTrueStrength.State trueStrength)
+                {
+                    trueStrength.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is RateOfChangeWithAverage.State roc)
                 {

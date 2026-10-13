@@ -1,0 +1,10 @@
+{
+  "source": "unit.log.gz: CompactTripleUpdatesReduceOrdinaryAllocation",
+  "updates": 4000,
+  "warmup_updates": 1000,
+  "includes_reset_startup": true,
+  "includes_state_construction": false,
+  "original_allocated_bytes": 13667808,
+  "compact_allocated_bytes": 0,
+  "scope": "SharedMean TRIX period20, disabled signal, ordinary97-bar repeating fixture; current-thread managed allocations. Not whole BuildAsync or extreme-input allocation."
+}
