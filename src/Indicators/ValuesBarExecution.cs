@@ -107,6 +107,8 @@ internal static partial class ValuesBarExecution
                 latest = FillOnBalanceVolume(source, nodes[0].Values, obv, cancellation, owned, out obvFinite);
             else if (nodes.Count == 1 && nodes[0].Indicator is VolumeWeightedPrice weightedPrice)
                 latest = FillVolumeWeightedPrice(source, nodes[0].Values, weightedPrice, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails)
+                latest = FillSeededAtr(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is AccumulationDistributionWithAverage adl)
                 latest = FillAccumulationDistribution(source, nodes[0].Values, adl, cancellation, owned);
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
@@ -623,6 +625,7 @@ internal static partial class ValuesBarExecution
                 _ when pointwise => null,
                 BalanceOfPower when singleRoot => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
+                SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
                 _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,
                 _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
