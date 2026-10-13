@@ -15,6 +15,8 @@ public sealed class SharedKlingerBenchmarkTests
     [InlineData(68)]
     [InlineData(69)]
     [InlineData(127)]
+    [InlineData(1000)]
+    [InlineData(10000)]
     public void SetupChecksStartupAndExactNativePrefixReplay(int count)
     {
         int prior = CpuParallelSettings.MaxDegreeOfParallelism;
@@ -23,4 +25,9 @@ public sealed class SharedKlingerBenchmarkTests
         finally { fixture.Cleanup(); }
         Assert.Equal(prior, CpuParallelSettings.MaxDegreeOfParallelism);
     }
+
+    [Fact]
+    public void NativeResultsAreEagerForBenchmarkValidation() =>
+        Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+            BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedKlingerBenchmarks))));
 }
