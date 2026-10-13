@@ -95,6 +95,7 @@ internal static class SharedCpuStates
         typeof(IdenticalThreeCrowsCandle),
         typeof(InNeckCandle),
         typeof(InvertedHammerCandle),
+        typeof(JurikAdaptive),
         typeof(KickingByLengthCandle),
         typeof(KickingCandle),
         typeof(KlingerVolumeWithSignal),
