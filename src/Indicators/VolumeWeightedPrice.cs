@@ -49,7 +49,12 @@ public sealed class VolumeWeightedPrice
     public override IIndicatorOutput PrimaryOutput => Value;
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(Period, TypicalPrice, StartDate);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period, TypicalPrice, StartDate);
+#else
+        new State(Period, TypicalPrice, StartDate);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -94,6 +99,48 @@ public sealed class VolumeWeightedPrice
 
     private static ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
 
+#if !NETFRAMEWORK
+    private sealed class CompactState(int? period, bool typical, DateTime? start) : IMultiOutputState
+    {
+        private readonly Queue<Bar> _window = new();
+        private JurikDyadic _weighted, _mass;
+
+        public void Reset()
+        {
+            _window.Clear();
+            _weighted = _mass = default;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (start is DateTime anchor && bar.Time < anchor) return;
+            if (period is int length)
+            {
+                if (_window.Count == length) Add(_window.Dequeue(), -1);
+                _window.Enqueue(bar);
+            }
+            Add(in bar, 1);
+            if (period is int required && _window.Count < required || _mass.Sign == 0) return;
+            var denominator = _mass;
+            if (typical) denominator.Multiply(3);
+            output[0] = _weighted.Sign == 0 ? 0 : _weighted.Ratio(denominator);
+            output[1] = 1;
+        }
+
+        private void Add(in Bar bar, int sign)
+        {
+            var numerator = JurikDyadic.FromDouble(bar.Close);
+            if (typical) { numerator.Add(bar.High); numerator.Add(bar.Low); }
+            // Weight the complete exact price sum. Division by three belongs
+            // only in the final ratio, never in an intermediate typical price.
+            numerator.Multiply(bar.Volume);
+            if (sign > 0) _weighted.AddExact(numerator);
+            else _weighted.Subtract(numerator);
+            _mass.Add(sign > 0 ? bar.Volume : -bar.Volume);
+        }
+    }
+#else
     private sealed class State(int? period, bool typical, DateTime? start) : IMultiOutputState
     {
         private readonly Queue<Bar> _window = new();
@@ -135,4 +182,5 @@ public sealed class VolumeWeightedPrice
             _mass.Add(bar.Volume, typical ? 3 * sign : sign);
         }
     }
+#endif
 }
