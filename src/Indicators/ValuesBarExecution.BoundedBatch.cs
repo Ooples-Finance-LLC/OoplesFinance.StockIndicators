@@ -30,12 +30,15 @@ internal static partial class ValuesBarExecution
         _ when NeckWindow(indicator) > 0 => NeckWindow(indicator),
         _ when KickingWindow(indicator) > 0 => KickingWindow(indicator),
         _ when MatchedLinesWindow(indicator) > 0 => MatchedLinesWindow(indicator),
+        _ when SequenceWindow(indicator) > 0 => SequenceWindow(indicator),
         _ when TasukiWindow(indicator) > 0 => TasukiWindow(indicator),
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
+        _ when SequenceWindow(indicator) > 0 =>
+            (SequenceCandleState)((IndicatorBase)indicator).CreateState()!,
         _ when MatchedLinesWindow(indicator) > 0 =>
             (MatchedLinesState)((IndicatorBase)indicator).CreateState()!,
         _ when KickingWindow(indicator) > 0 =>
