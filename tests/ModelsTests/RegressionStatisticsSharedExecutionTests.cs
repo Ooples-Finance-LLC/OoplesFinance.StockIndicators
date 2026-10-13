@@ -37,6 +37,50 @@ public sealed class RegressionStatisticsSharedExecutionTests
     }
 
     [Theory]
+    [InlineData(2)] [InlineData(20)] [InlineData(4096)]
+    public async Task IntegerCertificateBoundaryAndFallbackPreserveEveryMoment(int period)
+    {
+        long limit = (1L << 30) / period;
+        foreach (int excess in new[] { 0, 1 })
+        {
+            var bars = Enumerable.Range(0, Math.Max(513, 2 * period + 1)).Select(i =>
+                new Bar(default, 0, 0, 0, (i % 2 == 0 ? 1 : -1) * (limit + excess - i % 5), 0)).ToArray();
+            await Check(bars, period);
+        }
+    }
+
+    [Theory]
+    [InlineData(-1074)] [InlineData(-1070)] [InlineData(-1022)]
+    [InlineData(-500)] [InlineData(0)] [InlineData(500)] [InlineData(990)]
+    public async Task CertifiedGridPublishesOnFinalRoundingGrid(int grid)
+    {
+        var bars = Enumerable.Range(0, 513).Select(i =>
+            new Bar(default, 0, 0, 0, Math.ScaleB(i % 17 - 8, grid), 0)).ToArray();
+        await Check(bars, 3);
+    }
+
+    [Fact]
+    public async Task CertifiedGridRetainsNegativeUnderflowZeroAndRejectsOverflow()
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Enumerable.Range(0, 513).Select(i =>
+                new Bar(default, 0, 0, 0, i % 3 == 0 ? double.Epsilon : 0, 0)).ToArray();
+            var indicator = new WindowRegressionStatistics(3);
+            using var run = await Build(bars, indicator).BuildAsync();
+            Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(run[indicator.Slope][2]));
+            double h = Math.ScaleB(1, 1023);
+            Array.Fill(bars, new Bar(default, 0, 0, 0, h, 0));
+            bars[1] = new(default, 0, 0, 0, -h, 0);
+            var error = await Assert.ThrowsAsync<IndicatorOutputException>(() => Build(bars, indicator).BuildAsync());
+            Assert.Equal(0, error.OutputSlot); Assert.Equal(1, error.BarIndex);
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Theory]
     [InlineData(1)] [InlineData(8)]
     public async Task AllInputValidationPrecedesSlotMajorOverflowAndRecovery(int workers)
     {
