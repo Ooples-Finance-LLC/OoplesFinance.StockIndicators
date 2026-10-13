@@ -18,6 +18,7 @@ public class SharedSeededAtrBenchmarks
     private Quote[][] _quotes = null!;
     private (decimal High, decimal Low, decimal Close)[][] _tuples = null!;
     private int _priorDop, _priorAtr, _priorNatr;
+    private bool _settingsSaved;
     private bool Details => Operation == "Skender.GetAtr";
     private bool Normalized => Operation == "TaLib.Functions.Natr";
     private bool Trady => Operation.StartsWith("Trady", StringComparison.Ordinal);
@@ -25,49 +26,58 @@ public class SharedSeededAtrBenchmarks
     [GlobalSetup]
     public void Setup()
     {
+        if (Operation is not ("Skender.GetAtr" or "TaLib.Functions.Atr" or "TaLib.Functions.Natr" or "Trady.Indicator.AverageTrueRange"))
+            throw new ArgumentException("Unsupported seeded ATR operation.", nameof(Operation));
+        if (Count <= Period) throw new ArgumentOutOfRangeException(nameof(Count));
         _priorDop = CpuParallelSettings.MaxDegreeOfParallelism;
         _priorAtr = TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Atr);
         _priorNatr = TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Natr);
-        CpuParallelSettings.MaxDegreeOfParallelism = 8;
-        TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Atr, 0);
-        TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Natr, 0);
-        if (Count <= Period) throw new ArgumentOutOfRangeException(nameof(Count));
-        _data = CompetitorData.Create(Count);
-        int chunks = Math.Min(Math.Min(8, Environment.ProcessorCount), Count / (Period + 1));
-        _quotes = new Quote[chunks][];
-        _tuples = new (decimal, decimal, decimal)[chunks][];
-        var tuples = _data.Candles.Select(c => (c.High, c.Low, c.Close)).ToArray();
-        for (int c = 0; c < chunks; c++)
+        _settingsSaved = true;
+        try
         {
-            int end = Count * (c + 1) / chunks;
-            _quotes[c] = _data.Quotes.Take(end).ToArray();
-            _tuples[c] = tuples[..end];
-        }
-        var pair = Normalized ? NormalizedAtrComparison.Pair : SeededAtrComparison.Pairs.Single(p => p.Id == Operation);
-        var expected = pair.Reference!(_data, Period);
-        var native = pair.CompetitorReference!(_data, Period);
-        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
-        {
-            var indicator = Create(); using var run = Build(indicator, history);
-            var names = Details ? new[] { "Tr", "Atr", "Atrp" } : new[] { "Value" };
-            for (int slot = 0; slot < names.Length; slot++)
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Atr, 0);
+            TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Natr, 0);
+            _data = CompetitorData.Create(Count);
+            int chunks = Math.Min(Math.Min(8, Environment.ProcessorCount), Count / (Period + 1));
+            _quotes = new Quote[chunks][];
+            _tuples = new (decimal, decimal, decimal)[chunks][];
+            var tuples = _data.Candles.Select(c => (c.High, c.Low, c.Close)).ToArray();
+            for (int c = 0; c < chunks; c++)
             {
-                var output = expected.Outputs[names[slot]];
-                var present = Enumerable.Range(0, Count).Select(i => output.Present?[i] ?? i >= output.FirstValid).ToArray();
-                AsinFeasibilityBenchmarks.RequireSame(output.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                if (Details) AsinFeasibilityBenchmarks.RequireSame(present.Select(v => v ? 1d : 0d).ToArray(), run[indicator.Outputs[slot + 3]].ToArray());
+                int end = Count * (c + 1) / chunks;
+                _quotes[c] = _data.Quotes.Take(end).ToArray();
+                _tuples[c] = tuples[..end];
             }
+            var pair = Normalized ? NormalizedAtrComparison.Pair : SeededAtrComparison.Pairs.Single(p => p.Id == Operation);
+            var expected = pair.Reference!(_data, Period);
+            var native = pair.CompetitorReference!(_data, Period);
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                var indicator = Create(); using var run = Build(indicator, history);
+                var names = Details ? new[] { "Tr", "Atr", "Atrp" } : new[] { "Value" };
+                for (int slot = 0; slot < names.Length; slot++)
+                {
+                    var output = expected.Outputs[names[slot]];
+                    var present = Enumerable.Range(0, Count).Select(i => output.Present?[i] ?? i >= output.FirstValid).ToArray();
+                    AsinFeasibilityBenchmarks.RequireSame(output.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
+                    if (Details) AsinFeasibilityBenchmarks.RequireSame(present.Select(v => v ? 1d : 0d).ToArray(), run[indicator.Outputs[slot + 3]].ToArray());
+                }
+            }
+            Check(NativeSingle(), native);
+            Check(NativeParallel(), native);
         }
-        Check(NativeSingle(), native);
-        Check(NativeParallel(), native);
+        catch { Cleanup(); throw; }
     }
 
     [GlobalCleanup]
     public void Cleanup()
     {
+        if (!_settingsSaved) return;
         CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
         TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Atr, _priorAtr);
         TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Natr, _priorNatr);
+        _settingsSaved = false;
     }
     private IIndicator Create() => Details ? new AverageTrueRangeWithDetails(Period)
         : Normalized ? new NormalizedSeededAverageTrueRange(Period) : new SeededAverageTrueRange(Period);
