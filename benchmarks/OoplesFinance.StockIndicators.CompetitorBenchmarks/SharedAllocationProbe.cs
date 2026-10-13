@@ -24,7 +24,13 @@ public static class SharedAllocationProbe
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation == "QuanTAlib.Curvature")
+        if (operation == "QuanTAlib.Entropy")
+        {
+            var fixture = new SharedEntropyBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Curvature")
         {
             var fixture = new SharedCurvatureBenchmarks { Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
