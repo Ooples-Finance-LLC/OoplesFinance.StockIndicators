@@ -162,7 +162,7 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
         }
     }
 
-    private sealed class State(EmaDifferenceSignal owner) : IMultiOutputState
+    internal sealed class State(EmaDifferenceSignal owner) : IMultiOutputState
     {
         private readonly Average _fast = new(owner.FastPeriod, owner.FirstPrice),
             _slow = new(owner.SlowPeriod, owner.FirstPrice),

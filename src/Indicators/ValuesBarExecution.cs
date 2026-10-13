@@ -110,6 +110,8 @@ internal static partial class ValuesBarExecution
                 latest = FillBoundedWindow<ScaledRangeKernel>(source, nodes[0].Values, nodes[0].Indicator, 2, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMacd macd && ClassicMacdWindow(macd) > 0)
+                latest = FillClassicMacd(source, nodes[0].Values, macd, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicStochastic stochastic && ClassicStochasticWindow(stochastic) > 0)
                 latest = FillClassicStochastic(source, nodes[0].Values, stochastic, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMovingAverage or ClassicPriceOscillator)
@@ -598,11 +600,13 @@ internal static partial class ValuesBarExecution
                 && (obv.AveragePeriod is null || obv.AveragePeriod >= count);
             bool smoothed = indicator is SmoothedAccumulationOscillator;
             bool smoothedDetails = indicator is SmoothedAccumulationOscillator { IncludeDetails: true };
+            bool macd = indicator is ClassicMacd or AlignedEmaMacd or EmaDifferenceSignal;
             Values = new double[indicator.Outputs.Count][];
             for (int slot = 0; slot < Values.Length; slot++)
                 Values[slot] = indicator is RegressionWithChannels && slot is 5 or 6
                     || indicator is WindowRegressionStatistics && slot is 7 or 9
                     || indicator is RegressionWithFinalLine && slot is 6 or 7
+                    || macd && MacdColumnOwner(indicator, slot) < slot
                     || indicator is WindowAroon && slot >= 4
                     || indicator is ClassicStochastic or ClassicStochasticRsi && slot == 3
                     || indicator is WindowStochasticKdj && slot == 5
@@ -617,6 +621,12 @@ internal static partial class ValuesBarExecution
                     || pointwise && indicator is not PriceCircularTransform { Operation: PriceCircularOperation.ArcSine })
                     ? Array.Empty<double>()
                     : indicator is Sma || pointwise ? GC.AllocateUninitializedArray<double>(count) : new double[count];
+            if (macd)
+                for (int slot = 0; slot < Values.Length; slot++)
+                {
+                    int column = MacdColumnOwner(indicator, slot);
+                    if (column < slot) Values[slot] = Values[column];
+                }
             // These three presence outputs are identical by contract. Completed
             // series expose read-only spans, so one run-owned column serves all three.
             if (indicator is RegressionWithChannels) Values[5] = Values[6] = Values[4];
@@ -656,6 +666,7 @@ internal static partial class ValuesBarExecution
                 WindowRegressionStatistics when singleRoot => null,
                 BalanceOfPower when singleRoot => null,
                 ClassicMovingAverage or ClassicPriceOscillator when singleRoot => null,
+                ClassicMacd macdOwner when singleRoot && ClassicMacdWindow(macdOwner) > 0 => null,
                 ClassicStochastic stochastic when singleRoot && ClassicStochasticWindow(stochastic) > 0 => null,
                 WindowAverageEnvelope envelope when singleRoot && AverageEnvelopeWindow(envelope) > 0 => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
@@ -721,6 +732,21 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is ClassicMacd.State classicMacd)
+                {
+                    classicMacd.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is AlignedEmaMacd.State alignedMacd)
+                {
+                    alignedMacd.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is EmaDifferenceSignal.State emaDifference)
+                {
+                    emaDifference.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is ClassicStochastic.State classicStochastic)
                 {
