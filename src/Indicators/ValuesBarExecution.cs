@@ -613,6 +613,8 @@ internal static partial class ValuesBarExecution
                     || indicator is RateOfChangeWithAverage { AveragePeriod: null } && slot == 4
                     || indicator is SeededTrueStrength { SignalPeriod: <= 1 } && slot == 3
                     || indicator is TripleExponentialRate { SignalPeriod: null } && slot == 5
+                    || indicator is WindowChandelierExit { Selection: not ChandelierExitSelection.Short } && slot == 3
+                    || indicator is WindowChandelierExit { Selection: ChandelierExitSelection.Short } && slot == 2
                     || indicator is WindowAroon && slot >= 4
                     || indicator is ClassicStochastic or ClassicStochasticRsi && slot == 3
                     || indicator is WindowStochasticKdj && slot == 5
@@ -643,6 +645,14 @@ internal static partial class ValuesBarExecution
             if (indicator is RateOfChangeWithAverage { AveragePeriod: null }) Values[4] = Values[3];
             if (indicator is SeededTrueStrength { SignalPeriod: <= 1 }) Values[3] = Values[1];
             if (indicator is TripleExponentialRate { SignalPeriod: null }) Values[5] = Values[2];
+            if (indicator is WindowChandelierExit chandelier)
+            {
+                // Both selected levels mature together; an unselected level and
+                // its presence flag are identically zero, even on overflow.
+                if (chandelier.Selection == ChandelierExitSelection.Both) Values[3] = Values[2];
+                else if (chandelier.Selection == ChandelierExitSelection.Long) Values[3] = Values[1];
+                else Values[2] = Values[0];
+            }
             if (indicator is WindowStochasticKdj) Values[5] = Values[4];
             if (indicator is ClassicStochastic or ClassicStochasticRsi) Values[3] = Values[2];
             if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
@@ -693,6 +703,7 @@ internal static partial class ValuesBarExecution
                 DeviationRatioAdaptiveAverage ratio => new DeviationRatioValueState(ratio, count),
                 OldestFirstHilbertTrendline => new OldestHilbertValueState(),
                 TripleExponentialRate triple => new TripleRateState(triple.Period, triple.Seed, triple.SignalPeriod, triple.Suppression),
+                WindowChandelierExit chandelierOwner => new ChandelierState(chandelierOwner, count),
                 JurikAdaptive jurik => new JurikValueState(jurik, count),
                 RollingPivotLevels pivots => new PivotValueState(pivots, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
@@ -744,6 +755,16 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is ChandelierState chandelier)
+                {
+                    chandelier.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is SeededAtrTrailingStop.State atrStop)
+                {
+                    atrStop.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is TripleRateState tripleRate)
                 {
