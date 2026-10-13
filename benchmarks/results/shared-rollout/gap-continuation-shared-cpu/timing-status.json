@@ -1,0 +1,8 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "External Hip tuned-profile benchmark PID26188 observed after tests completed. No benchmark launched and no external process stopped.",
+  "source_commit": "12578ca0",
+  "reuse_binaries": true,
+  "next_filter": "*SharedGapContinuationBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; do not repeat"
+}
