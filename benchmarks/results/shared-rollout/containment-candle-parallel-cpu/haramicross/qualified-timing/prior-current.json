@@ -1,0 +1,128 @@
+[
+  {
+    "bars": 1000,
+    "evidence": "results/shared-rollout/containment-candle-shared-cpu/haramicross/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 88043.61979166667,
+        "allocated_bytes": 59665,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 88043.61979166667,
+          "StandardError": 452.6292107709387,
+          "Level": 12,
+          "Margin": 2281.842098321491,
+          "Lower": 85761.77769334518,
+          "Upper": 90325.46188998816
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 85803.974609375,
+        "allocated_bytes": 10629,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 85803.974609375,
+          "StandardError": 529.1786734252603,
+          "Level": 12,
+          "Margin": 2529.956979289956,
+          "Lower": 83274.01763008504,
+          "Upper": 88333.93158866496
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 53233.111572265625,
+        "allocated_bytes": 4068,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 53233.111572265625,
+          "StandardError": 470.90884449371555,
+          "Level": 12,
+          "Margin": 2546.6197076732124,
+          "Lower": 50686.49186459241,
+          "Upper": 55779.73127993884
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 15101.226806640625,
+        "allocated_bytes": 9009,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 15101.226806640625,
+          "StandardError": 77.88571565874317,
+          "Level": 12,
+          "Margin": 372.36479815481596,
+          "Lower": 14728.862008485808,
+          "Upper": 15473.591604795442
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 5.830229617699027,
+    "full_clear_win": false,
+    "latest_mean_ratio": 5.681920794120084,
+    "latest_clear_win": false
+  },
+  {
+    "bars": 10000,
+    "evidence": "results/shared-rollout/containment-candle-shared-cpu/haramicross/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 880819.6180555555,
+        "allocated_bytes": 564106,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 880819.6180555555,
+          "StandardError": 9023.187741219068,
+          "Level": 12,
+          "Margin": 45488.645361405455,
+          "Lower": 835330.97269415,
+          "Upper": 926308.263416961
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 836242.34375,
+        "allocated_bytes": 82700,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 836242.34375,
+          "StandardError": 7308.059394994558,
+          "Level": 12,
+          "Margin": 34939.19313066074,
+          "Lower": 801303.1506193393,
+          "Upper": 871181.5368806607
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 525853.2552083334,
+        "allocated_bytes": 40097,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 525853.2552083334,
+          "StandardError": 8405.467399840285,
+          "Level": 12,
+          "Margin": 42374.52844980172,
+          "Lower": 483478.72675853164,
+          "Upper": 568227.7836581351
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 131209.58116319444,
+        "allocated_bytes": 81040,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 131209.58116319444,
+          "StandardError": 243.17013077561873,
+          "Level": 12,
+          "Margin": 1225.8949008462343,
+          "Lower": 129983.6862623482,
+          "Upper": 132435.47606404067
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 6.713073925295282,
+    "full_clear_win": false,
+    "latest_mean_ratio": 6.373332925359373,
+    "latest_clear_win": false
+  }
+]
