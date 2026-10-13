@@ -1,0 +1,14 @@
+{
+  "preflight_evidence": "external-processes.json",
+  "measurement_kind": "standalone-snapshot",
+  "status": "deferred-before-launch",
+  "next_filter": "*SharedRetrospectiveSnapshotBenchmarks*Snapshot*",
+  "next_stem": "si-retroprice-snapshot-20261013-a",
+  "reason": "Preserve verified snapshot binaries; recent monitored timing interrupted by intermittent external work, no repeated attempt.",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "catalog_field": "snapshot_only",
+  "reuse_binaries": true,
+  "source_commit": "7a217806",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-retroprice-binaries-7a217806",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+}
