@@ -1,0 +1,8 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "External .NET tests/builds still active; no new timing attempt launched.",
+  "source_commit": "c3f21e56",
+  "reuse_binaries": true,
+  "next_filter": "*SharedCrowSoldierBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; do not repeat"
+}
