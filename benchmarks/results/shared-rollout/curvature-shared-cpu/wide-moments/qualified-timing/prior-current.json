@@ -1,0 +1,130 @@
+{
+  "QuanTAlib.Curvature": [
+    {
+      "bars": 1000,
+      "evidence": "results/shared-rollout/curvature-shared-cpu/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCurvatureBenchmarks-report-full-compressed.json",
+      "methods": {
+        "BuilderFull": {
+          "mean_ns": 532491.6232638889,
+          "allocated_bytes": 687054,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 532491.6232638889,
+            "StandardError": 1262.2122460554604,
+            "Level": 12,
+            "Margin": 6363.197450647603,
+            "Lower": 526128.4258132413,
+            "Upper": 538854.8207145365
+          }
+        },
+        "BuilderLatestOnly": {
+          "mean_ns": 518068.90625,
+          "allocated_bytes": 638300,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 518068.90625,
+            "StandardError": 1408.8522017469368,
+            "Level": 12,
+            "Margin": 6735.59922119783,
+            "Lower": 511333.30702880217,
+            "Upper": 524804.5054711979
+          }
+        },
+        "NativeSingle": {
+          "mean_ns": 263338.515625,
+          "allocated_bytes": 836975,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 263338.515625,
+            "StandardError": 2376.351243926418,
+            "Level": 12,
+            "Margin": 11361.127567558971,
+            "Lower": 251977.38805744104,
+            "Upper": 274699.64319255896
+          }
+        },
+        "NativeParallel": {
+          "mean_ns": 128794.482421875,
+          "allocated_bytes": 989128,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 128794.482421875,
+            "StandardError": 3104.2772888766394,
+            "Level": 12,
+            "Margin": 14841.278356532239,
+            "Lower": 113953.20406534275,
+            "Upper": 143635.76077840725
+          }
+        }
+      },
+      "fastest_measured_native": "NativeParallel",
+      "full_mean_ratio": 4.134428845481724,
+      "full_clear_win": false,
+      "latest_mean_ratio": 4.02244643177361,
+      "latest_clear_win": false
+    },
+    {
+      "bars": 10000,
+      "evidence": "results/shared-rollout/curvature-shared-cpu/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCurvatureBenchmarks-report-full-compressed.json",
+      "methods": {
+        "BuilderFull": {
+          "mean_ns": 4921243.75,
+          "allocated_bytes": 6611506,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 4921243.75,
+            "StandardError": 78931.58629949868,
+            "Level": 12,
+            "Margin": 377365.01426308585,
+            "Lower": 4543878.735736914,
+            "Upper": 5298608.764263086
+          }
+        },
+        "BuilderLatestOnly": {
+          "mean_ns": 4699492.8125,
+          "allocated_bytes": 6130326,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 4699492.8125,
+            "StandardError": 26372.848451153648,
+            "Level": 12,
+            "Margin": 126086.28305232739,
+            "Lower": 4573406.529447673,
+            "Upper": 4825579.095552327
+          }
+        },
+        "NativeSingle": {
+          "mean_ns": 4218898.125,
+          "allocated_bytes": 8448564,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 4218898.125,
+            "StandardError": 11605.428138719612,
+            "Level": 12,
+            "Margin": 55484.53743827722,
+            "Lower": 4163413.587561723,
+            "Upper": 4274382.662438277
+          }
+        },
+        "NativeParallel": {
+          "mean_ns": 2093367.3828125,
+          "allocated_bytes": 8604082,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 2093367.3828125,
+            "StandardError": 21114.251628448532,
+            "Level": 12,
+            "Margin": 114183.39226052874,
+            "Lower": 1979183.9905519714,
+            "Upper": 2207550.7750730286
+          }
+        }
+      },
+      "fastest_measured_native": "NativeParallel",
+      "full_mean_ratio": 2.3508743808686683,
+      "full_clear_win": false,
+      "latest_mean_ratio": 2.24494412738298,
+      "latest_clear_win": false
+    }
+  ]
+}
