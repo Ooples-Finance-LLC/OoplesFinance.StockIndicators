@@ -23,18 +23,7 @@ public static class FractalSnapshot
         bool useClose = false
     )
     {
-        if (bars is null) throw new ArgumentNullException(nameof(bars));
-        if (leftSpan < 2)
-            throw new ArgumentOutOfRangeException(nameof(leftSpan));
-        if (rightSpan < 2)
-            throw new ArgumentOutOfRangeException(nameof(rightSpan));
-        foreach (var bar in bars)
-            if (
-                useClose
-                    ? !FrameworkCompatibility.IsFinite(bar.Close)
-                    : !FrameworkCompatibility.IsFinite(bar.High) || !FrameworkCompatibility.IsFinite(bar.Low)
-            )
-                throw new ArgumentOutOfRangeException(nameof(bars));
+        Validate(bars, leftSpan, rightSpan, useClose);
         var result = Enumerable
             .Range(0, bars.Count)
             .Select(_ => new FractalValue(null, null))
@@ -57,22 +46,45 @@ public static class FractalSnapshot
         return result;
     }
 
+    private static void Validate(IReadOnlyList<Bar> bars, int leftSpan, int rightSpan, bool useClose)
+    {
+        if (bars is null) throw new ArgumentNullException(nameof(bars));
+        if (leftSpan < 2)
+            throw new ArgumentOutOfRangeException(nameof(leftSpan));
+        if (rightSpan < 2)
+            throw new ArgumentOutOfRangeException(nameof(rightSpan));
+        foreach (var bar in bars)
+            if (
+                useClose
+                    ? !FrameworkCompatibility.IsFinite(bar.Close)
+                    : !FrameworkCompatibility.IsFinite(bar.High) || !FrameworkCompatibility.IsFinite(bar.Low)
+            )
+                throw new ArgumentOutOfRangeException(nameof(bars));
+    }
+
     /// <summary>Returns symmetric high/low chaos bands, updating only when the right wing is complete.</summary>
     public static IReadOnlyList<FractalChaosValue> ChaosBands(
         IReadOnlyList<Bar> bars,
         int windowSpan = 2
     )
     {
-        var fractals = Calculate(bars, windowSpan, windowSpan);
+        Validate(bars, windowSpan, windowSpan, false);
         var result = new FractalChaosValue[bars.Count];
+        long width = 2L * windowSpan + 1;
+        // Confirm directly at the trailing edge, avoiding a second record series.
+        var highs = width <= bars.Count ? new ExtremeDeque((int)width, true) : null;
+        var lows = width <= bars.Count ? new ExtremeDeque((int)width, false) : null;
         double? upper = null,
             lower = null;
         for (var i = 0; i < bars.Count; i++)
         {
-            if ((long)i >= 2L * windowSpan)
+            long start = i - width + 1;
+            highs?.Add(i, bars[i].High, start);
+            lows?.Add(i, bars[i].Low, start);
+            if (start >= 0)
             {
-                upper = fractals[i - windowSpan].Bear ?? upper;
-                lower = fractals[i - windowSpan].Bull ?? lower;
+                upper = highs!.UniqueAt(i - windowSpan) ?? upper;
+                lower = lows!.UniqueAt(i - windowSpan) ?? lower;
             }
             result[i] = new(upper, lower);
         }
