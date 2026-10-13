@@ -96,7 +96,7 @@ public sealed class MoneyFlowWithDetails
     private static ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
 
 #if !NETFRAMEWORK
-    private sealed class CompactState(int period) : IMultiOutputState
+    internal sealed class CompactState(int period) : IMultiOutputState
     {
         private readonly Queue<(double Flow, double Volume)> _window = new();
         private JurikDyadic _flows, _volumes;
