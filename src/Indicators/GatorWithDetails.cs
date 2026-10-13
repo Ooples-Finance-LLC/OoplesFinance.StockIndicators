@@ -27,6 +27,7 @@ public readonly record struct GatorSample(
 public sealed class GatorWithDetails : MultiOutputIndicatorBase, IIndicatorValidationContract
 {
     private readonly AlligatorWithDetails _alligator;
+    internal AlligatorWithDetails Alligator => _alligator;
 
     /// <summary>Creates Gator from configurable Alligator periods and positive delays.</summary>
     public GatorWithDetails(
@@ -179,7 +180,7 @@ public sealed class GatorWithDetails : MultiOutputIndicatorBase, IIndicatorValid
         }
     }
 
-    private sealed class State(IMultiOutputState alligator) : IMultiOutputState
+    internal sealed class State(IMultiOutputState alligator) : IMultiOutputState
     {
         private readonly Transform _transform = new();
 
