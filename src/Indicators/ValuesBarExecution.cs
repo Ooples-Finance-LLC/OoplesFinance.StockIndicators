@@ -168,7 +168,7 @@ internal static partial class ValuesBarExecution
                     // Unproven guarded SMA and other states still validate every output.
                     // Deviation bands can overflow secondary slots while their mean stays finite.
                     // Keep slot-major validation after every input has been checked.
-                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics
+                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails
                         || (gpu is not null && node.Indicator is WindowMoneyFlowIndex))
                     for (int i = 0; i < source.Length; i++)
                     {
@@ -689,6 +689,12 @@ internal static partial class ValuesBarExecution
                     }
                 }
                 else if (_state is IIndicatorState single) Values[0][index] = single.Update(in bar);
+                else if (_state is MovingAverageDifference.State difference)
+                {
+                    difference.Update(in bar, _scratch);
+                    Values[0][index] = _scratch[0];
+                    Values[1][index] = _scratch[1];
+                }
                 else if (_state is WindowDirectionalMeasure.State directional)
                 {
                     // This state clears both outputs itself, including absence.
@@ -722,10 +728,15 @@ internal static partial class ValuesBarExecution
             if (_state is EntropyValueState entropy) return FillScalar(source, new EntropyUpdate(entropy), cancellation, owned);
             if (_state is FractalValueState fractal) return FillScalar(source, new FractalUpdate(fractal), cancellation, owned);
             if (_state is DeviationAverageValueState deviation) return FillScalar(source, new DeviationAverageUpdate(deviation), cancellation, owned);
+            if (_state is FirstValueEma.State firstEma) return FillScalar(source, new FirstEmaUpdate(firstEma), cancellation, owned);
             if (_state is TrendMethodsState methods) return FillScalar(source, new TrendMethodsUpdate(methods), cancellation, owned);
             return FillScalar(source, new StateUpdate((IIndicatorState)_state!), cancellation, owned);
         }
-        // Variable-length anchor search retains its original sequential state.
+        // Preserve recurrence state while exposing concrete updates to the JIT.
+        private readonly struct FirstEmaUpdate(FirstValueEma.State state) : IScalarUpdate
+        {
+            public double Update(in Bar bar) => state.Update(in bar);
+        }
         private readonly struct TrendMethodsUpdate(TrendMethodsState state) : IScalarUpdate
         {
             public double Update(in Bar bar) => state.Update(in bar);
