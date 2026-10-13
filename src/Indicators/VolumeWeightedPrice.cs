@@ -100,10 +100,17 @@ public sealed class VolumeWeightedPrice
     private static ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
 
 #if !NETFRAMEWORK
-    private sealed class CompactState(int? period, bool typical, DateTime? start) : IMultiOutputState
+    internal sealed class CompactState(int? period, bool typical, DateTime? start) : IMultiOutputState
     {
         private readonly Queue<Bar> _window = new();
         private JurikDyadic _weighted, _mass;
+
+        internal (JurikDyadic Weighted, JurikDyadic Mass) Totals => (_weighted, _mass);
+        internal void Seed(JurikDyadic weighted, JurikDyadic mass)
+        {
+            _weighted = weighted;
+            _mass = mass;
+        }
 
         public void Reset()
         {
@@ -114,18 +121,23 @@ public sealed class VolumeWeightedPrice
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            if (start is DateTime anchor && bar.Time < anchor) return;
+            if (!Accumulate(in bar)) return;
+            var denominator = _mass;
+            if (typical) denominator.Multiply(3);
+            output[0] = _weighted.Sign == 0 ? 0 : _weighted.Ratio(denominator);
+            output[1] = 1;
+        }
+
+        internal bool Accumulate(in Bar bar)
+        {
+            if (start is DateTime anchor && bar.Time < anchor) return false;
             if (period is int length)
             {
                 if (_window.Count == length) Add(_window.Dequeue(), -1);
                 _window.Enqueue(bar);
             }
             Add(in bar, 1);
-            if (period is int required && _window.Count < required || _mass.Sign == 0) return;
-            var denominator = _mass;
-            if (typical) denominator.Multiply(3);
-            output[0] = _weighted.Sign == 0 ? 0 : _weighted.Ratio(denominator);
-            output[1] = 1;
+            return !(period is int required && _window.Count < required || _mass.Sign == 0);
         }
 
         private void Add(in Bar bar, int sign)

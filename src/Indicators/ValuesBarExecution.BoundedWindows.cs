@@ -116,7 +116,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
-        if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or MoneyFlowWithDetails or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
+        if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or MoneyFlowWithDetails or VolumeWeightedPrice or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
         if (indicator is Wma or WilliamsR or EndpointWeightedAverage or FixedPeriodWma or FibonacciWeightedAverage or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or PriorPriceChannel or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
@@ -783,6 +783,21 @@ internal static partial class ValuesBarExecution
             int index = _index++;
             if (index >= target.WriteStart)
                 for (int slot = 1; slot < values.Length; slot++) target.Values[slot][index] = values[slot];
+            return values[0];
+        }
+    }
+
+    private struct VolumePriceKernel(VolumeWeightedPrice.CompactState state, BoundedOutput target) : IBoundedKernel<VolumePriceKernel>
+    {
+        private int _index = target.Origin;
+        public static VolumePriceKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(period, ((VolumeWeightedPrice)indicator).TypicalPrice, null), target);
+        public double Update(in Bar bar)
+        {
+            Span<double> values = stackalloc double[2];
+            state.Update(in bar, values);
+            int index = _index++;
+            if (index >= target.WriteStart) target.Values[1][index] = values[1];
             return values[0];
         }
     }
