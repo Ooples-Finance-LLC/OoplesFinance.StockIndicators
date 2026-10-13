@@ -1,0 +1,158 @@
+[
+  {
+    "Operation": "TaLib.Candles.Harami",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          564032,
+          564688,
+          564032
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          82624,
+          82624,
+          82624
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.HaramiCross",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          564032,
+          564688,
+          564032
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          82624,
+          82624,
+          82624
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.HomingPigeon",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          564032,
+          564688,
+          564032
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          82624,
+          82624,
+          82624
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.DojiStar",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          564032,
+          564688,
+          564032
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          82624,
+          82624,
+          82624
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  }
+]
