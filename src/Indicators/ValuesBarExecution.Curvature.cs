@@ -90,6 +90,8 @@ internal static partial class ValuesBarExecution
                 if (!double.IsFinite(slopes[i])) IndicatorOutputPolicy.Validate(first, 0, i, slopes[i]);
             }
             bool compactLast = TryNormalizeCurvatureInput(slopes, count, last.Period, cancellation, out int lastGrid);
+            bool wideLast = !compactLast && TryNormalizeCurvatureInput(slopes, count, last.Period,
+                cancellation, out lastGrid, wide: true);
             void Last(int chunk)
             {
                 int start = (int)((long)count * chunk / chunks), end = (int)((long)count * (chunk + 1) / chunks);
@@ -97,6 +99,11 @@ internal static partial class ValuesBarExecution
                 {
                     FillCertifiedRegressionStatistics(slopes, values, start, end, last.Period, lastGrid,
                         cancellation, false, count);
+                    return;
+                }
+                if (wideLast)
+                {
+                    FillWideCurvatureStatistics(slopes, values, start, end, last.Period, lastGrid, cancellation);
                     return;
                 }
                 using var state = new WindowRegressionStatistics.State(last.Period);
@@ -141,7 +148,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool TryNormalizeCurvatureInput(double[] input, int count, int period,
-        CancellationToken cancellation, out int grid)
+        CancellationToken cancellation, out int grid, bool wide = false)
     {
         grid = 0;
         if (period > 4096) return false;
@@ -155,8 +162,11 @@ internal static partial class ValuesBarExecution
             if (value.Integer != 0) minimum = Math.Min(minimum, value.Exponent);
         }
         grid = minimum == int.MaxValue ? 0 : minimum;
-        // Same P*B<=2^30 certificate as standalone regression statistics.
-        if (Math.ScaleB(maximum, -grid) > (1L << 30) / period) return false;
+        // Narrow moments use the standalone P*B<=2^30 certificate. The wider
+        // curvature stage accepts exactly representable signed Int64 inputs;
+        // its squared moments promote independently when UInt128 is too small.
+        double bound = Math.ScaleB(maximum, -grid);
+        if (wide ? bound >= 9223372036854775808d : bound > (1L << 30) / period) return false;
         for (int i = 0; i < count; i++)
         {
             cancellation.ThrowIfCancellationRequested();
