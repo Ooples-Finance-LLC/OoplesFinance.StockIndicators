@@ -110,6 +110,8 @@ internal static partial class ValuesBarExecution
                 latest = FillBoundedWindow<ScaledRangeKernel>(source, nodes[0].Values, nodes[0].Indicator, 2, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMovingAverage or ClassicPriceOscillator)
+                latest = FillClassicAverage(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is SeededOnBalanceVolume obv)
                 latest = FillOnBalanceVolume(source, nodes[0].Values, obv, cancellation, owned, out obvFinite);
             else if (nodes.Count == 1 && nodes[0].Indicator is VolumeWeightedPrice weightedPrice)
@@ -638,6 +640,7 @@ internal static partial class ValuesBarExecution
                 ScaledTrueRange when singleRoot => null,
                 WindowRegressionStatistics when singleRoot => null,
                 BalanceOfPower when singleRoot => null,
+                ClassicMovingAverage or ClassicPriceOscillator when singleRoot => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
                 _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,

@@ -107,7 +107,7 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
         return result;
     }
 
-    private sealed class State : IMultiOutputState, IDisposable
+    internal sealed class State : IMultiOutputState, IDisposable
     {
         private readonly IMultiOutputState _fast,
             _slow;
