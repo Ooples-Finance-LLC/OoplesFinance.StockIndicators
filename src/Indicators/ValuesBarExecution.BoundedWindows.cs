@@ -24,7 +24,21 @@ internal static partial class ValuesBarExecution
         || TrendReversalWindow(indicator) > 0 || ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0
         || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0 || SequenceWindow(indicator) > 0
         || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0
-        || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0;
+        || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0
+        || ExhaustionWindowLength(indicator) > 0;
+
+    // Two anchor candles and full window replay restore each threshold's
+    // original lag, including the total-shadow window used by Advance Block.
+    private static int ExhaustionWindowLength(IIndicator indicator) => indicator is
+        AdvanceBlockCandle or StalledCandle or ThreeStarsInSouthCandle
+        && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
+
+    private readonly struct ExhaustionKernel(ExhaustionCandleState state) : IBoundedKernel<ExhaustionKernel>
+    {
+        public static ExhaustionKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((ExhaustionCandleState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     // Complete warmup replay recovers lagged shadow/near/far sums and the
     // three prior anchors needed by Black Crows, preserving exact thresholds.
@@ -309,7 +323,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
-        if (GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0) return 512;
+        if (GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0 || ExhaustionWindowLength(indicator) > 0) return 512;
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
         if (SequenceWindow(indicator) > 0 || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0 || StarReversalWindow(indicator) > 0) return 512;
         if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or MoneyFlowWithDetails or VolumeWeightedPrice or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
@@ -1231,6 +1245,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<GapContinuationKernel>(source, output, indicator, GapContinuationWindow(indicator), cancellation, owned),
         _ when CrowSoldierWindow(indicator) > 0 =>
             FillBoundedWindow<CrowSoldierKernel>(source, output, indicator, CrowSoldierWindow(indicator), cancellation, owned),
+        _ when ExhaustionWindowLength(indicator) > 0 =>
+            FillBoundedWindow<ExhaustionKernel>(source, output, indicator, ExhaustionWindowLength(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
