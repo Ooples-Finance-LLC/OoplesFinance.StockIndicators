@@ -1,0 +1,55 @@
+{
+  "Operation": "QuanTAlib.Slope",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        1123368,
+        1123368,
+        1124024
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        642240,
+        642896,
+        642240
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        1123216,
+        1123216,
+        1123216
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        642088,
+        642088,
+        642088
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        4463824,
+        4463824,
+        4464880
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        4488336,
+        4488336,
+        4488336
+      ]
+    }
+  ]
+}

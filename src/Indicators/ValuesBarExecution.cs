@@ -27,6 +27,7 @@ internal static partial class ValuesBarExecution
             || indicators[0] is SeededOnBalanceVolume or AccumulationDistributionWithAverage or SeededForceIndex or MoneyFlowWithDetails or VolumeWeightedPrice
             || indicators[0] is SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails
             || indicators[0] is ScaledTrueRange
+            || indicators[0] is WindowRegressionStatistics or RegressionWithFinalLine
             || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]) || IsGpuPercentile(indicators[0]))
         || IsGpuIndexPair(indicators);
 

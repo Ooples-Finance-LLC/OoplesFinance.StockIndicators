@@ -158,8 +158,14 @@ public class SharedRegressionStatisticsBenchmarks
             result[i] = new(slope, state.Intercept ?? 0, state.StdDev ?? 0, state.RSquared ?? 0, state.Line ?? 0, presence);
         }
     }
-    private IIndicator Create() => Operation == "Skender.GetSlope" ? new RegressionWithFinalLine(Period) : new WindowRegressionStatistics(Period);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    internal IIndicator Create() => Operation == "Skender.GetSlope" ? new RegressionWithFinalLine(Period) : new WindowRegressionStatistics(Period);
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+            .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        { run.Dispose(); throw new InvalidOperationException("Required GPU regression did not execute on the device."); }
+        return run;
+    }
 }

@@ -16,9 +16,10 @@ public static class SharedAllocationProbe
             or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.Tsf";
         bool weightedPrice = operation is "Skender.GetVwap" or "Skender.GetVwma" or "Trady.Indicator.VolumeWeightedAveragePrice";
         bool seededAtr = operation is "Skender.GetAtr" or "TaLib.Functions.Atr" or "TaLib.Functions.Natr" or "Trady.Indicator.AverageTrueRange";
+        bool regressionStatistics = operation is "QuanTAlib.Slope" or "Skender.GetSlope";
         bool gpuPathRatio = operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio";
         bool obv = operation is "TaLib.Functions.Obv" or "Skender.GetObv" or "Trady.Indicator.OnBalanceVolume";
-        if (includeGpu && !gpuPathRatio && !gpuRegression && !obv && !weightedPrice && !seededAtr && operation is not ("QuanTAlib.Atr" or "QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "Skender.GetAdl" or "Skender.GetForceIndex" or "Skender.GetCmf"))
+        if (includeGpu && !gpuPathRatio && !gpuRegression && !regressionStatistics && !obv && !weightedPrice && !seededAtr && operation is not ("QuanTAlib.Atr" or "QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "Skender.GetAdl" or "Skender.GetForceIndex" or "Skender.GetCmf"))
             throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
         Action setup, cleanup;
         Func<object>[] methods;
@@ -313,7 +314,14 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
-        else if (operation is "QuanTAlib.Slope" or "Skender.GetSlope")
+        else if (regressionStatistics && includeGpu)
+        {
+            var fixture = new SharedGpuRegressionStatisticsBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (regressionStatistics)
         {
             var fixture = new SharedRegressionStatisticsBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
