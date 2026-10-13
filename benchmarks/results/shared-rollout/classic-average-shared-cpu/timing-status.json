@@ -1,12 +1,13 @@
 {
-  "status": "interrupted",
-  "reason": "External WebGPU/Dawn tests started during timing; only own benchmark stopped.",
+  "status": "completed",
+  "reason": "12 builder-only cases completed exit0 without observed competing jobs.",
   "source_commit": "e8262621",
   "reuse_binaries": true,
   "next_filter": "*SharedClassicAverageBenchmarks*Builder*",
-  "next_stem": "si-classicavg-builder-20261013-b",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-classicavg-binaries-e8262621",
   "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
-  "interruption_evidence": "interrupted-timing-a"
+  "interruption_evidence": "interrupted-timing-a",
+  "completed_stem": "si-classicavg-builder-20261013-b",
+  "evidence": "builder-timing"
 }
