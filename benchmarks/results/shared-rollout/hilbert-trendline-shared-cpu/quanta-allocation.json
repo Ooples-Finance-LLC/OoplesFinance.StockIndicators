@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Htit",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        563224,
+        562568,
+        562568
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        81160,
+        81160,
+        81160
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1886072,
+        1886072,
+        1886072
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        8208512,
+        8208512,
+        8208512
+      ]
+    }
+  ]
+}
