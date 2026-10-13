@@ -210,7 +210,7 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
-    private sealed class State(
+    internal sealed class State(
         int period,
         ReturnBetaSelection selection,
         CandlePriceField market,
