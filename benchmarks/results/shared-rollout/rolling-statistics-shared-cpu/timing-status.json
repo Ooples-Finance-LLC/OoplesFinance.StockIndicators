@@ -1,0 +1,9 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "External AiDotNet.Tensors HIP tests and a build remain active; no timing attempt launched.",
+  "source_commit": "34690b41",
+  "reuse_binaries": true,
+  "next_filter": "*SharedRollingStatisticsBenchmarks*Builder*",
+  "next_stem": "si-rollingstats-builder-20261013-a",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing"
+}
