@@ -1,0 +1,55 @@
+{
+  "Operation": "Skender.GetAtr",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        963064,
+        963064,
+        963064
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        481936,
+        481936,
+        481936
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        962944,
+        962944,
+        962944
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        481816,
+        481816,
+        481816
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1720480,
+        1720480,
+        1720480
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        7823760,
+        7823760,
+        7823760
+      ]
+    }
+  ]
+}
