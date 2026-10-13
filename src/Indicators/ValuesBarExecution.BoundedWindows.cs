@@ -24,7 +24,20 @@ internal static partial class ValuesBarExecution
         || TrendReversalWindow(indicator) > 0 || ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0
         || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0 || SequenceWindow(indicator) > 0
         || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0
-        || StarReversalWindow(indicator) > 0;
+        || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0;
+
+    // Two anchors plus the complete range window recover the lagged doji/near
+    // thresholds. The period-free three-method pattern needs only two seeds.
+    private static int GapContinuationWindow(IIndicator indicator) => indicator is
+        TristarCandle or TasukiGapCandle or UpDownSideGapThreeMethodsCandle
+        && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
+
+    private readonly struct GapContinuationKernel(GapContinuationState state) : IBoundedKernel<GapContinuationKernel>
+    {
+        public static GapContinuationKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((GapContinuationState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     // Full warmup replay recovers both anchor candles, the twice-lagged long
     // body sum, the prior middle-candle threshold and the current short sum.
@@ -283,6 +296,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
+        if (GapContinuationWindow(indicator) > 0) return 512;
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
         if (SequenceWindow(indicator) > 0 || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0 || StarReversalWindow(indicator) > 0) return 512;
         if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or MoneyFlowWithDetails or VolumeWeightedPrice or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
@@ -1200,6 +1214,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<PenetrationKernel>(source, output, indicator, PenetrationWindow(indicator), cancellation, owned),
         _ when StarReversalWindow(indicator) > 0 =>
             FillBoundedWindow<StarReversalKernel>(source, output, indicator, StarReversalWindow(indicator), cancellation, owned),
+        _ when GapContinuationWindow(indicator) > 0 =>
+            FillBoundedWindow<GapContinuationKernel>(source, output, indicator, GapContinuationWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
