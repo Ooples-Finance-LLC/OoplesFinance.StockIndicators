@@ -27,7 +27,7 @@ jobs:
       shards: ${{ steps.shards.outputs.matrix }}
       count: ${{ steps.shards.outputs.count }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
@@ -79,7 +79,7 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.build.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
@@ -128,7 +128,7 @@ jobs:
     needs: [build, contracts, correctness]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v4
         with:
           pattern: competitor-shard-*
@@ -148,7 +148,7 @@ jobs:
       COMPARISON_SHARD: ${{ matrix.shard }}
       COMPARISON_SHARDS: ${{ needs.build.outputs.count }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
@@ -177,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Require all performance shards to pass
