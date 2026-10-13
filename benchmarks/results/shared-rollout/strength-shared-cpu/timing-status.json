@@ -1,12 +1,13 @@
 {
-  "status": "deferred-before-launch",
-  "reason": "Monitored preflight found an active AiDotNet.Tensors build; benchmark did not launch.",
+  "status": "interrupted",
+  "reason": "External AiDotNet.Tensors build started during timing; only own benchmark stopped.",
   "source_commit": "da3ed5f7",
   "reuse_binaries": true,
   "next_filter": "*SharedStrengthBenchmarks*Builder*",
-  "next_stem": "si-strength-builder-20261013-b",
+  "next_stem": "si-strength-builder-20261013-c",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "preflight_evidence": "preflight-processes.jsonl",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-strength-binaries-da3ed5f7",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "interruption_evidence": "interrupted-timing-b"
 }
