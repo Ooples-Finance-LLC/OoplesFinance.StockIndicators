@@ -1,0 +1,119 @@
+[
+  {
+    "Operation": "TaLib.Candles.Counterattack",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          583592,
+          583592,
+          583592
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          102184,
+          102184,
+          102184
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40104,
+          40104,
+          40104
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81352,
+          81352,
+          81352
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.SeparatingLines",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          594928,
+          594928,
+          594928
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          113520,
+          113520,
+          113520
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.GapSideBySideWhiteLines",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          577256,
+          577256,
+          577256
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          95848,
+          95848,
+          95848
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          80920,
+          80920,
+          80920
+        ]
+      }
+    ]
+  }
+]
