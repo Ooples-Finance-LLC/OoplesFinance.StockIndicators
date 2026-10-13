@@ -77,7 +77,7 @@ public sealed class VolumeConditionedIndex
         return output;
     }
 
-    private sealed class State(bool positive) : IMultiOutputState
+    internal sealed class State(bool positive) : IMultiOutputState
     {
         private double _price,
             _volume,
