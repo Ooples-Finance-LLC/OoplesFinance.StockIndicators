@@ -122,9 +122,18 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
         private long _count;
         private BigInteger _sum;
         internal BigInteger Value { get; private set; }
-        private readonly BigInteger _alpha = coefficient.HasValue
-            ? ExactVarianceWindow.Units(coefficient.Value)
-            : 0;
+        private readonly (BigInteger Alpha, BigInteger Complement, BigInteger Denominator) _weights =
+            FixedWeights(coefficient);
+
+        private static (BigInteger, BigInteger, BigInteger) FixedWeights(double? coefficient)
+        {
+            if (!coefficient.HasValue) return default;
+            // The private fixed coefficients are in (0, 1). Cancel their exact
+            // binary scale once, preserving the complete recurrence fraction.
+            var factor = new ExactMeanAccumulator.ProductFactor(coefficient.Value);
+            var denominator = BigInteger.One << (1074 - factor.Scale);
+            return (factor.Mantissa, denominator - factor.Mantissa, denominator);
+        }
 
         public void Reset()
         {
@@ -147,8 +156,8 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
             }
             Value = coefficient.HasValue
                 ? RocBankValue.RoundUnits(
-                    Value * ((BigInteger.One << 1074) - _alpha) + input * _alpha,
-                    BigInteger.One << 1074
+                    Value * _weights.Complement + input * _weights.Alpha,
+                    _weights.Denominator
                 )
                 : RocBankValue.RoundUnits(Value * (period - 1) + 2 * input, (long)period + 1);
         }
