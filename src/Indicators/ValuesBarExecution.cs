@@ -122,6 +122,8 @@ internal static partial class ValuesBarExecution
                 latest = FillPriceCandle(source, nodes[0].Values, priceCandle, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is RangeAccelerationBands acceleration)
                 latest = FillBoundedWindow<AccelerationKernel>(source, nodes[0].Values, acceleration, acceleration.Period, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is PriceRelativeStrength relative && PriceRelativeWindow(relative) > 0)
+                latest = FillPriceRelative(source, nodes[0].Values, relative, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMovingAverage or ClassicPriceOscillator)
                 latest = FillClassicAverage(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is WindowAverageEnvelope envelope && AverageEnvelopeWindow(envelope) > 0)
@@ -765,6 +767,11 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is PriceRelativeStrength.State relative)
+                {
+                    relative.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is RangeAccelerationBands.State acceleration)
                 {
