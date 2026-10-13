@@ -41,12 +41,15 @@ internal static partial class ValuesBarExecution
         _ when FiveContinuationWindow(indicator) > 0 => FiveContinuationWindow(indicator),
         _ when ExtendedReversalWindow(indicator) > 0 => ExtendedReversalWindow(indicator),
         _ when HikkakeWindow(indicator) > 0 => HikkakeWindow(indicator),
+        _ when DelayedCloudWindow(indicator) > 0 => DelayedCloudWindow(indicator),
         _ when TasukiWindow(indicator) > 0 => TasukiWindow(indicator),
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
+        _ when DelayedCloudWindow(indicator) > 0 =>
+            (DelayedDarkCloudCoverPattern.State)((IndicatorBase)indicator).CreateState()!,
         _ when HikkakeWindow(indicator) > 0 =>
             (HikkakeState)((IndicatorBase)indicator).CreateState()!,
         _ when FiveContinuationWindow(indicator) > 0 =>
