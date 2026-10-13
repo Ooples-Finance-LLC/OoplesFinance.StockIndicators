@@ -77,4 +77,19 @@ public sealed class SeededAtrBenchmarkTests
         Assert.Equal(atr, TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Atr));
         Assert.Equal(natr, TaCore.UnstablePeriodSettings.Get(TaCore.UnstableFunc.Natr));
     }
+
+    [Theory]
+    [InlineData("Skender.GetAtr")]
+    [InlineData("TaLib.Functions.Atr")]
+    [InlineData("TaLib.Functions.Natr")]
+    [InlineData("Trady.Indicator.AverageTrueRange")]
+    public void AllocationProbeMeasuresAllFourEagerArms(string operation)
+    {
+        Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+            BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedSeededAtrBenchmarks))));
+        var report = SharedAllocationProbe.Run(operation, 64, 1);
+        Assert.Equal(new[] { "BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel" }, report.Arms.Select(a => a.Method));
+        Assert.All(report.Arms, arm => Assert.True(Assert.Single(arm.Bytes) > 0));
+        Assert.Throws<ArgumentException>(() => SharedAllocationProbe.Run(operation, 64, 1, includeGpu: true));
+    }
 }

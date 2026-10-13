@@ -138,6 +138,12 @@ public static class SharedAllocationProbe
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
         }
+        else if (operation is "Skender.GetAtr" or "TaLib.Functions.Atr" or "TaLib.Functions.Natr" or "Trady.Indicator.AverageTrueRange")
+        {
+            var fixture = new SharedSeededAtrBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, () => fixture.NativeSingle(), () => fixture.NativeParallel()];
+        }
         else if (operation is "Skender.GetVwap" or "Skender.GetVwma" or "Trady.Indicator.VolumeWeightedAveragePrice")
         {
             var fixture = new SharedVolumeWeightedPriceBenchmarks { Operation = operation, Count = count };
