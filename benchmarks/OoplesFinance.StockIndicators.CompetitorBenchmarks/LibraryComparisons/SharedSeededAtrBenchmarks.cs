@@ -14,6 +14,7 @@ public class SharedSeededAtrBenchmarks
     [Params("Skender.GetAtr", "TaLib.Functions.Atr", "TaLib.Functions.Natr", "Trady.Indicator.AverageTrueRange")]
     public string Operation { get; set; } = "";
     [Params(1_000, 10_000)] public int Count { get; set; }
+    internal bool UseGpuGrid { get; init; }
     private CompetitorData _data = null!;
     private Quote[][] _quotes = null!;
     private (decimal High, decimal Low, decimal Close)[][] _tuples = null!;
@@ -38,7 +39,14 @@ public class SharedSeededAtrBenchmarks
             CpuParallelSettings.MaxDegreeOfParallelism = 8;
             TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Atr, 0);
             TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Natr, 0);
-            _data = CompetitorData.Create(Count);
+            if (UseGpuGrid)
+            {
+                var closes = Enumerable.Range(0, Count).Select(i => 10 + (i * 13 % 101) / 8d).ToArray();
+                var highs = closes.Select((v, i) => v + (i % 3 + 1) / 4d).ToArray();
+                var lows = closes.Select(v => v - .5).ToArray();
+                _data = CompetitorData.FromOhlcv(closes, highs, lows, closes, Enumerable.Repeat(1d, Count).ToArray());
+            }
+            else _data = CompetitorData.Create(Count);
             int chunks = Math.Min(Math.Min(8, Environment.ProcessorCount), Count / (Period + 1));
             _quotes = new Quote[chunks][];
             _tuples = new (decimal, decimal, decimal)[chunks][];
@@ -79,13 +87,23 @@ public class SharedSeededAtrBenchmarks
         TaCore.UnstablePeriodSettings.Set(TaCore.UnstableFunc.Natr, _priorNatr);
         _settingsSaved = false;
     }
-    private IIndicator Create() => Details ? new AverageTrueRangeWithDetails(Period)
+    internal IIndicator Create() => Details ? new AverageTrueRangeWithDetails(Period)
         : Normalized ? new NormalizedSeededAverageTrueRange(Period) : new SeededAverageTrueRange(Period);
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(Create(), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+            .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Required GPU seeded ATR did not execute on the device.");
+        }
+        return run;
+    }
 
     public readonly record struct NativeResult(double[]? Packed = null, IReadOnlyList<AtrResult>? Rows = null, IReadOnlyList<decimal?>? Tuples = null);
     [Benchmark(Baseline = true)] public NativeResult NativeSingle() => Prefix(_quotes.Length - 1);
