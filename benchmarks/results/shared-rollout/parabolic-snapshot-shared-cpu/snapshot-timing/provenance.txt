@@ -1,0 +1,4 @@
+Source commit cc3c677d. Production SHA256 af320305ebcd09146ddb38fd61b226fb7b6ef91881255ea93b8a832f7c15fd41.
+8 snapshot-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedParabolicSnapshotBenchmarks*Snapshot*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and snapshot API retains eager immutable records. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+50 focused tests passed; build and verification evidence in parent directory. No full-suite claim.
