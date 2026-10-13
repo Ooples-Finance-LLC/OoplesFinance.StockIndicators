@@ -1,0 +1,1 @@
+{"Time":"2026-10-13T15:31:33.6866638Z","Processes":[{"ProcessId":13332,"ParentProcessId":35920,"CommandLine":"\"C:\\Program Files\\dotnet\\dotnet.exe\" build tests/AiDotNet.Evolution.Tests/AiDotNet.Evolution.Tests.csproj -c Release -f net10.0"}]}

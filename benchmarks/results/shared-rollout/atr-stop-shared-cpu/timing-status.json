@@ -1,0 +1,12 @@
+{
+  "status": "deferred-before-launch",
+  "source_commit": "42f8bb09",
+  "reuse_binaries": true,
+  "next_filter": "*SharedAtrStopBenchmarks*Builder*",
+  "next_stem": "si-atrstop-builder-20261013-b",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-atrstop-binaries-42f8bb09",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "reason": "Monitored preflight found external AiDotNet.Evolution build PID13332; no benchmark launched.",
+  "preflight_evidence": "preflight-processes.jsonl"
+}
