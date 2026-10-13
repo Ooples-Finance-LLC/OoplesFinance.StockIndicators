@@ -42,7 +42,7 @@ internal static partial class ValuesBarExecution
 
         private JurikDyadic Smooth(JurikDyadic prior, JurikDyadic input)
         {
-            prior.Multiply(period - 1); input.Multiply(2); prior.AddExact(input);
+            prior.Multiply(period - 1); input.ScaleByPowerOfTwo(1); prior.AddExact(input);
             return Round(prior, (long)period + 1);
         }
 
