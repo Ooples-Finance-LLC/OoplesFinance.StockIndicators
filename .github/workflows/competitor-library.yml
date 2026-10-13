@@ -83,7 +83,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-contract-binaries
           path: contracts
@@ -113,7 +113,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
           path: binaries
@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: competitor-shard-*
           path: results
@@ -152,7 +152,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
           path: binaries
@@ -185,7 +185,7 @@ jobs:
           BUILD_RESULT: ${{ needs.build.result }}
           PERFORMANCE_RESULT: ${{ needs.performance.result }}
         run: test "$BUILD_RESULT" = success && test "$PERFORMANCE_RESULT" = success
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: competitor-performance-[0-9]*
           path: performance-shards
