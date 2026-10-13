@@ -5,6 +5,7 @@ internal static partial class ValuesBarExecution
 {
     private static int BoundedPeriod(IIndicator indicator) => indicator switch
     {
+        FiftySeedStochastic stochastic => stochastic.Period,
         WindowMeanAbsoluteDeviation deviation => deviation.Period,
         HighestHigh high => high.Length,
         LowestLow low => low.Length,
@@ -49,6 +50,7 @@ internal static partial class ValuesBarExecution
 
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
+        FiftySeedStochastic stochastic => new FiftySeedStochastic.RawState(stochastic.Period),
         WindowMeanAbsoluteDeviation deviation => new WindowMeanAbsoluteDeviation.State(deviation.Period),
         _ when DelayedCloudWindow(indicator) > 0 =>
             (DelayedDarkCloudCoverPattern.State)((IndicatorBase)indicator).CreateState()!,

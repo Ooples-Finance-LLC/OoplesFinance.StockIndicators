@@ -172,7 +172,7 @@ internal static partial class ValuesBarExecution
                     // Unproven guarded SMA and other states still validate every output.
                     // Deviation bands can overflow secondary slots while their mean stays finite.
                     // Keep slot-major validation after every input has been checked.
-                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails
+                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails or StochasticSmaKdj
                         || (gpu is not null && node.Indicator is WindowMoneyFlowIndex))
                     for (int i = 0; i < source.Length; i++)
                     {
