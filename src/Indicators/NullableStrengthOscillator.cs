@@ -232,7 +232,7 @@ public sealed class NullableStrengthOscillator
         }
     }
 
-    private sealed class State(int period, NullableStrengthConvention convention, int lag)
+    internal sealed class State(int period, NullableStrengthConvention convention, int lag)
         : IMultiOutputState
     {
         private readonly Calculator _calculator = new(period, convention, lag);

@@ -80,7 +80,7 @@ public sealed class SumSeededDirectionalIndex
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly Queue<double?> _history = new();
         private Bar _previous;
