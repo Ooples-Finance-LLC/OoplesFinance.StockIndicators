@@ -78,7 +78,7 @@ public sealed class HeikinAshiCandles : MultiOutputIndicatorBase, IIndicatorVali
         return result;
     }
 
-    private sealed class State : IMultiOutputState
+    internal sealed class State : IMultiOutputState
     {
         private double _open,
             _close;

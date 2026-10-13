@@ -118,6 +118,8 @@ internal static partial class ValuesBarExecution
                 latest = FillRateOfChange(source, nodes[0].Values, roc, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPowerWithValidity { Period: <= 4096 } bop)
                 latest = FillNullableBalanceOfPower(source, nodes[0].Values, bop, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is PriceCandlePattern priceCandle)
+                latest = FillPriceCandle(source, nodes[0].Values, priceCandle, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMovingAverage or ClassicPriceOscillator)
                 latest = FillClassicAverage(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is WindowAverageEnvelope envelope && AverageEnvelopeWindow(envelope) > 0)
@@ -692,6 +694,7 @@ internal static partial class ValuesBarExecution
                 ClassicStochastic stochastic when singleRoot && ClassicStochasticWindow(stochastic) > 0 => null,
                 RateOfChangeWithAverage roc when singleRoot && RateOfChangeWindow(roc) > 0 => null,
                 BalanceOfPowerWithValidity { Period: <= 4096 } when singleRoot => null,
+                PriceCandlePattern when singleRoot => null,
                 WindowAverageEnvelope envelope when singleRoot && AverageEnvelopeWindow(envelope) > 0 => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
@@ -760,6 +763,16 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is PriceCandlePattern.State priceCandle)
+                {
+                    priceCandle.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is HeikinAshiCandles.State heikinAshi)
+                {
+                    heikinAshi.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is AlligatorState alligator)
                 {
