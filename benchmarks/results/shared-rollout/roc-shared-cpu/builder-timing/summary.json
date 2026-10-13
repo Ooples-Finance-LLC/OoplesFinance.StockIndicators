@@ -1,0 +1,188 @@
+[
+  {
+    "operation": "Skender.GetRoc",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 66677.7734375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 66677.7734375,
+              "StandardError": 1448.0641138906194,
+              "Level": 12,
+              "Margin": 6923.067945432474,
+              "Lower": 59754.70549206753,
+              "Upper": 73600.84138293247
+            },
+            "allocated_bytes": 104921
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 59750.99609375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 59750.99609375,
+              "StandardError": 2747.2931725503263,
+              "Level": 12,
+              "Margin": 13134.568502279255,
+              "Lower": 46616.42759147075,
+              "Upper": 72885.56459602926
+            },
+            "allocated_bytes": 56208
+          }
+        },
+        "evidence": "results/shared-rollout/roc-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRocBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-roc-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.7540893166278955,
+          "BuilderLatestOnly": 0.6757512359708058
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 498808.046875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 498808.046875,
+              "StandardError": 5050.194537991074,
+              "Level": 12,
+              "Margin": 24144.538621447467,
+              "Lower": 474663.50825355254,
+              "Upper": 522952.58549644746
+            },
+            "allocated_bytes": 897351
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 440342.5,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 440342.5,
+              "StandardError": 8219.56778807759,
+              "Level": 12,
+              "Margin": 39297.03507813577,
+              "Lower": 401045.4649218642,
+              "Upper": 479639.5350781358
+            },
+            "allocated_bytes": 416265
+          }
+        },
+        "evidence": "results/shared-rollout/roc-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRocBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-roc-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.5313618105811003,
+          "BuilderLatestOnly": 0.4690806203742805
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 88421.58610026042,
+        "allocated_bytes": 152816,
+        "evidence": "results/2026-10-06-library-comparisons/skender-roc-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 938735.2213541666,
+        "allocated_bytes": 1512041,
+        "evidence": "results/2026-10-06-library-comparisons/skender-roc-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetRocWb",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 999168.4895833334,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 999168.4895833334,
+              "StandardError": 10805.34524546773,
+              "Level": 12,
+              "Margin": 54473.04566581298,
+              "Lower": 944695.4439175203,
+              "Upper": 1053641.5352491464
+            },
+            "allocated_bytes": 845767
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 990974.9131944445,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 990974.9131944445,
+              "StandardError": 5902.780746718519,
+              "Level": 12,
+              "Margin": 29757.720634252713,
+              "Lower": 961217.1925601917,
+              "Upper": 1020732.6338286973
+            },
+            "allocated_bytes": 797055
+          }
+        },
+        "evidence": "results/shared-rollout/roc-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRocBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-roc-bands-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 10.886546045949345,
+          "BuilderLatestOnly": 10.797272067067325
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 10618445,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 10618445,
+              "StandardError": 133801.55178739253,
+              "Level": 12,
+              "Margin": 723583.072782102,
+              "Lower": 9894861.927217897,
+              "Upper": 11342028.072782103
+            },
+            "allocated_bytes": 8587378
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 10266093.333333334,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 10266093.333333334,
+              "StandardError": 106795.76895489196,
+              "Level": 12,
+              "Margin": 538390.0900006477,
+              "Lower": 9727703.243332686,
+              "Upper": 10804483.423333982
+            },
+            "allocated_bytes": 8106096
+          }
+        },
+        "evidence": "results/shared-rollout/roc-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRocBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-roc-bands-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 5.958772326994393,
+          "BuilderLatestOnly": 5.761042493605071
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 91780.11881510417,
+        "allocated_bytes": 274632,
+        "evidence": "results/2026-10-06-library-comparisons/skender-roc-bands-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1781985.3515625,
+        "allocated_bytes": 2723184,
+        "evidence": "results/2026-10-06-library-comparisons/skender-roc-bands-short.json.gz"
+      }
+    ]
+  }
+]
