@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Mgdi",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        9753584,
+        9753584,
+        9753584
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        9272456,
+        9272456,
+        9272456
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        480288,
+        480288,
+        480288
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1882320,
+        1882320,
+        1882320
+      ]
+    }
+  ]
+}
