@@ -1,0 +1,22 @@
+[
+  {
+    "ProcessId": 7816,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tensors.Tests -f net10.0 --filter \"FullyQualifiedName~RestoredKernelParityTests|FullyQualifiedName~HyperbolicOctonionGpuCorrectnessTests|FullyQualifiedName~KernelLookupIntegrityTests\""
+  },
+  {
+    "ProcessId": 3780,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" exec \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\vstest.console.dll\" --testAdapterPath:C:\\Users\\cheat\\.nuget\\packages\\coverlet.collector\\6.0.4\\build\\netstandard2.0\\ --framework:\".NETCoreApp,Version=v10.0\" --testCaseFilter:\"FullyQualifiedName~RestoredKernelParityTests|FullyQualifiedName~HyperbolicOctonionGpuCorrectnessTests|FullyQualifiedName~KernelLookupIntegrityTests\" C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\hip-all-any-fix\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.dll --logger:Console;Verbosity=minimal --nologo --artifactsProcessingMode-collect --testSessionCorrelationId:7816_d4e7369c-cbd8-40c7-9873-37bea83fa4e7"
+  },
+  {
+    "ProcessId": 27668,
+    "Name": "testhost.exe",
+    "CommandLine": "\"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\hip-all-any-fix\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\testhost.exe\"  --runtimeconfig \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\hip-all-any-fix\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.runtimeconfig.json\" --depsfile \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\hip-all-any-fix\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.deps.json\" --port 61316 --endpoint 127.0.0.1:061316 --role client --parentprocessid 3780 --telemetryoptedin false"
+  },
+  {
+    "ProcessId": 34844,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tests/AiDotNetTests.csproj -f net10.0 --filter FullyQualifiedName~UnitTests.TimeSeries.LSTMVAETests&FullyQualifiedName~Publishes -nologo -v q"
+  }
+]
