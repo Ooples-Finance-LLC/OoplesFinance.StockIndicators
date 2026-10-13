@@ -1,0 +1,53 @@
+{
+  "note": "Descriptive cross-run comparison, same CPU/runtime/architecture/core count, original library measurement retained; no competitor win claim.",
+  "measurements": [
+    {
+      "operation": "TaLib.Functions.MacdFix",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_mean_ms": 8.20203076923077,
+      "new_mean_ms": 3.3625395061728396,
+      "old_allocated_bytes": 5357396,
+      "new_allocated_bytes": 3673380,
+      "mean_change_percent": -59.00357361755915,
+      "allocation_change_percent": -31.433479996625223,
+      "new_upper_below_old_lower": true
+    },
+    {
+      "operation": "TaLib.Functions.MacdFix",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 8.126605555555557,
+      "new_mean_ms": 3.1756171875,
+      "old_allocated_bytes": 5308703,
+      "new_allocated_bytes": 3624875,
+      "mean_change_percent": -60.923202611586504,
+      "allocation_change_percent": -31.71825585270075,
+      "new_upper_below_old_lower": true
+    },
+    {
+      "operation": "TaLib.Functions.MacdFix",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_mean_ms": 84.50347222222223,
+      "new_mean_ms": 33.94752916666666,
+      "old_allocated_bytes": 54750896,
+      "new_allocated_bytes": 37514404,
+      "mean_change_percent": -59.827060032049964,
+      "allocation_change_percent": -31.481661962207884,
+      "new_upper_below_old_lower": true
+    },
+    {
+      "operation": "TaLib.Functions.MacdFix",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 84.37709,
+      "new_mean_ms": 33.035465,
+      "old_allocated_bytes": 54269808,
+      "new_allocated_bytes": 37034336,
+      "mean_change_percent": -60.847826110144354,
+      "allocation_change_percent": -31.758859364308055,
+      "new_upper_below_old_lower": true
+    }
+  ]
+}
