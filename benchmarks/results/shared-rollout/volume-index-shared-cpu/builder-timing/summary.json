@@ -1,0 +1,188 @@
+[
+  {
+    "operation": "Trady.Indicator.PositiveVolumeIndex",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 179508.89214409722,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 179508.89214409722,
+              "StandardError": 3820.534750162023,
+              "Level": 12,
+              "Margin": 19260.482583904013,
+              "Lower": 160248.4095601932,
+              "Upper": 198769.37472800125
+            },
+            "allocated_bytes": 169493
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 167358.91927083334,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 167358.91927083334,
+              "StandardError": 1672.7320804003846,
+              "Level": 12,
+              "Margin": 8432.753320912167,
+              "Lower": 158926.16594992118,
+              "Upper": 175791.6725917455
+            },
+            "allocated_bytes": 120737
+          }
+        },
+        "evidence": "results/shared-rollout/volume-index-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedVolumeIndexBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-positivevolumeindex-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.06349651893980707,
+          "BuilderLatestOnly": 0.0591987876494482
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1777081.5625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1777081.5625,
+              "StandardError": 14881.966148288408,
+              "Level": 12,
+              "Margin": 71149.37924220185,
+              "Lower": 1705932.1832577982,
+              "Upper": 1848230.9417422018
+            },
+            "allocated_bytes": 1705002
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1815013.4375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1815013.4375,
+              "StandardError": 34368.09264897543,
+              "Level": 12,
+              "Margin": 164310.8466547826,
+              "Lower": 1650702.5908452175,
+              "Upper": 1979324.2841547825
+            },
+            "allocated_bytes": 1223842
+          }
+        },
+        "evidence": "results/shared-rollout/volume-index-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedVolumeIndexBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-positivevolumeindex-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.16027600382107393,
+          "BuilderLatestOnly": 0.16369710135015286
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 2827066.6666666665,
+        "allocated_bytes": 955432,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-positivevolumeindex-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 11087633.333333334,
+        "allocated_bytes": 8698960,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-positivevolumeindex-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.NegativeVolumeIndex",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 176341.71006944444,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 176341.71006944444,
+              "StandardError": 1804.1049394953523,
+              "Level": 12,
+              "Margin": 9095.044028905071,
+              "Lower": 167246.66604053936,
+              "Upper": 185436.7540983495
+            },
+            "allocated_bytes": 174567
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 186747.7734375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 186747.7734375,
+              "StandardError": 3858.4991400995937,
+              "Level": 12,
+              "Margin": 18447.147096637476,
+              "Lower": 168300.62634086254,
+              "Upper": 205194.92053413746
+            },
+            "allocated_bytes": 125820
+          }
+        },
+        "evidence": "results/shared-rollout/volume-index-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedVolumeIndexBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-negativevolumeindex-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.06368349125547222,
+          "BuilderLatestOnly": 0.0674415042930144
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1884159.548611111,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1884159.548611111,
+              "StandardError": 29168.10907710837,
+              "Level": 12,
+              "Margin": 147045.34669164664,
+              "Lower": 1737114.2019194644,
+              "Upper": 2031204.8953027576
+            },
+            "allocated_bytes": 1712778
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1813697.3958333333,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1813697.3958333333,
+              "StandardError": 35352.278482236965,
+              "Level": 12,
+              "Margin": 178221.6334976599,
+              "Lower": 1635475.7623356734,
+              "Upper": 1991919.029330993
+            },
+            "allocated_bytes": 1231660
+          }
+        },
+        "evidence": "results/shared-rollout/volume-index-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedVolumeIndexBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-negativevolumeindex-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.16363932470719475,
+          "BuilderLatestOnly": 0.15751968419879395
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 2769033.3333333335,
+        "allocated_bytes": 956056,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-negativevolumeindex-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 11514100,
+        "allocated_bytes": 8696320,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-negativevolumeindex-short.json.gz"
+      }
+    ]
+  }
+]
