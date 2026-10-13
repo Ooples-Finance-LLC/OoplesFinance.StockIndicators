@@ -75,7 +75,7 @@ public sealed class WilderStrengthOscillator
                 )
             );
 
-    private sealed class State(int period, WilderStrengthConvention convention, int unstable)
+    internal sealed class State(int period, WilderStrengthConvention convention, int unstable)
         : IMultiOutputState
     {
         private bool _started;
