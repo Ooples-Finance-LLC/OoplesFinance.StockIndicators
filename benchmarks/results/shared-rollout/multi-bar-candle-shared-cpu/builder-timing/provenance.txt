@@ -1,0 +1,4 @@
+Source commit 54eda4f3. Production SHA256 2dfa3642ceb7b113fdc0d14f42228d088f4ff1a6b72e35f76503e90b513f15fd.
+20 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedMultiBarCandleBenchmarks*Builder*. Native methods execute only for setup correctness validation, not as timed benchmarks. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+228 focused tests passed; build and allocation evidence in parent directory. No full-suite claim.

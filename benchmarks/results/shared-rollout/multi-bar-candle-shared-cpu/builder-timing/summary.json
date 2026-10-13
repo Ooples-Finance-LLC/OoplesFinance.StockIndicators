@@ -1,0 +1,477 @@
+[
+  {
+    "operation": "TaLib.Candles.RisingFallingThreeMethods",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 46677.5634765625,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 46677.5634765625,
+              "StandardError": 114.26103729429515,
+              "Level": 12,
+              "Margin": 617.9102660636462,
+              "Lower": 46059.65321049885,
+              "Upper": 47295.47374262615
+            },
+            "allocated_bytes": 86521
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 42522.672526041664,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 42522.672526041664,
+              "StandardError": 251.41638618732182,
+              "Level": 12,
+              "Margin": 1267.4667930356186,
+              "Lower": 41255.20573300605,
+              "Upper": 43790.13931907728
+            },
+            "allocated_bytes": 37485
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-risingfallingthreemethods-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 344620.8984375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 344620.8984375,
+              "StandardError": 685.7723455599383,
+              "Level": 12,
+              "Margin": 3708.576278829118,
+              "Lower": 340912.32215867087,
+              "Upper": 348329.47471632913
+            },
+            "allocated_bytes": 590912
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 317762.0442708333,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 317762.0442708333,
+              "StandardError": 3299.4256974453983,
+              "Level": 12,
+              "Margin": 16633.412686493022,
+              "Lower": 301128.6315843403,
+              "Upper": 334395.4569573263
+            },
+            "allocated_bytes": 109505
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-risingfallingthreemethods-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 141617.822265625,
+        "allocated_bytes": 12433,
+        "evidence": "results/2026-10-06-library-comparisons/talib-risingfallingthreemethods-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1373015.625,
+        "allocated_bytes": 120442,
+        "evidence": "results/2026-10-06-library-comparisons/talib-risingfallingthreemethods-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.MatHold",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 46837.38037109375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 46837.38037109375,
+              "StandardError": 199.8321555572605,
+              "Level": 12,
+              "Margin": 955.3800673149242,
+              "Lower": 45882.00030377883,
+              "Upper": 47792.76043840867
+            },
+            "allocated_bytes": 86529
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 41972.047254774305,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 41972.047254774305,
+              "StandardError": 153.28556480253522,
+              "Level": 12,
+              "Margin": 772.7593502762709,
+              "Lower": 41199.28790449804,
+              "Upper": 42744.80660505057
+            },
+            "allocated_bytes": 37493
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-mathold-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 352939.5833333333,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 352939.5833333333,
+              "StandardError": 1905.3310735038203,
+              "Level": 12,
+              "Margin": 9605.355888003684,
+              "Lower": 343334.22744532966,
+              "Upper": 362544.939221337
+            },
+            "allocated_bytes": 590920
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 309853.3984375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 309853.3984375,
+              "StandardError": 856.397907238329,
+              "Level": 12,
+              "Margin": 4094.3635321557126,
+              "Lower": 305759.0349053443,
+              "Upper": 313947.7619696557
+            },
+            "allocated_bytes": 109514
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-mathold-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 107280.04557291667,
+        "allocated_bytes": 12369,
+        "evidence": "results/2026-10-06-library-comparisons/talib-mathold-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1118516.50390625,
+        "allocated_bytes": 120380,
+        "evidence": "results/2026-10-06-library-comparisons/talib-mathold-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.Breakaway",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 36556.4453125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 36556.4453125,
+              "StandardError": 831.6586293957836,
+              "Level": 12,
+              "Margin": 3976.0872073839414,
+              "Lower": 32580.358105116058,
+              "Upper": 40532.53251988394
+            },
+            "allocated_bytes": 73782
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 29138.71799045139,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 29138.71799045139,
+              "StandardError": 141.89678186237447,
+              "Level": 12,
+              "Margin": 715.3450169917675,
+              "Lower": 28423.372973459624,
+              "Upper": 29854.063007443157
+            },
+            "allocated_bytes": 24748
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-breakaway-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 243698.80859375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 243698.80859375,
+              "StandardError": 593.7725329311818,
+              "Level": 12,
+              "Margin": 2838.774575090823,
+              "Lower": 240860.03401865918,
+              "Upper": 246537.58316884082
+            },
+            "allocated_bytes": 578175
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 215436.9140625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 215436.9140625,
+              "StandardError": 1101.9520533924344,
+              "Level": 12,
+              "Margin": 5268.33643970885,
+              "Lower": 210168.57762279114,
+              "Upper": 220705.25050220886
+            },
+            "allocated_bytes": 96770
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-breakaway-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 30140.733337402344,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-breakaway-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 481479.78515625,
+        "allocated_bytes": 120370,
+        "evidence": "results/2026-10-06-library-comparisons/talib-breakaway-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.ConcealingBabySwallow",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 29371.713256835938,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 29371.713256835938,
+              "StandardError": 150.60846613195935,
+              "Level": 12,
+              "Margin": 814.472891046326,
+              "Lower": 28557.24036578961,
+              "Upper": 30186.186147882265
+            },
+            "allocated_bytes": 73784
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 25096.8310546875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 25096.8310546875,
+              "StandardError": 212.84408918698563,
+              "Level": 12,
+              "Margin": 1017.5889845554831,
+              "Lower": 24079.242070132015,
+              "Upper": 26114.420039242985
+            },
+            "allocated_bytes": 24748
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-concealingbabyswallow-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 211281.875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 211281.875,
+              "StandardError": 2350.334285073869,
+              "Level": 12,
+              "Margin": 11236.742761567348,
+              "Lower": 200045.13223843265,
+              "Upper": 222518.61776156735
+            },
+            "allocated_bytes": 578175
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 171615.91796875,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 171615.91796875,
+              "StandardError": 576.3528775324199,
+              "Level": 12,
+              "Margin": 2905.570891463654,
+              "Lower": 168710.34707728634,
+              "Upper": 174521.48886021366
+            },
+            "allocated_bytes": 96760
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-concealingbabyswallow-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 63321.112060546875,
+        "allocated_bytes": 12369,
+        "evidence": "results/2026-10-06-library-comparisons/talib-concealingbabyswallow-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 705283.1380208334,
+        "allocated_bytes": 120371,
+        "evidence": "results/2026-10-06-library-comparisons/talib-concealingbabyswallow-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.LadderBottom",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 29506.62841796875,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 29506.62841796875,
+              "StandardError": 126.20193725627777,
+              "Level": 12,
+              "Margin": 682.4852502163277,
+              "Lower": 28824.143167752423,
+              "Upper": 30189.113668185077
+            },
+            "allocated_bytes": 73784
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 24851.21826171875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 24851.21826171875,
+              "StandardError": 206.2147778465396,
+              "Level": 12,
+              "Margin": 985.8948265405979,
+              "Lower": 23865.32343517815,
+              "Upper": 25837.11308825935
+            },
+            "allocated_bytes": 24748
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-ladderbottom-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 202232.13975694444,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 202232.13975694444,
+              "StandardError": 832.3552413239236,
+              "Level": 12,
+              "Margin": 4196.156998299984,
+              "Lower": 198035.98275864444,
+              "Upper": 206428.29675524443
+            },
+            "allocated_bytes": 578174
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 170933.73046875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 170933.73046875,
+              "StandardError": 333.19089777302105,
+              "Level": 12,
+              "Margin": 1592.9565562429984,
+              "Lower": 169340.773912507,
+              "Upper": 172526.687024993
+            },
+            "allocated_bytes": 96761
+          }
+        },
+        "evidence": "results/shared-rollout/multi-bar-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMultiBarCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-ladderbottom-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 23597.10235595703,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-ladderbottom-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 288132.6334635417,
+        "allocated_bytes": 120370,
+        "evidence": "results/2026-10-06-library-comparisons/talib-ladderbottom-short.json.gz"
+      }
+    ]
+  }
+]
