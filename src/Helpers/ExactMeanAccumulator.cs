@@ -456,6 +456,9 @@ internal struct ExactMeanAccumulator
 #if !NETFRAMEWORK
     internal static (UInt128 Quotient, UInt128 Remainder) CompactDivRem(UInt128 numerator, UInt128 denominator)
     {
+#if NET10_0_OR_GREATER
+        // Earlier targets use the stable portable API below; the x64 intrinsic
+        // requires preview-feature opt-in on .NET 8.
         // x64 DIV returns both halves of the rounding decision directly. Its
         // quotient must fit ulong: upper < divisor proves that precondition and
         // also excludes division by zero. Other cases use the portable runtime.
@@ -473,6 +476,7 @@ internal struct ExactMeanAccumulator
                 return (quotient, remainder);
             }
         }
+#endif
         return UInt128.DivRem(numerator, denominator);
     }
 #endif
