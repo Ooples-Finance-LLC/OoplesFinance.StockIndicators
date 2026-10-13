@@ -707,6 +707,8 @@ internal static partial class ValuesBarExecution
                 OldestFirstHilbertTrendline => new OldestHilbertValueState(),
                 TripleExponentialRate triple => new TripleRateState(triple.Period, triple.Seed, triple.SignalPeriod, triple.Suppression),
                 WindowChandelierExit chandelierOwner => new ChandelierState(chandelierOwner, count),
+                AlligatorWithDetails alligator => new AlligatorState(alligator, count),
+                GatorWithDetails gator => new GatorWithDetails.State(new AlligatorState(gator.Alligator, count)),
                 JurikAdaptive jurik => new JurikValueState(jurik, count),
                 RollingPivotLevels pivots => new PivotValueState(pivots, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
@@ -758,6 +760,16 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is AlligatorState alligator)
+                {
+                    alligator.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is GatorWithDetails.State gator)
+                {
+                    gator.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is BalanceOfPowerWithValidity.State bop)
                 {
