@@ -1,0 +1,12 @@
+{
+  "status": "deferred-before-launch",
+  "next_stem": "si-pricecandle-builder-20261013-a",
+  "next_filter": "*SharedPriceCandleBenchmarks*Builder*",
+  "preflight_evidence": "external-processes.json",
+  "source_commit": "38b22cda",
+  "reuse_binaries": true,
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "reason": "External .NET tests active after verification; no timing attempt launched.",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-pricecandle-binaries-38b22cda",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+}
