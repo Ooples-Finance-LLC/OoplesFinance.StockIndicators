@@ -1,11 +1,12 @@
 {
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "next_filter": "*SharedRegressionChannelBenchmarks*Builder*",
-  "next_stem": "si-regressionchannel-builder-20261013-a",
-  "reason": "12 unit and 13 comparator checks passed; builder timing pending.",
+  "reason": "4 builder-only cases completed exit0 without observed competing jobs.",
   "source_commit": "fda3e3fe",
   "reuse_binaries": true,
-  "status": "pending",
+  "status": "completed",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-regressionchannel-binaries-fda3e3fe",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-regressionchannel-builder-20261013-a",
+  "evidence": "builder-timing"
 }
