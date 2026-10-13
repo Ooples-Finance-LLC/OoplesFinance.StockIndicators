@@ -1,11 +1,12 @@
 {
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "next_filter": "*SharedHurstSnapshotBenchmarks*Snapshot*",
-  "next_stem": "si-hurstsnapshot-snapshot-20261013-a",
-  "reason": "8 unit and 16 comparison checks passed; snapshot-only timing pending.",
+  "reason": "2 snapshot-only cases completed exit0 without observed competing jobs.",
   "source_commit": "b749d291",
   "reuse_binaries": true,
-  "status": "pending",
+  "status": "completed",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-hurstsnapshot-binaries-b749d291",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-hurstsnapshot-snapshot-20261013-a",
+  "evidence": "snapshot-timing"
 }
