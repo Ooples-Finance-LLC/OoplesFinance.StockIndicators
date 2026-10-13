@@ -1,0 +1,667 @@
+[
+  {
+    "operation": "Trady.Indicator.PlusDirectionalMovement",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 31256.9482421875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 31256.9482421875,
+              "StandardError": 584.7488101735149,
+              "Level": 12,
+              "Margin": 2795.6329453985954,
+              "Lower": 28461.315296788904,
+              "Upper": 34052.581187586096
+            },
+            "allocated_bytes": 68424
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 26346.552191840277,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 26346.552191840277,
+              "StandardError": 292.9361782130566,
+              "Level": 12,
+              "Margin": 1476.7807460536008,
+              "Lower": 24869.771445786675,
+              "Upper": 27823.33293789388
+            },
+            "allocated_bytes": 19668
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalmovement-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 231237.5,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 231237.5,
+              "StandardError": 626.4162772713968,
+              "Level": 12,
+              "Margin": 2994.8414632159893,
+              "Lower": 228242.658536784,
+              "Upper": 234232.341463216
+            },
+            "allocated_bytes": 644821
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 213255.46875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 213255.46875,
+              "StandardError": 3281.9375902010065,
+              "Level": 12,
+              "Margin": 15690.65672692082,
+              "Lower": 197564.81202307917,
+              "Upper": 228946.12547692083
+            },
+            "allocated_bytes": 163694
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalmovement-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 2328066.6666666665,
+        "allocated_bytes": 763880,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalmovement-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 5085700,
+        "allocated_bytes": 6780800,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalmovement-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.MinusDirectionalMovement",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 30815.679931640625,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 30815.679931640625,
+              "StandardError": 475.720258825118,
+              "Level": 12,
+              "Margin": 2572.639271122491,
+              "Lower": 28243.040660518134,
+              "Upper": 33388.319202763116
+            },
+            "allocated_bytes": 68424
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 26210.517578125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 26210.517578125,
+              "StandardError": 346.53438392244357,
+              "Level": 12,
+              "Margin": 1656.7505970974403,
+              "Lower": 24553.76698102756,
+              "Upper": 27867.26817522244
+            },
+            "allocated_bytes": 19668
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalmovement-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 243926.66015625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 243926.66015625,
+              "StandardError": 2706.9589153372967,
+              "Level": 12,
+              "Margin": 12941.733944378288,
+              "Lower": 230984.9262118717,
+              "Upper": 256868.3941006283
+            },
+            "allocated_bytes": 644821
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 206022.3388671875,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 206022.3388671875,
+              "StandardError": 739.6082013578263,
+              "Level": 12,
+              "Margin": 3999.7142622359775,
+              "Lower": 202022.62460495153,
+              "Upper": 210022.05312942347
+            },
+            "allocated_bytes": 163695
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalmovement-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 2499900,
+        "allocated_bytes": 763544,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalmovement-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 7688716.666666667,
+        "allocated_bytes": 6780848,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalmovement-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.PlusDirectionalIndicator",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 628391.357421875,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 628391.357421875,
+              "StandardError": 1074.8772090030884,
+              "Level": 12,
+              "Margin": 5812.809667482416,
+              "Lower": 622578.5477543926,
+              "Upper": 634204.1670893574
+            },
+            "allocated_bytes": 66563
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 646132.03125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 646132.03125,
+              "StandardError": 15899.185202119052,
+              "Level": 12,
+              "Margin": 76012.61461797336,
+              "Lower": 570119.4166320267,
+              "Upper": 722144.6458679733
+            },
+            "allocated_bytes": 17805
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalindicator-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 6400790.972222222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 6400790.972222222,
+              "StandardError": 27288.22402171772,
+              "Level": 12,
+              "Margin": 137568.2719529448,
+              "Lower": 6263222.700269277,
+              "Upper": 6538359.244175167
+            },
+            "allocated_bytes": 643502
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 6383953.75,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 6383953.75,
+              "StandardError": 50207.082779204735,
+              "Level": 12,
+              "Margin": 240035.67389602633,
+              "Lower": 6143918.076103974,
+              "Upper": 6623989.423896026
+            },
+            "allocated_bytes": 162070
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalindicator-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 8148700,
+        "allocated_bytes": 4058784,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalindicator-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 31013116.666666668,
+        "allocated_bytes": 30508848,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-plusdirectionalindicator-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.MinusDirectionalIndicator",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 673517.2309027778,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 673517.2309027778,
+              "StandardError": 5653.834434890847,
+              "Level": 12,
+              "Margin": 28502.706240500454,
+              "Lower": 645014.5246622773,
+              "Upper": 702019.9371432782
+            },
+            "allocated_bytes": 66563
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 661938.7152777778,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 661938.7152777778,
+              "StandardError": 3486.7897428233246,
+              "Level": 12,
+              "Margin": 17577.972065961647,
+              "Lower": 644360.7432118161,
+              "Upper": 679516.6873437394
+            },
+            "allocated_bytes": 17805
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalindicator-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 6743594.814814815,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 6743594.814814815,
+              "StandardError": 25778.462725042238,
+              "Level": 12,
+              "Margin": 129957.1041290591,
+              "Lower": 6613637.710685756,
+              "Upper": 6873551.918943875
+            },
+            "allocated_bytes": 643545
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 6730015.384615384,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 6730015.384615384,
+              "StandardError": 28337.984535272946,
+              "Level": 12,
+              "Margin": 135481.42688737906,
+              "Lower": 6594533.957728005,
+              "Upper": 6865496.811502763
+            },
+            "allocated_bytes": 162513
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalindicator-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 7996333.333333333,
+        "allocated_bytes": 4062600,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalindicator-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 31565233.333333332,
+        "allocated_bytes": 30443920,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-minusdirectionalindicator-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.DirectionalMovementIndex",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1395298.59375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1395298.59375,
+              "StandardError": 65570.3467802527,
+              "Level": 12,
+              "Margin": 313486.0960994357,
+              "Lower": 1081812.4976505642,
+              "Upper": 1708784.6898494358
+            },
+            "allocated_bytes": 66601
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1237588.1944444445,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1237588.1944444445,
+              "StandardError": 9826.736440358618,
+              "Level": 12,
+              "Margin": 49539.57978215367,
+              "Lower": 1188048.6146622908,
+              "Upper": 1287127.7742265982
+            },
+            "allocated_bytes": 17844
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-directionalmovementindex-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 12871177.5,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 12871177.5,
+              "StandardError": 227158.7385492919,
+              "Level": 12,
+              "Margin": 1086026.0718361184,
+              "Lower": 11785151.428163882,
+              "Upper": 13957203.571836118
+            },
+            "allocated_bytes": 644066
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 12696610,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 12696610,
+              "StandardError": 42354.15878832522,
+              "Level": 12,
+              "Margin": 202491.53076198674,
+              "Lower": 12494118.469238013,
+              "Upper": 12899101.530761987
+            },
+            "allocated_bytes": 162978
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-directionalmovementindex-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 13955366.666666666,
+        "allocated_bytes": 8065384,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-directionalmovementindex-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 56581333.333333336,
+        "allocated_bytes": 58403104,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-directionalmovementindex-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.AverageDirectionalIndex",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1477155.3125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1477155.3125,
+              "StandardError": 48124.35811215145,
+              "Level": 12,
+              "Margin": 230078.34932501824,
+              "Lower": 1247076.9631749818,
+              "Upper": 1707233.6618250182
+            },
+            "allocated_bytes": 66530
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1443850.5208333333,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1443850.5208333333,
+              "StandardError": 23685.72712844459,
+              "Level": 12,
+              "Margin": 119406.9848010578,
+              "Lower": 1324443.5360322755,
+              "Upper": 1563257.505634391
+            },
+            "allocated_bytes": 17844
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindex-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 14372883.75,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 14372883.75,
+              "StandardError": 192592.353063425,
+              "Level": 12,
+              "Margin": 920767.2044620017,
+              "Lower": 13452116.545537999,
+              "Upper": 15293650.954462001
+            },
+            "allocated_bytes": 644030
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 14125272.857142856,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 14125272.857142856,
+              "StandardError": 62992.51830642295,
+              "Level": 12,
+              "Margin": 301161.723507918,
+              "Lower": 13824111.133634938,
+              "Upper": 14426434.580650775
+            },
+            "allocated_bytes": 163151
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindex-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 16249300,
+        "allocated_bytes": 9154808,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindex-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 69464766.66666667,
+        "allocated_bytes": 65927928,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindex-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.AverageDirectionalIndexRating",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1456674.21875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1456674.21875,
+              "StandardError": 3662.371302207087,
+              "Level": 12,
+              "Margin": 17509.477048263394,
+              "Lower": 1439164.7417017366,
+              "Upper": 1474183.6957982634
+            },
+            "allocated_bytes": 67694
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1485809.1145833333,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1485809.1145833333,
+              "StandardError": 22214.01454342013,
+              "Level": 12,
+              "Margin": 111987.63215384686,
+              "Lower": 1373821.4824294865,
+              "Upper": 1597796.74673718
+            },
+            "allocated_bytes": 18940
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindexrating-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 14682730,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 14682730,
+              "StandardError": 60383.77590101086,
+              "Level": 12,
+              "Margin": 288689.5541118583,
+              "Lower": 14394040.445888141,
+              "Upper": 14971419.554111859
+            },
+            "allocated_bytes": 645335
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 14901907.936507937,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 14901907.936507937,
+              "StandardError": 104811.88726784776,
+              "Level": 12,
+              "Margin": 528388.7364780236,
+              "Lower": 14373519.200029913,
+              "Upper": 15430296.67298596
+            },
+            "allocated_bytes": 164247
+          }
+        },
+        "evidence": "results/shared-rollout/trady-directional-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyDirectionalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindexrating-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 19060233.333333332,
+        "allocated_bytes": 9675416,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindexrating-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 65283366.666666664,
+        "allocated_bytes": 67878976,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-averagedirectionalindexrating-short.json.gz"
+      }
+    ]
+  }
+]
