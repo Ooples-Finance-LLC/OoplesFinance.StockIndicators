@@ -1,0 +1,8 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "Another repository test run active; no benchmark launched and no external process stopped.",
+  "source_commit": "9fa1e7c1",
+  "reuse_binaries": true,
+  "next_filter": "*SharedStarReversalBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; do not repeat"
+}
