@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetVwap",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        642792,
+        642816,
+        642792
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        161664,
+        161664,
+        161664
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1400440,
+        1400440,
+        1400440
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        6384496,
+        6384496,
+        6384496
+      ]
+    }
+  ]
+}
