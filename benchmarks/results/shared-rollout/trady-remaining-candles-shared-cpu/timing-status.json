@@ -1,0 +1,9 @@
+{
+  "status": "deferred-preflight-busy",
+  "reason": "External AiDotNet.Tensors and AiDotNet.Evolution test jobs appeared before benchmark launch; preflight refused the run. No benchmark process started.",
+  "source_commit": "060a0be6",
+  "reuse_binaries": true,
+  "next_filter": "*SharedTradyRemainingCandleBenchmarks*Builder*",
+  "next_stem": "si-tradycandles-builder-20261013-b",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing"
+}
