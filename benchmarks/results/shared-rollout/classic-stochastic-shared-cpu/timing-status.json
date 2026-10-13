@@ -1,0 +1,11 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "External AiDotNet solution build and Evolution smoke tests remain active; no timing attempt launched.",
+  "source_commit": "1d2ad234",
+  "reuse_binaries": true,
+  "next_filter": "*SharedClassicStochasticBenchmarks*Builder*",
+  "next_stem": "si-classicstochastic-builder-20261013-a",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-classicstochastic-binaries-1d2ad234",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+}
