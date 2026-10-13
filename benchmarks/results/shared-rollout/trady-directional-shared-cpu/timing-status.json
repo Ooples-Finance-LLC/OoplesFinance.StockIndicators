@@ -1,0 +1,9 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "External AiDotNet.Tensors HIP test jobs remain active; no timing attempt launched.",
+  "source_commit": "033ecc10",
+  "reuse_binaries": true,
+  "next_filter": "*SharedTradyDirectionalBenchmarks*Builder*",
+  "next_stem": "si-tradydirectional-builder-20261013-a",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing"
+}
