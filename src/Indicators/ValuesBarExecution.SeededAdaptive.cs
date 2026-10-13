@@ -9,12 +9,21 @@ internal static partial class ValuesBarExecution
     {
         private readonly Queue<double> _prices = new(Math.Min(owner.Period, count));
         private readonly Queue<JurikDyadic> _changes = new(Math.Min(owner.Period, Math.Max(0, count - 1)));
-        private readonly JurikDyadic _fast = JurikDyadic.FromDouble(2d /
-            ((long)(owner.ClampFastPeriod ? Math.Min(owner.Period, owner.FastPeriod) : owner.FastPeriod) + 1));
-        private readonly JurikDyadic _slow = JurikDyadic.FromDouble(2d / ((long)owner.SlowPeriod + 1));
+        private readonly (JurikDyadic Slow, JurikDyadic Difference) _rates = RateCoefficients(owner);
         private JurikDyadic _volatility, _average;
         private double _previous;
         private long _index = -1;
+
+        private static (JurikDyadic, JurikDyadic) RateCoefficients(SeededAdaptiveAverage owner)
+        {
+            var fast = JurikDyadic.FromDouble(2d /
+                ((long)(owner.ClampFastPeriod ? Math.Min(owner.Period, owner.FastPeriod) : owner.FastPeriod) + 1));
+            var slow = JurikDyadic.FromDouble(2d / ((long)owner.SlowPeriod + 1));
+            // Retain the exact difference of the rounded rates, even when it
+            // needs more than binary64 precision. It is invariant across bars.
+            fast.Subtract(slow);
+            return (slow, fast);
+        }
 
         public void Reset()
         {
@@ -50,7 +59,7 @@ internal static partial class ValuesBarExecution
                 if (owner.ResetFlat && flat) _average = price;
                 else
                 {
-                    var rate = Blend(_slow, _fast, efficiency).Mean(1);
+                    var rate = JurikDyadic.SumProduct(_rates.Slow, _rates.Difference, efficiency).Mean(1);
                     // Efficiency and both rounded rates are in [0,1]. The
                     // square is one binary64 rounding, and the final convex
                     // update remains finite for validated finite closes.
