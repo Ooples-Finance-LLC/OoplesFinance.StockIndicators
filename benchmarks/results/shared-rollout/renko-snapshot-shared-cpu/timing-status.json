@@ -1,0 +1,11 @@
+{
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "next_filter": "*SharedRenkoSnapshotBenchmarks*Snapshot*",
+  "next_stem": "si-renkosnapshot-snapshot-20261013-a",
+  "reason": "22 comparison/fixture checks passed; materialized snapshot timing pending.",
+  "source_commit": "148e26b8",
+  "reuse_binaries": true,
+  "status": "pending",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-renkosnapshot-binaries-148e26b8",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+}
