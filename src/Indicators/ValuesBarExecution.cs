@@ -710,6 +710,7 @@ internal static partial class ValuesBarExecution
                 QuarticDynamicAverage quartic => new QuarticValueState(quartic.Period, quartic.Factor, quartic.Startup),
                 TillsonAverage tillson => new TillsonValueState(tillson.Period, tillson.VolumeFactor, tillson.Seed, tillson.Suppression),
                 SeededAdaptiveAverage adaptive => new SeededAdaptiveValueState(adaptive, count),
+                VariablePeriodClassicAverage { Method: ClassicAverageMethod.Sma } variable => new VariableSmaState(variable, count),
                 DeviationRatioAdaptiveAverage ratio => new DeviationRatioValueState(ratio, count),
                 OldestFirstHilbertTrendline => new OldestHilbertValueState(),
                 TripleExponentialRate triple => new TripleRateState(triple.Period, triple.Seed, triple.SignalPeriod, triple.Suppression),
@@ -765,6 +766,12 @@ internal static partial class ValuesBarExecution
                 {
                     // This state clears both outputs itself, including absence.
                     directional.Update(in bar, _scratch);
+                    Values[0][index] = _scratch[0];
+                    Values[1][index] = _scratch[1];
+                }
+                else if (_state is VariableSmaState variable)
+                {
+                    variable.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
                 }
