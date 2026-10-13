@@ -92,9 +92,18 @@ public class SharedForceIndexBenchmarks
         return result;
     }
 
-    private IIndicatorRun Build(SeededForceIndex indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    internal IIndicatorRun Build(SeededForceIndex indicator, IndicatorHistoryMode history, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+            .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        {
+            run.Dispose();
+            throw new InvalidOperationException("Force Index GPU fixture did not execute on device.");
+        }
+        return run;
+    }
 
     private void CheckNative(object result, ComparisonOutput expected)
     {
