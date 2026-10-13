@@ -37,6 +37,33 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
+    // Three Outside uses only open/close comparisons from the preceding two
+    // candles. Keep its three-bar startup without shifting unused range arrays.
+    private struct ThreeOutsideKernel : IBoundedKernel<ThreeOutsideKernel>
+    {
+        private double _lastOpen, _lastClose, _middleOpen, _middleClose;
+        private int _seen;
+        public static ThreeOutsideKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) => default;
+        public double Update(in Bar bar)
+        {
+            double value = 0;
+            if (_seen == 3)
+            {
+                bool lastWhite = _lastClose >= _lastOpen;
+                bool middleWhite = _middleClose >= _middleOpen;
+                bool up = lastWhite && !middleWhite && _lastClose > _middleOpen
+                    && _lastOpen < _middleClose && bar.Close > _lastClose;
+                bool down = !lastWhite && middleWhite && _lastOpen > _middleClose
+                    && _lastClose < _middleOpen && bar.Close < _lastClose;
+                value = up ? 100 : down ? -100 : 0;
+            }
+            else _seen++;
+            _middleOpen = _lastOpen; _middleClose = _lastClose;
+            _lastOpen = bar.Open; _lastClose = bar.Close;
+            return value;
+        }
+    }
+
     // Warmup includes the longest threshold window plus one anchor, or two
     // for the side-by-side gap pattern. Replay it before publishing a region.
     private static int MatchedLinesWindow(IIndicator indicator) => indicator is
@@ -1107,6 +1134,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<KickingKernel>(source, output, indicator, KickingWindow(indicator), cancellation, owned),
         _ when MatchedLinesWindow(indicator) > 0 =>
             FillBoundedWindow<MatchedLinesKernel>(source, output, indicator, MatchedLinesWindow(indicator), cancellation, owned),
+        ThreeOutsideCandle =>
+            FillBoundedWindow<ThreeOutsideKernel>(source, output, indicator, 4, cancellation, owned),
         _ when SequenceWindow(indicator) > 0 =>
             FillBoundedWindow<SequenceKernel>(source, output, indicator, SequenceWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
