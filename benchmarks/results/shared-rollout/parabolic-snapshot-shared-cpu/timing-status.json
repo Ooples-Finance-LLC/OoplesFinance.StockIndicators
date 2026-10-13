@@ -1,11 +1,12 @@
 {
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "next_filter": "*SharedParabolicSnapshotBenchmarks*Snapshot*",
-  "next_stem": "si-parabolicsnapshot-snapshot-20261013-a",
-  "reason": "9 unit and 41 comparison checks passed; snapshot-only timing pending.",
+  "reason": "8 snapshot-only cases completed exit0 without observed competing jobs.",
   "source_commit": "cc3c677d",
   "reuse_binaries": true,
-  "status": "pending",
+  "status": "completed",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-parabolicsnapshot-binaries-cc3c677d",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-parabolicsnapshot-snapshot-20261013-a",
+  "evidence": "snapshot-timing"
 }
