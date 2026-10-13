@@ -45,7 +45,15 @@ public class SharedChoppinessBenchmarks
                 return _quotes[start..(end + Period)];
             }).ToArray();
             var native = NativeValues([(IEnumerable<ChopResult>)NativeSingle()]);
-            Check(native, NativeValues(NativeParallel()));
+            var nativeReference = ChoppinessComparison.NativeReference(_bars, Period);
+            for (int i = Period; i < Count; i++)
+            {
+                double reference = nativeReference[i] ?? throw new InvalidOperationException("Native Choppiness reference is absent.");
+                if (!double.IsFinite(reference) || !double.IsFinite(native[i - Period])
+                    || Math.Abs(reference - native[i - Period]) > 4e-15 * Math.Abs(reference))
+                    throw new InvalidOperationException($"Native Choppiness/reference mismatch at {i}.");
+            }
+            AsinFeasibilityBenchmarks.RequireSame(native, NativeValues(NativeParallel()));
             var expected = ChoppinessComparison.Reference(_bars, Period);
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
             {

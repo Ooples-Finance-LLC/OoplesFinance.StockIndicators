@@ -91,6 +91,7 @@ public sealed class SharedAllocationProbeTests
 
     [Theory]
     [InlineData(15)] [InlineData(513)]
+    [InlineData(1000)] [InlineData(10000)]
     public void VortexFixtureHandlesSmallAndPartitionedInputsAndRestoresSettings(int count)
     {
         int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
@@ -108,6 +109,7 @@ public sealed class SharedAllocationProbeTests
 
     [Theory]
     [InlineData(15)] [InlineData(513)]
+    [InlineData(1000)] [InlineData(10000)]
     public void ChoppinessFixtureHandlesSmallAndPartitionedInputsAndRestoresSettings(int count)
     {
         int prior = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
