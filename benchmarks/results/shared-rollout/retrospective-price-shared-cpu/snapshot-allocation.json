@@ -1,0 +1,15 @@
+{
+  "scope": "Warmed standalone 1000-bar calls including retained returned records, period/span20; original algorithm versus optimized path, no native timing claim. Original test oracle omits source validation enumeration.",
+  "samples": [
+    {
+      "snapshot": "Dpo",
+      "original_bytes": 103200,
+      "compact_bytes": 56056
+    },
+    {
+      "snapshot": "Chaos",
+      "original_bytes": 159688,
+      "compact_bytes": 57496
+    }
+  ]
+}
