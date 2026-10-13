@@ -1,0 +1,4 @@
+Source commit 67e8e704. Production SHA256 46bdb84048c5899fa7124e59d44d62238e8ce8bd1e4037dee1ac44a52d854ec2.
+4 snapshot-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedIchimokuSnapshotBenchmarks*Snapshot*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and snapshot API retains eager immutable records. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+33 focused tests passed; build and verification evidence in parent directory. No full-suite claim.
