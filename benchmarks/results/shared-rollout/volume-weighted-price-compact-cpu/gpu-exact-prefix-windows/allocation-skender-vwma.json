@@ -1,0 +1,55 @@
+{
+  "Operation": "Skender.GetVwma",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        668744,
+        668744,
+        669400
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        187616,
+        187616,
+        187616
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        642584,
+        642584,
+        642584
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        161456,
+        161456,
+        161456
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1400440,
+        1400440,
+        1400440
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1503528,
+        1503528,
+        1503528
+      ]
+    }
+  ]
+}
