@@ -17,10 +17,9 @@ public static class HurstSnapshot
         foreach (var b in bars)
             if (!FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
-        var result = Enumerable
-            .Range(0, bars.Count)
-            .Select(_ => new HurstValue(null, null))
-            .ToArray();
+        var result = new HurstValue[bars.Count];
+        for (var i = 0; i < Math.Min(period, bars.Count); i++)
+            result[i] = new(null, null);
         if (period >= bars.Count)
             return result;
         var returns = new double[bars.Count];
@@ -41,10 +40,11 @@ public static class HurstSnapshot
             .ToArray();
         var corrections = sizes.Select(Correction).ToArray();
         var x = sizes.Select(n => Math.Log10(n)).ToArray();
+        // Every partition overwrites its slot before either regression reads it.
+        var raw = new double[sizes.Length];
+        var corrected = new double[sizes.Length];
         for (var end = period; end < bars.Count; end++)
         {
-            var raw = new double[sizes.Length];
-            var corrected = new double[sizes.Length];
             for (var k = 0; k < sizes.Length; k++)
             {
                 var n = sizes[k];
