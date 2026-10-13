@@ -1,11 +1,12 @@
 {
-  "status": "deferred-before-launch",
-  "reason": "External AiDotNet.Tensors determinism, parallel, grain-size and GEMM tests remain active; no timing attempt launched.",
+  "status": "completed",
+  "reason": "28 builder-only cases completed exit0 without observed competing jobs.",
   "source_commit": "21ec564a",
   "reuse_binaries": true,
   "next_filter": "*SharedMacdBenchmarks*Builder*",
-  "next_stem": "si-macd-builder-20261013-a",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-macd-binaries-21ec564a",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-macd-builder-20261013-a",
+  "evidence": "builder-timing"
 }
