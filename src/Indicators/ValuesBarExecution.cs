@@ -645,6 +645,7 @@ internal static partial class ValuesBarExecution
                 NormalizedWindowEntropy { Period: <= 4096 } entropy => new EntropyValueState(entropy.Period, count),
                 RangeFractalAverage fractal => new FractalValueState(fractal.Period, count),
                 FilteredDeviationAverage deviation => new DeviationAverageValueState(deviation.Period, deviation.ScaleFactor, count),
+                QuarticDynamicAverage quartic => new QuarticValueState(quartic.Period, quartic.Factor, quartic.Startup),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),
