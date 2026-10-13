@@ -1,0 +1,4 @@
+Source commit d074d154. Production SHA256 49380e0c320b4ea153adf100b09aeb9298df3d6191caed406dbcdd0616474e4c.
+12 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedPriceVolumeDetailsBenchmarks*Builder*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+48 focused tests passed; build and verification evidence in parent directory. No full-suite claim.
