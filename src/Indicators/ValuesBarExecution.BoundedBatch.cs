@@ -27,12 +27,15 @@ internal static partial class ValuesBarExecution
         _ when TrendReversalWindow(indicator) > 0 => TrendReversalWindow(indicator),
         _ when HaramiWindow(indicator) > 0 => HaramiWindow(indicator),
         _ when ContainmentWindow(indicator) > 0 => ContainmentWindow(indicator),
+        _ when NeckWindow(indicator) > 0 => NeckWindow(indicator),
         _ when TasukiWindow(indicator) > 0 => TasukiWindow(indicator),
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
+        _ when NeckWindow(indicator) > 0 =>
+            (NeckCandleState)((IndicatorBase)indicator).CreateState()!,
         _ when ContainmentWindow(indicator) > 0 =>
             (ContainmentCandleState)((IndicatorBase)indicator).CreateState()!,
         HighestHigh high when high.Length >= count => new PrefixPriceExtremeState(true),
