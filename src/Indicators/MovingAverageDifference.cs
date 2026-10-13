@@ -141,7 +141,7 @@ public sealed class MovingAverageDifference : MultiOutputIndicatorBase, IIndicat
         }
     }
 
-    private sealed class State(int first, int second, bool exponential) : IMultiOutputState
+    internal sealed class State(int first, int second, bool exponential) : IMultiOutputState
     {
         private readonly Average _first = new(first, exponential),
             _second = new(second, exponential);
