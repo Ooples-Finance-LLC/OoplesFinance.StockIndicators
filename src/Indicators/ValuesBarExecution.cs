@@ -12,10 +12,12 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static readonly object ParallelBarGate = new();
-    // These sealed states read finite bars, have no user callbacks, and publish
-    // their own outputs without graph or built-in evaluator substitution.
+    // These sealed states publish their own outputs without graph or built-in
+    // evaluator substitution. Variable SMA's documented pure selector runs once
+    // per published bar; deferred node failures retain raw-input priority.
     private static bool IsSharedState(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
-        && (SharedCpuStates.Contains(indicator) || IsGeneratedState(indicator));
+        && (SharedCpuStates.Contains(indicator) || IsGeneratedState(indicator)
+            || indicator is VariablePeriodClassicAverage { Method: ClassicAverageMethod.Sma });
 
     internal static bool SupportsOwned(IReadOnlyList<IIndicator> indicators) =>
         IsWeightedChain(indicators) || IsCurvatureChain(indicators) || indicators.Count > 0 && indicators.All(IsPointwise)
