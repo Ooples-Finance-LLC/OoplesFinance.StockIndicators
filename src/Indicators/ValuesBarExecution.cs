@@ -649,6 +649,7 @@ internal static partial class ValuesBarExecution
                 TillsonAverage tillson => new TillsonValueState(tillson.Period, tillson.VolumeFactor, tillson.Seed, tillson.Suppression),
                 SeededAdaptiveAverage adaptive => new SeededAdaptiveValueState(adaptive, count),
                 DeviationRatioAdaptiveAverage ratio => new DeviationRatioValueState(ratio, count),
+                OldestFirstHilbertTrendline => new OldestHilbertValueState(),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),
