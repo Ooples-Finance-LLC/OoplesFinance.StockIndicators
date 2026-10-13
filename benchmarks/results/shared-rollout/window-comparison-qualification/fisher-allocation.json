@@ -1,0 +1,1 @@
+{"Operation":"Skender.GetFisherTransform","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[803624,803624,803624]},{"Method":"BuilderLatestOnly","Bytes":[322496,322496,322496]},{"Method":"NativeSingle","Bytes":[1240448,1240448,1240448]},{"Method":"NativeParallel","Bytes":[5664216,5664216,5725120]}]}

@@ -45,7 +45,14 @@ public class SharedVortexBenchmarks
                 return _quotes[start..(end + Period)];
             }).ToArray();
             var native = NativeValues([(IEnumerable<VortexResult>)NativeSingle()]);
-            Check(native, NativeValues(NativeParallel()));
+            var nativeReference = TrueRangeRatioComparison.VortexReference(_bars, Period, true);
+            var parallel = NativeValues(NativeParallel());
+            for (int slot = 0; slot < 2; slot++)
+            {
+                AsinFeasibilityBenchmarks.RequireSame(nativeReference[slot].Skip(Period)
+                    .Select(value => value ?? throw new InvalidOperationException("Native Vortex reference is absent.")).ToArray(), native[slot]);
+                AsinFeasibilityBenchmarks.RequireSame(native[slot], parallel[slot]);
+            }
             var expected = TrueRangeRatioComparison.VortexReference(_bars, Period, false);
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
             {
