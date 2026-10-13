@@ -120,7 +120,7 @@ public sealed class RateOfChangeWithAverage
         return values;
     }
 
-    private sealed class State(int period, int? averagePeriod) : IMultiOutputState
+    internal sealed class State(int period, int? averagePeriod) : IMultiOutputState
     {
         private readonly Queue<double> _prices = new();
         private readonly Queue<(double Value, bool Present)> _returns = new();
