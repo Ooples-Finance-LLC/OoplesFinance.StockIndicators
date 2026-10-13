@@ -24,7 +24,13 @@ public static class SharedAllocationProbe
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation == "QuanTAlib.Atr")
+        if (operation == "QuanTAlib.Curvature")
+        {
+            var fixture = new SharedCurvatureBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Atr")
         {
             var fixture = new SharedScaledTrueRangeBenchmarks { Count = count, ValidateGpu = includeGpu };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
