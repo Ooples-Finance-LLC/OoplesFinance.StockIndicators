@@ -172,7 +172,7 @@ internal static partial class ValuesBarExecution
                     // Unproven guarded SMA and other states still validate every output.
                     // Deviation bands can overflow secondary slots while their mean stays finite.
                     // Keep slot-major validation after every input has been checked.
-                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails or StochasticSmaKdj
+                    if (!finiteByConstruction || node.Indicator is WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails or StochasticSmaKdj or WindowStochasticKdj
                         || (gpu is not null && node.Indicator is WindowMoneyFlowIndex))
                     for (int i = 0; i < source.Length; i++)
                     {
@@ -602,6 +602,7 @@ internal static partial class ValuesBarExecution
                     || indicator is WindowRegressionStatistics && slot is 7 or 9
                     || indicator is RegressionWithFinalLine && slot is 6 or 7
                     || indicator is WindowAroon && slot >= 4
+                    || indicator is WindowStochasticKdj && slot == 5
                     || indicator is StandardDeviationWithDetails && slot == 5
                     || indicator is WindowDeviationBands && slot is 7 or 8
                     || indicator is ClassicDeviationBands && slot is 4 or 5
@@ -619,6 +620,7 @@ internal static partial class ValuesBarExecution
             if (indicator is WindowRegressionStatistics) Values[7] = Values[9] = Values[6];
             if (indicator is RegressionWithFinalLine) Values[6] = Values[7] = Values[5];
             if (indicator is WindowAroon) Values[4] = Values[5] = Values[3];
+            if (indicator is WindowStochasticKdj) Values[5] = Values[4];
             if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
             if (indicator is WindowDeviationBands) Values[7] = Values[8] = Values[6];
             if (indicator is ClassicDeviationBands) Values[4] = Values[5] = Values[3];
@@ -714,6 +716,16 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is WindowStochasticKdj.State kdj)
+                {
+                    kdj.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is DoubleSmoothedStochasticMomentum.State momentum)
+                {
+                    momentum.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is WindowAtrBands.State atrBands)
                 {
