@@ -1,0 +1,11 @@
+Source: 26c6ca0f plus Force Index GPU benchmark/allocation fixture and tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedGpuForceIndexBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-force-gpu-timing-20261012
+All twelve cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Harness-only net10 build: 60 existing warnings, zero errors; production binaries reused. All 19 focused Force Index fixture/allocation checks passed, zero skips. Production/harness production DLL SHA256 matched.
+Setup independently validates CPU/native arithmetic and compares every GPU column bitwise for both histories; each GPU invocation confirms device execution.
+GPU workers replay complete prefixes for exact recurrence. Native parallel also replays complete prefixes; its costs are measured and no optimality claim is made.
+Catalog CPU current rows and historical measurements remain unchanged; gpu_current includes same-run CPU/native comparators. Win qualification uses upper builder CI below both native lower bounds.
+All three warmed allocation samples are retained. Managed allocations exclude retained host staging/device buffers. Warnings/outliers remain in raw log.
+Coverage remains 197/401 APIs; coverage is not wins. CPU/GPU latency gaps and remaining rollout remain open.
+OoplesFinance.StockIndicators.dll SHA256 ef4f37014ca26fa322589417d954a1dfa3fd0e3e40521b4d760099575cb2aa6c
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 7769dc5e94b98562e1ab6b29c7106615181a834acb1eb1f63c6236b63a02cc48
