@@ -1,0 +1,4 @@
+Source commit 060a0be6. Production SHA256 b83e6ca6c05b5dbc5d41a78058c5cf3b5062ebe41683e1f0c066596cf0da3f7c.
+16 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedTradyRemainingCandleBenchmarks*Builder*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+74 unique focused tests and 8 repeated final-fixture checks passed; build and verification evidence in parent directory. No full-suite claim.

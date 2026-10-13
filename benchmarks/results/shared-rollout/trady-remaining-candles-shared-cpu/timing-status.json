@@ -1,11 +1,12 @@
 {
-  "status": "deferred-preflight-busy",
-  "reason": "External AiDotNet.Tensors and AiDotNet.Evolution test jobs appeared before benchmark launch; preflight refused the run. No benchmark process started.",
+  "status": "completed",
+  "reason": "16 builder-only cases completed exit0 without observed competing jobs.",
   "source_commit": "060a0be6",
   "reuse_binaries": true,
   "next_filter": "*SharedTradyRemainingCandleBenchmarks*Builder*",
-  "next_stem": "si-tradycandles-builder-20261013-b",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-tradycandles-binaries-060a0be6",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-tradycandles-builder-20261013-b",
+  "evidence": "builder-timing"
 }
