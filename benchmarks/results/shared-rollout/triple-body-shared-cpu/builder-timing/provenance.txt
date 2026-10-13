@@ -1,0 +1,4 @@
+Source commit 637785cb. Production SHA256 8c5592d6735c51347a557910acf773f3461a9e242e304e714a009a1b859ab23f.
+16 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedTripleBodyBenchmarks*Builder*. Native methods execute only for setup correctness validation, not as timed benchmarks. Saved competitor results referenced without rerunning. Older serial fixture differs; no ratios, wins or parallel qualification claimed. Coverage stays 269/401.
+104 focused tests passed; build and allocation evidence in parent directory. No full-suite claim.
