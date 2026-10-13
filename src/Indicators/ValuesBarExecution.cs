@@ -26,6 +26,7 @@ internal static partial class ValuesBarExecution
         && (indicators[0] is Wma or FixedPeriodWma or TriangularWindowAverage or EndpointWeightedAverage or WindowLinearRegression { Output: not WindowRegressionOutput.Angle } or NormalizedConvolution { HasAffineKernel: true } or RollingPriceSum or WindowPathRatio or WindowVortex or WindowUltimateOscillator or WindowMoneyFlowIndex or TrueRange or CandleArithmetic or PriceRoundingTransform or EngulfingPattern or BullishCandle or BearishCandle or WindowRangeMidpoint or WindowPriceRange or HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or WindowExtremeIndex or WindowAroon or DecayingWindowExtreme { Decay: 0 }
             || indicators[0] is SeededOnBalanceVolume or AccumulationDistributionWithAverage or SeededForceIndex or MoneyFlowWithDetails or VolumeWeightedPrice
             || indicators[0] is SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails
+            || indicators[0] is ScaledTrueRange
             || IsGpuLagged(indicators[0]) || IsGpuCandleWindow(indicators[0]) || IsGpuPercentile(indicators[0]))
         || IsGpuIndexPair(indicators);
 
@@ -102,6 +103,8 @@ internal static partial class ValuesBarExecution
                 latest = FillPointwiseBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is TrueRange)
                 latest = FillTrueRange(source, nodes[0].Values[0], nodes[0].Indicator, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is ScaledTrueRange)
+                latest = FillBoundedWindow<ScaledRangeKernel>(source, nodes[0].Values, nodes[0].Indicator, 2, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is BalanceOfPower power)
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is SeededOnBalanceVolume obv)
@@ -624,6 +627,7 @@ internal static partial class ValuesBarExecution
                 RegressionWithChannels r => new RegressionWithChannels.Writer(r.Period, r.Deviations, count),
                 Sma => null,
                 _ when pointwise => null,
+                ScaledTrueRange when singleRoot => null,
                 BalanceOfPower when singleRoot => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,

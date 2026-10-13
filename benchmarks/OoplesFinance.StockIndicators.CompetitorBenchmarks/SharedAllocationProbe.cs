@@ -18,12 +18,21 @@ public static class SharedAllocationProbe
         bool seededAtr = operation is "Skender.GetAtr" or "TaLib.Functions.Atr" or "TaLib.Functions.Natr" or "Trady.Indicator.AverageTrueRange";
         bool gpuPathRatio = operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio";
         bool obv = operation is "TaLib.Functions.Obv" or "Skender.GetObv" or "Trady.Indicator.OnBalanceVolume";
-        if (includeGpu && !gpuPathRatio && !gpuRegression && !obv && !weightedPrice && !seededAtr && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "Skender.GetAdl" or "Skender.GetForceIndex" or "Skender.GetCmf"))
+        if (includeGpu && !gpuPathRatio && !gpuRegression && !obv && !weightedPrice && !seededAtr && operation is not ("QuanTAlib.Atr" or "QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "Skender.GetAdl" or "Skender.GetForceIndex" or "Skender.GetCmf"))
             throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (includeGpu && gpuRegression)
+        if (operation == "QuanTAlib.Atr")
+        {
+            var fixture = new SharedScaledTrueRangeBenchmarks { Count = count, ValidateGpu = includeGpu };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = includeGpu
+                ? [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly, fixture.NativeSingle, fixture.NativeParallel]
+                : [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+            if (includeGpu) names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && gpuRegression)
         {
             var fixture = new SharedGpuRegressionBenchmarks { Operation = operation[(operation.LastIndexOf('.') + 1)..], Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
