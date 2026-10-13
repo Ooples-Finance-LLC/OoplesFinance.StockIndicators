@@ -1,0 +1,4 @@
+Source commit 42f8bb09. Production SHA256 41e933a3a18c095ea03e33f005fab81a3a94654d93fecf2c1de453fabe6ebe1e.
+16 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedAtrStopBenchmarks*Builder*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+50 focused tests passed; build and verification evidence in parent directory. No full-suite claim.
