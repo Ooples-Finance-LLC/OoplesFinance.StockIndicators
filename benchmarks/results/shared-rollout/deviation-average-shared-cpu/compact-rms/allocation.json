@@ -1,0 +1,1 @@
+{"Operation":"QuanTAlib.Dsma","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[563336,563336,563336]},{"Method":"BuilderLatestOnly","Bytes":[81928,81928,82584]},{"Method":"NativeSingle","Bytes":[2225128,2225128,2225128]},{"Method":"NativeParallel","Bytes":[9722648,9722648,9722648]}]}
