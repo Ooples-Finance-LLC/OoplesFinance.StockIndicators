@@ -10,6 +10,38 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactVolumeWeightedPriceTests
 {
     [Theory]
+    [InlineData(null)] [InlineData(1)] [InlineData(2)] [InlineData(20)]
+    public void CertifiedArithmeticAndFallbackRetainOneFinalRounding(int? period)
+    {
+        foreach (bool typical in new[] { false, true })
+        foreach (int scale in new[] { -1074, -1070, -970, -969, -968, -967, -500, 0, 500, 1000 })
+        {
+            var bars = Enumerable.Range(0, 193).Select(i =>
+            {
+                double close = Math.ScaleB(1 + (i * 13 % 101) / 8d, scale);
+                double high = Math.ScaleB(2 + (i * 7 % 103) / 4d, scale);
+                double low = Math.ScaleB((i % 11) / 4d, scale);
+                double volume = (i % 9 - 4) / 8d;
+                return new Bar(default, 0, high, low, close, volume);
+            }).ToArray();
+            CheckState(bars, new(period, typical));
+        }
+        double m = double.MaxValue;
+        // Overflowing partial price sums and products can still yield a finite
+        // weighted mean. A rounded partial sum must not erase small residues.
+        CheckState([new(default, 0, m, -m, m, m), new(default, 0, -m, m, -m, m),
+            new(default, 0, 1, -1, double.Epsilon, 1), new(default, 0, 1, -1, 0, -.5),
+            new(default, 0, m, m, m, 0)], new(period, true));
+        // Exact sums cross binary64 precision and return through cancellation.
+        double boundary = Math.ScaleB(1, 53);
+        CheckState([new(default, 0, 0, 0, boundary, 1), new(default, 0, 0, 0, 1, 1),
+            new(default, 0, 0, 0, -boundary, 1), new(default, 0, 0, 0, .5, -.5)], new(period, false));
+        // Typical-price denominator scaling need not be exactly representable.
+        CheckState([new(default, 0, 2, 0, 1, Math.BitDecrement(1)),
+            new(default, 0, 3, 1, 2, .125), new(default, 0, 1, 0, .5, -1)], new(period, true));
+    }
+
+    [Theory]
     [InlineData(0, null)] [InlineData(1, null)] [InlineData(511, null)]
     [InlineData(512, null)] [InlineData(1025, null)] [InlineData(513, 1)]
     [InlineData(511, 20)] [InlineData(512, 20)] [InlineData(513, 20)]
