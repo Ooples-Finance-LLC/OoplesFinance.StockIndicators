@@ -14,6 +14,12 @@ on:
       - '.github/workflows/competitor-library.yml'
       - 'scripts/*competitor*.py'
   workflow_dispatch:
+    inputs:
+      measure_performance:
+        description: 'Run fresh library and competitor timings instead of reusing saved evidence'
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -137,6 +143,9 @@ jobs:
       - run: python scripts/verify-competitor-shards.py benchmarks/competitor-library-manifest.json results ${{ needs.build.outputs.count }}
   performance:
     needs: [build, complete-union]
+    # Reuse saved competitor timings during normal PR validation. Fresh native
+    # baselines require an explicitly requested manual run.
+    if: github.event_name == 'workflow_dispatch' && inputs.measure_performance
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -173,7 +182,7 @@ jobs:
           retention-days: 14
   performance-summary:
     needs: [build, performance]
-    if: always()
+    if: always() && github.event_name == 'workflow_dispatch' && inputs.measure_performance
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
