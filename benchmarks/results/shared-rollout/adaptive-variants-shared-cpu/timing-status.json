@@ -1,12 +1,13 @@
 {
   "preflight_evidence": "external-processes.json",
   "source_commit": "d7980d07",
-  "next_stem": "si-adaptivevariants-builder-20261013-a",
-  "status": "deferred-before-launch",
+  "status": "completed",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
-  "reason": "Preserve verified binaries for queued builder timing; recent monitored run interrupted by intermittent external tests, no repeated timing attempt.",
+  "reason": "8 builder-only cases completed exit0 without observed competing jobs.",
   "next_filter": "*SharedAdaptiveVariantBenchmarks*Builder*",
   "reuse_binaries": true,
   "preserved_executable_directory": "C:/Users/cheat/temp/si-adaptivevariants-binaries-d7980d07",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-adaptivevariants-builder-20261013-a",
+  "evidence": "builder-timing"
 }
