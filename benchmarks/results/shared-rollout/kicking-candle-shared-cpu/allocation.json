@@ -1,0 +1,80 @@
+[
+  {
+    "Operation": "TaLib.Candles.Kicking",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          589176,
+          588520,
+          588520
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          107112,
+          107112,
+          107112
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40144,
+          40144,
+          40144
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81672,
+          81672,
+          81672
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.KickingByLength",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          589176,
+          588520,
+          588520
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          107112,
+          107112,
+          107112
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40144,
+          40144,
+          40144
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81672,
+          81672,
+          81672
+        ]
+      }
+    ]
+  }
+]
