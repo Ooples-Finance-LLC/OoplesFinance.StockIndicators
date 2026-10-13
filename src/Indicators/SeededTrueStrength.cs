@@ -74,7 +74,7 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
                 )
             );
 
-    private sealed class State(int period, int smooth, int signal) : IMultiOutputState
+    internal sealed class State(int period, int smooth, int signal) : IMultiOutputState
     {
         private long _index = -1;
         private double _previous;
