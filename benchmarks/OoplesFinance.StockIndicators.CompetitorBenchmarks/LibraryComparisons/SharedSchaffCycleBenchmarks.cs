@@ -59,7 +59,8 @@ public class SharedSchaffCycleBenchmarks
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new(Cycle, Fast, Slow), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new(Cycle, Fast, Slow), IndicatorHistoryMode.LatestOnly);
     // GetStc eagerly executes; retain its own collection without a normalization copy.
-    [Benchmark(Baseline = true)] public IEnumerable<StcResult> NativeSingle() => _input.GetStc(Cycle, Fast, Slow);
+    [Benchmark(Baseline = true)] public List<StcResult> NativeSingle() =>
+        (List<StcResult>)_input.GetStc(Cycle, Fast, Slow);
     [Benchmark] public StcResult[] NativeParallel()
     {
         var result = new StcResult[Count];

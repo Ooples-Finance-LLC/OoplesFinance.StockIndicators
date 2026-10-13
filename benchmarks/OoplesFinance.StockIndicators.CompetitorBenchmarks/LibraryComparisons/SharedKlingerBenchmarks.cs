@@ -68,7 +68,8 @@ public class SharedKlingerBenchmarks
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new(Fast, Slow, Signal), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new(Fast, Slow, Signal), IndicatorHistoryMode.LatestOnly);
     // Retain the library's own result collection without an additional normalization copy.
-    [Benchmark(Baseline = true)] public IEnumerable<KvoResult> NativeSingle() => _quotes.GetKvo(Fast, Slow, Signal);
+    [Benchmark(Baseline = true)] public List<KvoResult> NativeSingle() =>
+        (List<KvoResult>)_quotes.GetKvo(Fast, Slow, Signal);
     [Benchmark] public KvoResult[] NativeParallel()
     {
         var result = new KvoResult[Count];
