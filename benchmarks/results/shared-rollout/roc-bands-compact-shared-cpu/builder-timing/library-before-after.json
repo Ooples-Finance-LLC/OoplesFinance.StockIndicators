@@ -1,0 +1,61 @@
+{
+  "note": "Original library measurements retained. CPU/architecture/core count matched. Descriptive cross-run ratios only when runtime also matches; incompatible comparisons explicitly withheld. No competitor win claim.",
+  "measurements": [
+    {
+      "operation": "Skender.GetRocWb",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_mean_ms": 0.9991684895833334,
+      "new_mean_ms": 0.4570796875,
+      "old_allocated_bytes": 845767,
+      "new_allocated_bytes": 107884,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetRocWb",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 0.9909749131944445,
+      "new_mean_ms": 0.4576971354166667,
+      "old_allocated_bytes": 797055,
+      "new_allocated_bytes": 59106,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetRocWb",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_mean_ms": 10.618445,
+      "new_mean_ms": 4.7310109375,
+      "old_allocated_bytes": 8587378,
+      "new_allocated_bytes": 1044484,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetRocWb",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 10.266093333333334,
+      "new_mean_ms": 4.6965528125,
+      "old_allocated_bytes": 8106096,
+      "new_allocated_bytes": 563384,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    }
+  ]
+}
