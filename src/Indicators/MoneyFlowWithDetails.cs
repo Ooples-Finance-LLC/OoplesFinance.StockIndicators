@@ -112,15 +112,20 @@ public sealed class MoneyFlowWithDetails
             output.Clear();
             if (bar.High != bar.Low)
             {
-                var range = JurikDyadic.FromDouble(bar.High);
-                range.Add(-bar.Low);
-                var balance = JurikDyadic.FromDouble(bar.Close);
-                balance.Multiply(2);
-                balance.Add(-bar.High);
-                balance.Add(-bar.Low);
-                output[0] = balance.Sign == 0 ? 0 : balance.Ratio(range);
-                balance.Multiply(bar.Volume);
-                double flow = balance.Sign == 0 ? 0 : balance.Ratio(range);
+                double flow;
+                if (TryOrdinaryFlow(in bar, out var multiplier, out flow)) output[0] = multiplier;
+                else
+                {
+                    var range = JurikDyadic.FromDouble(bar.High);
+                    range.Add(-bar.Low);
+                    var balance = JurikDyadic.FromDouble(bar.Close);
+                    balance.Multiply(2);
+                    balance.Add(-bar.High);
+                    balance.Add(-bar.Low);
+                    output[0] = balance.Sign == 0 ? 0 : balance.Ratio(range);
+                    balance.Multiply(bar.Volume);
+                    flow = balance.Sign == 0 ? 0 : balance.Ratio(range);
+                }
                 // The original published flow canonicalizes underflowed zero;
                 // multiplier and CMF retain their rounded underflow signs.
                 output[1] = flow == 0 ? 0 : flow;
@@ -138,6 +143,23 @@ public sealed class MoneyFlowWithDetails
             if (_window.Count < period || _volumes.Sign == 0) return;
             output[2] = _flows.Sign == 0 ? 0 : _flows.Ratio(_volumes);
             output[3] = 1;
+        }
+
+        private static bool TryOrdinaryFlow(in Bar bar, out double multiplier, out double flow)
+        {
+            multiplier = flow = 0;
+            if (!Binary64ArithmeticCertificate.TryDifference(bar.Close, bar.Low, out var buying)
+                || !Binary64ArithmeticCertificate.TryDifference(bar.High, bar.Close, out var selling)
+                || !Binary64ArithmeticCertificate.TryDifference(buying, selling, out var balance)
+                || !Binary64ArithmeticCertificate.TryDifference(bar.High, bar.Low, out var range)) return false;
+            double product;
+            if (balance == 0 || bar.Volume == 0) product = 0;
+            else if (!Binary64ArithmeticCertificate.TryProduct(balance, bar.Volume, out product)) return false;
+            // Certificates establish exact operands for both independent divisions.
+            // Do not multiply the already-rounded multiplier by volume.
+            multiplier = balance == 0 ? 0 : balance / range;
+            flow = product == 0 ? 0 : product / range;
+            return true;
         }
     }
 #else

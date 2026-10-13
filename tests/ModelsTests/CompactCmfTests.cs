@@ -8,6 +8,30 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactCmfTests
 {
     [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(20)]
+    public void CertifiedFlowAndFallbackTransitionsKeepIndependentRounding(int period)
+    {
+        foreach (int scale in new[] { -1074, -970, -968, -967, 0, 900 })
+        {
+            var bars = Enumerable.Range(0, 313).Select(i =>
+            {
+                double low = 10 + (i * 13 % 101) / 8d;
+                double high = low + (i % 7 == 0 ? 0 : i % 3 + 1);
+                double close = low + (high - low) * (i % 9) / 8d;
+                if (i % 5 == 0) (low, high) = (high, low);
+                double volume = Math.ScaleB(i % 17 - 8, scale);
+                return new Bar(default, low, high, low, close, volume);
+            }).ToArray();
+            CheckState(bars, period);
+        }
+        // The exact product may overflow even though the final flow is finite;
+        // a zero balance over an inverted range must remain positive exact zero.
+        CheckState([new(default, 0, 4, 0, 3, double.MaxValue),
+            new(default, 0, 0, 4, 2, -1), new(default, 0, 3, 0, 2, 5),
+            new(default, 0, 3, 0, 1, 2), new(default, 0, 1, -double.Epsilon, 0, 1)], period);
+    }
+
+    [Theory]
     [InlineData(1)] [InlineData(2)] [InlineData(20)] [InlineData(int.MaxValue)]
     public void ExactWindowAndSeparatelyRoundedFlowSurviveResetAndExtremeScales(int period)
     {
