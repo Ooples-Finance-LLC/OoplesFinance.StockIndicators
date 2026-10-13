@@ -150,7 +150,7 @@ public sealed class RateOfChangeRmsBands
         return output;
     }
 
-    private sealed class State(int period, int emaPeriod, int deviationPeriod) : IMultiOutputState
+    internal sealed class State(int period, int emaPeriod, int deviationPeriod) : IMultiOutputState
     {
         private readonly Queue<double> _prices = new();
         private readonly Queue<(double Value, bool Present)> _returns = new();

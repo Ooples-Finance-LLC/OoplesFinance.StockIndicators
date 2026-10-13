@@ -114,6 +114,8 @@ internal static partial class ValuesBarExecution
                 latest = FillClassicMacd(source, nodes[0].Values, macd, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicStochastic stochastic && ClassicStochasticWindow(stochastic) > 0)
                 latest = FillClassicStochastic(source, nodes[0].Values, stochastic, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is RateOfChangeWithAverage roc && RateOfChangeWindow(roc) > 0)
+                latest = FillRateOfChange(source, nodes[0].Values, roc, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMovingAverage or ClassicPriceOscillator)
                 latest = FillClassicAverage(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is WindowAverageEnvelope envelope && AverageEnvelopeWindow(envelope) > 0)
@@ -608,6 +610,7 @@ internal static partial class ValuesBarExecution
                     || indicator is RegressionWithFinalLine && slot is 6 or 7
                     || macd && MacdColumnOwner(indicator, slot) < slot
                     || indicator is SumSeededDirectionalIndex && slot is 6 or 7
+                    || indicator is RateOfChangeWithAverage { AveragePeriod: null } && slot == 4
                     || indicator is WindowAroon && slot >= 4
                     || indicator is ClassicStochastic or ClassicStochasticRsi && slot == 3
                     || indicator is WindowStochasticKdj && slot == 5
@@ -635,6 +638,7 @@ internal static partial class ValuesBarExecution
             if (indicator is RegressionWithFinalLine) Values[6] = Values[7] = Values[5];
             if (indicator is WindowAroon) Values[4] = Values[5] = Values[3];
             if (indicator is SumSeededDirectionalIndex) Values[6] = Values[7] = Values[5];
+            if (indicator is RateOfChangeWithAverage { AveragePeriod: null }) Values[4] = Values[3];
             if (indicator is WindowStochasticKdj) Values[5] = Values[4];
             if (indicator is ClassicStochastic or ClassicStochasticRsi) Values[3] = Values[2];
             if (indicator is StandardDeviationWithDetails) Values[5] = Values[4];
@@ -670,6 +674,7 @@ internal static partial class ValuesBarExecution
                 ClassicMovingAverage or ClassicPriceOscillator when singleRoot => null,
                 ClassicMacd macdOwner when singleRoot && ClassicMacdWindow(macdOwner) > 0 => null,
                 ClassicStochastic stochastic when singleRoot && ClassicStochasticWindow(stochastic) > 0 => null,
+                RateOfChangeWithAverage roc when singleRoot && RateOfChangeWindow(roc) > 0 => null,
                 WindowAverageEnvelope envelope when singleRoot && AverageEnvelopeWindow(envelope) > 0 => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
@@ -734,6 +739,16 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is RateOfChangeWithAverage.State roc)
+                {
+                    roc.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is RateOfChangeRmsBands.State rocBands)
+                {
+                    rocBands.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is VolumeConditionedIndex.State volumeIndex)
                 {
