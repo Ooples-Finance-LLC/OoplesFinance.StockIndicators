@@ -23,7 +23,20 @@ internal static partial class ValuesBarExecution
         || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0
         || TrendReversalWindow(indicator) > 0 || ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0
         || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0 || SequenceWindow(indicator) > 0
-        || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0;
+        || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0;
+
+    // The prior body's threshold ends one bar before the current threshold.
+    // Replaying Period + 1 bars restores both exact sums and the prior candle.
+    private static int PenetrationWindow(IIndicator indicator) => indicator is
+        PiercingLineCandle or DarkCloudCoverCandle
+        && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
+
+    private readonly struct PenetrationKernel(PenetrationCandleState state) : IBoundedKernel<PenetrationKernel>
+    {
+        public static PenetrationKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((PenetrationCandleState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     // Two preceding candles and the longest body window recover both lagged
     // thresholds. Keep maximum public periods on the original scalar route.
@@ -257,7 +270,7 @@ internal static partial class ValuesBarExecution
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
-        if (SequenceWindow(indicator) > 0 || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0) return 512;
+        if (SequenceWindow(indicator) > 0 || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0) return 512;
         if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or MoneyFlowWithDetails or VolumeWeightedPrice or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
@@ -1169,6 +1182,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<ContextReversalKernel>(source, output, indicator, ContextReversalWindow(indicator), cancellation, owned),
         _ when TripleBodyWindow(indicator) > 0 =>
             FillBoundedWindow<TripleBodyKernel>(source, output, indicator, TripleBodyWindow(indicator), cancellation, owned),
+        _ when PenetrationWindow(indicator) > 0 =>
+            FillBoundedWindow<PenetrationKernel>(source, output, indicator, PenetrationWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
