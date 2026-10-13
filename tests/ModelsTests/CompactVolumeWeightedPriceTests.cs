@@ -1,3 +1,4 @@
+using AiDotNet.Tensors.Helpers;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
@@ -5,8 +6,103 @@ using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
+[Collection("IndicatorValuesDispatch")]
 public sealed class CompactVolumeWeightedPriceTests
 {
+    [Theory]
+    [InlineData(0, null)] [InlineData(1, null)] [InlineData(511, null)]
+    [InlineData(512, null)] [InlineData(1025, null)] [InlineData(513, 1)]
+    [InlineData(511, 20)] [InlineData(512, 20)] [InlineData(513, 20)]
+    [InlineData(1025, 127)] [InlineData(513, 4097)] [InlineData(513, int.MaxValue)]
+    public async Task WorkersPreserveExactColumnsAndArrivalAnchors(int count, int? period)
+    {
+        var random = new Random(7114);
+        var bars = Enumerable.Range(0, count).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i % 19),
+            i, 12 + random.NextDouble(), 10 + random.NextDouble(), 11 + random.NextDouble(), i % 17 - 8)).ToArray();
+        foreach (bool typical in new[] { false, true })
+        foreach (DateTime? anchor in new DateTime?[] { null, DateTime.UnixEpoch.AddMinutes(7), DateTime.UnixEpoch.AddDays(1) })
+            await CheckWorkers(bars, new(period, typical, anchor));
+    }
+
+    [Theory]
+    [InlineData(null)] [InlineData(20)]
+    public async Task WorkerBoundariesPreserveWideCancellationAndNegativeUnderflow(int? period)
+    {
+        foreach (bool typical in new[] { false, true })
+        {
+            var bars = Enumerable.Range(0, 1025).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i),
+                0, 0, 0, 0, 1)).ToArray();
+            foreach (int index in new[] { 0, 126, 127, 128, 511, 512, 895 })
+                bars[index] = new(bars[index].Time, 0, -double.Epsilon, -double.Epsilon, -double.Epsilon, 1);
+            await CheckWorkers(bars, new(period, typical));
+            double m = double.MaxValue;
+            foreach (int index in new[] { 126, 127, 511, 512 })
+            {
+                double price = index % 2 == 0 ? m : -m;
+                bars[index] = new(bars[index].Time, 0, price, price, price, m);
+            }
+            await CheckWorkers(bars, new(period, typical));
+            await CheckWorkers(bars, new(period, typical, bars[1].Time));
+        }
+    }
+
+    [Theory]
+    [InlineData(null, false)] [InlineData(null, true)]
+    [InlineData(2, false)] [InlineData(2, true)]
+    public async Task WorkersRejectInputBeforeOverflowAndRecover(int? period, bool anchored)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Enumerable.Repeat(new Bar(DateTime.UnixEpoch, 0, 0, 0, 0, 0), 1025).ToArray();
+            var indicator = new VolumeWeightedPrice(period, true, anchored ? DateTime.UnixEpoch : null);
+            var builder = Build(bars, indicator);
+            double m = double.MaxValue;
+            bars[127] = new(DateTime.UnixEpoch, 0, m, m, m, 1);
+            bars[128] = new(DateTime.UnixEpoch, 0, -m, -m, -m, -.5);
+            bars[^1] = new(DateTime.UnixEpoch.AddDays(-1), double.NaN, 0, 0, 0, 0);
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => builder.BuildAsync());
+            bars[^1] = bars[0];
+            var failure = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
+            Assert.Equal(0, failure.OutputSlot); Assert.Equal(128, failure.BarIndex);
+            bars[127] = bars[128] = bars[0];
+            using var recovered = await builder.BuildAsync();
+            Assert.All(recovered[indicator.Value].ToArray(), value => Assert.Equal(0, value));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(new CancellationToken(true)));
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    private static async Task CheckWorkers(Bar[] bars, VolumeWeightedPrice indicator)
+    {
+        var expected = Reference(bars, indicator);
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (int workers in new[] { 1, 2, 8 })
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                Assert.True(ValuesBarExecution.SupportsOwned([indicator]));
+                var input = bars.ToArray();
+                using var run = await Build(input, indicator).ConfigureHistory(history).BuildAsync();
+                Array.Clear(input); run.Dispose();
+                for (int slot = 0; slot < 2; slot++)
+                    Assert.Equal(expected[slot].Select(BitConverter.DoubleToInt64Bits),
+                        run[indicator.Outputs[slot]].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                if (bars.Length > 0) Assert.Equal(bars[^1], run.Latest.Bar);
+                if (history == IndicatorHistoryMode.Full)
+                {
+                    int row = 0;
+                    await foreach (var snapshot in run) Assert.Equal(bars[row++], snapshot.Bar);
+                    Assert.Equal(bars.Length, row);
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
     [Theory]
     [InlineData(null, true)] [InlineData(null, false)]
     [InlineData(1, true)] [InlineData(1, false)]
