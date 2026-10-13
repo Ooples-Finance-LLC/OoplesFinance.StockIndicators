@@ -9,6 +9,17 @@ public sealed class VariableAverageSharedExecutionTests(Xunit.Abstractions.ITest
 {
     private static Bar[] Data(int count) => Enumerable.Range(0, count).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i), i, 110 + i % 17, 90 - i % 13, 100 + i % 7, i % 13)).ToArray();
     private static double Select(Bar bar) => (bar.Open % 7) switch { 0 => -1e100, 1 => 1.99, 2 => 3.99, 3 => 29.9, 4 => 1e100, _ => 7.25 };
+    [Fact]
+    public void OnlyQualifiedVariableSmaEntersOwnedSharedExecution()
+    {
+        var sma = new VariablePeriodClassicAverage(Select);
+        Assert.True(ValuesBarExecution.SupportsOwned([sma]));
+        Assert.True(ValuesBarExecution.SupportsOwned([sma, new PriceRelativeStrength()]));
+        foreach (var method in Enum.GetValues<ClassicAverageMethod>().Where(m => m != ClassicAverageMethod.Sma))
+            Assert.False(ValuesBarExecution.SupportsOwned([new VariablePeriodClassicAverage(Select, method: method)]));
+        sma.Of(new FirstValueEma(5));
+        Assert.False(ValuesBarExecution.SupportsOwned([sma]));
+    }
     [Theory]
     [InlineData(1, 1)] [InlineData(1, 2)] [InlineData(2, 30)]
     [InlineData(3, 129)] [InlineData(2, 4097)] [InlineData(1, int.MaxValue)]
