@@ -1,0 +1,4 @@
+Source commit e499e2fb. Production SHA256 1577cc2ed218f496e92bea27d5437d509f00d688fcc2d1a62e9411e741391aa8.
+2 snapshot-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedVolatilityStopSnapshotBenchmarks*Snapshot*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and snapshot API retains eager immutable records. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+21 focused tests passed; build and verification evidence in parent directory. No full-suite claim.
