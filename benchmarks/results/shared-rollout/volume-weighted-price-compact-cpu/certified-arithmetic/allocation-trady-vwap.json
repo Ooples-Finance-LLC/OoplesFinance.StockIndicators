@@ -1,0 +1,39 @@
+{
+  "Operation": "Trady.Indicator.VolumeWeightedAveragePrice",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        646664,
+        646664,
+        646664
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        165536,
+        165536,
+        165536
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        5912464,
+        5912464,
+        5912464
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        10622280,
+        10566192,
+        10626048
+      ]
+    }
+  ]
+}

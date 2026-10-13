@@ -122,9 +122,19 @@ public sealed class VolumeWeightedPrice
         {
             output.Clear();
             if (!Accumulate(in bar)) return;
-            var denominator = _mass;
-            if (typical) denominator.Multiply(3);
-            output[0] = _weighted.Sign == 0 ? 0 : _weighted.Ratio(denominator);
+            if (_weighted.TryDouble(out var weighted) && _mass.TryDouble(out var mass)
+                && (!typical || Binary64ArithmeticCertificate.TryProduct(mass, 3, out mass)))
+            {
+                // Both operands are exact binary64 values: one hardware division
+                // gives the required rounding, including signed underflow zero.
+                output[0] = weighted == 0 ? 0 : weighted / mass;
+            }
+            else
+            {
+                var denominator = _mass;
+                if (typical) denominator.Multiply(3);
+                output[0] = _weighted.Sign == 0 ? 0 : _weighted.Ratio(denominator);
+            }
             output[1] = 1;
         }
 
@@ -142,14 +152,29 @@ public sealed class VolumeWeightedPrice
 
         private void Add(in Bar bar, int sign)
         {
-            var numerator = JurikDyadic.FromDouble(bar.Close);
-            if (typical) { numerator.Add(bar.High); numerator.Add(bar.Low); }
-            // Weight the complete exact price sum. Division by three belongs
-            // only in the final ratio, never in an intermediate typical price.
-            numerator.Multiply(bar.Volume);
+            JurikDyadic numerator;
+            if (TryOrdinaryProduct(in bar, out var product)) numerator = JurikDyadic.FromDouble(product);
+            else
+            {
+                numerator = JurikDyadic.FromDouble(bar.Close);
+                if (typical) { numerator.Add(bar.High); numerator.Add(bar.Low); }
+                // Weight the complete exact price sum. Division by three belongs
+                // only in the final ratio, never in an intermediate typical price.
+                numerator.Multiply(bar.Volume);
+            }
             if (sign > 0) _weighted.AddExact(numerator);
             else _weighted.Subtract(numerator);
             _mass.Add(sign > 0 ? bar.Volume : -bar.Volume);
+        }
+
+        private bool TryOrdinaryProduct(in Bar bar, out double product)
+        {
+            product = 0;
+            if (bar.Volume == 0) return true;
+            double price = bar.Close;
+            if (typical && (!Binary64ArithmeticCertificate.TryDifference(price, -bar.High, out price)
+                || !Binary64ArithmeticCertificate.TryDifference(price, -bar.Low, out price))) return false;
+            return price == 0 || Binary64ArithmeticCertificate.TryProduct(price, bar.Volume, out product);
         }
     }
 #else
