@@ -1,0 +1,1 @@
+Source42f8bb09. AttemptB interrupted by external SpectralTransformBackendParityTests PID13900. Monitor stopped only ownPID30952. Session96687 terminal exit2. Diagnostic evidence excluded from catalog. Next fresh stem si-atrstop-builder-20261013-c; preserved snapshot reusable.
