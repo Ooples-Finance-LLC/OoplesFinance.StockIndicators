@@ -83,7 +83,7 @@ jobs:
         shell: pwsh
         run: |
           & ./tools/Build-CorrectnessPackageConsumer.ps1 -PackagePath (Get-ChildItem candidate/*.nupkg).FullName -TargetFramework '${{ matrix.framework }}'
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         if: matrix.os == 'ubuntu-latest' && matrix.framework == 'net10.0'
         with:
           python-version: '3.12'
@@ -177,7 +177,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Require all shard jobs to succeed
@@ -277,7 +277,7 @@ jobs:
 
       - name: Build unit tests once for all shards
         run: dotnet build tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --framework net10.0
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Verify CI selection and evidence accounting
@@ -314,7 +314,7 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.x
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - uses: actions/download-artifact@v8
@@ -341,7 +341,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Require every unit shard to succeed
