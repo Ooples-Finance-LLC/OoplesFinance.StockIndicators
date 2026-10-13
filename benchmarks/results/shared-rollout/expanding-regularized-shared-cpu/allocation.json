@@ -1,0 +1,1 @@
+{"Operation":"QuanTAlib.Rema","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[562472,562472,562472]},{"Method":"BuilderLatestOnly","Bytes":[81064,81064,81064]},{"Method":"NativeSingle","Bytes":[480376,480376,480376]},{"Method":"NativeParallel","Bytes":[1883000,1883000,1883000]}]}
