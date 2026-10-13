@@ -25,7 +25,21 @@ internal static partial class ValuesBarExecution
         || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0 || SequenceWindow(indicator) > 0
         || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0
         || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0
-        || ExhaustionWindowLength(indicator) > 0 || FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0;
+        || ExhaustionWindowLength(indicator) > 0 || FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0
+        || HikkakeWindow(indicator) > 0;
+
+    // Formation tracking starts three bars before visible output. Full warmup
+    // replay therefore restores every pending confirmation that can still fire.
+    private static int HikkakeWindow(IIndicator indicator) => indicator is
+        HikkakeCandle or ModifiedHikkakeCandle
+        && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
+
+    private readonly struct HikkakeKernel(HikkakeState state) : IBoundedKernel<HikkakeKernel>
+    {
+        public static HikkakeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((HikkakeState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     // Four prior anchors and complete threshold history restore the exact
     // continuation state. Maximum public periods keep the scalar fallback.
@@ -347,6 +361,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
+        if (HikkakeWindow(indicator) > 0) return 512;
         if (FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0) return 512;
         if (GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0 || ExhaustionWindowLength(indicator) > 0) return 512;
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
@@ -1276,6 +1291,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<FiveContinuationKernel>(source, output, indicator, FiveContinuationWindow(indicator), cancellation, owned),
         _ when ExtendedReversalWindow(indicator) > 0 =>
             FillBoundedWindow<ExtendedReversalKernel>(source, output, indicator, ExtendedReversalWindow(indicator), cancellation, owned),
+        _ when HikkakeWindow(indicator) > 0 =>
+            FillBoundedWindow<HikkakeKernel>(source, output, indicator, HikkakeWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
