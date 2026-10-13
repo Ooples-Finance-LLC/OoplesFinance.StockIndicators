@@ -5,5 +5,7 @@
   "reuse_binaries": true,
   "next_filter": "*SharedTradyRemainingCandleBenchmarks*Builder*",
   "next_stem": "si-tradycandles-builder-20261013-b",
-  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing"
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-tradycandles-binaries-060a0be6",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
 }

@@ -100,7 +100,7 @@ public sealed class WindowDirectionalMeasure
                 )
             );
 
-    private sealed class State(DirectionalWindowMeasure measure, int period, int lag)
+    internal sealed class State(DirectionalWindowMeasure measure, int period, int lag)
         : IMultiOutputState
     {
         private readonly SeededAtrWindow? _atr = measure >= DirectionalWindowMeasure.PositiveIndicator ? new(period) : null;

@@ -26,7 +26,26 @@ internal static partial class ValuesBarExecution
         || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0
         || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0
         || ExhaustionWindowLength(indicator) > 0 || FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0
-        || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0;
+        || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0 || IsRawDirectional(indicator);
+
+    private static bool IsRawDirectional(IIndicator indicator) => indicator is WindowDirectionalMeasure
+        { Measure: DirectionalWindowMeasure.PositiveMovement or DirectionalWindowMeasure.NegativeMovement };
+
+    // Raw signed movement has one predecessor and no Wilder recurrence.
+    private struct RawDirectionalKernel(WindowDirectionalMeasure.State state, BoundedOutput target) : IBoundedKernel<RawDirectionalKernel>
+    {
+        private int _index = target.Origin;
+        public static RawDirectionalKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((WindowDirectionalMeasure.State)((WindowDirectionalMeasure)indicator).CreateState()!, target);
+        public double Update(in Bar bar)
+        {
+            Span<double> values = stackalloc double[2];
+            state.Update(in bar, values);
+            int index = _index++;
+            if (index >= target.WriteStart) target.Values[1][index] = values[1];
+            return values[0];
+        }
+    }
 
     // The reported match depends on the anchor's trend plus the output delay,
     // not WarmupBars (which describes only the reporting offset).
@@ -374,7 +393,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
-        if (HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0) return 512;
+        if (IsRawDirectional(indicator) || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0) return 512;
         if (FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0) return 512;
         if (GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0 || ExhaustionWindowLength(indicator) > 0) return 512;
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
@@ -1304,6 +1323,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<FiveContinuationKernel>(source, output, indicator, FiveContinuationWindow(indicator), cancellation, owned),
         _ when ExtendedReversalWindow(indicator) > 0 =>
             FillBoundedWindow<ExtendedReversalKernel>(source, output, indicator, ExtendedReversalWindow(indicator), cancellation, owned),
+        _ when IsRawDirectional(indicator) =>
+            FillBoundedWindow<RawDirectionalKernel>(source, output, indicator, 2, cancellation, owned),
         _ when DelayedCloudWindow(indicator) > 0 =>
             FillBoundedWindow<DelayedCloudKernel>(source, output, indicator, DelayedCloudWindow(indicator), cancellation, owned),
         _ when HikkakeWindow(indicator) > 0 =>

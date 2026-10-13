@@ -689,6 +689,13 @@ internal static partial class ValuesBarExecution
                     }
                 }
                 else if (_state is IIndicatorState single) Values[0][index] = single.Update(in bar);
+                else if (_state is WindowDirectionalMeasure.State directional)
+                {
+                    // This state clears both outputs itself, including absence.
+                    directional.Update(in bar, _scratch);
+                    Values[0][index] = _scratch[0];
+                    Values[1][index] = _scratch[1];
+                }
                 else if (_state is IMultiOutputState multi)
                 {
                     Array.Clear(_scratch);
