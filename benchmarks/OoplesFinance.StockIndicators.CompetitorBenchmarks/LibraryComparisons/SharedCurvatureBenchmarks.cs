@@ -42,7 +42,7 @@ public class SharedCurvatureBenchmarks
                     if (flags[i] is not (0 or 1) || flags[i] == 0 && values[i] != 0)
                         throw new InvalidOperationException("Curvature presence or placeholder differs.");
                 return new KeyValuePair<string, ComparisonOutput>(name,
-                    new(0, values.Select((v, i) => flags[i] == 1 ? v : double.NaN).ToArray(), flags.Select(v => v == 1).ToArray()));
+                    new(0, values.Select((v, i) => flags[i] == 1 ? v : double.NaN).ToArray(), flags.Select(v => v == 1).ToArray())); // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
             }).ToDictionary(x => x.Key, x => x.Value);
             ComparisonVerifier.Compare(expected, new ComparisonSeries(outputs), "shared curvature",
                 OoplesFinance.StockIndicators.Validation.IndicatorErrorBudget.Exact);

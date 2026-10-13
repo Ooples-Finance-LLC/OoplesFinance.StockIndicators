@@ -110,7 +110,7 @@ public sealed class MoneyFlowWithDetails
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            if (bar.High != bar.Low)
+            if (bar.High != bar.Low) // NOSONAR: S1244 - Only an exactly flat candle takes the zero-range branch.
             {
                 double flow;
                 if (TryOrdinaryFlow(in bar, out var multiplier, out flow)) output[0] = multiplier;

@@ -199,7 +199,7 @@ public sealed class SmoothedAccumulationOscillator
             output.Clear();
             _index++;
             JurikDyadic multiplier = default, flow = default;
-            if (owner.FirstValue ? bar.High > bar.Low : bar.High != bar.Low)
+            if (owner.FirstValue ? bar.High > bar.Low : bar.High != bar.Low) // NOSONAR: S1244 - The native conventions distinguish an exactly flat range.
             {
                 if (TryOrdinaryFlow(in bar, owner.IncludeDetails, out var ordinaryMultiplier, out var ordinaryFlow))
                 {

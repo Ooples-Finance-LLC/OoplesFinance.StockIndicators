@@ -46,8 +46,8 @@ public class SharedRetrospectiveBenchmarks
             expected[2][i] = high ? 1 : 0; expected[3][i] = low ? 1 : 0;
             foreach (var row in new[] { serial[i], parallel[i] })
                 if (row.Date != _bars[i].Time || row.FractalBear.HasValue != high || row.FractalBull.HasValue != low
-                    || high && (double)row.FractalBear!.Value != expected[0][i]
-                    || low && (double)row.FractalBull!.Value != expected[1][i])
+                    || high && (double)row.FractalBear!.Value != expected[0][i] // NOSONAR: S1244 - These dyadic fixture prices convert exactly; comparison intentionally rejects any difference.
+                    || low && (double)row.FractalBull!.Value != expected[1][i]) // NOSONAR: S1244 - These dyadic fixture prices convert exactly; comparison intentionally rejects any difference.
                     throw new InvalidOperationException($"Native fractal mismatch at {i}.");
         }
         if (Count >= 1000 && (!expected[2].Contains(1d) || !expected[3].Contains(1d)))

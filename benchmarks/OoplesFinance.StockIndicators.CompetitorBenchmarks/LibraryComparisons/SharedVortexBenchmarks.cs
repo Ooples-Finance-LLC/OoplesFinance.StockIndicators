@@ -62,7 +62,7 @@ public class SharedVortexBenchmarks
                 {
                     for (int i = 0; i < Count; i++)
                         if (BitConverter.DoubleToInt64Bits(expected[slot][i] ?? 0) != BitConverter.DoubleToInt64Bits(run[indicator.Outputs[slot]][i])
-                            || run[indicator.Outputs[slot + 2]][i] != (expected[slot][i].HasValue ? 1 : 0))
+                            || run[indicator.Outputs[slot + 2]][i] != (expected[slot][i].HasValue ? 1 : 0)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                             throw new InvalidOperationException($"Exact Vortex mismatch at {slot}/{i}.");
                 }
                 Check(native, [run[indicator.Positive].Slice(Period).ToArray(), run[indicator.Negative].Slice(Period).ToArray()]);

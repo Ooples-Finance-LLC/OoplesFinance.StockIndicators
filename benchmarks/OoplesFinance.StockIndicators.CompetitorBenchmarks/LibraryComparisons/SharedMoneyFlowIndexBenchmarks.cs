@@ -61,7 +61,7 @@ public class SharedMoneyFlowIndexBenchmarks
                 for (int i = 0; i < Count; i++)
                 {
                     if (BitConverter.DoubleToInt64Bits(expected[i] ?? 0) != BitConverter.DoubleToInt64Bits(run[indicator.Value][i])
-                        || run[indicator.IsDefined][i] != (expected[i].HasValue ? 1d : 0d))
+                        || run[indicator.IsDefined][i] != (expected[i].HasValue ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                         throw new InvalidOperationException($"Exact MFI builder mismatch at {i}.");
                 }
                 CheckNative(native, run[indicator.Value].Slice(Period).ToArray());

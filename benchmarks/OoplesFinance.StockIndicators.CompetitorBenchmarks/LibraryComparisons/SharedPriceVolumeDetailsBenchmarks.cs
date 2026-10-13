@@ -27,7 +27,7 @@ public class SharedPriceVolumeDetailsBenchmarks
         if (owner is BalanceOfPowerWithValidity)
         {
             expected = [new double[Count], new double[Count]];
-            var raw = _bars.Select(b => b.High == b.Low ? (double?)null : Round(Units(b.Close) - Units(b.Open), Units(b.High) - Units(b.Low))).ToArray();
+            var raw = _bars.Select(b => b.High == b.Low ? (double?)null : Round(Units(b.Close) - Units(b.Open), Units(b.High) - Units(b.Low))).ToArray(); // NOSONAR: S1244 - Exactly flat candles are absent in this reference convention.
             for (int i = 19; i < Count; i++)
             {
                 if (Enumerable.Range(i - 19, 20).Any(j => !raw[j].HasValue)) continue;

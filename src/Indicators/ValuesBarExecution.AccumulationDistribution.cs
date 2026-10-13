@@ -66,7 +66,7 @@ internal static partial class ValuesBarExecution
 
     private static double AccumulationMultiplier(double high, double low, double close)
     {
-        if (high == low) return 0;
+        if (high == low) return 0; // NOSONAR: S1244 - Only an exactly zero range has zero flow.
         if (Binary64ArithmeticCertificate.TryDifference(close, low, out double buying)
             && Binary64ArithmeticCertificate.TryDifference(high, close, out double selling)
             && Binary64ArithmeticCertificate.TryDifference(buying, selling, out double balance)

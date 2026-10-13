@@ -54,7 +54,7 @@ public class SharedCmfBenchmarks
                         bool present = reference.Present![i];
                         double value = present ? reference.Values[i] : 0;
                         if (BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(run[indicator.Outputs[slot]][i])
-                            || slot == 2 && run[indicator.CmfIsDefined][i] != (present ? 1d : 0d))
+                            || slot == 2 && run[indicator.CmfIsDefined][i] != (present ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                             throw new InvalidOperationException($"Exact CMF column {slot} differs at {i}.");
                         if (present != native.Present![i] || present && Math.Abs(value - native.Values[i]) > 1e-12)
                             throw new InvalidOperationException($"Native and exact CMF column {slot} disagree at {i}.");

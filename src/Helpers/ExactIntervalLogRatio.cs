@@ -20,7 +20,7 @@ internal static class ExactIntervalLogRatio
         {
             double relative = difference.Ratio(denominator);
             double argument = 1 + relative;
-            if (argument == 1) return relative;
+            if (argument == 1) return relative; // NOSONAR: S1244 - Exact equality identifies rounding of 1 + relative to 1; a tolerance would change the correction.
             // Two binary64 factors require at most 106 significant bits.
             // Keep their product exact without the general accumulator's heap storage.
             var top = JurikDyadic.FromDouble(Math.Log(argument)); top.Multiply(relative);
@@ -44,13 +44,13 @@ internal static class ExactIntervalLogRatio
 
     private static double CalculateDoubles(double numerator, double denominator)
     {
-        if (numerator == denominator) return 0;
+        if (numerator == denominator) return 0; // NOSONAR: S1244 - Exact equality identifies the zero logarithm.
         if (numerator >= .5 * denominator && numerator <= 2 * denominator)
         {
             // Sterbenz: subtraction is exact when the ratio lies in [1/2, 2].
             double relative = (numerator - denominator) / denominator;
             double argument = 1 + relative;
-            if (argument == 1) return relative;
+            if (argument == 1) return relative; // NOSONAR: S1244 - Exact equality identifies rounding of 1 + relative to 1; a tolerance would change the correction.
             var top = JurikDyadic.FromDouble(Math.Log(argument)); top.Multiply(relative);
             return top.Ratio(JurikDyadic.FromDouble(argument - 1));
         }

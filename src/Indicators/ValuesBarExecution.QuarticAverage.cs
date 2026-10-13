@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             }
             else if (value == 0)
                 next = _previous > 0 ? double.NegativeInfinity : double.PositiveInfinity;
-            else if (value == _previous)
+            else if (value == _previous) // NOSONAR: S1244 - This exact fixed-point identity must not absorb nearby unequal prices.
                 next = value;
             else
             {

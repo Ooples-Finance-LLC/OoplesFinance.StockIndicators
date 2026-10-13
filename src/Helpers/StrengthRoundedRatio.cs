@@ -13,7 +13,7 @@ internal static class StrengthRoundedRatio
             || denominator <= 0 || denominator >= (1L << 57)) return false;
         if (numerator == 0) return true;
         double top = numerator, bottom = denominator;
-        double topTail = numerator - (long)top, bottomTail = denominator - (long)bottom;
+        double topTail = numerator - (long)top, bottomTail = denominator - (long)bottom; // NOSONAR: S3949 - The guards bound both Int64 casts; subtraction is only a rounding residual of at most 512.
         double quotient = top / bottom;
         if (topTail == 0 && bottomTail == 0)
         {

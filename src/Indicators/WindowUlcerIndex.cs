@@ -87,7 +87,7 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
 
         private RocBankValue Drawdown(double price, double peak)
         {
-            if (peak == 0 || price == peak) return default;
+            if (peak == 0 || price == peak) return default; // NOSONAR: S1244 - An exactly zero peak or zero drawdown has an exact zero result.
 #if !NETFRAMEWORK
             // Every peak is a retained price. The 200-term common-grid proof
             // makes subtraction and multiplication by 100 exact; only division
@@ -146,7 +146,7 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
                 var entry = _prices[index];
 #endif
                 peak = Math.Max(peak, entry.Price);
-                if (entry.Peak == peak)
+                if (entry.Peak == peak) // NOSONAR: S1244 - Reuse is valid only for an identical peak; nearby peaks change drawdown.
                 {
                     int priorLast = last == 0 ? period - 1 : last - 1;
 #if !NETFRAMEWORK

@@ -130,7 +130,7 @@ public class SharedSmoothedAccumulationBenchmarks
     private double[] Native(int count)
     {
         var output = new double[Math.Max(0, count - Lookback)];
-        if (output.Length == 0) return output;
+        if (output.Length == 0) return output; // NOSONAR: S2583 - Public Count includes startup cases 1 and 9 in fixture tests; output can be empty.
         var code = TALib.Functions.AdOsc<double>(_highs.AsSpan(0, count), _lows.AsSpan(0, count),
             _closes.AsSpan(0, count), _volumes.AsSpan(0, count), System.Range.All, output, out var range, Fast, Slow);
         if (code != TALib.Core.RetCode.Success || range.Start.Value != Lookback || range.End.Value != count)

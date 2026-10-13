@@ -88,7 +88,7 @@ public class SharedVolumeWeightedPriceBenchmarks
                     bool present = expected.Present![i];
                     double value = present ? expected.Values[i] : 0;
                     if (BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(run[indicator.Value][i])
-                        || run[indicator.IsDefined][i] != (present ? 1d : 0d))
+                        || run[indicator.IsDefined][i] != (present ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                         throw new InvalidOperationException($"Exact weighted price differs at {i}.");
                     if (present != native.Present![i] || present && Math.Abs(value - native.Values[i]) > 1e-10)
                         throw new InvalidOperationException($"Exact and native weighted price disagree at {i}.");

@@ -99,7 +99,7 @@ internal sealed class ConnorsStrengthState : IMultiOutputState
             if (change.HasValue)
                 foreach (var prior in _returns)
                     if (prior.HasValue && prior.Value.CompareTo(change.Value) < 0) count++;
-            output[2] = (100L * count) / _rankPeriod; output[6] = 1;
+            output[2] = (100L * count) / _rankPeriod; output[6] = 1; // NOSONAR: S2184 - Connors percent rank deliberately truncates integer division before publication.
         }
         if (_priceOutput[1] > 0) { output[0] = _priceOutput[0]; output[4] = 1; }
         if (_index >= (long)_streakPeriod + 2 && _streakOutput[1] > 0)

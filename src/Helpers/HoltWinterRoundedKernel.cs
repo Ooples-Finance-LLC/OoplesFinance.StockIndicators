@@ -51,7 +51,7 @@ internal static class HoltWinterRoundedKernel
         level = velocity = acceleration = output = 0;
         // Halving must retain the exact unpublished term, including subnormals.
         double half = oldAcceleration * .5;
-        if (half * 2 != oldAcceleration) return false;
+        if (half * 2 != oldAcceleration) return false; // NOSONAR: S1244 - The certificate requires halving to round-trip exactly, including subnormals.
         if (!TrySum([oldLevel, oldVelocity, half, oldLevel, oldVelocity, half, price],
             [1, 1, 1, -a, -a, -a, a], out level)) return false;
         if (!TrySum([oldVelocity, oldAcceleration, oldVelocity, oldAcceleration, level, oldLevel],
@@ -59,7 +59,7 @@ internal static class HoltWinterRoundedKernel
         if (!TrySum([oldAcceleration, oldAcceleration, velocity, oldVelocity],
             [1, -c, c, -c], out acceleration)) return false;
         half = acceleration * .5;
-        if (half * 2 != acceleration) return false;
+        if (half * 2 != acceleration) return false; // NOSONAR: S1244 - The certificate requires halving to round-trip exactly, including subnormals.
         return TrySum([level, velocity, half], [1, 1, 1], out output);
     }
 }

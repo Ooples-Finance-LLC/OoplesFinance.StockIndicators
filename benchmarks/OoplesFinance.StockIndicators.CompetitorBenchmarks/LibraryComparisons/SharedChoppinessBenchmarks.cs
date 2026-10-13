@@ -64,7 +64,7 @@ public class SharedChoppinessBenchmarks
                     double value = expected[i] ?? 0;
                     double actual = run[indicator.Value][i];
                     if (!double.IsFinite(actual) || Math.Abs(value - actual) > 4e-15 * Math.Abs(value)
-                        || run[indicator.IsDefined][i] != (expected[i].HasValue ? 1 : 0))
+                        || run[indicator.IsDefined][i] != (expected[i].HasValue ? 1 : 0)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                         throw new InvalidOperationException($"Choppiness builder/reference mismatch at {i}.");
                 }
                 Check(native, run[indicator.Value].Slice(Period).ToArray());

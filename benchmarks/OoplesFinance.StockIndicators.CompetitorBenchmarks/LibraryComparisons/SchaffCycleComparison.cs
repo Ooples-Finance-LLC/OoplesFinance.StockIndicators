@@ -39,7 +39,7 @@ internal static class SchaffCycleComparison
         using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
             .BuildAsync().GetAwaiter().GetResult();
         var values = run[indicator.Value].ToArray(); var present = run[indicator.IsDefined].ToArray();
-        return values.Select((value, i) => present[i] == 1 ? (double?)value : null).ToArray();
+        return values.Select((value, i) => present[i] == 1 ? (double?)value : null).ToArray(); // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
     }
 
     internal static ComparisonSeries Series(double?[] values) =>

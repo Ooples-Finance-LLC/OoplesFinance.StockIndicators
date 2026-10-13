@@ -49,7 +49,7 @@ public class SharedForceIndexBenchmarks
                     bool present = expected.Present![i];
                     double value = present ? expected.Values[i] : 0;
                     if (BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(run[indicator.Value][i])
-                        || run[indicator.IsDefined][i] != (present ? 1d : 0d))
+                        || run[indicator.IsDefined][i] != (present ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                         throw new InvalidOperationException($"Exact Force Index output differs at {i}.");
                     // Native uses rounded alpha/difference/addition; both paths
                     // have separately passed their bitwise arithmetic references.
