@@ -715,7 +715,13 @@ internal static partial class ValuesBarExecution
             if (_state is EntropyValueState entropy) return FillScalar(source, new EntropyUpdate(entropy), cancellation, owned);
             if (_state is FractalValueState fractal) return FillScalar(source, new FractalUpdate(fractal), cancellation, owned);
             if (_state is DeviationAverageValueState deviation) return FillScalar(source, new DeviationAverageUpdate(deviation), cancellation, owned);
+            if (_state is TrendMethodsState methods) return FillScalar(source, new TrendMethodsUpdate(methods), cancellation, owned);
             return FillScalar(source, new StateUpdate((IIndicatorState)_state!), cancellation, owned);
+        }
+        // Variable-length anchor search retains its original sequential state.
+        private readonly struct TrendMethodsUpdate(TrendMethodsState state) : IScalarUpdate
+        {
+            public double Update(in Bar bar) => state.Update(in bar);
         }
         private interface IScalarUpdate { double Update(in Bar bar); }
         private readonly struct GridUpdate(RickshawGridState state) : IScalarUpdate

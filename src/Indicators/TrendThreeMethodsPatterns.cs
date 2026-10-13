@@ -118,9 +118,9 @@ public sealed class FallingThreeMethodsPattern : IndicatorBase, IIndicatorValida
 internal sealed class TrendMethodsState : IIndicatorState
 {
     private readonly bool _rising;
-    private readonly IIndicatorState _longBody,
-        _shortBody,
-        _trend;
+    private readonly PercentileCandleState _longBody,
+        _shortBody;
+    private readonly CandleTrendState _trend;
     private Bar _previous,
         _anchor,
         _after;
