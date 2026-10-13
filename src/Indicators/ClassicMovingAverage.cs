@@ -173,7 +173,7 @@ public sealed class ClassicMovingAverage
             _ => new WideClassicalWindowState(Period, Method),
         };
 
-    private sealed class State : IMultiOutputState, IDisposable, IWideAverageState
+    internal sealed class State : IMultiOutputState, IDisposable, IWideAverageState
     {
         private readonly long _first,
             _offset;
