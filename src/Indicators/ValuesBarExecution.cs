@@ -112,6 +112,8 @@ internal static partial class ValuesBarExecution
                 latest = FillBalanceOfPower(source, nodes[0].Values, power, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is ClassicMovingAverage or ClassicPriceOscillator)
                 latest = FillClassicAverage(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is WindowAverageEnvelope envelope && AverageEnvelopeWindow(envelope) > 0)
+                latest = FillAverageEnvelope(source, nodes[0].Values, envelope, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is SeededOnBalanceVolume obv)
                 latest = FillOnBalanceVolume(source, nodes[0].Values, obv, cancellation, owned, out obvFinite);
             else if (nodes.Count == 1 && nodes[0].Indicator is VolumeWeightedPrice weightedPrice)
@@ -603,6 +605,7 @@ internal static partial class ValuesBarExecution
                     || indicator is StandardDeviationWithDetails && slot == 5
                     || indicator is WindowDeviationBands && slot is 7 or 8
                     || indicator is ClassicDeviationBands && slot is 4 or 5
+                    || indicator is WindowAtrBands && (slot == 6 || slot == 7 && !((WindowAtrBands)indicator).IncludeWidth)
                     || indicator is PriorPriceChannel && slot is 5 or 6
                     || inactiveObvAverage && slot == 2
                     || smoothed && (slot >= 6 || !smoothedDetails && slot is 2 or 3 or 5)
@@ -620,6 +623,12 @@ internal static partial class ValuesBarExecution
             if (indicator is WindowDeviationBands) Values[7] = Values[8] = Values[6];
             if (indicator is ClassicDeviationBands) Values[4] = Values[5] = Values[3];
             if (indicator is PriorPriceChannel) Values[5] = Values[6] = Values[4];
+            // Both bands publish together; disabled width/value flags remain zero.
+            if (indicator is WindowAtrBands atrBands)
+            {
+                Values[6] = Values[5];
+                if (!atrBands.IncludeWidth) Values[7] = Values[3];
+            }
             // Disabled/all-warmup OBV average and presence are both constant zero.
             // Keep both public columns while sharing their run-owned storage.
             if (inactiveObvAverage) Values[2] = Values[1];
@@ -641,6 +650,7 @@ internal static partial class ValuesBarExecution
                 WindowRegressionStatistics when singleRoot => null,
                 BalanceOfPower when singleRoot => null,
                 ClassicMovingAverage or ClassicPriceOscillator when singleRoot => null,
+                WindowAverageEnvelope envelope when singleRoot && AverageEnvelopeWindow(envelope) > 0 => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
                 _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,
@@ -704,6 +714,16 @@ internal static partial class ValuesBarExecution
                     directional.Update(in bar, _scratch);
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
+                }
+                else if (_state is WindowAtrBands.State atrBands)
+                {
+                    atrBands.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is WindowAverageEnvelope.State envelope)
+                {
+                    envelope.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
                 else if (_state is IMultiOutputState multi)
                 {
