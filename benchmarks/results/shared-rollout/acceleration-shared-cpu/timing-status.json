@@ -1,13 +1,14 @@
 {
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
-  "next_stem": "si-acceleration-builder-20261013-b",
-  "status": "interrupted",
+  "status": "completed",
   "next_filter": "*SharedAccelerationBenchmarks*Builder*",
   "reuse_binaries": true,
-  "reason": "External ForecasterFusedTrainingTests started during warmup. Own benchmark stopped; all timing excluded.",
+  "reason": "4 builder-only cases completed exit0 without observed competing jobs.",
   "source_commit": "46a1a514",
   "preflight_evidence": "external-processes.json",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-acceleration-binaries-46a1a514",
   "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
-  "interrupted_evidence": "interrupted-timing-a"
+  "interrupted_evidence": "interrupted-timing-a",
+  "completed_stem": "si-acceleration-builder-20261013-b",
+  "evidence": "builder-timing"
 }
