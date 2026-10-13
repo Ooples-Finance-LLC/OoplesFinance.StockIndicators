@@ -1,12 +1,13 @@
 {
-  "status": "deferred-before-launch",
-  "reason": "External AiDotNet and AiDotNet.Tensors tests are active; no timing attempt launched.",
+  "status": "completed",
+  "reason": "8 builder-only cases completed exit0 without observed competing jobs.",
   "source_commit": "4893c44c",
   "reuse_binaries": true,
   "next_filter": "*SharedVolumeIndexBenchmarks*Builder*",
-  "next_stem": "si-volumeindex-builder-20261013-a",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "preflight_evidence": "external-processes.json",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-volumeindex-binaries-4893c44c",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-volumeindex-builder-20261013-a",
+  "evidence": "builder-timing"
 }
