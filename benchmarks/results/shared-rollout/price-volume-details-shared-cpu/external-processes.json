@@ -1,0 +1,32 @@
+[
+  {
+    "ProcessId": 37860,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tensors.Tests -f net10.0 --filter \"FullyQualifiedName~WebGpu|FullyQualifiedName~Dawn|FullyQualifiedName~Hip_|FullyQualifiedName~HipTensor|FullyQualifiedName~Mel\""
+  },
+  {
+    "ProcessId": 35216,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" exec \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\vstest.console.dll\" --testAdapterPath:C:\\Users\\cheat\\.nuget\\packages\\coverlet.collector\\6.0.4\\build\\netstandard2.0\\ --framework:\".NETCoreApp,Version=v10.0\" --testCaseFilter:\"FullyQualifiedName~WebGpu|FullyQualifiedName~Dawn|FullyQualifiedName~Hip_|FullyQualifiedName~HipTensor|FullyQualifiedName~Mel\" C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.dll --logger:Console;Verbosity=minimal --nologo --artifactsProcessingMode-collect --testSessionCorrelationId:37860_542d3622-7364-40ab-8a50-784b9e5ca9c4"
+  },
+  {
+    "ProcessId": 22368,
+    "Name": "testhost.exe",
+    "CommandLine": "\"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\testhost.exe\"  --runtimeconfig \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.runtimeconfig.json\" --depsfile \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.deps.json\" --port 57371 --endpoint 127.0.0.1:057371 --role client --parentprocessid 35216 --telemetryoptedin false"
+  },
+  {
+    "ProcessId": 30836,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tests/AiDotNetTests.csproj -f net10.0 --filter FullyQualifiedName~DeepAR -nologo -v q"
+  },
+  {
+    "ProcessId": 40164,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" exec \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\vstest.console.dll\" --testAdapterPath:C:\\Users\\cheat\\.nuget\\packages\\coverlet.collector\\10.1.0\\build\\net10.0\\ --framework:\".NETCoreApp,Version=v10.0\" --testCaseFilter:\"FullyQualifiedName~DeepAR\" C:\\Users\\cheat\\source\\repos\\AiDotNet-wt\\pr2295\\tests\\AiDotNet.Tests\\bin\\Debug\\net10.0\\AiDotNetTests.dll --logger:Console;Verbosity=quiet --nologo --artifactsProcessingMode-collect --testSessionCorrelationId:30836_20c00f5e-99b7-4fb1-b0e7-0f5753e8b309"
+  },
+  {
+    "ProcessId": 8092,
+    "Name": "testhost.exe",
+    "CommandLine": "\"C:\\Users\\cheat\\source\\repos\\AiDotNet-wt\\pr2295\\tests\\AiDotNet.Tests\\bin\\Debug\\net10.0\\testhost.exe\"  --runtimeconfig \"C:\\Users\\cheat\\source\\repos\\AiDotNet-wt\\pr2295\\tests\\AiDotNet.Tests\\bin\\Debug\\net10.0\\AiDotNetTests.runtimeconfig.json\" --depsfile \"C:\\Users\\cheat\\source\\repos\\AiDotNet-wt\\pr2295\\tests\\AiDotNet.Tests\\bin\\Debug\\net10.0\\AiDotNetTests.deps.json\" --port 55310 --endpoint 127.0.0.1:055310 --role client --parentprocessid 40164 --telemetryoptedin false"
+  }
+]
