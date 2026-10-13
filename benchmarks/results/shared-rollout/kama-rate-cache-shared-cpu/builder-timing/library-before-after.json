@@ -1,0 +1,226 @@
+[
+  {
+    "operation": "QuanTAlib.Kama",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "old_mean_ms": 0.390958125,
+    "new_mean_ms": 0.38231892361111114,
+    "old_allocated_bytes": 84002,
+    "new_allocated_bytes": 84010,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "QuanTAlib.Kama",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 0.32051341145833334,
+    "new_mean_ms": 0.37256716796875,
+    "old_allocated_bytes": 35269,
+    "new_allocated_bytes": 35255,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "QuanTAlib.Kama",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "old_mean_ms": 3.420779296875,
+    "new_mean_ms": 3.7899916666666664,
+    "old_allocated_bytes": 804600,
+    "new_allocated_bytes": 804676,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "QuanTAlib.Kama",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 3.261827777777778,
+    "new_mean_ms": 3.7471640625,
+    "old_allocated_bytes": 323534,
+    "new_allocated_bytes": 323567,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Skender.GetKama",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "old_mean_ms": 0.329795625,
+    "new_mean_ms": 0.39655490451388886,
+    "old_allocated_bytes": 83994,
+    "new_allocated_bytes": 84011,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Skender.GetKama",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 0.34675953125,
+    "new_mean_ms": 0.3780346484375,
+    "old_allocated_bytes": 35252,
+    "new_allocated_bytes": 35255,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Skender.GetKama",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "old_mean_ms": 3.712409375,
+    "new_mean_ms": 3.8253336805555556,
+    "old_allocated_bytes": 804634,
+    "new_allocated_bytes": 804676,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Skender.GetKama",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 3.248561875,
+    "new_mean_ms": 3.8102996875,
+    "old_allocated_bytes": 323534,
+    "new_allocated_bytes": 323567,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "TaLib.Functions.Kama",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "old_mean_ms": 0.4166553125,
+    "new_mean_ms": 0.39055890625,
+    "old_allocated_bytes": 83994,
+    "new_allocated_bytes": 83994,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "TaLib.Functions.Kama",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 0.430136796875,
+    "new_mean_ms": 0.385007763671875,
+    "old_allocated_bytes": 35267,
+    "new_allocated_bytes": 35254,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "TaLib.Functions.Kama",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "old_mean_ms": 4.304200625,
+    "new_mean_ms": 3.982252734375,
+    "old_allocated_bytes": 804623,
+    "new_allocated_bytes": 804634,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "TaLib.Functions.Kama",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 4.130752083333333,
+    "new_mean_ms": 3.8908621875,
+    "old_allocated_bytes": 323524,
+    "new_allocated_bytes": 323524,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "old_mean_ms": 0.4864951953125,
+    "new_mean_ms": 0.4177061631944444,
+    "old_allocated_bytes": 84022,
+    "new_allocated_bytes": 84023,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 0.423587255859375,
+    "new_mean_ms": 0.38717061631944444,
+    "old_allocated_bytes": 35268,
+    "new_allocated_bytes": 35251,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "old_mean_ms": 4.397761458333333,
+    "new_mean_ms": 3.95437109375,
+    "old_allocated_bytes": 804622,
+    "new_allocated_bytes": 804623,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  },
+  {
+    "operation": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "old_mean_ms": 4.188209375,
+    "new_mean_ms": 3.8656,
+    "old_allocated_bytes": 323514,
+    "new_allocated_bytes": 323524,
+    "library_comparison_unavailable": {
+      "reason": "RuntimeVersion differs; ratios and win claims withheld",
+      "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+    }
+  }
+]
