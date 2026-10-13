@@ -1,10 +1,12 @@
 {
-  "status": "deferred-before-launch",
+  "status": "deferred-after-interrupted-attempt",
   "reason": "Another repository test run active; no benchmark launched and no external process stopped.",
   "source_commit": "9fa1e7c1",
   "reuse_binaries": true,
   "next_filter": "*SharedStarReversalBenchmarks*Builder*",
   "competitor_timing": "reuse saved baseline; do not repeat",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-star-binaries-9fa1e7c1",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before gap batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before gap batch build.",
+  "interrupted_evidence": "interrupted-timing-b",
+  "next_fresh_stem": "si-star-builder-20261013-c"
 }
