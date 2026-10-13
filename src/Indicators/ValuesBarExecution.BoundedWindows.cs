@@ -8,6 +8,7 @@ internal static partial class ValuesBarExecution
     private static bool IsBoundedWindowIndicator(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or Wma or WilliamsR or RollingPriceSum or EngulfingPattern
             or WindowPathRatio { Period: < int.MaxValue } or WindowLinearRegression { Period: <= 32767 } or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
+        || IsRollingDiagnostics(indicator)
         || indicator is WindowReturnBeta { Period: < int.MaxValue }
         || indicator is WindowMoneyFlowIndex { Period: < int.MaxValue } or WindowVortex { Period: < int.MaxValue } or WindowUltimateOscillator { LongPeriod: < int.MaxValue } or WindowChoppinessIndex { Period: < int.MaxValue }
         || indicator is WindowCorrelation or WindowPairStatistics or MoneyFlowWithDetails
@@ -393,7 +394,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
-        if (IsRawDirectional(indicator) || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0) return 512;
+        if (IsRollingDiagnostics(indicator) || IsRawDirectional(indicator) || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0) return 512;
         if (FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0) return 512;
         if (GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0 || ExhaustionWindowLength(indicator) > 0) return 512;
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
@@ -1323,6 +1324,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<FiveContinuationKernel>(source, output, indicator, FiveContinuationWindow(indicator), cancellation, owned),
         _ when ExtendedReversalWindow(indicator) > 0 =>
             FillBoundedWindow<ExtendedReversalKernel>(source, output, indicator, ExtendedReversalWindow(indicator), cancellation, owned),
+        _ when IsRollingDiagnostics(indicator) =>
+            FillRollingDiagnostics(source, output, indicator, cancellation, owned),
         _ when IsRawDirectional(indicator) =>
             FillBoundedWindow<RawDirectionalKernel>(source, output, indicator, 2, cancellation, owned),
         _ when DelayedCloudWindow(indicator) > 0 =>

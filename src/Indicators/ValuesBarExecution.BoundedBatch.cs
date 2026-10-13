@@ -5,6 +5,7 @@ internal static partial class ValuesBarExecution
 {
     private static int BoundedPeriod(IIndicator indicator) => indicator switch
     {
+        WindowMeanAbsoluteDeviation deviation => deviation.Period,
         HighestHigh high => high.Length,
         LowestLow low => low.Length,
         Wma average => Math.Max(1, average.Length),
@@ -48,6 +49,7 @@ internal static partial class ValuesBarExecution
 
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
+        WindowMeanAbsoluteDeviation deviation => new WindowMeanAbsoluteDeviation.State(deviation.Period),
         _ when DelayedCloudWindow(indicator) > 0 =>
             (DelayedDarkCloudCoverPattern.State)((IndicatorBase)indicator).CreateState()!,
         _ when HikkakeWindow(indicator) > 0 =>
