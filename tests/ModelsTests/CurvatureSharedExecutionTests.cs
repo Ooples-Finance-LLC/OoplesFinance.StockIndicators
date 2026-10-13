@@ -22,6 +22,30 @@ public sealed class CurvatureSharedExecutionTests
     }
 
     [Fact]
+    public async Task WideIntegerMomentsPromoteDemoteAndRejectOutsideTheirCertificate()
+    {
+        foreach (double magnitude in new[] { Math.BitDecrement(Math.ScaleB(1d, 63)), Math.ScaleB(1d, 63) })
+        foreach (int scale in new[] { -1074, -63, 0, 900 })
+        {
+            // The first two-point fit produces +/-magnitude and +/-1 on the
+            // common integer grid. Wide squared moments promote on the large
+            // block and demote when it expires; equality at2^63 falls back.
+            var bars = Enumerable.Range(0, 513).Select(i => new Bar(default, 0, 0, 0,
+                Math.ScaleB(i % 101 < 40 ? (i % 2 == 0 ? 0 : magnitude) : (i % 2 == 0 ? 0 : 1), scale), 0)).ToArray();
+            await Check(bars, 2, 20);
+        }
+    }
+
+    [Theory]
+    [InlineData(3)] [InlineData(20)] [InlineData(256)] [InlineData(4096)]
+    public async Task FullSignificandSlopesKeepIndependentRatioAndRootRounding(int period)
+    {
+        var bars = Enumerable.Range(0, Math.Max(513, period * 2 + 1)).Select(i =>
+            new Bar(default, 0, 0, 0, 100 + (i * 13 % 101) / 8d, 0)).ToArray();
+        await Check(bars, 20, period);
+    }
+
+    [Fact]
     public async Task WideFallbackAndSubnormalRoundingSurviveWorkerReplay()
     {
         foreach (int exponent in new[] { -1074, -1022, -500, 0, 700 })
