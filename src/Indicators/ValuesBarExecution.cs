@@ -651,6 +651,7 @@ internal static partial class ValuesBarExecution
                 DeviationRatioAdaptiveAverage ratio => new DeviationRatioValueState(ratio, count),
                 OldestFirstHilbertTrendline => new OldestHilbertValueState(),
                 JurikAdaptive jurik => new JurikValueState(jurik, count),
+                RollingPivotLevels pivots => new PivotValueState(pivots, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),

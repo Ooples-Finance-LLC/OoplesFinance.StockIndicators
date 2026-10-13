@@ -132,6 +132,7 @@ internal static class SharedCpuStates
         typeof(RangeAccelerationBands),
         typeof(RangeFractalAverage),
         typeof(RetrospectiveFractals),
+        typeof(RollingPivotLevels),
         typeof(RateOfChangeRmsBands),
         typeof(RateOfChangeWithAverage),
         typeof(RateOfChangeWithValidity),
