@@ -27,7 +27,22 @@ public class SharedCommodityChannelBenchmarks
         _lows = _closes.Select((v, i) => v - 1 - (i % 7) / 16d).ToArray();
         _bars = _closes.Select((v, i) => new Bar(default, v, _highs[i], _lows[i], v, 1)).ToArray();
         var native = NativeSingle();
-        CheckNative(native, NativeParallel());
+        var parallel = NativeParallel();
+        var inputs = _bars.Select(b => (b.High, b.Low, b.Close)).ToArray();
+        var nativeExpected = CommodityChannelComparison.FloatingReference(inputs, Period, true);
+        AsinFeasibilityBenchmarks.RequireSame(nativeExpected.Skip(Period - 1).Select(v => v!.Value).ToArray(), native);
+        int chunks = Math.Min(8, Environment.ProcessorCount);
+        for (int chunk = 0; chunk < chunks; chunk++)
+        {
+            int start = native.Length * chunk / chunks, end = native.Length * (chunk + 1) / chunks;
+            // Each native partition starts a fresh circular buffer. Check its
+            // own summation order exactly, then bound serial/parallel drift.
+            var reference = CommodityChannelComparison.FloatingReference(
+                inputs.Skip(start).Take(end - start + Period - 1).ToArray(), Period, true);
+            AsinFeasibilityBenchmarks.RequireSame(reference.Skip(Period - 1).Select(v => v!.Value).ToArray(),
+                parallel.AsSpan(start, end - start).ToArray());
+        }
+        CheckNative(native, parallel);
         var expected = CommodityChannelComparison.Reference(_bars, Period, 1);
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {

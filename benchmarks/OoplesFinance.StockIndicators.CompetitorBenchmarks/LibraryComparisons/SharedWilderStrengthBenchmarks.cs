@@ -36,6 +36,10 @@ public class SharedWilderStrengthBenchmarks
         _bars = _prices.Select(v => new Bar(default, v, v + 1, v - 1, v, 1)).ToArray();
         var expected = WilderStrengthComparison.OwnedReference(_prices, Period, Convention).Outputs["Value"];
         var native = NativeSingle();
+        var nativeExpected = WilderStrengthComparison.NativeReference(_prices, Period, Convention);
+        if (nativeExpected.Range.Start.Value != Period || nativeExpected.Range.End.Value != Count)
+            throw new InvalidOperationException("Unexpected independent strength reference range.");
+        AsinFeasibilityBenchmarks.RequireSame(nativeExpected.Values, native);
         AsinFeasibilityBenchmarks.RequireSame(native, NativeParallel());
         for (int i = Period; i < Count; i++)
             if (!double.IsFinite(native[i - Period]) || Math.Abs(native[i - Period] - expected.Values[i]) > 1e-10)

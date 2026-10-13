@@ -1,0 +1,39 @@
+{
+  "Operation": "TaLib.Functions.HtPhasor",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        804760,
+        804760,
+        804760
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        323632,
+        323632,
+        323632
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        159920,
+        159920,
+        159920
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        880824,
+        880824,
+        881496
+      ]
+    }
+  ]
+}

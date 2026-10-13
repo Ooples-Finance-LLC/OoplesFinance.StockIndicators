@@ -15,6 +15,10 @@ public sealed class SharedHilbertBenchmarkTests
     [InlineData("TaLib.Functions.HtPhasor", 65, 2)]
     [InlineData("TaLib.Functions.Mama", 33, 2)]
     [InlineData("TaLib.Functions.Mama", 65, 2)]
+    [InlineData("TaLib.Functions.HtPhasor", 1000, 2)]
+    [InlineData("TaLib.Functions.HtPhasor", 10000, 2)]
+    [InlineData("TaLib.Functions.Mama", 1000, 2)]
+    [InlineData("TaLib.Functions.Mama", 10000, 2)]
     public void SetupChecksBothHistoriesPackedOutputsAndUnevenPrefixReplay(string operation, int count, int outputs)
     {
         int prior = CpuParallelSettings.MaxDegreeOfParallelism;
@@ -23,6 +27,8 @@ public sealed class SharedHilbertBenchmarkTests
         {
             fixture.Setup();
             Assert.Equal((count - 32) * outputs, fixture.NativeSingle().Length);
+            Assert.Empty(BenchmarkDotNet.Validators.DeferredExecutionValidator.FailOnError.Validate(
+                BenchmarkDotNet.Running.BenchmarkConverter.TypeToBenchmarks(typeof(SharedHilbertBenchmarks))));
         }
         finally { fixture.Cleanup(); }
         Assert.Equal(prior, CpuParallelSettings.MaxDegreeOfParallelism);
