@@ -1,0 +1,14 @@
+{
+  "source_commit": "67e8e704",
+  "reuse_binaries": true,
+  "preflight_evidence": "external-processes.json",
+  "catalog_field": "snapshot_only",
+  "reason": "Preserve verified snapshot binaries for queued timing; recent monitored timing interrupted by intermittent external work, no repeated attempt.",
+  "status": "deferred-before-launch",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "next_filter": "*SharedIchimokuSnapshotBenchmarks*Snapshot*",
+  "measurement_kind": "standalone-snapshot",
+  "next_stem": "si-ichimoku-snapshot-20261013-a",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-ichimoku-binaries-67e8e704",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+}
