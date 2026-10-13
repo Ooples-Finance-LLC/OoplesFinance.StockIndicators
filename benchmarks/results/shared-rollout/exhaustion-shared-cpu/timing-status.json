@@ -4,5 +4,7 @@
   "source_commit": "3dccb169",
   "reuse_binaries": true,
   "next_filter": "*SharedExhaustionBenchmarks*Builder*",
-  "competitor_timing": "reuse saved baseline; do not repeat"
+  "competitor_timing": "reuse saved baseline; do not repeat",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-exhaustion-binaries-3dccb169",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before multi-bar candle batch build."
 }

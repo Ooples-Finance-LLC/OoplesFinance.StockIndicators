@@ -1,0 +1,8 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "External .NET work remains active; no new timing attempt launched.",
+  "source_commit": "54eda4f3",
+  "reuse_binaries": true,
+  "next_filter": "*SharedMultiBarCandleBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; do not repeat"
+}
