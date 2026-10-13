@@ -1,0 +1,1 @@
+Excluded diagnostic run. Initial idle preflight passed; external HIP tests PID29052 and children13180/28692 appeared during warmup. Monitor stopped only own verified benchmark PID36916. No timing rows or coverage recorded. Preserved source9fa1e7c1 executable used. No competitor timing repeated. Automatic immediate retries deferred to avoid repeated contention.
