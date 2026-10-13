@@ -24,7 +24,13 @@ public static class SharedAllocationProbe
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation is "TaLib.Candles.MatchingLow" or "TaLib.Candles.StickSandwich" or "TaLib.Candles.ThreeLineStrike" or "TaLib.Candles.ThreeOutside")
+        if (operation is "TaLib.Candles.Hammer" or "TaLib.Candles.HangingMan" or "TaLib.Candles.InvertedHammer" or "TaLib.Candles.ShootingStar")
+        {
+            var fixture = new SharedContextReversalBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.MatchingLow" or "TaLib.Candles.StickSandwich" or "TaLib.Candles.ThreeLineStrike" or "TaLib.Candles.ThreeOutside")
         {
             var fixture = new SharedSequenceCandleBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
