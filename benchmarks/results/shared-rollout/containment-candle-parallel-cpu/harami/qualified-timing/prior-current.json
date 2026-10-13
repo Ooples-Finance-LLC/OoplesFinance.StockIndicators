@@ -1,0 +1,128 @@
+[
+  {
+    "bars": 1000,
+    "evidence": "results/shared-rollout/containment-candle-shared-cpu/harami/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 88937.02256944444,
+        "allocated_bytes": 59665,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 88937.02256944444,
+          "StandardError": 405.56333503018755,
+          "Level": 12,
+          "Margin": 2044.568643352266,
+          "Lower": 86892.45392609217,
+          "Upper": 90981.5912127967
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 85984.20681423611,
+        "allocated_bytes": 10629,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 85984.20681423611,
+          "StandardError": 699.5275383715648,
+          "Level": 12,
+          "Margin": 3526.531978068094,
+          "Lower": 82457.67483616802,
+          "Upper": 89510.7387923042
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 52838.837890625,
+        "allocated_bytes": 4068,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 52838.837890625,
+          "StandardError": 813.6877496898054,
+          "Level": 12,
+          "Margin": 3890.170002440985,
+          "Lower": 48948.66788818401,
+          "Upper": 56729.00789306599
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 14708.643256293402,
+        "allocated_bytes": 9009,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 14708.643256293402,
+          "StandardError": 38.68108430542318,
+          "Level": 12,
+          "Margin": 195.0031603716027,
+          "Lower": 14513.640095921799,
+          "Upper": 14903.646416665006
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 6.0465823407193495,
+    "full_clear_win": false,
+    "latest_mean_ratio": 5.845828559166798,
+    "latest_clear_win": false
+  },
+  {
+    "bars": 10000,
+    "evidence": "results/shared-rollout/containment-candle-shared-cpu/harami/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 869943.75,
+        "allocated_bytes": 564106,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 869943.75,
+          "StandardError": 6117.805175430454,
+          "Level": 12,
+          "Margin": 30841.724454436393,
+          "Lower": 839102.0255455635,
+          "Upper": 900785.4744544365
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 937160.9375,
+        "allocated_bytes": 82700,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 937160.9375,
+          "StandardError": 42347.252186307356,
+          "Level": 12,
+          "Margin": 202458.5109014826,
+          "Lower": 734702.4265985175,
+          "Upper": 1139619.4484014825
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 678094.296875,
+        "allocated_bytes": 40097,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 678094.296875,
+          "StandardError": 58921.790323410125,
+          "Level": 12,
+          "Margin": 281699.9288653779,
+          "Lower": 396394.3680096221,
+          "Upper": 959794.2257403779
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 131060.44921875,
+        "allocated_bytes": 81040,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 131060.44921875,
+          "StandardError": 997.9344317952743,
+          "Level": 12,
+          "Margin": 4771.037283593019,
+          "Lower": 126289.41193515698,
+          "Upper": 135831.48650234303
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 6.637729041718732,
+    "full_clear_win": false,
+    "latest_mean_ratio": 7.150600681490158,
+    "latest_clear_win": false
+  }
+]

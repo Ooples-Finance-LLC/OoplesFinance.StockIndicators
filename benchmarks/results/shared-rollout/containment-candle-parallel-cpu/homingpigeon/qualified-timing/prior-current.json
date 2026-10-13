@@ -1,0 +1,128 @@
+[
+  {
+    "bars": 1000,
+    "evidence": "results/shared-rollout/containment-candle-shared-cpu/homingpigeon/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 87622.12890625,
+        "allocated_bytes": 59663,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 87622.12890625,
+          "StandardError": 431.1324941287886,
+          "Level": 12,
+          "Margin": 2061.206766817803,
+          "Lower": 85560.9221394322,
+          "Upper": 89683.3356730678
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 86287.82958984375,
+        "allocated_bytes": 10629,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 86287.82958984375,
+          "StandardError": 1390.9307123539486,
+          "Level": 12,
+          "Margin": 7521.989882982071,
+          "Lower": 78765.83970686168,
+          "Upper": 93809.81947282582
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 39418.28125,
+        "allocated_bytes": 4066,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 39418.28125,
+          "StandardError": 271.2938874080122,
+          "Level": 12,
+          "Margin": 1297.0323604387354,
+          "Lower": 38121.24888956126,
+          "Upper": 40715.31361043874
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 12646.611870659723,
+        "allocated_bytes": 9009,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 12646.611870659723,
+          "StandardError": 75.44873805928349,
+          "Level": 12,
+          "Margin": 380.36013291247735,
+          "Lower": 12266.251737747245,
+          "Upper": 13026.9720035722
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 6.928506211970836,
+    "full_clear_win": false,
+    "latest_mean_ratio": 6.822999746677801,
+    "latest_clear_win": false
+  },
+  {
+    "bars": 10000,
+    "evidence": "results/shared-rollout/containment-candle-shared-cpu/homingpigeon/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 874717.734375,
+        "allocated_bytes": 564104,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 874717.734375,
+          "StandardError": 3485.6686162306887,
+          "Level": 12,
+          "Margin": 16664.67695314314,
+          "Lower": 858053.0574218569,
+          "Upper": 891382.4113281431
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 829049.7395833334,
+        "allocated_bytes": 82700,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 829049.7395833334,
+          "StandardError": 4952.702975580397,
+          "Level": 12,
+          "Margin": 24968.08840709286,
+          "Lower": 804081.6511762405,
+          "Upper": 854017.8279904262
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 396651.09375,
+        "allocated_bytes": 40097,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 396651.09375,
+          "StandardError": 3721.1199336382247,
+          "Level": 12,
+          "Margin": 17790.349119601568,
+          "Lower": 378860.74463039846,
+          "Upper": 414441.44286960154
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 107865.859375,
+        "allocated_bytes": 81040,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 107865.859375,
+          "StandardError": 622.8672783196267,
+          "Level": 12,
+          "Margin": 2977.8740094646782,
+          "Lower": 104887.98536553532,
+          "Upper": 110843.73338446468
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 8.109310392030611,
+    "full_clear_win": false,
+    "latest_mean_ratio": 7.685932735223558,
+    "latest_clear_win": false
+  }
+]
