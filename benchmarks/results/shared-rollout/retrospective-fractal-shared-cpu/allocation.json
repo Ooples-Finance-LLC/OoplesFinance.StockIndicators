@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetFractal",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        804352,
+        804352,
+        804352
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        323224,
+        323224,
+        323224
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1080392,
+        1080392,
+        1080392
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1194648,
+        1194648,
+        1194648
+      ]
+    }
+  ]
+}
