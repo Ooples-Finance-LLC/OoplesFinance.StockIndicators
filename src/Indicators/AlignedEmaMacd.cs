@@ -154,7 +154,7 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
         }
     }
 
-    private sealed class State(AlignedEmaMacd owner) : IMultiOutputState
+    internal sealed class State(AlignedEmaMacd owner) : IMultiOutputState
     {
         private long _index = -1;
         private readonly Average _fast =
