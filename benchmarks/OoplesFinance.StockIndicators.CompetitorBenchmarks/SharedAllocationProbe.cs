@@ -24,7 +24,13 @@ public static class SharedAllocationProbe
         Action setup, cleanup;
         Func<object>[] methods;
         string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
-        if (operation is "Skender.GetT3" or "TaLib.Functions.T3" or "QuanTAlib.T3")
+        if (operation is "QuanTAlib.Kama" or "Skender.GetKama")
+        {
+            var fixture = new SharedSeededAdaptiveBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "Skender.GetT3" or "TaLib.Functions.T3" or "QuanTAlib.T3")
         {
             var fixture = new SharedTillsonBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
