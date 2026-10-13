@@ -165,10 +165,16 @@ public class SharedVolumeWeightedPriceBenchmarks
         return result;
     }
 
-    private VolumeWeightedPrice Create() => new(Rolling ? Period : null, typicalPrice: !Rolling);
-    private IIndicatorRun Build(VolumeWeightedPrice indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    internal VolumeWeightedPrice Create() => new(Rolling ? Period : null, typicalPrice: !Rolling);
+    internal IIndicatorRun Build(VolumeWeightedPrice indicator, IndicatorHistoryMode history, bool gpu = false)
+    {
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+            .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
+        var run = builder.BuildAsync().GetAwaiter().GetResult();
+        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
+        { run.Dispose(); throw new InvalidOperationException("Weighted-price fixture did not execute on GPU."); }
+        return run;
+    }
 
     private ComparisonOutput TradyReference()
     {

@@ -1,0 +1,55 @@
+{
+  "Operation": "Trady.Indicator.VolumeWeightedAveragePrice",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        646664,
+        646664,
+        646664
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        165536,
+        165536,
+        166192
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        642584,
+        642584,
+        642584
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        161456,
+        161456,
+        161456
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        5912464,
+        5912464,
+        5912464
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        10618104,
+        10566192,
+        10619888
+      ]
+    }
+  ]
+}

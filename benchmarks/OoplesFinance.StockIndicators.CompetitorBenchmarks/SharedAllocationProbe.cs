@@ -14,9 +14,10 @@ public static class SharedAllocationProbe
         if (repetitions is < 1 or > 50) throw new ArgumentOutOfRangeException(nameof(repetitions));
         bool gpuRegression = operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
             or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.Tsf";
+        bool weightedPrice = operation is "Skender.GetVwap" or "Skender.GetVwma" or "Trady.Indicator.VolumeWeightedAveragePrice";
         bool gpuPathRatio = operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio";
         bool obv = operation is "TaLib.Functions.Obv" or "Skender.GetObv" or "Trady.Indicator.OnBalanceVolume";
-        if (includeGpu && !gpuPathRatio && !gpuRegression && !obv && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "Skender.GetAdl" or "Skender.GetForceIndex" or "Skender.GetCmf"))
+        if (includeGpu && !gpuPathRatio && !gpuRegression && !obv && !weightedPrice && operation is not ("QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "Skender.GetAdl" or "Skender.GetForceIndex" or "Skender.GetCmf"))
             throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
         Action setup, cleanup;
         Func<object>[] methods;
@@ -72,6 +73,14 @@ public static class SharedAllocationProbe
         else if (includeGpu && operation == "Skender.GetForceIndex")
         {
             var fixture = new SharedGpuForceIndexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && weightedPrice)
+        {
+            var fixture = new SharedGpuVolumeWeightedPriceBenchmarks { Operation = operation, Count = count };
             setup = fixture.Setup; cleanup = fixture.Cleanup;
             methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
                 fixture.NativeSingle, fixture.NativeParallel];
