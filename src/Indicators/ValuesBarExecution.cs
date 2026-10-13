@@ -735,6 +735,13 @@ internal static partial class ValuesBarExecution
                     Values[0][index] = _scratch[0];
                     Values[1][index] = _scratch[1];
                 }
+                else if (_state is VolumeConditionedIndex.State volumeIndex)
+                {
+                    // The recurrence assigns both columns, including absent values.
+                    volumeIndex.Update(in bar, _scratch);
+                    Values[0][index] = _scratch[0];
+                    Values[1][index] = _scratch[1];
+                }
                 else if (_state is WilderStrengthOscillator.State wilderStrength)
                 {
                     wilderStrength.Update(in bar, _scratch);
