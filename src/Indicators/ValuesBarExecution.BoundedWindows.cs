@@ -10,7 +10,7 @@ internal static partial class ValuesBarExecution
             or WindowPathRatio { Period: < int.MaxValue } or WindowLinearRegression { Period: <= 32767 } or LaggedPriceChange { Period: < int.MaxValue } or RateOfChangeWithValidity { Period: < int.MaxValue } or WindowRangeMidpoint or WindowPriceRange or WindowMode or WindowDispersion or WindowSampleShape or WindowUlcerIndex or PriorPriceChannel { Period: < int.MaxValue } or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or WindowExtremeIndex or DecayingWindowExtreme { Decay: 0 }
         || indicator is WindowReturnBeta { Period: < int.MaxValue }
         || indicator is WindowMoneyFlowIndex { Period: < int.MaxValue } or WindowVortex { Period: < int.MaxValue } or WindowUltimateOscillator { LongPeriod: < int.MaxValue } or WindowChoppinessIndex { Period: < int.MaxValue }
-        || indicator is WindowCorrelation or WindowPairStatistics
+        || indicator is WindowCorrelation or WindowPairStatistics or MoneyFlowWithDetails
         || CommodityReplayWindow(indicator) > 0
         || BodyShadowPeriod(indicator) is > 0 and < int.MaxValue
         || indicator is RollingPercentile { HasFractionalFullRank: true }
@@ -116,7 +116,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
-        if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
+        if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or MoneyFlowWithDetails or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
         if (indicator is Wma or WilliamsR or EndpointWeightedAverage or FixedPeriodWma or FibonacciWeightedAverage or NormalizedConvolution { HasAffineKernel: true } or WindowRangeMidpoint or WindowPriceRange or WindowAroon or RollingPercentile or WindowMode or WindowDispersion or WindowSampleShape or StandardDeviationWithDetails or PriorPriceChannel or ClassicDeviationBands { Method: ClassicAverageMethod.Sma } or WindowDeviationBands or HullWindow or RateOfChangeWithValidity) return 512;
@@ -787,6 +787,22 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    private struct CmfKernel(MoneyFlowWithDetails.CompactState state, BoundedOutput target) : IBoundedKernel<CmfKernel>
+    {
+        private int _index = target.Origin;
+        public static CmfKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new(new(period), target);
+        public double Update(in Bar bar)
+        {
+            Span<double> values = stackalloc double[4];
+            state.Update(in bar, values);
+            int index = _index++;
+            if (index >= target.WriteStart)
+                for (int slot = 1; slot < values.Length; slot++) target.Values[slot][index] = values[slot];
+            return values[0];
+        }
+    }
+
     private struct MoneyFlowKernel(WindowMoneyFlowIndex.CompactState state, BoundedOutput target) : IBoundedKernel<MoneyFlowKernel>
     {
         private int _index = target.Origin;
@@ -925,6 +941,7 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<VortexKernel>(source, output, indicator, vortex.Period + 1, cancellation, owned),
         WindowMoneyFlowIndex { Period: < int.MaxValue } flow =>
             FillBoundedWindow<MoneyFlowKernel>(source, output, indicator, flow.Period + 1, cancellation, owned),
+        MoneyFlowWithDetails cmf => FillBoundedWindow<CmfKernel>(source, output, indicator, cmf.Period, cancellation, owned),
         WindowCorrelation correlation => FillBoundedWindow<CorrelationKernel>(source, output, indicator, correlation.Period, cancellation, owned),
         WindowPairStatistics pair => FillBoundedWindow<PairStatisticsKernel>(source, output, indicator, pair.Period, cancellation, owned),
         WindowCommodityChannelIndex commodity when CommodityReplayWindow(commodity) > 0 =>

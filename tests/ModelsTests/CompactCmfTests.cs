@@ -1,3 +1,4 @@
+using AiDotNet.Tensors.Helpers;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
@@ -5,8 +6,92 @@ using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
+[Collection("IndicatorValuesDispatch")]
 public sealed class CompactCmfTests
 {
+    [Theory]
+    [InlineData(0, 20)] [InlineData(1, 1)] [InlineData(511, 20)]
+    [InlineData(512, 20)] [InlineData(513, 20)] [InlineData(1025, 1)]
+    [InlineData(1025, 127)] [InlineData(513, 4097)] [InlineData(513, int.MaxValue)]
+    public async Task WorkerPartitionsRetainEveryColumnAndOwnedHistory(int count, int period)
+    {
+        var random = new Random(849);
+        var bars = Enumerable.Range(0, count).Select(i =>
+        {
+            double low = 10 + random.NextDouble(), high = low + 1 + random.NextDouble();
+            double close = low + random.NextDouble(), volume = i % 7 == 0 ? 0 : i % 9 - 4;
+            if (i % 11 == 0) (high, low) = (low, high);
+            if (i % 31 == 0) high = low;
+            return new Bar(DateTime.UnixEpoch.AddMinutes(i), i, high, low, close, volume);
+        }).ToArray();
+        var expected = Reference(bars, period);
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (int workers in new[] { 1, 2, 8 })
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                var indicator = new MoneyFlowWithDetails(period);
+                Assert.True(ValuesBarExecution.SupportsOwned([indicator]));
+                var input = bars.ToArray();
+                using var run = await Build(input, indicator).ConfigureHistory(history).BuildAsync();
+                Array.Clear(input); run.Dispose();
+                for (int slot = 0; slot < 4; slot++)
+                    Assert.Equal(expected[slot].Select(BitConverter.DoubleToInt64Bits),
+                        run[indicator.Outputs[slot]].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                if (count > 0) Assert.Equal(bars[^1], run.Latest.Bar);
+                if (history == IndicatorHistoryMode.Full)
+                {
+                    int row = 0;
+                    await foreach (var snapshot in run) Assert.Equal(bars[row++], snapshot.Bar);
+                    Assert.Equal(count, row);
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Fact]
+    public async Task WorkersValidateSecondaryOverflowAfterAllInputsAndRecover()
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Enumerable.Repeat(new Bar(default, 0, 1, 0, .5, 1), 1025).ToArray();
+            var indicator = new MoneyFlowWithDetails(2);
+            var builder = Build(bars, indicator);
+            // Multiplier is finite, but complete flow overflows in slot 1.
+            bars[127] = new(default, 0, 1, 0, 2, double.MaxValue);
+            bars[^1] = new(default, double.NaN, 1, 0, 1, 1);
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => builder.BuildAsync());
+            bars[^1] = new(default, 0, 1, 0, .5, 1);
+            var flowFailure = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
+            Assert.Equal(1, flowFailure.OutputSlot);
+            Assert.Equal(127, flowFailure.BarIndex);
+            bars[512] = new(default, 0, double.Epsilon, 0, double.MaxValue, 1);
+            var multiplierFailure = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
+            Assert.Equal(0, multiplierFailure.OutputSlot);
+            Assert.Equal(512, multiplierFailure.BarIndex);
+            bars[512] = new(default, 0, 1, 0, .5, 1);
+            bars[127] = new(default, 0, 1, 0, 1, double.MaxValue);
+            bars[128] = new(default, 0, 1, 0, 0, -double.MaxValue);
+            bars[129] = new(default, 0, 1, 0, .5, double.Epsilon);
+            // A full window has tiny nonzero mass and a huge exact flow sum:
+            // slot 2 must also be scanned after the bounded executor completes.
+            indicator = new MoneyFlowWithDetails(3);
+            builder = Build(bars, indicator);
+            var cmfFailure = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
+            Assert.Equal(2, cmfFailure.OutputSlot);
+            bars[127] = bars[128] = bars[129] = new(default, 0, 1, 0, .5, 1);
+            using var recovered = await builder.BuildAsync();
+            Assert.All(recovered[indicator.Cmf].ToArray(), value => Assert.Equal(0, value));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(new CancellationToken(true)));
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
     [Theory]
     [InlineData(1)] [InlineData(2)] [InlineData(20)]
     public void CertifiedFlowAndFallbackTransitionsKeepIndependentRounding(int period)
