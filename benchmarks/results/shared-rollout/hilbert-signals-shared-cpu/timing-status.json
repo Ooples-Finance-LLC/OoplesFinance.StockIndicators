@@ -1,12 +1,13 @@
 {
   "preflight_evidence": "external-processes.json",
-  "next_stem": "si-hilbertsignals-builder-20261013-a",
   "reuse_binaries": true,
   "source_commit": "24cb588f",
   "next_filter": "*SharedHilbertSignalBenchmarks*Builder*",
-  "reason": "Preserve verified binaries for queued builder timing; recent timing interrupted by intermittent external tests, no repeated attempt.",
+  "reason": "16 builder-only cases completed exit0 without observed competing jobs.",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
-  "status": "deferred-before-launch",
+  "status": "completed",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-hilbertsignals-binaries-24cb588f",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-hilbertsignals-builder-20261013-a",
+  "evidence": "builder-timing"
 }
