@@ -648,6 +648,7 @@ internal static partial class ValuesBarExecution
                 QuarticDynamicAverage quartic => new QuarticValueState(quartic.Period, quartic.Factor, quartic.Startup),
                 TillsonAverage tillson => new TillsonValueState(tillson.Period, tillson.VolumeFactor, tillson.Seed, tillson.Suppression),
                 SeededAdaptiveAverage adaptive => new SeededAdaptiveValueState(adaptive, count),
+                DeviationRatioAdaptiveAverage ratio => new DeviationRatioValueState(ratio, count),
                 RetrospectiveFractals f => (long)f.LeftSpan + f.RightSpan + 1 > count ? null
                     : IndicatorKernels.Fractal(f.LeftSpan, f.RightSpan, f.UseClose),
                 IndicatorBase single => single.CreateState(),
