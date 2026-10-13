@@ -95,7 +95,7 @@ public sealed class SeededAtrTrailingStop : MultiOutputIndicatorBase, IIndicator
                 )
             );
 
-    private sealed class State(SeededAtrTrailingStop owner) : IMultiOutputState
+    internal sealed class State(SeededAtrTrailingStop owner) : IMultiOutputState
     {
         private readonly SeededAtrWindow _atr = new(owner.Period);
         private JurikDyadic _upper,
