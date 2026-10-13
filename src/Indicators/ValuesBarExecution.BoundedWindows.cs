@@ -25,7 +25,31 @@ internal static partial class ValuesBarExecution
         || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0 || SequenceWindow(indicator) > 0
         || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0
         || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0
-        || ExhaustionWindowLength(indicator) > 0;
+        || ExhaustionWindowLength(indicator) > 0 || FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0;
+
+    // Four prior anchors and complete threshold history restore the exact
+    // continuation state. Maximum public periods keep the scalar fallback.
+    private static int FiveContinuationWindow(IIndicator indicator) => indicator is
+        RisingFallingThreeMethodsCandle or MatHoldCandle
+        && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
+
+    private static int ExtendedReversalWindow(IIndicator indicator) => indicator is
+        BreakawayCandle or ConcealingBabySwallowCandle or LadderBottomCandle
+        && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
+
+    private readonly struct FiveContinuationKernel(FiveCandleContinuationState state) : IBoundedKernel<FiveContinuationKernel>
+    {
+        public static FiveContinuationKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((FiveCandleContinuationState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
+
+    private readonly struct ExtendedReversalKernel(ExtendedReversalState state) : IBoundedKernel<ExtendedReversalKernel>
+    {
+        public static ExtendedReversalKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((ExtendedReversalState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     // Two anchor candles and full window replay restore each threshold's
     // original lag, including the total-shadow window used by Advance Block.
@@ -323,6 +347,7 @@ internal static partial class ValuesBarExecution
 
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
+        if (FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0) return 512;
         if (GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0 || ExhaustionWindowLength(indicator) > 0) return 512;
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
         if (SequenceWindow(indicator) > 0 || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0 || StarReversalWindow(indicator) > 0) return 512;
@@ -1247,6 +1272,10 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<CrowSoldierKernel>(source, output, indicator, CrowSoldierWindow(indicator), cancellation, owned),
         _ when ExhaustionWindowLength(indicator) > 0 =>
             FillBoundedWindow<ExhaustionKernel>(source, output, indicator, ExhaustionWindowLength(indicator), cancellation, owned),
+        _ when FiveContinuationWindow(indicator) > 0 =>
+            FillBoundedWindow<FiveContinuationKernel>(source, output, indicator, FiveContinuationWindow(indicator), cancellation, owned),
+        _ when ExtendedReversalWindow(indicator) > 0 =>
+            FillBoundedWindow<ExtendedReversalKernel>(source, output, indicator, ExtendedReversalWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
