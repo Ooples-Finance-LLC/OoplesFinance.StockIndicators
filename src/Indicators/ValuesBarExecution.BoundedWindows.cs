@@ -22,7 +22,20 @@ internal static partial class ValuesBarExecution
         || PercentileCandlePeriod(indicator) > 0
         || HaramiWindow(indicator) > 0 || TasukiWindow(indicator) > 0
         || TrendReversalWindow(indicator) > 0 || ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0
-        || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0;
+        || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0 || SequenceWindow(indicator) > 0;
+
+    // Replay the original startup length to recover up to three anchor candles
+    // and their lagged range windows. The maximum-period fallback stays scalar.
+    private static int SequenceWindow(IIndicator indicator) => indicator is
+        MatchingLowCandle or StickSandwichCandle or ThreeLineStrikeCandle or ThreeOutsideCandle
+        && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
+
+    private readonly struct SequenceKernel(SequenceCandleState state) : IBoundedKernel<SequenceKernel>
+    {
+        public static SequenceKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
+            new((SequenceCandleState)((IndicatorBase)indicator).CreateState()!);
+        public double Update(in Bar bar) => state.Update(in bar);
+    }
 
     // Warmup includes the longest threshold window plus one anchor, or two
     // for the side-by-side gap pattern. Replay it before publishing a region.
@@ -190,6 +203,7 @@ internal static partial class ValuesBarExecution
     private static int BoundedParallelMinimum(IIndicator indicator)
     {
         if (ContainmentWindow(indicator) > 0 || NeckWindow(indicator) > 0 || KickingWindow(indicator) > 0 || MatchedLinesWindow(indicator) > 0) return 512;
+        if (SequenceWindow(indicator) > 0) return 512;
         if (indicator is TriangularWindowAverage or WindowReturnBeta or WindowCorrelation or WindowPairStatistics or WindowCommodityChannelIndex or WindowMoneyFlowIndex or MoneyFlowWithDetails or VolumeWeightedPrice or WindowVortex or WindowUltimateOscillator or WindowChoppinessIndex) return 512;
         // Exact weighted recurrences still perform several accumulator updates
         // per bar. The 1k native-worker comparison justifies scheduling at 512.
@@ -1093,6 +1107,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<KickingKernel>(source, output, indicator, KickingWindow(indicator), cancellation, owned),
         _ when MatchedLinesWindow(indicator) > 0 =>
             FillBoundedWindow<MatchedLinesKernel>(source, output, indicator, MatchedLinesWindow(indicator), cancellation, owned),
+        _ when SequenceWindow(indicator) > 0 =>
+            FillBoundedWindow<SequenceKernel>(source, output, indicator, SequenceWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
