@@ -99,7 +99,7 @@ public sealed class PriceCandlePattern : MultiOutputIndicatorBase, IIndicatorVal
                 )
             );
 
-    private sealed class State(PriceCandleKind kind, double percent) : IMultiOutputState
+    internal sealed class State(PriceCandleKind kind, double percent) : IMultiOutputState
     {
         public void Reset() { }
 
