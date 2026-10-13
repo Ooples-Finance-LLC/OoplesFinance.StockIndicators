@@ -1,0 +1,6 @@
+{
+  "updates": 1000,
+  "original_bytes": 2842888,
+  "compact_bytes": 0,
+  "scope": "Warmed direct state updates after reset; excludes construction and reset; ordinary changing SMA periods2/30. Not whole BuildAsync allocation."
+}
