@@ -111,6 +111,8 @@ internal static partial class ValuesBarExecution
                 latest = FillOnBalanceVolume(source, nodes[0].Values, obv, cancellation, owned, out obvFinite);
             else if (nodes.Count == 1 && nodes[0].Indicator is VolumeWeightedPrice weightedPrice)
                 latest = FillVolumeWeightedPrice(source, nodes[0].Values, weightedPrice, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is WindowRegressionStatistics regressionStatistics)
+                latest = FillRegressionStatistics(source, nodes[0].Values, regressionStatistics, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails)
                 latest = FillSeededAtr(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is AccumulationDistributionWithAverage adl)
@@ -628,6 +630,7 @@ internal static partial class ValuesBarExecution
                 Sma => null,
                 _ when pointwise => null,
                 ScaledTrueRange when singleRoot => null,
+                WindowRegressionStatistics when singleRoot => null,
                 BalanceOfPower when singleRoot => null,
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,

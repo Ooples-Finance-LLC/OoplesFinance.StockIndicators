@@ -10,6 +10,7 @@ public sealed class SharedRegressionStatisticsBenchmarkTests
     [Theory]
     [InlineData(1)] [InlineData(2)] [InlineData(19)] [InlineData(20)]
     [InlineData(21)] [InlineData(39)] [InlineData(40)] [InlineData(127)]
+    [InlineData(511)] [InlineData(512)] [InlineData(513)] [InlineData(1025)]
     public void SetupChecksStartupGlobalCoordinatesAndFinalOverlayAcrossWorkers(int count)
     {
         foreach (string operation in new[] { "QuanTAlib.Slope", "Skender.GetSlope" })
