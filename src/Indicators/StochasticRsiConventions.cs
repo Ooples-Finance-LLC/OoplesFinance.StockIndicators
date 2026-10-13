@@ -66,7 +66,7 @@ public sealed class NullableStochasticRsi : MultiOutputIndicatorBase, IIndicator
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly IMultiOutputState _rsi = (IMultiOutputState)
             new NullableStrengthOscillator(period).CreateState();
@@ -166,7 +166,7 @@ public sealed class SmoothedStochasticRsi : MultiOutputIndicatorBase, IIndicator
                 )
             );
 
-    private sealed class State(int rsiPeriod, int stochPeriod, int signalPeriod, int smoothPeriod)
+    internal sealed class State(int rsiPeriod, int stochPeriod, int signalPeriod, int smoothPeriod)
         : IMultiOutputState
     {
         private readonly IMultiOutputState _rsi = (IMultiOutputState)
