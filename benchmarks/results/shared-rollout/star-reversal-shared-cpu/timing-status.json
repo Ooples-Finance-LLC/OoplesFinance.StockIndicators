@@ -1,12 +1,12 @@
 {
   "status": "deferred-after-interrupted-attempt",
-  "reason": "Another repository test run active; no benchmark launched and no external process stopped.",
+  "reason": "External AiDotNet.Tensors concurrency tests began during timing; only the verified benchmark was stopped. Attempt C excluded from qualification.",
   "source_commit": "9fa1e7c1",
   "reuse_binaries": true,
   "next_filter": "*SharedStarReversalBenchmarks*Builder*",
   "competitor_timing": "reuse saved baseline; do not repeat",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-star-binaries-9fa1e7c1",
   "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before gap batch build.",
-  "interrupted_evidence": "interrupted-timing-b",
-  "next_fresh_stem": "si-star-builder-20261013-c"
+  "interrupted_evidence": "interrupted-timing-c",
+  "next_fresh_stem": "si-star-builder-20261013-d"
 }
