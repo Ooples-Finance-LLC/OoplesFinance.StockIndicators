@@ -34,12 +34,15 @@ internal static partial class ValuesBarExecution
         _ when ContextReversalWindow(indicator) > 0 => ContextReversalWindow(indicator),
         _ when TripleBodyWindow(indicator) > 0 => TripleBodyWindow(indicator),
         _ when PenetrationWindow(indicator) > 0 => PenetrationWindow(indicator),
+        _ when StarReversalWindow(indicator) > 0 => StarReversalWindow(indicator),
         _ when TasukiWindow(indicator) > 0 => TasukiWindow(indicator),
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
+        _ when StarReversalWindow(indicator) > 0 =>
+            (StarReversalState)((IndicatorBase)indicator).CreateState()!,
         _ when PenetrationWindow(indicator) > 0 =>
             (PenetrationCandleState)((IndicatorBase)indicator).CreateState()!,
         _ when TripleBodyWindow(indicator) > 0 =>
