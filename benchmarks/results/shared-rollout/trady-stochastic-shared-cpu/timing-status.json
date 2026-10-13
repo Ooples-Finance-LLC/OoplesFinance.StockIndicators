@@ -1,11 +1,12 @@
 {
-  "status": "deferred-before-launch",
-  "reason": "External AiDotNet.Tensors restored-kernel, kernel-lookup and GPU correctness tests remain active; no timing attempt launched.",
+  "status": "completed",
+  "reason": "32 builder-only cases completed exit0 without observed competing jobs.",
   "source_commit": "bdf2ad59",
   "reuse_binaries": true,
   "next_filter": "*SharedTradyStochasticBenchmarks*Builder*",
-  "next_stem": "si-tradystochastic-builder-20261013-a",
   "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
   "preserved_executable_directory": "C:/Users/cheat/temp/si-tradystochastic-binaries-bdf2ad59",
-  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build."
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-tradystochastic-builder-20261013-a",
+  "evidence": "builder-timing"
 }
