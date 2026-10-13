@@ -54,6 +54,9 @@ public static class VolatilityStopSnapshot
             atr.Add(bars[i]);
         }
         var firstStop = -1;
+        // These exact operands are invariant across every width calculation.
+        var multiplierUnits = ExactVarianceWindow.Units(multiplier);
+        var grid = BigInteger.One << 1074;
         for (var i = period; i < bars.Count; i++)
         {
             var price = ExactVarianceWindow.Units(bars[i].Close);
@@ -63,8 +66,8 @@ public static class VolatilityStopSnapshot
                 var average =
                     ExactVarianceWindow.Units(atr.Average.Mantissa) << atr.Average.UpperShift;
                 var width = RocBankValue.RoundUnits(
-                    average * ExactVarianceWindow.Units(multiplier),
-                    BigInteger.One << 1074
+                    average * multiplierUnits,
+                    grid
                 );
                 stops[i] = RocBankValue.RoundUnits(bullish ? extreme - width : extreme + width, 1);
             }
