@@ -1,0 +1,4 @@
+Source commit fd9f0c6d. Production SHA256 52b1a7d569f84b2801671982e3a87edfae34298e8bce90850c2faa06c801f55b.
+12 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedSmoothedStochasticBenchmarks*Builder*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+45 focused tests passed; build and verification evidence in parent directory. No full-suite claim.

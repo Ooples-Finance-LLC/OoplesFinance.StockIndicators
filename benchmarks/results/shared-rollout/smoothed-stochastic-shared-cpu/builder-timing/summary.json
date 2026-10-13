@@ -1,0 +1,281 @@
+[
+  {
+    "operation": "Skender.GetStoch",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 785884.765625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 785884.765625,
+              "StandardError": 6269.745384290967,
+              "Level": 12,
+              "Margin": 29975.1046101034,
+              "Lower": 755909.6610148966,
+              "Upper": 815859.8702351034
+            },
+            "allocated_bytes": 1514903
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 822013.828125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 822013.828125,
+              "StandardError": 14489.017107002932,
+              "Level": 12,
+              "Margin": 69270.72422560678,
+              "Lower": 752743.1038993932,
+              "Upper": 891284.5523506068
+            },
+            "allocated_bytes": 1466112
+          }
+        },
+        "evidence": "results/shared-rollout/smoothed-stochastic-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSmoothedStochasticBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getstoch-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.9521259578689121,
+          "BuilderLatestOnly": 0.9958975383147565
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 8025219.444444444,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 8025219.444444444,
+              "StandardError": 81801.22721288454,
+              "Level": 12,
+              "Margin": 412384.9709805471,
+              "Lower": 7612834.473463897,
+              "Upper": 8437604.415424991
+            },
+            "allocated_bytes": 15198124
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 7708776.587301587,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 7708776.587301587,
+              "StandardError": 93290.47106161602,
+              "Level": 12,
+              "Margin": 470305.75838899415,
+              "Lower": 7238470.8289125925,
+              "Upper": 8179082.345690581
+            },
+            "allocated_bytes": 14716957
+          }
+        },
+        "evidence": "results/shared-rollout/smoothed-stochastic-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSmoothedStochasticBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getstoch-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 4.0069332334748,
+          "BuilderLatestOnly": 3.8489356348347776
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 825400,
+        "allocated_bytes": 278800,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getstoch-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 2002833.3333333333,
+        "allocated_bytes": 2717848,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getstoch-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetSmi",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 538358.1597222222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 538358.1597222222,
+              "StandardError": 3759.5379533139294,
+              "Level": 12,
+              "Margin": 18952.979100702658,
+              "Lower": 519405.18062151957,
+              "Upper": 557311.1388229249
+            },
+            "allocated_bytes": 83794
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 541035.8203125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 541035.8203125,
+              "StandardError": 3521.5608439664124,
+              "Level": 12,
+              "Margin": 16836.274556414814,
+              "Lower": 524199.5457560852,
+              "Upper": 557872.0948689148
+            },
+            "allocated_bytes": 35071
+          }
+        },
+        "evidence": "results/shared-rollout/smoothed-stochastic-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSmoothedStochasticBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getsmi-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.7762915064487703,
+          "BuilderLatestOnly": 0.7801525887707282
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 6695190.666666666,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 6695190.666666666,
+              "StandardError": 58473.935737996595,
+              "Level": 12,
+              "Margin": 279558.77524189575,
+              "Lower": 6415631.8914247705,
+              "Upper": 6974749.441908562
+            },
+            "allocated_bytes": 808279
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 6366811.805555556,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 6366811.805555556,
+              "StandardError": 117033.00076778095,
+              "Level": 12,
+              "Margin": 589999.1023335874,
+              "Lower": 5776812.703221968,
+              "Upper": 6956810.907889144
+            },
+            "allocated_bytes": 327110
+          }
+        },
+        "evidence": "results/shared-rollout/smoothed-stochastic-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSmoothedStochasticBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getsmi-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 3.1087404426559355,
+          "BuilderLatestOnly": 2.9562661223752777
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 693500,
+        "allocated_bytes": 221880,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getsmi-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 2153666.6666666665,
+        "allocated_bytes": 2147592,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getsmi-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.StochasticsMomentumIndex",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 555874.6527777778,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 555874.6527777778,
+              "StandardError": 5630.21137565912,
+              "Level": 12,
+              "Margin": 28383.615183707447,
+              "Lower": 527491.0375940703,
+              "Upper": 584258.2679614852
+            },
+            "allocated_bytes": 83824
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 592224.375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 592224.375,
+              "StandardError": 11874.883927869541,
+              "Level": 12,
+              "Margin": 56772.78201162213,
+              "Lower": 535451.5929883779,
+              "Upper": 648997.1570116221
+            },
+            "allocated_bytes": 35071
+          }
+        },
+        "evidence": "results/shared-rollout/smoothed-stochastic-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSmoothedStochasticBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-stochasticsmomentumindex-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.04046521120016435,
+          "BuilderLatestOnly": 0.043111309883454296
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 5883606.597222222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 5883606.597222222,
+              "StandardError": 57692.74724992961,
+              "Level": 12,
+              "Margin": 290846.76001905795,
+              "Lower": 5592759.837203164,
+              "Upper": 6174453.35724128
+            },
+            "allocated_bytes": 807965
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 5729603.993055556,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 5729603.993055556,
+              "StandardError": 48548.761694179615,
+              "Level": 12,
+              "Margin": 244749.13597924943,
+              "Lower": 5484854.857076307,
+              "Upper": 5974353.129034805
+            },
+            "allocated_bytes": 326846
+          }
+        },
+        "evidence": "results/shared-rollout/smoothed-stochastic-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSmoothedStochasticBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-stochasticsmomentumindex-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.10264754268931436,
+          "BuilderLatestOnly": 0.09996075719061588
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 13737100,
+        "allocated_bytes": 6429808,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-stochasticsmomentumindex-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 57318533.333333336,
+        "allocated_bytes": 46121008,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-stochasticsmomentumindex-short.json.gz"
+      }
+    ]
+  }
+]
