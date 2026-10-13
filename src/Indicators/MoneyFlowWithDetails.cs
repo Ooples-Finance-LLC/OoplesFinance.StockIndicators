@@ -42,7 +42,12 @@ public sealed class MoneyFlowWithDetails
     public override IIndicatorOutput PrimaryOutput => Cmf;
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(Period);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period);
+#else
+        new State(Period);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -90,6 +95,52 @@ public sealed class MoneyFlowWithDetails
 
     private static ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
 
+#if !NETFRAMEWORK
+    private sealed class CompactState(int period) : IMultiOutputState
+    {
+        private readonly Queue<(double Flow, double Volume)> _window = new();
+        private JurikDyadic _flows, _volumes;
+
+        public void Reset()
+        {
+            _window.Clear();
+            _flows = _volumes = default;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (bar.High != bar.Low)
+            {
+                var range = JurikDyadic.FromDouble(bar.High);
+                range.Add(-bar.Low);
+                var balance = JurikDyadic.FromDouble(bar.Close);
+                balance.Multiply(2);
+                balance.Add(-bar.High);
+                balance.Add(-bar.Low);
+                output[0] = balance.Sign == 0 ? 0 : balance.Ratio(range);
+                balance.Multiply(bar.Volume);
+                double flow = balance.Sign == 0 ? 0 : balance.Ratio(range);
+                // The original published flow canonicalizes underflowed zero;
+                // multiplier and CMF retain their rounded underflow signs.
+                output[1] = flow == 0 ? 0 : flow;
+            }
+            if (double.IsInfinity(output[0]) || double.IsInfinity(output[1])) return;
+            if (_window.Count == period)
+            {
+                var old = _window.Dequeue();
+                _flows.Add(-old.Flow);
+                _volumes.Add(-old.Volume);
+            }
+            _window.Enqueue((output[1], bar.Volume));
+            _flows.Add(output[1]);
+            _volumes.Add(bar.Volume);
+            if (_window.Count < period || _volumes.Sign == 0) return;
+            output[2] = _flows.Sign == 0 ? 0 : _flows.Ratio(_volumes);
+            output[3] = 1;
+        }
+    }
+#else
     private sealed class State(int period) : IMultiOutputState
     {
         private readonly Queue<(double Flow, double Volume)> _window = new();
@@ -133,4 +184,5 @@ public sealed class MoneyFlowWithDetails
             output[3] = 1;
         }
     }
+#endif
 }
