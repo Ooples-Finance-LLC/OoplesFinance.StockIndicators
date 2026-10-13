@@ -1,0 +1,12 @@
+{
+  "status": "interrupted",
+  "source_commit": "59f778dc",
+  "reuse_binaries": true,
+  "next_filter": "*SharedRocBenchmarks*Builder*",
+  "next_stem": "si-roc-builder-20261013-b",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-roc-binaries-59f778dc",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "reason": "External AiDotNet LSTMVAE tests started during timing; only own benchmark stopped.",
+  "interruption_evidence": "interrupted-timing-a"
+}

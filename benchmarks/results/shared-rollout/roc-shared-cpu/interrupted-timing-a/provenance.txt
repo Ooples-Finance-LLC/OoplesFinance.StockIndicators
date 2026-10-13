@@ -1,0 +1,1 @@
+Source59f778dc. Builder-only attempt A interrupted when external AiDotNet test PID14572 appeared. Monitor stopped only verified own benchmark PID4248. Session63677 terminal exit2. Diagnostic evidence only; excluded from catalog. No competitor benchmarks executed. Reuse preserved binaries; next fresh stem si-roc-builder-20261013-b.
