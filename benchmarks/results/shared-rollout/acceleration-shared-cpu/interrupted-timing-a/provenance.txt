@@ -1,0 +1,1 @@
+Monitored builder-only attempt interrupted during warmup when external ForecasterFusedTrainingTests appeared. Runner session30730 exited2. Only verified own benchmark PID39824 stopped; external work left untouched. Diagnostic only, excluded from catalog and performance claims. Saved competitor benchmarks not rerun.
