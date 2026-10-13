@@ -1,0 +1,188 @@
+[
+  {
+    "bars": 1000,
+    "evidence": "results/shared-rollout/force-index-compact-cpu/gpu-prefix-replay/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedGpuForceIndexBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 139533.12717013888,
+        "allocated_bytes": 66366,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 139533.12717013888,
+          "StandardError": 464.6899301401617,
+          "Level": 12,
+          "Margin": 2342.6438683748643,
+          "Lower": 137190.483301764,
+          "Upper": 141875.77103851375
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 136056.25,
+        "allocated_bytes": 17625,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 136056.25,
+          "StandardError": 766.8657410662125,
+          "Level": 12,
+          "Margin": 3866.004425001513,
+          "Lower": 132190.2455749985,
+          "Upper": 139922.2544250015
+        }
+      },
+      "GpuFull": {
+        "mean_ns": 6668411.851851853,
+        "allocated_bytes": 66943,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 6668411.851851853,
+          "StandardError": 2303.2901260292633,
+          "Level": 12,
+          "Margin": 11611.589020668733,
+          "Lower": 6656800.262831184,
+          "Upper": 6680023.440872521
+        }
+      },
+      "GpuLatestOnly": {
+        "mean_ns": 6662679.375,
+        "allocated_bytes": 18152,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 6662679.375,
+          "StandardError": 5252.730858040785,
+          "Level": 12,
+          "Margin": 25112.847062815224,
+          "Lower": 6637566.527937185,
+          "Upper": 6687792.222062815
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 56871.60915798611,
+        "allocated_bytes": 140443,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 56871.60915798611,
+          "StandardError": 808.3634734315287,
+          "Level": 12,
+          "Margin": 4075.207168533629,
+          "Lower": 52796.40198945248,
+          "Upper": 60946.816326519736
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 171442.61067708334,
+        "allocated_bytes": 642488,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 171442.61067708334,
+          "StandardError": 1718.6178598952558,
+          "Level": 12,
+          "Margin": 8664.07755026837,
+          "Lower": 162778.53312681496,
+          "Upper": 180106.68822735173
+        }
+      }
+    },
+    "fastest_measured_native": "NativeSingle",
+    "full_mean_ratio": 2.453475982761869,
+    "full_clear_win": false,
+    "latest_mean_ratio": 2.3923404316210473,
+    "latest_clear_win": false,
+    "gpu_full_mean_ratio": 117.2537923681284,
+    "gpu_full_clear_win": false,
+    "gpu_latest_mean_ratio": 117.1529955569123,
+    "gpu_latest_clear_win": false
+  },
+  {
+    "bars": 10000,
+    "evidence": "results/shared-rollout/force-index-compact-cpu/gpu-prefix-replay/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedGpuForceIndexBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 1518410.625,
+        "allocated_bytes": 642812,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 1518410.625,
+          "StandardError": 36803.416181513174,
+          "Level": 12,
+          "Margin": 175953.91557910715,
+          "Lower": 1342456.7094208929,
+          "Upper": 1694364.5405791071
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 1714730.859375,
+        "allocated_bytes": 161691,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 1714730.859375,
+          "StandardError": 12769.109910815887,
+          "Level": 12,
+          "Margin": 61047.998266982155,
+          "Lower": 1653682.8611080179,
+          "Upper": 1775778.8576419821
+        }
+      },
+      "GpuFull": {
+        "mean_ns": 64399062.5,
+        "allocated_bytes": 644992,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 64399062.5,
+          "StandardError": 27341.870853797933,
+          "Level": 12,
+          "Margin": 147861.6253975813,
+          "Lower": 64251200.87460242,
+          "Upper": 64546924.12539758
+        }
+      },
+      "GpuLatestOnly": {
+        "mean_ns": 64290785,
+        "allocated_bytes": 163832,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 64290785,
+          "StandardError": 26235.202495883157,
+          "Level": 12,
+          "Margin": 125428.20977255302,
+          "Lower": 64165356.79022745,
+          "Upper": 64416213.20977255
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 723555.1866319445,
+        "allocated_bytes": 1400474,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 723555.1866319445,
+          "StandardError": 5209.143959857102,
+          "Level": 12,
+          "Margin": 26260.88573376322,
+          "Lower": 697294.3008981813,
+          "Upper": 749816.0723657077
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 2720277.96875,
+        "allocated_bytes": 6384595,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 2720277.96875,
+          "StandardError": 58936.77278240909,
+          "Level": 12,
+          "Margin": 281771.55869215453,
+          "Lower": 2438506.4100578455,
+          "Upper": 3002049.5274421545
+        }
+      }
+    },
+    "fastest_measured_native": "NativeSingle",
+    "full_mean_ratio": 2.0985415529505143,
+    "full_clear_win": false,
+    "latest_mean_ratio": 2.369868796541767,
+    "latest_clear_win": false,
+    "gpu_full_mean_ratio": 89.00366370085644,
+    "gpu_full_clear_win": false,
+    "gpu_latest_mean_ratio": 88.8540172025651,
+    "gpu_latest_clear_win": false
+  }
+]

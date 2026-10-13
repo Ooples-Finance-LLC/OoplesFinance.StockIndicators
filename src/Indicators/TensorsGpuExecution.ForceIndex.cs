@@ -134,6 +134,29 @@ internal sealed partial class TensorsGpuExecution
                 *negative = (int)(raw >> 63);
                 return (ulong2)(mantissa * weight, mul_hi(mantissa, weight));
             }
+            static inline int certified_divide(ulong2 numerator, ulong2 bottom,
+                __private ulong* quotient, __private ulong2* remainder) {
+                double estimate = (ldexp((double)numerator.s1, 64) + (double)numerator.s0)
+                    / (ldexp((double)bottom.s1, 64) + (double)bottom.s0);
+                if (!(estimate >= 0.0 && estimate < 0x1p54)) return 0;
+                ulong q = (ulong)estimate;
+                // Leave room for ordinary conversion/division error. This is
+                // only a guess: the checks below do not rely on its accuracy.
+                q = q > 2UL ? q - 2UL : 0UL;
+                ulong carry = mul_hi(bottom.s0, q), high = bottom.s1 * q;
+                if (mul_hi(bottom.s1, q) != 0 || high + carry < high) return 0;
+                ulong2 product = (ulong2)(bottom.s0 * q, high + carry);
+                if (compare(product, numerator) > 0) return 0;
+                ulong2 rest = subtract(numerator, product);
+                for (int i = 0; i < 4 && compare(rest, bottom) >= 0; i++) {
+                    rest = subtract(rest, bottom); q++;
+                }
+                // An exact, nonoverflowing product and a remainder in [0,d)
+                // certify floor(n/d), even on a device with a poor estimate.
+                if (compare(rest, bottom) >= 0) return 0;
+                *quotient = q; *remainder = rest;
+                return 1;
+            }
             // Round an exact signed dyadic / positive integer once, including
             // halfway ties, subnormal results and negative underflow zero.
             static inline double ratio(ulong2 numerator, ulong denominator, int scale, int negative, __private int* ok) {
@@ -152,13 +175,15 @@ internal sealed partial class TensorsGpuExecution
                 if (!*ok) return 0.0;
                 ulong quotient = 0;
                 ulong2 remainder = (ulong2)(0, 0);
-                for (int bit = bits(numerator) - 1; bit >= 0; bit--) {
-                    ulong next = bit >= 64 ? (numerator.s1 >> (bit - 64)) & 1UL : (numerator.s0 >> bit) & 1UL;
-                    int carry = (int)(remainder.s1 >> 63);
-                    remainder = (ulong2)((remainder.s0 << 1) | next, (remainder.s1 << 1) | (remainder.s0 >> 63));
-                    quotient <<= 1;
-                    if (carry || compare(remainder, bottom) >= 0) {
-                        remainder = subtract(remainder, bottom); quotient |= 1UL;
+                if (!certified_divide(numerator, bottom, &quotient, &remainder)) {
+                    for (int bit = bits(numerator) - 1; bit >= 0; bit--) {
+                        ulong next = bit >= 64 ? (numerator.s1 >> (bit - 64)) & 1UL : (numerator.s0 >> bit) & 1UL;
+                        int carry = (int)(remainder.s1 >> 63);
+                        remainder = (ulong2)((remainder.s0 << 1) | next, (remainder.s1 << 1) | (remainder.s0 >> 63));
+                        quotient <<= 1;
+                        if (carry || compare(remainder, bottom) >= 0) {
+                            remainder = subtract(remainder, bottom); quotient |= 1UL;
+                        }
                     }
                 }
                 int rounding = compare(remainder, subtract(bottom, remainder));

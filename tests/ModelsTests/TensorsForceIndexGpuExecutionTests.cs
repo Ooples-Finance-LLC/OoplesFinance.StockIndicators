@@ -30,6 +30,26 @@ public sealed class TensorsForceIndexGpuExecutionTests
             new(default, 0, 0, 0, -double.MaxValue, double.Epsilon)], new SeededForceIndex(2));
     }
 
+    [SkippableTheory]
+    [InlineData(2)] [InlineData(3)] [InlineData(14)] [InlineData(127)]
+    public async Task CertifiedDeviceQuotientsMatchExactSignedRandomRecurrences(int period)
+    {
+        Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
+        foreach (int scale in new[] { -400, 0, 400 })
+        {
+            var random = new Random(7319 + period);
+            var bars = Enumerable.Range(0, 1031).Select(i =>
+            {
+                double close = Math.ScaleB(random.Next(-(1 << 18), 1 << 18), scale);
+                double volume = random.Next(-(1 << 19), 1 << 19);
+                return new Bar(DateTime.UnixEpoch.AddMinutes(i), close, close, close, close, volume);
+            }).ToArray();
+            // Large signed products and cancellation exercise adjacent rounded
+            // quotients across block boundaries and widely separated grids.
+            await Check(bars, new SeededForceIndex(period));
+        }
+    }
+
     [SkippableFact]
     public async Task DeviceRecurrencePreservesSubnormalsAndNegativeUnderflowZero()
     {
