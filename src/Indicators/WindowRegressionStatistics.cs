@@ -134,6 +134,16 @@ public sealed class WindowRegressionStatistics
 
         internal double LineAt(int position) => At(JurikDyadic.FromDouble(2L * position - (_history.Count - 1L)));
 
+        // Bounded replay retains local moments but global-coordinate consumers
+        // must supply the original one-based observation count.
+        internal double GlobalInterceptAt(int seen)
+        {
+            var position = JurikDyadic.FromDouble(seen);
+            position.Multiply(-2);
+            position.Add(_history.Count - 1d);
+            return At(position);
+        }
+
         private double At(JurikDyadic twiceCenteredPosition)
         {
             if (_history.Count < 2) return _sum.Mean(1);

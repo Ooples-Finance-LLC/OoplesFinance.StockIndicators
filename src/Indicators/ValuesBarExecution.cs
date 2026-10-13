@@ -113,6 +113,8 @@ internal static partial class ValuesBarExecution
                 latest = FillVolumeWeightedPrice(source, nodes[0].Values, weightedPrice, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is WindowRegressionStatistics regressionStatistics)
                 latest = FillRegressionStatistics(source, nodes[0].Values, regressionStatistics, cancellation, owned);
+            else if (indicators.Count == 1 && nodes[0].Indicator is RegressionWithFinalLine historicalRegression)
+                latest = FillRegressionStatistics(source, nodes[0].Values, historicalRegression, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails)
                 latest = FillSeededAtr(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is AccumulationDistributionWithAverage adl)
@@ -625,6 +627,7 @@ internal static partial class ValuesBarExecution
             }
             _state = indicator switch
             {
+                RegressionWithFinalLine when singleRoot => null,
                 RegressionWithFinalLine r => new RegressionWithFinalLine.Writer(r.Period, count),
                 RegressionWithChannels r => new RegressionWithChannels.Writer(r.Period, r.Deviations, count),
                 Sma => null,
