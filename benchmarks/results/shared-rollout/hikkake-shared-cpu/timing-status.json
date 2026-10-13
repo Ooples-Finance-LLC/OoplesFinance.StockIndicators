@@ -1,0 +1,8 @@
+{
+  "status": "deferred-before-launch",
+  "reason": "External .NET jobs remain active; no timing attempt launched.",
+  "source_commit": "d667c635",
+  "reuse_binaries": true,
+  "next_filter": "*SharedHikkakeBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; do not repeat"
+}
