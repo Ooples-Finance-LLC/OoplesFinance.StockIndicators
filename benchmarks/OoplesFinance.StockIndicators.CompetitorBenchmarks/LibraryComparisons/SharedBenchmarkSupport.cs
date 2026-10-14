@@ -1,3 +1,4 @@
+using Skender.Stock.Indicators;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 
@@ -38,5 +39,76 @@ internal static class SharedBenchmarkSupport
             if (!double.IsFinite(expected[i]) || !double.IsFinite(actual[i])
                 || Math.Abs(expected[i] - actual[i]) > 1e-10 * Math.Max(1, Math.Abs(expected[i])))
                 throw new InvalidOperationException($"Native mismatch at {i}.");
+    }
+
+    internal static void VerifyMappedOutputs(Bar[] bars, Func<IIndicator> create,
+        ComparisonSeries expected, string[] names, bool includeScalarStartup = false)
+    {
+        foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            var owner = create();
+            using var run = BuildCpu(bars, owner, mode);
+            bool masks = owner.Outputs.Count == 2 * names.Length;
+            for (int slot = 0; slot < names.Length; slot++)
+            {
+                var reference = expected.Outputs[names[slot]];
+                if (masks)
+                {
+                    var present = reference.Present ?? reference.Values.Select((v, i) => i >= reference.FirstValid && !double.IsNaN(v)).ToArray();
+                    AsinFeasibilityBenchmarks.RequireSame(reference.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[owner.Outputs[slot]].ToArray());
+                    AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(), run[owner.Outputs[slot + names.Length]].ToArray());
+                }
+                else if (includeScalarStartup)
+                {
+                    // Raw stochastic publishes fifty during startup and flat windows.
+                    AsinFeasibilityBenchmarks.RequireSame(reference.Values, run[owner.Outputs[slot]].ToArray());
+                }
+                else
+                {
+                    // Native scalar comparisons suppress startup; separate golden tests
+                    // retain coverage of the builder's expanding-prefix values.
+                    AsinFeasibilityBenchmarks.RequireSame(reference.Values.Skip(reference.FirstValid).ToArray(), run[owner.Outputs[slot]].ToArray().Skip(reference.FirstValid).ToArray());
+                }
+            }
+        }
+    }
+
+    internal static void VerifyNullablePair(Bar[] bars, Func<IIndicator> create, double?[][] expected)
+    {
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            var indicator = create();
+            using var run = BuildCpu(bars, indicator, history);
+            for (int slot = 0; slot < 2; slot++)
+            {
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 2]].ToArray());
+            }
+        }
+    }
+
+    internal static Quote[] ToQuotes(Bar[] bars) => bars.Select(b => new Quote
+    {
+        Date = b.Time, Open = (decimal)b.Open, High = (decimal)b.High,
+        Low = (decimal)b.Low, Close = (decimal)b.Close, Volume = (decimal)b.Volume
+    }).ToArray();
+
+    internal static Quote[][] OverlappingQuotes(Quote[] quotes, int count, int period, int chunks) =>
+        Enumerable.Range(0, chunks).Select(chunk =>
+        {
+            int start = (count - period) * chunk / chunks;
+            int end = (count - period) * (chunk + 1) / chunks;
+            return quotes[start..(end + period)];
+        }).ToArray();
+
+    internal static void VerifyNullableColumn(double?[] expected, IIndicatorRun run,
+        IIndicatorOutput value, IIndicatorOutput presence, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (BitConverter.DoubleToInt64Bits(expected[i] ?? 0) != BitConverter.DoubleToInt64Bits(run[value][i])
+                || run[presence][i] != (expected[i].HasValue ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
+                throw new InvalidOperationException($"Exact nullable builder mismatch at {i}.");
+        }
     }
 }

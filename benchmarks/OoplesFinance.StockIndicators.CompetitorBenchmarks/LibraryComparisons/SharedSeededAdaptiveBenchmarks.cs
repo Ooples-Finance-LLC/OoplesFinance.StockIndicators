@@ -55,16 +55,7 @@ public class SharedSeededAdaptiveBenchmarks
             SharedBenchmarkSupport.RequireExactNullable(native[0], rows.Select(r => r.Kama).ToArray());
             SharedBenchmarkSupport.RequireExactNullable(native[1], rows.Select(r => r.ER).ToArray());
         }
-        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
-        {
-            var indicator = Create();
-            using var run = Build(indicator, history);
-            for (int slot = 0; slot < 2; slot++)
-            {
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 2]].ToArray());
-            }
-        }
+        SharedBenchmarkSupport.VerifyNullablePair(_bars, Create, expected);
     }
     private static double?[][] Read(object result) => result switch
     {

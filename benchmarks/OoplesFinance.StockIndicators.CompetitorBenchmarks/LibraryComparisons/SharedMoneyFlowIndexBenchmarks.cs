@@ -42,15 +42,8 @@ public class SharedMoneyFlowIndexBenchmarks
             _chunks = Math.Min(Count - Period, Math.Min(8, Environment.ProcessorCount));
             // These dyadic inputs convert to decimal and back exactly. Prepare
             // quotes and overlapping worker slices outside every measured call.
-            _quotes = _bars.Select(b => new Quote { Date = b.Time, Open = (decimal)b.Open,
-                High = (decimal)b.High, Low = (decimal)b.Low, Close = (decimal)b.Close,
-                Volume = (decimal)b.Volume }).ToArray();
-            _segments = Enumerable.Range(0, _chunks).Select(chunk =>
-            {
-                int start = (Count - Period) * chunk / _chunks;
-                int end = (Count - Period) * (chunk + 1) / _chunks;
-                return _quotes[start..(end + Period)];
-            }).ToArray();
+            _quotes = SharedBenchmarkSupport.ToQuotes(_bars);
+            _segments = SharedBenchmarkSupport.OverlappingQuotes(_quotes, Count, Period, _chunks);
             var native = NativeValues(NativeSingle());
             SharedBenchmarkSupport.RequireNativeTolerance(native, NativeValues(NativeParallel()));
             var expected = MoneyFlowIndexComparison.Reference(_bars, Period, IsTa);
@@ -58,12 +51,7 @@ public class SharedMoneyFlowIndexBenchmarks
             {
                 var indicator = new WindowMoneyFlowIndex(Period, minimumTotalOne: IsTa);
                 using var run = Build(indicator, history);
-                for (int i = 0; i < Count; i++)
-                {
-                    if (BitConverter.DoubleToInt64Bits(expected[i] ?? 0) != BitConverter.DoubleToInt64Bits(run[indicator.Value][i])
-                        || run[indicator.IsDefined][i] != (expected[i].HasValue ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
-                        throw new InvalidOperationException($"Exact MFI builder mismatch at {i}.");
-                }
+                SharedBenchmarkSupport.VerifyNullableColumn(expected, run, indicator.Value, indicator.IsDefined, Count);
                 SharedBenchmarkSupport.RequireNativeTolerance(native, run[indicator.Value].Slice(Period).ToArray());
             }
         }
