@@ -322,12 +322,12 @@ internal sealed class FusedBarExecution
         }
         else
         {
-            if (source.Length >= 8192)
+            if (source.Length >= ValuesBarExecution.AsinParallelMinimum)
             {
                 cancellation.ThrowIfCancellationRequested();
-                var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
+                var owned = new OwnedBarBuffer(source.Length);
                 LatestBar = ValuesBarExecution.FillAsin(source, AsinValues!, cancellation, owned);
-                history.TakeOwnedArray(owned);
+                owned.TransferTo(history);
                 return;
             }
             var asin = new AsinKernel(AsinValues!);

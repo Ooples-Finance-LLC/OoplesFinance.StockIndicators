@@ -12,6 +12,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static readonly object ParallelBarGate = new();
+    internal const int AsinParallelMinimum = 512;
     // These sealed states publish their own outputs without graph or built-in
     // evaluator substitution. Variable SMA's documented pure selector runs once
     // per published bar; deferred node failures retain raw-input priority.
@@ -396,8 +397,8 @@ internal static partial class ValuesBarExecution
     internal static Bar FillAsin(Bar[] source, double[][] output, CancellationToken cancellation, OwnedBarBuffer? owned = null)
     {
         // The published tensor pool is shared and serializes dispatches. Let one
-        // large build use a bounded fan-out; competing builders continue inline.
-        if (CanParallelize(source.Length, 8192) && Monitor.TryEnter(ParallelBarGate))
+        // mid-sized build use a bounded fan-out; competing builders continue inline.
+        if (CanParallelize(source.Length, AsinParallelMinimum) && Monitor.TryEnter(ParallelBarGate))
         {
             try { return FillAsinParallel(source, output, cancellation, owned); }
             finally { Monitor.Exit(ParallelBarGate); }
