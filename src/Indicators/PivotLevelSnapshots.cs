@@ -190,10 +190,17 @@ public static class PivotLevelSnapshots
         PivotLevelStyle style, Span<double> values, bool rejectOverflow = true)
     {
         values.Fill(double.NaN);
+        // Every level uses the same prices. Decode them once, while retaining
+        // exact weighted accumulation and one final rounding per level.
+        var openFactor = new ExactMeanAccumulator.ProductFactor(open);
+        var highFactor = new ExactMeanAccumulator.ProductFactor(high);
+        var lowFactor = new ExactMeanAccumulator.ProductFactor(low);
+        var closeFactor = new ExactMeanAccumulator.ProductFactor(close);
         double Q(int ow, int hw, int lw, int cw, int denominator)
         {
             var sum = new ExactMeanAccumulator();
-            sum.Add(open, ow); sum.Add(high, hw); sum.Add(low, lw); sum.Add(close, cw);
+            sum.AddFactor(openFactor, ow); sum.AddFactor(highFactor, hw);
+            sum.AddFactor(lowFactor, lw); sum.AddFactor(closeFactor, cw);
             var value = sum.Mean(denominator);
             return !rejectOverflow || FrameworkCompatibility.IsFinite(value)
                 ? value : throw new OverflowException("Pivot level is not representable.");

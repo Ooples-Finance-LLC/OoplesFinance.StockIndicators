@@ -109,6 +109,16 @@ internal struct ExactMeanAccumulator
 
     internal void AddFactor(ProductFactor value) => AddSmall(value.Mantissa, value.Scale);
 
+    // Reuse a finite price's binary decoding across weighted formulas.
+    internal void AddFactor(ProductFactor value, int weight)
+    {
+        if (value.Mantissa == 0 || weight == 0) return;
+        if (Math.Abs(value.Mantissa) <= long.MaxValue / Math.Abs((long)weight))
+            AddSmall(value.Mantissa * weight, value.Scale);
+        else AddLarge(new BigInteger(value.Mantissa) * weight, value.Scale);
+    }
+
+
     internal readonly struct ProductCoefficient
     {
         internal readonly ProductFactor Factor;

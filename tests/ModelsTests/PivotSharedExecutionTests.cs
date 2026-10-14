@@ -10,6 +10,50 @@ public sealed class PivotSharedExecutionTests
     [Theory]
     [InlineData(PivotLevelStyle.Standard)] [InlineData(PivotLevelStyle.Camarilla)]
     [InlineData(PivotLevelStyle.Demark)] [InlineData(PivotLevelStyle.Fibonacci)] [InlineData(PivotLevelStyle.Woodie)]
+    public async Task WorkerReplayPreservesOffsetsAndEveryColumn(PivotLevelStyle style)
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (int workers in new[] { 1, 8 })
+            {
+                AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                foreach (var (period, offset, count) in new[] { (20, 7, 1001), (1, 0, 513), (511, 1, 2051), (4095, 0, 8193), (4096, 0, 8193) })
+                    await Check(BarsOf(count, .125), new(period, offset, style));
+            }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public async Task LaterWorkerInvalidInputPrecedesEarlierSecondaryOverflow()
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                var bars = BarsOf(1025, 1);
+                bars[0] = new(default, 0, double.MaxValue, -double.MaxValue, 0, 1);
+                bars[^1] = new(default, 0, 1, -1, 0, double.NaN);
+                var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(new RollingPivotLevels(1)).ConfigureHistory(mode);
+                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => builder.BuildAsync());
+                Assert.Null(builder.LastExecution);
+                bars[^1] = new(default, 0, 1, -1, 0, 1);
+                var error = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
+                Assert.Equal(1, error.BarIndex);
+                Assert.Equal(2, error.OutputSlot);
+                Assert.Null(builder.LastExecution);
+            }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Theory]
+    [InlineData(PivotLevelStyle.Standard)] [InlineData(PivotLevelStyle.Camarilla)]
+    [InlineData(PivotLevelStyle.Demark)] [InlineData(PivotLevelStyle.Fibonacci)] [InlineData(PivotLevelStyle.Woodie)]
     public async Task EveryStyleWindowAndOffsetRetainsAllOwnedColumns(PivotLevelStyle style)
     {
         foreach (var (period, offset) in new[] { (1, 0), (3, 2), (20, 0), (int.MaxValue, 0), (1, int.MaxValue - 1) })
