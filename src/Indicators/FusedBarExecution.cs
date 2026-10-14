@@ -275,15 +275,14 @@ internal sealed class FusedBarExecution
         if (SmaLength > 0)
         {
             cancellation.ThrowIfCancellationRequested();
-            var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
-            if (AsinValues is null && ValuesBarExecution.TryExecuteSmaParallel(source, SmaValues!, SmaLength,
-                cancellation, out var latest, out _, out var certified, owned))
+            if (AsinValues is null && ValuesBarExecution.TryExecuteSmaParallelOwned(source, SmaValues!, SmaLength,
+                cancellation, out var latest, out _, out var certified, history))
             {
                 LatestBar = latest;
                 UsedSmaFallback = !certified;
-                history.TakeOwnedArray(owned);
                 return;
             }
+            var owned = GC.AllocateUninitializedArray<Bar>(source.Length);
             if (AsinValues is null && source.Length >= 65_536)
             {
                 LatestBar = ValuesBarExecution.FillSmaColumn(source, SmaValues!, SmaLength, cancellation,

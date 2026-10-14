@@ -228,16 +228,28 @@ internal static partial class ValuesBarExecution
 
     internal static bool TryExecuteSmaParallel(Bar[] source, double[] output, int period,
         CancellationToken cancellation, out Bar latest, out bool finite, out bool certified, OwnedBarBuffer? owned = null)
+        => TryExecuteSmaParallelCore(source, output, period, cancellation, out latest, out finite, out certified, owned, null);
+
+    internal static bool TryExecuteSmaParallelOwned(Bar[] source, double[] output, int period,
+        CancellationToken cancellation, out Bar latest, out bool finite, out bool certified, OwnedBarHistory history)
+        => TryExecuteSmaParallelCore(source, output, period, cancellation, out latest, out finite, out certified, null, history);
+
+    private static bool TryExecuteSmaParallelCore(Bar[] source, double[] output, int period,
+        CancellationToken cancellation, out Bar latest, out bool finite, out bool certified,
+        OwnedBarBuffer? owned, OwnedBarHistory? history)
     {
         latest = default;
         finite = certified = false;
         if (period is < 2 or > 4096 || !CanParallelize(source.Length, 8192)) return false;
-        int chunks = Math.Min(WorkerCount(owned is null ? 8 : 4), source.Length / (16 * period));
+        int chunks = Math.Min(WorkerCount(owned is null && history is null ? 8 : 4), source.Length / (16 * period));
         if (chunks < 2 || !Monitor.TryEnter(ParallelBarGate)) return false;
         double[]? closes = null;
         try
         {
             cancellation.ThrowIfCancellationRequested();
+            // Only an accepted Full dispatch reserves snapshots. Rejected work
+            // keeps the original serial path without a second history allocation.
+            if (history is not null) owned = new OwnedBarBuffer(source.Length);
             closes = System.Buffers.ArrayPool<double>.Shared.Rent(source.Length);
             var captured = closes;
             int intervals = (source.Length - period) / period;
@@ -331,6 +343,7 @@ internal static partial class ValuesBarExecution
                     captured.AsSpan(0, source.Length), output, period, ref reader, ref consumer, cancellation);
             }
             cancellation.ThrowIfCancellationRequested();
+            if (history is not null) owned!.TransferTo(history);
             return true;
         }
         finally

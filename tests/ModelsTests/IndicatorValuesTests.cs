@@ -51,7 +51,7 @@ public sealed class IndicatorValuesTests
         try
         {
             AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 4;
-            foreach (bool full in new[] { false, true })
+            foreach (int ownership in new[] { 0, 1, 2 })
             foreach (int count in new[] { Math.Max(8193, period * 64 + 1), Math.Max(65537, period * 64 + 1) }.Distinct())
             {
                 var bars = Data(count, mode);
@@ -60,9 +60,14 @@ public sealed class IndicatorValuesTests
                 OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
                     bars.Select(b => b.Close).ToArray(), expected, period);
                 var actual = new double[bars.Length];
-                var owned = full ? new Bar[bars.Length] : null;
-                bool used = ValuesBarExecution.TryExecuteSmaParallel(bars, actual, period, default,
-                    out var latest, out var finite, out _, owned);
+                var owned = ownership == 1 ? new Bar[bars.Length] : null;
+                var history = ownership == 2 ? new OwnedBarHistory() : null;
+                Bar latest; bool finite;
+                bool used = history is null
+                    ? ValuesBarExecution.TryExecuteSmaParallel(bars, actual, period, default,
+                        out latest, out finite, out _, owned)
+                    : ValuesBarExecution.TryExecuteSmaParallelOwned(bars, actual, period, default,
+                        out latest, out finite, out _, history);
                 Assert.Equal(Environment.ProcessorCount > 1, used);
                 if (!used) continue;
                 Assert.Equal(mode != 2, finite);
@@ -70,7 +75,70 @@ public sealed class IndicatorValuesTests
                 Bits(expected, actual);
                 Assert.Equal(original[^1], latest);
                 if (owned is not null) Assert.Equal(original, owned);
+                if (history is not null) Assert.Equal(original, history);
             }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public void OwnedSmaWorkerHistoryPublishesOnlyAfterSuccessfulCompletion()
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            if (Environment.ProcessorCount < 2) return;
+            var bars = Data(8193);
+            var original = bars.ToArray();
+            int chunks = Math.Min(4, Environment.ProcessorCount);
+            int boundary = 20 + ((bars.Length - 20) / 20 / chunks) * 20 - 1;
+            var history = new OwnedBarHistory();
+            var output = new double[bars.Length];
+            bars[boundary] = new(default, double.NaN, 1, 1, 1, 1);
+            bars[^1] = new(default, 1, 1, 1, 1, double.NaN);
+            var expected = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[boundary]));
+            var failure = Assert.Throws<ArgumentOutOfRangeException>(() => ValuesBarExecution.TryExecuteSmaParallelOwned(
+                bars, output, 20, default, out _, out _, out _, history));
+            Assert.Equal(expected!.Message, failure.Message);
+            Assert.Empty(history);
+            Assert.ThrowsAny<OperationCanceledException>(() => ValuesBarExecution.TryExecuteSmaParallelOwned(
+                bars, output, 20, new CancellationToken(true), out _, out _, out _, history));
+            Assert.Empty(history);
+            bars[boundary] = original[boundary]; bars[^1] = original[^1];
+            Assert.True(ValuesBarExecution.TryExecuteSmaParallelOwned(bars, output, 20, default,
+                out var latest, out _, out _, history));
+            Array.Clear(bars);
+            Assert.Equal(original, history);
+            Assert.Equal(original[^1], latest);
+            var expectedValues = new double[original.Length];
+            OoplesFinance.StockIndicators.Core.MovingAverageCore.SimpleMovingAverage(
+                original.Select(b => b.Close).ToArray(), expectedValues, 20);
+            Bits(expectedValues, output);
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
+    [Fact]
+    public async Task FullWorkerSmaHistoryFeedsLegacyBuildAfterMutationAndDisposal()
+    {
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 8;
+            var bars = Data(8193, 2);
+            var original = bars.ToArray();
+            var builder = Builder(bars, new Sma(20));
+            using var run = await builder.ConfigureHistory(IndicatorHistoryMode.Full).BuildAsync();
+            run.Dispose(); Array.Clear(bars);
+            SeriesHandle average = default;
+            using var legacy = builder.ConfigureIndicators(catalog => average = catalog.Ema(3)).Build();
+            legacy.Start();
+            var expected = new double[original.Length];
+            OoplesFinance.StockIndicators.Core.MovingAverageCore.ExponentialMovingAverage(
+                original.Select(b => b.Close).ToArray(), expected, 3);
+            Bits(expected, legacy.GetSeries(average).ToArray());
+            Assert.Equal(original[^1], run.Latest.Bar);
         }
         finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
