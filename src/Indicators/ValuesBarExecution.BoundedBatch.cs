@@ -12,6 +12,7 @@ internal static partial class ValuesBarExecution
         Wma average => Math.Max(1, average.Length),
         WilliamsR range => Math.Max(1, range.Length),
         RollingPriceSum sum => sum.Period,
+        RickshawManCandle => RickshawReplayWindow(indicator),
         WindowLinearRegression regression => regression.Period,
         RelativeVolatilityStrength => RelativeVolatilityWindow(indicator),
         RollingPercentile { HasFractionalFullRank: true } percentile => percentile.Period,
@@ -51,6 +52,7 @@ internal static partial class ValuesBarExecution
     private static IIndicatorState CreateBoundedState(IIndicator indicator, int count, int origin) => indicator switch
     {
         FiftySeedStochastic stochastic => new FiftySeedStochastic.RawState(stochastic.Period),
+        RickshawManCandle candle => new RickshawGridState(candle.DojiPeriod, candle.NearPeriod),
         WindowMeanAbsoluteDeviation deviation => new WindowMeanAbsoluteDeviation.State(deviation.Period),
         _ when DelayedCloudWindow(indicator) > 0 =>
             (DelayedDarkCloudCoverPattern.State)((IndicatorBase)indicator).CreateState()!,
