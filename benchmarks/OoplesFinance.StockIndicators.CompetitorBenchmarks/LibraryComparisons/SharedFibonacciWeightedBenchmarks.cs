@@ -37,8 +37,7 @@ public class SharedFibonacciWeightedBenchmarks
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new FibonacciWeightedAverage(Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new FibonacciWeightedAverage(Period), IndicatorHistoryMode.LatestOnly);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+        SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 
     [Benchmark(Baseline = true)] public double[] NativeSingle()
     {

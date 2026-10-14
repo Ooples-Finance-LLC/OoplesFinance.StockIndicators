@@ -96,13 +96,7 @@ public class SharedForceIndexBenchmarks
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Force Index GPU fixture did not execute on device.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Force Index GPU fixture did not execute on device.");
     }
 
     private void CheckNative(object result, ComparisonOutput expected)

@@ -82,12 +82,6 @@ public class SharedMidpointBenchmarks
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Midpoint benchmark did not dispatch GPU work.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Midpoint benchmark did not dispatch GPU work.");
     }
 }

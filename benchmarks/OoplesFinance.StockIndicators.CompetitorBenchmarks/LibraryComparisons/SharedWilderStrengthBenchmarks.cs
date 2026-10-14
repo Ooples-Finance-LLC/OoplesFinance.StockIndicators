@@ -89,7 +89,5 @@ public class SharedWilderStrengthBenchmarks
         if (code != TALib.Core.RetCode.Success || range.Start.Value != Period || range.End.Value != input.Length)
             throw new InvalidOperationException("Unexpected native strength output range.");
     }
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

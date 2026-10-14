@@ -64,7 +64,5 @@ public class SharedAsinBenchmarks
         if (code != TALib.Core.RetCode.Success || range.GetOffsetAndLength(length) != (0, length))
             throw new InvalidOperationException("Native Asin status/range failed.");
     }
-    private IIndicatorRun Build(PriceCircularTransform indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(PriceCircularTransform indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

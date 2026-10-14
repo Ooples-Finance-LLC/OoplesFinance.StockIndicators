@@ -56,7 +56,5 @@ public class SharedTradyStochasticBenchmarks
             : Operation[(Operation.IndexOf('+')+1)..]+(Operation.Contains("Oscillator",StringComparison.Ordinal) ? "Difference" : "");
         return StochasticSmaComparison.Indicator(20,variant,3,3);
     }
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

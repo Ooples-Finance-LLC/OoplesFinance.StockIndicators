@@ -96,7 +96,5 @@ public class SharedNativeHullBenchmarks
         });
         return decimals;
     }
-    private IIndicatorRun Build(IIndicator hull, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(hull).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator hull, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, hull, history);
 }

@@ -91,12 +91,6 @@ public class SharedRegressionBenchmarks
             .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Required GPU regression did not execute on the device.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU regression did not execute on the device.");
     }
 }

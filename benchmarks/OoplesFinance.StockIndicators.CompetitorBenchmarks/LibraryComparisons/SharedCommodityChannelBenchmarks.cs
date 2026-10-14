@@ -42,7 +42,7 @@ public class SharedCommodityChannelBenchmarks
             AsinFeasibilityBenchmarks.RequireSame(reference.Skip(Period - 1).Select(v => v!.Value).ToArray(),
                 parallel.AsSpan(start, end - start).ToArray());
         }
-        CheckNative(native, parallel);
+        SharedBenchmarkSupport.RequireNativeTolerance(native, parallel);
         var expected = CommodityChannelComparison.Reference(_bars, Period, 1);
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
@@ -54,16 +54,14 @@ public class SharedCommodityChannelBenchmarks
                     || run[indicator.IsDefined][i] != (expected[i].HasValue ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                     throw new InvalidOperationException($"Exact CCI builder mismatch at {i}.");
             }
-            CheckNative(native, run[indicator.Value].Slice(Period - 1).ToArray());
+            SharedBenchmarkSupport.RequireNativeTolerance(native, run[indicator.Value].Slice(Period - 1).ToArray());
         }
     }
 
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new WindowCommodityChannelIndex(Period, flatZero: true), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new WindowCommodityChannelIndex(Period, flatZero: true), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 
     [Benchmark(Baseline = true)]
     public double[] NativeSingle()
@@ -95,12 +93,4 @@ public class SharedCommodityChannelBenchmarks
             throw new InvalidOperationException("Unexpected native CCI output range.");
     }
 
-    private static void CheckNative(double[] expected, double[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("CCI output length mismatch.");
-        for (int i = 0; i < expected.Length; i++)
-            if (!double.IsFinite(expected[i]) || !double.IsFinite(actual[i])
-                || Math.Abs(expected[i] - actual[i]) > 1e-10 * Math.Max(1, Math.Abs(expected[i])))
-                throw new InvalidOperationException($"Native CCI mismatch at {i}.");
-    }
 }

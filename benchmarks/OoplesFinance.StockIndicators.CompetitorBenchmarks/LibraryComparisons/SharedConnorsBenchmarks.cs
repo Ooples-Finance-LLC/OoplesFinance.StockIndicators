@@ -86,7 +86,5 @@ public class SharedConnorsBenchmarks
         });
         return result;
     }
-    private IIndicatorRun Build(ConnorsStrength indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(ConnorsStrength indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

@@ -122,12 +122,6 @@ public class SharedPathRatioBenchmarks
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Required GPU path ratio did not execute on the device.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU path ratio did not execute on the device.");
     }
 }

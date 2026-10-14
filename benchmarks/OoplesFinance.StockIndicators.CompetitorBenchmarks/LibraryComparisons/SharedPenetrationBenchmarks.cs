@@ -40,7 +40,5 @@ public class SharedPenetrationBenchmarks
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(PenetrationCandleComparison.Create(_name), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(PenetrationCandleComparison.Create(_name), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, mode);
 }

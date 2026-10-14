@@ -52,7 +52,5 @@ public class SharedWindowModeBenchmarks
         for (int i = Math.Max(0, start - Period + 1); i < start; i++) state.Calc(_input[i]);
         for (int i = start; i < end; i++) result[i] = state.Calc(_input[i]).Value;
     }
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

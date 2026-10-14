@@ -70,7 +70,5 @@ public class SharedDeviationAverageBenchmarks
             if (i >= start) result[i] = value;
         }
     }
-    private IIndicatorRun Build(IIndicator root, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(root).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator root, IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, root, mode);
 }

@@ -79,7 +79,5 @@ public class SharedRickshawBenchmarks
             if (index >= start) result[index] = packed[i];
         }
     }
-    private IIndicatorRun Build(RickshawManCandle indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(RickshawManCandle indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

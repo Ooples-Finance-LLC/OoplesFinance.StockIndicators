@@ -79,13 +79,7 @@ public class SharedObvBenchmarks
     {
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("OBV benchmark did not execute on GPU.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "OBV benchmark did not execute on GPU.");
     }
 
     [Benchmark(Baseline = true)]

@@ -58,7 +58,5 @@ public class SharedStrengthBenchmarks
         var convention=name=="NetMomentumOscillator" ? NullableStrengthConvention.NetMomentum : Enum.Parse<NullableStrengthConvention>(name);
         return new NullableStrengthOscillator(20,convention,NullableStrengthComparison.Momentum(convention) ? 5 : 1);
     }
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

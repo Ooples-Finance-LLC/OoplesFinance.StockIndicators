@@ -64,7 +64,5 @@ public class SharedReverseWilderBenchmarks
         for (int i = 0; i < start; i++) state.Calc(_ticks[i]);
         for (int i = start; i < end; i++) result[i] = state.Calc(_ticks[i]).Value;
     }
-    private IIndicatorRun Build(ReverseWilderAverage indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(ReverseWilderAverage indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

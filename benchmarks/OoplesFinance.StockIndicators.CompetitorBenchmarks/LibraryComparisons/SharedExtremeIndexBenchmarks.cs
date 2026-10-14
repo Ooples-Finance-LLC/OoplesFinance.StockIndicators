@@ -94,12 +94,6 @@ public class SharedExtremeIndexBenchmarks
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Index benchmark did not execute on the GPU.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Index benchmark did not execute on the GPU.");
     }
 }

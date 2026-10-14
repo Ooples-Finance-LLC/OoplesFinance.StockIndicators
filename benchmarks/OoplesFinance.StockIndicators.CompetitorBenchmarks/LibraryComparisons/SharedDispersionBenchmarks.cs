@@ -61,7 +61,5 @@ public class SharedDispersionBenchmarks
     }
     private WindowDispersion Create() => new(Period,
         Variance ? WindowDispersionOutput.Variance : WindowDispersionOutput.StandardDeviation);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, mode);
 }

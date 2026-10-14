@@ -40,8 +40,8 @@ public class SharedSeededAdaptiveBenchmarks
         var parallel = Read(NativeParallel());
         for (int slot = 0; slot < native.Length; slot++)
         {
-            Require(nativeExpected[slot], native[slot]);
-            Require(native[slot], parallel[slot]);
+            SharedBenchmarkSupport.RequireExactNullable(nativeExpected[slot], native[slot]);
+            SharedBenchmarkSupport.RequireExactNullable(native[slot], parallel[slot]);
             for (int i = 0; i < Count; i++)
                 if (native[slot][i].HasValue != expected[slot][i].HasValue || expected[slot][i] is double value
                     && (!double.IsFinite(native[slot][i]!.Value) || Math.Abs(value - native[slot][i]!.Value) > 1e-9))
@@ -52,8 +52,8 @@ public class SharedSeededAdaptiveBenchmarks
             var quotes = _bars.Select(b => new Quote { Date = b.Time, Open = (decimal)b.Open,
                 High = (decimal)b.High, Low = (decimal)b.Low, Close = (decimal)b.Close, Volume = 1 }).ToArray();
             var rows = quotes.GetKama(Period, Fast, Slow).ToArray();
-            Require(native[0], rows.Select(r => r.Kama).ToArray());
-            Require(native[1], rows.Select(r => r.ER).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native[0], rows.Select(r => r.Kama).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native[1], rows.Select(r => r.ER).ToArray());
         }
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
@@ -73,14 +73,6 @@ public class SharedSeededAdaptiveBenchmarks
         KamaResult[] rows => [rows.Select(v => v.Kama).ToArray(), rows.Select(v => v.ER).ToArray()],
         _ => throw new InvalidOperationException("Unexpected native adaptive result type.")
     };
-    private static void Require(double?[] expected, double?[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("Adaptive output length differs.");
-        for (int i = 0; i < expected.Length; i++)
-            if (expected[i].HasValue != actual[i].HasValue || expected[i] is double value
-                && BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(actual[i]!.Value))
-                throw new InvalidOperationException($"Adaptive value/presence differs at {i}.");
-    }
     private SeededAdaptiveAverage Create() => new(Period, Fast, Slow, _quan, _quan, !_quan);
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);
@@ -126,7 +118,5 @@ public class SharedSeededAdaptiveBenchmarks
         for (int i = 0; i < start; i++) state.Calc(_ticks[i]);
         for (int i = start; i < end; i++) result[i] = state.Calc(_ticks[i]).Value;
     }
-    private IIndicatorRun Build(SeededAdaptiveAverage indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(SeededAdaptiveAverage indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

@@ -40,7 +40,5 @@ public class SharedGapContinuationBenchmarks
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(GapContinuationComparison.Create(_name, _name == "TasukiGap" ? 5 : 10), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(GapContinuationComparison.Create(_name, _name == "TasukiGap" ? 5 : 10), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, mode);
 }

@@ -115,7 +115,5 @@ public class SharedCurvatureBenchmarks
         root.Of(new WindowLinearRegression(Period, WindowRegressionOutput.Slope));
         return root;
     }
-    private IIndicatorRun Build(IIndicator root, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(root).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator root, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, root, history);
 }

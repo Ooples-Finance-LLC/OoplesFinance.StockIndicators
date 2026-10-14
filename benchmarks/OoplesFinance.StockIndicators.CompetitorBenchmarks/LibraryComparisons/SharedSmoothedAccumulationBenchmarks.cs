@@ -124,8 +124,7 @@ public class SharedSmoothedAccumulationBenchmarks
 
     private SmoothedAccumulationOscillator Indicator() => new(Fast, Slow, IsTa, includeDetails: !IsTa);
     private IIndicatorRun Build(SmoothedAccumulationOscillator indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+        SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 
     private double[] Native(int count)
     {

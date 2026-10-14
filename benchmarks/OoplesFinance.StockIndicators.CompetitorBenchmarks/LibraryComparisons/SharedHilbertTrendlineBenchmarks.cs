@@ -44,7 +44,7 @@ public class SharedHilbertTrendlineBenchmarks
         var parallel = Read(NativeParallel());
         for (int slot = 0; slot < Columns; slot++)
         {
-            Require(nativeExpected[slot], native[slot]); Require(native[slot], parallel[slot]);
+            SharedBenchmarkSupport.RequireExactNullable(nativeExpected[slot], native[slot]); SharedBenchmarkSupport.RequireExactNullable(native[slot], parallel[slot]);
             for (int i = 0; i < Count; i++)
                 if (native[slot][i].HasValue != expected[slot][i].HasValue || expected[slot][i] is double value
                     && (!double.IsFinite(native[slot][i]!.Value) || Math.Abs(value - native[slot][i]!.Value) > 1e-9))
@@ -55,9 +55,9 @@ public class SharedHilbertTrendlineBenchmarks
             var quotes = _bars.Select(b => new Quote { Date = b.Time, Open = (decimal)b.Open,
                 High = (decimal)b.High, Low = (decimal)b.Low, Close = (decimal)b.Close, Volume = 1 }).ToArray();
             var rows = quotes.GetHtTrendline().ToArray();
-            Require(native[0], rows.Select(r => r.Trendline).ToArray());
-            Require(native[1], rows.Select(r => r.SmoothPrice).ToArray());
-            Require(native[2], rows.Select(r => (double?)r.DcPeriods).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native[0], rows.Select(r => r.Trendline).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native[1], rows.Select(r => r.SmoothPrice).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native[2], rows.Select(r => (double?)r.DcPeriods).ToArray());
         }
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
@@ -77,14 +77,6 @@ public class SharedHilbertTrendlineBenchmarks
         HtlResult[] rows => [rows.Select(v => v.Trendline).ToArray(), rows.Select(v => v.SmoothPrice).ToArray(), rows.Select(v => (double?)v.DcPeriods).ToArray()],
         _ => throw new InvalidOperationException("Unexpected native trendline result type.")
     };
-    private static void Require(double?[] expected, double?[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("Trendline output length differs.");
-        for (int i = 0; i < expected.Length; i++)
-            if (expected[i].HasValue != actual[i].HasValue || expected[i] is double value
-                && BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(actual[i]!.Value))
-                throw new InvalidOperationException($"Trendline value/presence differs at {i}.");
-    }
     private IIndicator Create() => _quan ? new OldestFirstHilbertTrendline() : new SeededHilbertTrendline();
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);
@@ -130,7 +122,5 @@ public class SharedHilbertTrendlineBenchmarks
             result[i] = state.Calc(_ticks[i]).Value;
         }
     }
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

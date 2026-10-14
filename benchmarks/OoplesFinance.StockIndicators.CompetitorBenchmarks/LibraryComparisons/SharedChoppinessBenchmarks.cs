@@ -82,9 +82,7 @@ public class SharedChoppinessBenchmarks
     }
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new WindowChoppinessIndex(Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new WindowChoppinessIndex(Period), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 
     // Native eager results are retained directly; normalization is setup-only.
     [Benchmark(Baseline = true)] public object NativeSingle() => _quotes.GetChop(Period);

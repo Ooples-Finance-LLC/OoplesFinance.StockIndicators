@@ -81,7 +81,5 @@ public class SharedAverageOscillatorBenchmarks
         // builder rounds binary64 at every stage; verify that exact contract.
         return new(exponential ? 0 : Math.Min(19,_bars.Length),values);
     }
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

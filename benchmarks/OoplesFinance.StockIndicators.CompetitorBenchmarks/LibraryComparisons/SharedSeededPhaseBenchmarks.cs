@@ -41,7 +41,7 @@ public class SharedSeededPhaseBenchmarks
         var parallel = Read(NativeParallel());
         for (int slot = 0; slot < 2; slot++)
         {
-            Require(nativeExpected[slot], native[slot]); Require(native[slot], parallel[slot]);
+            SharedBenchmarkSupport.RequireExactNullable(nativeExpected[slot], native[slot]); SharedBenchmarkSupport.RequireExactNullable(native[slot], parallel[slot]);
             for (int i = 0; i < Count; i++)
                 if (native[slot][i].HasValue != expected[slot][i].HasValue || expected[slot][i] is double value
                     && (!double.IsFinite(native[slot][i]!.Value) || Math.Abs(value - native[slot][i]!.Value) > 1e-9))
@@ -52,8 +52,8 @@ public class SharedSeededPhaseBenchmarks
             var quotes = _bars.Select(b => new Quote { Date = b.Time, Open = (decimal)b.Open,
                 High = (decimal)b.High, Low = (decimal)b.Low, Close = (decimal)b.Close, Volume = 1 }).ToArray();
             var rows = quotes.GetMama().ToArray();
-            Require(native[0], rows.Select(r => r.Mama).ToArray());
-            Require(native[1], rows.Select(r => r.Fama).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native[0], rows.Select(r => r.Mama).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native[1], rows.Select(r => r.Fama).ToArray());
         }
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
@@ -73,14 +73,6 @@ public class SharedSeededPhaseBenchmarks
         MamaResult[] rows => [rows.Select(v => v.Mama).ToArray(), rows.Select(v => v.Fama).ToArray()],
         _ => throw new InvalidOperationException("Unexpected native seeded phase result type.")
     };
-    private static void Require(double?[] expected, double?[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("Phase output length differs.");
-        for (int i = 0; i < expected.Length; i++)
-            if (expected[i].HasValue != actual[i].HasValue || expected[i] is double value
-                && BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(actual[i]!.Value))
-                throw new InvalidOperationException($"Phase value/presence differs at {i}.");
-    }
     private SeededPhaseAdaptiveAverage Create() => new(.5, .05, _quan, _quan, !_quan);
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);
@@ -126,7 +118,5 @@ public class SharedSeededPhaseBenchmarks
             result[i] = state.Calc(_ticks[i]).Value; result[Count + i] = state.Fama.Value;
         }
     }
-    private IIndicatorRun Build(SeededPhaseAdaptiveAverage indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(SeededPhaseAdaptiveAverage indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

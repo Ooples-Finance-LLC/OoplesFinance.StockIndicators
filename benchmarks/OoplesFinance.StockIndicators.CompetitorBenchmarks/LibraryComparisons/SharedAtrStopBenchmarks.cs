@@ -45,7 +45,5 @@ public class SharedAtrStopBenchmarks
         "Skender.GetChandelier" => new WindowChandelierExit(20, selection: ChandelierExitSelection.Long, zeroFloorHigh: true),
         _ => new WindowChandelierExit(20)
     };
-    private IIndicatorRun Build(IIndicator owner, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner, IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

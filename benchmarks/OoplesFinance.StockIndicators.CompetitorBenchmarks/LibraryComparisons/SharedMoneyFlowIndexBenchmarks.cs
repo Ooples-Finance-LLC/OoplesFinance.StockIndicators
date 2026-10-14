@@ -52,7 +52,7 @@ public class SharedMoneyFlowIndexBenchmarks
                 return _quotes[start..(end + Period)];
             }).ToArray();
             var native = NativeValues(NativeSingle());
-            CheckNative(native, NativeValues(NativeParallel()));
+            SharedBenchmarkSupport.RequireNativeTolerance(native, NativeValues(NativeParallel()));
             var expected = MoneyFlowIndexComparison.Reference(_bars, Period, IsTa);
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
             {
@@ -64,7 +64,7 @@ public class SharedMoneyFlowIndexBenchmarks
                         || run[indicator.IsDefined][i] != (expected[i].HasValue ? 1d : 0d)) // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
                         throw new InvalidOperationException($"Exact MFI builder mismatch at {i}.");
                 }
-                CheckNative(native, run[indicator.Value].Slice(Period).ToArray());
+                SharedBenchmarkSupport.RequireNativeTolerance(native, run[indicator.Value].Slice(Period).ToArray());
             }
         }
         catch { Cleanup(); throw; }
@@ -85,13 +85,7 @@ public class SharedMoneyFlowIndexBenchmarks
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Required GPU MFI did not execute on the device.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU MFI did not execute on the device.");
     }
 
     [Benchmark(Baseline = true)]
@@ -159,13 +153,5 @@ public class SharedMoneyFlowIndexBenchmarks
             throw new InvalidOperationException("Unexpected native MFI output range.");
     }
 
-    private static void CheckNative(double[] expected, double[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("MFI output length mismatch.");
-        for (int i = 0; i < expected.Length; i++)
-            if (!double.IsFinite(expected[i]) || !double.IsFinite(actual[i])
-                || Math.Abs(expected[i] - actual[i]) > 1e-10 * Math.Max(1, Math.Abs(expected[i])))
-                throw new InvalidOperationException($"Native MFI mismatch at {i}.");
-    }
 }
 

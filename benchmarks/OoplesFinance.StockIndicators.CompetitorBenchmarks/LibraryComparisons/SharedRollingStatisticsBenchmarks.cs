@@ -62,7 +62,5 @@ public class SharedRollingStatisticsBenchmarks
         "Skender.GetEpma" => new WindowLinearRegression(20,WindowRegressionOutput.Endpoint),
         _ => throw new ArgumentException("Unknown rolling statistics operation.")
     };
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

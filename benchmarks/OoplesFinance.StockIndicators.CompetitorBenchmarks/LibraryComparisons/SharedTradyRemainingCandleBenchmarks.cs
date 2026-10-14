@@ -45,7 +45,5 @@ public class SharedTradyRemainingCandleBenchmarks
         "Trady.Candlestick.DragonifyDoji" => new DragonflyDojiCandle(),
         _ => throw new ArgumentException("Unknown Trady candle operation.")
     };
-    private IIndicatorRun Build(IIndicator owner, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner, IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

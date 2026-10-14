@@ -50,8 +50,7 @@ public class SharedSeededEmaBenchmarks
     [Benchmark] public IIndicatorRun BuilderFull() => Build(Create(), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(Create(), IndicatorHistoryMode.LatestOnly);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+        SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 
     [Benchmark(Baseline = true)] public object NativeSingle() => NativePrefix(_prefixes.Length - 1);
     private object NativePrefix(int chunk)

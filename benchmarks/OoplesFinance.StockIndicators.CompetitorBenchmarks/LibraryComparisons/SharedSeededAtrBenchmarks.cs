@@ -96,13 +96,7 @@ public class SharedSeededAtrBenchmarks
         var builder = new StockIndicatorBuilder()
             .ConfigureSource(Bars.From(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Required GPU seeded ATR did not execute on the device.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU seeded ATR did not execute on the device.");
     }
 
     public readonly record struct NativeResult(double[]? Packed = null, IReadOnlyList<AtrResult>? Rows = null, IReadOnlyList<decimal?>? Tuples = null);

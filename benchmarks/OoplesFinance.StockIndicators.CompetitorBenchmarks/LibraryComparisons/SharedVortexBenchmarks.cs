@@ -85,13 +85,7 @@ public class SharedVortexBenchmarks
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
-        var run = builder.BuildAsync().GetAwaiter().GetResult();
-        if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)
-        {
-            run.Dispose();
-            throw new InvalidOperationException("Required GPU Vortex did not execute on the device.");
-        }
-        return run;
+        return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU Vortex did not execute on the device.");
     }
 
     // Native eager results are retained directly; normalization is setup-only.

@@ -39,13 +39,13 @@ public class SharedTillsonBenchmarks
         var expected = TillsonComparison.Reference(_prices, Period, Factor, TillsonComparison.Seed(_variant, true));
         var nativeExpected = TillsonComparison.NativeReference(_prices, Period, Factor, _variant);
         var native = Read(NativeSingle());
-        Require(nativeExpected, native);
-        Require(native, Read(NativeParallel()));
+        SharedBenchmarkSupport.RequireExactNullable(nativeExpected, native);
+        SharedBenchmarkSupport.RequireExactNullable(native, Read(NativeParallel()));
         if (_variant == 0)
         {
             var quotes = _bars.Select(b => new Quote { Date = b.Time, Open = (decimal)b.Open,
                 High = (decimal)b.High, Low = (decimal)b.Low, Close = (decimal)b.Close, Volume = 1 }).ToArray();
-            Require(native, quotes.GetT3(Period, Factor).Select(r => r.T3).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native, quotes.GetT3(Period, Factor).Select(r => r.T3).ToArray());
         }
         for (int i = 0; i < Count; i++)
             if (native[i].HasValue != expected[i].HasValue || expected[i] is double value
@@ -76,14 +76,6 @@ public class SharedTillsonBenchmarks
             T3Result[] rows => rows.Select(v => v.T3).ToArray(),
             _ => throw new InvalidOperationException("Unexpected native Tillson result type.")
         };
-    }
-    private static void Require(double?[] expected, double?[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("Tillson output length differs.");
-        for (int i = 0; i < expected.Length; i++)
-            if (expected[i].HasValue != actual[i].HasValue || expected[i] is double value
-                && BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(actual[i]!.Value))
-                throw new InvalidOperationException($"Tillson value/presence differs at {i}.");
     }
     private TillsonAverage Create() => new(Period, Factor, TillsonComparison.Seed(_variant, true));
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
@@ -147,7 +139,5 @@ public class SharedTillsonBenchmarks
         for (int i = 0; i < start; i++) state.Calc(_ticks[i]);
         for (int i = start; i < end; i++) result[i] = state.Calc(_ticks[i]).Value;
     }
-    private IIndicatorRun Build(TillsonAverage indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(TillsonAverage indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

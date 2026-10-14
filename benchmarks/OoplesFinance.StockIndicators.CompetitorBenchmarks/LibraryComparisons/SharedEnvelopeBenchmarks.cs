@@ -53,7 +53,5 @@ public class SharedEnvelopeBenchmarks
         "Trady.Indicator.KeltnerChannels" => new WindowAtrBands(20,20,2,AtrBandCenterMode.FirstSeededExponential,false),
         _ => throw new ArgumentException("Unknown envelope operation.")
     };
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

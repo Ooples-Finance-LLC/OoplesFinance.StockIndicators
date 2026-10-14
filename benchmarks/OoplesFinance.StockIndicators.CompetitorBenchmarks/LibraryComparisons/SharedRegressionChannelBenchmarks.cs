@@ -42,7 +42,5 @@ public class SharedRegressionChannelBenchmarks
     // Original period20/deviations2, saved native input generator. No native calls.
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new RegressionWithChannels(), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new RegressionWithChannels(), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(RegressionWithChannels owner, IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(RegressionWithChannels owner, IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

@@ -58,7 +58,5 @@ public class SharedMacdBenchmarks
         int variant=Array.IndexOf(EmaDifferenceSignalComparison.Ids,Operation);
         return new EmaDifferenceSignal(12,26,9,variant>=2,variant==1,variant==1,EmaDifferenceSignalComparison.Selection(variant));
     }
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

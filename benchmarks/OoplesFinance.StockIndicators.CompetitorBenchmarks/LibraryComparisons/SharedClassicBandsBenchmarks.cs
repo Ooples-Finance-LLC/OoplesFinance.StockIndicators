@@ -73,7 +73,5 @@ public class SharedClassicBandsBenchmarks
         if (status != TALib.Core.RetCode.Success || range.Start.Value != Period - 1 || range.End.Value - range.Start.Value != upper.Length)
             throw new InvalidOperationException("Native bands failed.");
     }
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

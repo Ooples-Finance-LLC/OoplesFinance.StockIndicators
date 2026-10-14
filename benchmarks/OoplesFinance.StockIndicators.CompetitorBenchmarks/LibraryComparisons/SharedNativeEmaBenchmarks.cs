@@ -126,6 +126,5 @@ public class SharedNativeEmaBenchmarks
         for (int i = start; i < end; i++) values[i] = state.Calc(_inputs[i]).Value;
     }
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
-            .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+        SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

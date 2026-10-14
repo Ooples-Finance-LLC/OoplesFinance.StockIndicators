@@ -67,7 +67,5 @@ public class SharedExpandingRecurrenceBenchmarks
         for (int i = start; i < end; i++) result[i] = state.Calc(_input[i]).Value;
     }
     private IIndicator Create() => Regularized ? new ExpandingRegularizedEma(Period, .5) : new ExpandingZeroLagEma(Period);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

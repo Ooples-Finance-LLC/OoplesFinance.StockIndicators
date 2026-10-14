@@ -38,13 +38,13 @@ public class SharedQuarticDynamicBenchmarks
         var expected = McGinleyComparison.GridReference(prices, Period, Factor, _reset);
         var nativeExpected = McGinleyComparison.NativeReference(prices, Period, Factor, _reset);
         var native = Read(NativeSingle());
-        Require(nativeExpected, native);
-        Require(native, Read(NativeParallel()));
+        SharedBenchmarkSupport.RequireExactNullable(nativeExpected, native);
+        SharedBenchmarkSupport.RequireExactNullable(native, Read(NativeParallel()));
         if (_reset)
         {
             var quotes = _bars.Select(b => new Quote { Date = b.Time, Open = (decimal)b.Open,
                 High = (decimal)b.High, Low = (decimal)b.Low, Close = (decimal)b.Close, Volume = 1 }).ToArray();
-            Require(native, quotes.GetDynamic(Period, Factor).Select(r => r.Dynamic).ToArray());
+            SharedBenchmarkSupport.RequireExactNullable(native, quotes.GetDynamic(Period, Factor).Select(r => r.Dynamic).ToArray());
         }
         for (int i = 0; i < Count; i++)
             if (native[i].HasValue != expected[i].HasValue || expected[i] is double value
@@ -66,14 +66,6 @@ public class SharedQuarticDynamicBenchmarks
         DynamicResult[] values => values.Select(v => v.Dynamic).ToArray(),
         _ => throw new InvalidOperationException("Unexpected native result type.")
     };
-    private static void Require(double?[] expected, double?[] actual)
-    {
-        if (expected.Length != actual.Length) throw new InvalidOperationException("Quartic output length differs.");
-        for (int i = 0; i < expected.Length; i++)
-            if (expected[i].HasValue != actual[i].HasValue || expected[i] is double value
-                && BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(actual[i]!.Value))
-                throw new InvalidOperationException($"Quartic value/presence differs at {i}.");
-    }
     private QuarticDynamicAverage Create() => new(Period, Factor,
         _reset ? McGinleyStartup.ResetDelay : McGinleyStartup.Immediate);
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
@@ -121,7 +113,5 @@ public class SharedQuarticDynamicBenchmarks
         for (int i = 0; i < start; i++) state.Calc(_ticks[i]);
         for (int i = start; i < end; i++) result[i] = state.Calc(_ticks[i]).Value;
     }
-    private IIndicatorRun Build(QuarticDynamicAverage indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(QuarticDynamicAverage indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

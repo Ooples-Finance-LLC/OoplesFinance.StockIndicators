@@ -72,7 +72,5 @@ public class SharedTradyReturnBenchmarks
         return output;
     }
     private static IReadOnlyList<decimal?> Native(decimal?[] values, int skip) => new PercentageDifferenceByTuple(values, Period).Compute(startIndex: skip);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => SharedBenchmarkSupport.BuildCpu(_bars, indicator, history);
 }

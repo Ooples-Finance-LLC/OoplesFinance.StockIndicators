@@ -59,7 +59,5 @@ public class SharedClassicStochasticBenchmarks
         "Trady.Indicator.StochasticsRsiOscillator" => new NullableStochasticRsi(20),
         _ => throw new ArgumentException("Unknown classical stochastic operation.")
     };
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }

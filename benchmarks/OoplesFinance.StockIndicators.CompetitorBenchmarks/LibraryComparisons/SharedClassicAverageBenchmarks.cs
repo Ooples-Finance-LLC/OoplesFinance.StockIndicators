@@ -57,7 +57,5 @@ public class SharedClassicAverageBenchmarks
         "TaLib.Functions.Ppo" => new ClassicPriceOscillator(percentage:true),
         _ => throw new ArgumentException("Unknown classical average operation.")
     };
-    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(owner).ConfigureHistory(mode)
-        .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
+    private IIndicatorRun Build(IIndicator owner,IndicatorHistoryMode mode) => SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
 }
