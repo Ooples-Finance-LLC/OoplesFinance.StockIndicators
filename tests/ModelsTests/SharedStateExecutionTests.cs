@@ -120,13 +120,18 @@ public sealed class SharedStateExecutionTests
     }
 
     [Fact]
-    public async Task CancellationInvalidInputAndRequiredGpuAreRejected()
+    public async Task CancellationInvalidInputAndUnsupportedGpuInputsAreRejected()
     {
         StockIndicatorBuilder Builder(Bar[] bars) => new StockIndicatorBuilder()
             .ConfigureSource(Bars.From(bars)).ConfigureIndicators(new RollingPriceSum(7));
         var builder = Builder(Input(41));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(new CancellationToken(true)));
         Assert.Null(builder.LastExecution);
+        // The original dyadic fixture is supported on GPU. Use an uncertified
+        // price grid to check required-GPU rejection on every host instead.
+        var unsupported = Input(41);
+        unsupported[0] = new Bar(default, 2, 3, 0, .1, 1);
+        builder = Builder(unsupported);
         await Assert.ThrowsAsync<NotSupportedException>(() => builder.ConfigureExecution(IndicatorExecutionBackend.Gpu).BuildAsync());
         Assert.Null(builder.LastExecution);
         var invalid = Input(41);
@@ -136,6 +141,45 @@ public sealed class SharedStateExecutionTests
         Assert.NotNull(error);
         Assert.Equal(legacyError!.GetType(), error.GetType());
         Assert.Equal(legacyError.Message, error.Message);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task ScalarOverflowPreservesInputAndRootFailureOrder(bool invalidTail, bool reverseRoots)
+    {
+        var bars = new[]
+        {
+            new Bar(default, 0, double.MaxValue, -double.MaxValue, double.MaxValue, 1),
+            new Bar(default, 0, 1, -1, double.MaxValue, 1),
+            new Bar(default, 0, 1, -1, 0, invalidTail ? double.NaN : 1)
+        };
+        IIndicator[] roots = [new RollingPriceSum(2), new TrueRange(1)];
+        if (reverseRoots) Array.Reverse(roots);
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            StockIndicatorBuilder Builder() => new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(roots).ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
+            var expected = await Record.ExceptionAsync(() => Builder().ConfigureBehavior(_ => { }).BuildAsync());
+            var builder = Builder();
+            var actual = await Record.ExceptionAsync(() => builder.BuildAsync());
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.Equal(expected.GetType(), actual.GetType());
+            Assert.Equal(expected.Message, actual.Message);
+            Assert.Null(builder.LastExecution);
+            if (!invalidTail)
+            {
+                var outputError = Assert.IsType<Validation.IndicatorOutputException>(actual);
+                Assert.Equal(roots[0].GetType(), outputError.IndicatorType);
+                Assert.Equal(reverseRoots ? 0 : 1, outputError.BarIndex);
+                Assert.Equal(0, outputError.OutputSlot);
+            }
+            else
+                Assert.IsNotType<Validation.IndicatorOutputException>(actual);
+        }
     }
 
     private static void AssertBits(double[] expected, double[] actual) => Assert.Equal(

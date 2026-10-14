@@ -6,12 +6,12 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class TensorsRollingSumGpuExecutionTests
 {
     [SkippableTheory]
-    [InlineData(1)] [InlineData(2)] [InlineData(20)] [InlineData(65)]
+    [InlineData(1)] [InlineData(2)] [InlineData(7)] [InlineData(20)] [InlineData(65)]
     [InlineData(4096)] [InlineData(int.MaxValue)]
     public async Task CertifiedDeviceSumsMatchExactCpuAcrossBlockBoundaries(int period)
     {
         Skip.IfNot(TensorsGpuExecution.TryGet(out _, out var reason), reason);
-        foreach (int count in new[] { 1, 63, 64, 65, 513, 8193 })
+        foreach (int count in new[] { 1, 41, 63, 64, 65, 513, 8193 })
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var bars = Enumerable.Range(0, count).Select(i => new Bar(default, 0, 1, -1,
