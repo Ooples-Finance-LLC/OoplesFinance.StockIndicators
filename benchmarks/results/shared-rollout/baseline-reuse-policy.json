@@ -200,6 +200,16 @@
         ],
         "contract_cases_passed": 127,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_stochastic_momentum_fixture": {
+        "name": "SharedTradyStochasticMomentumBenchmarks",
+        "operations": [
+          "Trady.Indicator.StochasticsMomentum",
+          "Trady.Indicator.StochasticsMomentumIndex",
+          "Trady.Indicator.StochasticsRsiOscillator"
+        ],
+        "contract_cases_passed": 52,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
