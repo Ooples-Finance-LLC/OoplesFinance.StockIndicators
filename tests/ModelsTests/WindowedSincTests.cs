@@ -29,7 +29,8 @@ public sealed class WindowedSincTests
     [InlineData(SincWindow.BlackmanHarris)]
     public void CoefficientsStartupOrientationAndResetMatchSnapshot(SincWindow window)
     {
-        double[] values = [-0d, 0d, double.Epsilon, -double.Epsilon, double.MaxValue / 16, -double.MaxValue / 16, 1, -.125];
+        double[] values = [-0d, 0d, double.Epsilon, -double.Epsilon, double.MaxValue / 16,
+            -double.MaxValue / 16, 1, -.125, Math.BitIncrement(1d), -Math.BitIncrement(1d)];
         var bars = Enumerable.Range(0, 65).Select(i => new Bar(default, 0, 1, 0, values[i % values.Length], 1)).ToArray();
         foreach (int taps in new[] { window == SincWindow.Rectangular ? 1 : window == SincWindow.Hann ? 3 : 2, 7, 20, 21, 129 })
         {

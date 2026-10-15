@@ -1,0 +1,14 @@
+{
+  "base_commit": "df0025ef2095e1e2d3d481ec2c15bcdaf94d9ac9",
+  "source_sha256": {
+    "src/Indicators/WindowedSinc.cs": "c7cb8f8b65c173e08a98f430cb24a2a514421b578d13ec7db71945187f1c3216",
+    "tests/ModelsTests/WindowedSincTests.cs": "fe37cc10cd46a9c2c807d195a1c3e67b139fcf396ca0794ff9ad8d4c60edab99"
+  },
+  "verification": {
+    "unit_cases": 15,
+    "comparator_cases": 7,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Compact decoded factors replace general dyadic coefficient/history arrays. Products fit exactly in Int128 (at most 106 mantissa bits), preserving exact accumulation and final rounding. Reduced storage representation and arithmetic work, not measured latency."
+}

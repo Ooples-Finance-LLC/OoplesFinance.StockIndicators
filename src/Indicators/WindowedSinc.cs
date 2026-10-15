@@ -13,7 +13,7 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
     private readonly ExactMeanAccumulator.ProductCoefficient[] _coefficients;
     private readonly ExactMeanAccumulator _mass;
 #else
-    private readonly JurikDyadic[] _compactCoefficients;
+    private readonly ExactMeanAccumulator.ProductFactor[] _compactCoefficients;
     private readonly JurikDyadic _compactMass;
 #endif
 
@@ -26,13 +26,13 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
         _mass = mass;
         _coefficients = weights.Select(w => new ExactMeanAccumulator.ProductCoefficient(w)).ToArray();
 #else
-        _compactCoefficients = new JurikDyadic[weights.Length];
+        _compactCoefficients = new ExactMeanAccumulator.ProductFactor[weights.Length];
         var compactMass = new JurikDyadic();
         for (int i = 0; i < weights.Length; i++)
         {
             var factor = new ExactMeanAccumulator.ProductFactor(weights[i]);
-            _compactCoefficients[i] = JurikDyadic.FromFactor(in factor);
-            compactMass.AddExact(_compactCoefficients[i]);
+            _compactCoefficients[i] = factor;
+            compactMass.AddExact(JurikDyadic.FromFactor(in factor));
         }
         _compactMass = compactMass;
 #endif
@@ -99,9 +99,9 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
     }
 
 #else
-    private sealed class CompactState(JurikDyadic[] coefficients, JurikDyadic mass) : IIndicatorState
+    private sealed class CompactState(ExactMeanAccumulator.ProductFactor[] coefficients, JurikDyadic mass) : IIndicatorState
     {
-        private JurikDyadic[] _history = [];
+        private ExactMeanAccumulator.ProductFactor[] _history = [];
         private int _count, _position;
 
         public void Reset() => _count = _position = 0;
@@ -119,8 +119,7 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
                 }
                 _count++;
             }
-            var factor = new ExactMeanAccumulator.ProductFactor(bar.Close);
-            var newest = JurikDyadic.FromFactor(in factor);
+            var newest = new ExactMeanAccumulator.ProductFactor(bar.Close);
             _history[_position] = newest;
             if (++_position == _history.Length) _position = 0;
             int oldest = _count == coefficients.Length ? _position : 0, coefficient = 0;
@@ -131,10 +130,14 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
             return sum.Ratio(mass);
         }
 
-        private static void Add(in JurikDyadic value, in JurikDyadic coefficient, ref JurikDyadic sum)
+        private static void Add(in ExactMeanAccumulator.ProductFactor value,
+            in ExactMeanAccumulator.ProductFactor coefficient, ref JurikDyadic sum)
         {
-            var product = value;
-            product.Multiply(coefficient);
+            // Each normalized finite factor has at most 53 mantissa bits.
+            // Their exact product fits Int128, including negative sinc weights.
+            var product = JurikDyadic.FromBinaryProduct(
+                (Int128)value.Mantissa * coefficient.Mantissa,
+                value.Scale + coefficient.Scale - 2148);
             sum.AddExact(product);
         }
     }
