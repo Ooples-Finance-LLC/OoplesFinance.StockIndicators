@@ -65,49 +65,41 @@ internal static class VolumeRecurrenceComparison
     {
         if (id == Ids[0])
             return ForceReference(data, period, native);
+        if (native)
+            return VolumePriceComparison.Mask(TradyReference(data, id == Ids[1]).Select(v => (double?)v).ToArray());
         var values = new double?[data.Count];
         var index = 100d;
-        var decimalIndex = 100m;
         var positive = id == Ids[1];
         for (var i = 0; i < data.Count; i++)
         {
-            if (native)
+            if (i > 0 && (positive ? data.Volumes[i] > data.Volumes[i - 1] : data.Volumes[i] < data.Volumes[i - 1]))
             {
-                if (
-                    i > 0
-                    && (
-                        positive
-                            ? (decimal)data.Volumes[i] > (decimal)data.Volumes[i - 1]
-                            : (decimal)data.Volumes[i] < (decimal)data.Volumes[i - 1]
-                    )
-                )
-                {
-                    var prior = (decimal)data.Closes[i - 1];
-                    var current = (decimal)data.Closes[i];
-                    decimalIndex *= 1 + (current - prior) / prior;
-                }
-                values[i] = (double)decimalIndex;
+                var previous = Units(data.Closes[i - 1]);
+                if (previous.IsZero) break;
+                index = Round(Units(index) * Units(data.Closes[i]), previous * Grid);
             }
-            else
-            {
-                if (
-                    i > 0
-                    && (
-                        positive
-                            ? data.Volumes[i] > data.Volumes[i - 1]
-                            : data.Volumes[i] < data.Volumes[i - 1]
-                    )
-                )
-                {
-                    var previous = Units(data.Closes[i - 1]);
-                    if (previous.IsZero)
-                        break;
-                    index = Round(Units(index) * Units(data.Closes[i]), previous * Grid);
-                }
-                values[i] = index;
-            }
+            values[i] = index;
         }
         return VolumePriceComparison.Mask(values);
+    }
+
+    internal static decimal?[] TradyReference(CompetitorData data, bool positive)
+    {
+        var values = new decimal?[data.Count];
+        var index = 100m;
+        for (var i = 0; i < data.Count; i++)
+        {
+            if (i > 0 && (positive
+                ? (decimal)data.Volumes[i] > (decimal)data.Volumes[i - 1]
+                : (decimal)data.Volumes[i] < (decimal)data.Volumes[i - 1]))
+            {
+                var prior = (decimal)data.Closes[i - 1];
+                var current = (decimal)data.Closes[i];
+                index *= 1 + (current - prior) / prior;
+            }
+            values[i] = index;
+        }
+        return values;
     }
 
     private static ComparisonSeries ForceReference(CompetitorData data, int period, bool native)

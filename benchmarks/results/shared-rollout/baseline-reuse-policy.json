@@ -228,6 +228,16 @@
         ],
         "contract_cases_passed": 31,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_native_volume_fixture": {
+        "name": "SharedTradyNativeVolumeBenchmarks",
+        "operations": [
+          "Trady.Indicator.PositiveVolumeIndex",
+          "Trady.Indicator.NegativeVolumeIndex",
+          "Trady.Indicator.AccumulationDistributionLine"
+        ],
+        "contract_cases_passed": 69,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
