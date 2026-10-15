@@ -31,5 +31,10 @@
     "hosted_contract_methods": 1253,
     "gpu_receipt": "../../local-gpu-contracts/receipt.json"
   },
-  "benchmark_cases": 24
+  "benchmark_cases": 24,
+  "shared_support_refactor": {
+    "evidence": "../../skender-native-support/summary.json",
+    "source_sha256": "03a4f60d41d616c03a8bb10a60dce7f539d86bfa9c8f30175761e1f0e8087adf",
+    "note": "Original source hashes and per-fixture evidence retained above; shared-support refactor validated all 356 affected cases."
+  }
 }

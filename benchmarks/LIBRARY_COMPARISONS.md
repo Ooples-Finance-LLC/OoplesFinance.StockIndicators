@@ -135,6 +135,8 @@ The 102 runtime-mismatched mappings account for 204 size rows. The saved-artifac
 | Skender Stochastic / Stochastic RSI / SMI | 3 | 73 | 24 | [Stochastic](results/shared-rollout/skender-stochastic/direct-native-contracts/summary.json) |
 | Skender ROC / ROC with bands | 2 | 35 | 16 | [ROC](results/shared-rollout/skender-roc/direct-native-contracts/summary.json) |
 
+The seven Skender fixture families share partition setup, eager native result joining and date checks. All 356 affected contract cases passed after this consolidation ([evidence](results/shared-rollout/skender-native-support/summary.json)); first native timings remain pending.
+
 The evidence retains source hashes, native API/materialization choices and independent arithmetic/output checks. Each batch refreshes the required 100-case local GPU receipt. All 71 hosted checks passed for combined strength/EMA-family commit 1006ef85, with 7 intentional skips; later fixture batches await hosted verification.
 
 - Snapshot-only measurements retain their separate API contract; they do not establish builder or GPU performance. Auto remains CPU; RequiredGPU executes a supported device path or rejects it.
