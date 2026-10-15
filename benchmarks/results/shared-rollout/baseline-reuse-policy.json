@@ -261,6 +261,21 @@
         ],
         "contract_cases_passed": 61,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_reversal_continuation_fixture": {
+        "name": "SharedTaReversalContinuationBenchmarks",
+        "operations": [
+          "TaLib.Candles.AdvanceBlock",
+          "TaLib.Candles.Stalled",
+          "TaLib.Candles.ThreeStarsInSouth",
+          "TaLib.Candles.ThreeBlackCrows",
+          "TaLib.Candles.IdenticalThreeCrows",
+          "TaLib.Candles.ThreeWhiteSoldiers",
+          "TaLib.Candles.PiercingLine",
+          "TaLib.Candles.DarkCloudCover"
+        ],
+        "contract_cases_passed": 153,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
