@@ -1,0 +1,25 @@
+{
+  "status": "21 affected contract cases passed (15 new and 6 existing). 100 local GPU cases passed. First native timings pending; catalog qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderVolatilityStopNativeBenchmarks.cs": "f17ae35244cfddcbc5ff8d8d11a3c0a8bfa6531c12643a99c44477a72485a58c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedVolatilityStopSnapshotBenchmarks.cs": "26a40ca0415d2dfb52264cc029322b1a5da7c576b1070ee93b9fada2b502a39e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/VolatilityStopComparison.cs": "6943a848a066e4681b9c96cae86c243b07a72ff41e04821bcc99e252be971c34",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderVolatilityStopNativeBenchmarkTests.cs": "bfb71eb2c3c40843061cd50e215bb47e9fe23cb030ce6a1a329f8d13b971ae3e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedVolatilityStopSnapshotBenchmarkTests.cs": "00e95ebd62dfd21f0dc61fdc439a4760884594299ce06588ef7a67abb8c0b6ad"
+  },
+  "operations": [
+    "Skender.GetVolatilityStop"
+  ],
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_package_dll_sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+  "contract": "Standalone volatility stop snapshot retains SAR, upper/lower bands, stop flags and dates at period20/multiplier3. Native serial returns an eager list; parallel workers replay prefixes, falling back to the complete input when the first reversal has not yet finalized startup suppression. All native arithmetic remains inside timing. Exact independent reference and serial/parallel contracts include delayed-first-reversal and no-reversal inputs.",
+  "validation": {
+    "comparator_cases_passed": 21,
+    "new_fixture_cases_passed": 15,
+    "affected_existing_cases_passed": 6,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1311
+  },
+  "benchmark_cases": 6,
+  "baseline_gap": "Saved normalized serial LibraryPair results retained; no compatible direct-native serial/parallel pair in catalog. Save first three-arm baseline for reuse."
+}
