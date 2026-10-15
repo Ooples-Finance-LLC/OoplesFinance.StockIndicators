@@ -24,6 +24,10 @@ Shared CPU Tillson publication now evaluates the exact finite-difference Horner 
 
 Modern ALMA caches the exact binary decoding of each inserted price. A complete period-20 window now decodes one new price instead of all 20 retained prices; cached factors and validity flags make queue entries larger. Deferred invalid-state errors, eviction, reset, signed zero and all output contracts are preserved. All 21 unit, 16 comparator and 100 GPU cases passed, including zero steady-state per-bar allocation. Eight builder-only cases reuse the unchanged native fixture and compatible saved report. [Evidence](results/shared-rollout/alma-price-cache/contracts/summary.json). This is a work reduction with a storage tradeoff; latency and total allocation remain unmeasured.
 
+### Certified logarithm first term (2026-10-15)
+
+The fixed logarithm series initializes its directed sums from the first endpoints, eliminating two divisions by one per nonzero series evaluation. Subsequent terms and the certified tail bound are unchanged. All 4 independent logarithm unit tests, 10 volatility comparator tests and 100 local GPU cases passed. Eight builder-only timing cases will reuse the saved compatible native baseline; latency remains unmeasured. [Evidence](results/shared-rollout/log-first-term/contracts/summary.json).
+
 ### Eight-pilot timing gate
 
 The table below summarizes the existing catalog, before the latest worker/history repairs. Ratio = builder mean / fastest saved native mean; **below 1 is faster**. Each native choice is the faster of the recorded serial and parallel paths. These historical measurements must not be presented as timings of `86380f4d` or as results of the new candidates.
