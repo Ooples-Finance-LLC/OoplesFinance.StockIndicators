@@ -1,0 +1,43 @@
+{
+  "status": "56 focused contract cases passed. First direct-native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderAtrFamilyBenchmarks.cs": "de4ce306f74c6cdc9910aeb3001de76a346b2753efb51b247ad1c9e670943b90",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderAtrFamilyBenchmarkTests.cs": "ca56833d440acd2152993de07d3ef72cac36ce800479e8ff00d101bea19bd2a3"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "AtrStop.Api.cs": "4898f259af12721bea1ba5ef837a72e44912316afd92be21c160b17c28ea9cf8",
+    "AtrStop.Models.cs": "c2ef8631886ecf095d1fb197873edcb90ab20306c9f913da083801af2f69c8ef",
+    "AtrStop.Series.cs": "25ccd2857262c6b242667cabd5050bb6521f6d6465e24a4ba4e3b13cfab7a995",
+    "Chandelier.Api.cs": "9a0ff45ec537f8cb009fa85990eab7f38e23def36aca73c00ed19fb338f2f077",
+    "Chandelier.Models.cs": "33c4db0a0201859182ae6a06dc13cfbf4522c3ae0506db1c71490c6857ad900d",
+    "Chandelier.Series.cs": "13da8625f3586360b7cc8afc896e1d3a2ef85fa485bab15c4139d406c2d037ad",
+    "Keltner.Api.cs": "a2a8ac82a13aad71ee1e40f28ce40151faeaac78aa4b53726f7598d177228859",
+    "Keltner.Models.cs": "263bf83386d18ecb4d15fa1397cc20758cbbf8733b408230f1cbfd0fdeda3e14",
+    "Keltner.Series.cs": "4fc40dcdb478e2fc047d4700a5e82cc2dd85cd1998fe6ebf33e0be8788f81555",
+    "StarcBands.Api.cs": "bdf9608c9c61cf33e420f49352c4b8ef47ffe8bba2bab21df5850d9b24e2911c",
+    "StarcBands.Models.cs": "a2a295e2371ddd80346e7e32f32aaa62dbc329a5f1d4fb6e3f41c103a9bd6832",
+    "StarcBands.Series.cs": "39364e8b858a33371b0e5ae6a7f4cf3dbc70061ddf44873849f0b059b206aa44",
+    "SuperTrend.Api.cs": "f627e62ee197755eee08719e6dd018b606b422c5e1a38a0eb8ea60df50b1c03e",
+    "SuperTrend.Models.cs": "7e76243f3d10633785f775ca5115392879cf7879b720de98446bd663245d4cd0",
+    "SuperTrend.Series.cs": "44aa63d259d9637b45cd954b3d4bba4197ba9e266be342922fa91a6ca6f3738c"
+  },
+  "operations": [
+    "Skender.GetAtrStop",
+    "Skender.GetSuperTrend",
+    "Skender.GetChandelier",
+    "Skender.GetKeltner",
+    "Skender.GetStarcBands"
+  ],
+  "contract": "Public quote APIs, eager native Lists and full-prefix parallel calls preserve recursive ATR seeds. Native ATR Stop and SuperTrend decimal values are compared directly across serial, parallel and repeated calls in addition to normalized independent-reference checks. Chandelier unselected short and Starc unselected width outputs are verified absent. Tests cover warmup, worker boundaries, dates, presence and independently retained results.",
+  "validation": {
+    "comparator_cases_passed": 56,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1251,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 40
+}

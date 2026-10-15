@@ -90,6 +90,18 @@
         ],
         "contract_cases_passed": 49,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_atr_family_fixture": {
+        "name": "SharedSkenderAtrFamilyBenchmarks",
+        "operations": [
+          "Skender.GetAtrStop",
+          "Skender.GetSuperTrend",
+          "Skender.GetChandelier",
+          "Skender.GetKeltner",
+          "Skender.GetStarcBands"
+        ],
+        "contract_cases_passed": 56,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
