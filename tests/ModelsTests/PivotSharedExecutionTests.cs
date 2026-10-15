@@ -125,9 +125,19 @@ public sealed class PivotSharedExecutionTests
     [Fact]
     public async Task WideSubnormalAndSignedZeroLevelsMatchSnapshots()
     {
-        foreach (double scale in new[] { double.MaxValue / 256, double.Epsilon, 1e-200, -0d })
-        foreach (var style in Enum.GetValues<PivotLevelStyle>())
-            await Check(BarsOf(65, scale), new(3, 2, style));
+        int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (int workers in new[] { 1, 8 })
+            {
+                AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                foreach (double scale in new[] { double.MaxValue / 256, double.Epsilon, 1e-200, -0d })
+                foreach (var style in Enum.GetValues<PivotLevelStyle>())
+                foreach (int count in new[] { 65, 513 })
+                    await Check(BarsOf(count, scale), new(3, 2, style));
+            }
+        }
+        finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
     [Fact]
     public async Task ValidationPrecedesOverflowAndMixedRootsRecover()

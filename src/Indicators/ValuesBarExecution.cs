@@ -960,6 +960,8 @@ internal static partial class ValuesBarExecution
                     envelope.Update(in bar, _scratch);
                     for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
                 }
+                else if (_state is PivotValueState pivot)
+                    pivot.Append(in bar, _scratch, Values, index);
                 else if (_state is IMultiOutputState multi)
                 {
                     Array.Clear(_scratch);

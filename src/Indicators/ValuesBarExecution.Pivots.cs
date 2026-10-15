@@ -30,7 +30,7 @@ internal static partial class ValuesBarExecution
             state.Update(in bar, values);
             int index = _index++;
             if (index >= target.WriteStart)
-                for (int slot = 1; slot < values.Length; slot++) target.Values[slot][index] = values[slot];
+                state.StoreSecondary(values, target.Values, index);
             return values[0];
         }
     }
@@ -42,6 +42,32 @@ internal static partial class ValuesBarExecution
         private readonly PivotCpuKernel? _kernel = (long)owner.Period + owner.Offset >= count ? null
             : new(owner.Period, owner.Offset, owner.Style, rejectOverflow: false);
         public void Reset() => _kernel?.Reset();
+        public void Append(in Bar bar, Span<double> outputs, double[][] columns, int index)
+        {
+            Update(in bar, outputs);
+            columns[0][index] = outputs[0];
+            StoreSecondary(outputs, columns, index);
+        }
+        public void StoreSecondary(ReadOnlySpan<double> outputs, double[][] columns, int index)
+        {
+            // Undefined levels retain their new array's positive zero. Presence
+            // aliases share slot 9; write each defined level and that flag once.
+            if (owner.Style == PivotLevelStyle.Camarilla)
+            {
+                for (int slot = 1; slot < 9; slot++) columns[slot][index] = outputs[slot];
+            }
+            else if (owner.Style == PivotLevelStyle.Demark)
+            {
+                columns[1][index] = outputs[1];
+                columns[5][index] = outputs[5];
+            }
+            else
+            {
+                for (int slot = 1; slot < 4; slot++) columns[slot][index] = outputs[slot];
+                for (int slot = 5; slot < 8; slot++) columns[slot][index] = outputs[slot];
+            }
+            columns[9][index] = outputs[9];
+        }
         public void Update(in Bar bar, Span<double> outputs)
         {
             if (_kernel is null) { outputs.Clear(); return; }
