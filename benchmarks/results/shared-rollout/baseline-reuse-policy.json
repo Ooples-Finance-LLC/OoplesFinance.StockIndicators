@@ -276,6 +276,23 @@
         ],
         "contract_cases_passed": 153,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_multibar_fixture": {
+        "name": "SharedTaMultiBarNativeBenchmarks",
+        "operations": [
+          "TaLib.Candles.Breakaway",
+          "TaLib.Candles.ConcealingBabySwallow",
+          "TaLib.Candles.LadderBottom",
+          "TaLib.Candles.MatHold",
+          "TaLib.Candles.RisingFallingThreeMethods",
+          "TaLib.Candles.Hikkake",
+          "TaLib.Candles.HikkakeModified",
+          "TaLib.Candles.TasukiGap",
+          "TaLib.Candles.Tristar",
+          "TaLib.Candles.UpDownSideGapThreeMethods"
+        ],
+        "contract_cases_passed": 111,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }

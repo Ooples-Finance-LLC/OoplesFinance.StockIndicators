@@ -15,11 +15,19 @@ public abstract class SharedTaCandleBenchmarkBase : SharedMappedBenchmarkBase
     private int _workers;
 
     [GlobalSetup]
-    public void Setup()
+    public void Setup() => Setup(null);
+
+    internal void Setup(CompetitorData? supplied)
     {
         if (NativeLookback() != Lookback) throw new InvalidOperationException("Native candle settings changed.");
         ArgumentOutOfRangeException.ThrowIfLessThan(Count, 1);
         var (pair, data) = PrepareFixture("TaLib.Candles." + Operation);
+        if (supplied is not null)
+        {
+            if (supplied.Count != Count) throw new ArgumentException("Supplied fixture length differs.", nameof(supplied));
+            data = supplied;
+            _bars = data.IndicatorBars;
+        }
         _open = data.Opens; _high = data.Highs; _low = data.Lows; _close = data.Closes;
         _workers = Math.Min(Count, Math.Min(8, Environment.ProcessorCount));
         SharedBenchmarkSupport.VerifyMappedOutputs(_bars, Create, pair.Reference!(data, 20), ["Value"], includeScalarStartup: true);
