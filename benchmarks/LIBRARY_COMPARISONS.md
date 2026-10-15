@@ -14,7 +14,7 @@ The production library has no competitor package dependency.
 
 The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. These are coverage counts, not speedup counts. Two stale KAMA qualification labels now agree with their latest builder-only rows; historical native measurements remain retained. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
 
-All 134 catalog gaps now have prepared comparisons: 119 builder-only mappings and 15 snapshot mappings. The local measurement queue has 46 preserved stages, including pilot repairs and later candidates. A [queue coverage audit](results/shared-rollout/prepared-queue-coverage.json) verified recorder operation IDs, candidate manifests, required file presence and retained C# hashes. No queued stage has been archived yet. Preparation is complete; measurements, result review and qualification remain unfinished.
+All 134 catalog gaps now have prepared comparisons: 119 builder-only mappings and 15 snapshot mappings. The local measurement queue has 47 preserved stages, including pilot repairs and later candidates. The audit below covers the first 46; the added logarithm candidate reuses existing native baselines and does not change mapping coverage. A [queue coverage audit](results/shared-rollout/prepared-queue-coverage.json) verified recorder operation IDs, candidate manifests, required file presence and retained C# hashes. No queued stage has been archived yet. Preparation is complete; measurements, result review and qualification remain unfinished.
 
 ### Tillson polynomial candidate (2026-10-15)
 
@@ -26,7 +26,7 @@ Modern ALMA caches the exact binary decoding of each inserted price. A complete 
 
 ### Certified logarithm first term (2026-10-15)
 
-The fixed logarithm series initializes its directed sums from the first endpoints, eliminating two divisions by one per nonzero series evaluation. Subsequent terms and the certified tail bound are unchanged. All 4 independent logarithm unit tests, 10 volatility comparator tests and 100 local GPU cases passed. Eight builder-only timing cases will reuse the saved compatible native baseline; latency remains unmeasured. [Evidence](results/shared-rollout/log-first-term/contracts/summary.json).
+The fixed logarithm series initializes its directed sums from the first endpoints, eliminating two divisions by one per nonzero series evaluation. Subsequent terms and the certified tail bound are unchanged. All 4 independent logarithm unit tests, 10 volatility comparator tests and 100 local GPU cases passed. Eight queued builder-only timing cases reuse the saved compatible native baseline; latency remains unmeasured. [Evidence](results/shared-rollout/log-first-term/contracts/summary.json).
 
 ### Eight-pilot timing gate
 
