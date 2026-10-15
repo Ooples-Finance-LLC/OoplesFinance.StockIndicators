@@ -46,7 +46,19 @@
       "implemented_operations": [
         "Skender.GetRsi",
         "Skender.GetAdx"
-      ]
+      ],
+      "additional_implemented_fixture": {
+        "name": "SharedTradyStrengthBenchmarks",
+        "operations": [
+          "Trady.Indicator.RelativeStrength",
+          "Trady.Indicator.RelativeStrengthIndex",
+          "Trady.Indicator.NetMomentumOscillator",
+          "Trady.Indicator.RelativeMomentum",
+          "Trady.Indicator.RelativeMomentumIndex"
+        ],
+        "contract_cases_passed": 46,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      }
     }
   }
 }
