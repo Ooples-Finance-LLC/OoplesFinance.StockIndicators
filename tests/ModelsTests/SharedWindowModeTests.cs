@@ -7,6 +7,25 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SharedWindowModeTests
 {
+    [Fact]
+    public void UnchangedWindowsRetainFutureEvictionAndReset()
+    {
+        double[] cycle = [-0d, 0d, double.MaxValue, -double.MaxValue, 1, 1, double.Epsilon, -double.Epsilon];
+        var values = Enumerable.Range(0, 40).Select(i => cycle[i % cycle.Length])
+            .Concat(Enumerable.Repeat(3d, 12)).Concat(cycle).ToArray();
+        var state = new WindowMode.State(cycle.Length);
+        foreach (var input in new[] { values, values.Reverse().ToArray() })
+        {
+            state.Reset();
+            var expected = Oracle(input, cycle.Length).Select(BitConverter.DoubleToInt64Bits);
+            var actual = input.Select(v =>
+            {
+                var bar = new Bar(default, 0, 1, -1, v, 1);
+                return BitConverter.DoubleToInt64Bits(state.Update(in bar));
+            });
+            Assert.Equal(expected, actual);
+        }
+    }
     private static double[] Oracle(double[] values, int period) => Enumerable.Range(0, values.Length).Select(i =>
     {
         var window = values.Skip(Math.Max(0, i - period + 1)).Take(Math.Min(period, i + 1)).ToArray();

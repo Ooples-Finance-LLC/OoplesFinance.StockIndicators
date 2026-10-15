@@ -10,6 +10,29 @@ public sealed class SharedRollingPercentileTests
 {
     [Theory]
     [InlineData(false)] [InlineData(true)]
+    public void ReplacedEqualValuesPreserveMixedZeroOrderingAndFutureEviction(bool average)
+    {
+        double[] cycle = [-0d, 0d, double.MaxValue, -double.MaxValue, 1, 1, double.Epsilon, -double.Epsilon];
+        var values = Enumerable.Range(0, 40).Select(i => cycle[i % cycle.Length])
+            .Concat(Enumerable.Repeat(3d, 12)).Concat(cycle).ToArray();
+        foreach (double percentile in new[] { 0, double.Epsilon, .25, .5, .75, 1 })
+        {
+            var state = new RollingPercentile.State(cycle.Length, percentile, average);
+            foreach (var input in new[] { values, values.Reverse().ToArray() })
+            {
+                state.Reset();
+                var oracle = new Original(cycle.Length, percentile, average);
+                foreach (double value in input)
+                {
+                    var bar = new Bar(default, 0, 1, -1, value, 1);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(oracle.Next(value)),
+                        BitConverter.DoubleToInt64Bits(state.Update(in bar)));
+                }
+            }
+        }
+    }
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
     public void EqualEndpointsPreserveExactBitsThroughPlateausEvictionAndReset(bool average)
     {
         double[] levels = [double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon,

@@ -74,6 +74,12 @@ In All mode, standard and directional moment windows now share one exact square 
 
 The net10 production build passed with zero warnings/errors; 35 focused unit, 27 comparator and 100 local GPU cases passed with zero skips. Independent reference checks cover all selections and output slots, wide/subnormal returns, excluded runs evicting included observations, reset, workers, ownership and input-error priority. Existing zero-per-bar-allocation assertions also pass. Hosted analysis found exact-equality and complexity findings in the preceding rolling-percentile change; interpolation is now a separate helper, with its deliberate exact comparison documented. Pivot validation also has explicit braces. Another 36 percentile/pivot unit cases passed after these analysis fixes. [Source hashes and compressed test results](results/shared-rollout/compact-return/shared-products/summary.json) retain the evidence. Product counts describe reduced work, not measured latency; hosted verification remains pending.
 
+### Unchanged percentile and mode windows (2026-10-15)
+
+Rolling percentiles now skip two binary searches and sorted-list removal/insertion when the incoming value equals the outgoing nonzero value. Zero replacements retain the original tie ordering. Rolling mode reuses its prior full-window result when replacement leaves frequencies unchanged, including equivalent signed zeros. Both still rotate history for future eviction; mode retains one additional scalar result per state. This covers five QuanTAlib/Trady mappings without changing their public outputs.
+
+The net10 production build passed with zero warnings/errors; 24 focused unit, 22 comparator and 100 local GPU cases passed with zero skips. Independent references cover periodic and constant windows, later eviction, warmup, reset, wide/subnormal values, signed-zero bits, workers, ownership and input rejection. [Source hashes and compressed test results](results/shared-rollout/order-statistics/unchanged-windows/summary.json) retain the evidence. The preceding beta/analysis commit `20d4302a` passed Sonar analysis; hosted checks for this follow-up and fresh latency qualification remain pending.
+
 ### Evidence still required
 
 - The four candidates have preserved binaries and source hashes for builder-only measurements on .NET 10.0.12, matching the saved native baseline. Competitor timings are reused under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json); they are not rerun.

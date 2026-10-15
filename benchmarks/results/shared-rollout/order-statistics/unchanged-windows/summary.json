@@ -1,0 +1,16 @@
+{
+  "base_commit": "20d4302a938a591b39afa33eac9eb4b4434ac652",
+  "source_sha256": {
+    "src/Indicators/RollingPercentile.cs": "ac166e6e722933774f2b2063265128f585ff020f29d5937e24caaf2517b68156",
+    "src/Indicators/WindowMode.cs": "352de442935f2c4c39d5ba8e076a633afc03f429e8ab4d78238368014c25c57d",
+    "tests/ModelsTests/SharedRollingPercentileTests.cs": "793249fe390f17878a1922913dd9bb76e57eed0f53449056c44cdf19e9ea4781",
+    "tests/ModelsTests/SharedWindowModeTests.cs": "980ccbd015d3ec21d0a9a5b0f3dc18d80d42710b0218ea56112511aa6ee2ab7c"
+  },
+  "verification": {
+    "unit_cases": 24,
+    "comparator_cases": 22,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Equal outgoing/incoming nonzero percentile values skip two binary searches and sorted-list removal/insertion; zero replacements retain original tie ordering. Mode reuses the last full-window result when frequencies are unchanged, including equivalent signed zeros. Both rotate history and retain reset/input contracts. Work reduction, not measured latency."
+}

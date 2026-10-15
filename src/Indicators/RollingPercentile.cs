@@ -140,14 +140,7 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
 
         public double Update(in Bar bar)
         {
-            if (_history.Count == _period)
-            {
-                var oldest = _history.Dequeue();
-                _sorted.RemoveAt(_sorted.BinarySearch(oldest));
-            }
-            var insertion = _sorted.BinarySearch(bar.Close);
-            _sorted.Insert(insertion < 0 ? ~insertion : insertion, bar.Close);
-            _history.Enqueue(bar.Close);
+            Append(bar.Close);
             if (_warming)
             {
                 if (_history.Count < _period)
@@ -167,6 +160,25 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
             if (remainder.IsZero)
                 return _sorted[index];
             return Interpolate(index, remainder, full);
+        }
+
+        private void Append(double value)
+        {
+            bool unchanged = false;
+            if (_history.Count == _period)
+            {
+                var oldest = _history.Dequeue();
+                // Nonzero equal values have identical bits. Zero replacement
+                // still runs the original tie-ordering operations.
+                unchanged = value != 0 && value == oldest; // NOSONAR: Exact multiset identity; signed-zero ordering is excluded.
+                if (!unchanged) _sorted.RemoveAt(_sorted.BinarySearch(oldest));
+            }
+            if (!unchanged)
+            {
+                var insertion = _sorted.BinarySearch(value);
+                _sorted.Insert(insertion < 0 ? ~insertion : insertion, value);
+            }
+            _history.Enqueue(value);
         }
 
         private double Interpolate(int index, BigInteger remainder, bool full)

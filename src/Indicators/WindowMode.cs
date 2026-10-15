@@ -62,6 +62,7 @@ public sealed class WindowMode : IndicatorBase, IIndicatorValidationContract
         private readonly Dictionary<double, int> _frequencies = new();
         private ExactMeanAccumulator _sum;
         private bool _warming = true;
+        private double _last;
 
         public void Reset()
         {
@@ -69,6 +70,7 @@ public sealed class WindowMode : IndicatorBase, IIndicatorValidationContract
             _frequencies.Clear();
             _sum = default;
             _warming = true;
+            _last = 0;
         }
 
         public double Update(in Bar bar)
@@ -78,6 +80,13 @@ public sealed class WindowMode : IndicatorBase, IIndicatorValidationContract
             if (_window.Count == period)
             {
                 var old = _window.Dequeue();
+                // The full-window multiset and its exact mode mean are unchanged.
+                // Queue rotation still matters for the next eviction.
+                if (old == bar.Close) // NOSONAR: Exact frequency identity, including equivalent signed zeros.
+                {
+                    _window.Enqueue(bar.Close);
+                    return _last;
+                }
                 if (_frequencies[old] == 1)
                     _frequencies.Remove(old);
                 else
@@ -97,6 +106,11 @@ public sealed class WindowMode : IndicatorBase, IIndicatorValidationContract
                 _sum = default;
                 _warming = false;
             }
+            return _last = Mode();
+        }
+
+        private double Mode()
+        {
             var maximum = 0;
             var modes = new ExactMeanAccumulator();
             var count = 0;
