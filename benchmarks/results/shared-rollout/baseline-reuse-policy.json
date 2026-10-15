@@ -70,6 +70,16 @@
         ],
         "contract_cases_passed": 81,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_smoothing_fixture": {
+        "name": "SharedSkenderSmoothingBenchmarks",
+        "operations": [
+          "Skender.GetAlligator",
+          "Skender.GetGator",
+          "Skender.GetElderRay"
+        ],
+        "contract_cases_passed": 43,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
