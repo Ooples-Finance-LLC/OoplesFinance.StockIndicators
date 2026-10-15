@@ -11,12 +11,16 @@ public abstract class SharedTaPackedBenchmarkBase : SharedMappedBenchmarkBase
     protected abstract int Columns { get; }
     protected virtual bool IndependentWindows => false;
     protected abstract TALib.Core.RetCode Call(System.Range input, double[][] output, out System.Range range);
+    protected virtual void PrepareNative() { }
+    private protected virtual void VerifyBuilder(ComparisonPair pair, string[] names) =>
+        SharedBenchmarkSupport.VerifyMappedOutputs(_bars, Create, pair.Reference!(Data, 20), names);
 
     [GlobalSetup]
     public void Setup()
     {
         var (pair, data) = PrepareFixture(Mapping);
         Data = data;
+        PrepareNative();
         var names = pair.OutputNames ?? ["Value"];
         var native = (pair.CompetitorReference ?? pair.Reference)!(data, 20);
         var serial = NativeSingle();
@@ -27,7 +31,7 @@ public abstract class SharedTaPackedBenchmarkBase : SharedMappedBenchmarkBase
             AsinFeasibilityBenchmarks.RequireSame(expected, serial[slot]);
             AsinFeasibilityBenchmarks.RequireSame(expected, parallel[slot]);
         }
-        SharedBenchmarkSupport.VerifyMappedOutputs(_bars, Create, pair.Reference!(data, 20), names);
+        VerifyBuilder(pair, names);
     }
 
     [Benchmark(Baseline = true)]

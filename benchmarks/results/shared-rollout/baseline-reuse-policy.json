@@ -343,6 +343,16 @@
         ],
         "contract_cases_passed": 40,
         "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_adaptive_rate_fixture": {
+        "name": "SharedTaAdaptiveRateNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Trix",
+          "TaLib.Functions.Kama",
+          "TaLib.Functions.Mavp"
+        ],
+        "contract_cases_passed": 40,
+        "timing_status": "First native baselines pending; catalog unchanged."
       }
     }
   }
