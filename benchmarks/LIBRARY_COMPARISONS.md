@@ -28,6 +28,10 @@ Modern ALMA caches the exact binary decoding of each inserted price. A complete 
 
 The fixed logarithm series initializes its directed sums from the first endpoints, eliminating two divisions by one per nonzero series evaluation. Subsequent terms and the certified tail bound are unchanged. All 4 independent logarithm unit tests, 10 volatility comparator tests and 100 local GPU cases passed. Eight queued builder-only timing cases reuse the saved compatible native baseline; latency remains unmeasured. [Evidence](results/shared-rollout/log-first-term/contracts/summary.json).
 
+### Connors sorted return index (2026-10-15)
+
+Connors retains a sorted exact-return index alongside its inclusive nullable history. At rank period 100, binary searches require at most 14 comparisons for insertion and eviction instead of the 101-comparison rank scan. Array shifts remain linear and the index adds storage; no latency or total allocation improvement is claimed. Exact ties, excluded returns, startup, reset and all eight outputs are preserved. All 262 focused unit, 10 comparator and 100 GPU cases passed, including zero warmed per-update allocation after reset. Six timing cases will reuse the existing 10k native baseline and measure the missing 1k native arms once. [Evidence](results/shared-rollout/connors-rank-index/contracts/summary.json).
+
 ### Eight-pilot timing gate
 
 The table below summarizes the existing catalog, before the latest worker/history repairs. Ratio = builder mean / fastest saved native mean; **below 1 is faster**. Each native choice is the faster of the recorded serial and parallel paths. These historical measurements must not be presented as timings of `86380f4d` or as results of the new candidates.

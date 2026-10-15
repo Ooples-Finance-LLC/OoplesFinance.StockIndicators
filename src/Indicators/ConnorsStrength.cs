@@ -58,6 +58,7 @@ internal sealed class ConnorsStrengthState : IMultiOutputState
     private readonly IMultiOutputState _rsi, _streakRsi;
     private readonly double[] _priceOutput = new double[2], _streakOutput = new double[2];
     private readonly Queue<ReturnKey?> _returns = new();
+    private readonly List<ReturnKey> _orderedReturns = new();
     private long _index = -1;
     private double _previous;
     private int _streak;
@@ -71,7 +72,7 @@ internal sealed class ConnorsStrengthState : IMultiOutputState
 
     public void Reset()
     {
-        _rsi.Reset(); _streakRsi.Reset(); _returns.Clear();
+        _rsi.Reset(); _streakRsi.Reset(); _returns.Clear(); _orderedReturns.Clear();
         Array.Clear(_priceOutput, 0, 2); Array.Clear(_streakOutput, 0, 2);
         _index = -1; _previous = 0; _streak = 0;
     }
@@ -91,14 +92,16 @@ internal sealed class ConnorsStrengthState : IMultiOutputState
             change = _previous > 0 ? new ReturnKey(bar.Close, _previous) : null;
         }
         _previous = bar.Close;
-        if (_returns.Count > _rankPeriod) _returns.Dequeue();
+        if (_returns.Count > _rankPeriod)
+        {
+            var expired = _returns.Dequeue();
+            if (expired.HasValue) _orderedReturns.RemoveAt(LowerBound(expired.Value));
+        }
         _returns.Enqueue(change);
+        int count = change.HasValue ? LowerBound(change.Value) : 0;
+        if (change.HasValue) _orderedReturns.Insert(count, change.Value);
         if (_index >= _rankPeriod)
         {
-            int count = 0;
-            if (change.HasValue)
-                foreach (var prior in _returns)
-                    if (prior.HasValue && prior.Value.CompareTo(change.Value) < 0) count++;
             output[2] = (100L * count) / _rankPeriod; output[6] = 1; // NOSONAR: S2184 - Connors percent rank deliberately truncates integer division before publication.
         }
         if (_priceOutput[1] > 0) { output[0] = _priceOutput[0]; output[4] = 1; }
@@ -111,5 +114,19 @@ internal sealed class ConnorsStrengthState : IMultiOutputState
             mean.Add(output[0]); mean.Add(output[1]); mean.Add(output[2]);
             output[3] = mean.Mean(3); output[7] = 1;
         }
+    }
+
+    private int LowerBound(ReturnKey key)
+    {
+        // The first equal key is also the number of strictly smaller returns.
+        // Exact ties are interchangeable for eviction and never count in rank.
+        int low = 0, high = _orderedReturns.Count;
+        while (low < high)
+        {
+            int middle = low + (high - low) / 2;
+            if (_orderedReturns[middle].CompareTo(key) < 0) low = middle + 1;
+            else high = middle;
+        }
+        return low;
     }
 }

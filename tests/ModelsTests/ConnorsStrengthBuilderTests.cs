@@ -6,6 +6,38 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class ConnorsStrengthBuilderTests
 {
+    [Theory]
+    [InlineData(3)]
+    [InlineData(17)]
+    [InlineData(100)]
+    public void RankEvictionPreservesExactTiesExcludedReturnsAndReset(int rankPeriod)
+    {
+        double[] pattern = [1, 2, 4, 8, 4, 2, 1, 0, -0d, -1, 1,
+            Math.BitIncrement(1d), Math.BitDecrement(1d), 1e-100, 1e100, 1e100];
+        var prices = Enumerable.Range(0, 320).Select(i => pattern[i % pattern.Length]).ToArray();
+        var state = new ConnorsStrengthState(3, 2, rankPeriod);
+        var output = new double[8];
+        for (int replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            if (replay != 0) Array.Reverse(prices);
+            var bars = prices.Select(p => new Bar(default, p, p, p, p, 0)).ToArray();
+            var expected = ConnorsStrengthReference.Calculate(bars, 3, 2, rankPeriod);
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(bars[i], output);
+                double?[] values = [expected[i].Rsi, expected[i].RsiStreak,
+                    expected[i].PercentRank, expected[i].ConnorsRsi];
+                for (int slot = 0; slot < 4; slot++)
+                {
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(values[slot] ?? 0),
+                        BitConverter.DoubleToInt64Bits(output[slot]));
+                    Assert.Equal(values[slot].HasValue ? 1d : 0d, output[slot + 4]);
+                }
+            }
+        }
+    }
+
     [Fact]
     public void LatestOnlyAvoidsFullBarStorageOnTheSharedCpuPath()
     {
