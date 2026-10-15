@@ -1,0 +1,72 @@
+{
+  "base_commit": "7156dd54f37feab39fc95b6d7b6b4b8b4348fd9a",
+  "source_sha256": {
+    "src/Indicators/ValuesBarExecution.cs": "ff8a84ea632f4ef6805e97529bd9d3be0b7b9c683911a60ef241d551bde81311",
+    "src/Indicators/ValuesBarExecution.Pivots.cs": "2be40c226626e44ad4aaae3f38bbc92753c6689445f1103c700709a368f11c7c",
+    "tests/ModelsTests/PivotSharedExecutionTests.cs": "10efd4a85ceeda5c8871baa76168be5e28c54f898c4b6bcfe3ff8badd0cdf8e8"
+  },
+  "verification": {
+    "unit_cases": 18,
+    "independent_comparator_cases": 12,
+    "local_gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Retained double-array payload reduction derived from tested distinct buffer counts, not a total-GC allocation measurement or a latency claim. Array headers and alignment are excluded. Full and LatestOnly preserve all 18 public outputs and isolate storage across runs and indicator roots.",
+  "styles": [
+    {
+      "style": "Standard",
+      "public_outputs": 18,
+      "distinct_owned_columns_before": 18,
+      "distinct_owned_columns_after": 9,
+      "removed_arrays": 9,
+      "retained_payload_bytes_removed": {
+        "1000": 72000,
+        "10000": 720000
+      }
+    },
+    {
+      "style": "Camarilla",
+      "public_outputs": 18,
+      "distinct_owned_columns_before": 18,
+      "distinct_owned_columns_after": 10,
+      "removed_arrays": 8,
+      "retained_payload_bytes_removed": {
+        "1000": 64000,
+        "10000": 640000
+      }
+    },
+    {
+      "style": "Demark",
+      "public_outputs": 18,
+      "distinct_owned_columns_before": 18,
+      "distinct_owned_columns_after": 5,
+      "removed_arrays": 13,
+      "retained_payload_bytes_removed": {
+        "1000": 104000,
+        "10000": 1040000
+      }
+    },
+    {
+      "style": "Fibonacci",
+      "public_outputs": 18,
+      "distinct_owned_columns_before": 18,
+      "distinct_owned_columns_after": 9,
+      "removed_arrays": 9,
+      "retained_payload_bytes_removed": {
+        "1000": 72000,
+        "10000": 720000
+      }
+    },
+    {
+      "style": "Woodie",
+      "public_outputs": 18,
+      "distinct_owned_columns_before": 18,
+      "distinct_owned_columns_after": 9,
+      "removed_arrays": 9,
+      "retained_payload_bytes_removed": {
+        "1000": 72000,
+        "10000": 720000
+      }
+    }
+  ]
+}

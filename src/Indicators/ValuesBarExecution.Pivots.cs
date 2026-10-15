@@ -3,6 +3,17 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal static partial class ValuesBarExecution
 {
+    // Every defined level matures on the same bar. Missing style-specific levels
+    // and their presence flags stay zero, so they share one run-owned column.
+    private static int PivotColumnOwner(PivotLevelStyle style, int slot)
+    {
+        int level = slot % 9;
+        bool defined = style == PivotLevelStyle.Camarilla
+            || (style == PivotLevelStyle.Demark ? level is 0 or 1 or 5 : level is not (4 or 8));
+        if (!defined) return style == PivotLevelStyle.Demark ? 2 : 4;
+        return slot < 9 ? slot : 9;
+    }
+
     // Each output depends on Period + Offset preceding bars and the current
     // open. Bound replay storage; larger windows keep the existing state path.
     private static int PivotReplayWindow(IIndicator indicator) => indicator is RollingPivotLevels pivot

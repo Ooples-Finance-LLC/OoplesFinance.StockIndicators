@@ -627,12 +627,14 @@ internal static partial class ValuesBarExecution
             bool smoothed = indicator is SmoothedAccumulationOscillator;
             bool smoothedDetails = indicator is SmoothedAccumulationOscillator { IncludeDetails: true };
             bool macd = indicator is ClassicMacd or AlignedEmaMacd or EmaDifferenceSignal;
+            var pivot = indicator as RollingPivotLevels;
             Values = new double[indicator.Outputs.Count][];
             for (int slot = 0; slot < Values.Length; slot++)
                 Values[slot] = indicator is RegressionWithChannels && slot is 5 or 6
                     || indicator is WindowRegressionStatistics && slot is 7 or 9
                     || indicator is RegressionWithFinalLine && slot is 6 or 7
                     || macd && MacdColumnOwner(indicator, slot) < slot
+                    || pivot is not null && PivotColumnOwner(pivot.Style, slot) < slot
                     || indicator is SumSeededDirectionalIndex && slot is 6 or 7
                     || indicator is RateOfChangeWithAverage { AveragePeriod: null } && slot == 4
                     || indicator is SeededTrueStrength { SignalPeriod: <= 1 } && slot == 3
@@ -661,6 +663,12 @@ internal static partial class ValuesBarExecution
                 }
             // These three presence outputs are identical by contract. Completed
             // series expose read-only spans, so one run-owned column serves all three.
+            if (pivot is not null)
+                for (int slot = 0; slot < Values.Length; slot++)
+                {
+                    int column = PivotColumnOwner(pivot.Style, slot);
+                    if (column < slot) Values[slot] = Values[column];
+                }
             if (indicator is RegressionWithChannels) Values[5] = Values[6] = Values[4];
             if (indicator is WindowRegressionStatistics) Values[7] = Values[9] = Values[6];
             if (indicator is RegressionWithFinalLine) Values[6] = Values[7] = Values[5];

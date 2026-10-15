@@ -10,9 +10,9 @@ and no pending families.
 it does not claim that timings have been collected. `pending` makes neither claim.
 The production library has no competitor package dependency.
 
-## Shared rollout status — 2026-10-15
+## Shared rollout status (2026-10-15)
 
-The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. These are coverage counts, not speedup counts. Historical evidence records 106 mappings winning at both recorded sizes in Full and LatestOnly; it does not prove current-head performance.
+The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. These are coverage counts, not speedup counts. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
 
 ### Eight-pilot timing gate
 
@@ -39,6 +39,18 @@ The table below summarizes the existing catalog, before the latest worker/histor
 | `86380f4d` | Accepted Full SMA workers allocate chunked history and publish it only after validation, fallback replay and cancellation checks succeed. | 55 unit + 4 comparator + 100 GPU cases | Pending |
 
 All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,231 contract methods remain assigned to hosted CI. Correctness checks do not establish latency wins.
+
+### Rolling-pivot column storage (2026-10-15)
+
+Identical presence flags and permanently absent levels now share run-owned storage. Every style still exposes all 18 outputs, with exact values and presence, raw-input validation priority, cancellation, and Full/Latest ownership preserved. Storage is never shared between indicator roots or separate runs.
+
+| Style | Distinct arrays before / after | Retained array payload removed at 1k / 10k bars |
+|---|---:|---:|
+| Standard, Fibonacci, Woodie | 18 / 9 | 72,000 / 720,000 B |
+| Camarilla | 18 / 10 | 64,000 / 640,000 B |
+| DeMark | 18 / 5 | 104,000 / 1,040,000 B |
+
+These are exact payload reductions from tested buffer ownership, excluding array headers; they are not total allocation measurements or latency wins. The production net10 build passed with zero warnings/errors; 18 focused unit cases, 12 independent comparator cases, and 100 local GPU cases passed with zero skips. Tests cover all styles, serial/workers, mixed roots, extremes, validation order, rebuild isolation, source mutation and disposal. [Source hashes, storage counts and compressed test results](results/shared-rollout/rolling-pivot-shared-cpu/column-storage/summary.json) retain the evidence. Matching-runtime timing and hosted verification of this follow-up remain pending.
 
 ### Evidence still required
 

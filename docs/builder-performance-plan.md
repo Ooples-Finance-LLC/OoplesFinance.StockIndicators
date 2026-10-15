@@ -1,9 +1,9 @@
 # Builder performance: profile-led implementation plan
 
-## Current status — 2026-10-15
+## Current status (2026-10-15)
 
 The approved shared rollout now extends beyond the original fused pilot. See the
-[current performance report](../benchmarks/LIBRARY_COMPARISONS.md#shared-rollout-status--2026-10-15)
+[current performance report](../benchmarks/LIBRARY_COMPARISONS.md#shared-rollout-status-2026-10-15)
 for the 401-mapping coverage split, the eight historical pilot results, and the
 verified pivot, Rickshaw, Asin and SMA follow-ups. Their matching-runtime builder
 timings remain pending; green correctness checks do not close the performance gate.

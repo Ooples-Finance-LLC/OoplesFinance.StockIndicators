@@ -8,6 +8,62 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class PivotSharedExecutionTests
 {
     [Theory]
+    [InlineData(PivotLevelStyle.Standard, 9)]
+    [InlineData(PivotLevelStyle.Camarilla, 10)]
+    [InlineData(PivotLevelStyle.Demark, 5)]
+    [InlineData(PivotLevelStyle.Fibonacci, 9)]
+    [InlineData(PivotLevelStyle.Woodie, 9)]
+    public async Task IdenticalColumnsShareStorageOnlyWithinTheirOwnRun(PivotLevelStyle style, int columnCount)
+    {
+        foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
+        foreach (bool mixed in new[] { false, true })
+        {
+            var original = BarsOf(513, .125);
+            var input = original.ToArray();
+            var pivot = new RollingPivotLevels(3, 2, style);
+            var other = new RollingPivotLevels(7, 1, style);
+            var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(input))
+                .ConfigureIndicators(mixed ? [pivot, other] : [pivot]).ConfigureHistory(mode);
+            using var first = await builder.BuildAsync();
+            Assert.Equal(columnCount, DistinctColumnCount(first, pivot));
+            AssertColumns(original, pivot, first);
+            if (mixed)
+            {
+                AssertColumns(original, other, first);
+                AssertDisjointColumns(first, pivot, first, other);
+            }
+            input[0] = new(default, 2, 3, 1, 2, 1);
+            using var second = await builder.BuildAsync();
+            AssertDisjointColumns(first, pivot, second, pivot);
+            AssertColumns(input, pivot, second);
+            Array.Clear(input);
+            first.Dispose();
+            AssertColumns(original, pivot, first);
+        }
+    }
+
+    private static int DistinctColumnCount(IIndicatorRun run, RollingPivotLevels pivot)
+    {
+        int count = 0;
+        for (int slot = 0; slot < pivot.Outputs.Count; slot++)
+        {
+            bool shared = false;
+            for (int prior = 0; prior < slot; prior++)
+                shared |= run[pivot.Outputs[slot]].Overlaps(run[pivot.Outputs[prior]]);
+            if (!shared) count++;
+        }
+        return count;
+    }
+
+    private static void AssertDisjointColumns(IIndicatorRun first, RollingPivotLevels left,
+        IIndicatorRun second, RollingPivotLevels right)
+    {
+        foreach (var a in left.Outputs)
+        foreach (var b in right.Outputs)
+            Assert.False(first[a].Overlaps(second[b]));
+    }
+
+    [Theory]
     [InlineData(PivotLevelStyle.Standard)] [InlineData(PivotLevelStyle.Camarilla)]
     [InlineData(PivotLevelStyle.Demark)] [InlineData(PivotLevelStyle.Fibonacci)] [InlineData(PivotLevelStyle.Woodie)]
     public async Task WorkerReplayPreservesOffsetsAndEveryColumn(PivotLevelStyle style)
