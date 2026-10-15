@@ -38,7 +38,7 @@ The table below summarizes the existing catalog, before the latest worker/histor
 | `332edbfb` | Asin uses exact workers from 512 bars; Full transfers chunked owned history. | 22 unit + 9 comparator + 100 GPU cases | Pending |
 | `86380f4d` | Accepted Full SMA workers allocate chunked history and publish it only after validation, fallback replay and cancellation checks succeed. | 55 unit + 4 comparator + 100 GPU cases | Pending |
 
-All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,296 contract methods remain assigned to hosted CI in the fresh inventory after the direct-native fixture batches. Correctness checks do not establish latency wins.
+All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,298 contract methods remain assigned to hosted CI in the fresh inventory after the direct-native fixture batches. Correctness checks do not establish latency wins.
 
 ### Rolling-pivot column storage (2026-10-15)
 
@@ -155,8 +155,11 @@ The 102 runtime-mismatched mappings account for 204 size rows. The saved-artifac
 | TA-Lib Stoch / StochF / StochRsi | 3 | 40 | 24 | [Stochastic](results/shared-rollout/ta-stochastic-native/direct-native-contracts/summary.json) |
 | TA-Lib MA / APO / PPO | 3 | 40 | 24 | [Averages](results/shared-rollout/ta-average-native/direct-native-contracts/summary.json) |
 | TA-Lib Trix / KAMA / Mavp | 3 | 40 | 24 | [Adaptive / rate](results/shared-rollout/ta-adaptive-rate-native/direct-native-contracts/summary.json) |
+| TA-Lib Hilbert phase / sine / trendline / trend mode | 4 | 54 | 32 | [Hilbert](results/shared-rollout/ta-hilbert-native/direct-native-contracts/summary.json) |
 
-The table includes 109 newly implemented mappings and four mappings from the existing triple-body fixture. Its 32 tests passed using current binaries; the existing 100-case GPU receipt was reverified. The saved serial-only triple-body comparison uses different inputs, so this existing four-arm fixture is queued for its first compatible native baseline.
+The table includes 113 newly implemented mappings and four mappings from the existing triple-body fixture. Its 32 tests passed using current binaries; the existing 100-case GPU receipt was reverified. The saved serial-only triple-body comparison uses different inputs, so this existing four-arm fixture is queued for its first compatible native baseline.
+
+The packed TA harness retains native integer or double columns, including integer TrendMode outputs. All 247 affected contract cases passed, plus 100 GPU cases. Seven queued packed fixtures use the latest common source state before first timing.
 
 The packed TA harness now supports prepared native inputs and full owner-output checks for Trix/KAMA. All 193 affected cases across five fixture families passed, plus 100 GPU cases. All five queued candidates use this verified common source state before first timing.
 

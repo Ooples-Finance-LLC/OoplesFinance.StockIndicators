@@ -353,6 +353,20 @@
         ],
         "contract_cases_passed": 40,
         "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_hilbert_fixtures": {
+        "names": [
+          "SharedTaHilbertNativeBenchmarks",
+          "SharedTaHilbertTrendModeBenchmarks"
+        ],
+        "operations": [
+          "TaLib.Functions.HtDcPhase",
+          "TaLib.Functions.HtSine",
+          "TaLib.Functions.HtTrendline",
+          "TaLib.Functions.HtTrendMode"
+        ],
+        "contract_cases_passed": 54,
+        "timing_status": "First native baselines pending; catalog unchanged."
       }
     }
   }
