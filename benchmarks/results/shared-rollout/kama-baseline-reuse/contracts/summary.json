@@ -1,0 +1,35 @@
+{
+  "status": "10 existing fixture cases passed; 100-case GPU receipt reverified. Eight builder-only timings pending; native baselines reused without rerunning. Qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSeededAdaptiveBenchmarkTests.cs": "4eb2f87d29335bf4d16e589280aea80b12aa3eb9d92c28505404012c03321e87",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SeededAdaptiveComparison.cs": "41e5e6073832ecb80552352659b24ca3b52b15ff6e18327ef319193e4e72d3d5",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedBenchmarkSupport.cs": "1b57a5d028ae3ae45151b00a1cd4ba3a70a8ed9821b0e80d01c5641fde1d45aa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSeededAdaptiveBenchmarks.cs": "87c2c6073d547236d10aaa57dacc6ba81d90ef344cf4a9a795a87235fd89ffa2"
+  },
+  "baseline_source_commit": "93cb7084",
+  "baselines": {
+    "QuanTAlib.Kama": {
+      "path": "benchmarks/results/shared-rollout/seeded-adaptive-shared-cpu/quanta/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+      "sha256": "cf9390bf371230ed63c438f1779dde1dd9dd4c1d8f8db5d5151098a0dcef9031",
+      "environment": {
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "Architecture": "X64",
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+      }
+    },
+    "Skender.GetKama": {
+      "path": "benchmarks/results/shared-rollout/seeded-adaptive-shared-cpu/skender/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+      "sha256": "c196f7801c28aa431bcccc87ad3cdbf7b96fcb6b464d3c02a7236b84bd3e052d",
+      "environment": {
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "Architecture": "X64",
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+      }
+    }
+  },
+  "compatibility": "Fixture inputs/constants, native serial/parallel implementations and benchmark package references are text-identical to baseline source. Setup verification helpers and builder invocation were extracted without changing input generation, worker8 or retained outputs. P20/fast2/slow30; closes100+(i*13%101)/8. Builder owns average/efficiency and both presence columns; QuanTAlib native owns average only, Skender owns KAMA/ER result rows. Cross-run descriptive comparisons only; saved monitor limitations retained.",
+  "benchmark_cases": 8,
+  "contract_cases_passed": 10
+}

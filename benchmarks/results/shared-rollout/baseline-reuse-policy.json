@@ -368,6 +368,36 @@
         "contract_cases_passed": 54,
         "timing_status": "First native baselines pending; catalog unchanged."
       }
+    },
+    "kama_matching_runtime_builder_queue": {
+      "operations": [
+        "QuanTAlib.Kama",
+        "Skender.GetKama"
+      ],
+      "baselines": {
+        "QuanTAlib.Kama": {
+          "path": "benchmarks/results/shared-rollout/seeded-adaptive-shared-cpu/quanta/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+          "sha256": "cf9390bf371230ed63c438f1779dde1dd9dd4c1d8f8db5d5151098a0dcef9031",
+          "environment": {
+            "ProcessorName": "AMD Ryzen 9 3950X",
+            "Architecture": "X64",
+            "LogicalCoreCount": 32,
+            "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+          }
+        },
+        "Skender.GetKama": {
+          "path": "benchmarks/results/shared-rollout/seeded-adaptive-shared-cpu/skender/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+          "sha256": "c196f7801c28aa431bcccc87ad3cdbf7b96fcb6b464d3c02a7236b84bd3e052d",
+          "environment": {
+            "ProcessorName": "AMD Ryzen 9 3950X",
+            "Architecture": "X64",
+            "LogicalCoreCount": 32,
+            "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+          }
+        }
+      },
+      "contract_cases_passed": 10,
+      "timing_status": "Only eight matching-runtime builder cases queued; native measurements reused."
     }
   }
 }
