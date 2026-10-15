@@ -1,0 +1,14 @@
+{
+  "base_commit": "369be0d0b5d8fb17b7ff9b3bb6ed2f3b1600b837",
+  "source_sha256": {
+    "src/Indicators/NormalizedConvolution.cs": "24d86e4e38e283d20533cc53b09c55651e4237bdf2615e5ef30c97c526d8d922",
+    "tests/ModelsTests/SharedWeightedWindowTests.cs": "a33b484c4a336bb62e736523a538a436ce19e8c94e54d60ffdf07f4af5ba67ea"
+  },
+  "verification": {
+    "unit_cases": 25,
+    "comparator_cases": 32,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Shared normalized kernels use compact exact products and Int128 accumulation before the established wide fallback. Ordinary floating kernels pass zero-per-bar-allocation assertions. Exact prefix/zero-mass normalization and builder contracts remain unchanged. No new latency qualification."
+}

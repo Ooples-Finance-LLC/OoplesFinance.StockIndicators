@@ -205,9 +205,14 @@ internal sealed class AffineConvolutionState(int length, int first, int step, bo
 internal sealed class NormalizedKernelState(int length, Func<int, double> weight) : IIndicatorState
 {
     private ExactMeanAccumulator.ProductFactor[] _history = [];
+#if NETFRAMEWORK
     private ExactMeanAccumulator.ProductCoefficient[] _coefficients = [];
-    private int _count, _position, _cachedCoefficients;
     private ExactMeanAccumulator _denominator;
+#else
+    private ExactMeanAccumulator.ProductFactor[] _coefficients = [];
+    private JurikDyadic _denominator;
+#endif
+    private int _count, _position, _cachedCoefficients;
 
     public void Reset()
     {
@@ -231,25 +236,55 @@ internal sealed class NormalizedKernelState(int length, Func<int, double> weight
             }
             if (_cachedCoefficients == _count)
             {
+#if NETFRAMEWORK
                 _coefficients[_count] = new ExactMeanAccumulator.ProductCoefficient(weight(_count));
+#else
+                _coefficients[_count] = new ExactMeanAccumulator.ProductFactor(weight(_count));
+#endif
                 _cachedCoefficients++;
             }
+#if NETFRAMEWORK
             _denominator.AddFactor(_coefficients[_count].Factor);
+#else
+            _denominator.AddExact(JurikDyadic.FromFactor(in _coefficients[_count]));
+#endif
             _count++;
         }
         _history[_position] = new ExactMeanAccumulator.ProductFactor(bar.Close);
         if (++_position == _history.Length) _position = 0;
-        var numerator = new ExactMeanAccumulator();
         var history = _history; var coefficients = _coefficients;
         int oldest = _count == length ? _position : 0, lag = _count;
         // Preserve oldest-to-newest accumulation order without enumerator state
         // or a wrap/modulo branch on every product.
+#if NETFRAMEWORK
+        var numerator = new ExactMeanAccumulator();
         for (int i = oldest; i < _count; i++)
             numerator.AddProduct(in history[i], in coefficients[--lag]);
         for (int i = 0; i < oldest; i++)
             numerator.AddProduct(in history[i], in coefficients[--lag]);
         return _denominator.IsExactlyZero ? numerator.Mean(_count) : numerator.Ratio(_denominator);
+#else
+        var numerator = new JurikDyadic();
+        for (int i = oldest; i < _count; i++)
+            AddProduct(in history[i], in coefficients[--lag], ref numerator);
+        for (int i = 0; i < oldest; i++)
+            AddProduct(in history[i], in coefficients[--lag], ref numerator);
+        return _denominator.Sign == 0 ? numerator.Mean(_count) : numerator.Ratio(_denominator);
+#endif
     }
+
+#if !NETFRAMEWORK
+    private static void AddProduct(in ExactMeanAccumulator.ProductFactor price,
+        in ExactMeanAccumulator.ProductFactor coefficient, ref JurikDyadic numerator)
+    {
+        // Finite mantissas need at most 106 product bits. The accumulator retains
+        // exact wider-exponent fallback without allocating for ordinary kernels.
+        var product = JurikDyadic.FromBinaryProduct(
+            (Int128)price.Mantissa * coefficient.Mantissa,
+            price.Scale + coefficient.Scale - 2148);
+        numerator.AddExact(product);
+    }
+#endif
 }
 
 internal static class NormalizedKernelReference

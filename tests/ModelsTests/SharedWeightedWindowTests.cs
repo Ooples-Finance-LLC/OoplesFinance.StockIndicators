@@ -12,6 +12,25 @@ public sealed class SharedWeightedWindowTests : IDisposable
     public SharedWeightedWindowTests() => CpuParallelSettings.MaxDegreeOfParallelism = 8;
     public void Dispose() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
 
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public void OrdinaryFloatingKernelsAllocateNoPerBarObjects(int operation)
+    {
+        IndicatorBase indicator = operation switch
+        {
+            0 => new GaussianWeightedAverage(20),
+            1 => new SineWeightedAverage(20),
+            _ => new NormalizedConvolution(Enumerable.Range(0, 20).Select(i => Math.Exp(-i / 10d)))
+        };
+        var state = (IIndicatorState)indicator.CreateState()!;
+        var bars = Enumerable.Range(0, 97).Select(i =>
+            new Bar(default, 0, 1, 0, 100 + (i * 17 % 97) / 10d, 1)).ToArray();
+        for (int i = 0; i < 1000; i++) state.Update(in bars[i % bars.Length]);
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 1000; i++) state.Update(in bars[i % bars.Length]);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+    }
+
     [Fact]
     public void CachedKernelResetMatchesIndependentPrefixAndZeroMassReferences()
     {

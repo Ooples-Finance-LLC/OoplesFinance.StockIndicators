@@ -98,6 +98,12 @@ Modern WindowedSinc retains normalized mantissa/exponent factors for both shared
 
 The net10 production build passed with zero warnings/errors; 15 focused unit, 7 comparator and 100 local GPU cases passed with zero skips. Bit-exact references cover all five window functions, odd/even taps, wide cancellation, subnormals, signed zero, full-width mantissas, startup and reset. Worker boundaries, ownership, overflow/input-error priority, cancellation and unsupported GPU rejection remain covered. Existing zero-per-bar-allocation assertions pass. [Source hashes and compressed test results](results/shared-rollout/windowed-sinc/compact-products/summary.json) retain the evidence. This reduces representation and computation without claiming measured latency; hosted checks remain pending.
 
+### Compact exact shared weighted kernels (2026-10-15)
+
+Gaussian, sine and non-affine normalized-convolution windows now use the existing exact Int128 dyadic accumulator on modern runtimes. Decoded coefficient factors replace the larger coefficient-with-limit records, and each weighted term uses an exact product of at most 106 mantissa bits. Ordinary floating-point products no longer require BigInteger merely because they exceed 64 bits. Wider exponent spans still use the exact fallback. Prefix normalization, zero-mass averaging, cached coefficients, lazy history growth, wrap order and reset remain unchanged; the framework path retains its existing arithmetic.
+
+The net10 production build passed with zero warnings/errors; 25 focused unit, 32 comparator and 100 local GPU cases passed with zero skips. New warmed period-20 tests assert zero per-bar managed allocations for Gaussian, sine and a non-affine floating-point convolution. Independent references cover signed/zero-mass kernels, extreme and subnormal values, partial resets, ring growth, worker boundaries, mixed roots, ownership, overflow/input-error priority and cancellation. [Source hashes and compressed test results](results/shared-rollout/weighted-kernels/compact-products/summary.json) retain the evidence. This reduces representation and computation without claiming measured latency; hosted checks remain pending.
+
 ### Evidence still required
 
 - The four candidates have preserved binaries and source hashes for builder-only measurements on .NET 10.0.12, matching the saved native baseline. Competitor timings are reused under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json); they are not rerun.
