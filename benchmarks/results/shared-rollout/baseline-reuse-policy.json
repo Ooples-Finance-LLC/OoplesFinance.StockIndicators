@@ -163,6 +163,15 @@
         ],
         "contract_cases_passed": 65,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_macd_fixture": {
+        "name": "SharedTradyMacdBenchmarks",
+        "operations": [
+          "Trady.Indicator.MovingAverageConvergenceDivergence",
+          "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram"
+        ],
+        "contract_cases_passed": 33,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
