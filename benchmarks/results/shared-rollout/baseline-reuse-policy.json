@@ -446,6 +446,14 @@
       ],
       "contract_cases_passed": 21,
       "timing_status": "First native baseline pending; standalone snapshot contract retained."
+    },
+    "skender_pivots": {
+      "operations": [
+        "Skender.GetPivotPoints",
+        "Skender.GetPivots"
+      ],
+      "contract_cases_passed": 61,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained."
     }
   }
 }
