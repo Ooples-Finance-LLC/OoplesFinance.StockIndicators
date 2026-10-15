@@ -1,0 +1,26 @@
+{
+  "status": "30 affected cases passed (20 new and10 existing).100 local GPU cases passed. First timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyIchimokuNativeBenchmarks.cs": "b440baf5da7fd08f6a873362c67491238a5b36a653dd23ac4dd0e8ecc39a5f92",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedIchimokuSnapshotBenchmarks.cs": "7cacc3fa35a5d52a6fb55384b835ada85ec7b614c3f3566a93e360946de0bc7d",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ExtendedCloudComparison.cs": "f61e4097fcc88a2e3dbde90701b0a680cdd5c1b844856870ec178697b7abe89f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyIchimokuNativeBenchmarkTests.cs": "c6c850bf72055aff9ff930f7b55969bbdeb0448a503e8c8e363c4ff9ff57150e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedIchimokuSnapshotBenchmarkTests.cs": "daa9835c458b4ddb8529d25ef5adce94e58239bf1f95c5ec330c0c89bb6ce80d"
+  },
+  "operations": [
+    "Trady.Indicator.IchimokuCloud"
+  ],
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "contract": "Extended standalone snapshot and eager native decimal tuples retain Count+51 rows at coordinates-25 through Count+25, defaults9/26/52. Native tuple input High/Low/Close; outputs ConversionLine/BaseLine/LeadingSpanA/LeadingSpanB/LaggingSpan. Each worker uses independently constructed native state and explicit IEnumerable<int> coordinates over the complete prepared source. Normalization outside timing.",
+  "api_overload_evidence": "Pinned reflection confirms tuple field order. Compute(startIndex,endIndex) expands its interval; basis3/start5/end15 returned16 rows, matching existing ExtendedCloudComparisonTests. Compute(int[]) is a single-result overload. Explicit IEnumerable<int> gives exactly requested coordinates; final tests prove row count and all fields for serial/parallel, including empty source and extended endpoints.",
+  "validation": {
+    "comparator_cases_passed": 30,
+    "new_fixture_cases_passed": 20,
+    "affected_existing_cases_passed": 10,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1306
+  },
+  "benchmark_cases": 6,
+  "baseline_gap": "Saved normalized serial LibraryPair evidence retained; no compatible direct-native serial/parallel pair in catalog."
+}
