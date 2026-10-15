@@ -1,0 +1,14 @@
+{
+  "base_commit": "84a89e997e0c2fddeb8b0305ee7dca513124655f",
+  "source_sha256": {
+    "src/Indicators/ValuesBarExecution.PairStatistics.cs": "e6253a7b79f715de3afa2968ef8ca4027d82e1cdb880187ae9192b5f1f99176f",
+    "tests/ModelsTests/BoundedPairStatisticsExecutionTests.cs": "df6062648fe138cdfd16633d00d9f99aae751281981d6086a6e8b2206c7636c6"
+  },
+  "verification": {
+    "unit_cases": 20,
+    "comparator_cases": 13,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Full pair windows reuse values and presence when incoming equals outgoing. Certified integer columns also skip unchanged moment updates; wide fallback still rotates state. Reuse only reads a preceding row owned by the same worker. Captured-input validation and cancellation remain before the shortcut. Work reduction, not measured latency."
+}
