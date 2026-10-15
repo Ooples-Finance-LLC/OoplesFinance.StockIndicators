@@ -166,10 +166,15 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
             else index = (int)BigInteger.DivRem(_top * (_history.Count - 1), _bottom, out remainder);
             if (remainder.IsZero)
                 return _sorted[index];
+            return Interpolate(index, remainder, full);
+        }
+
+        private double Interpolate(int index, BigInteger remainder, bool full)
+        {
             double lower = _sorted[index], upper = _sorted[index + 1];
             // Equal endpoints need no weighted arithmetic. Fractional ranks
             // canonicalize zero; integer ranks above retain the selected bits.
-            if (lower == upper && FrameworkCompatibility.IsFinite(lower)) return lower == 0 ? 0 : lower;
+            if (lower == upper && FrameworkCompatibility.IsFinite(lower)) return lower == 0 ? 0 : lower; // NOSONAR: Exact interpolation identity and canonical fractional zero.
             if (_bottom == 2)
             {
                 double total = lower + upper;

@@ -1,0 +1,17 @@
+{
+  "base_commit": "67df54ac00ce4c6e74c11c3ac423b32a7854e6dd",
+  "source_sha256": {
+    "src/Indicators/WindowReturnBeta.cs": "84ed88c8f80f6c9469ed59a15387c97dd5a443865a3e790ca7ffbcd0bfb6b6f9",
+    "tests/ModelsTests/ReturnBetaExecutionTests.cs": "459c30d1e4d89bb7a871c5191598de6118e3ccad996c7fff89645f22a62c25cc",
+    "src/Indicators/RollingPercentile.cs": "ce75dce9d0e59f188584767d69fb4aa1efbc64016d92dcb1f093c1b5d80ac9f8",
+    "src/Indicators/ValuesBarExecution.cs": "4977691c3fea4dbc9495c87ab807329ec52d68baa47000c59eb16ea4505f369b"
+  },
+  "verification": {
+    "unit_cases": 35,
+    "comparator_cases": 27,
+    "analysis_fix_unit_cases": 36,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "All-mode standard and directional moments reuse one exact square and cross-product per nonzero insertion or eviction. Up-only/Down-only selections skip moment conversion for excluded returns; history and published returns still update. No new retained product storage. Work reduction, not a latency claim."
+}

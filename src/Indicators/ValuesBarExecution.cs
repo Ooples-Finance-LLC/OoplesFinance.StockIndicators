@@ -195,11 +195,13 @@ internal static partial class ValuesBarExecution
                         || PivotColumnOwner(pivot.Style, slot) == slot;
                     if (distinctColumn && (!finiteByConstruction || node.Indicator is RollingPivotLevels or WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails or StochasticSmaKdj or WindowStochasticKdj
                         || (gpu is not null && node.Indicator is WindowMoneyFlowIndex)))
-                    for (int i = 0; i < source.Length; i++)
                     {
-                        cancellation.ThrowIfCancellationRequested();
-                        if (!double.IsFinite(node.Values[slot][i]))
-                            IndicatorOutputPolicy.Validate(node.Indicator, slot, i, node.Values[slot][i]);
+                        for (int i = 0; i < source.Length; i++)
+                        {
+                            cancellation.ThrowIfCancellationRequested();
+                            if (!double.IsFinite(node.Values[slot][i]))
+                                IndicatorOutputPolicy.Validate(node.Indicator, slot, i, node.Values[slot][i]);
+                        }
                     }
                     published?.Add(node.Indicator.Outputs[slot], node.Values[slot]);
                 }

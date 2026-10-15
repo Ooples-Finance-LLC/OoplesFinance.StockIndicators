@@ -6,6 +6,33 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class ReturnBetaExecutionTests
 {
     [Theory]
+    [InlineData(ReturnBetaSelection.Up)]
+    [InlineData(ReturnBetaSelection.Down)]
+    [InlineData(ReturnBetaSelection.All)]
+    public void ExcludedRunsStillEvictIncludedObservationsAndReset(ReturnBetaSelection selection)
+    {
+        double[] market = [1, 2, 4, 8, 16, 16, 16, 16, 8, 4, 2, 1, 1, 1, 1, 2, 4, 8];
+        var bars = market.Select((price, i) => new Bar(default, price, 0, 0, 10 + i % 7, 1)).ToArray();
+        var state = (IMultiOutputState)new WindowBetaStatistics(3, selection).CreateState();
+        var expected = ReturnBetaReference.Calculate(bars, 3, CandlePriceField.Open,
+            CandlePriceField.Close, selection, true);
+        var output = new double[14];
+        for (int replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                for (int slot = 0; slot < expected.Length; slot++)
+                {
+                    Assert.Equal(expected[slot][i].HasValue ? 1d : 0d, output[slot + expected.Length]);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[slot][i] ?? 0),
+                        BitConverter.DoubleToInt64Bits(output[slot]));
+                }
+            }
+        }
+    }
+    [Theory]
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(20)]

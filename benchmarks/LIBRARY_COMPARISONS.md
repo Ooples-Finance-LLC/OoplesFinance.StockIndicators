@@ -68,6 +68,12 @@ Fractional ranks with equal finite interpolation endpoints now return that value
 
 The net10 production build passed with zero warnings/errors; 14 focused unit, 14 comparator and 100 local GPU cases passed with zero skips. Bit-exact regression checks cover constant plateaus and transitions through maximum finite values, subnormals, alternating signed zeros, adjacent values, extreme binary fractions, warmup, eviction, reset and worker replay. [Source hashes and compressed test results](results/shared-rollout/rolling-percentile-cpu/equal-endpoints/summary.json) retain the evidence. This reduces arithmetic work without claiming a measured latency gain; hosted verification remains pending.
 
+### Return-beta moment products (2026-10-15)
+
+In All mode, standard and directional moment windows now share one exact square and cross-product for each nonzero return insertion or eviction. This removes the duplicate pair of products without retaining extra history. Up-only and Down-only selections also skip moment conversion for excluded returns; raw return calculation, publication and window eviction still occur. Standard-only beta retains its existing arithmetic.
+
+The net10 production build passed with zero warnings/errors; 35 focused unit, 27 comparator and 100 local GPU cases passed with zero skips. Independent reference checks cover all selections and output slots, wide/subnormal returns, excluded runs evicting included observations, reset, workers, ownership and input-error priority. Existing zero-per-bar-allocation assertions also pass. Hosted analysis found exact-equality and complexity findings in the preceding rolling-percentile change; interpolation is now a separate helper, with its deliberate exact comparison documented. Pivot validation also has explicit braces. Another 36 percentile/pivot unit cases passed after these analysis fixes. [Source hashes and compressed test results](results/shared-rollout/compact-return/shared-products/summary.json) retain the evidence. Product counts describe reduced work, not measured latency; hosted verification remains pending.
+
 ### Evidence still required
 
 - The four candidates have preserved binaries and source hashes for builder-only measurements on .NET 10.0.12, matching the saved native baseline. Competitor timings are reused under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json); they are not rerun.

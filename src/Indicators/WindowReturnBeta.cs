@@ -345,6 +345,8 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
 
     private void Accumulate(BetaHistoryValue x, BetaHistoryValue y, int sign)
     {
+        var directional = x.Mantissa > 0 ? _up : x.Mantissa < 0 ? _down : null;
+        if (_standard is null && directional is null) return;
         static JurikDyadic Compact(BetaHistoryValue value)
         {
 #if !NETFRAMEWORK
@@ -357,11 +359,14 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
         }
         var left = Compact(x);
         var right = Compact(y);
-        _standard?.Add(left, right, sign);
-        if (x.Mantissa > 0)
-            _up?.Add(left, right, sign);
-        if (x.Mantissa < 0)
-            _down?.Add(left, right, sign);
+        // Standard and directional subsets consume the same exact products.
+        // Compute them once for insertion or eviction, without retaining copies.
+        var square = left;
+        square.Square();
+        var product = left;
+        product.Multiply(right);
+        _standard?.Add(left, right, in square, in product, sign);
+        directional?.Add(left, right, in square, in product, sign);
     }
 
     internal double? Beta(int slot, bool flatZero) =>
@@ -378,12 +383,8 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
             _x = _y = _xx = _xy = default;
         }
 
-        internal void Add(JurikDyadic x, JurikDyadic y, int sign)
+        internal void Add(JurikDyadic x, JurikDyadic y, in JurikDyadic xx, in JurikDyadic xy, int sign)
         {
-            var xx = x;
-            xx.Square();
-            var xy = x;
-            xy.Multiply(y);
             _count += sign;
             if (sign > 0)
             {
