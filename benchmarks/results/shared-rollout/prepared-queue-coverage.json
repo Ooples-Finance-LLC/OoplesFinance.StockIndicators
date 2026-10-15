@@ -1,0 +1,524 @@
+{
+  "date": "2026-10-15",
+  "catalog_sha256": "55b722f067dad474154ddf286686fbb8625700243d8f3dc008bb577d50299264",
+  "prepared_stages": 46,
+  "archived_stages": 0,
+  "builder_only_mappings_covered": 119,
+  "snapshot_only_mappings_covered": 15,
+  "unmatched_pending_mappings": [],
+  "verification": "Recorder-declared operation lists mapped to catalog IDs, with explicit Trady stochastic aliases. All manifest paths exist and retained C# hashes match. Binary hashes are checked by recorders before archival. This checks prepared measurement coverage, not current-head performance or completed timings. All 46 Python recorders parsed and 47 PowerShell runner/watcher scripts parsed without errors.",
+  "source_files_checked": 444,
+  "stages": [
+    {
+      "name": "pivot-columns",
+      "candidate_commit": "033e31abd34f64f15c0a32fa3f779973e4124420",
+      "snapshot": "si-pivot-columns-033e31ab-preserved",
+      "destination": "benchmarks/results/shared-rollout/rolling-pivot-shared-cpu/reused-baseline-columns",
+      "operations": [
+        "Skender.GetRollingPivots"
+      ]
+    },
+    {
+      "name": "rickshaw",
+      "candidate_commit": "29c34f2391930ba0194f0721be2771ae5aa679c8",
+      "snapshot": "si-rickshaw-29c34f23-preserved",
+      "destination": "benchmarks/results/shared-rollout/rickshaw-shared-cpu/reused-baseline-workers",
+      "operations": [
+        "TaLib.Candles.RickshawMan"
+      ]
+    },
+    {
+      "name": "asin",
+      "candidate_commit": "332edbfbe60f7ad70a2ba9e042a3288d9a4a1f8a",
+      "snapshot": "si-asin-332edbfb-preserved",
+      "destination": "benchmarks/results/shared-rollout/asin-shared-cpu/reused-baseline-workers",
+      "operations": [
+        "TaLib.Functions.Asin"
+      ]
+    },
+    {
+      "name": "sma",
+      "candidate_commit": "86380f4d4dde47d8884ff8a73dc63106616191ec",
+      "snapshot": "si-sma-86380f4d-preserved",
+      "destination": "benchmarks/results/shared-rollout/sma-cpu/reused-baseline-workers",
+      "operations": [
+        "TaLib.Functions.Sma"
+      ]
+    },
+    {
+      "name": "skender-strength",
+      "candidate_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+      "snapshot": "si-skender-common-2e533ff2-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-strength/first-native-baseline",
+      "operations": [
+        "Skender.GetAdx",
+        "Skender.GetRsi"
+      ]
+    },
+    {
+      "name": "trady-strength",
+      "candidate_commit": "0cfea03900f1e25f62e5b4107fe2efac9b633fb0",
+      "snapshot": "si-trady-strength-0cfea039-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-strength/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.NetMomentumOscillator",
+        "Trady.Indicator.RelativeMomentum",
+        "Trady.Indicator.RelativeMomentumIndex",
+        "Trady.Indicator.RelativeStrength",
+        "Trady.Indicator.RelativeStrengthIndex"
+      ]
+    },
+    {
+      "name": "skender-ema",
+      "candidate_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+      "snapshot": "si-skender-common-2e533ff2-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-ema-family/first-native-baseline",
+      "operations": [
+        "Skender.GetMacd",
+        "Skender.GetPmo",
+        "Skender.GetPvo",
+        "Skender.GetTrix",
+        "Skender.GetTsi"
+      ]
+    },
+    {
+      "name": "skender-smoothing",
+      "candidate_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+      "snapshot": "si-skender-common-2e533ff2-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-smoothing/first-native-baseline",
+      "operations": [
+        "Skender.GetAlligator",
+        "Skender.GetElderRay",
+        "Skender.GetGator"
+      ]
+    },
+    {
+      "name": "skender-finite",
+      "candidate_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+      "snapshot": "si-skender-common-2e533ff2-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-finite-window/first-native-baseline",
+      "operations": [
+        "Skender.GetAwesome",
+        "Skender.GetBop",
+        "Skender.GetCci"
+      ]
+    },
+    {
+      "name": "skender-atr",
+      "candidate_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+      "snapshot": "si-skender-common-2e533ff2-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-atr-family/first-native-baseline",
+      "operations": [
+        "Skender.GetAtrStop",
+        "Skender.GetChandelier",
+        "Skender.GetKeltner",
+        "Skender.GetStarcBands",
+        "Skender.GetSuperTrend"
+      ]
+    },
+    {
+      "name": "skender-stochastic",
+      "candidate_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+      "snapshot": "si-skender-common-2e533ff2-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-stochastic/first-native-baseline",
+      "operations": [
+        "Skender.GetSmi",
+        "Skender.GetStoch",
+        "Skender.GetStochRsi"
+      ]
+    },
+    {
+      "name": "skender-roc",
+      "candidate_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+      "snapshot": "si-skender-common-2e533ff2-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-roc/first-native-baseline",
+      "operations": [
+        "Skender.GetRoc",
+        "Skender.GetRocWb"
+      ]
+    },
+    {
+      "name": "skender-candle",
+      "candidate_commit": "219192b10270e756d79cd20a52ba515951126247",
+      "snapshot": "si-skender-candle-219192b1-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-candle/first-native-baseline",
+      "operations": [
+        "Skender.GetDoji",
+        "Skender.GetHeikinAshi",
+        "Skender.GetMarubozu"
+      ]
+    },
+    {
+      "name": "skender-statistics",
+      "candidate_commit": "71ca6f567e41b035bb994c2b1acc2d939bfc4293",
+      "snapshot": "si-skender-statistics-71ca6f56-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-statistics/first-native-baseline",
+      "operations": [
+        "Skender.GetBeta",
+        "Skender.GetCorrelation",
+        "Skender.GetEpma"
+      ]
+    },
+    {
+      "name": "skender-diagnostics",
+      "candidate_commit": "9a8bfe2c76702e282924a8315689c71f6a344f75",
+      "snapshot": "si-skender-diagnostics-9a8bfe2c-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-diagnostics/first-native-baseline",
+      "operations": [
+        "Skender.GetMaEnvelopes",
+        "Skender.GetPrs",
+        "Skender.GetSmaAnalysis",
+        "Skender.GetStdDevChannels"
+      ]
+    },
+    {
+      "name": "trady-average",
+      "candidate_commit": "1266c8026a3eff751df7927f0cc34195e2ac782f",
+      "snapshot": "si-trady-average-1266c802-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-average/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.ExponentialMovingAverage",
+        "Trady.Indicator.ExponentialMovingAverageOscillator",
+        "Trady.Indicator.SimpleMovingAverageOscillator",
+        "Trady.Indicator.WeightedMovingAverage"
+      ]
+    },
+    {
+      "name": "trady-macd",
+      "candidate_commit": "66b442f72d0217af56c5cb76b0ff9b68ffd4ee3e",
+      "snapshot": "si-trady-macd-66b442f7-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-macd/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.MovingAverageConvergenceDivergence",
+        "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram"
+      ]
+    },
+    {
+      "name": "trady-native-directional",
+      "candidate_commit": "7f2385ba0822728cd2acbae7f8f0b7852293e3d9",
+      "snapshot": "si-trady-native-directional-7f2385ba-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-native-directional/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.AverageDirectionalIndex",
+        "Trady.Indicator.AverageDirectionalIndexRating",
+        "Trady.Indicator.DirectionalMovementIndex",
+        "Trady.Indicator.MinusDirectionalIndicator",
+        "Trady.Indicator.MinusDirectionalMovement",
+        "Trady.Indicator.PlusDirectionalIndicator",
+        "Trady.Indicator.PlusDirectionalMovement"
+      ]
+    },
+    {
+      "name": "trady-native-stochastic",
+      "candidate_commit": "2acdf60caf82df36e9253d7e44758df2b03e7361",
+      "snapshot": "si-trady-native-stochastic-2acdf60c-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-native-stochastic/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.RawStochasticsValue",
+        "Trady.Indicator.Stochastics+Fast",
+        "Trady.Indicator.Stochastics+Full",
+        "Trady.Indicator.Stochastics+Slow",
+        "Trady.Indicator.StochasticsOscillator+Fast",
+        "Trady.Indicator.StochasticsOscillator+Full",
+        "Trady.Indicator.StochasticsOscillator+Slow"
+      ]
+    },
+    {
+      "name": "trady-stochastic-momentum",
+      "candidate_commit": "32a26e87375a5dcdfba80b61fff3324deb83a9c2",
+      "snapshot": "si-trady-stochastic-momentum-32a26e87-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-stochastic-momentum/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.StochasticsMomentum",
+        "Trady.Indicator.StochasticsMomentumIndex",
+        "Trady.Indicator.StochasticsRsiOscillator"
+      ]
+    },
+    {
+      "name": "trady-atr-channel",
+      "candidate_commit": "7e7b5a4f2f980b4c0d2e7da9785fadb8fefb39fb",
+      "snapshot": "si-trady-atr-channel-7e7b5a4f-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-atr-channel/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.ChandelierExit",
+        "Trady.Indicator.KeltnerChannels"
+      ]
+    },
+    {
+      "name": "trady-cci-adaptive",
+      "candidate_commit": "4fb832dfa973561019776a0b97cda15c42b9e74f",
+      "snapshot": "si-trady-cci-adaptive-4fb832df-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-cci-adaptive/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.CommodityChannelIndex",
+        "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+      ]
+    },
+    {
+      "name": "trady-native-volume",
+      "candidate_commit": "7822008bbd5ae3759e7d381002de1b67ab0bb143",
+      "snapshot": "si-trady-native-volume-7822008b-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-native-volume/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.AccumulationDistributionLine",
+        "Trady.Indicator.NegativeVolumeIndex",
+        "Trady.Indicator.PositiveVolumeIndex"
+      ]
+    },
+    {
+      "name": "trady-native-candle",
+      "candidate_commit": "126865be6b98c6fc92af8d452d2c830bb13b1bd4",
+      "snapshot": "si-trady-native-candle-126865be-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-native-candle/first-native-baseline",
+      "operations": [
+        "Trady.Candlestick.DarkCloudCover",
+        "Trady.Candlestick.DragonifyDoji",
+        "Trady.Candlestick.FallingThreeMethods",
+        "Trady.Candlestick.RisingThreeMethods"
+      ]
+    },
+    {
+      "name": "ta-star-reversal",
+      "candidate_commit": "43680c493d88a5ca78fc98f0d95ecd037962d5c8",
+      "snapshot": "si-ta-candle-common-43680c49-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-star-reversal/first-native-baseline",
+      "operations": [
+        "TaLib.Candles.AbandonedBaby",
+        "TaLib.Candles.EveningDojiStar",
+        "TaLib.Candles.EveningStar",
+        "TaLib.Candles.MorningDojiStar",
+        "TaLib.Candles.MorningStar"
+      ]
+    },
+    {
+      "name": "ta-reversal-continuation",
+      "candidate_commit": "43680c493d88a5ca78fc98f0d95ecd037962d5c8",
+      "snapshot": "si-ta-candle-common-43680c49-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-reversal-continuation/first-native-baseline",
+      "operations": [
+        "TaLib.Candles.AdvanceBlock",
+        "TaLib.Candles.DarkCloudCover",
+        "TaLib.Candles.IdenticalThreeCrows",
+        "TaLib.Candles.PiercingLine",
+        "TaLib.Candles.Stalled",
+        "TaLib.Candles.ThreeBlackCrows",
+        "TaLib.Candles.ThreeStarsInSouth",
+        "TaLib.Candles.ThreeWhiteSoldiers"
+      ]
+    },
+    {
+      "name": "ta-multibar-native",
+      "candidate_commit": "43680c493d88a5ca78fc98f0d95ecd037962d5c8",
+      "snapshot": "si-ta-candle-common-43680c49-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-multibar-native/first-native-baseline",
+      "operations": [
+        "TaLib.Candles.Breakaway",
+        "TaLib.Candles.ConcealingBabySwallow",
+        "TaLib.Candles.Hikkake",
+        "TaLib.Candles.HikkakeModified",
+        "TaLib.Candles.LadderBottom",
+        "TaLib.Candles.MatHold",
+        "TaLib.Candles.RisingFallingThreeMethods",
+        "TaLib.Candles.TasukiGap",
+        "TaLib.Candles.Tristar",
+        "TaLib.Candles.UpDownSideGapThreeMethods"
+      ]
+    },
+    {
+      "name": "ta-triple-body",
+      "candidate_commit": "43680c493d88a5ca78fc98f0d95ecd037962d5c8",
+      "snapshot": "si-ta-triple-body-43680c49-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-triple-body/first-native-baseline",
+      "operations": [
+        "TaLib.Candles.ThreeInside",
+        "TaLib.Candles.TwoCrows",
+        "TaLib.Candles.UniqueThreeRiver",
+        "TaLib.Candles.UpsideGapTwoCrows"
+      ]
+    },
+    {
+      "name": "ta-window-native",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-ta-packed-hilbert-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-window-native/first-native-baseline",
+      "operations": [
+        "TaLib.Functions.Accbands",
+        "TaLib.Functions.AvgDev"
+      ]
+    },
+    {
+      "name": "ta-macd-native",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-ta-packed-hilbert-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-macd-native/first-native-baseline",
+      "operations": [
+        "TaLib.Functions.Macd",
+        "TaLib.Functions.MacdExt",
+        "TaLib.Functions.MacdFix"
+      ]
+    },
+    {
+      "name": "ta-stochastic-native",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-ta-packed-hilbert-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-stochastic-native/first-native-baseline",
+      "operations": [
+        "TaLib.Functions.Stoch",
+        "TaLib.Functions.StochF",
+        "TaLib.Functions.StochRsi"
+      ]
+    },
+    {
+      "name": "ta-average-native",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-ta-packed-hilbert-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-average-native/first-native-baseline",
+      "operations": [
+        "TaLib.Functions.Apo",
+        "TaLib.Functions.Ma",
+        "TaLib.Functions.Ppo"
+      ]
+    },
+    {
+      "name": "ta-adaptive-rate-native",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-ta-packed-hilbert-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-adaptive-rate-native/first-native-baseline",
+      "operations": [
+        "TaLib.Functions.Kama",
+        "TaLib.Functions.Mavp",
+        "TaLib.Functions.Trix"
+      ]
+    },
+    {
+      "name": "ta-hilbert-native",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-ta-packed-hilbert-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-hilbert-native/first-native-baseline",
+      "operations": [
+        "TaLib.Functions.HtDcPhase",
+        "TaLib.Functions.HtSine",
+        "TaLib.Functions.HtTrendline"
+      ]
+    },
+    {
+      "name": "ta-hilbert-trendmode",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-ta-packed-hilbert-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/ta-hilbert-trendmode/first-native-baseline",
+      "operations": [
+        "TaLib.Functions.HtTrendMode"
+      ]
+    },
+    {
+      "name": "kama-reuse",
+      "candidate_commit": "44a7f0d2aab363b415fe3ba14a4c9d070da99a93",
+      "snapshot": "si-kama-reuse-44a7f0d2-preserved",
+      "destination": "benchmarks/results/shared-rollout/kama-baseline-reuse/builder-timing",
+      "operations": [
+        "QuanTAlib.Kama",
+        "Skender.GetKama"
+      ]
+    },
+    {
+      "name": "skender-retrospective-native",
+      "candidate_commit": "69f3704fa9a742402e8197c7a9e37eba1aa912d5",
+      "snapshot": "si-retrospective-native-69f3704f-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-retrospective-native/first-native-baseline",
+      "operations": [
+        "Skender.GetDpo",
+        "Skender.GetFcb"
+      ]
+    },
+    {
+      "name": "skender-hurst-native",
+      "candidate_commit": "31af87b483d49c28501d9e151578dc4cd2a5fc4a",
+      "snapshot": "si-hurst-native-31af87b4-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-hurst-native/first-native-baseline",
+      "operations": [
+        "Skender.GetHurst"
+      ]
+    },
+    {
+      "name": "skender-ichimoku-native",
+      "candidate_commit": "087f2d39addf6484b5b5cbc41087f1dde3d17032",
+      "snapshot": "si-ichimoku-native-087f2d39-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-ichimoku-native/first-native-baseline",
+      "operations": [
+        "Skender.GetIchimoku"
+      ]
+    },
+    {
+      "name": "trady-ichimoku-native",
+      "candidate_commit": "7da1bf349deca434acb6eae0f32794304794283e",
+      "snapshot": "si-trady-ichimoku-7da1bf34-preserved",
+      "destination": "benchmarks/results/shared-rollout/trady-ichimoku-native/first-native-baseline",
+      "operations": [
+        "Trady.Indicator.IchimokuCloud"
+      ]
+    },
+    {
+      "name": "parabolic-native",
+      "candidate_commit": "6803075de7f8cff30c148dc2e9136d150c1c695c",
+      "snapshot": "si-parabolic-native-6803075d-preserved",
+      "destination": "benchmarks/results/shared-rollout/parabolic-native/first-native-baseline",
+      "operations": [
+        "Skender.GetParabolicSar",
+        "TaLib.Functions.Sar",
+        "TaLib.Functions.SarExt",
+        "Trady.Indicator.ParabolicStopAndReverse"
+      ]
+    },
+    {
+      "name": "skender-volatility-stop-native",
+      "candidate_commit": "45f3f80348245bc407d6f00df904584b052bdaa5",
+      "snapshot": "si-volatility-stop-native-45f3f803-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-volatility-stop-native/first-native-baseline",
+      "operations": [
+        "Skender.GetVolatilityStop"
+      ]
+    },
+    {
+      "name": "skender-pivot-native",
+      "candidate_commit": "89840f0d05d829e7ef2ac2196b3ec43d7b476cd8",
+      "snapshot": "si-pivot-native-89840f0d-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-pivot-native/first-native-baseline",
+      "operations": [
+        "Skender.GetPivotPoints",
+        "Skender.GetPivots"
+      ]
+    },
+    {
+      "name": "skender-chart-native",
+      "candidate_commit": "b273adbc6f493d24da721817e84ce3baf69ada70",
+      "snapshot": "si-chart-native-b273adbc-preserved",
+      "destination": "benchmarks/results/shared-rollout/skender-chart-native/first-native-baseline",
+      "operations": [
+        "Skender.GetRenko",
+        "Skender.GetRenkoAtr",
+        "Skender.GetZigZag"
+      ]
+    },
+    {
+      "name": "tillson-horner",
+      "candidate_commit": "55f15bb41b966ccde5ae11d08a37a846c6d61ad9",
+      "snapshot": "si-tillson-horner-55f15bb4-preserved",
+      "destination": "benchmarks/results/shared-rollout/tillson-horner/builder-timing",
+      "operations": [
+        "QuanTAlib.T3",
+        "Skender.GetT3",
+        "TaLib.Functions.T3"
+      ]
+    },
+    {
+      "name": "alma-cache",
+      "candidate_commit": "888adf62d74099fc4b59dc907e8e926b8c064fa9",
+      "snapshot": "si-alma-cache-888adf62-preserved",
+      "destination": "benchmarks/results/shared-rollout/alma-price-cache/builder-timing",
+      "operations": [
+        "QuanTAlib.Alma",
+        "Skender.GetAlma"
+      ]
+    }
+  ]
+}
