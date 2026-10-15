@@ -323,6 +323,16 @@
         ],
         "contract_cases_passed": 46,
         "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_stochastic_fixture": {
+        "name": "SharedTaStochasticNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Stoch",
+          "TaLib.Functions.StochF",
+          "TaLib.Functions.StochRsi"
+        ],
+        "contract_cases_passed": 40,
+        "timing_status": "First native baselines pending; catalog unchanged."
       }
     }
   }
