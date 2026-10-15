@@ -18,6 +18,10 @@ The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalo
 
 Shared CPU Tillson publication now evaluates the exact finite-difference Horner polynomial, retaining one final rounding and the existing stage recurrence. This replaces four wide coefficient products with three factor products. All 17 focused unit, 26 comparator and 100 GPU cases passed. The isolated 256-publication allocation test used 178,512 bytes versus 180,264 for the prior expression (1,752 bytes less, about 1%). This small allocation result does not establish end-to-end allocation or latency improvement. Twelve builder-only timing cases will reuse the three compatible saved native baselines; native methods, inputs and package references are unchanged. [Evidence](results/shared-rollout/tillson-horner/contracts/summary.json). Qualification remains unchanged.
 
+### ALMA retained price factors (2026-10-15)
+
+Modern ALMA caches the exact binary decoding of each inserted price. A complete period-20 window now decodes one new price instead of all 20 retained prices; cached factors and validity flags make queue entries larger. Deferred invalid-state errors, eviction, reset, signed zero and all output contracts are preserved. All 21 unit, 16 comparator and 100 GPU cases passed, including zero steady-state per-bar allocation. Eight builder-only cases reuse the unchanged native fixture and compatible saved report. [Evidence](results/shared-rollout/alma-price-cache/contracts/summary.json). This is a work reduction with a storage tradeoff; latency and total allocation remain unmeasured.
+
 ### Eight-pilot timing gate
 
 The table below summarizes the existing catalog, before the latest worker/history repairs. Ratio = builder mean / fastest saved native mean; **below 1 is faster**. Each native choice is the faster of the recorded serial and parallel paths. These historical measurements must not be presented as timings of `86380f4d` or as results of the new candidates.

@@ -8,6 +8,28 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class SharedAlmaWindowTests
 {
     [Theory]
+    [InlineData(double.NaN)] [InlineData(double.PositiveInfinity)] [InlineData(double.NegativeInfinity)]
+    public void CachedPricePreservesDeferredStateValidationAndReset(double invalid)
+    {
+        var state = (IMultiOutputState)new ArnaudLegouxWindow(3).CreateState();
+        var output = new double[2];
+        state.Update(new Bar(default, 0, 0, 0, invalid, 0), output);
+        Assert.Equal(new double[] { 0, 0 }, output);
+        state.Update(new Bar(default, 0, 0, 0, 1, 0), output);
+        Assert.Equal(new double[] { 0, 0 }, output);
+        var error = Assert.Throws<ArithmeticException>(() => state.Update(new Bar(default, 0, 0, 0, 2, 0), output));
+        Assert.Equal("An exact finite product requires finite inputs.", error.Message);
+        // The invalid entry leaves on the next insertion, as in the prior queue.
+        state.Update(new Bar(default, 0, 0, 0, 3, 0), output);
+        Assert.Equal(1, output[1]);
+        Assert.True(double.IsFinite(output[0]));
+        state.Reset();
+        for (int i = 0; i < 3; i++) state.Update(new Bar(default, 0, 0, 0, -0d, 0), output);
+        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(output[0]));
+        Assert.Equal(1, output[1]);
+    }
+
+    [Theory]
     [InlineData(6d)] [InlineData(500d)]
     public void CompactProductsPreserveWideWindowsAndReset(double sigma)
     {
