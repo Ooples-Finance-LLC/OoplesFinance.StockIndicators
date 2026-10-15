@@ -1,0 +1,25 @@
+{
+  "base_commit": "47a8aee1250944a9e6a4afdcb23f4b48e15aa550",
+  "source_sha256": {
+    "src/Indicators/ValuesBarExecution.cs": "7921ebf1eb3aa4559aba595324e30d0b97c1a35f3a3e76b994f5f6dd2326e50c",
+    "src/Indicators/ValuesBarExecution.Pivots.cs": "2be40c226626e44ad4aaae3f38bbc92753c6689445f1103c700709a368f11c7c",
+    "tests/ModelsTests/PivotSharedExecutionTests.cs": "6dec06cf9a91a4a710e5325ca6ae5427751f6fcb8ea3b831c7096694287e28c6"
+  },
+  "verification": {
+    "unit_cases": 22,
+    "independent_comparator_cases": 12,
+    "local_gpu_cases": 100,
+    "skipped": 0
+  },
+  "validation_passes": {
+    "before": 18,
+    "after": {
+      "Standard": 9,
+      "Fibonacci": 9,
+      "Woodie": 9,
+      "Camarilla": 10,
+      "Demark": 5
+    }
+  },
+  "interpretation": "Each unique pivot output array is validated once at its earliest owning slot. All 18 outputs remain published. Counts describe removed duplicate scans, not measured latency."
+}

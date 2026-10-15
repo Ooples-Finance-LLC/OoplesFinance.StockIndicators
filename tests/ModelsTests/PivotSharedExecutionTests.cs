@@ -81,8 +81,13 @@ public sealed class PivotSharedExecutionTests
         finally { AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
-    [Fact]
-    public async Task LaterWorkerInvalidInputPrecedesEarlierSecondaryOverflow()
+    [Theory]
+    [InlineData(PivotLevelStyle.Standard, 2)]
+    [InlineData(PivotLevelStyle.Camarilla, 4)]
+    [InlineData(PivotLevelStyle.Demark, 5)]
+    [InlineData(PivotLevelStyle.Fibonacci, 2)]
+    [InlineData(PivotLevelStyle.Woodie, 2)]
+    public async Task LaterWorkerInvalidInputPrecedesEarlierSecondaryOverflow(PivotLevelStyle style, int expectedSlot)
     {
         int previous = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
         try
@@ -91,16 +96,17 @@ public sealed class PivotSharedExecutionTests
             foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
             {
                 var bars = BarsOf(1025, 1);
-                bars[0] = new(default, 0, double.MaxValue, -double.MaxValue, 0, 1);
+                bars[0] = new(default, 0, double.MaxValue, -double.MaxValue,
+                    style == PivotLevelStyle.Demark ? double.MaxValue : 0, 1);
                 bars[^1] = new(default, 0, 1, -1, 0, double.NaN);
                 var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
-                    .ConfigureIndicators(new RollingPivotLevels(1)).ConfigureHistory(mode);
+                    .ConfigureIndicators(new RollingPivotLevels(1, style: style)).ConfigureHistory(mode);
                 await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => builder.BuildAsync());
                 Assert.Null(builder.LastExecution);
                 bars[^1] = new(default, 0, 1, -1, 0, 1);
                 var error = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
                 Assert.Equal(1, error.BarIndex);
-                Assert.Equal(2, error.OutputSlot);
+                Assert.Equal(expectedSlot, error.OutputSlot);
                 Assert.Null(builder.LastExecution);
             }
         }

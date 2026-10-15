@@ -52,6 +52,8 @@ Identical presence flags and permanently absent levels now share run-owned stora
 
 These are exact payload reductions from tested buffer ownership, excluding array headers; they are not total allocation measurements or latency wins. The production net10 build passed with zero warnings/errors; 18 focused unit cases, 12 independent comparator cases, and 100 local GPU cases passed with zero skips. Tests cover all styles, serial/workers, mixed roots, extremes, validation order, rebuild isolation, source mutation and disposal. [Source hashes, storage counts and compressed test results](results/shared-rollout/rolling-pivot-shared-cpu/column-storage/summary.json) retain the evidence. Matching-runtime timing and hosted verification of this follow-up remain pending.
 
+Pivot publication now also validates each distinct array only once, at its earliest owning output slot: 9 scans for Standard/Fibonacci/Woodie, 10 for Camarilla and 5 for DeMark, instead of 18. All outputs remain published, and tests for all five styles preserve the first overflow slot and the priority of later invalid raw input. The net10 production build passed with zero warnings/errors; 22 unit, 12 comparator and 100 local GPU cases passed with zero skips. [Source-bound validation evidence](results/shared-rollout/rolling-pivot-shared-cpu/unique-validation/summary.json) records these checks. This removes duplicate validation work without claiming a measured latency gain.
+
 ### Evidence still required
 
 - The four candidates have preserved binaries and source hashes for builder-only measurements on .NET 10.0.12, matching the saved native baseline. Competitor timings are reused under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json); they are not rerun.
