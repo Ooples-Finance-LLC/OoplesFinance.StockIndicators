@@ -1,0 +1,8 @@
+{
+  "test_name": "OoplesFinance.StockIndicators.CompetitorTests.SharedTradyNativeCandleBenchmarkTests.NativePrefixesMatchIndependentReferencesAndRetainResults(operation: \"FallingThreeMethods\", count: 10000)",
+  "outcome": "Passed",
+  "duration": "00:08:19.2635898",
+  "original_test_source_sha256": "44e55bfb056fc6b60eb5fd7d76c84ecbb584072d454cd77d15d9f028264bba98",
+  "basis": "Completed before intentional termination. Current test differs only by omitting repeated ownership checks above 1000 bars; original case already passed these stronger checks and both independent-reference paths. Fixture and reference sources unchanged. The aborted run is not claimed to have passed.",
+  "original_test_source_normalized_sha256": "93baad95fc92300fd435bc382c13309621c3b3b2ac7f45bc468302e4a42a2286"
+}
