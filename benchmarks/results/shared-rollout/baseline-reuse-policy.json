@@ -415,6 +415,13 @@
       ],
       "contract_cases_passed": 19,
       "timing_status": "First native baseline pending; standalone snapshot contract retained."
+    },
+    "skender_ichimoku": {
+      "operations": [
+        "Skender.GetIchimoku"
+      ],
+      "contract_cases_passed": 33,
+      "timing_status": "First native baseline pending; standalone snapshot retained."
     }
   }
 }
