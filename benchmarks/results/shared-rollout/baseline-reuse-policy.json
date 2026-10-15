@@ -80,6 +80,16 @@
         ],
         "contract_cases_passed": 43,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_finite_window_fixture": {
+        "name": "SharedSkenderFiniteWindowBenchmarks",
+        "operations": [
+          "Skender.GetAwesome",
+          "Skender.GetBop",
+          "Skender.GetCci"
+        ],
+        "contract_cases_passed": 49,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
