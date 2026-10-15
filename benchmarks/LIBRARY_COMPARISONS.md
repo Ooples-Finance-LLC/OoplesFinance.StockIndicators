@@ -38,7 +38,7 @@ The table below summarizes the existing catalog, before the latest worker/histor
 | `332edbfb` | Asin uses exact workers from 512 bars; Full transfers chunked owned history. | 22 unit + 9 comparator + 100 GPU cases | Pending |
 | `86380f4d` | Accepted Full SMA workers allocate chunked history and publish it only after validation, fallback replay and cancellation checks succeed. | 55 unit + 4 comparator + 100 GPU cases | Pending |
 
-All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,261 contract methods remain assigned to hosted CI in the fresh inventory after the direct-native fixture batches. Correctness checks do not establish latency wins.
+All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,263 contract methods remain assigned to hosted CI in the fresh inventory after the direct-native fixture batches. Correctness checks do not establish latency wins.
 
 ### Rolling-pivot column storage (2026-10-15)
 
@@ -137,6 +137,7 @@ The 102 runtime-mismatched mappings account for 204 size rows. The saved-artifac
 | Skender Doji / Marubozu / Heikin-Ashi | 3 | 56 | 24 | [Candles](results/shared-rollout/skender-candle/direct-native-contracts/summary.json) |
 | Skender Beta / Correlation / EPMA | 3 | 43 | 24 | [Statistics](results/shared-rollout/skender-statistics/direct-native-contracts/summary.json) |
 | Skender MA envelopes / SMA analysis / PRS / deviation channels | 4 | 54 | 32 | [Diagnostics](results/shared-rollout/skender-diagnostics/direct-native-contracts/summary.json) |
+| Trady EMA / WMA / SMA oscillator / EMA oscillator | 4 | 65 | 32 | [Averages](results/shared-rollout/trady-average/direct-native-contracts/summary.json) |
 
 The seven Skender fixture families share partition setup, eager native result joining and date checks. All 356 affected contract cases passed after this consolidation ([evidence](results/shared-rollout/skender-native-support/summary.json)); first native timings remain pending.
 
