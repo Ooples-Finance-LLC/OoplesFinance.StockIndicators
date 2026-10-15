@@ -107,7 +107,11 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
         : IMultiOutputState
     {
         private static readonly BigInteger Grid = BigInteger.One << 1074;
+#if NETFRAMEWORK
         private readonly Queue<double> _history = new();
+#else
+        private readonly Queue<(ExactMeanAccumulator.ProductFactor Factor, bool Finite)> _history = new();
+#endif
         private readonly BigInteger _offset = ExactVarianceWindow.Units(offset);
 #if NETFRAMEWORK
         private readonly BigInteger _sigmaSquared = BigInteger.Pow(
@@ -190,7 +194,15 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             output.Clear();
             if (_history.Count == period)
                 _history.Dequeue();
+#if NETFRAMEWORK
             _history.Enqueue(bar.Close);
+#else
+            // Decode each retained price once instead of once per window term.
+            // Invalid state inputs must still wait until a published window
+            // reaches them, matching the original full-window startup behavior.
+            bool finite = double.IsFinite(bar.Close);
+            _history.Enqueue((finite ? new ExactMeanAccumulator.ProductFactor(bar.Close) : default, finite));
+#endif
             if (fullWindowOnly && _history.Count < period)
                 return;
             PrepareWeights(_history.Count);
@@ -202,10 +214,12 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             var i = 0;
             foreach (var price in _history)
             {
-                var factor = new ExactMeanAccumulator.ProductFactor(price);
 #if NETFRAMEWORK
+                var factor = new ExactMeanAccumulator.ProductFactor(price);
                 numerator.AddProduct(in factor, in _weights[i++]);
 #else
+                if (!price.Finite) throw new ArithmeticException("An exact finite product requires finite inputs.");
+                var factor = price.Factor;
                 // Both normalized mantissas have at most 53 bits. Their exact
                 // product fits Int128 and needs no general dyadic multiplication.
                 var weight = _weights[i++];
