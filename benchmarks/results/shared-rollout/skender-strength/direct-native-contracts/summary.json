@@ -1,0 +1,36 @@
+{
+  "status": "Correctness verified; first direct-native timings pending. Qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderStrengthBenchmarks.cs": "b4d7cad6a0520be678d80cf88d13dac1453f6c3a080693704a0124596073f9e2",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderStrengthBenchmarkTests.cs": "73b29165e8885e47fa57858ecac9157407f740351a543c2c46acb5fb784cbd2f"
+  },
+  "validation": {
+    "comparator_cases_passed": 19,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1241,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Adx.Api.cs": "4b0d6187d427837520428e27ae9add1552f7dc0ae93a9002313981c5ef1842df",
+    "Adx.Series.cs": "22e57c842d5927c6d0cac5b5aa5c9df76c68b383c643e7f97533418af883a219",
+    "Rsi.Api.cs": "ffda9e54085404ce1ff6ecdc53f71515acf2e336d94ee1d62f1e405d2c58bd23",
+    "Rsi.Series.cs": "0310bb1406caec1044f1e958f84e766263572a57635dd00c9518d5d5a620f9de"
+  },
+  "contract": "NativeSingle retains eager native Lists. RSI uses the public tuple overload with decimal-converted close values. NativeParallel computes full input prefixes using up to eight workers and copies worker-owned rows from native Lists into a typed joined array. Normalization is outside timed methods. Both operations and sizes provide all four arms.",
+  "production": "No production source changes. GPU reference build refreshed informational-version metadata; all 50,248 method IL bodies match the prior preserved production candidate. Byte identity is not claimed.",
+  "production_il_evidence": [
+    {
+      "Path": "C:/Users/cheat/temp/si-directional-range-d90d37ad-preserved/benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll",
+      "Methods": 50248,
+      "ILSha256": "C84DBA16A34EB9F6B91B7B1F13DDC1AACEDA48971C4FF3C588108F4DFFEBC6FD"
+    },
+    {
+      "Path": "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll",
+      "Methods": 50248,
+      "ILSha256": "C84DBA16A34EB9F6B91B7B1F13DDC1AACEDA48971C4FF3C588108F4DFFEBC6FD"
+    }
+  ]
+}
