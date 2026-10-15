@@ -313,6 +313,16 @@
         ],
         "contract_cases_passed": 27,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_macd_fixture": {
+        "name": "SharedTaMacdNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Macd",
+          "TaLib.Functions.MacdFix",
+          "TaLib.Functions.MacdExt"
+        ],
+        "contract_cases_passed": 46,
+        "timing_status": "First native baselines pending; catalog unchanged."
       }
     }
   }

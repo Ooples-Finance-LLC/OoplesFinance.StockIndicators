@@ -1,0 +1,30 @@
+{
+  "status": "73 affected contract cases passed (46 MACD and 27 window). 100 local GPU cases passed. First native timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaPackedBenchmarkBase.cs": "a7527a88c94e00ab013a9f3b06f038f2d09b61a4f6cb73a8c0de41ad82d0bade",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaWindowNativeBenchmarks.cs": "f0d3b96c2aefb2a7f85e6398c94dbcaa714aa20468c582004b3e5a9838231deb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaMacdNativeBenchmarks.cs": "f035e50d07906b145a6cc894c3054a33c4bb22c6f230415882f26d6b67823391",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMappedBenchmarkBase.cs": "3b49e0446805024ee5a769be827d87aeb035df899e48a15e79975e6cba531ad0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedBenchmarkSupport.cs": "1b57a5d028ae3ae45151b00a1cd4ba3a70a8ed9821b0e80d01c5641fde1d45aa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/AlignedMacdComparison.cs": "27a2c79580adbf8e91fe996cf74e2ecc55b2a2ddf9c4f5a3a270ea3009c54d5e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ClassicMacdComparison.cs": "1eac214a3c962adee8521ab7cf269869bbf85d909031714b9bc70d4c563df0e8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaMacdNativeBenchmarkTests.cs": "b1b7e81d834655533fef5e2f9a4d3f2b799cc9722883db1e06f9f150719cc1e2",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaWindowNativeBenchmarkTests.cs": "b74dfaf587f41fbf8d6af27c6bf2f40ef0d443196140803481131b1ea0dcd21e"
+  },
+  "operations": [
+    "TaLib.Functions.Macd",
+    "TaLib.Functions.MacdFix",
+    "TaLib.Functions.MacdExt"
+  ],
+  "native_package": "TALib.NETCore 0.5.0",
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+  "contract": "Three eager packed native columns; original prefixes preserve native EMA seeds and SMA rolling arithmetic. Defaults12/26/9; MacdExt uses SMA for all three averages. Lookback33. Independent native/owned references check both paths separately. Shared packed harness extracted from window fixture; both fixtures reverified. No production changes.",
+  "validation": {
+    "comparator_cases_passed": 73,
+    "new_fixture_cases_passed": 46,
+    "affected_existing_cases_passed": 27,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1290
+  },
+  "benchmark_cases": 24
+}
