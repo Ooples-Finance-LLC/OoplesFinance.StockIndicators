@@ -454,6 +454,15 @@
       ],
       "contract_cases_passed": 61,
       "timing_status": "First native baseline pending; standalone snapshot contract retained."
+    },
+    "skender_charts": {
+      "operations": [
+        "Skender.GetRenko",
+        "Skender.GetRenkoAtr",
+        "Skender.GetZigZag"
+      ],
+      "contract_cases_passed": 61,
+      "timing_status": "First native baseline pending. Renko serial/parallel; ZigZag original serial API, with no valid independent partitioning path established."
     }
   }
 }

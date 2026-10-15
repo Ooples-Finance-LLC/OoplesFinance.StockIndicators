@@ -1,0 +1,65 @@
+{
+  "status": "61 affected cases passed (41 new and 20 existing); 100 local GPU cases passed. First native timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderRenkoChartNativeBenchmarks.cs": "872a5bdd67800b129a6e810bad911495f7ba7570c7d6919d43a696d7613b2c85",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderZigZagChartNativeBenchmarks.cs": "e658c6aa72fe20c759b59e5b6f0a7ff420a6e9de39268964054a2209106fbd72",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRenkoSnapshotBenchmarks.cs": "5c1abaafa88197517d45780971b7e8b7e602770690ac34112ba5f4d767924075",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedZigZagSnapshotBenchmarks.cs": "ea44275bb83f56c9095f92397371f5a9da57c152962282404f3528970f5c09a8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/RenkoComparison.cs": "e8674a8c852f742f95889d563e15adeeffd6d082b34656976ba39e7fc78a1be9",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ZigZagComparison.cs": "b8d5d64a9d1b8c1b41c606310c7680f4fc7ecc29d7ad1b8e1ef33321871e2141",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderChartNativeBenchmarkTests.cs": "a01d7f92ea2aaaddbc984b1b35ae30afe28bdb98d32d472e19b4ac143c1317ee",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedRenkoSnapshotBenchmarkTests.cs": "8184d50f2cb953b00c95e6eca744b7955bd70501ad6aa11339b145fceab640fc",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedZigZagSnapshotBenchmarkTests.cs": "3619d4a8ab0604125cb85c8f35e98cd735d7c71e2d108fe448cda8e2f5165400"
+  },
+  "operations": [
+    "Skender.GetRenko",
+    "Skender.GetRenkoAtr",
+    "Skender.GetZigZag"
+  ],
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_package_dll_sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+  "contract": "Fixed Renko size1 and ATR20 use Close thresholds. All bricks, dates, decimal OHLC/volume and direction retained. Native parallel calculates final native ATR inside timing, converts to decimal, replays native Renko prefixes and joins all bricks by assigned input dates. Setup never caches computed ATR or output counts. Tests cover repeated timestamps from multiple bricks, volume splitting, zero ATR and final ATR changing historical bricks. ZigZag retains native decimal values, point types, retraces and dates at5percent/Close. Normalization outside timing.",
+  "zigzag_parallel_scope": "The pinned native API exposes only a whole-series sequential calculation. Pivot searches and retraces have unbounded future dependencies, with no public range/state API. Measure native serial directly; no independent partitioning path established. No parallel speedup claim.",
+  "validation": {
+    "comparator_cases_passed": 61,
+    "new_fixture_cases_passed": 41,
+    "affected_existing_cases_passed": 20,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1317
+  },
+  "benchmark_cases": 16,
+  "timed_arms": {
+    "Skender.GetRenko": [
+      "Snapshot",
+      "NativeSingle",
+      "NativeParallel"
+    ],
+    "Skender.GetRenkoAtr": [
+      "Snapshot",
+      "NativeSingle",
+      "NativeParallel"
+    ],
+    "Skender.GetZigZag": [
+      "Snapshot",
+      "NativeSingle"
+    ]
+  },
+  "pinned_native_source": {
+    "Renko.Series.cs": {
+      "url": "https://raw.githubusercontent.com/facioquo/stock-indicators-dotnet/2.7.3/src/m-r/Renko/Renko.Series.cs",
+      "sha256": "f261c6c5d8c252a6270c6c4c5f93e78dfb4c5424ae776549aab004d4382cf54a"
+    },
+    "RenkoAtr.Series.cs": {
+      "url": "https://raw.githubusercontent.com/facioquo/stock-indicators-dotnet/2.7.3/src/m-r/Renko/RenkoAtr.Series.cs",
+      "sha256": "9a7bf113533dba93613a2b1812ed49b671097074ebc959e28291a41e05082eec"
+    },
+    "RenkoAtr.Api.cs": {
+      "url": "https://raw.githubusercontent.com/facioquo/stock-indicators-dotnet/2.7.3/src/m-r/Renko/RenkoAtr.Api.cs",
+      "sha256": "4b6b7ce816d42c65bbef8d5d3a83162c15edb094449f416e93282c1d212ccbe7"
+    },
+    "ZigZag.Series.cs": {
+      "url": "https://raw.githubusercontent.com/facioquo/stock-indicators-dotnet/2.7.3/src/s-z/ZigZag/ZigZag.Series.cs",
+      "sha256": "afe38ceadc97bd1c3bfba3ef9b88558d4f95b10cedd6688ca86070deba31205e"
+    }
+  }
+}
