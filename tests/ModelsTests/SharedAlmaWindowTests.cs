@@ -8,6 +8,34 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class SharedAlmaWindowTests
 {
     [Theory]
+    [InlineData(6d)] [InlineData(500d)]
+    public void CompactProductsPreserveWideWindowsAndReset(double sigma)
+    {
+        double[] values = [double.MaxValue, -double.MaxValue, double.Epsilon,
+            -double.Epsilon, 0d, -0d, Math.BitIncrement(1d), -.125];
+        var bars = Enumerable.Range(0, 63).Select(i =>
+            new Bar(default, 0, 0, 0, values[i % values.Length], 1)).ToArray();
+        foreach (bool fullWindow in new[] { false, true })
+        {
+            var indicator = new ArnaudLegouxWindow(20, .85, sigma, fullWindow);
+            var expected = indicator.Reference(bars);
+            var state = (IMultiOutputState)indicator.CreateState();
+            var output = new double[2];
+            for (int replay = 0; replay < 2; replay++)
+            {
+                state.Reset();
+                for (int row = 0; row < bars.Length; row++)
+                {
+                    state.Update(in bars[row], output);
+                    for (int slot = 0; slot < 2; slot++)
+                        Assert.Equal(BitConverter.DoubleToInt64Bits(expected[slot][row]),
+                            BitConverter.DoubleToInt64Bits(output[slot]));
+                }
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(511, 20)] [InlineData(512, 20)] [InlineData(513, 20)]
     [InlineData(8193, 20)] [InlineData(513, 1)] [InlineData(513, 513)]
     [InlineData(17, 4097)] [InlineData(17, int.MaxValue)]

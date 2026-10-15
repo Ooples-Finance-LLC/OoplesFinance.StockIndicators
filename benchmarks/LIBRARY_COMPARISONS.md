@@ -86,6 +86,12 @@ Correlation and full pair-statistics builders reuse the preceding values and pre
 
 The net10 production build passed with zero warnings/errors; 20 focused unit, 13 comparator and 100 local GPU cases passed with zero skips. Bit-exact checks cover periodic windows, later eviction, both flat-correlation settings, worker seeds, wide/subnormal and signed-zero inputs, every output, ownership and input-error priority. [Source hashes and compressed test results](results/shared-rollout/pair-statistics/unchanged-windows/summary.json) retain the evidence. This reduces computation; fresh latency qualification and hosted checks for this batch remain pending.
 
+### Compact ALMA weight products (2026-10-15)
+
+Modern Arnaud Legoux windows retain normalized mantissa/exponent factors for Gaussian weights instead of general dyadic arithmetic states. Each weighted term now forms the exact product of two at-most-53-bit mantissas directly in Int128, avoiding general multiplication dispatch and normalization. Exact accumulation and final rounding, weight generation, window ordering, startup, reset and the framework fallback remain unchanged.
+
+The net10 production build passed with zero warnings/errors. All 120 selected unit cases passed, including 18 directly relevant shared ALMA cases; the remaining cases cover legacy ALMA/composition paths. All 16 ALMA comparator cases and 100 local GPU cases passed with zero skips. Independent references cover wide cancellation, subnormals, signed zero, underflowed weights, extreme parameters, both startup modes, reset and worker ownership. Existing zero-per-bar-allocation assertions pass. [Source hashes and compressed test results](results/shared-rollout/alma/compact-products/summary.json) retain the evidence. This reduces stored representation and arithmetic work without claiming measured latency; hosted checks remain pending.
+
 ### Evidence still required
 
 - The four candidates have preserved binaries and source hashes for builder-only measurements on .NET 10.0.12, matching the saved native baseline. Competitor timings are reused under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json); they are not rerun.
