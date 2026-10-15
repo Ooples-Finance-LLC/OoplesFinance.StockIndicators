@@ -1,5 +1,4 @@
 #if !NETFRAMEWORK
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -11,8 +10,7 @@ internal static partial class ValuesBarExecution
         private readonly int _period;
         private readonly TillsonSeed _seed;
         private readonly long _first;
-        private readonly BigInteger[] _coefficients;
-        private readonly ExactMeanAccumulator _denominator;
+        private readonly double _factor;
         private readonly JurikDyadic _smoothingDivisor;
         private readonly double[] _stages = new double[6];
         private readonly JurikDyadic[] _sums = new JurikDyadic[6];
@@ -24,16 +22,7 @@ internal static partial class ValuesBarExecution
             _seed = seed;
             _first = (seed == TillsonSeed.CascadedMeans ? 6L * (period - 1) : 0) + suppression;
             _smoothingDivisor = JurikDyadic.FromDouble((long)period + 1);
-            var parts = ExactMeanAccumulator.DecomposeFinite(factor);
-            BigInteger n = parts.Integer, q = BigInteger.One;
-            if (parts.Exponent >= 0) n <<= parts.Exponent;
-            else q <<= -parts.Exponent;
-            var combined = q + n;
-            _coefficients = [combined * combined * combined, -3 * n * combined * combined,
-                3 * n * n * combined, -n * n * n];
-            var denominator = new ExactMeanAccumulator();
-            denominator.Add(1, q * q * q);
-            _denominator = denominator;
+            _factor = factor;
         }
 
         public void Reset()
@@ -75,12 +64,29 @@ internal static partial class ValuesBarExecution
             }
             if (_index < _first) return;
             // Finite raw closes and convex stage means keep every stage finite.
-            // Coefficient terms may overflow separately: accumulate all four
-            // exactly, then round the complete polynomial once.
-            var polynomial = new ExactMeanAccumulator();
-            for (int j = 0; j < 4; j++) polynomial.Add(_stages[j + 2], _coefficients[j]);
-            output[0] = polynomial.Ratio(_denominator);
+            output[0] = Combine(_stages[2], _stages[3], _stages[4], _stages[5], _factor);
             output[1] = 1;
+        }
+
+        internal static double Combine(double third, double fourth, double fifth, double sixth, double factor)
+        {
+            // Exact finite differences give E3 + a*(3*d1 + a*(3*d2 + a*d3)).
+            // Form the differences with small integer weights before the three
+            // factor products. Wide factors/cancellation retain arbitrary precision.
+            var first = new ExactMeanAccumulator();
+            first.Add(third, 3); first.Add(fourth, -3);
+            var second = new ExactMeanAccumulator();
+            second.Add(third, 3); second.Add(fourth, -6); second.Add(fifth, 3);
+            var polynomial = new ExactMeanAccumulator();
+            polynomial.Add(third); polynomial.Add(fourth, -3);
+            polynomial.Add(fifth, 3); polynomial.Add(sixth, -1);
+            polynomial.Multiply(factor);
+            polynomial.AddExact(second);
+            polynomial.Multiply(factor);
+            polynomial.AddExact(first);
+            polynomial.Multiply(factor);
+            polynomial.Add(third);
+            return polynomial.Mean(1);
         }
 
         private double Smooth(double prior, double input)

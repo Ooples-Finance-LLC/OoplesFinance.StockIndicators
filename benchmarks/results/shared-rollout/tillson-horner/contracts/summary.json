@@ -1,0 +1,56 @@
+{
+  "baseline_source_commit": "281b7984",
+  "compatibility": "Native methods, worker partition helpers, input preparation/constants and package project are text-identical to281b7984. Only setup assertion and builder plumbing extraction differ. Native baselines reused without timing reruns; cross-run descriptive comparison only.",
+  "baselines": {
+    "QuanTAlib.T3": {
+      "path": "benchmarks/results/shared-rollout/tillson-shared-cpu/quanta/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json",
+      "sha256": "f88f9729ab79c6fe8023d2322cd27dd80449365a95475b46ab7b223cd7b9733f",
+      "environment": {
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "Architecture": "X64",
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+      }
+    },
+    "Skender.GetT3": {
+      "path": "benchmarks/results/shared-rollout/tillson-shared-cpu/skender/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json",
+      "sha256": "8ab1e8beb4155bad9383cd6ebe3eb7afdf621fbd6b38c766727f806f67474b19",
+      "environment": {
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "Architecture": "X64",
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+      }
+    },
+    "TaLib.Functions.T3": {
+      "path": "benchmarks/results/shared-rollout/tillson-shared-cpu/talib/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json",
+      "sha256": "5b15171ea9abc612af42c360a815711f6adbf85810b7eec75ef5c517c30520cb",
+      "environment": {
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "Architecture": "X64",
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+      }
+    }
+  },
+  "status": "17 unit and26 comparator cases passed;100 local GPU cases passed. Latency unmeasured; candidate timing pending.",
+  "source_sha256": {
+    "src/Indicators/ValuesBarExecution.Tillson.cs": "711865b0ab717995a0bca2b6a407fa57b26482cbc08893d4eb6cb49f019ed139",
+    "tests/ModelsTests/TillsonPolynomialExecutionTests.cs": "e84a40bdfe5132c1405cddd8da8e136e074c491cbb2095bae0d8ae6b5a371507",
+    "tests/ModelsTests/TillsonSharedExecutionTests.cs": "b57f0cf4c4e28496b88521445f96ad4a12d02ae1e19f1e7a5b21e8e145d8cf24",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTillsonBenchmarks.cs": "97e15dc459f8daaed2f28ef780707b01977faa36179e755218a354759639119d"
+  },
+  "change": "Exact finite-difference Horner polynomial replaces four wide coefficient products with three factor products. Stage recurrence and all seed/startup/validation/history contracts unchanged. Complete exact sum still rounds once.",
+  "allocation_probe": {
+    "scope": "256 isolated polynomial publications on fixed finite stage tuples; excludes construction. Not an end-to-end allocation or latency result.",
+    "previous_bytes": 180264,
+    "candidate_bytes": 178512,
+    "reduction_bytes": 1752
+  },
+  "validation": {
+    "unit_cases": 17,
+    "comparator_cases": 26,
+    "gpu_cases": 100
+  },
+  "benchmark_cases": 12
+}

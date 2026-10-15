@@ -14,6 +14,10 @@ The production library has no competitor package dependency.
 
 The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. These are coverage counts, not speedup counts. Two stale KAMA qualification labels now agree with their latest builder-only rows; historical native measurements remain retained. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
 
+### Tillson polynomial candidate (2026-10-15)
+
+Shared CPU Tillson publication now evaluates the exact finite-difference Horner polynomial, retaining one final rounding and the existing stage recurrence. This replaces four wide coefficient products with three factor products. All 17 focused unit, 26 comparator and 100 GPU cases passed. The isolated 256-publication allocation test used 178,512 bytes versus 180,264 for the prior expression (1,752 bytes less, about 1%). This small allocation result does not establish end-to-end allocation or latency improvement. Twelve builder-only timing cases will reuse the three compatible saved native baselines; native methods, inputs and package references are unchanged. [Evidence](results/shared-rollout/tillson-horner/contracts/summary.json). Qualification remains unchanged.
+
 ### Eight-pilot timing gate
 
 The table below summarizes the existing catalog, before the latest worker/history repairs. Ratio = builder mean / fastest saved native mean; **below 1 is faster**. Each native choice is the faster of the recorded serial and parallel paths. These historical measurements must not be presented as timings of `86380f4d` or as results of the new candidates.
