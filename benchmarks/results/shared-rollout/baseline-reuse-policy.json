@@ -238,6 +238,29 @@
         ],
         "contract_cases_passed": 69,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_native_candle_fixture": {
+        "name": "SharedTradyNativeCandleBenchmarks",
+        "operations": [
+          "Trady.Candlestick.DarkCloudCover",
+          "Trady.Candlestick.DragonifyDoji",
+          "Trady.Candlestick.RisingThreeMethods",
+          "Trady.Candlestick.FallingThreeMethods"
+        ],
+        "contract_cases_passed": 65,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_star_reversal_fixture": {
+        "name": "SharedTaStarReversalBenchmarks",
+        "operations": [
+          "TaLib.Candles.MorningStar",
+          "TaLib.Candles.EveningStar",
+          "TaLib.Candles.MorningDojiStar",
+          "TaLib.Candles.EveningDojiStar",
+          "TaLib.Candles.AbandonedBaby"
+        ],
+        "contract_cases_passed": 61,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }

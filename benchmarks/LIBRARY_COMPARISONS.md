@@ -38,7 +38,7 @@ The table below summarizes the existing catalog, before the latest worker/histor
 | `332edbfb` | Asin uses exact workers from 512 bars; Full transfers chunked owned history. | 22 unit + 9 comparator + 100 GPU cases | Pending |
 | `86380f4d` | Accepted Full SMA workers allocate chunked history and publish it only after validation, fallback replay and cancellation checks succeed. | 55 unit + 4 comparator + 100 GPU cases | Pending |
 
-All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,277 contract methods remain assigned to hosted CI in the fresh inventory after the direct-native fixture batches. Correctness checks do not establish latency wins.
+All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,281 contract methods remain assigned to hosted CI in the fresh inventory after the direct-native fixture batches. Correctness checks do not establish latency wins.
 
 ### Rolling-pivot column storage (2026-10-15)
 
@@ -145,6 +145,10 @@ The 102 runtime-mismatched mappings account for 204 size rows. The saved-artifac
 | Trady Chandelier / Keltner channels | 2 | 25 | 16 | [ATR channels](results/shared-rollout/trady-atr-channel/direct-native-contracts/summary.json) |
 | Trady CCI / KAMA | 2 | 31 | 16 | [CCI / adaptive](results/shared-rollout/trady-cci-adaptive/direct-native-contracts/summary.json) |
 | Trady positive / negative volume index / ADL | 3 | 69 | 24 | [Volume](results/shared-rollout/trady-native-volume/direct-native-contracts/summary.json) |
+| Trady Dark Cloud Cover / Dragonify Doji / rising and falling three methods | 4 | 65 across two runs | 32 | [Trady candles](results/shared-rollout/trady-native-candle/direct-native-contracts/summary.json) |
+| TA-Lib morning / evening stars, doji stars and Abandoned Baby | 5 | 61 | 40 | [Star reversals](results/shared-rollout/ta-star-reversal/direct-native-contracts/summary.json) |
+
+Trady candle evidence covers 64 passing follow-up cases plus the completed 10,000-bar Falling Three Methods case retained from an intentionally stopped run. That earlier run is not reported as passing. Its completed case also verified repeated output ownership; the follow-up retains those repeat checks through 1,000 bars and checks both native paths against independent references at every size. The pinned native LongDay implementation rebuilds full-series percentiles inside individual predicate evaluations; diagnostic test durations are not performance measurements. [Coverage verifier and source evidence](results/shared-rollout/trady-native-candle/direct-native-contracts/verify-case-coverage.py) retain this distinction.
 
 The seven Skender fixture families share partition setup, eager native result joining and date checks. All 356 affected contract cases passed after this consolidation ([evidence](results/shared-rollout/skender-native-support/summary.json)); first native timings remain pending.
 
