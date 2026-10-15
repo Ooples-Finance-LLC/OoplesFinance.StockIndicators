@@ -408,6 +408,13 @@
       ],
       "contract_cases_passed": 43,
       "timing_status": "First native baseline pending; standalone snapshot contract retained, not builder qualification."
+    },
+    "skender_hurst": {
+      "operations": [
+        "Skender.GetHurst"
+      ],
+      "contract_cases_passed": 19,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained."
     }
   }
 }
