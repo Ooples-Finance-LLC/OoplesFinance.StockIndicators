@@ -1,0 +1,14 @@
+{
+  "base_commit": "4f65f7f4116e22081e8f3a51f30c0b7bdf4360b8",
+  "source_sha256": {
+    "src/Indicators/RollingPercentile.cs": "acaf5a4c02afda06438e6b5bd89aa218b26533f36995e528c495f2f419389584",
+    "tests/ModelsTests/SharedRollingPercentileTests.cs": "77b89653b1bb484e1f0b1b3fef30c5a1d87f01dfe0be946fdef9d3964466c88c"
+  },
+  "verification": {
+    "unit_cases": 14,
+    "comparator_cases": 14,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Equal finite interpolation endpoints return their exact value without weighted arithmetic. Fractional ranks canonicalize zero while integer ranks preserve the selected bits. This is an arithmetic-work reduction, not a qualified latency result."
+}

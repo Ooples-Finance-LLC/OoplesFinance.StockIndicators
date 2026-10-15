@@ -166,19 +166,23 @@ public sealed class RollingPercentile : IndicatorBase, IIndicatorValidationContr
             else index = (int)BigInteger.DivRem(_top * (_history.Count - 1), _bottom, out remainder);
             if (remainder.IsZero)
                 return _sorted[index];
+            double lower = _sorted[index], upper = _sorted[index + 1];
+            // Equal endpoints need no weighted arithmetic. Fractional ranks
+            // canonicalize zero; integer ranks above retain the selected bits.
+            if (lower == upper && FrameworkCompatibility.IsFinite(lower)) return lower == 0 ? 0 : lower;
             if (_bottom == 2)
             {
-                double total = _sorted[index] + _sorted[index + 1];
+                double total = lower + upper;
                 if (total == 0) return 0; // NOSONAR: S1244 - Exact cancellation alone produces canonical zero.
                 if (FrameworkCompatibility.IsFinite(total) && Math.Abs(total) >= 4.450147717014403E-308)
                     return total * .5;
                 var mean = new ExactMeanAccumulator();
-                mean.Add(_sorted[index]); mean.Add(_sorted[index + 1]);
+                mean.Add(lower); mean.Add(upper);
                 return mean.Mean(2);
             }
             var numerator = new ExactMeanAccumulator();
-            numerator.Add(_sorted[index], full ? _fullLowerWeight : _bottom - remainder);
-            numerator.Add(_sorted[index + 1], remainder);
+            numerator.Add(lower, full ? _fullLowerWeight : _bottom - remainder);
+            numerator.Add(upper, remainder);
             return numerator.Ratio(_denominator);
         }
     }

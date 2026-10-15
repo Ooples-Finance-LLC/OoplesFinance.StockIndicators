@@ -10,6 +10,31 @@ public sealed class SharedRollingPercentileTests
 {
     [Theory]
     [InlineData(false)] [InlineData(true)]
+    public void EqualEndpointsPreserveExactBitsThroughPlateausEvictionAndReset(bool average)
+    {
+        double[] levels = [double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon,
+            -0d, 0d, 1, Math.BitIncrement(1)];
+        var input = levels.SelectMany(level => Enumerable.Repeat(level, 23))
+            .Concat(Enumerable.Range(0, 46).Select(i => i % 2 == 0 ? -0d : 0d)).ToArray();
+        foreach (int period in new[] { 2, 3, 20 })
+        foreach (double percentile in new[] { double.Epsilon, .1, .25, .5, .9 })
+        {
+            var state = new RollingPercentile.State(period, percentile, average);
+            foreach (var prices in new[] { input, input.Reverse().ToArray() })
+            {
+                state.Reset();
+                var oracle = new Original(period, percentile, average);
+                foreach (double price in prices)
+                {
+                    var bar = new Bar(default, 0, 1, -1, price, 1);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(oracle.Next(price)),
+                        BitConverter.DoubleToInt64Bits(state.Update(in bar)));
+                }
+            }
+        }
+    }
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
     public void CachedRanksAndWarmupMatchOriginalArithmeticAndTieOrdering(bool average)
     {
         double[] edges = [-0d, 0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue, 1, -1, Math.BitIncrement(1)];
