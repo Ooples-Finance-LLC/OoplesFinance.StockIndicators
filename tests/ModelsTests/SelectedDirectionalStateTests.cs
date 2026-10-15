@@ -7,6 +7,38 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class SelectedDirectionalStateTests
 {
     [Theory]
+    [InlineData(PriorDirectionalMeasure.PositiveIndicator)]
+    [InlineData(PriorDirectionalMeasure.NegativeIndicator)]
+    [InlineData(PriorDirectionalMeasure.Index)]
+    [InlineData(PriorDirectionalMeasure.Average)]
+    [InlineData(PriorDirectionalMeasure.Rating)]
+    public void OrderedRangeEndpointsPreserveGapsCurrentCloseAndInvertedFallback(PriorDirectionalMeasure measure)
+    {
+        Bar[] cycle = [new(default, 0, 2, 1, -5, 1), new(default, 0, 4, 3, 9, 1),
+            new(default, 0, 2, -2, 0, 1), new(default, 0, 1, 1, -0d, 1),
+            new(default, 0, -2, 2, 1, 1), new(default, 0, double.Epsilon, -double.Epsilon, 0, 1),
+            new(default, 0, double.MaxValue, -double.MaxValue, double.MaxValue, 1)];
+        var bars = Enumerable.Range(0, 91).Select(i => cycle[i % cycle.Length]).ToArray();
+        foreach (int period in new[] { 2, 3, 20 })
+        {
+            var expected = PriorDirectionalReference.Calculate(bars, measure, period, 2);
+            var state = (IMultiOutputState)new PriorSeededDirectionalMeasure(measure, period, 2).CreateState();
+            var output = new double[2];
+            for (int replay = 0; replay < 2; replay++)
+            {
+                state.Reset();
+                for (int row = 0; row < bars.Length; row++)
+                {
+                    state.Update(in bars[row], output);
+                    Assert.Equal(expected[row].HasValue ? 1d : 0d, output[1]);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[row] ?? 0),
+                        BitConverter.DoubleToInt64Bits(output[0]));
+                }
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(PriorDirectionalMeasure.PositiveMovement)]
     [InlineData(PriorDirectionalMeasure.NegativeMovement)]
     [InlineData(PriorDirectionalMeasure.PositiveIndicator)]

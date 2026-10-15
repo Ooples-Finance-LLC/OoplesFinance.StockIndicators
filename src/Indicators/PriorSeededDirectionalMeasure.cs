@@ -114,6 +114,7 @@ public sealed class PriorSeededDirectionalMeasure
         private RocBankValue _positive, _negative, _range;
         private ExactMeanAccumulator _positiveSeed, _negativeSeed, _rangeSeed, _seedDx;
         private ExactMeanAccumulator.ProductFactor _previousHigh, _previousLow, _previousClose;
+        private double _previousClosePrice;
         private long _index = -1;
         private double _average, _lastDx;
 
@@ -123,6 +124,7 @@ public sealed class PriorSeededDirectionalMeasure
             _positive = _negative = _range = default;
             _positiveSeed = _negativeSeed = _rangeSeed = _seedDx = default;
             _previousHigh = _previousLow = _previousClose = default;
+            _previousClosePrice = 0;
             _index = -1;
             _average = _lastDx = 0;
         }
@@ -154,9 +156,17 @@ public sealed class PriorSeededDirectionalMeasure
         }
 
         private static RocBankValue TrueRange(ExactMeanAccumulator.ProductFactor high,
-            ExactMeanAccumulator.ProductFactor low, ExactMeanAccumulator.ProductFactor close) =>
-            RocBankValue.Round(Maximum(Difference(high, low),
+            ExactMeanAccumulator.ProductFactor low, ExactMeanAccumulator.ProductFactor close,
+            double highPrice, double lowPrice, double closePrice)
+        {
+            // For an ordered range, select its extended endpoints without any
+            // rounded subtraction. Inverted candles retain the original formula.
+            if (highPrice >= lowPrice)
+                return RocBankValue.Round(Difference(closePrice > highPrice ? close : high,
+                    closePrice < lowPrice ? close : low));
+            return RocBankValue.Round(Maximum(Difference(high, low),
                 Maximum(Absolute(Difference(high, close)), Absolute(Difference(low, close)))));
+        }
 
         private static void AddWeighted(ref ExactMeanAccumulator sum, RocBankValue value,
             in ExactMeanAccumulator.ProductCoefficient coefficient, int weight)
@@ -200,6 +210,7 @@ public sealed class PriorSeededDirectionalMeasure
             if (++_index == 0)
             {
                 _previousHigh = high; _previousLow = low; _previousClose = close;
+                _previousClosePrice = bar.Close;
                 return;
             }
             var up = Difference(high, _previousHigh);
@@ -207,8 +218,10 @@ public sealed class PriorSeededDirectionalMeasure
             var dominance = up; dominance.Subtract(down);
             var positive = _needsPositive && up.Sign > 0 && dominance.Sign > 0 ? RocBankValue.Round(up) : default;
             var negative = _needsNegative && down.Sign > 0 && dominance.Sign < 0 ? RocBankValue.Round(down) : default;
-            var range = _needsRange ? TrueRange(high, low, _previousClose) : default;
+            var range = _needsRange ? TrueRange(high, low, _previousClose,
+                bar.High, bar.Low, _previousClosePrice) : default;
             _previousHigh = high; _previousLow = low; _previousClose = close;
+            _previousClosePrice = bar.Close;
             if (period == 1)
             {
                 var movement = measure is PriorDirectionalMeasure.PositiveMovement or PriorDirectionalMeasure.PositiveIndicator
@@ -244,7 +257,7 @@ public sealed class PriorSeededDirectionalMeasure
             if (_index < period) return;
             var firstDx = (long)period + unstable;
             if (measure == PriorDirectionalMeasure.Index && _index > firstDx)
-                _range = Smooth(_range, TrueRange(high, low, close));
+                _range = Smooth(_range, TrueRange(high, low, close, bar.High, bar.Low, bar.Close));
             if (measure is PriorDirectionalMeasure.PositiveIndicator or PriorDirectionalMeasure.NegativeIndicator)
             {
                 if (_index >= firstDx)
