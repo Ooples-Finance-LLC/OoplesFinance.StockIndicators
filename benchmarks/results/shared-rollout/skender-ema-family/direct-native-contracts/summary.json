@@ -1,0 +1,38 @@
+{
+  "status": "81 focused contract cases passed. First direct-native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderEmaFamilyBenchmarks.cs": "720e9c000438652a959817953097ab5cd7723c049cf4b5a22c2f7996d10c2b51",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderEmaFamilyBenchmarkTests.cs": "8f3a9c0879e34e6ce98d0a9848ceb67b11fa0f8a59ddce37cbab8d5afbc4a59e"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Macd.Series.cs": "a8c186ecf5d5863a494a090d0587edbefde60874b6fd21d9f15c3dbe733c3383",
+    "MacdApi.cs": "b1893b3c4973918bdd5d524352b56c68c293b9fd20150d89e6ef4ef3cabf127a",
+    "Pmo.Api.cs": "34202a19be24589d26c15023fcd14b6ae32f6212d9f169a8b21cccc83318de03",
+    "Pmo.Series.cs": "e0f6a865d5b6140dd19eaad30db17ea3879f1c0aa24aae73e97d0833d076c910",
+    "Pvo.Api.cs": "9d6c767d333ba0b3469aca2bd77860eee1cd1fe5d3980e40afc505ec9c3071e4",
+    "Pvo.Series.cs": "ddd7542ad7f72eb971cda7665035770b1c44840b2b62c2c6862be4390901b35b",
+    "Trix.Api.cs": "2d0420ea92f943b05561c6e3fbd3b882589fd44b7e6fe5c1723484034ac7763a",
+    "Trix.Series.cs": "0d70b2c22fee84d7419d5c91fa6f4429226192a2bf49da00a0bcebfb6c641082",
+    "Tsi.Api.cs": "17a5d84e0c5eb31514d92eecb6ee097e3f5241e7f1bf502be5603a3d2efb2aa9",
+    "Tsi.Series.cs": "637d97eb4a1a97c0a1c1d3b0b4344413ab394f6521ededa49f1c8e1909004e78"
+  },
+  "operations": [
+    "Skender.GetMacd",
+    "Skender.GetPvo",
+    "Skender.GetPmo",
+    "Skender.GetTsi",
+    "Skender.GetTrix"
+  ],
+  "contract": "Public tuple APIs for MACD/PMO/TSI/TRIX, public quote API for PVO. Eager native Lists returned without normalization. Full-prefix parallel calls preserve recursive seeds and copy worker-owned rows. Independent native and owned references validate arithmetic, presence, dates and warmup. PVO verifies all five owned value/presence pairs, including its two unselected columns. Repeated native results remain independently owned.",
+  "validation": {
+    "comparator_cases_passed": 81,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1245,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 40
+}
