@@ -37,7 +37,7 @@ public class SharedPriceCandleBenchmarks
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[owner.Outputs[slot]].ToArray());
         }
     }
-    private static double[][] Reference(Bar[] bars, PriceCandlePattern owner)
+    internal static double[][] Reference(Bar[] bars, PriceCandlePattern owner)
     {
         var result = Enumerable.Range(0, 12).Select(_ => new double[bars.Length]).ToArray();
         var percent = Units(owner.Percent);
