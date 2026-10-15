@@ -16,7 +16,7 @@ public class SharedPointwiseBenchmarks
         "Sin", "Cos", "Tan", "Acos", "Atan", "Ln", "Log10", "Exp", "Sinh", "Cosh", "Tanh", "Ceil", "Floor", "Sqrt"
     }.Where(name => Environment.GetEnvironmentVariable("SHARED_POINTWISE") is not { } selected || selected == name);
     [ParamsSource(nameof(Cases))] public string Operation { get; set; } = "";
-    [Params(10_000, 100_000)] public int Count { get; set; }
+    [Params(1_000, 10_000, 100_000)] public int Count { get; set; }
     private Bar[] _bars = null!;
     private double[] _closes = null!;
     private int _previousDop;
