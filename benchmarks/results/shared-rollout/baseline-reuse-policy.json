@@ -121,6 +121,16 @@
         ],
         "contract_cases_passed": 35,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_candle_fixture": {
+        "name": "SharedSkenderCandleBenchmarks",
+        "operations": [
+          "Skender.GetDoji",
+          "Skender.GetMarubozu",
+          "Skender.GetHeikinAshi"
+        ],
+        "contract_cases_passed": 56,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }

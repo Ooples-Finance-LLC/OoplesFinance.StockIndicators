@@ -69,6 +69,11 @@ internal static class PriceCandleComparison
         var rows = (
             marubozu ? data.Quotes.GetMarubozu(threshold) : data.Quotes.GetDoji(threshold)
         ).ToArray();
+        return Normalize(rows);
+    }
+
+    internal static ComparisonSeries Normalize(IReadOnlyList<CandleResult> rows)
+    {
         double[] Values(Func<CandleResult, double> select) => rows.Select(select).ToArray();
         double[][] values =
         [
