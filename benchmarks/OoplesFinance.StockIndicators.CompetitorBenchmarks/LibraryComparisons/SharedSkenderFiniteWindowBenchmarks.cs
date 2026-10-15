@@ -1,6 +1,5 @@
 using System.Numerics;
 using static OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic;
-using AiDotNet.Tensors.Helpers;
 using BenchmarkDotNet.Attributes;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
@@ -9,30 +8,21 @@ using Skender.Stock.Indicators;
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
-public class SharedSkenderFiniteWindowBenchmarks : SharedMappedBenchmarkBase
+public class SharedSkenderFiniteWindowBenchmarks : SharedSkenderBenchmarkBase
 {
     private const int Period = 20;
     [Params("Skender.GetAwesome", "Skender.GetBop", "Skender.GetCci")]
     public string Operation { get; set; } = "";
-    private List<Quote> _quotes = null!;
     private IEnumerable<Quote>[] _quoteWindows = null!;
     private (DateTime Date, double Value)[] _medians = null!;
     private IEnumerable<(DateTime Date, double Value)>[] _windows = null!;
-    private int[] _ends = null!;
-    private int[] _seeds = null!;
 
     [GlobalSetup]
     public void Setup()
     {
         if (Operation is not ("Skender.GetAwesome" or "Skender.GetBop" or "Skender.GetCci"))
             throw new ArgumentException("Unknown Skender finite-window operation.");
-        if (Count < 1) throw new ArgumentOutOfRangeException(nameof(Count));
-        var (pair, data) = PrepareFixture(Operation);
-        _quotes = data.Quotes;
-        int chunks = Math.Min(Count, Math.Min(8, Environment.ProcessorCount));
-        _ends = Enumerable.Range(1, chunks).Select(i => (int)((long)Count * i / chunks)).ToArray();
-        int lookback = Operation == "Skender.GetAwesome" ? 34 : Period;
-        _seeds = Enumerable.Range(0, chunks).Select(i => Math.Max(0, (i == 0 ? 0 : _ends[i - 1]) - lookback + 1)).ToArray();
+        var (pair, data) = PrepareNativeFixture(Operation, Operation == "Skender.GetAwesome" ? 33 : Period - 1);
         // Cache input views only. Each worker includes exactly the preceding
         // lookback needed for its first row; native window sums keep their order.
         _quoteWindows = _ends.Select((end, i) => _quotes.Skip(_seeds[i]).Take(end - _seeds[i])).ToArray();
@@ -41,12 +31,7 @@ public class SharedSkenderFiniteWindowBenchmarks : SharedMappedBenchmarkBase
         var expected = Operation == "Skender.GetBop" ? BopReference(data, false) : pair.Reference!(data, Period);
         SharedBenchmarkSupport.VerifyMappedOutputs(_bars, Create, expected, pair.OutputNames ?? ["Value"]);
         var nativeExpected = Operation == "Skender.GetBop" ? BopReference(data, true) : pair.CompetitorReference!(data, Period);
-        var serial = NativeSingle();
-        var parallel = NativeParallel();
-        ComparisonVerifier.Compare(nativeExpected, Normalize(serial), Operation + " direct native serial", IndicatorErrorBudget.Exact);
-        ComparisonVerifier.Compare(nativeExpected, Normalize(parallel), Operation + " direct native parallel", IndicatorErrorBudget.Exact);
-        RequireDates(serial);
-        RequireDates(parallel);
+        VerifyNative(nativeExpected, NativeSingle(), NativeParallel(), Normalize, Operation, IndicatorErrorBudget.Exact);
     }
 
     protected override IIndicator Create() => Operation switch
@@ -74,21 +59,6 @@ public class SharedSkenderFiniteWindowBenchmarks : SharedMappedBenchmarkBase
         "Skender.GetCci" => Parallel(_quoteWindows, static quotes => quotes.GetCci(Period)),
         _ => throw new InvalidOperationException("Unknown operation.")
     };
-
-    private T[] Parallel<TInput, T>(IEnumerable<TInput>[] windows, Func<IEnumerable<TInput>, IEnumerable<T>> calculate)
-    {
-        var result = new T[Count];
-        CpuParallelSettings.LightweightParallel(_ends.Length, _ends.Length, chunk =>
-        {
-            int start = chunk == 0 ? 0 : _ends[chunk - 1], end = _ends[chunk];
-            // Skender 2.7.3 eagerly returns List<T>; do not charge an avoidable
-            // intermediate array copy to its serial or parallel native path.
-            var window = (List<T>)calculate(windows[chunk]);
-            if (window.Count != end - _seeds[chunk]) throw new InvalidOperationException("Native window length differs.");
-            window.CopyTo(start - _seeds[chunk], result, start, end - start);
-        });
-        return result;
-    }
 
     internal static ComparisonSeries Normalize(object result) => result switch
     {
@@ -128,16 +98,4 @@ public class SharedSkenderFiniteWindowBenchmarks : SharedMappedBenchmarkBase
         return VolumePriceComparison.Mask(values);
     }
 
-    private void RequireDates(object result)
-    {
-        var dates = result switch
-        {
-            IReadOnlyList<AwesomeResult> rows => rows.Select(row => row.Date),
-            IReadOnlyList<BopResult> rows => rows.Select(row => row.Date),
-            IReadOnlyList<CciResult> rows => rows.Select(row => row.Date),
-            _ => throw new ArgumentException("Unexpected native result type.", nameof(result))
-        };
-        if (!dates.SequenceEqual(_quotes.Select(quote => quote.Date)))
-            throw new InvalidOperationException("Native result dates differ from the fixture.");
-    }
 }

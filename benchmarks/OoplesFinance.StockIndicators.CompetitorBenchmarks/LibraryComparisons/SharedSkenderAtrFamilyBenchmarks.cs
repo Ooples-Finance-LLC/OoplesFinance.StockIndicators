@@ -1,4 +1,3 @@
-using AiDotNet.Tensors.Helpers;
 using BenchmarkDotNet.Attributes;
 using OoplesFinance.StockIndicators.Indicators;
 using Skender.Stock.Indicators;
@@ -6,25 +5,19 @@ using Skender.Stock.Indicators;
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
-public class SharedSkenderAtrFamilyBenchmarks : SharedMappedBenchmarkBase
+public class SharedSkenderAtrFamilyBenchmarks : SharedSkenderBenchmarkBase
 {
     private const int Period = 20;
     [Params("Skender.GetAtrStop", "Skender.GetSuperTrend", "Skender.GetChandelier", "Skender.GetKeltner", "Skender.GetStarcBands")]
     public string Operation { get; set; } = "";
-    private List<Quote> _quotes = null!;
     private IEnumerable<Quote>[] _quotePrefixes = null!;
-    private int[] _ends = null!;
 
     [GlobalSetup]
     public void Setup()
     {
         if (Operation is not ("Skender.GetAtrStop" or "Skender.GetSuperTrend" or "Skender.GetChandelier" or "Skender.GetKeltner" or "Skender.GetStarcBands"))
             throw new ArgumentException("Unknown Skender ATR-family operation.");
-        if (Count < 1) throw new ArgumentOutOfRangeException(nameof(Count));
-        var (pair, data) = PrepareFixture(Operation);
-        _quotes = data.Quotes;
-        int chunks = Math.Min(Count, Math.Min(8, Environment.ProcessorCount));
-        _ends = Enumerable.Range(1, chunks).Select(i => (int)((long)Count * i / chunks)).ToArray();
+        var (pair, data) = PrepareNativeFixture(Operation);
         // Cache only input views. Each measured call still runs every full prefix
         // and allocates its native results and the joined output.
         _quotePrefixes = _ends.Select(end => _quotes.Take(end)).ToArray();
@@ -42,12 +35,7 @@ public class SharedSkenderAtrFamilyBenchmarks : SharedMappedBenchmarkBase
         }
         else SharedBenchmarkSupport.VerifyMappedOutputs(_bars, Create, pair.Reference!(data, Period), pair.OutputNames!);
         var nativeExpected = pair.CompetitorReference!(data, Period);
-        var serial = NativeSingle();
-        var parallel = NativeParallel();
-        ComparisonVerifier.Compare(nativeExpected, Normalize(serial), Operation + " direct native serial", pair.ErrorBudget);
-        ComparisonVerifier.Compare(nativeExpected, Normalize(parallel), Operation + " direct native parallel", pair.ErrorBudget);
-        RequireDates(serial);
-        RequireDates(parallel);
+        VerifyNative(nativeExpected, NativeSingle(), NativeParallel(), Normalize, Operation, pair.ErrorBudget);
     }
 
     private void VerifyOwnedColumns(double?[][] expected)
@@ -96,21 +84,6 @@ public class SharedSkenderAtrFamilyBenchmarks : SharedMappedBenchmarkBase
         _ => throw new InvalidOperationException("Unknown operation.")
     };
 
-    private T[] Parallel<TInput, T>(IEnumerable<TInput>[] prefixes, Func<IEnumerable<TInput>, IEnumerable<T>> calculate)
-    {
-        var result = new T[Count];
-        CpuParallelSettings.LightweightParallel(_ends.Length, _ends.Length, chunk =>
-        {
-            int start = chunk == 0 ? 0 : _ends[chunk - 1], end = _ends[chunk];
-            // Skender 2.7.3 eagerly returns List<T>; do not charge an avoidable
-            // intermediate array copy to its serial or parallel native path.
-            var prefix = (List<T>)calculate(prefixes[chunk]);
-            if (prefix.Count != end) throw new InvalidOperationException("Native prefix length differs.");
-            prefix.CopyTo(start, result, start, end - start);
-        });
-        return result;
-    }
-
     internal static ComparisonSeries Normalize(object result) => result switch
     {
         IReadOnlyList<AtrStopResult> rows => AtrTrailingComparison.Series(
@@ -125,18 +98,4 @@ public class SharedSkenderAtrFamilyBenchmarks : SharedMappedBenchmarkBase
         _ => throw new ArgumentException("Unexpected native result type.", nameof(result))
     };
 
-    private void RequireDates(object result)
-    {
-        var dates = result switch
-        {
-            IReadOnlyList<AtrStopResult> rows => rows.Select(row => row.Date),
-            IReadOnlyList<SuperTrendResult> rows => rows.Select(row => row.Date),
-            IReadOnlyList<ChandelierResult> rows => rows.Select(row => row.Date),
-            IReadOnlyList<KeltnerResult> rows => rows.Select(row => row.Date),
-            IReadOnlyList<StarcBandsResult> rows => rows.Select(row => row.Date),
-            _ => throw new ArgumentException("Unexpected native result type.", nameof(result))
-        };
-        if (!dates.SequenceEqual(_quotes.Select(quote => quote.Date)))
-            throw new InvalidOperationException("Native result dates differ from the fixture.");
-    }
 }

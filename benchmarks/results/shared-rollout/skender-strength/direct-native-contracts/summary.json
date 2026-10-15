@@ -32,5 +32,10 @@
       "Methods": 50248,
       "ILSha256": "C84DBA16A34EB9F6B91B7B1F13DDC1AACEDA48971C4FF3C588108F4DFFEBC6FD"
     }
-  ]
+  ],
+  "shared_support_refactor": {
+    "evidence": "../../skender-native-support/summary.json",
+    "source_sha256": "21a1f49c5bf8414e8fc2043a1f56b2cbe0278a0bcc23ca91c27f7b493079a672",
+    "note": "Original source hashes and per-fixture evidence retained above; shared-support refactor validated all 356 affected cases."
+  }
 }

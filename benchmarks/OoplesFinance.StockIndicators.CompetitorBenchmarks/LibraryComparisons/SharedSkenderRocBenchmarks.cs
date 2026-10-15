@@ -1,4 +1,3 @@
-using AiDotNet.Tensors.Helpers;
 using BenchmarkDotNet.Attributes;
 using OoplesFinance.StockIndicators.Indicators;
 using Skender.Stock.Indicators;
@@ -9,31 +8,22 @@ using static OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferen
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
 [MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
-public class SharedSkenderRocBenchmarks : SharedMappedBenchmarkBase
+public class SharedSkenderRocBenchmarks : SharedSkenderBenchmarkBase
 {
     private const int Period = 20;
     [Params("Skender.GetRoc", "Skender.GetRocWb")]
     public string Operation { get; set; } = "";
-    private List<Quote> _quotes = null!;
     private (DateTime Date, double Value)[] _prices = null!;
     private IEnumerable<(DateTime Date, double Value)>[] _prefixes = null!;
-    private int[] _ends = null!;
-    private int[] _seeds = null!;
 
     [GlobalSetup]
     public void Setup()
     {
         if (Operation is not ("Skender.GetRoc" or "Skender.GetRocWb"))
             throw new ArgumentException("Unknown Skender ROC operation.");
-        if (Count < 1) throw new ArgumentOutOfRangeException(nameof(Count));
-        var (_, data) = PrepareFixture(Operation);
-        _quotes = data.Quotes;
-        int chunks = Math.Min(Count, Math.Min(8, Environment.ProcessorCount));
-        _ends = Enumerable.Range(1, chunks).Select(i => (int)((long)Count * i / chunks)).ToArray();
+        var (_, data) = PrepareNativeFixture(Operation, Operation == "Skender.GetRoc" ? 39 : null);
         // ROC20 with SMA20 needs 39 preceding bars. ROC bands retain the
         // full prefix because their EMA is recursive.
-        _seeds = Enumerable.Range(0, chunks).Select(i => Operation == "Skender.GetRoc"
-            ? Math.Max(0, (i == 0 ? 0 : _ends[i - 1]) - 39) : 0).ToArray();
         _prices = _quotes.Select(quote => (quote.Date, (double)quote.Close)).ToArray();
         _prefixes = _ends.Select((end, i) => _prices.Skip(_seeds[i]).Take(end - _seeds[i])).ToArray();
         var owner = Create();
@@ -45,12 +35,7 @@ public class SharedSkenderRocBenchmarks : SharedMappedBenchmarkBase
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[owner.Outputs[slot]].ToArray());
         }
         var nativeExpected = NativeReference(_prices.Select(v => v.Value).ToArray(), Operation == "Skender.GetRocWb");
-        var serial = NativeSingle();
-        var parallel = NativeParallel();
-        ComparisonVerifier.Compare(nativeExpected, Normalize(serial), Operation + " direct native serial", IndicatorErrorBudget.Exact);
-        ComparisonVerifier.Compare(nativeExpected, Normalize(parallel), Operation + " direct native parallel", IndicatorErrorBudget.Exact);
-        RequireDates(serial);
-        RequireDates(parallel);
+        VerifyNative(nativeExpected, NativeSingle(), NativeParallel(), Normalize, Operation, IndicatorErrorBudget.Exact);
     }
 
     protected override IIndicator Create() => Operation switch
@@ -75,21 +60,6 @@ public class SharedSkenderRocBenchmarks : SharedMappedBenchmarkBase
         "Skender.GetRocWb" => Parallel(_prefixes, static prices => prices.GetRocWb(Period, 3, 3)),
         _ => throw new InvalidOperationException("Unknown operation.")
     };
-
-    private T[] Parallel<TInput, T>(IEnumerable<TInput>[] prefixes, Func<IEnumerable<TInput>, IEnumerable<T>> calculate)
-    {
-        var result = new T[Count];
-        CpuParallelSettings.LightweightParallel(_ends.Length, _ends.Length, chunk =>
-        {
-            int start = chunk == 0 ? 0 : _ends[chunk - 1], end = _ends[chunk];
-            // Skender 2.7.3 eagerly returns List<T>; do not charge an avoidable
-            // intermediate array copy to its serial or parallel native path.
-            var prefix = (List<T>)calculate(prefixes[chunk]);
-            if (prefix.Count != end - _seeds[chunk]) throw new InvalidOperationException("Native input range length differs.");
-            prefix.CopyTo(start - _seeds[chunk], result, start, end - start);
-        });
-        return result;
-    }
 
     internal static ComparisonSeries Normalize(object result) => result switch
     {
@@ -137,15 +107,4 @@ public class SharedSkenderRocBenchmarks : SharedMappedBenchmarkBase
             : RetrospectivePriceComparison.Series(["Momentum", "Roc", "RocSma"], [momentum, roc, average]);
     }
 
-    private void RequireDates(object result)
-    {
-        var dates = result switch
-        {
-            IReadOnlyList<RocResult> rows => rows.Select(row => row.Date),
-            IReadOnlyList<RocWbResult> rows => rows.Select(row => row.Date),
-            _ => throw new ArgumentException("Unexpected native result type.", nameof(result))
-        };
-        if (!dates.SequenceEqual(_quotes.Select(quote => quote.Date)))
-            throw new InvalidOperationException("Native result dates differ from the fixture.");
-    }
 }

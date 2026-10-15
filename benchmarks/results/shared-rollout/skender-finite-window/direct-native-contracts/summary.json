@@ -36,5 +36,10 @@
     "rule": "S1244",
     "reason": "Exact equality defines absent BOP values; a tolerance would change the contract. Two inline comments follow the existing reference convention. No executable text changed.",
     "annotated_source_sha256": "e3dd37f1aa97c988f1a0208055dea6048f517ca74749677f724c920e2386e6e0"
+  },
+  "shared_support_refactor": {
+    "evidence": "../../skender-native-support/summary.json",
+    "source_sha256": "2ea34bec25d63bd4bbb37ccbf4966cce643cf4e44cba29046b499b455397d9f2",
+    "note": "Original source hashes and per-fixture evidence retained above; shared-support refactor validated all 356 affected cases."
   }
 }
