@@ -4,8 +4,48 @@
   "index": "catalog.json.gz",
   "saved_serial_results": "pairs[].measurements[].saved_competitor",
   "qualified_results": "pairs[].current[].methods.NativeSingle and NativeParallel, with report paths in each row's evidence",
-  "reuse_checks": ["competitor implementation and package version", "input fixture and parameters", "output materialization and worker count", "runtime and hardware"],
+  "reuse_checks": [
+    "competitor implementation and package version",
+    "input fixture and parameters",
+    "output materialization and worker count",
+    "runtime and hardware"
+  ],
   "comparison": "Identify saved-baseline comparisons explicitly. Preserve dates, confidence intervals and report provenance. Do not present them as same-run comparisons.",
   "missing_or_incompatible": "Record the gap; do not silently rerun competitors or claim a qualified win. Establish a new baseline only when required by the agreed scope.",
-  "builder_only_results": "pairs[].builder_only; excluded from measured_current_apis until a compatible comparison is available"
+  "builder_only_results": "pairs[].builder_only; excluded from measured_current_apis until a compatible comparison is available",
+  "saved_artifact_audit": {
+    "date": "2026-10-15",
+    "catalog_sha256": "55b722f067dad474154ddf286686fbb8625700243d8f3dc008bb577d50299264",
+    "builder_only_mappings": 119,
+    "runtime_mismatch_mappings": 102,
+    "mappings_without_saved_native_method_pair": 117,
+    "overlap": 100,
+    "retained_native_method_pair_mappings": [
+      "QuanTAlib.Kama",
+      "Skender.GetKama"
+    ],
+    "repository_json_artifacts_scanned": 1651,
+    "benchmark_reports_read": 968,
+    "matching_operation_or_pair_id_parallel_rows": 0,
+    "scope": "Searched repository JSON artifacts and named BDN reports in external si-* temporary folders, excluding preserved snapshots and bin/obj. Searched parallel/eight-worker methods keyed to the 117 target mappings. Unkeyed benchmark types retain their separate or grouped comparison families; no baseline was promoted. Two unreadable external reports were excluded. File counts include copied artifacts, not unique benchmark runs.",
+    "next_action": "Preserve the gaps. Matching runtime alone is insufficient. Any required new baseline must match fixture, output materialization, runtime and worker count, and be saved once for reuse.",
+    "invalidate_when": "Catalog classification or saved result artifacts change.",
+    "external_named_bdn_reports_considered": 999,
+    "external_benchmark_reports_read": 997,
+    "external_unreadable_reports": 2,
+    "external_matching_operation_or_pair_id_parallel_rows": 0,
+    "fixture_gap_example": {
+      "builder_only_harness": "SharedStrengthBenchmarks : SharedMappedBenchmarkBase",
+      "timed_methods": [
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ],
+      "older_serial_method": "LibraryPairBenchmarks.Competitor returns normalized ComparisonSeries; it is not a direct native arm.",
+      "next_bounded_fixture_batch": [
+        "Skender.GetRsi",
+        "Skender.GetAdx"
+      ],
+      "requirement": "Add direct native serial and full-prefix parallel arms with correctness verification before collecting any missing baseline."
+    }
+  }
 }
