@@ -1,0 +1,35 @@
+{
+  "status": "43 focused contract cases passed. First direct-native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderSmoothingBenchmarks.cs": "8633fdcc51b43da8dc02da295f6afc0aedb8ad5147ec44876be8b5e36f0fe3b6",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderSmoothingBenchmarkTests.cs": "58e3343a5a867b21b41e69ed35e7816588cb9d7c05d75f92f493c44fb342e189"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Alligator.Api.cs": "487f7c810a5c073d712c06e89584f03b6e6ddc20e1527a4e6be8582949da14b0",
+    "Alligator.Models.cs": "c6be1944b431280f1751e17f4a96999b797e881e38349de8c15897836e2fe040",
+    "Alligator.Series.cs": "06db14398a3f3262cc9a372e3b7c62fdf5149333c74c090ebac8f628faed6a33",
+    "ElderRay.Api.cs": "319c04c078cfc61f0d50724be5ca296812a8d896a131fd0afa3a7b0bfbebe7d2",
+    "ElderRay.Models.cs": "3284e6310d54a71302f9b20f4baffabbd3401d76b0dfbf086533f8de4048919c",
+    "ElderRay.Series.cs": "f2f9f995b564b82f1cbd8383fc3c32f429c5e250fb1db38fb4b37def1d45842a",
+    "Gator.Api.cs": "1eea90467a88d2e17d843223e0248c0587b4a5b36a57556654136a4405dfaf9d",
+    "Gator.Models.cs": "6d8efa28dc52d84bf5cb6bdf2f80932a5d7c3248f193427c4b0c88e2fe55d23a",
+    "Gator.Series.cs": "d72cf684f05bbc3ee9ceee969d2e9283a54847b3eba42aeb92b15ef45e797fd1"
+  },
+  "operations": [
+    "Skender.GetAlligator",
+    "Skender.GetGator",
+    "Skender.GetElderRay"
+  ],
+  "contract": "Public Alligator tuple API; Gator composes public GetAlligator().GetGator() to avoid its convenience tuple overload sorting twice. Median inputs retain quote decimal arithmetic. Elder Ray uses the public quote API. Native Lists are eager; full-prefix parallel calls retain recursive seeds and offsets, copying worker-owned rows. Independent references verify nullable expansion flags, values, dates and warmup. Elder Ray explicitly verifies its common presence flag for all three values. Retained native results are independently owned.",
+  "validation": {
+    "comparator_cases_passed": 43,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1247,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 24
+}
