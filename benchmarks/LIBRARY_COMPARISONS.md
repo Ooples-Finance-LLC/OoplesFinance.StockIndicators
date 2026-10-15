@@ -157,6 +157,8 @@ The 102 runtime-mismatched mappings account for 204 size rows. The saved-artifac
 | TA-Lib Trix / KAMA / Mavp | 3 | 40 | 24 | [Adaptive / rate](results/shared-rollout/ta-adaptive-rate-native/direct-native-contracts/summary.json) |
 | TA-Lib Hilbert phase / sine / trendline / trend mode | 4 | 54 | 32 | [Hilbert](results/shared-rollout/ta-hilbert-native/direct-native-contracts/summary.json) |
 
+The two remaining KAMA runtime gaps reuse their saved .NET 10.0.12 native serial/parallel measurements. Ten existing fixture tests passed; fixture generation, native implementations and package references match baseline source 93cb7084. Only eight builder cases are queued on the matching runtime. [Compatibility evidence](results/shared-rollout/kama-baseline-reuse/contracts/summary.json) preserves baseline hashes and cross-run limitations.
+
 The table includes 113 newly implemented mappings and four mappings from the existing triple-body fixture. Its 32 tests passed using current binaries; the existing 100-case GPU receipt was reverified. The saved serial-only triple-body comparison uses different inputs, so this existing four-arm fixture is queued for its first compatible native baseline.
 
 The packed TA harness retains native integer or double columns, including integer TrendMode outputs. All 247 affected contract cases passed, plus 100 GPU cases. Seven queued packed fixtures use the latest common source state before first timing.
