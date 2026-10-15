@@ -1,16 +1,19 @@
 using AiDotNet.Tensors.Helpers;
 using BenchmarkDotNet.Attributes;
+using System.Numerics;
 
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
-public abstract class SharedTaPackedBenchmarkBase : SharedMappedBenchmarkBase
+public abstract class SharedTaPackedBenchmarkBase : SharedTaPackedBenchmarkBase<double> { }
+
+public abstract class SharedTaPackedBenchmarkBase<T> : SharedMappedBenchmarkBase where T : INumber<T>
 {
     private protected CompetitorData Data { get; private set; } = null!;
     protected abstract string Mapping { get; }
     protected abstract int Lookback { get; }
     protected abstract int Columns { get; }
     protected virtual bool IndependentWindows => false;
-    protected abstract TALib.Core.RetCode Call(System.Range input, double[][] output, out System.Range range);
+    protected abstract TALib.Core.RetCode Call(System.Range input, T[][] output, out System.Range range);
     protected virtual void PrepareNative() { }
     private protected virtual void VerifyBuilder(ComparisonPair pair, string[] names) =>
         SharedBenchmarkSupport.VerifyMappedOutputs(_bars, Create, pair.Reference!(Data, 20), names);
@@ -28,16 +31,16 @@ public abstract class SharedTaPackedBenchmarkBase : SharedMappedBenchmarkBase
         for (int slot = 0; slot < names.Length; slot++)
         {
             var expected = native.Outputs[names[slot]].Values.Skip(Lookback).ToArray();
-            AsinFeasibilityBenchmarks.RequireSame(expected, serial[slot]);
-            AsinFeasibilityBenchmarks.RequireSame(expected, parallel[slot]);
+            AsinFeasibilityBenchmarks.RequireSame(expected, serial[slot].Select(v => double.CreateChecked(v)).ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, parallel[slot].Select(v => double.CreateChecked(v)).ToArray());
         }
         VerifyBuilder(pair, names);
     }
 
     [Benchmark(Baseline = true)]
-    public double[][] NativeSingle() => NativeRange(0, Math.Max(0, Count - Lookback));
+    public T[][] NativeSingle() => NativeRange(0, Math.Max(0, Count - Lookback));
 
-    private double[][] NativeRange(int start, int end)
+    private T[][] NativeRange(int start, int end)
     {
         int defined = end - start;
         var output = Allocate(defined);
@@ -48,10 +51,10 @@ public abstract class SharedTaPackedBenchmarkBase : SharedMappedBenchmarkBase
         return output;
     }
 
-    private double[][] Allocate(int length) => Enumerable.Range(0, Columns).Select(_ => new double[length]).ToArray();
+    private T[][] Allocate(int length) => Enumerable.Range(0, Columns).Select(_ => new T[length]).ToArray();
 
     [Benchmark]
-    public double[][] NativeParallel()
+    public T[][] NativeParallel()
     {
         int defined = Math.Max(0, Count - Lookback);
         var output = Allocate(defined);
