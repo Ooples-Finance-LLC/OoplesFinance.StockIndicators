@@ -1,0 +1,35 @@
+{
+  "status": "73 focused contract cases passed. First direct-native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderStochasticBenchmarks.cs": "fb4cd6b3849544b62d8128e3a72435138e7f32f475721e19d473336b9224516d",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderStochasticBenchmarkTests.cs": "8cf75f79c13cc0ef8d535e25d028c3c0aee6557d6c958759b8ab18d9e7e36d6e"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Smi.Api.cs": "fcdb78b5ddcfaf58bfeceaefb566572ff9dae70fcafc15904b88ddcf87c37d12",
+    "Smi.Models.cs": "4c57d689597a8e81f103efd542d1683b79ba1b410cb9da8dc1b931b19898d05b",
+    "Smi.Series.cs": "f05e1c6d3512fd65d67a9a59cd59e79ee534cc0ca1e3b0b75258614c847e1151",
+    "Stoch.Api.cs": "1d8a388cb9afe475042c5e63351e1feed93f76da484c60bb5bde2e97d0d529e9",
+    "Stoch.Models.cs": "dd2bd446d63fff90430b7809175eb89d748b39968f9ad2d848d63706d528eac2",
+    "Stoch.Series.cs": "f10dd8e1f6250937647852e23c0be5d7bb510306004474fd5c51f92838688a9f",
+    "StochRsi.Api.cs": "9d7f560ec590187275070328f70fbcca5ecd652f7f856976886fb8e7420437d5",
+    "StochRsi.Models.cs": "4902eea2526d2bbfce37eb140d7be1346b83f4261690c90718cef54d2acfbb1f",
+    "StochRsi.Series.cs": "9fdf74fc2522ed927ab3507adc3b21091ca7a16b6c748eef38d3f9a6683eac29"
+  },
+  "operations": [
+    "Skender.GetStoch",
+    "Skender.GetStochRsi",
+    "Skender.GetSmi"
+  ],
+  "contract": "Public quote APIs for Stochastic/SMI; public tuple API for Stochastic RSI preserves converted close inputs. Eager native Lists. Standard Stochastic parallel workers retain 17 preceding bars for the 14/3/3 finite dependency; SMI and Stochastic RSI retain full prefixes for recursive smoothing. Native calculation and joined outputs remain timed. Independent references and exact serial/parallel comparisons verify warmup, worker boundaries, dates, values, presence and retained ownership.",
+  "validation": {
+    "comparator_cases_passed": 73,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1253,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 24
+}

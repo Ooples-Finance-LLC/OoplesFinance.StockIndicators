@@ -102,6 +102,16 @@
         ],
         "contract_cases_passed": 56,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_stochastic_fixture": {
+        "name": "SharedSkenderStochasticBenchmarks",
+        "operations": [
+          "Skender.GetStoch",
+          "Skender.GetStochRsi",
+          "Skender.GetSmi"
+        ],
+        "contract_cases_passed": 73,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }

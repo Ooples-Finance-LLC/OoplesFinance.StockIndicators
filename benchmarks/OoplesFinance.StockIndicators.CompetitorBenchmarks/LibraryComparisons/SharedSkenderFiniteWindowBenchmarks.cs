@@ -108,12 +108,12 @@ public class SharedSkenderFiniteWindowBenchmarks : SharedMappedBenchmarkBase
             {
                 var quote = data.Quotes[i];
                 double high = (double)quote.High, low = (double)quote.Low;
-                if (high != low) raw[i] = Divide(Subtract((double)quote.Close, (double)quote.Open), Subtract(high, low));
+                if (high != low) raw[i] = Divide(Subtract((double)quote.Close, (double)quote.Open), Subtract(high, low)); // NOSONAR: S1244 - Exactly equal converted prices define native BOP absence.
             }
             else
             {
                 var bar = data.IndicatorBars[i];
-                if (bar.High != bar.Low) raw[i] = Round(Units(bar.Close) - Units(bar.Open), Units(bar.High) - Units(bar.Low));
+                if (bar.High != bar.Low) raw[i] = Round(Units(bar.Close) - Units(bar.Open), Units(bar.High) - Units(bar.Low)); // NOSONAR: S1244 - Exactly flat candles define owned BOP absence.
             }
         }
         var values = new double?[data.Count];

@@ -31,5 +31,10 @@
     "hosted_contract_methods": 1249,
     "gpu_receipt": "../../local-gpu-contracts/receipt.json"
   },
-  "benchmark_cases": 24
+  "benchmark_cases": 24,
+  "analysis_annotation": {
+    "rule": "S1244",
+    "reason": "Exact equality defines absent BOP values; a tolerance would change the contract. Two inline comments follow the existing reference convention. No executable text changed.",
+    "annotated_source_sha256": "e3dd37f1aa97c988f1a0208055dea6048f517ca74749677f724c920e2386e6e0"
+  }
 }
