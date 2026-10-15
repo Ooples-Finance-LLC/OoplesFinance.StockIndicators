@@ -118,7 +118,7 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
         private ExactMeanAccumulator _denominator;
 #else
         private readonly JurikDyadic _sigmaSquared = Square(sigma);
-        private JurikDyadic[] _weights = [];
+        private ExactMeanAccumulator.ProductFactor[] _weights = [];
         private JurikDyadic _denominator;
 
         private static JurikDyadic Square(double value)
@@ -156,7 +156,7 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             twiceCenter.Multiply(2);
             var divisor = Square(n);
             divisor.Multiply(2);
-            _weights = new JurikDyadic[n];
+            _weights = new ExactMeanAccumulator.ProductFactor[n];
 #endif
             _denominator = default;
             for (var i = 0; i < n; i++)
@@ -179,8 +179,8 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                 numerator.Multiply(_sigmaSquared);
                 var weight = Math.Exp(-numerator.Ratio(divisor));
                 var factor = new ExactMeanAccumulator.ProductFactor(weight);
-                _weights[i] = JurikDyadic.FromFactor(in factor);
-                _denominator.AddExact(_weights[i]);
+                _weights[i] = factor;
+                _denominator.AddExact(JurikDyadic.FromFactor(in factor));
 #endif
             }
         }
@@ -206,8 +206,12 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
 #if NETFRAMEWORK
                 numerator.AddProduct(in factor, in _weights[i++]);
 #else
-                var product = JurikDyadic.FromFactor(in factor);
-                product.Multiply(_weights[i++]);
+                // Both normalized mantissas have at most 53 bits. Their exact
+                // product fits Int128 and needs no general dyadic multiplication.
+                var weight = _weights[i++];
+                var product = JurikDyadic.FromBinaryProduct(
+                    (Int128)factor.Mantissa * weight.Mantissa,
+                    factor.Scale + weight.Scale - 2148);
                 numerator.AddExact(product);
 #endif
             }
