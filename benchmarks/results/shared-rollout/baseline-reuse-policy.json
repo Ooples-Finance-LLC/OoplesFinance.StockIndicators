@@ -304,6 +304,15 @@
         ],
         "contract_cases_passed": 32,
         "timing_status": "First compatible native baseline pending. Existing implementation reused; saved serial-only fixture differs; catalog unchanged."
+      },
+      "implemented_ta_window_fixture": {
+        "name": "SharedTaWindowNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.AvgDev",
+          "TaLib.Functions.Accbands"
+        ],
+        "contract_cases_passed": 27,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
