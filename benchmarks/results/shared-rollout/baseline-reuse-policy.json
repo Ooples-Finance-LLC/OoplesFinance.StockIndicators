@@ -41,11 +41,12 @@
         "BuilderLatestOnly"
       ],
       "older_serial_method": "LibraryPairBenchmarks.Competitor returns normalized ComparisonSeries; it is not a direct native arm.",
-      "next_bounded_fixture_batch": [
+      "requirement": "Direct native serial and full-prefix parallel arms implemented and verified by 19 passing contract cases. First quiet-window timings remain pending; no baseline has been promoted.",
+      "implemented_fixture": "SharedSkenderStrengthBenchmarks",
+      "implemented_operations": [
         "Skender.GetRsi",
         "Skender.GetAdx"
-      ],
-      "requirement": "Add direct native serial and full-prefix parallel arms with correctness verification before collecting any missing baseline."
+      ]
     }
   }
 }
