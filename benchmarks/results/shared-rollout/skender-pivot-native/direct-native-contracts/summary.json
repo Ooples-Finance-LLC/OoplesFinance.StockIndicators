@@ -1,0 +1,27 @@
+{
+  "status": "61 affected contract cases passed (49 new and 12 existing). 100 local GPU cases passed. First native timings pending; catalog qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderPivotNativeBenchmarks.cs": "2452d926b078d6945d115e5e2430fa840f030a68fe9bfb22725490022f176903",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedPivotSnapshotBenchmarks.cs": "7ef7518d6eb6001699c44c88395dfc1fcc7d24e27858c42c810d957fe3580289",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PivotLevelComparison.cs": "47da503940c70e20147a904e5e5a41b181b3dffc6bdb8d150a2a0c62597a8069",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PivotTrendComparison.cs": "da929ca7602ccf448528a9ac3ec0e8d6c7a6641444d712f5ed4ffa95435a9c73",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderPivotNativeBenchmarkTests.cs": "480485440e754a7124cca022e5b6aaceb803c45885f3170a1068503d865b0942",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedPivotSnapshotBenchmarkTests.cs": "dbce2544a7927558d2cd12dc8e57fc9f07a8de957d017b69128745f161ad1665"
+  },
+  "operations": [
+    "Skender.GetPivotPoints",
+    "Skender.GetPivots"
+  ],
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_package_dll_sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+  "contract": "Standalone calendar-hour/standard and trend2/2/20 snapshots retain all nine and six fields respectively. Eager native decimal rows and dates are normalized only in setup. Calendar workers replay full prefixes; trend workers include22 future bars for retrospective lines spanning20 bars plus two confirmation bars. Exact independent references, native decimal equality, startup masks, hour transitions, partition boundaries and independent ownership verified.",
+  "validation": {
+    "comparator_cases_passed": 61,
+    "new_fixture_cases_passed": 49,
+    "affected_existing_cases_passed": 12,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1313
+  },
+  "benchmark_cases": 12,
+  "baseline_gap": "Saved normalized serial LibraryPair results retained; no compatible direct-native serial/parallel pair in catalog. Save first three-arm baseline for reuse."
+}
