@@ -149,6 +149,9 @@ The 102 runtime-mismatched mappings account for 204 size rows. The saved-artifac
 | TA-Lib morning / evening stars, doji stars and Abandoned Baby | 5 | 61 | 40 | [Star reversals](results/shared-rollout/ta-star-reversal/direct-native-contracts/summary.json) |
 | TA-Lib exhaustion / crows and soldiers / penetration patterns | 8 | 153 | 64 | [Reversal / continuation](results/shared-rollout/ta-reversal-continuation/direct-native-contracts/summary.json) |
 | TA-Lib multi-bar / Hikkake / gap patterns | 10 | 111 | 80 | [Multi-bar](results/shared-rollout/ta-multibar-native/direct-native-contracts/summary.json) |
+| TA-Lib existing triple-body patterns | 4 | 32 | 32 | [Triple body](results/shared-rollout/ta-triple-body/direct-native-contracts/summary.json) |
+
+The table includes 95 newly implemented mappings and four mappings from the existing triple-body fixture. Its 32 tests passed using current binaries; the existing 100-case GPU receipt was reverified. The saved serial-only triple-body comparison uses different inputs, so this existing four-arm fixture is queued for its first compatible native baseline.
 
 The three TA candle fixtures share native packing, alignment and worker overlap mechanics. All 325 affected cases passed, including shifted Hikkake formation/confirmation examples across worker boundaries. The three queued candidates use the latest verified shared source state before their first timing runs. The linked multi-bar evidence contains the updated source hashes and combined test record.
 

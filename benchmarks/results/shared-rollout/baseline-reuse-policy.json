@@ -293,6 +293,17 @@
         ],
         "contract_cases_passed": 111,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "reused_ta_triple_body_fixture": {
+        "name": "SharedTripleBodyBenchmarks",
+        "operations": [
+          "TaLib.Candles.ThreeInside",
+          "TaLib.Candles.TwoCrows",
+          "TaLib.Candles.UpsideGapTwoCrows",
+          "TaLib.Candles.UniqueThreeRiver"
+        ],
+        "contract_cases_passed": 32,
+        "timing_status": "First compatible native baseline pending. Existing implementation reused; saved serial-only fixture differs; catalog unchanged."
       }
     }
   }
