@@ -33,7 +33,7 @@ public class SharedRocBenchmarks
         }
     }
 
-    private static double[][] Reference(Bar[] bars, bool bands)
+    internal static double[][] Reference(Bar[] bars, bool bands)
     {
         var output = Enumerable.Range(0, bands ? 7 : 5).Select(_ => new double[bars.Length]).ToArray();
         var returns = new double[bars.Length];
