@@ -219,6 +219,15 @@
         ],
         "contract_cases_passed": 25,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_cci_adaptive_fixture": {
+        "name": "SharedTradyCciAdaptiveBenchmarks",
+        "operations": [
+          "Trady.Indicator.CommodityChannelIndex",
+          "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+        ],
+        "contract_cases_passed": 31,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }

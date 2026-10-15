@@ -1,0 +1,24 @@
+{
+  "status": "31 focused contract and 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyCciAdaptiveBenchmarks.cs": "b25fc77fa14bc5fd4c43d6deea18e39c1d2b98b77d6b4ce87f748fcb450e8c6a",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/CommodityChannelComparison.cs": "18c9a2292b0cfd898001008a76a62a6aff14e0ce217a1003094ef9b3cc5aded4",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/TradyAdaptiveComparison.cs": "7a27e9f2c0dc1ad2f9529fc1d7cd33aed42e352865f93fc24a89d6f5ec0ecdd8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SeededAdaptiveComparison.cs": "41e5e6073832ecb80552352659b24ca3b52b15ff6e18327ef319193e4e72d3d5",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyCciAdaptiveBenchmarkTests.cs": "5539c969a4571508a5b4e21b5e6eccd316fb9ce2ee1b76bcfc13dd7f3babf343"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "CommodityChannelIndex",
+    "KaufmanAdaptiveMovingAverage"
+  ],
+  "contract": "Public native tuple APIs return eager decimal Lists. CCI retains 38 prior bars for its nested mean/deviation windows; KAMA retains full prefixes for recursive state. Named Compute(startIndex,endIndex) returns owned rows. Native computation and joining remain timed. Independent decimal references verify native values and nulls; binary64 references verify owned values and presence, including KAMA efficiency. Repeated calls retain earlier results. Existing benchmark inputs and native flat-efficiency behavior are unchanged.",
+  "validation": {
+    "comparator_cases_passed": 31,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1275
+  },
+  "benchmark_cases": 16
+}
