@@ -258,16 +258,19 @@ internal sealed class PercentileCandleState : IPreviewIndicatorState
         var ready = _window.Count >= _period - 1;
         var direction = !(_direction > 0 && bar.Close <= bar.Open || _direction < 0 && bar.Close >= bar.Open);
         var atMost = 1; // The prospective current observation always equals itself.
-        if (ready && direction)
+        if (ready && direction && _rank != 0)
         {
             var skip = _window.Count == _period;
+            var remaining = _period - 1;
             foreach (var previous in _window)
             {
                 if (skip) { skip = false; continue; }
                 var difference = current; difference.Subtract(previous);
                 if (difference.Sign >= 0) atMost++;
-                // Once the rank is exceeded, no remaining comparison can undo it.
-                if (atMost > _rank) break;
+                remaining--;
+                // Stop once either outcome is certain. Unexamined observations
+                // can increase the count by at most one each.
+                if (atMost > _rank || atMost + remaining <= _rank) break;
             }
         }
         var result = ready && direction && (atMost > _rank) == _above ? 1d : 0d;

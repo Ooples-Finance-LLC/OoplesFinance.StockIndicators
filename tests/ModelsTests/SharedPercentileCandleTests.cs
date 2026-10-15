@@ -10,6 +10,42 @@ public sealed class SharedPercentileCandleTests : IDisposable
     private readonly int _priorDop = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
     public SharedPercentileCandleTests() => AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 8;
     public void Dispose() => AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)]
+    [InlineData(4)] [InlineData(5)] [InlineData(6)] [InlineData(7)]
+    public void DecidedRanksPreserveEvictionPreviewsAndReset(int kind)
+    {
+        var bars = Enumerable.Range(0, 96).Select(i =>
+        {
+            double length = i < 32 ? i + 1 : i < 64 ? 64 - i : 4;
+            return new Bar(default, i % 2 == 0 ? 0 : length, 3 * length,
+                -2 * length, i % 2 == 0 ? length : 0, 1);
+        }).ToArray();
+        foreach (int period in new[] { 1, 7 })
+        foreach (decimal q in new[] { 0m, .0000000000000000000000000001m, .25m, .75m,
+            .9999999999999999999999999999m, 1m })
+        {
+            var indicator = Create(kind, period, q);
+            var state = (IPreviewIndicatorState)indicator.CreateState()!;
+            for (int replay = 0; replay < 2; replay++)
+            {
+                var output = new double[bars.Length];
+                for (int i = 0; i < bars.Length; i++)
+                {
+                    var alternate = new Bar(default, -double.MaxValue, double.MaxValue,
+                        -double.MaxValue, double.MaxValue, 1);
+                    state.Update(in alternate, false);
+                    var preview = state.Update(in bars[i], false);
+                    Assert.Equal(preview, state.Update(in bars[i], false));
+                    output[i] = state.Update(in bars[i], true);
+                    Assert.Equal(preview, output[i]);
+                }
+                foreach (var rule in ((IIndicatorValidationContract)indicator).ValidationRules)
+                    rule.Check(new IndicatorValidationContext("decided-percentile-rank", bars, [output], 0));
+                state.Reset();
+            }
+        }
+    }
     [Fact]
     public async Task EachPatternPreservesExactWindowsAndResetAcrossWideAndSubnormalBars()
     {

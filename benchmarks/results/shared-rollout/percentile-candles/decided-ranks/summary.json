@@ -1,0 +1,14 @@
+{
+  "base_commit": "033e31abd34f64f15c0a32fa3f779973e4124420",
+  "source_sha256": {
+    "src/Indicators/PercentileCandles.cs": "8acc808ec808111168500cea3da43bf4a7c9d4b716b035f69c0bdc806dc8e18a",
+    "tests/ModelsTests/SharedPercentileCandleTests.cs": "9125729bbc40c2d8ade0c26bf975cf1f906bba58371ec726998ecfea4cb9d78a"
+  },
+  "verification": {
+    "unit_cases": 19,
+    "comparator_cases": 48,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "All eight percentile-candle states stop comparisons when the rank decision is certain in either direction; rank zero requires no history comparisons. Exact arithmetic, decimal ranks, window mutation, preview and reset are unchanged. This is an operation-count improvement, not a qualified latency result."
+}

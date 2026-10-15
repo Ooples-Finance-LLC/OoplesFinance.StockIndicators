@@ -56,6 +56,12 @@ Pivot publication now also validates each distinct array only once, at its earli
 
 Serial and worker pivot execution now writes each defined level and the shared presence flag once, leaving permanently absent columns at their allocated positive zero. Output-column stores per bar fall from 18 to 8 for Standard/Fibonacci/Woodie, 10 for Camarilla and 4 for DeMark. All 18 public columns retain exact values, including signed zero. Expanded regression coverage checks wide, subnormal and signed-zero inputs with one and eight workers on both sides of worker dispatch. The net10 production build and 22 unit, 12 comparator and 100 GPU cases passed (zero skips). [Source-bound store-reduction evidence](results/shared-rollout/rolling-pivot-shared-cpu/unique-stores/summary.json) retains the checks; latency remains unqualified.
 
+### Percentile-candle rank decisions (2026-10-15)
+
+All eight body/shadow percentile candle indicators now stop exact history comparisons when either rank outcome is certain. Previously only a successful rank decision stopped the scan. A zero percentile now skips history comparisons entirely; warmup, candle direction and window updates remain unchanged. For a full 20-bar window at percentile 1, a current length below every prior length now needs one exact comparison instead of 19. This is a derived work reduction, not a measured latency claim.
+
+The net10 production build passed with zero warnings/errors; 19 focused unit cases, 48 comparator cases and 100 local GPU cases passed with zero skips. Independent reference checks cover all eight patterns, ascending/descending lengths, ties, eviction, extreme decimal percentiles, subnormals, wide values, repeated previews, reset, worker boundaries and both history modes. [Source hashes and compressed test results](results/shared-rollout/percentile-candles/decided-ranks/summary.json) retain the evidence. Latest pivot source `033e31ab` also completed 71 hosted checks with 7 intentional skips; hosted verification of this percentile change remains pending.
+
 ### Evidence still required
 
 - The four candidates have preserved binaries and source hashes for builder-only measurements on .NET 10.0.12, matching the saved native baseline. Competitor timings are reused under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json); they are not rerun.
