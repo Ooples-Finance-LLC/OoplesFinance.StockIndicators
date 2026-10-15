@@ -1,0 +1,44 @@
+{
+  "status": "325 affected contract cases passed (111 new and 214 existing TA native candle cases). 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaCandleBenchmarkBase.cs": "a33155de4ac8d9d1c8f381e54c3271a1065b9a8bc321d7b65dedc4fba579ce12",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaMultiBarNativeBenchmarks.cs": "59536aca2f7a6c5ce8b3107cf7c8192387240e2c2eb96d7937c32d7cdc9c16fc",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaStarReversalBenchmarks.cs": "e0685b5054d60f9f76a20fcc1263eb0502308b92223f97b33c6e987540549f04",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaReversalContinuationBenchmarks.cs": "d4ec7617c2492d918efb981fd9c17f0c653018c5aaa4dddb3d13378a1e506f03",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/HikkakeComparison.cs": "50c141af9b39e45e31f8aca141cb31dbeca4b6957dc230216fd1388d4b44d7d1",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/FiveCandleContinuationComparison.cs": "78cd82a685ec20885ed87d5900fd23b06d9a122d8102e373eddf63e1c1a3446a",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ExtendedReversalComparison.cs": "16eacd137bfc11862465dab122b782f00a060937ab74b3d1af09088332e79992",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/GapContinuationComparison.cs": "531871cf38e21b41a399ff2c13db22ab65497f3fde8874a5b108c33833dea82e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaMultiBarNativeBenchmarkTests.cs": "f1458426985242a272d17ddd1031597f3f03ad5920c6cd3da52186021737140d",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaStarReversalBenchmarkTests.cs": "b5f1c8539c3bf47c6268093e467caecb91fb888306038397cd031e90b24fee45",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaReversalContinuationBenchmarkTests.cs": "031f173a6c0327a112b7e40e0aff21889bb3f21e09709da093b077b761cfc84f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ExhaustionComparison.cs": "5c5c383935b40ef995f6a777e5a22604a7869ed4a134f5d97de7912e7fe393dd",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/CrowSoldierComparison.cs": "eb000d7826b5b323aff63517dde3a9068fbe0358bde46104fada77ae13d26be8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PenetrationCandleComparison.cs": "1f3027a73f64b47d61ad7b2b0412fad9cb738aa48b9984bc936be3a31bd325c3",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/StarReversalComparison.cs": "a5df5dec659cd51235e6a180c4b05fc0bd36fa656b4d9008313f2bc7aace04d9"
+  },
+  "native_package": "TALib.NETCore 0.5.0",
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+  "operations": [
+    "Breakaway",
+    "ConcealingBabySwallow",
+    "LadderBottom",
+    "MatHold",
+    "RisingFallingThreeMethods",
+    "Hikkake",
+    "HikkakeModified",
+    "TasukiGap",
+    "Tristar",
+    "UpDownSideGapThreeMethods"
+  ],
+  "contract": "Direct native OHLC span APIs return eager aligned int arrays. Parallel overlap uses each pinned native lookback (2 through 14 bars), including Hikkake formation plus confirmation history. Defaults match existing mappings: MatHold penetration 0.5, TasukiGap period 5. The shared base accepts internal supplied input for boundary tests while normal benchmark inputs remain unchanged. Shifted Hikkake golden cases exercise every 16-bar worker-boundary offset, with full independent-reference checks and original post-warmup golden suffixes.",
+  "validation": {
+    "comparator_cases_passed": 325,
+    "new_fixture_cases_passed": 111,
+    "affected_existing_cases_passed": 214,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1286
+  },
+  "benchmark_cases": 80
+}
