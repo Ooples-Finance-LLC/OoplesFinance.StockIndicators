@@ -131,6 +131,16 @@
         ],
         "contract_cases_passed": 56,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_statistics_fixture": {
+        "name": "SharedSkenderStatisticsBenchmarks",
+        "operations": [
+          "Skender.GetBeta",
+          "Skender.GetCorrelation",
+          "Skender.GetEpma"
+        ],
+        "contract_cases_passed": 43,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
