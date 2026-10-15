@@ -1,0 +1,23 @@
+{
+  "status": "32 existing fixture contract cases passed. First compatible native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTripleBodyBenchmarkTests.cs": "e88f776026560e018685dcd5e37f7cfecc8e8de576268483c4730adbbc304b45",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedCandleBenchmarkBase.cs": "d4270387d3993f060e31338d3e049c21c3401154b0f407d8e35872cf13019302",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTripleBodyBenchmarks.cs": "1512789cc140a92794b0e3ab8f90eb76570e8a65eb67fd8bd26d8414d62c15d4",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/TripleBodyComparison.cs": "fb5680ebc26a3ff9dc0a7fb8a4e50d474fdea7b31944e51b53fad73e9cf4953b"
+  },
+  "operations": [
+    "TaLib.Candles.ThreeInside",
+    "TaLib.Candles.TwoCrows",
+    "TaLib.Candles.UpsideGapTwoCrows",
+    "TaLib.Candles.UniqueThreeRiver"
+  ],
+  "contract": "Existing pattern fixture includes matches and nonmatches. Eager aligned int arrays; native parallel overlap 12. Saved serial-only results use different inputs and cannot substitute for this fixture. No source or production changes.",
+  "validation": {
+    "comparator_cases_passed": 32,
+    "local_gpu_cases_passed": 100,
+    "gpu_receipt": "Existing receipt reverified without source changes; no GPU rerun."
+  },
+  "benchmark_cases": 32,
+  "implementation_status": "Existing fixture reused; not four newly implemented mappings."
+}
