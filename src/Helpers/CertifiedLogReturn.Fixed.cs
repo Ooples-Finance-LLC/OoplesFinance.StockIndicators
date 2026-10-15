@@ -49,17 +49,20 @@ internal static partial class CertifiedLogReturn
         UInt128 high = low + (tail == 0 ? (UInt128)0 : 1);
         UInt128 squareLow = FixedProduct(low, low, false);
         UInt128 squareHigh = FixedProduct(high, high, true);
-        UInt128 powerLow = low, powerHigh = high, sumLow = 0, sumHigh = 0;
+        // The first odd denominator is one, so both directed terms are the
+        // endpoints themselves. Start with them instead of dividing twice.
+        UInt128 powerLow = low, powerHigh = high, sumLow = low, sumHigh = high;
         for (uint odd = 1; ; odd += 2)
         {
-            sumLow += powerLow / odd;
-            sumHigh += (powerHigh + odd - 1) / odd;
             powerLow = FixedProduct(powerLow, squareLow, false);
             powerHigh = FixedProduct(powerHigh, squareHigh, true);
             // |atanh argument| <= 1/3, including log(2). Once powerHigh <= 1,
             // the remaining geometric tail is less than one fixed-point unit:
             // 1 / ((odd + 2) * (1 - squareHigh / 2^96)) < 1.
             if (powerHigh <= 1) return (2 * sumLow, 2 * (sumHigh + 1));
+            uint nextOdd = odd + 2;
+            sumLow += powerLow / nextOdd;
+            sumHigh += (powerHigh + nextOdd - 1) / nextOdd;
         }
     }
 

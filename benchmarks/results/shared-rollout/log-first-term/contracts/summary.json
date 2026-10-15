@@ -1,0 +1,48 @@
+{
+  "change": "Initialize the fixed logarithm series sums with the first interval endpoints, removing the two first-term identity divisions. Subsequent powers, directed divisions, termination and tail bound are unchanged.",
+  "status": "4 unit, 10 comparator and 100 local GPU cases passed. No latency improvement claimed; eight builder timing cases pending.",
+  "baseline_source_commit": "68d39a02",
+  "baseline_compatibility": "Native fixture, inputs and setup text identical before builder helper extraction; LogVolatilityComparison and benchmark project text identical. Builder helper extraction does not affect native paths. Runtime/hardware equality rechecked by recorder. Saved baseline monitoring limitations remain; cross-run comparison is descriptive.",
+  "baselines": {
+    "QuanTAlib.Historical": {
+      "path": "benchmarks/results/shared-rollout/log-volatility-cpu/cpu-native.json.gz",
+      "sha256": "6ed491c0b1ac0251650e10833c0a75876e0132297c77f8708bce358757d6a6d5"
+    },
+    "QuanTAlib.Realized": {
+      "path": "benchmarks/results/shared-rollout/log-volatility-cpu/cpu-native.json.gz",
+      "sha256": "6ed491c0b1ac0251650e10833c0a75876e0132297c77f8708bce358757d6a6d5"
+    }
+  },
+  "baseline_host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9606)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.401",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "source_sha256": {
+    "src/Helpers/CertifiedLogReturn.Fixed.cs": "005ebf774c6d8afcdabba981defac81b1309eab68e89241bcc516b06365b519f",
+    "tests/ModelsTests/CertifiedLogReturnExecutionTests.cs": "16a577337d298794d58b7a18ad76161781945cec599acc19db59ef97543ded8c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedLogVolatilityBenchmarks.cs": "c8f8e166eee68be6c9f7e4c707edbaa47694227f521e34a23fb322cc4bbb081a",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/LogVolatilityComparison.cs": "582fd401ce553ebd3bb7b195b31dd1c800d2e372cf1d9c3036cb0dada87e7949",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj": "446d66bc4203623646569b1a43bbf04224b5a726be53b920f8c0ce0e0ae30d13"
+  },
+  "validation": {
+    "unit_cases": 4,
+    "comparator_cases": 10,
+    "gpu_cases": 100
+  },
+  "benchmark_cases": 8
+}
