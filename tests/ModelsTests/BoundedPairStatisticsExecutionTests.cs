@@ -11,6 +11,37 @@ public sealed class BoundedPairStatisticsExecutionTests
         new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator);
 
     [Theory]
+    [InlineData(.125)] [InlineData(1e100)] [InlineData(double.Epsilon)] [InlineData(-0d)]
+    public async Task UnchangedPairsPreserveWorkerSeedsAndLaterEviction(double scale)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            double[] cycle = [-2, 0, 1, 3, 1, -1, 2, 0];
+            var bars = Enumerable.Range(0, 513).Select(i => new Bar(default,
+                scale * (i % 97 == 96 ? 5 : cycle[i % cycle.Length]), 0, 0,
+                scale * (i % 97 == 96 ? -7 : cycle[(i + 3) % cycle.Length]), 1)).ToArray();
+            foreach (int workers in new[] { 1, 8 })
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                foreach (IIndicator indicator in new IIndicator[]
+                    { new WindowCorrelation(8), new WindowCorrelation(8, flatZero: true), new WindowPairStatistics(8) })
+                {
+                    using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+                    foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+                    {
+                        using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                        foreach (var output in indicator.Outputs)
+                            Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                                actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+                    }
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Theory]
     [InlineData(511, 20)] [InlineData(512, 20)] [InlineData(513, 20)]
     [InlineData(8193, 20)] [InlineData(513, 1)] [InlineData(513, 513)]
     [InlineData(17, 4097)] [InlineData(17, int.MaxValue)]

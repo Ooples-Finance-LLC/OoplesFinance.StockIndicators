@@ -60,6 +60,14 @@ internal static partial class ValuesBarExecution
                     state.Add(prices[2 * i], prices[2 * i + 1]);
                     if (i < seed.Length) continue;
                     int row = start + i - seed.Length;
+                    // State still rotates its history. Reuse only a completed
+                    // output row owned by this worker, never its neighbor's row.
+                    if (i >= period && i > seed.Length
+                        && prices[2 * i] == prices[2 * (i - period)] && prices[2 * i + 1] == prices[2 * (i - period) + 1]) // NOSONAR: Exact pair equality preserves all mathematical moments, including signed zeros.
+                    {
+                        CopyPairRow(output, slots, row);
+                        continue;
+                    }
                     for (int slot = 0; slot < slots; slot++)
                     {
                         var value = state.Read(slot, flatZero);
@@ -83,12 +91,19 @@ internal static partial class ValuesBarExecution
             for (int i = 0; i < count; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
+                long a = unchecked((long)prices[2 * i]), b = unchecked((long)prices[2 * i + 1]);
                 if (i >= period)
                 {
                     long oldA = unchecked((long)prices[2 * (i - period)]), oldB = unchecked((long)prices[2 * (i - period) + 1]);
+                    if (i > seed.Length && a == oldA && b == oldB)
+                    {
+                        // Captured history is indexed, so no queue needs rotation.
+                        // Equal replacement leaves both moments and outputs intact.
+                        CopyPairRow(output, slots, start + i - seed.Length);
+                        continue;
+                    }
                     x -= oldA; y -= oldB; xx -= oldA * oldA; yy -= oldB * oldB; xy -= oldA * oldB;
                 }
-                long a = unchecked((long)prices[2 * i]), b = unchecked((long)prices[2 * i + 1]);
                 x += a; y += b; xx += a * a; yy += b * b; xy += a * b;
                 if (i < seed.Length) continue;
                 int row = start + i - seed.Length;
@@ -104,6 +119,11 @@ internal static partial class ValuesBarExecution
             return region;
         }
         finally { System.Buffers.ArrayPool<double>.Shared.Return(rented); }
+    }
+
+    private static void CopyPairRow(double[][] output, int slots, int row)
+    {
+        for (int slot = 0; slot < 2 * slots; slot++) output[slot][row] = output[slot][row - 1];
     }
 }
 #endif
