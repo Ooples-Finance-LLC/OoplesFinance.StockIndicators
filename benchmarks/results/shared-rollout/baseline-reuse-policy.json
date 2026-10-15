@@ -439,6 +439,13 @@
       ],
       "contract_cases_passed": 98,
       "timing_status": "First native baseline pending; standalone snapshots retained."
+    },
+    "skender_volatility_stop": {
+      "operations": [
+        "Skender.GetVolatilityStop"
+      ],
+      "contract_cases_passed": 21,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained."
     }
   }
 }
