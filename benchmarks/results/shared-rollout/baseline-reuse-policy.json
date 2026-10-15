@@ -210,6 +210,15 @@
         ],
         "contract_cases_passed": 52,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_atr_channel_fixture": {
+        "name": "SharedTradyAtrChannelBenchmarks",
+        "operations": [
+          "Trady.Indicator.ChandelierExit",
+          "Trady.Indicator.KeltnerChannels"
+        ],
+        "contract_cases_passed": 25,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
