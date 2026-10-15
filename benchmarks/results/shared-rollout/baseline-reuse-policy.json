@@ -399,5 +399,15 @@
       "contract_cases_passed": 10,
       "timing_status": "Only eight matching-runtime builder cases queued; native measurements reused."
     }
+  },
+  "snapshot_native_fixtures": {
+    "skender_retrospective": {
+      "operations": [
+        "Skender.GetDpo",
+        "Skender.GetFcb"
+      ],
+      "contract_cases_passed": 43,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained, not builder qualification."
+    }
   }
 }
