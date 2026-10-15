@@ -1,6 +1,6 @@
 # Full-library comparisons
 
-Stacked on #246. The reflected manifest inventories 421 public API families from
+Delivered in [PR #255](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/255), targeting `master`. The reflected manifest inventories 421 public API families from
 Skender.Stock.Indicators 2.7.3, TALib.NETCore 0.5.0, Trady.Analysis 3.2.8, and
 QuanTAlib 1.0.0. There are 401 paired families, 16 unavailable implementations with
 verified counterparts (including two explicitly owned definitions), 4 utilities,
@@ -9,6 +9,45 @@ and no pending families.
 `paired` means full-trajectory correctness and both performance runners exist;
 it does not claim that timings have been collected. `pending` makes neither claim.
 The production library has no competitor package dependency.
+
+## Shared rollout status — 2026-10-15
+
+The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. These are coverage counts, not speedup counts. Historical evidence records 106 mappings winning at both recorded sizes in Full and LatestOnly; it does not prove current-head performance.
+
+### Eight-pilot timing gate
+
+The table below summarizes the existing catalog, before the latest worker/history repairs. Ratio = builder mean / fastest saved native mean; **below 1 is faster**. Each native choice is the faster of the recorded serial and parallel paths. These historical measurements must not be presented as timings of `86380f4d` or as results of the new candidates.
+
+| Competitor mapping | 1k Full / Latest | 10k Full / Latest | Recorded clear wins at both sizes and modes |
+|---|---:|---:|---|
+| `QuanTAlib.Atr` | 0.759 / 0.536 | 0.601 / 0.378 | Yes |
+| `QuanTAlib.Jma` | 0.834 / 0.802 | 0.885 / 0.851 | Yes |
+| `Skender.GetFractal` | 0.555 / 0.506 | 0.555 / 0.486 | Yes |
+| `Skender.GetRollingPivots` | 3.037 / 2.962 | 2.658 / 2.626 | No |
+| `TaLib.Candles.RickshawMan` | 3.388 / 3.410 | 3.704 / 3.689 | No |
+| `TaLib.Functions.Asin` | 3.295 / 2.540 | 3.330 / 1.308 | No |
+| `TaLib.Functions.Sma` | 3.424 / 2.673 | 6.466 / 1.696 | No |
+| `Trady.Candlestick.BullishShortDay` | 0.012 / 0.011 | 0.003 / 0.003 | Yes |
+
+### Implemented and verified follow-ups
+
+| Candidate commit | Change | Focused local verification | New latency qualification |
+|---|---|---|---|
+| `9a66e1bd` | Rolling pivots reuse exact decoded OHLC factors and bounded workers while retaining all 18 outputs. | 28 unit + 24 comparator + 100 GPU cases | Pending |
+| `29c34f23` | Rickshaw workers replay the complete longer prior-range window; oversized windows retain the scalar path. | 18 unit + 6 comparator + 100 GPU cases | Pending |
+| `332edbfb` | Asin uses exact workers from 512 bars; Full transfers chunked owned history. | 22 unit + 9 comparator + 100 GPU cases | Pending |
+| `86380f4d` | Accepted Full SMA workers allocate chunked history and publish it only after validation, fallback replay and cancellation checks succeed. | 55 unit + 4 comparator + 100 GPU cases | Pending |
+
+All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,231 contract methods remain assigned to hosted CI. Correctness checks do not establish latency wins.
+
+### Evidence still required
+
+- The four candidates have preserved binaries and source hashes for builder-only measurements on .NET 10.0.12, matching the saved native baseline. Competitor timings are reused under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json); they are not rerun.
+- The completed pivot worker attempt is **diagnostic only**: its monitor omitted reusable MSBuild nodes and standalone compiler activity. Its latency ratios are excluded from the table and from qualification. Interrupted attempts are also excluded. The corrected monitor includes compiler processes and descendants and distinguishes the benchmark's own process tree from competing work.
+- Of the 119 builder-only mappings, 102 have a saved/current runtime mismatch (204 size rows). The other 17 lack a comparable parallel-native baseline or retain fixture/output-contract differences. None becomes a best-path win merely because a builder timing exists.
+- Snapshot-only measurements retain their separate API contract; they do not establish builder or GPU performance. Auto remains CPU; RequiredGPU executes a supported device path or rejects it.
+
+The sections below retain the historical implementation and measurement record. Their dated coverage totals are milestones, not the current aggregate.
 
 ## Implemented comparisons
 
