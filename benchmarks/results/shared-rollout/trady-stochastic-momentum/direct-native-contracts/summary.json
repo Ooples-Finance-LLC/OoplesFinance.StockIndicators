@@ -1,0 +1,24 @@
+{
+  "status": "52 focused contract and 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyStochasticMomentumBenchmarks.cs": "f927c9ab453c8f6014743009e6d84cb43018cf6bf67c76d174aa5d68ebc0a194",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/StochasticMomentumComparison.cs": "974653be1a3b3e14674669c555fcf94147b358830ddb379eeb7684323c7a257f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/StochasticRsiComparison.cs": "64f820024c502612f05e18fab5bc5042843c9570621d7340dacd6801e02e6ab4",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyStochasticMomentumBenchmarkTests.cs": "aaec9c03216346c51dc3a2c6fe6b7cb6c0c1387d01be2410ac7e04be9bcce259"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "StochasticsMomentum",
+    "StochasticsMomentumIndex",
+    "StochasticsRsiOscillator"
+  ],
+  "contract": "Public native tuple APIs return eager decimal Lists. Raw momentum retains 19 preceding bars; smoothed momentum and stochastic RSI retain full prefixes for recursive state. Named Compute(startIndex,endIndex) returns owned rows. All native computation and joining remain timed. Independent decimal references verify native values and presence; independent binary64 references verify all owned values and masks, including the smoothed momentum signal. Repeated calls retain earlier results.",
+  "validation": {
+    "comparator_cases_passed": 52,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1271
+  },
+  "benchmark_cases": 24
+}
