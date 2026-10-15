@@ -429,6 +429,16 @@
       ],
       "contract_cases_passed": 30,
       "timing_status": "First native baseline pending; extended snapshot retained."
+    },
+    "parabolic": {
+      "operations": [
+        "TaLib.Functions.Sar",
+        "TaLib.Functions.SarExt",
+        "Skender.GetParabolicSar",
+        "Trady.Indicator.ParabolicStopAndReverse"
+      ],
+      "contract_cases_passed": 98,
+      "timing_status": "First native baseline pending; standalone snapshots retained."
     }
   }
 }
