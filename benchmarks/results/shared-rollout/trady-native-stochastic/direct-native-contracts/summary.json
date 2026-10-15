@@ -1,0 +1,27 @@
+{
+  "status": "127 focused contract and 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyNativeStochasticBenchmarks.cs": "cffcb657ad164289863df6f75fee322d8f4fd6d03e98b143bd5f1b0122a0f548",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/StochasticSmaComparison.cs": "98528941d585f2943459e3357d945999d2f315d9e9f88af1148f89a1b6fb6537",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyNativeStochasticBenchmarkTests.cs": "6c225e0076148035a2377845720de0f26435b7e0a724279f7a0b14de83f28b08"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "Raw",
+    "Fast",
+    "Slow",
+    "Full",
+    "FastDifference",
+    "SlowDifference",
+    "FullDifference"
+  ],
+  "contract": "Public native tuple APIs return eager scalar or K/D/J decimal Lists. Parallel windows retain 19 prior bars for raw, 21 for Fast variants, and 23 for Slow/Full variants; original prefixes preserve startup. Named Compute(startIndex,endIndex) returns owned rows. Native computation and joining remain timed. Independent decimal and binary64 references verify all values and presence; repeated calls retain earlier results. Tuple factories accept enumerable views to avoid input copies.",
+  "validation": {
+    "comparator_cases_passed": 127,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1269
+  },
+  "benchmark_cases": 56
+}
