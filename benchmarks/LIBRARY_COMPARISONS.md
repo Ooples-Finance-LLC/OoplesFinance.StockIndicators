@@ -12,7 +12,7 @@ The production library has no competitor package dependency.
 
 ## Shared rollout status (2026-10-15)
 
-The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. These are coverage counts, not speedup counts. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
+The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. These are coverage counts, not speedup counts. Two stale KAMA qualification labels now agree with their latest builder-only rows; historical native measurements remain retained. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
 
 ### Eight-pilot timing gate
 
@@ -103,6 +103,12 @@ The net10 production build passed with zero warnings/errors; 15 focused unit, 7 
 Gaussian, sine and non-affine normalized-convolution windows now use the existing exact Int128 dyadic accumulator on modern runtimes. Decoded coefficient factors replace the larger coefficient-with-limit records, and each weighted term uses an exact product of at most 106 mantissa bits. Ordinary floating-point products no longer require BigInteger merely because they exceed 64 bits. Wider exponent spans still use the exact fallback. Prefix normalization, zero-mass averaging, cached coefficients, lazy history growth, wrap order and reset remain unchanged; the framework path retains its existing arithmetic.
 
 The net10 production build passed with zero warnings/errors; 25 focused unit, 32 comparator and 100 local GPU cases passed with zero skips. New warmed period-20 tests assert zero per-bar managed allocations for Gaussian, sine and a non-affine floating-point convolution. Independent references cover signed/zero-mass kernels, extreme and subnormal values, partial resets, ring growth, worker boundaries, mixed roots, ownership, overflow/input-error priority and cancellation. [Source hashes and compressed test results](results/shared-rollout/weighted-kernels/compact-products/summary.json) retain the evidence. This reduces representation and computation without claiming measured latency; hosted checks remain pending.
+
+### Ordered directional true-range endpoints (2026-10-15)
+
+Selected TA-style directional indicators now choose the extended endpoints of ordered high/low candles using exact comparisons, then compute one exact difference for true range. This replaces three differences and two exact maximum comparisons on that path. Inverted candles retain the original formula. One additional previous-close scalar preserves endpoint selection without decoding retained factors; DX's separate current-close range update retains its native recurrence.
+
+The net10 production build passed with zero warnings/errors; 14 focused unit, 23 comparator and 100 local GPU cases passed with zero skips. Independent references cover all selected measures, periods and suppression settings, gaps above/below the range, flat and inverted candles, current-close DX updates, signed zero, subnormals, extended unpublished stages and reset. Builder/native-prefix setup checks cover worker thresholds and both history modes; raw input validation remains covered. [Source hashes and compressed test results](results/shared-rollout/prior-directional/ordered-range/summary.json) retain the evidence. This reduces exact arithmetic work without claiming measured latency; hosted checks remain pending.
 
 ### Evidence still required
 
