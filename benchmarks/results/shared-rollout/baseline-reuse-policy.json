@@ -172,6 +172,20 @@
         ],
         "contract_cases_passed": 33,
         "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_directional_fixture": {
+        "name": "SharedTradyNativeDirectionalBenchmarks",
+        "operations": [
+          "Trady.Indicator.PlusDirectionalMovement",
+          "Trady.Indicator.MinusDirectionalMovement",
+          "Trady.Indicator.PlusDirectionalIndicator",
+          "Trady.Indicator.MinusDirectionalIndicator",
+          "Trady.Indicator.DirectionalMovementIndex",
+          "Trady.Indicator.AverageDirectionalIndex",
+          "Trady.Indicator.AverageDirectionalIndexRating"
+        ],
+        "contract_cases_passed": 99,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
       }
     }
   }
