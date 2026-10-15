@@ -333,6 +333,16 @@
         ],
         "contract_cases_passed": 40,
         "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_average_fixture": {
+        "name": "SharedTaAverageNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Ma",
+          "TaLib.Functions.Apo",
+          "TaLib.Functions.Ppo"
+        ],
+        "contract_cases_passed": 40,
+        "timing_status": "First native baselines pending; catalog unchanged."
       }
     }
   }
