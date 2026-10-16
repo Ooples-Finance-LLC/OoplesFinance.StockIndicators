@@ -4103,3 +4103,6 @@ Auto Filter and Auto Dispersion Bands now use shared execution through their exi
 
 
 Auto Line and Auto Line with Drift now use shared execution. Auto Line retains the existing translated two-pass deviation and its exceptional-value fallback; unfillable windows avoid period-sized storage. Drift reuses the exact staged kernel, rounded seed and lagged drift. Validation: 93 focused unit cases, 8 fixture parity cases, 97 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Bull Power and Bear Power, including both Indicator aliases, now share one exact candle kernel across Value and EMA Signal. Original OHLC, previous-close seed, gap/wick branch precedence, extended stages and component/source fallback are preserved. Validation: 186 focused unit cases, 16 fixture parity cases, 98 discovery cases, 100 local GPU cases and 4 inventory tests passed. Thirty-two timing cases are prepared; measured performance qualification remains pending.
