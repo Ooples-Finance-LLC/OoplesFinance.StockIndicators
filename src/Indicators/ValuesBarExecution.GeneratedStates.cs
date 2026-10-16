@@ -21,7 +21,8 @@ internal static partial class ValuesBarExecution
             or OnBalanceVolume or NegativeVolumeIndex or PositiveVolumeIndex or PriceVolumeTrend
             or AverageTrueRange or ChandeMomentumOscillator or RateOfChange or DetrendedPriceOscillator
             or AccumulationDistributionLine or WilliamsAccumulationDistribution or SmoothedWilliamsAccumulationDistribution
-            or EaseOfMovement { Divisor: >= double.MinValue and <= double.MaxValue };
+            or EaseOfMovement { Divisor: >= double.MinValue and <= double.MaxValue }
+            or Pvo or PercentageVolumeOscillator or VolumeOscillator or PriceVolumeOscillator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -59,6 +60,10 @@ internal static partial class ValuesBarExecution
         PriceOscillatorPercent oscillator => new GeneratedEmaGapSignalState(oscillator.ShortLength, oscillator.LongLength, oscillator.SignalLength, percentage: true),
         PercentagePriceOscillator oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, percentage: true),
         Ppo oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, percentage: true),
+        Pvo oscillator => new GeneratedVolumeGapState(oscillator.Length, 26, oscillator.SignalLength),
+        PercentageVolumeOscillator oscillator => new GeneratedVolumeGapState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
+        VolumeOscillator oscillator => new GeneratedVolumeSmaGapState(oscillator.Length, count),
+        PriceVolumeOscillator oscillator => new GeneratedPriceVolumeBalanceState(oscillator.Length, count),
         Macd oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
         Aroon oscillator => new GeneratedAroonState(Math.Max(1, oscillator.Length)),
         Dpo oscillator => new GeneratedDetrendedState(Math.Max(1, oscillator.Length), count),
@@ -203,6 +208,39 @@ internal static partial class ValuesBarExecution
             outputs[2] = value.Adx;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVolumeGapState(int fastPeriod, int slowPeriod, int signalPeriod) : IMultiOutputState
+    {
+        private readonly GeneratedEmaGapSignalState _state = new(fastPeriod, slowPeriod, signalPeriod, percentage: true);
+        public void Reset() => _state.Reset();
+        public void Update(in Bar bar, Span<double> outputs) =>
+            _state.Update(new Bar(default, 0, 0, 0, bar.Volume, 0), outputs);
+    }
+
+    private sealed class GeneratedVolumeSmaGapState(int period, int count) : IIndicatorState, IDisposable
+    {
+        // Unfillable windows publish zero throughout this owned execution.
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _fast = count >= 5 ? new(5) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _slow = Math.Max(1, period) <= count ? new(period) : null;
+        public void Reset() { _fast?.Reset(); _slow?.Reset(); }
+        public double Update(in Bar bar) => RoundedPercentageChange.Of(
+            _fast?.Next(bar.Volume, true) ?? 0, _slow?.Next(bar.Volume, true) ?? 0);
+        public void Dispose() { _fast?.Dispose(); _slow?.Dispose(); }
+    }
+
+    private sealed class GeneratedPriceVolumeBalanceState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        // A lag that cannot be reached contributes only exact zero changes.
+        private readonly LaggedBalanceWindow? _price = Math.Max(1, period) < count ? new(period) : null;
+        private readonly LaggedBalanceWindow? _volume = count > 14 ? new(14) : null;
+        public void Reset() { _price?.Reset(); _volume?.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            outputs[0] = _price?.Next(bar.Close, true) ?? 0;
+            outputs[1] = _volume?.Next(bar.Volume, true) ?? 0;
+        }
+        public void Dispose() { _price?.Dispose(); _volume?.Dispose(); }
     }
 
     private sealed class GeneratedAccumulationState(int period) : IMultiOutputState, IDisposable
