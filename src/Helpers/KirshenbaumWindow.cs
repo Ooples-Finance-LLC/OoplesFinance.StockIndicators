@@ -11,9 +11,9 @@ internal sealed class KirshenbaumWindow : IDisposable
     private readonly double _factor;
     private BigInteger _sum;
     private long _count;
-    internal KirshenbaumWindow(MovingAvgType kind, int meanLength, int errorLength, double factor, bool external = false, int capacityHint = int.MaxValue)
+    internal KirshenbaumWindow(MovingAvgType kind, int meanLength, int errorLength, double factor, bool external = false, int capacityHint = int.MaxValue, int maxInputCount = int.MaxValue)
     {
-        HighLowBandsWindow.ValidateShift(factor); _factor = factor; _length = Math.Max(1, errorLength); _fit = new(_length); _squares = new(Math.Min(_length, Math.Max(1, capacityHint)));
+        HighLowBandsWindow.ValidateShift(factor); _factor = factor; _length = Math.Max(1, errorLength); _fit = new(_length, observedHistory: _length > maxInputCount); _squares = new(Math.Min(_length, Math.Max(1, capacityHint)));
         if (!external) { if (StrengthWindow.Supports(kind)) _mean = new(kind, Math.Max(1, meanLength), capacityHint); else _fallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, meanLength)); }
     }
     internal (double Upper, double Middle, double Lower) Next(double close, bool commit, double? externalMean = null)
