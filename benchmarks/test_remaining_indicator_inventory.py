@@ -18,9 +18,17 @@ class RemainingInventoryTests(unittest.TestCase):
         report = inventory(root)
         expected = enum_members(source_text(root / 'src/Enums/IndicatorName.cs'))
         self.assertEqual(expected, [row['indicator'] for row in report['batch_formulas']])
-        self.assertTrue(all(row['status'] == 'pending-assessment' for row in report['batch_formulas']))
+        self.assertTrue(all(row['status'] in {'pending-assessment',
+                           'contract-receipts-recorded-performance-pending'} for row in report['batch_formulas']))
         self.assertEqual(len(report['handwritten_facades']),
                          len({row['type'] for row in report['handwritten_facades']}))
+
+    def test_receipt_does_not_hide_unassessed_alias_or_claim_performance(self):
+        report = inventory(Path(__file__).resolve().parents[1])
+        median = next(row for row in report['batch_formulas'] if row['indicator'] == 'MedianPrice')
+        self.assertIn('MidRangeSpecOptions', median['contract_receipts'])
+        self.assertIn('MedianPriceSpecOptions', median['options_without_receipts'])
+        self.assertEqual('contract-receipts-recorded-performance-pending', median['status'])
 
 
 if __name__ == '__main__':

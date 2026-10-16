@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
-            or Wwma or Smma or ModifiedMa or Dema or Tema;
+            or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -25,6 +25,9 @@ internal static partial class ValuesBarExecution
         ModifiedMa average => new WilderValueState(average.Length),
         Dema average => new ExtrapolatedEmaValueState(average.Length, triple: false),
         Tema average => new ExtrapolatedEmaValueState(average.Length, triple: true),
+        Zlema average => new ExtrapolatedEmaValueState(average.Length, triple: false),
+        Tma average => new GeneratedTriangularState(average.Length),
+        Hma average => new HullValueState(average.Length),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -56,6 +59,29 @@ internal static partial class ValuesBarExecution
             return _third is null ? ExponentialExtrapolation.Double(first, second)
                 : ExponentialExtrapolation.Triple(first, second, _third.GetNext(second, commit: true));
         }
+    }
+
+    private sealed class GeneratedTriangularState : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother _first;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother _second;
+        internal GeneratedTriangularState(int period)
+        {
+            _first = new(period);
+            try { _second = new(period); }
+            catch { _first.Dispose(); throw; }
+        }
+        public void Reset() { _first.Reset(); _second.Reset(); }
+        public double Update(in Bar bar) => _second.Next(_first.Next(bar.Close, true), true);
+        public void Dispose() { _first.Dispose(); _second.Dispose(); }
+    }
+
+    private sealed class HullValueState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly Helpers.HullWindow _window = new(MovingAvgType.WeightedMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class AdlValueState(int period, int count) : IMultiOutputState, IDisposable

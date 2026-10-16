@@ -64,16 +64,37 @@ def inventory(root):
                 status='pending-assessment'))
     if not handwritten:
         raise ValueError('No handwritten indicators found')
+    # Receipts record completed batches, not a current-head performance verdict.
+    # Keep unmapped options visible: reviewing one alias does not cover them all.
+    receipts = {}
+    known_options = {option for option, _ in targets}
+    for path in sorted((root / 'benchmarks/results/remaining-indicators').glob('*-contracts.json')):
+        relative = path.relative_to(root).as_posix()
+        record = json.loads(read(relative))
+        for name in record['types']:
+            option = name + 'SpecOptions'
+            if option not in known_options:
+                raise ValueError(f'Unmapped receipt type {name}: add an explicit options mapping')
+            receipts.setdefault(option, []).append(relative)
+    formulas = []
+    for name in members:
+        options = sorted(option for option, target in targets if target == name)
+        recorded = {option: receipts[option] for option in options if option in receipts}
+        row = dict(indicator=name, options=options, status='pending-assessment')
+        if recorded:
+            row.update(status='contract-receipts-recorded-performance-pending',
+                       contract_receipts=recorded,
+                       options_without_receipts=[option for option in options if option not in receipts])
+        formulas.append(row)
     return dict(
-        schema_version=1,
+        schema_version=2,
         scope='All remaining indicators; no enum formula is silently excluded by competitor overlap.',
         qualification='Inventory only. Exact catalog name matches are navigation hints, not parity or speed evidence. '
-                      'All entries await assessment against inherited work; no new optimization is claimed.',
+                      'Batch receipts record historical contract checks, not current-head or performance qualification. '
+                      'Options without receipts still await assessment against inherited work.',
         inherited_pr=255,
         counts=dict(batch_formulas=len(members), handwritten_facade_types=len(handwritten)),
-        batch_formulas=[dict(indicator=name,
-                             options=sorted(option for option, target in targets if target == name),
-                             status='pending-assessment') for name in members],
+        batch_formulas=formulas,
         handwritten_facades=sorted(handwritten, key=lambda row: row['type']),
         normalized_source_sha256=dict(sorted(sources.items())))
 
