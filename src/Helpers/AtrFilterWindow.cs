@@ -4,17 +4,18 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class AtrFilterWindow : IDisposable
 {
     private static readonly BigInteger Unit = BigInteger.One << 1074;
-    private readonly int _length, _deviationLength, _lookback;
+    private readonly int _length, _deviationLength;
     private readonly double _cap;
     private readonly bool _population;
     private readonly Average? _rangeAverage, _squareAverage;
-    private readonly Queue<BigInteger> _ranges = new(), _deviations = new();
+    private readonly Queue<BigInteger> _ranges = new();
+    private readonly ExactWindowExtreme _minimum;
     private BigInteger _sum, _squares, _previousPrice, _previousAverage, _difference;
     private bool _seeded;
     internal AtrFilterWindow(MovingAvgType kind, int length, int atrLength, int deviationLength, int lookback, double cap, bool external = false)
     {
         if (double.IsNaN(cap) || double.IsInfinity(cap)) throw new ArgumentOutOfRangeException(nameof(cap));
-        _length = Math.Max(1, length); _deviationLength = Math.Max(1, deviationLength); _lookback = Math.Max(1, lookback); _cap = cap; _population = kind == MovingAvgType.SimpleMovingAverage;
+        _length = Math.Max(1, length); _deviationLength = Math.Max(1, deviationLength); _minimum = new(lookback, maximum: false); _cap = cap; _population = kind == MovingAvgType.SimpleMovingAverage;
         if (!external) { _rangeAverage = new(kind, atrLength); _squareAverage = new(kind, _deviationLength); }
     }
     internal static BigInteger RelativeRange(double price, double high, double low, double previous)
@@ -41,17 +42,16 @@ internal sealed class AtrFilterWindow : IDisposable
         var n = new BigInteger(_deviationLength);
         var deviation = _population && !customSquares ? _ranges.Count < _deviationLength - 1 ? BigInteger.Zero : Root(n * squares - sum * sum, n * n)
             : Root(meanSquare * Unit * n * n - sum * sum, n * n);
-        var lowest = deviation; var skip = _deviations.Count == _lookback;
-        foreach (var retained in _deviations) { if (skip) { skip = false; continue; } lowest = BigInteger.Min(lowest, retained); }
+        var lowest = _minimum.Preview(deviation);
         var factor = deviation.IsZero ? 1 : ExactMeanAccumulator.UnitRatio(lowest << 1074, deviation);
         var gain = ExactMeanAccumulator.UnitRatio(2 * ExactVarianceWindow.Units(Math.Min(factor, _cap)), _length + 1L);
         var previous = _seeded ? _previousAverage : p; var estimate = RocBankValue.RoundUnits(previous * Unit + ExactVarianceWindow.Units(gain) * (p - previous), Unit);
         var difference = p - estimate; var signal = difference.Sign > 0 && difference > _difference ? Signal.StrongBuy : difference.Sign < 0 && difference < _difference ? Signal.StrongSell : difference.Sign > 0 ? Signal.Buy : difference.Sign < 0 ? Signal.Sell : Signal.None;
-        if (commit) { if (_ranges.Count == _deviationLength) _ranges.Dequeue(); _ranges.Enqueue(range); if (_deviations.Count == _lookback) _deviations.Dequeue(); _deviations.Enqueue(deviation); _sum = sum; _squares = squares; _previousPrice = p; _previousAverage = estimate; _difference = difference; _seeded = true; }
+        if (commit) { if (_ranges.Count == _deviationLength) _ranges.Dequeue(); _ranges.Enqueue(range); _minimum.Commit(deviation); _sum = sum; _squares = squares; _previousPrice = p; _previousAverage = estimate; _difference = difference; _seeded = true; }
         return (Publish(estimate), signal);
     }
-    internal void Reset() { _ranges.Clear(); _deviations.Clear(); _rangeAverage?.Reset(); _squareAverage?.Reset(); _sum = _squares = _previousPrice = _previousAverage = _difference = default; _seeded = false; }
-    public void Dispose() { _rangeAverage?.Dispose(); _squareAverage?.Dispose(); _ranges.Clear(); _deviations.Clear(); }
+    internal void Reset() { _ranges.Clear(); _minimum.Reset(); _rangeAverage?.Reset(); _squareAverage?.Reset(); _sum = _squares = _previousPrice = _previousAverage = _difference = default; _seeded = false; }
+    public void Dispose() { _rangeAverage?.Dispose(); _squareAverage?.Dispose(); _ranges.Clear(); _minimum.Reset(); }
     private sealed class Average : IDisposable
     {
         private readonly int _length; private readonly MovingAvgType _kind; private readonly Queue<BigInteger> _history = new(); private readonly IMovingAverageSmoother? _fallback;
