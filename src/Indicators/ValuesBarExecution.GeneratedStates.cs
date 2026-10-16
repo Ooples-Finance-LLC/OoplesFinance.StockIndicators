@@ -14,7 +14,8 @@ internal static partial class ValuesBarExecution
             or Variance or CoefficientOfVariation or StandardError or StdDev { Length: > 0 } or HistoricalVolatility
             or Kvo or KlingerVolumeOscillator or UltimateOscillator or Tsi or TrueStrengthIndex
             or ErgodicTrueStrengthIndexV1 or SMIErgodicIndicator
-            or HullMovingAverage or TriangularMovingAverage or EhlersZeroLagEma or EhlersZeroLagExponentialMovingAverage;
+            or HullMovingAverage or TriangularMovingAverage or EhlersZeroLagEma or EhlersZeroLagExponentialMovingAverage
+            or ZeroLowLagMovingAverage or ZeroLagTripleExponentialMovingAverage or SlowSmoothedMovingAverage { Length: > int.MinValue };
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -70,6 +71,9 @@ internal static partial class ValuesBarExecution
         AtrPercent range => new GeneratedAtrDerivedState(range.Length, count),
         AtrChannelWidth range => new GeneratedAtrDerivedState(range.Length, count, range.Multiplier),
         ChaikinVolatility volatility => new GeneratedChaikinVolatilityState(volatility.Length, count),
+        ZeroLowLagMovingAverage average => new GeneratedZeroLowLagState(average.Length),
+        ZeroLagTripleExponentialMovingAverage average => new GeneratedZeroLagTripleState(average.Length),
+        SlowSmoothedMovingAverage average => new GeneratedSlowSmoothedState(average.Length, count),
         HullMovingAverage average => new HullValueState(average.Length),
         TriangularMovingAverage average => new GeneratedTriangularState(average.Length),
         EhlersZeroLagEma average => new GeneratedEhlersZeroLagState(average.Length),
@@ -200,6 +204,43 @@ internal static partial class ValuesBarExecution
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedZeroLowLagState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly ZeroLowLagWindow _window = new(period, 1.4);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedZeroLagTripleState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly ZeroLagTripleWindow _window = new(MovingAvgType.TripleExponentialMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSlowSmoothedState : IIndicatorState
+    {
+        private readonly WmaValueState _first, _second, _third;
+        internal GeneratedSlowSmoothedState(int period, int count)
+        {
+            // Empty legacy runs never evaluate the potentially overflowing split.
+            if (count == 0) period = 1;
+            int second = Math.Max(1, Math.Min(530, (int)Math.Ceiling(period / 3d)));
+            int first = Math.Max(1, Math.Min(530, (int)Math.Ceiling((double)(period - second) / 2)));
+            int third = Math.Max(1, Math.Min(530, (int)Math.Floor((double)(period - second) / 2)));
+            _first = new(first, count); _second = new(second, count); _third = new(third, count);
+        }
+        public void Reset() { _first.Reset(); _second.Reset(); _third.Reset(); }
+        public double Update(in Bar bar)
+        {
+            double first = _first.Update(bar);
+            double second = _second.Update(new Bar(default, 0, 0, 0, first, 0));
+            return _third.Update(new Bar(default, 0, 0, 0, second, 0));
+        }
     }
 
     private sealed class GeneratedEhlersZeroLagState(int period) : IIndicatorState, IDisposable
