@@ -1,0 +1,18 @@
+{
+  "base_commit": "86380f4d4dde47d8884ff8a73dc63106616191ec",
+  "source_files_sha256": {
+    "src/Indicators/FusedBarExecution.cs": "77d5bae936a1c1093e6d4d02dcf0b598ceb3d359a5e88c45125ba4a2ed9f5f3b",
+    "src/Indicators/OwnedBarBuffer.cs": "bf140ae07d7ad37a606ecc628193c83c98857dc525d911d8417df89b01a4cfb6",
+    "src/Indicators/OwnedBarHistory.cs": "a9aaeb0eea6c464816095600f62350541ebaa2dc93788cdecca89eea2cd0f45c",
+    "src/Indicators/PriceCircularTransform.cs": "184ef4ea0ebdb97c6b290ae1f1ccf31bdc63bacfd1962b12a8def550113905fb",
+    "src/Indicators/ValuesBarExecution.cs": "24a1ee9d66aa02e4ad61481dd5aae41302c5913b0d53971113c7bc36c47a8dd8"
+  },
+  "binary_sha256": {
+    "OoplesFinance.StockIndicators.dll": "3227e410562edf911d689a1e3c2e335f1c5b28e768ee64cc33738bb4a2887355",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "c2ffb01742c9e7a4f43e6bc177463216a5c7ba1c99f25b9f596a67a65d9a0a25"
+  },
+  "saved_baseline": "benchmarks/results/shared-rollout/sma-cpu/cpu-native.json.gz",
+  "filter": "*SharedSmaBenchmarks*Builder*TaLib.Functions.Sma*",
+  "interpretation": "Saved-baseline cross-run comparison against TALib, not same-run qualification. The four operation labels use identical builder code and inputs; only the TALib-labelled builder cases are measured. Native methods were not timed; existing setup correctness checks still execute. Fixture inputs, output ownership, native methods and worker settings are unchanged. Same recorded runtime and hardware. The monitor includes .NET hosts, reusable MSBuild nodes, compiler processes and their live descendants. Existing processes were permitted only after at least 60 seconds of low CPU activity. Combined background CPU was limited to 1% of one logical core plus 0.1 CPU seconds of timer allowance, checked across each consecutive sample and the entire window. New process identities or activity above that bound invalidate the run. Process identities and CPU totals were sampled every ten seconds and at completion. Brief unobserved activity and non-CPU contention cannot be excluded.",
+  "validation": "55 focused unit, 4 SMA comparator and 100 local GPU cases passed with zero skips."
+}
