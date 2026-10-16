@@ -12583,7 +12583,7 @@ internal static partial class IndicatorCompute
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         using var window = new VolumeWeightedWindow(maType, length, false);
         var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var mean = context.Rent(input.Count);
+        using var mean = context.Rent(external ? input.Count : 0);
         if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), mean.WritableSpan);
         var output = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = external
