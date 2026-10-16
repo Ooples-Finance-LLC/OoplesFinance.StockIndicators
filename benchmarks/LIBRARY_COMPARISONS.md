@@ -10,6 +10,14 @@ and no pending families.
 it does not claim that timings have been collected. `pending` makes neither claim.
 The production library has no competitor package dependency.
 
+## Remaining-indicator rollout (PR #266)
+
+[PR #266](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266) extends the shared execution work to all remaining indicators, including formulas without competitor equivalents. The [inventory](results/remaining-indicators/inventory.json) retains 830 batch formulas and 232 handwritten facade types; these overlapping surfaces are not 1,062 unique formulas.
+
+Verified implementation batches currently cover Wilder aliases, price averages, DEMA/TEMA, ZLEMA/TMA/HMA, RSI/ATR, ROC/momentum, CCI/CMO/TRIX, APO/PPO/MACD, and Aroon/DPO. Each batch has a `*-contracts.json` receipt beside the inventory, focused exact-output tests, and a same-library legacy/shared fixture covering both history modes at 1,000 and 10,000 bars. The inventory links those historical receipts without claiming current-head qualification for every alias.
+
+Nine immutable candidates provide 192 prepared timing cases. Their queue waits for the existing shared-rollout queue and a guarded natural quiet window. No measurements for these candidates have been archived, and no latency or allocation improvement is claimed. Existing competitor evidence is retained; incompatible startup conventions are not substituted as baselines. Remaining implementation, measurement review, and full-inventory qualification are still open.
+
 ## Shared rollout status (2026-10-15)
 
 The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. Of the 267 native-comparison mappings, 243 have both standard sizes in their current catalog rows; 24 lack either 1k or 10k coverage. These are coverage counts, not speedup counts. Two stale KAMA qualification labels now agree with their latest builder-only rows; historical native measurements remain retained. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
