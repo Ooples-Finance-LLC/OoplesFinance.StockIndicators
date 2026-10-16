@@ -54,6 +54,7 @@ internal static partial class ValuesBarExecution
             or Alma or JsaMovingAverage or SelfWeightedMovingAverage
             or SimplifiedLeastSquaresMovingAverage or FisherLeastSquaresMovingAverage or TStepLeastSquaresMovingAverage
             or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage or AdaptiveLeastSquares
+            or R2AdaptiveRegression or KaufmanAdaptiveLeastSquaresMovingAverage or RegressionOscillator or KaufmanAdaptiveCorrelationOscillator
             or OneLCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
             or _1LCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
@@ -176,6 +177,10 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        R2AdaptiveRegression average => new GeneratedR2FitState(average.Length),
+        KaufmanAdaptiveLeastSquaresMovingAverage average => new GeneratedKaufmanFitState(average.Length),
+        KaufmanAdaptiveCorrelationOscillator oscillator => new GeneratedKaufmanCorrelationState(oscillator.Length),
+        RegressionOscillator oscillator => new GeneratedRegressionResidualState(oscillator.Length, count),
         OneLCLeastSquaresMovingAverage average => new GeneratedOneLcState(average.Length, average.MaType),
         _1LCLeastSquaresMovingAverage average => new GeneratedOneLcState(average.Length, average.MaType),
         AdaptiveLeastSquares average => new GeneratedAdaptiveRangeFitState(average.Length),
@@ -647,6 +652,39 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedR2FitState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly R2AdaptiveWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedKaufmanFitState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.KaufmanRegressionMoments _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true, out _, out _, out _);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedKaufmanCorrelationState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.KaufmanRegressionMoments _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) =>
+            _window.Next(bar.Close, true, out outputs[0], out outputs[1], out outputs[2]);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRegressionResidualState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactLinearFitWindow _window = new(period, observedHistory: Math.Max(1, period) > count, compact: true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).PercentFitResidual(bar.Close);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedOneLcState(int period, MovingAvgType kind) : IIndicatorState, IDisposable
