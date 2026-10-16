@@ -1,0 +1,37 @@
+{
+  "batch": "trader-pressure-shared-execution",
+  "types": [
+    "TraderPressureIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute net, bulls and bears together with the existing exact default-WMA TraderPressureWindow over original high/low fields, preserving startup, custom-average fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 321,
+    "fixture_passed": 4,
+    "discovery_passed": 73,
+    "gpu_passed": 100,
+    "contract_methods": 1408,
+    "hosted_methods": 1396,
+    "evidence": [
+      {
+        "file": "traderpressure-unit.trx.gz",
+        "passed_cases": 321,
+        "trx_sha256": "f725de8a1857ea496b76f875f1a3393cd21db4ceb6e201a35c4a1cf7f21085a1"
+      },
+      {
+        "file": "traderpressure-fixture.trx.gz",
+        "passed_cases": 77,
+        "trx_sha256": "6338a6c3c0a41e0975b7827c642f89b5010bd8608ccde2c2e799d1850bb9bdbf"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTraderPressureBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TraderPressureIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
