@@ -49,7 +49,8 @@ internal static partial class ValuesBarExecution
             or EhlersImpulseReaction { Q: >= double.MinValue and <= double.MaxValue }
             or EhlersImpulseResponse { Bw: >= double.MinValue and <= double.MaxValue }
             or EhlersHannMovingAverage or EhlersHammingMovingAverage or HammingMa
-            or EhlersHannWindowIndicator or EhlersHammingWindowIndicator;
+            or EhlersHannWindowIndicator or EhlersHammingWindowIndicator
+            or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -169,6 +170,9 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        SymmetricallyWeightedMovingAverage filter => new GeneratedSymmetricMeanState(filter.Length, count),
+        EhlersTriangleMovingAverage filter => new GeneratedSymmetricMeanState(filter.Length, count),
+        EhlersTriangleWindowIndicator filter => new GeneratedTriangleIndicatorState(filter.Length),
         EhlersHannMovingAverage filter => new GeneratedHannMeanState(filter.Length, count),
         EhlersHammingMovingAverage filter => new GeneratedHammingMeanState(filter.Length, count),
         HammingMa filter => new GeneratedHammingMeanState(filter.Length, count),
@@ -617,6 +621,27 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedSymmetricMeanState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly SymmetricWindowMean _window = new(period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTriangleIndicatorState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly TriangleIndicatorWindow _window = new(MovingAvgType.EhlersTriangleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Open, bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Roc;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedHannMeanState(int period, int count) : IIndicatorState, IDisposable
