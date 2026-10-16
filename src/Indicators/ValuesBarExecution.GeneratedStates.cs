@@ -687,7 +687,7 @@ internal static partial class ValuesBarExecution
     {
         private readonly VariableAdaptiveWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
         public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.NextValidated(bar.Close, bar.Open, bar.High, bar.Low, true).Value;
+        public double Update(in Bar bar) => _window.NextValidated(bar.Close, bar.Open, bar.High, bar.Low, true, includeSignals: false).Value;
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
