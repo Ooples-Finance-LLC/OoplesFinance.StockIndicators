@@ -3961,3 +3961,20 @@ Four builder measurements completed without detected interference. All four rema
 | 10,000 | LatestOnly | 20.302 | 81,631 | 1.035 | 1.756 |
 
 Evidence: `results/shared-rollout/sma-cpu/reused-baseline-workers/`. These gaps remain open; no competitor measurement was repeated.
+
+### Skender RSI/ADX first direct-native baseline (2026-10-16)
+
+All 16 native/builder cases completed in one run without detected interference. Native serial and full-prefix parallel results are now cached for reuse. Every builder case remains slower than the fastest native mean; no workload qualifies as a latency win. The interrupted first attempt is excluded.
+
+| Operation | Bars | Builder history | Mean (us) | Managed bytes | Builder / fastest native |
+| --- | ---: | --- | ---: | ---: | ---: |
+| Skender.GetRsi | 1,000 | Full | 243.886 | 66,401 | 4.149 |
+| Skender.GetRsi | 1,000 | LatestOnly | 225.026 | 17,643 | 3.828 |
+| Skender.GetRsi | 10,000 | Full | 2,403.441 | 642,914 | 2.650 |
+| Skender.GetRsi | 10,000 | LatestOnly | 2,379.979 | 161,784 | 2.624 |
+| Skender.GetAdx | 1,000 | Full | 1,475.513 | 116,590 | 12.400 |
+| Skender.GetAdx | 1,000 | LatestOnly | 1,715.316 | 67,834 | 14.415 |
+| Skender.GetAdx | 10,000 | Full | 16,911.649 | 1,126,086 | 11.838 |
+| Skender.GetAdx | 10,000 | LatestOnly | 16,881.285 | 644,989 | 11.817 |
+
+Evidence: `results/shared-rollout/skender-strength/first-native-baseline/`. Comparisons are from the same run on the preserved 2e533ff2 candidate. RSI and ADX latency gaps remain open; retain these native baselines when measuring later candidates.
