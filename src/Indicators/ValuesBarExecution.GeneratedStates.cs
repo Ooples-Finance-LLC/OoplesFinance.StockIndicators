@@ -29,7 +29,8 @@ internal static partial class ValuesBarExecution
             or GeneralizedDoubleExponentialMovingAverage { VolumeFactor: >= double.MinValue and <= double.MaxValue }
             or LightLeastSquaresMovingAverage or LinearExtrapolation or RecursiveMovingTrendAverage
             or EhlersIirFilter or EhlersInfiniteImpulseResponseFilter or EhlersFirFilter or EhlersFiniteImpulseResponseFilter or EhlersOptimumEllipticFilter or EhlersModifiedOptimumEllipticFilter
-            or Spencer15PointMovingAverage or Spencer21PointMovingAverage or DampedSineWaveWeightedFilter or HendersonWeightedMovingAverage or RightSidedRickerMovingAverage;
+            or Spencer15PointMovingAverage or Spencer21PointMovingAverage or DampedSineWaveWeightedFilter or HendersonWeightedMovingAverage or RightSidedRickerMovingAverage
+            or FibonacciWeightedMovingAverage or SquareRootWeightedMovingAverage or SineWma;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -136,6 +137,9 @@ internal static partial class ValuesBarExecution
         DampedSineWaveWeightedFilter filter => new GeneratedDampedSineState(filter.Length, count),
         HendersonWeightedMovingAverage average => new GeneratedHendersonState(average.Length, count),
         RightSidedRickerMovingAverage average => new GeneratedRickerState(average.Length, count),
+        FibonacciWeightedMovingAverage average => new GeneratedFibonacciMeanState(average.Length, count),
+        SquareRootWeightedMovingAverage average => new GeneratedSquareRootMeanState(average.Length, count),
+        SineWma average => new GeneratedSineMeanState(average.Length, count),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -490,6 +494,30 @@ internal static partial class ValuesBarExecution
     private sealed class GeneratedRickerState(int period, int count) : IIndicatorState, IDisposable
     {
         private readonly RickerWindow? _window = count == 0 ? null : new(period, 60, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedFibonacciMeanState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly FibonacciWindowMean? _window = count == 0 ? null : new(period, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedSquareRootMeanState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly SquareRootWindowMean? _window = count == 0 ? null : new(period, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedSineMeanState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly SineWindowMean? _window = count == 0 ? null : new(period, count);
         public void Reset() => _window?.Reset();
         public double Update(in Bar bar) => _window!.Next(bar.Close, true);
         public void Dispose() => _window?.Dispose();
