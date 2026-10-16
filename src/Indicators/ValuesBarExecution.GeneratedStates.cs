@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeFlowIndicator { Coef: > double.NegativeInfinity and < double.PositiveInfinity, Vcoef: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -206,6 +206,7 @@ internal static partial class ValuesBarExecution
         BetterVolumeIndicator volume => new GeneratedBetterVolumeState(volume.Length, volume.LbLength),
         AverageMoneyFlowOscillator flow => new GeneratedAverageMoneyFlowState(flow.Length),
         TradeVolumeIndex volume => new GeneratedTradeVolumeState(volume.Length),
+        TimeAndMoneyChannel channel => new GeneratedTimeMoneyState(channel.Length1, channel.Length2),
         BuffAverage average => new GeneratedBuffState(average.Length),
         EquityMovingAverage average => new GeneratedEquityState(average.Length),
         Vwma average => new GeneratedVolumeWeightedState(average.Length),
@@ -794,6 +795,14 @@ internal static partial class ValuesBarExecution
         private readonly AverageMoneyFlowWindow _window = new(MovingAvgType.WeightedMovingAverage, period, 3);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedTimeMoneyState(int length1, int length2) : IMultiOutputState, IDisposable
+    {
+        private readonly TimeMoneyWindow _window = new(MovingAvgType.SimpleMovingAverage, length1, length2);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true, outputs);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 

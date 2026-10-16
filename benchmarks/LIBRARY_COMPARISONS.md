@@ -4017,3 +4017,6 @@ Average Money Flow (PR #266 candidate): shared execution uses the existing exact
 
 
 Trade Volume Index now computes its line and default SMA signal together through the existing exact kernel. The raw default path no longer rents an unused mean buffer. Validation: 52 focused unit cases, 4 fixture parity cases, 71 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared for quiet-window qualification; no measured performance claim or repeated competitor run.
+
+
+Time and Money Channel now computes all seven outputs in one shared pass and writes directly to destination storage, removing the per-update output array on this path. The exact arithmetic and existing allocating wrapper remain compatible; slot six retains the legacy width value. Validation: 83 focused unit cases (including comparison with the frozen prior kernel), 4 fixture parity cases, 72 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window qualification remains pending, with no measured speedup claim.
