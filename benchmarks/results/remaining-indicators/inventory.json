@@ -284,7 +284,15 @@
         "AdxSpecOptions",
         "AverageDirectionalIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AdxSpecOptions": [
+          "benchmarks/results/remaining-indicators/directionalflow-contracts.json"
+        ]
+      },
+      "options_without_receipts": [
+        "AverageDirectionalIndexSpecOptions"
+      ]
     },
     {
       "indicator": "AverageMoneyFlowOscillator",
@@ -507,7 +515,13 @@
       "options": [
         "ChaikinOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ChaikinOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/directionalflow-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ChaikinVolatility",
@@ -3313,7 +3327,15 @@
         "MassIndexCoreSpecOptions",
         "MassIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "MassIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/directionalflow-contracts.json"
+        ]
+      },
+      "options_without_receipts": [
+        "MassIndexCoreSpecOptions"
+      ]
     },
     {
       "indicator": "MassThrustIndicator",
@@ -8121,6 +8143,7 @@
     "benchmarks/competitor-library-manifest.json": "a55ef0e199c0251d6684741d5f8079267108ffbe15f96ae023d692bc5ef7856e",
     "benchmarks/results/remaining-indicators/aroondpo-contracts.json": "4deb075f23f91bc5220164017b006419fa196497527ff959d95cfc4cc2d72e87",
     "benchmarks/results/remaining-indicators/composed-contracts.json": "c4d8bac264a40537f0cba0270016bb25a1712d58628b5de9d11ba590567979f2",
+    "benchmarks/results/remaining-indicators/directionalflow-contracts.json": "7021c51f621c2fc3948293d116c3cf1ae1893ff6a5e60a51ff1ef00d4510e33b",
     "benchmarks/results/remaining-indicators/emagap-contracts.json": "d3a7d421e76aafa2981e666408382c4114495c06c255b634a80ac5640dfd3202",
     "benchmarks/results/remaining-indicators/extrapolation-contracts.json": "2c65abf424b6839269cdb1db4908d6decb5f7d86bd0baf61fcb75c95f260f460",
     "benchmarks/results/remaining-indicators/oscillator-contracts.json": "a0ecd34360e016bb6e502f553b181f91e17dede91b3028a1184ce78f102a4367",
@@ -8331,7 +8354,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "c030bb42d31e8d7fd5465de4a9b7d483c060de5e29fd79630e030c1556b39a29",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "940118ef1d1d6a184f0810156b45ee7a2c1d151ef38f5d315cc824467a96c0c2",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

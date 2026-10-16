@@ -9,7 +9,7 @@ internal static partial class ValuesBarExecution
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
-            or Nvi or Pvi or Vroc or Pvt;
+            or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -50,6 +50,9 @@ internal static partial class ValuesBarExecution
         Pvi volume => new GeneratedVolumeIndexState(volume.Length, positive: true),
         Vroc volume => new GeneratedVolumeRatioState(Math.Max(1, volume.Length), count),
         Pvt volume => new GeneratedVolumeTrendState(volume.Length),
+        Adx direction => new GeneratedDirectionalState(direction.Length, count),
+        MassIndex mass => new GeneratedMassState(mass.EmaLength, mass.SumLength, count),
+        ChaikinOscillator flow => new GeneratedChaikinOscillatorState(flow.FastLength, flow.SlowLength),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -122,6 +125,41 @@ internal static partial class ValuesBarExecution
             output[0] = value.Line;
             output[1] = value.Signal;
         }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDirectionalState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly DirectionalIndexWindow _window = new(MovingAvgType.WildersSmoothingMethod, Math.Max(1, period), Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> output)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            output[0] = value.Plus;
+            output[1] = value.Minus;
+            output[2] = value.Adx;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedMassState(int averagePeriod, int sumPeriod, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly MassIndexWindow _window = new(MovingAvgType.ExponentialMovingAverage, averagePeriod, averagePeriod, sumPeriod, 9, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> output)
+        {
+            var value = _window.Next(bar.High, bar.Low, true);
+            output[0] = value.Value;
+            output[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChaikinOscillatorState(int fastPeriod, int slowPeriod) : IIndicatorState, IDisposable
+    {
+        private readonly MoneyFlowAverageWindow _window = new(MovingAvgType.ExponentialMovingAverage, fastPeriod, slowPeriod);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true).Signal;
         public void Dispose() => _window.Dispose();
     }
 
