@@ -36,6 +36,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingVolumeOscillatorBenchmarks), 32)]
     [InlineData(typeof(RemainingSpecialAverageBenchmarks), 32)]
     [InlineData(typeof(RemainingLaguerreBenchmarks), 16)]
+    [InlineData(typeof(RemainingWeightedFilterBenchmarks), 40)]
     [InlineData(typeof(RemainingEhlersFilterBenchmarks), 48)]
     [InlineData(typeof(RemainingTrendExtraBenchmarks), 24)]
     [InlineData(typeof(RemainingDoubleRecurrenceBenchmarks), 24)]
