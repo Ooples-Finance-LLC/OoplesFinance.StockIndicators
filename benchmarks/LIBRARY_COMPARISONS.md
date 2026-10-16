@@ -4147,3 +4147,6 @@ Donchian Channel, Upper and Lower now reuse bounded exact extrema; the midpoint 
 
 
 Qstick, Daily Average Price Delta and Drunkard Walk now reuse their existing exact candle kernels in shared execution. Paired outputs are computed together, preserving original fields, arithmetic stages, newest Drunkard extremum ties, facade clamps/warmup and component/source fallback. Drunkard Length2 remains a warmup setting with no formula effect. Validation: 295 focused unit cases, 12 parity cases, 111 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+Price Cycle Oscillator now reuses its exact distance-to-ATR kernel in shared execution. Facade clamps, staged arithmetic, original candle fields, ownership and both component-average/source fallbacks remain intact. Validation: 54 focused unit cases, 4 parity cases, 112 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending. Existing Price Volume Oscillator qualification and timing evidence are reused unchanged.
