@@ -39,6 +39,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingDecyclerBenchmarks), 32)]
     [InlineData(typeof(RemainingDecyclerOscillatorBenchmarks), 24)]
     [InlineData(typeof(RemainingRoofingBenchmarks), 56)]
+    [InlineData(typeof(RemainingCycleTrendBenchmarks), 32)]
     [InlineData(typeof(RemainingPoleFilterBenchmarks), 56)]
     [InlineData(typeof(RemainingEstimatorBenchmarks), 24)]
     [InlineData(typeof(RemainingWeightedMeanBenchmarks), 24)]
