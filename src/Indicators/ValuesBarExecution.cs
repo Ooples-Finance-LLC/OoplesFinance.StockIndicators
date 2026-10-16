@@ -16,7 +16,8 @@ internal static partial class ValuesBarExecution
     // These sealed states publish their own outputs without graph or built-in
     // evaluator substitution. Variable SMA's documented pure selector runs once
     // per published bar; deferred node failures retain raw-input priority.
-    private static bool IsSharedState(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
+    private static bool IsSharedState(IIndicator indicator) => indicator.Source is null
+        && (indicator.Components.Count == 0 || indicator is BollingerBands { HasUnmodifiedDefaultAverage: true })
         && (SharedCpuStates.Contains(indicator) || IsGeneratedState(indicator)
             || indicator is VariablePeriodClassicAverage { Method: ClassicAverageMethod.Sma });
 
