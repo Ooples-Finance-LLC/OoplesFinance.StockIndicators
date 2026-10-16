@@ -62,6 +62,11 @@ internal static partial class ValuesBarExecution
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or Vpci or VolumeWeightedRsi or VortexBands
+            or WoodieCommodityChannelIndex
+            or EhlersCommodityChannelIndexInverseFisherTransform { Constant: > 0d and < double.PositiveInfinity }
+            or ZScore or FastZScore or InverseFisherZScore or InverseFisherFastZScore
+            or ZDistanceFromVwap or WamiOscillator or PriceMomentum or VolumeMomentum
+            or VolumeZoneOscillator or VolumeMomentumOscillator
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or UltimateMomentumIndicator { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -216,6 +221,18 @@ internal static partial class ValuesBarExecution
         Vpci vpci => new GeneratedVpciState(vpci.Length),
         VolumeWeightedRsi rsi => new GeneratedVolumeWeightedRsiState(rsi.Length),
         VortexBands bands => new GeneratedVortexBandsState(bands.Length),
+        WoodieCommodityChannelIndex cci => new GeneratedWoodieCciState(cci.FastLength, cci.SlowLength, count),
+        EhlersCommodityChannelIndexInverseFisherTransform cci => new GeneratedInverseCciState(cci.Length, cci.SignalLength, cci.Constant, count),
+        ZScore score => new GeneratedStandardizedScoreState(score.Length, count, false, false),
+        FastZScore score => new GeneratedStandardizedScoreState(score.Length, count, true, false),
+        InverseFisherZScore score => new GeneratedStandardizedScoreState(score.Length, count, false, true),
+        InverseFisherFastZScore score => new GeneratedStandardizedScoreState(score.Length, count, true, true),
+        ZDistanceFromVwap distance => new GeneratedZDistanceState(distance.Length),
+        WamiOscillator wami => new GeneratedWamiState(wami.Length, count),
+        PriceMomentum momentum => new GeneratedLaggedDifferenceState(Math.Max(1, momentum.Length), count, false),
+        VolumeMomentum momentum => new GeneratedLaggedDifferenceState(Math.Max(1, momentum.Length), count, true),
+        VolumeZoneOscillator zone => new GeneratedVolumeZoneState(zone.Length),
+        VolumeMomentumOscillator momentum => new GeneratedVolumeMomentumOscillatorState(momentum.ShortLength, momentum.LongLength),
         ValueChartIndicator chart => new GeneratedValueChartState(chart.Length, valueChartCustomRange),
         UltimateMomentumIndicator momentum => new GeneratedUltimateMomentumState(momentum),
         UltimateTraderOscillator => new GeneratedUltimateTraderState(),
@@ -903,6 +920,109 @@ internal static partial class ValuesBarExecution
             outputs[0] = point.Upper; outputs[1] = point.Middle; outputs[2] = point.Lower;
         }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedWoodieCciState(int fast, int slow, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly CommodityIndexWindow _fast = new(MovingAvgType.SimpleMovingAverage, fast, .015, count);
+        private readonly CommodityIndexWindow _slow = new(MovingAvgType.SimpleMovingAverage, slow, .015, count);
+        public void Reset() { _fast.Reset(); _slow.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var price = CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close);
+            var fastValue = _fast.Next(price, true); var slowValue = _slow.Next(price, true);
+            outputs[0] = fastValue; outputs[1] = slowValue; outputs[2] = fastValue - slowValue;
+        }
+        public void Dispose() { Reset(); _fast.Dispose(); _slow.Dispose(); }
+    }
+
+    private sealed class GeneratedInverseCciState(int length, int signal, double constant, int count) : IIndicatorState, IDisposable
+    {
+        private readonly CommodityIndexWindow _cci = new(MovingAvgType.WeightedMovingAverage, length, constant, count);
+        private readonly StrengthAverage _signal = new(MovingAvgType.WeightedMovingAverage, signal, count);
+        public void Reset() { _cci.Reset(); _signal.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var value = _cci.Next(CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close), true);
+            var scaled = .1 * (value - 50);
+            return Math.Tanh(_signal.Next(new StrengthValue(scaled), true).Mantissa);
+        }
+        public void Dispose() { Reset(); _cci.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedStandardizedScoreState(int length, int count, bool fast, bool inverse) : IIndicatorState, IDisposable
+    {
+        private readonly StrengthAverage _mean = new(MovingAvgType.SimpleMovingAverage, length, count);
+        private readonly StandardizedScoreWindow _score = new(length, fast, observedHistory: true);
+        public void Reset() { _mean.Reset(); _score.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var average = _mean.Next(new StrengthValue(bar.Close), true).Mantissa;
+            var score = _score.Next(bar.Close, average, true, true);
+            return inverse ? StandardizedScoreWindow.Inverse(score, fast) : score;
+        }
+        public void Dispose() { Reset(); _mean.Dispose(); _score.Dispose(); }
+    }
+
+    private sealed class GeneratedZDistanceState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly ZDistanceWindow _window = new(MovingAvgType.VolumeWeightedAveragePrice, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedWamiState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly WamiWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 4, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedLaggedDifferenceState(int period, int count, bool volume) : IIndicatorState
+    {
+        private readonly double[] _lag = new double[Math.Min(period, Math.Max(1, count))];
+        private int _position, _seen;
+        public void Reset() { _position = _seen = 0; }
+        public double Update(in Bar bar)
+        {
+            double value = volume ? bar.Volume : bar.Close;
+            double result = _seen < period ? 0 : value - _lag[_position];
+            _lag[_position] = value;
+            if (++_position == _lag.Length) _position = 0;
+            if (_seen < period) _seen++;
+            return result;
+        }
+    }
+
+    private sealed class GeneratedVolumeZoneState(int length) : IIndicatorState
+    {
+        private readonly Streaming.EmaState _signed = new(length), _total = new(length);
+        private double _previous;
+        private bool _hasPrevious;
+        public void Reset() { _signed.Reset(); _total.Reset(); _previous = 0; _hasPrevious = false; }
+        public double Update(in Bar bar)
+        {
+            var signed = _hasPrevious ? (bar.Close > _previous ? bar.Volume : -bar.Volume) : 0;
+            var result = RoundedMomentumRatio.Of(_signed.GetNext(signed, true), _total.GetNext(bar.Volume, true));
+            _previous = bar.Close; _hasPrevious = true;
+            return result;
+        }
+    }
+
+    private sealed class GeneratedVolumeMomentumOscillatorState(int shortLength, int longLength) : IIndicatorState
+    {
+        private double _short, _long;
+        private bool _hasPrevious;
+        public void Reset() { _short = _long = 0; _hasPrevious = false; }
+        public double Update(in Bar bar)
+        {
+            if (!_hasPrevious) { _short = _long = bar.Volume; _hasPrevious = true; return 0; }
+            _short = RoundedSeededEma.Next(bar.Volume, _short, shortLength);
+            _long = RoundedSeededEma.Next(bar.Volume, _long, longLength);
+            return RoundedPercentageChange.Of(_short, _long);
+        }
     }
 
     private sealed class GeneratedValueChartState(int length, bool customRange) : IMultiOutputState, IDisposable
