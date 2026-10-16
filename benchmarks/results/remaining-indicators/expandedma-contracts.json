@@ -1,0 +1,42 @@
+{
+  "batch": "generated-expanded-averages",
+  "types": [
+    "HullMovingAverage",
+    "TriangularMovingAverage",
+    "EhlersZeroLagEma",
+    "EhlersZeroLagExponentialMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse the existing Hull and rounded triangular shared states for the full-name facades. Reuse EhlersZeroLagWindow for both Ehlers facades, preserving its lag correction and unpublished exponents. Supplied component averages retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 56,
+    "fixture_passed": 16,
+    "gpu_passed": 100,
+    "contract_methods": 1351,
+    "hosted_methods": 1339,
+    "unit_trx_sha256": "f6d1edcba59e97517a42aa0e0246e77b3a571f4e88f748a8c5d0a33d9597fe72",
+    "fixture_trx_sha256": "ad90aa4de3462925b4313f847a7904d6f2e3d9e088cf9bb8f968b46acc2829d6",
+    "discovery_passed": 20,
+    "selected_comparator_passed": 36,
+    "comparator_isolation": "Release comparator built into a separate output directory while the earlier Klinger validation continued. Production DLL hashes matched source, unit and benchmark outputs. GPU TRX and source fingerprint verified by the repository verifier."
+  },
+  "benchmark_fixture": {
+    "type": "RemainingExpandedAverageBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
