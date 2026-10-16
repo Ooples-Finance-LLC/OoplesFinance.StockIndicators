@@ -8,7 +8,7 @@ internal static partial class ValuesBarExecution
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
-            or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo;
+            or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -41,6 +41,10 @@ internal static partial class ValuesBarExecution
         Macd oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
         Aroon oscillator => new GeneratedAroonState(Math.Max(1, oscillator.Length)),
         Dpo oscillator => new GeneratedDetrendedState(Math.Max(1, oscillator.Length), count),
+        Cmf flow => new GeneratedChaikinFlowState(flow.Length),
+        Mfi flow => new GeneratedMoneyFlowState(flow.Length, count),
+        ForceIndex force => new GeneratedForceState(force.Length),
+        Obv volume => new GeneratedObvState(volume.Length),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -92,6 +96,50 @@ internal static partial class ValuesBarExecution
             output[0] = up - down;
             output[1] = up;
             output[2] = down;
+        }
+    }
+
+    private sealed class GeneratedChaikinFlowState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly ChaikinFlowWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedMoneyFlowState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingMoneyFlowIndex _window = new(Math.Min(Math.Max(1, period), Math.Max(1, count)));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(
+            Streaming.RollingMoneyFlowIndex.TypicalPrice(bar.High, bar.Low, bar.Close), bar.Volume, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedForceState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly ForceWindow _window = new(MovingAvgType.ExponentialMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedObvState(int period) : IMultiOutputState
+    {
+        private readonly Streaming.EmaState _signal = new(period);
+        private ExactMeanAccumulator _sum;
+        private double _previous;
+        private bool _invalidSignal;
+        public void Reset() { _signal.Reset(); _sum = default; _previous = 0; _invalidSignal = false; }
+        public void Update(in Bar bar, Span<double> output)
+        {
+            if (bar.Close > _previous) _sum.Add(bar.Volume);
+            else if (bar.Close < _previous) _sum.Add(bar.Volume, -1);
+            _previous = bar.Close;
+            double value = _sum.Mean(1);
+            _invalidSignal |= !double.IsFinite(value);
+            output[0] = value;
+            output[1] = _invalidSignal ? double.NaN : _signal.GetNext(value, commit: true);
         }
     }
 
