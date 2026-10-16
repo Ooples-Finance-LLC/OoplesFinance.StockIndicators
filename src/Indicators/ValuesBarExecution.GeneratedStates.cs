@@ -80,6 +80,8 @@ internal static partial class ValuesBarExecution
             or RootMovingAverageSquaredErrorBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or MeanAbsoluteErrorBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or MeanAbsoluteDeviationBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
+            or InterquartileRangeBands { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or RangeBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
             or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -285,6 +287,8 @@ internal static partial class ValuesBarExecution
         RootMovingAverageSquaredErrorBands channel => new GeneratedRmseBandState(channel.Length, channel.StdDevFactor, count),
         MeanAbsoluteErrorBands channel => new GeneratedMaeBandState(Math.Max(1, channel.Length), channel.StdDevFactor, count),
         MeanAbsoluteDeviationBands channel => new GeneratedMadBandState(Math.Max(1, channel.Length), channel.StdDevFactor, count),
+        InterquartileRangeBands channel => new GeneratedIqrBandState(Math.Max(1, channel.Length), channel.Mult, count),
+        RangeBands channel => new GeneratedRangeBandState(Math.Max(1, channel.Length), channel.StdDevFactor, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
         MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
@@ -1006,6 +1010,40 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedIqrBandState(int length, double multiplier, int count) : IMultiOutputState, IDisposable
+    {
+        private RollingOrderStatistic _order = new(Math.Min(length, Math.Max(1, count)));
+        public void Reset() { _order.Dispose(); _order = new(Math.Min(length, Math.Max(1, count))); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            _order.Add(bar.Close);
+            var first = _order.PercentileNearestRank(25);
+            var third = _order.PercentileNearestRank(75);
+            outputs[0] = RangeBandArithmetic.Band(third, third, first, multiplier);
+            outputs[1] = RangeBandArithmetic.Midpoint(first, third);
+            outputs[2] = RangeBandArithmetic.Band(first, third, first, -multiplier);
+        }
+        public void Dispose() => _order.Dispose();
+    }
+
+    private sealed class GeneratedRangeBandState(int length, double factor, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _average = length <= count ? new(length) : null;
+        private readonly Streaming.RollingWindowMax _high = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.RollingWindowMin _low = new(Math.Min(length, Math.Max(1, count)));
+        public void Reset() { _average?.Reset(); _high.Reset(); _low.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var middle = _average?.Next(bar.Close, true) ?? 0;
+            var high = _high.Add(middle, out _);
+            var low = _low.Add(middle, out _);
+            outputs[0] = RangeBandArithmetic.Band(middle, high, low, factor);
+            outputs[1] = middle;
+            outputs[2] = RangeBandArithmetic.Band(middle, high, low, -factor);
+        }
+        public void Dispose() { _average?.Dispose(); _high.Dispose(); _low.Dispose(); }
     }
 
     private sealed class GeneratedMaeBandState(int length, double factor, int count) : IMultiOutputState, IDisposable
