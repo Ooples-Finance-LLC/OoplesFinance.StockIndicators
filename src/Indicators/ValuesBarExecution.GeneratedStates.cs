@@ -50,7 +50,8 @@ internal static partial class ValuesBarExecution
             or EhlersImpulseResponse { Bw: >= double.MinValue and <= double.MaxValue }
             or EhlersHannMovingAverage or EhlersHammingMovingAverage or HammingMa
             or EhlersHannWindowIndicator or EhlersHammingWindowIndicator
-            or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator;
+            or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator
+            or Alma or JsaMovingAverage or SelfWeightedMovingAverage;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -170,6 +171,9 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        Alma average => new GeneratedAlmaState(average.Length, count),
+        JsaMovingAverage average => new GeneratedJsaState(average.Length, count),
+        SelfWeightedMovingAverage average => new GeneratedSelfWeightedState(average.Length),
         SymmetricallyWeightedMovingAverage filter => new GeneratedSymmetricMeanState(filter.Length, count),
         EhlersTriangleMovingAverage filter => new GeneratedSymmetricMeanState(filter.Length, count),
         EhlersTriangleWindowIndicator filter => new GeneratedTriangleIndicatorState(filter.Length),
@@ -621,6 +625,30 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedAlmaState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly AlmaWindowMean? _window = count == 0 ? null : new(period, .85, 6, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedJsaState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.JsaMovingAverageSmoother? _window = Math.Max(1, period) >= count ? null : new(period);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window is null ? PriceMean.Of(bar.Close, 0) : _window.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedSelfWeightedState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly SelfWeightedWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedSymmetricMeanState(int period, int count) : IIndicatorState, IDisposable
