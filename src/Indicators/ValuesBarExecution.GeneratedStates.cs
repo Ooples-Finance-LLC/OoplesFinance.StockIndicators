@@ -19,7 +19,9 @@ internal static partial class ValuesBarExecution
             or AbsolutePriceOscillator or PriceOscillator or PriceOscillatorPercent or PercentagePriceOscillator
             or McNichollMovingAverage or WellRoundedMovingAverage or WellesWilderSummation or WildersSummationMethod
             or OnBalanceVolume or NegativeVolumeIndex or PositiveVolumeIndex or PriceVolumeTrend
-            or AverageTrueRange or ChandeMomentumOscillator or RateOfChange or DetrendedPriceOscillator;
+            or AverageTrueRange or ChandeMomentumOscillator or RateOfChange or DetrendedPriceOscillator
+            or AccumulationDistributionLine or WilliamsAccumulationDistribution or SmoothedWilliamsAccumulationDistribution
+            or EaseOfMovement { Divisor: >= double.MinValue and <= double.MaxValue };
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -76,6 +78,10 @@ internal static partial class ValuesBarExecution
         MassIndex mass => new GeneratedMassState(mass.EmaLength, mass.SumLength, count),
         ChaikinOscillator flow => new GeneratedChaikinOscillatorState(flow.FastLength, flow.SlowLength),
         Emv => new GeneratedEaseState(),
+        EaseOfMovement ease => new GeneratedEaseState(ease.Divisor),
+        AccumulationDistributionLine flow => new GeneratedAccumulationState(flow.Length),
+        WilliamsAccumulationDistribution => new GeneratedWilliamsAccumulationState(),
+        SmoothedWilliamsAccumulationDistribution flow => new GeneratedSmoothedWilliamsState(flow.Length, count),
         Vwap => new GeneratedVwapState(),
         AroonUp up => new GeneratedAroonLegState(Math.Max(1, up.Length), maximum: true),
         AroonDown down => new GeneratedAroonLegState(Math.Max(1, down.Length), maximum: false),
@@ -199,9 +205,43 @@ internal static partial class ValuesBarExecution
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedEaseState : IIndicatorState
+    private sealed class GeneratedAccumulationState(int period) : IMultiOutputState, IDisposable
     {
-        private readonly EaseWindow _window = new(1000000);
+        private readonly MoneyFlowAverageWindow _window = new(MovingAvgType.ExponentialMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedWilliamsAccumulationState : IIndicatorState
+    {
+        private readonly WilliamsAccumulationWindow _window = new();
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Publish();
+    }
+
+    private sealed class GeneratedSmoothedWilliamsState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly WilliamsAccumulationWindow _line = new();
+        private readonly RocBankAverage _signal = new(MovingAvgType.SimpleMovingAverage, period, count);
+        public void Reset() { _line.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _line.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Publish();
+            outputs[1] = _signal.Next(value, true).Publish();
+        }
+        public void Dispose() => _signal.Dispose();
+    }
+
+    private sealed class GeneratedEaseState(double divisor = 1000000) : IIndicatorState
+    {
+        private readonly EaseWindow _window = new(divisor);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Volume, true).Publish();
     }
