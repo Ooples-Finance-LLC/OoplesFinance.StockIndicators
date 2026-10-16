@@ -70,6 +70,8 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or MovingAverageEnvelope { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
+            or MovingAverageDisplacedEnvelope { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
             or SmartEnvelope { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or DEnvelope { DevFactor: > double.NegativeInfinity and < double.PositiveInfinity } or GChannels
             or ChandeTrendScore { Length: < int.MaxValue } or TrendScore { Length: < int.MaxValue }
@@ -255,6 +257,8 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        MovingAverageEnvelope envelope => new GeneratedAverageEnvelopeState(Math.Max(1, envelope.Length), envelope.Pct, count),
+        MovingAverageDisplacedEnvelope envelope => new GeneratedDisplacedEnvelopeState(Math.Max(1, envelope.Length1), Math.Max(1, envelope.Length2), envelope.Pct, count),
         SmartEnvelope envelope => new GeneratedSmartEnvelopeState(envelope.Length, envelope.Factor),
         DEnvelope envelope => new GeneratedDEnvelopeState(envelope.Length, envelope.DevFactor),
         GChannels channel => new GeneratedGChannelState(channel.Length),
@@ -970,6 +974,37 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedAverageEnvelopeState(int length, double fraction, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _average = length <= count ? new(length) : null;
+        public void Reset() => _average?.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var middle = _average?.Next(bar.Close, true) ?? 0;
+            outputs[0] = RoundedPercentageBand.Of(middle, fraction, 1);
+            outputs[1] = middle;
+            outputs[2] = RoundedPercentageBand.Of(middle, fraction, -1);
+        }
+        public void Dispose() => _average?.Dispose();
+    }
+
+    private sealed class GeneratedDisplacedEnvelopeState(int length, int lag, double percent, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.ExponentialMovingAverageSmoother _average = new(length);
+        private readonly PooledRingBuffer<double>? _delay = lag < count ? new(lag) : null;
+        public void Reset() { _average.Reset(); _delay?.Clear(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var average = _average.Next(bar.Close, true);
+            var middle = _delay is not null && _delay.Count == lag ? _delay[0] : 0;
+            outputs[0] = RoundedPercentageBand.Percent(middle, percent, 1);
+            outputs[1] = middle;
+            outputs[2] = RoundedPercentageBand.Percent(middle, percent, -1);
+            _delay?.TryAdd(average, out _);
+        }
+        public void Dispose() { _average.Dispose(); _delay?.Dispose(); }
     }
 
     private sealed class GeneratedSmartEnvelopeState(int length, double factor) : IMultiOutputState
