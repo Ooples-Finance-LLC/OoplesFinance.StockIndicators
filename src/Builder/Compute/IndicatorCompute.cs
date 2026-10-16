@@ -5051,17 +5051,17 @@ internal static partial class IndicatorCompute
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var means = context.Rent(input.Count);
+        using ComputeBuffer? means = custom ? context.Rent(input.Count) : null;
         if (custom)
         {
             using var line = context.Rent(input.Count); var cumulative = new TradeVolumeTotal();
             for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = cumulative.Next(input[i], data.Volumes[i], true).Publish();
-            MovingAverage(data, maType, Math.Max(1, length), line.Span, means.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), line.Span, means!.Value.WritableSpan);
         }
         using var window = new TradeVolumeWindow(maType, length); var output = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++)
         {
-            var value = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            var value = window.Next(input[i], data.Volumes[i], true, custom ? means!.Value.Span[i] : null);
             output.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line;
         }
         return output;
