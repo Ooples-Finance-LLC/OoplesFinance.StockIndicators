@@ -3948,3 +3948,16 @@ The four builder measurements completed without detected interference. All four 
 | 10,000 | LatestOnly | 45.931 | 161,988 | 1.192 | 1.559 |
 
 Evidence: `results/shared-rollout/asin-shared-cpu/reused-baseline-workers/`. Recording accepts a missing final process command line only after matching the previously proven PID, creation time and monotonic CPU total; changed identities, unexpected commands and background CPU limits remain enforced. The completed measurement was recorded without rerunning it.
+
+### Preserved SMA workers against the cached baseline (2026-10-16)
+
+Four builder measurements completed without detected interference. All four remain slower than the saved fastest TALib native mean and none establishes a latency win. Identical builder code and inputs are timed once under the TALib operation label; cached native results are reused on matching recorded hardware/runtime. Comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 9.615 | 57,741 | 1.134 | 3.884 |
+| 1,000 | LatestOnly | 6.746 | 9,035 | 1.019 | 2.725 |
+| 10,000 | Full | 66.570 | 562,618 | 0.890 | 5.757 |
+| 10,000 | LatestOnly | 20.302 | 81,631 | 1.035 | 1.756 |
+
+Evidence: `results/shared-rollout/sma-cpu/reused-baseline-workers/`. These gaps remain open; no competitor measurement was repeated.
