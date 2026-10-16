@@ -37,7 +37,10 @@ internal static partial class ValuesBarExecution
             or EhlersDecycler or EhlersHighPassFilterV1 or EhlersLeadingIndicator or EhlersSimpleDecycler
             or EhlersHighPassFilterV2 or EhlersDecyclerOscillatorV1 or EhlersDecyclerOscillatorV2
             or EhlersRoofingFilter or EhlersRoofingFilterV1 or EhlersRoofingFilterV2 or EhlersRoofingFilterIndicator
-            or EhlersHpLpRoofingFilter or EhlersZeroMeanRoofingFilter or EhlersDetrendedLeadingIndicator;
+            or EhlersHpLpRoofingFilter or EhlersZeroMeanRoofingFilter or EhlersDetrendedLeadingIndicator
+            or EhlersCyberCycle or EhlersGaussianFilter
+            or EhlersCyberCycleOscillator { Alpha: >= double.MinValue and <= double.MaxValue }
+            or EhlersInstantaneousTrendlineV2 { Alpha: >= double.MinValue and <= double.MaxValue };
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -157,6 +160,10 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        EhlersCyberCycle filter => new GeneratedCyberCycleState(2d / (Math.Max(1, filter.Length) + 1d)),
+        EhlersCyberCycleOscillator filter => new GeneratedCyberCycleState(filter.Alpha),
+        EhlersInstantaneousTrendlineV2 filter => new GeneratedInstantaneousTrendState(filter.Alpha),
+        EhlersGaussianFilter filter => new GeneratedGaussianState(filter.Length),
         EhlersRoofingFilter filter => new GeneratedRoofingV1State(filter.HpLength, filter.LpLength),
         EhlersRoofingFilterV1 filter => new GeneratedRoofingV1State(filter.Length1, filter.Length2),
         EhlersRoofingFilterV2 filter => new GeneratedRoofingV2State(filter.UpperLength, filter.LowerLength, false),
@@ -589,6 +596,38 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedCyberCycleState(double alpha) : IIndicatorState
+    {
+        private readonly CyberCycleWindow _window = new(alpha);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedInstantaneousTrendState(double alpha) : IMultiOutputState
+    {
+        private readonly InstantaneousTrendWindow _window = new(alpha);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+    }
+
+    private sealed class GeneratedGaussianState : IMultiOutputState
+    {
+        private readonly double[] _gains;
+        private readonly double[][] _stages = [new double[1], new double[2], new double[3], new double[4]];
+        internal GeneratedGaussianState(int period) => _gains =
+            [EhlersGaussian.Gain(period, 1), EhlersGaussian.Gain(period, 2), EhlersGaussian.Gain(period, 3), EhlersGaussian.Gain(period, 4)];
+        public void Reset() { foreach (var stages in _stages) Array.Clear(stages, 0, stages.Length); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            for (int i = 0; i < 4; i++) outputs[i] = EhlersGaussian.Next(bar.Close, _gains[i], _stages[i], true);
+        }
     }
 
     private sealed class GeneratedRoofingV1State(int high, int low) : IIndicatorState, IDisposable
