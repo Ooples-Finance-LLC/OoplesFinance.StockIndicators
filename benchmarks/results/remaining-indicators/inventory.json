@@ -345,11 +345,12 @@
       "contract_receipts": {
         "AtrSpecOptions": [
           "benchmarks/results/remaining-indicators/strength-contracts.json"
+        ],
+        "AverageTrueRangeSpecOptions": [
+          "benchmarks/results/remaining-indicators/rangealias-contracts.json"
         ]
       },
-      "options_without_receipts": [
-        "AverageTrueRangeSpecOptions"
-      ]
+      "options_without_receipts": []
     },
     {
       "indicator": "AverageTrueRangeChannel",
@@ -595,13 +596,15 @@
       ],
       "status": "contract-receipts-recorded-performance-pending",
       "contract_receipts": {
+        "ChandeMomentumOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/rangealias-contracts.json"
+        ],
         "CmoSpecOptions": [
           "benchmarks/results/remaining-indicators/oscillator-contracts.json"
         ]
       },
       "options_without_receipts": [
-        "ChandeMomentumOscillatorSignalSpecOptions",
-        "ChandeMomentumOscillatorSpecOptions"
+        "ChandeMomentumOscillatorSignalSpecOptions"
       ]
     },
     {
@@ -997,13 +1000,14 @@
       ],
       "status": "contract-receipts-recorded-performance-pending",
       "contract_receipts": {
+        "DetrendedPriceOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/rangealias-contracts.json"
+        ],
         "DpoSpecOptions": [
           "benchmarks/results/remaining-indicators/aroondpo-contracts.json"
         ]
       },
-      "options_without_receipts": [
-        "DetrendedPriceOscillatorSpecOptions"
-      ]
+      "options_without_receipts": []
     },
     {
       "indicator": "DetrendedSyntheticPrice",
@@ -4534,13 +4538,14 @@
       ],
       "status": "contract-receipts-recorded-performance-pending",
       "contract_receipts": {
+        "RateOfChangeSpecOptions": [
+          "benchmarks/results/remaining-indicators/rangealias-contracts.json"
+        ],
         "RocSpecOptions": [
           "benchmarks/results/remaining-indicators/ratio-contracts.json"
         ]
       },
-      "options_without_receipts": [
-        "RateOfChangeSpecOptions"
-      ]
+      "options_without_receipts": []
     },
     {
       "indicator": "RateOfChangeBands",
@@ -8355,6 +8360,7 @@
     "benchmarks/results/remaining-indicators/oscillatoralias-contracts.json": "cf98dfcaf7b380585620d7c4debd7789055f96b87f6915b5ad5348bd7fd8f1db",
     "benchmarks/results/remaining-indicators/pressureflow-contracts.json": "a783a470713879bd3386d7ac46bd9f993589bcbb925ac72a0ff9ca5dc351aee6",
     "benchmarks/results/remaining-indicators/price-contracts.json": "d00758a41b725b80c3d2510805eb59de15f021c4d4f84405ab85905df6a62b13",
+    "benchmarks/results/remaining-indicators/rangealias-contracts.json": "a7cb36562004917f5d80acdc87317428593b534e354b55e84e84543837210bb2",
     "benchmarks/results/remaining-indicators/rangehealth-contracts.json": "4471e9a1fdde6b0b166b7c6b307a35b5a5a48c4984f6a53dc37de6fe1a7f9c31",
     "benchmarks/results/remaining-indicators/ratio-contracts.json": "3fa30f61f1befe6d233fccacab9ef8628629da2f0cd693346e6336da64f301ea",
     "benchmarks/results/remaining-indicators/recursiveextra-contracts.json": "bd4b8d492d0d1a6ae0da8bd91a374c5bc3abbb20046825db268a915510ae7c60",
@@ -8565,7 +8571,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "9cf1df67dcf2fa91fa2949623a848936540dc40e85052456cc2379fa1e45317e",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2b59c96b1d265d2ba1f74cc263e6b57c80840f76712461cd645a5c5a63b03a80",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

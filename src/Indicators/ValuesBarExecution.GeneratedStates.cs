@@ -18,7 +18,8 @@ internal static partial class ValuesBarExecution
             or ZeroLowLagMovingAverage or ZeroLagTripleExponentialMovingAverage or SlowSmoothedMovingAverage { Length: > int.MinValue }
             or AbsolutePriceOscillator or PriceOscillator or PriceOscillatorPercent or PercentagePriceOscillator
             or McNichollMovingAverage or WellRoundedMovingAverage or WellesWilderSummation or WildersSummationMethod
-            or OnBalanceVolume or NegativeVolumeIndex or PositiveVolumeIndex or PriceVolumeTrend;
+            or OnBalanceVolume or NegativeVolumeIndex or PositiveVolumeIndex or PriceVolumeTrend
+            or AverageTrueRange or ChandeMomentumOscillator or RateOfChange or DetrendedPriceOscillator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -41,6 +42,10 @@ internal static partial class ValuesBarExecution
         Hma average => new HullValueState(average.Length),
         Rsi strength => new GeneratedRsiState(strength.Length, count),
         Atr range => new GeneratedAtrState(range.Length, count),
+        AverageTrueRange range => new GeneratedAtrState(range.Length, count),
+        ChandeMomentumOscillator momentum => new GeneratedChandeState(momentum.Length, count, momentum.SignalLength),
+        RateOfChange change => new GeneratedRatioState(Math.Max(1, change.Length), count),
+        DetrendedPriceOscillator oscillator => new GeneratedDetrendedState(Math.Max(1, oscillator.Length), count),
         Roc change => new GeneratedRatioState(Math.Max(1, change.Length), count),
         Momentum momentum => new GeneratedMomentumState(Math.Max(1, momentum.Length), count),
         Cci commodity => new GeneratedCommodityState(commodity.Length, count),
@@ -560,10 +565,10 @@ internal static partial class ValuesBarExecution
         }
     }
 
-    private sealed class GeneratedChandeState(int period, int count) : IMultiOutputState, IDisposable
+    private sealed class GeneratedChandeState(int period, int count, int signalLength = 3) : IMultiOutputState, IDisposable
     {
         private readonly ChandeMomentumWindow _window = new(Math.Min(Math.Max(1, period), Math.Max(1, count)));
-        private readonly Streaming.EmaState _signal = new(3);
+        private readonly Streaming.EmaState _signal = new(signalLength);
         public void Reset() { _window.Reset(); _signal.Reset(); }
         public void Update(in Bar bar, Span<double> outputs)
         {
