@@ -4085,3 +4085,6 @@ Integrated hosted run 38935309364 passed on bd99fef5. The subsequent merge of th
 
 
 Weighted Close qualification now records its existing shared pointwise kernel and mixed-batch dispatch. The kernel preserves PriceMean.Of(high, low, close, close); TickerData uses doubles, so the legacy casts do not add decimal rounding. No production code changed, and the verified 16c9662f production binary was reused. Validation: 53 focused unit cases, 4 fixture parity cases, 92 discovery cases, 100 fresh local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
+
+
+Absolute Strength Index and Absolute Strength MTF now use shared execution. The Index retains fixed 21/34 smoothing and the typed positive-close domain, including raw finite-input priority and domain validation before any root calculations. MTF shares the default SMA Bulls/Bears computation with input-bounded storage. Validation: 190 focused unit cases (including existing commodity-pair regressions and mixed-root error priority), 8 fixture parity cases, 93 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.

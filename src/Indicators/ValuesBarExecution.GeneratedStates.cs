@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AbsoluteStrengthIndex or AbsoluteStrengthMTFIndicator
             or Vpci or VolumeWeightedRsi or VortexBands
             or WoodieCommodityChannelIndex
             or EhlersCommodityChannelIndexInverseFisherTransform { Constant: > 0d and < double.PositiveInfinity }
@@ -218,6 +219,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        AbsoluteStrengthIndex strength => new GeneratedAbsoluteStrengthState(strength.Length),
+        AbsoluteStrengthMTFIndicator strength => new GeneratedAbsoluteStrengthMtfState(strength.Length, strength.SmoothLength, count),
         Vpci vpci => new GeneratedVpciState(vpci.Length),
         VolumeWeightedRsi rsi => new GeneratedVolumeWeightedRsiState(rsi.Length),
         VortexBands bands => new GeneratedVortexBandsState(bands.Length),
@@ -888,6 +891,38 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private static void ValidateAbsoluteStrengthInput(Bar[] source, CancellationToken cancellation)
+    {
+        Bar? firstNonpositive = null;
+        foreach (var bar in source)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            // The typed builder validates every raw bar before any indicator domain.
+            if (!AllFieldsFinite(in bar)) Validation.IndicatorInputDomain.Finite.Validate(in bar);
+            if (bar.Close <= 0 && firstNonpositive is null) firstNonpositive = bar;
+        }
+        if (firstNonpositive is Bar invalid) Validation.IndicatorInputDomain.PositiveClose.Validate(in invalid);
+    }
+
+    private sealed class GeneratedAbsoluteStrengthState(int length) : IIndicatorState
+    {
+        private readonly AbsoluteStrengthWindow _window = new(length, 21, 34);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedAbsoluteStrengthMtfState(int length, int smooth, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly AbsoluteStrengthMtfWindow _window = new(MovingAvgType.SimpleMovingAverage, length, smooth, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Bulls; outputs[1] = point.Bears;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedVpciState(int length) : IMultiOutputState, IDisposable
