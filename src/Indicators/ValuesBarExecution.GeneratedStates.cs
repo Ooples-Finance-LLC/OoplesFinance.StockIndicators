@@ -8,7 +8,8 @@ internal static partial class ValuesBarExecution
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
-            or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv;
+            or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
+            or Nvi or Pvi or Vroc or Pvt;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -45,6 +46,10 @@ internal static partial class ValuesBarExecution
         Mfi flow => new GeneratedMoneyFlowState(flow.Length, count),
         ForceIndex force => new GeneratedForceState(force.Length),
         Obv volume => new GeneratedObvState(volume.Length),
+        Nvi volume => new GeneratedVolumeIndexState(volume.Length, positive: false),
+        Pvi volume => new GeneratedVolumeIndexState(volume.Length, positive: true),
+        Vroc volume => new GeneratedVolumeRatioState(Math.Max(1, volume.Length), count),
+        Pvt volume => new GeneratedVolumeTrendState(volume.Length),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -104,6 +109,39 @@ internal static partial class ValuesBarExecution
         private readonly ChaikinFlowWindow _window = new(period);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVolumeIndexState(int period, bool positive) : IMultiOutputState, IDisposable
+    {
+        private readonly VolumeIndexWindow _window = new(MovingAvgType.ExponentialMovingAverage, period, positive, 1000);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> output)
+        {
+            var value = _window.Next(bar.Close, bar.Volume, true);
+            output[0] = value.Line;
+            output[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVolumeRatioState(int period, int count) : IIndicatorState
+    {
+        private readonly GeneratedRatioState _ratio = new(period, count);
+        public void Reset() => _ratio.Reset();
+        public double Update(in Bar bar) => _ratio.Update(new Bar(default, 0, 0, 0, bar.Volume, 0));
+    }
+
+    private sealed class GeneratedVolumeTrendState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly PriceVolumeTrendWindow _window = new(MovingAvgType.ExponentialMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> output)
+        {
+            var value = _window.Next(bar.Close, bar.Volume, true);
+            output[0] = value.Line;
+            output[1] = value.Signal;
+        }
         public void Dispose() => _window.Dispose();
     }
 
