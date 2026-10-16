@@ -8,7 +8,7 @@ internal static partial class ValuesBarExecution
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
-            or Cci or Cmo or Trix;
+            or Cci or Cmo or Trix or Apo or Ppo or Macd;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -36,6 +36,9 @@ internal static partial class ValuesBarExecution
         Cci commodity => new GeneratedCommodityState(commodity.Length, count),
         Cmo momentum => new GeneratedChandeState(momentum.Length, count),
         Trix trix => new GeneratedTrixState(trix.Length),
+        Apo oscillator => new GeneratedEmaGapState(oscillator.FastLength, oscillator.SlowLength),
+        Ppo oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, percentage: true),
+        Macd oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -70,6 +73,36 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close), true);
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEmaGapState(int fastPeriod, int slowPeriod, bool percentage = false) : IIndicatorState
+    {
+        private readonly Streaming.EmaState _fast = new(fastPeriod);
+        private readonly Streaming.EmaState _slow = new(slowPeriod);
+        public void Reset() { _fast.Reset(); _slow.Reset(); }
+        public double Update(in Bar bar)
+        {
+            double fast = _fast.GetNext(bar.Close, commit: true);
+            double slow = _slow.GetNext(bar.Close, commit: true);
+            return percentage ? RoundedPercentageChange.Of(fast, slow) : fast - slow;
+        }
+    }
+
+    private sealed class GeneratedEmaGapSignalState(int fastPeriod, int slowPeriod, int signalPeriod, bool percentage = false) : IMultiOutputState
+    {
+        private readonly GeneratedEmaGapState _line = new(fastPeriod, slowPeriod, percentage);
+        private readonly Streaming.EmaState _signal = new(signalPeriod);
+        private bool _invalidSignal;
+        public void Reset() { _line.Reset(); _signal.Reset(); _invalidSignal = false; }
+        public void Update(in Bar bar, Span<double> output)
+        {
+            double value = _line.Update(bar);
+            _invalidSignal |= double.IsInfinity(value);
+            double signal = _invalidSignal ? double.NaN : _signal.GetNext(value, commit: true);
+            output[0] = value;
+            output[1] = signal;
+            output[2] = value - signal;
+        }
     }
 
     private sealed class GeneratedChandeState(int period, int count) : IMultiOutputState, IDisposable
