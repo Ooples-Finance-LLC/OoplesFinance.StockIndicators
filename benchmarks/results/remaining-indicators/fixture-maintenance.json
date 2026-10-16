@@ -1,0 +1,12 @@
+{
+  "scope": "Sonar duplication gate and captured fixture/interface/inventory findings; arithmetic unchanged",
+  "status": "local-verification-passed-hosted-quality-gate-pending",
+  "fixture_cases_passed": 161,
+  "discovery_cases_passed": 12,
+  "intended_timing_cases": 280,
+  "unit_cases_passed": 201,
+  "gpu_cases_passed": 100,
+  "fixture_trx_sha256": "c72f68b8310a09e8484c2d22423068aa40ef9aa7cc8c7e8952b2d90d3360e57c",
+  "unit_trx_sha256": "d6b7613de560cb76c9b4882242609a420fb773b5aabf0b1155f1d24c12276533",
+  "changes": "Extract identical benchmark lifecycle, retain operation/period/data/method contracts, verify all outputs, use configured-state exceptions, align state parameter names, extract inventory receipt reader. Unmeasured timing candidates will be refreshed; historical snapshots retained."
+}
