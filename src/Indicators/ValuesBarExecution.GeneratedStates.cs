@@ -57,6 +57,7 @@ internal static partial class ValuesBarExecution
             or AtrFilteredEma or AtrFilteredExponentialMovingAverage { Min: > double.NegativeInfinity and < double.PositiveInfinity }
             or AhrensMovingAverage or AlphaDecreasingEma
             or AdaptiveEma or AdaptiveExponentialMovingAverage
+            or AdaptivePriceZoneIndicator { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
             or AutonomousRecursiveMa
             or AdaptiveAutonomousRecursiveMovingAverage { Lambda: > double.NegativeInfinity and < double.PositiveInfinity }
             or AdaptiveAutonomousRecursiveTrailingStop { Lambda: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -188,6 +189,7 @@ internal static partial class ValuesBarExecution
         AlphaDecreasingEma => new GeneratedAlphaDecreasingState(),
         AdaptiveEma average => new GeneratedAdaptiveEmaState(average.Length, count),
         AdaptiveExponentialMovingAverage average => new GeneratedAdaptiveEmaState(average.Length, count),
+        AdaptivePriceZoneIndicator zone => new GeneratedAdaptiveZoneState(zone.Length, zone.Pct, count),
         AutonomousRecursiveMa average => new GeneratedAutonomousState(average.Length),
         AdaptiveAutonomousRecursiveMovingAverage average => new GeneratedAdaptiveAutonomousState(average.Length, average.Lambda),
         AdaptiveAutonomousRecursiveTrailingStop stop => new GeneratedAdaptiveAutonomousStopState(stop.Length, stop.Lambda),
@@ -667,6 +669,20 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedAdaptiveZoneState(int period, double pct, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveZoneWindow _window = new(MovingAvgType.ExponentialMovingAverage, period, pct, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.High, bar.Low, true);
+            outputs[0] = point.Upper;
+            outputs[1] = point.Middle;
+            outputs[2] = point.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveEmaState(int period, int count) : IIndicatorState, IDisposable

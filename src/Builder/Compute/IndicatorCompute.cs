@@ -17361,19 +17361,20 @@ internal static partial class IndicatorCompute
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
         var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count; var period = AdaptiveZoneWindow.Period(length);
-        using var center = context.Rent(count); using var width = context.Rent(count);
         var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using ComputeBuffer? center = external ? context.Rent(count) : null;
+        using ComputeBuffer? width = external ? context.Rent(count) : null;
         if (external)
         {
             using var first = context.Rent(count); using var range = context.Rent(count); using var rangeFirst = context.Rent(count);
-            MovingAverage(data, maType, period, SpanCompat.AsReadOnlySpan(input), first.WritableSpan); MovingAverage(data, maType, period, first.Span, center.WritableSpan);
+            MovingAverage(data, maType, period, SpanCompat.AsReadOnlySpan(input), first.WritableSpan); MovingAverage(data, maType, period, first.Span, center!.Value.WritableSpan);
             for (var i = 0; i < count; i++) range.WritableSpan[i] = high[i] - low[i];
-            MovingAverage(data, maType, period, range.Span, rangeFirst.WritableSpan); MovingAverage(data, maType, period, rangeFirst.Span, width.WritableSpan);
+            MovingAverage(data, maType, period, range.Span, rangeFirst.WritableSpan); MovingAverage(data, maType, period, rangeFirst.Span, width!.Value.WritableSpan);
         }
         var result = context.Rent(count); using var window = new AdaptiveZoneWindow(maType, length, pct, Math.Max(1, count));
         for (var i = 0; i < count; i++)
         {
-            var point = external ? AdaptiveZoneWindow.Bands(new RocBankValue(center.Span[i]), new RocBankValue(width.Span[i]), pct) : window.Next(input[i], high[i], low[i], true);
+            var point = external ? AdaptiveZoneWindow.Bands(new RocBankValue(center!.Value.Span[i]), new RocBankValue(width!.Value.Span[i]), pct) : window.Next(input[i], high[i], low[i], true);
             result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle;
         }
         return result;
