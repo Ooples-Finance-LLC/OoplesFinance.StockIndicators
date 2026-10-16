@@ -16,7 +16,8 @@ internal static partial class ValuesBarExecution
             or ErgodicTrueStrengthIndexV1 or SMIErgodicIndicator
             or HullMovingAverage or TriangularMovingAverage or EhlersZeroLagEma or EhlersZeroLagExponentialMovingAverage
             or ZeroLowLagMovingAverage or ZeroLagTripleExponentialMovingAverage or SlowSmoothedMovingAverage { Length: > int.MinValue }
-            or AbsolutePriceOscillator or PriceOscillator or PriceOscillatorPercent or PercentagePriceOscillator;
+            or AbsolutePriceOscillator or PriceOscillator or PriceOscillatorPercent or PercentagePriceOscillator
+            or McNichollMovingAverage or WellRoundedMovingAverage or WellesWilderSummation or WildersSummationMethod;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -79,6 +80,10 @@ internal static partial class ValuesBarExecution
         ZeroLowLagMovingAverage average => new GeneratedZeroLowLagState(average.Length),
         ZeroLagTripleExponentialMovingAverage average => new GeneratedZeroLagTripleState(average.Length),
         SlowSmoothedMovingAverage average => new GeneratedSlowSmoothedState(average.Length, count),
+        McNichollMovingAverage average => new GeneratedMcNichollState(average.Length),
+        WellRoundedMovingAverage average => new GeneratedWellRoundedState(average.Length),
+        WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
+        WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
         HullMovingAverage average => new HullValueState(average.Length),
         TriangularMovingAverage average => new GeneratedTriangularState(average.Length),
         EhlersZeroLagEma average => new GeneratedEhlersZeroLagState(average.Length),
@@ -209,6 +214,28 @@ internal static partial class ValuesBarExecution
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedMcNichollState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly McNichollWindow _window = new(MovingAvgType.ExponentialMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedWellRoundedState(int period) : IIndicatorState
+    {
+        private readonly WellRoundedWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedWilderSumState(int period) : IIndicatorState
+    {
+        private readonly WilderSummationWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
 
     private sealed class GeneratedZeroLowLagState(int period) : IIndicatorState, IDisposable
