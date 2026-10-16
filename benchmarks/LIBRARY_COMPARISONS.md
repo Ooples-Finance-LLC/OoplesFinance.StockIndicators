@@ -4047,3 +4047,6 @@ Vertical Horizontal Filter now shares its unchanged exact range/path kernel and 
 
 
 Vertical Horizontal Moving Average now uses shared execution with its unchanged exact kernel and history capacity bounded by observed input. Original-close input, staged rounding, startup and source fallback remain intact. Validation: 44 focused unit cases, 4 fixture parity cases, 81 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.
+
+
+Smoothed Williams R and Enhanced Williams R now use shared execution with their unchanged exact kernels. Smoothed Williams preserves original high/low/close input; Enhanced Williams preserves close/volume input and computes its line and signal together with the default simple average. Both period parameters and source/custom-component fallback remain intact. Validation: 184 focused unit cases, 8 fixture parity cases, 82 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
