@@ -30,7 +30,8 @@ internal static partial class ValuesBarExecution
             or LightLeastSquaresMovingAverage or LinearExtrapolation or RecursiveMovingTrendAverage
             or EhlersIirFilter or EhlersInfiniteImpulseResponseFilter or EhlersFirFilter or EhlersFiniteImpulseResponseFilter or EhlersOptimumEllipticFilter or EhlersModifiedOptimumEllipticFilter
             or Spencer15PointMovingAverage or Spencer21PointMovingAverage or DampedSineWaveWeightedFilter or HendersonWeightedMovingAverage or RightSidedRickerMovingAverage
-            or FibonacciWeightedMovingAverage or SquareRootWeightedMovingAverage or SineWma;
+            or FibonacciWeightedMovingAverage or SquareRootWeightedMovingAverage or SineWma
+            or TillsonIE2 or IIRLeastSquaresEstimate or HullEstimate;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -140,6 +141,9 @@ internal static partial class ValuesBarExecution
         FibonacciWeightedMovingAverage average => new GeneratedFibonacciMeanState(average.Length, count),
         SquareRootWeightedMovingAverage average => new GeneratedSquareRootMeanState(average.Length, count),
         SineWma average => new GeneratedSineMeanState(average.Length, count),
+        TillsonIE2 average => new GeneratedTillsonIe2State(average.Length, count),
+        IIRLeastSquaresEstimate average => new GeneratedIirLeastSquaresState(average.Length),
+        HullEstimate average => new GeneratedHullEstimateState(average.Length, count),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -521,6 +525,29 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window?.Reset();
         public double Update(in Bar bar) => _window!.Next(bar.Close, true);
         public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedTillsonIe2State(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly TillsonIe2Window _window = new(MovingAvgType.SimpleMovingAverage, period, capacityHint: count, compactFit: true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedIirLeastSquaresState(int period) : IIndicatorState
+    {
+        private readonly IirLeastSquaresWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedHullEstimateState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly HullEstimateWindow _window = new(period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedQuickState(int period, int count) : IIndicatorState, IDisposable
