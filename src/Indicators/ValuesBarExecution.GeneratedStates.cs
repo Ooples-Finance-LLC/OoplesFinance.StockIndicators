@@ -55,6 +55,7 @@ internal static partial class ValuesBarExecution
             or SimplifiedLeastSquaresMovingAverage or FisherLeastSquaresMovingAverage or TStepLeastSquaresMovingAverage
             or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage or AdaptiveLeastSquares
             or AtrFilteredEma or AtrFilteredExponentialMovingAverage { Min: > double.NegativeInfinity and < double.PositiveInfinity }
+            or AhrensMovingAverage or AlphaDecreasingEma
             or R2AdaptiveRegression or KaufmanAdaptiveLeastSquaresMovingAverage or RegressionOscillator or KaufmanAdaptiveCorrelationOscillator
             or OneLCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
             or _1LCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
@@ -179,6 +180,8 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
         AtrFilteredEma average => new GeneratedAtrFilteredState(average.Length, 20, 10, 20, 5),
+        AhrensMovingAverage average => new GeneratedAhrensState(average.Length),
+        AlphaDecreasingEma => new GeneratedAlphaDecreasingState(),
         AtrFilteredExponentialMovingAverage average => new GeneratedAtrFilteredState(average.Length, average.AtrLength, average.StdDevLength, average.LbLength, average.Min),
         R2AdaptiveRegression average => new GeneratedR2FitState(average.Length),
         KaufmanAdaptiveLeastSquaresMovingAverage average => new GeneratedKaufmanFitState(average.Length),
@@ -653,6 +656,21 @@ internal static partial class ValuesBarExecution
     private sealed class GeneratedThreePoleState(int period, int variant) : IIndicatorState
     {
         private readonly ThreePoleWindow _window = new(period, variant);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedAhrensState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly AhrensWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAlphaDecreasingState : IIndicatorState
+    {
+        private readonly AlphaDecreasingWindow _window = new();
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
