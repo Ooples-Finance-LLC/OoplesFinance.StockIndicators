@@ -9,7 +9,8 @@ internal static partial class ValuesBarExecution
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
-            or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown;
+            or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown
+            or Demarker or DeMarker or UlcerIndex or ChoppinessIndex;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -57,6 +58,10 @@ internal static partial class ValuesBarExecution
         Vwap => new GeneratedVwapState(),
         AroonUp up => new GeneratedAroonLegState(Math.Max(1, up.Length), maximum: true),
         AroonDown down => new GeneratedAroonLegState(Math.Max(1, down.Length), maximum: false),
+        Demarker marker => new GeneratedDemarkerState(marker.Length, count),
+        DeMarker marker => new GeneratedDemarkerState(marker.Length, count),
+        UlcerIndex drawdown => new GeneratedDrawdownState(drawdown.Length, count),
+        ChoppinessIndex choppiness => new GeneratedChoppinessState(choppiness.Length),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -151,6 +156,30 @@ internal static partial class ValuesBarExecution
         private readonly EaseWindow _window = new(1000000);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Volume, true).Publish();
+    }
+
+    private sealed class GeneratedDemarkerState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly DemarkerWindow _window = new(MovingAvgType.SimpleMovingAverage, period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDrawdownState(int period, int count) : IIndicatorState, IDisposable
+    {
+        // No window can evict an observation beyond this owned finite input.
+        private readonly DrawdownWindow _window = new(Math.Min(Math.Max(1, period), Math.Max(1, count)));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChoppinessState(int period) : IIndicatorState
+    {
+        private readonly ChoppinessWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
     }
 
     private sealed class GeneratedVwapState : IIndicatorState

@@ -1,0 +1,41 @@
+{
+  "batch": "generated-demarker-drawdown-choppiness",
+  "types": [
+    "Demarker",
+    "DeMarker",
+    "UlcerIndex",
+    "ChoppinessIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse DemarkerWindow for both aliases and ChoppinessWindow. Bound DrawdownWindow storage by owned bar count while retaining available-history arithmetic and public warmup; explicit int.MaxValue tests use equivalent full-prefix references without allocating an enormous legacy window.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 49,
+    "fixture_passed": 16,
+    "gpu_passed": 100,
+    "contract_methods": 1345,
+    "hosted_methods": 1333,
+    "unit_trx_sha256": "0e3d4368392185779d9d2365b62bd4775df05374342ef69845734ef568cf7b8c",
+    "fixture_trx_sha256": "fc7b99c97cb4e14e36841060a4fbdf2ed77e0b7d484e8f1005a29890b8fe813b",
+    "discovery_passed": 14,
+    "selected_comparator_passed": 30
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRangeHealthBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
