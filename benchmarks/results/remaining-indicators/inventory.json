@@ -5425,7 +5425,13 @@
       "options": [
         "PseudoPolynomialChannelSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PseudoPolynomialChannelSpecOptions": [
+          "benchmarks/results/remaining-indicators/unipseudo-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PsychologicalLine",
@@ -7125,7 +7131,13 @@
       "options": [
         "UniChannelSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "UniChannelSpecOptions": [
+          "benchmarks/results/remaining-indicators/unipseudo-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "UpsideDownsideVolume",
@@ -9996,6 +10008,7 @@
     "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
     "benchmarks/results/remaining-indicators/ultimatemomentum-contracts.json": "6d4a96b05a9467482b5743abde8458d8ab5aada891c773f658707af86f6d2449",
     "benchmarks/results/remaining-indicators/ultimatepair-contracts.json": "977d7050d3468e8b1ad385eefd7549034101ffde0f3dab35c6c7abdc5e98d9dd",
+    "benchmarks/results/remaining-indicators/unipseudo-contracts.json": "7c0c6b68779308899d7a3d2102e38137ad9f432072bbbc9027dd9066c4bd087d",
     "benchmarks/results/remaining-indicators/valuechart-contracts.json": "34625de22bf366efd139df16e3d52aec214baa8651e14ef205842f8b233eff2d",
     "benchmarks/results/remaining-indicators/variablelength-contracts.json": "fed51af6af609d4f6d0c294f545183638cd88fbc6820e4296cdc11bb31ff0acc",
     "benchmarks/results/remaining-indicators/verticalaverage-contracts.json": "b04dffeef1c3f9dc0f94e7d1acc82271334f72bd90779cff57b80a5e7fe8078d",
@@ -10223,7 +10236,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "56bfac4505fa16b6b3806c044d760fa417b6333660c877bfb94b1ec178e96a68",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "bc93c54c5c57a36e82e463f6c8d90780b9f13cf4cb25273f320ad8646e516260",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
