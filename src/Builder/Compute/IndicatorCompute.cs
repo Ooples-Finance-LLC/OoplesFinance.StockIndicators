@@ -14851,11 +14851,11 @@ internal static partial class IndicatorCompute
         int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
-        using var seed = context.Rent(input.Count);
         var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), seed.WritableSpan);
+        using ComputeBuffer? seed = external ? context.Rent(input.Count) : null;
+        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), seed!.Value.WritableSpan);
         var result = context.Rent(input.Count); using var window = new AdaptiveEmaWindow(maType, length, Math.Max(1, input.Count));
-        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], high[i], low[i], true, external ? seed.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], high[i], low[i], true, external ? seed!.Value.Span[i] : null);
         return result;
     }
 

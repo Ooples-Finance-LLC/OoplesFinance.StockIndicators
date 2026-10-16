@@ -56,6 +56,7 @@ internal static partial class ValuesBarExecution
             or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage or AdaptiveLeastSquares
             or AtrFilteredEma or AtrFilteredExponentialMovingAverage { Min: > double.NegativeInfinity and < double.PositiveInfinity }
             or AhrensMovingAverage or AlphaDecreasingEma
+            or AdaptiveEma or AdaptiveExponentialMovingAverage
             or AutonomousRecursiveMa
             or AdaptiveAutonomousRecursiveMovingAverage { Lambda: > double.NegativeInfinity and < double.PositiveInfinity }
             or AdaptiveAutonomousRecursiveTrailingStop { Lambda: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -185,6 +186,8 @@ internal static partial class ValuesBarExecution
         AtrFilteredEma average => new GeneratedAtrFilteredState(average.Length, 20, 10, 20, 5),
         AhrensMovingAverage average => new GeneratedAhrensState(average.Length),
         AlphaDecreasingEma => new GeneratedAlphaDecreasingState(),
+        AdaptiveEma average => new GeneratedAdaptiveEmaState(average.Length, count),
+        AdaptiveExponentialMovingAverage average => new GeneratedAdaptiveEmaState(average.Length, count),
         AutonomousRecursiveMa average => new GeneratedAutonomousState(average.Length),
         AdaptiveAutonomousRecursiveMovingAverage average => new GeneratedAdaptiveAutonomousState(average.Length, average.Lambda),
         AdaptiveAutonomousRecursiveTrailingStop stop => new GeneratedAdaptiveAutonomousStopState(stop.Length, stop.Lambda),
@@ -664,6 +667,14 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedAdaptiveEmaState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly AdaptiveEmaWindow _window = new(MovingAvgType.SimpleMovingAverage, period, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAutonomousState(int period) : IIndicatorState, IDisposable
