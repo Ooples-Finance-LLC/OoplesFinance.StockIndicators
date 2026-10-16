@@ -8,7 +8,7 @@ internal static partial class ValuesBarExecution
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
-            or Cci or Cmo or Trix or Apo or Ppo or Macd;
+            or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -39,6 +39,8 @@ internal static partial class ValuesBarExecution
         Apo oscillator => new GeneratedEmaGapState(oscillator.FastLength, oscillator.SlowLength),
         Ppo oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, percentage: true),
         Macd oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
+        Aroon oscillator => new GeneratedAroonState(Math.Max(1, oscillator.Length)),
+        Dpo oscillator => new GeneratedDetrendedState(Math.Max(1, oscillator.Length), count),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -73,6 +75,48 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close), true);
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAroonState(int period) : IMultiOutputState
+    {
+        private readonly WindowExtremeDeque _high = new(Math.Max(2, period), true);
+        private readonly WindowExtremeDeque _low = new(Math.Max(2, period), false);
+        private long _index;
+        public void Reset() { _high.Reset(); _low.Reset(); _index = 0; }
+        public void Update(in Bar bar, Span<double> output)
+        {
+            _high.Add(bar.Close); _low.Add(bar.Close);
+            double up = (double)(period - (_index - _high.Index)) / period * 100;
+            double down = (double)(period - (_index - _low.Index)) / period * 100;
+            _index++;
+            output[0] = up - down;
+            output[1] = up;
+            output[2] = down;
+        }
+    }
+
+    private sealed class GeneratedDetrendedState : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother _mean;
+        private readonly double[] _lag;
+        private readonly int _lookback;
+        private int _position, _seen;
+        internal GeneratedDetrendedState(int period, int count)
+        {
+            _lookback = MathHelper.MinOrMax((int)Math.Ceiling(period / 2.0 + 1));
+            _lag = new double[Math.Min(_lookback, Math.Max(1, count))];
+            _mean = new(period);
+        }
+        public void Reset() { _mean.Reset(); _position = _seen = 0; }
+        public double Update(in Bar bar)
+        {
+            double previous = _seen >= _lookback ? _lag[_position] : 0;
+            _lag[_position] = bar.Close;
+            if (++_position == _lag.Length) _position = 0;
+            if (_seen < _lookback) _seen++;
+            return previous - _mean.Next(bar.Close, true);
+        }
+        public void Dispose() => _mean.Dispose();
     }
 
     private sealed class GeneratedEmaGapState(int fastPeriod, int slowPeriod, bool percentage = false) : IIndicatorState
