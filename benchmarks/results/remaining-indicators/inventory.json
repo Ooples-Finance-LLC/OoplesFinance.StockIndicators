@@ -7226,7 +7226,13 @@
       "options": [
         "ZDistanceFromVwapSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ZDistanceFromVwapSpecOptions": [
+          "benchmarks/results/remaining-indicators/zdistance-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ZScore",
@@ -9363,6 +9369,7 @@
     "benchmarks/results/remaining-indicators/weightedmean-contracts.json": "3dc3497c731600c92319282123d78387546bda19102a90065988c47862365e4a",
     "benchmarks/results/remaining-indicators/wilder-contracts.json": "39fdbf300716803c9083728024d437259ffaea26d2494463630da52d4b3eb458",
     "benchmarks/results/remaining-indicators/williamspair-contracts.json": "a3d3726607809cd76b9dfad2b473b5dc29acd6ceb95c1e7d7187d1e64b2b56e8",
+    "benchmarks/results/remaining-indicators/zdistance-contracts.json": "966a4f3c8d2d269a9b514a52d65a387d33fe519ddcd1b43d9f9bed5e53430012",
     "src/Builder/Compute/BuilderArmTargets.cs": "86f2cd1f1e2c5cd064bd301a72efcd0b536267d09a611dfdca1480c20cb8e419",
     "src/Enums/IndicatorName.cs": "cad2063df998a7723103c8deb4843d0e07b8c5dcfe26fbcc6bf89212dbb569b4",
     "src/Indicators/AccumulationDistributionWithAverage.cs": "7a7ddf3ef6be394d6016e383fccc281e0a791c0b546695a844d9691b98cccfd8",
@@ -9564,7 +9571,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "eaed9177ece2c25b8e8b1021a81cff1235df180f341fdd5712441d9f4a57f45b",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "d63b00189c80f5f689edd80f9f73ae8c8c412980208e3aef4dd91b3af52975e6",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
