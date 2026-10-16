@@ -21,6 +21,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingDirectionalFlowBenchmarks), 24)]
     [InlineData(typeof(RemainingBarFlowBenchmarks), 32)]
     [InlineData(typeof(RemainingRangeHealthBenchmarks), 32)]
+    [InlineData(typeof(RemainingAtrDerivedBenchmarks), 32)]
     public void SharedLifecycleRetainsEveryBenchmarkCase(Type type, int count)
     {
         var cases = BenchmarkConverter.TypeToBenchmarks(type).BenchmarksCases;
