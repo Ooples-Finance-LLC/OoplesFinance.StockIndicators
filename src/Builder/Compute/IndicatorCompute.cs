@@ -10421,14 +10421,17 @@ internal static partial class IndicatorCompute
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
         using var window = new GeneralizedDoubleWindow(maType, length, factor, initializeFallback: !custom);
-        using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
         if (custom)
         {
+            using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
             MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
             MovingAverage(data, maType, length, first.Span, second.WritableSpan);
+            var customResult = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) customResult.WritableSpan[i] = window.Next(input[i], true, first.Span[i], second.Span[i]);
+            return customResult;
         }
         var result = context.Rent(input.Count);
-        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
         return result;
     }
 
