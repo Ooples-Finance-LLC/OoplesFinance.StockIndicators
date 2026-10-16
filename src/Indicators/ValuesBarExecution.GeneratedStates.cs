@@ -9,7 +9,7 @@ internal static partial class ValuesBarExecution
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
-            or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator;
+            or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -53,6 +53,10 @@ internal static partial class ValuesBarExecution
         Adx direction => new GeneratedDirectionalState(direction.Length, count),
         MassIndex mass => new GeneratedMassState(mass.EmaLength, mass.SumLength, count),
         ChaikinOscillator flow => new GeneratedChaikinOscillatorState(flow.FastLength, flow.SlowLength),
+        Emv => new GeneratedEaseState(),
+        Vwap => new GeneratedVwapState(),
+        AroonUp up => new GeneratedAroonLegState(Math.Max(1, up.Length), maximum: true),
+        AroonDown down => new GeneratedAroonLegState(Math.Max(1, down.Length), maximum: false),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -140,6 +144,39 @@ internal static partial class ValuesBarExecution
             outputs[2] = value.Adx;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEaseState : IIndicatorState
+    {
+        private readonly EaseWindow _window = new(1000000);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Volume, true).Publish();
+    }
+
+    private sealed class GeneratedVwapState : IIndicatorState
+    {
+        private ExactVolumeMean _mean;
+        public void Reset() => _mean = default;
+        public double Update(in Bar bar)
+        {
+            _mean.AddTypical(bar.High, bar.Low, bar.Close, bar.Volume);
+            return _mean.Value();
+        }
+    }
+
+    private sealed class GeneratedAroonLegState(int period, bool maximum) : IIndicatorState
+    {
+        // These facades include both endpoints and blank the first period bars.
+        private readonly WindowExtremeDeque _window = new((long)period + 1, maximum);
+        private long _index;
+        public void Reset() { _window.Reset(); _index = 0; }
+        public double Update(in Bar bar)
+        {
+            _window.Add(maximum ? bar.High : bar.Low);
+            double value = _index < period ? 0 : 100.0 * (period - (_index - _window.Index)) / period;
+            _index++;
+            return value;
+        }
     }
 
     private sealed class GeneratedMassState(int averagePeriod, int sumPeriod, int count) : IMultiOutputState, IDisposable
