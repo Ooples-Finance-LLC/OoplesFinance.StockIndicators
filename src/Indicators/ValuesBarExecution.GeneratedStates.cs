@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeFlowIndicator { Coef: > double.NegativeInfinity and < double.PositiveInfinity, Vcoef: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -207,6 +207,7 @@ internal static partial class ValuesBarExecution
         BetterVolumeIndicator volume => new GeneratedBetterVolumeState(volume.Length, volume.LbLength),
         AverageMoneyFlowOscillator flow => new GeneratedAverageMoneyFlowState(flow.Length),
         TradeVolumeIndex volume => new GeneratedTradeVolumeState(volume.Length),
+        TironeLevels levels => new GeneratedTironeState(levels.Length),
         TimeAndMoneyChannel channel => new GeneratedTimeMoneyState(channel.Length1, channel.Length2),
         TraderPressureIndex pressure => new GeneratedTraderPressureState(pressure.Length1, pressure.Length2, pressure.SmoothLength),
         VortexPositive vortex => new GeneratedVortexState(vortex.Length, true),
@@ -805,6 +806,14 @@ internal static partial class ValuesBarExecution
         private readonly AverageMoneyFlowWindow _window = new(MovingAvgType.WeightedMovingAverage, period, 3);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedTironeState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly TironeWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.High, bar.Low, bar.Close, true, outputs);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 

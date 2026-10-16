@@ -4029,3 +4029,6 @@ Volume Accumulation Percent and Twiggs Money Flow now use shared execution with 
 
 
 All six Vortex aliases now use shared execution with the existing exact VortexWindow and original candle fields. Positive/negative output mappings and source fallback remain intact. Validation: 237 focused unit cases, 24 fixture parity cases, 75 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Forty-eight timing cases are prepared; no measured speedup is claimed before quiet-window qualification.
+
+
+Tirone Levels now computes all eight outputs in one shared pass and writes directly to destination storage, avoiding its per-update output array on this path. The existing wrapper, staged rounding and primary mean at slot three remain compatible. Validation: 46 focused unit cases (including a frozen prior-kernel comparison), 4 fixture parity cases, 76 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.
