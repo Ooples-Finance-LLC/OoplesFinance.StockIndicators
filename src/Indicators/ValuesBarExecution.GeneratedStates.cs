@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
-            or Wwma or Smma or ModifiedMa;
+            or Wwma or Smma or ModifiedMa or Dema or Tema;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -23,6 +23,8 @@ internal static partial class ValuesBarExecution
         Wwma average => new WilderValueState(average.Length),
         Smma average => new WilderValueState(average.Length),
         ModifiedMa average => new WilderValueState(average.Length),
+        Dema average => new ExtrapolatedEmaValueState(average.Length, triple: false),
+        Tema average => new ExtrapolatedEmaValueState(average.Length, triple: true),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -39,6 +41,21 @@ internal static partial class ValuesBarExecution
         private readonly Streaming.WilderState _state = new(period);
         public void Reset() => _state.Reset();
         public double Update(in Bar bar) => _state.GetNext(bar.Close, commit: true);
+    }
+
+    private sealed class ExtrapolatedEmaValueState(int period, bool triple) : IIndicatorState
+    {
+        private readonly Streaming.EmaState _first = new(period);
+        private readonly Streaming.EmaState _second = new(period);
+        private readonly Streaming.EmaState? _third = triple ? new(period) : null;
+        public void Reset() { _first.Reset(); _second.Reset(); _third?.Reset(); }
+        public double Update(in Bar bar)
+        {
+            double first = _first.GetNext(bar.Close, commit: true);
+            double second = _second.GetNext(first, commit: true);
+            return _third is null ? ExponentialExtrapolation.Double(first, second)
+                : ExponentialExtrapolation.Triple(first, second, _third.GetNext(second, commit: true));
+        }
     }
 
     private sealed class AdlValueState(int period, int count) : IMultiOutputState, IDisposable
