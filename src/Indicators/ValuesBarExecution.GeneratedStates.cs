@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or DonchianChannel or DonchianChannelUpper or DonchianChannelLower
             or DonchianChannelWidth
             or ChandeQuickStick or DeltaMovingAverage
             or CumulativeSum or CumulativeVolumeIndex
@@ -248,6 +249,9 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        DonchianChannel channel => new GeneratedDonchianMiddleState(Math.Max(1, channel.Length), count),
+        DonchianChannelUpper channel => new PriceExtremeState(Math.Max(1, channel.Length), count, true),
+        DonchianChannelLower channel => new PriceExtremeState(Math.Max(1, channel.Length), count, false),
         DonchianChannelWidth width => new GeneratedDonchianWidthState(width.Length, count),
         ChandeQuickStick quick => new GeneratedQuickStickState(quick.Length),
         DeltaMovingAverage delta => new GeneratedDeltaAverageState(delta.Length1, delta.Length2),
@@ -949,6 +953,13 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedDonchianMiddleState(int length, int count) : IIndicatorState
+    {
+        private readonly PriceExtremeState _high = new(length, count, true), _low = new(length, count, false);
+        public void Reset() { _high.Reset(); _low.Reset(); }
+        public double Update(in Bar bar) => PriceMean.Of(_high.Update(bar), _low.Update(bar));
     }
 
     private sealed class GeneratedDonchianWidthState(int length, int count) : IMultiOutputState, IDisposable

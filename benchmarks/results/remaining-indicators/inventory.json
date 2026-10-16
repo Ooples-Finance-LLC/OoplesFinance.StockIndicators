@@ -1370,7 +1370,19 @@
         "DonchianChannelSpecOptions",
         "DonchianChannelUpperSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DonchianChannelLowerSpecOptions": [
+          "benchmarks/results/remaining-indicators/donchianchannels-contracts.json"
+        ],
+        "DonchianChannelSpecOptions": [
+          "benchmarks/results/remaining-indicators/donchianchannels-contracts.json"
+        ],
+        "DonchianChannelUpperSpecOptions": [
+          "benchmarks/results/remaining-indicators/donchianchannels-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DoubleExponentialMovingAverage",
@@ -9599,6 +9611,7 @@
     "benchmarks/results/remaining-indicators/decycleroscillator-contracts.json": "26f5178acd05330c16834d0f9d862898d354063d5460193437d361edf77d59f6",
     "benchmarks/results/remaining-indicators/demarkcounts-contracts.json": "59391242c6a8dd20ef7cf265214cf2dfb000c65a726d9729ced6fca2e9c5b01d",
     "benchmarks/results/remaining-indicators/directionalflow-contracts.json": "7021c51f621c2fc3948293d116c3cf1ae1893ff6a5e60a51ff1ef00d4510e33b",
+    "benchmarks/results/remaining-indicators/donchianchannels-contracts.json": "34f850a982ac453bbbe934ccceacda89d3b6de00e23afeebc77feb681809ffb9",
     "benchmarks/results/remaining-indicators/donchianwidth-contracts.json": "92d60aa879465b53fcaab207904499ae882241bd08c78505cc3fe49fde2a73b2",
     "benchmarks/results/remaining-indicators/doublerecurrence-contracts.json": "28fd27a3f19ae108a385564ccb4d5b5833812382654c70315b8613b605c9c6cd",
     "benchmarks/results/remaining-indicators/ehlersfilter-contracts.json": "eeec1b23fc1c3ce3a7a9c4382da4804f23247f19eb054d90022dcc95efdd854a",
@@ -9873,7 +9886,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "dbab673e99a553071dbc7ac9c543d947bdb43cb8c54eacc4966ab8736a3662c3",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "e4244fc3a818afd7577dcbfd7522e07bc40c17cd489aa912a4c509f1b9a3efeb",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

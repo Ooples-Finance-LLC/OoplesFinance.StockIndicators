@@ -4141,3 +4141,6 @@ Chande Quick Stick and Delta Moving Average now reuse their exact open-close ave
 
 
 Donchian Channel Width now shares its exact width and signal kernel, publishing both outputs together. Clamped periods, fixed 22-bar signal smoothing, original fields, extended arithmetic stages, ownership and both component-average/source fallbacks remain intact. Validation: 55 focused unit cases, 4 parity cases, 109 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
+
+
+Donchian Channel, Upper and Lower now reuse bounded exact extrema; the midpoint uses the existing exact mean helper. Earliest signed-zero ties, shortened startup windows, facade clamps, warmup, ownership and source fallback are preserved, including periods through int.MaxValue. Validation: 43 focused unit cases, 12 parity cases, 110 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
