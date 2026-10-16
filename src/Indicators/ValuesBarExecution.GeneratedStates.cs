@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or DonchianChannelWidth
             or ChandeQuickStick or DeltaMovingAverage
             or CumulativeSum or CumulativeVolumeIndex
             or ConditionalAccumulator
@@ -247,6 +248,7 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        DonchianChannelWidth width => new GeneratedDonchianWidthState(width.Length, count),
         ChandeQuickStick quick => new GeneratedQuickStickState(quick.Length),
         DeltaMovingAverage delta => new GeneratedDeltaAverageState(delta.Length1, delta.Length2),
         CumulativeSum => new GeneratedCumulativeState(false),
@@ -947,6 +949,18 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedDonchianWidthState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly DonchianWidthWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), 22, capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Width; outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedQuickStickState(int length) : IIndicatorState, IDisposable
