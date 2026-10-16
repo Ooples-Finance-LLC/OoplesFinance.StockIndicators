@@ -64,6 +64,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingAdaptiveLaguerreBenchmarks), 16)]
     [InlineData(typeof(RemainingAhrensAlphaBenchmarks), 16)]
     [InlineData(typeof(RemainingAutonomousBenchmarks), 24)]
+    [InlineData(typeof(RemainingAdaptiveEmaBenchmarks), 16)]
     public void SharedLifecycleRetainsEveryBenchmarkCase(Type type, int count)
     {
         var cases = BenchmarkConverter.TypeToBenchmarks(type).BenchmarksCases;
