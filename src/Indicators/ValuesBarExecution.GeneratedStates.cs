@@ -11,7 +11,7 @@ internal static partial class ValuesBarExecution
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
             or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown
             or Demarker or DeMarker or UlcerIndex or ChoppinessIndex or Natr or AtrPercent or AtrChannelWidth or ChaikinVolatility
-            or Variance or CoefficientOfVariation or StandardError;
+            or Variance or CoefficientOfVariation or StandardError or StdDev { Length: > 0 } or HistoricalVolatility;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -67,6 +67,8 @@ internal static partial class ValuesBarExecution
         AtrPercent range => new GeneratedAtrDerivedState(range.Length, count),
         AtrChannelWidth range => new GeneratedAtrDerivedState(range.Length, count, range.Multiplier),
         ChaikinVolatility volatility => new GeneratedChaikinVolatilityState(volatility.Length, count),
+        StdDev deviation => new GeneratedOrderedDeviationState(deviation.Length, count),
+        HistoricalVolatility volatility => new GeneratedHistoricalVolatilityState(Math.Max(1, volatility.Length), count),
         Variance variance => new GeneratedVarianceState(variance.Length, count),
         CoefficientOfVariation variation => new GeneratedCoefficientState(variation.Length, count),
         StandardError error => new GeneratedStandardErrorState(error.Length, count),
@@ -184,6 +186,36 @@ internal static partial class ValuesBarExecution
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedOrderedDeviationState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RollingStandardDeviation? _line = period <= count ? new(period) : null;
+        private readonly Streaming.SimpleMovingAverageSmoother? _signal = period <= count ? new(period) : null;
+        public void Reset() { _line?.Reset(); _signal?.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double value = _line?.Next(bar.Close, true) ?? 0;
+            outputs[0] = value;
+            outputs[1] = _signal?.Next(value, true) ?? 0;
+        }
+        public void Dispose() { _line?.Dispose(); _signal?.Dispose(); }
+    }
+
+    private sealed class GeneratedHistoricalVolatilityState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingStandardDeviation? _deviation = period <= count ? new(period) : null;
+        private double _previous;
+        private int _seen;
+        public void Reset() { _deviation?.Reset(); _previous = 0; _seen = 0; }
+        public double Update(in Bar bar)
+        {
+            double deviation = _deviation?.Next(StableLogRatio.OfSameSign(bar.Close, _previous), true) ?? 0;
+            _previous = bar.Close;
+            if (_seen < period) { _seen++; return 0; }
+            return 100 * deviation * MathHelper.Sqrt(365);
+        }
+        public void Dispose() => _deviation?.Dispose();
     }
 
     // These formulas publish zero until a complete period is available. Avoid
