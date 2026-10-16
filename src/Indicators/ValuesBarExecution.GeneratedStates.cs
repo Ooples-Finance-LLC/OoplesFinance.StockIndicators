@@ -52,7 +52,7 @@ internal static partial class ValuesBarExecution
             or EhlersHannWindowIndicator or EhlersHammingWindowIndicator
             or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator
             or Alma or JsaMovingAverage or SelfWeightedMovingAverage
-            or SimplifiedLeastSquaresMovingAverage
+            or SimplifiedLeastSquaresMovingAverage or FisherLeastSquaresMovingAverage or TStepLeastSquaresMovingAverage
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
@@ -173,6 +173,8 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        FisherLeastSquaresMovingAverage average => new GeneratedFisherLsmaState(average.Length),
+        TStepLeastSquaresMovingAverage average => new GeneratedTStepLsmaState(average.Length),
         SimplifiedLeastSquaresMovingAverage average => new GeneratedSimplifiedLsmaState(average.Length, count),
         Lsma average => new GeneratedLsmaState(average.Length, count),
         LinReg fit => new GeneratedRegressionOutputsState(fit.Length, count),
@@ -636,6 +638,22 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedFisherLsmaState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly FisherLeastSquaresWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Line;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTStepLsmaState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly TStepLeastSquaresWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Line;
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedSimplifiedLsmaState(int period, int count) : IIndicatorState, IDisposable
