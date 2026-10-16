@@ -1120,7 +1120,13 @@
       "options": [
         "DoubleExponentialSmoothingSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DoubleExponentialSmoothingSpecOptions": [
+          "benchmarks/results/remaining-indicators/doublerecurrence-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DoubleSmoothedMomenta",
@@ -2782,7 +2788,16 @@
         "GeneralizedDoubleEmaSpecOptions",
         "GeneralizedDoubleExponentialMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "GeneralizedDoubleEmaSpecOptions": [
+          "benchmarks/results/remaining-indicators/doublerecurrence-contracts.json"
+        ],
+        "GeneralizedDoubleExponentialMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/doublerecurrence-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "GeometricMeanMovingAverage",
@@ -8457,6 +8472,7 @@
     "benchmarks/results/remaining-indicators/chainedma-contracts.json": "0f95ff360a33b19664d7934d6e458cc5bb19c7452d14dcf1887546d07eee82e9",
     "benchmarks/results/remaining-indicators/composed-contracts.json": "c4d8bac264a40537f0cba0270016bb25a1712d58628b5de9d11ba590567979f2",
     "benchmarks/results/remaining-indicators/directionalflow-contracts.json": "7021c51f621c2fc3948293d116c3cf1ae1893ff6a5e60a51ff1ef00d4510e33b",
+    "benchmarks/results/remaining-indicators/doublerecurrence-contracts.json": "28fd27a3f19ae108a385564ccb4d5b5833812382654c70315b8613b605c9c6cd",
     "benchmarks/results/remaining-indicators/emagap-contracts.json": "d3a7d421e76aafa2981e666408382c4114495c06c255b634a80ac5640dfd3202",
     "benchmarks/results/remaining-indicators/exactstats-contracts.json": "ff73a385c8a32a92979024b81f3f3780a62eb55df1f8879e517777e6b80af199",
     "benchmarks/results/remaining-indicators/expandedma-contracts.json": "a285757e9ecc60521d9a5aedf4ebf394f62cf6d68269f136e05bf4fb85bcbabb",
@@ -8681,7 +8697,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "68e90d6a2f10ce5f4fec29ce0fc6a6e86aa4af5276c34ce2362f143cd47eeefe",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "327bc06c4cc04cf54ce5004027790aa25319dca80aaffbb5e9316d9eaad193af",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

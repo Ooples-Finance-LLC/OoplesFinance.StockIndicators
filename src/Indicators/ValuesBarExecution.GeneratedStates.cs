@@ -25,7 +25,8 @@ internal static partial class ValuesBarExecution
             or Pvo or PercentageVolumeOscillator or VolumeOscillator or PriceVolumeOscillator
             or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage or EhlersLaguerreFilter or EhlersLaguerreRsi
             or EhlersAdaptiveLaguerreFilter or EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha
-            or RepulsionMovingAverage or CompoundRatioMovingAverage;
+            or RepulsionMovingAverage or CompoundRatioMovingAverage or GeneralizedDoubleEma or DoubleExponentialSmoothing
+            or GeneralizedDoubleExponentialMovingAverage { VolumeFactor: >= double.MinValue and <= double.MaxValue };
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -115,6 +116,9 @@ internal static partial class ValuesBarExecution
         EhlersLaguerreRsi strength => new GeneratedLaguerreRsiState(strength.Length),
         RepulsionMovingAverage average => new GeneratedRepulsionState(average.Length, count),
         CompoundRatioMovingAverage average => new GeneratedCompoundRatioState(average.Length),
+        GeneralizedDoubleEma average => new GeneratedGeneralizedDoubleState(average.Length, .7),
+        GeneralizedDoubleExponentialMovingAverage average => new GeneratedGeneralizedDoubleState(average.Length, average.VolumeFactor),
+        DoubleExponentialSmoothing => new GeneratedDoubleSmoothingState(),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -380,6 +384,21 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedGeneralizedDoubleState(int period, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly GeneralizedDoubleWindow _window = new(MovingAvgType.ExponentialMovingAverage, period, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDoubleSmoothingState : IIndicatorState
+    {
+        private readonly DoubleSmoothingWindow _window = new(.01, .9);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
 
     private sealed class GeneratedQuickState(int period, int count) : IIndicatorState, IDisposable
