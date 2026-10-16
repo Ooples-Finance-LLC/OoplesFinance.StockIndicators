@@ -70,6 +70,8 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AverageTrueRangeChannel { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
+            or StollerAverageRangeChannels { AtrMult: > double.NegativeInfinity and < double.PositiveInfinity } or KeltnerChannelWidth
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
             or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -260,6 +262,9 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        AverageTrueRangeChannel channel => new GeneratedRangeChannelState(channel.Length, channel.Multiplier, true, count),
+        StollerAverageRangeChannels channel => new GeneratedRangeChannelState(channel.Length, channel.AtrMult, false, count),
+        KeltnerChannelWidth channel => new GeneratedKeltnerWidthState(channel.Length, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
         MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
@@ -981,6 +986,32 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedRangeChannelState(int length, double multiplier, bool rounded, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly KeltnerWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), Math.Max(1, length), MovingAvgType.SimpleMovingAverage, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var stages = _window.Next(bar.High, bar.Low, bar.Close, true);
+            var value = RangeChannelWindow.Output(bar.Close, stages.Middle, stages.Atr, multiplier, rounded);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+            if (rounded) outputs[3] = value.Average;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedKeltnerWidthState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly KeltnerWindow _window = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length), Math.Max(1, length), capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var stages = _window.Next(bar.High, bar.Low, bar.Close, true);
+            return KeltnerWindow.Width(stages.Middle, stages.Atr, 2);
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedHighLowAverageState(int length, int count) : IMultiOutputState, IDisposable
