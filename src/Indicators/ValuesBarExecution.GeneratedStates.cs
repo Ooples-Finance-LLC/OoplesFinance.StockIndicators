@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
-            or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr;
+            or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -30,6 +30,8 @@ internal static partial class ValuesBarExecution
         Hma average => new HullValueState(average.Length),
         Rsi strength => new GeneratedRsiState(strength.Length, count),
         Atr range => new GeneratedAtrState(range.Length, count),
+        Roc change => new GeneratedRatioState(Math.Max(1, change.Length), count),
+        Momentum momentum => new GeneratedMomentumState(Math.Max(1, momentum.Length), count),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -39,6 +41,40 @@ internal static partial class ValuesBarExecution
         private readonly Streaming.EmaState _state = new(period);
         public void Reset() => _state.Reset();
         public double Update(in Bar bar) => _state.GetNext(bar.Close, commit: true);
+    }
+
+    private sealed class GeneratedRatioState(int period, int count, bool momentum = false) : IIndicatorState
+    {
+        private readonly double[] _lag = new double[Math.Min(period, Math.Max(1, count))];
+        private int _position, _seen;
+        public void Reset() { _position = _seen = 0; }
+        public double Update(in Bar bar)
+        {
+            double prior = _seen >= period ? _lag[_position] : 0;
+            double value = momentum ? RoundedMomentumRatio.Of(bar.Close, prior)
+                : RoundedPercentageChange.Of(bar.Close, prior);
+            _lag[_position] = bar.Close;
+            if (++_position == _lag.Length) _position = 0;
+            if (_seen < period) _seen++;
+            return value;
+        }
+    }
+
+    private sealed class GeneratedMomentumState(int period, int count) : IMultiOutputState
+    {
+        private readonly GeneratedRatioState _ratio = new(period, count, momentum: true);
+        private readonly WmaValueState _signal = new(period, count);
+        private bool _invalidSignal;
+        public void Reset() { _ratio.Reset(); _signal.Reset(); _invalidSignal = false; }
+        public void Update(in Bar bar, Span<double> output)
+        {
+            double value = _ratio.Update(bar);
+            _invalidSignal |= !double.IsFinite(value);
+            output[0] = value;
+            // FiniteSignalInput invalidates the entire dependent suffix.
+            output[1] = _invalidSignal ? double.NaN
+                : _signal.Update(new Bar(default, 0, 0, 0, value, 0));
+        }
     }
 
     private sealed class GeneratedRsiState(int period, int count) : IMultiOutputState, IDisposable
