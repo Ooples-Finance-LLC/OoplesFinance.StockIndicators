@@ -4162,3 +4162,6 @@ Smart Envelope, DEnvelope and GChannels now reuse their exact recursive kernels 
 
 
 Moving Average Envelope and Moving Average Displaced Envelope now compute their three outputs together with the exact rounded SMA and EMA helpers. Distinct percentage units, delayed startup, finite-factor eligibility, fallback behavior, ownership and unfillable-window allocation bounds are preserved. Validation: 128 focused unit cases, 8 parity cases, 116 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Moving Average Support/Resistance, Moving Average Channel and High/Low Bands now reuse their exact SMA kernels in shared execution and compute all three outputs together. Rounded stages, high/low fields, facade clamps, finite-shift eligibility, component fallback, ownership and unfillable-window allocation bounds are preserved. Validation: 167 focused unit cases, 12 parity cases, 117 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
