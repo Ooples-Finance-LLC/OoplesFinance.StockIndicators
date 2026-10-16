@@ -3920,3 +3920,6 @@ A single 20-case 10k batch at 5450bd1c covered expanding Rema/Zlema, Holt-Winter
 
 
 Remaining-indicator pressure/flow validation (PR #266): Kvo, KlingerVolumeOscillator and UltimateOscillator at 79cb43b4 now have all 12 fixture cases and 18 discovery cases passing across the original partial run and three resumptions. The original aborted run remains recorded as aborted; its saved passes were reused. The batch also has 38 focused unit and 100 local GPU passes. Evidence: results/remaining-indicators/pressureflow-contracts.json. Its preserved 24 timing cases are now queued; latency and allocation measurements remain pending.
+
+
+Remaining-indicator shared execution (PR #266, 2026-10-16): chained moving averages and the four additional price-oscillator facades are verified and preserved. McNichollMovingAverage, WellRoundedMovingAverage and both Wilder summation facades now reuse their existing exact recurrence helpers through shared execution; 44 focused unit cases, 16 parity cases, 23 discovery cases and 100 local GPU cases passed. Raw receipts and TRX files are under results/remaining-indicators/. The prepared timing queue covers 23 batches / 592 cases after this batch is queued. No new latency win or allocation reduction is claimed before measurement. Competitor results remain cached.
