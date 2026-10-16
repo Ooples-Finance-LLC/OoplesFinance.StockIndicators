@@ -11,6 +11,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingFractalChaosBenchmarks), 16)]
     [InlineData(typeof(RemainingUniPseudoBenchmarks), 16)]
     [InlineData(typeof(RemainingProjectionFamilyBenchmarks), 24)]
+    [InlineData(typeof(RemainingVervoortVolatilityBenchmarks), 8)]
     [InlineData(typeof(RemainingScalperHurstBenchmarks), 24)]
     [InlineData(typeof(RemainingTrendRocChannelBenchmarks), 24)]
     [InlineData(typeof(RemainingVolatilityBandBenchmarks), 16)]
