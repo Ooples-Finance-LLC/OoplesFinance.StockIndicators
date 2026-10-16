@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or VolumeZoneOscillator or VolumeMomentumOscillator
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or UltimateMomentumIndicator { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -212,6 +213,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        VolumeZoneOscillator zone => new GeneratedVolumeZoneState(zone.Length),
+        VolumeMomentumOscillator momentum => new GeneratedVolumeMomentumOscillatorState(momentum.ShortLength, momentum.LongLength),
         ValueChartIndicator chart => new GeneratedValueChartState(chart.Length, valueChartCustomRange),
         UltimateMomentumIndicator momentum => new GeneratedUltimateMomentumState(momentum),
         UltimateTraderOscillator => new GeneratedUltimateTraderState(),
@@ -867,6 +870,35 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedVolumeZoneState(int length) : IIndicatorState
+    {
+        private readonly Streaming.EmaState _signed = new(length), _total = new(length);
+        private double _previous;
+        private bool _hasPrevious;
+        public void Reset() { _signed.Reset(); _total.Reset(); _previous = 0; _hasPrevious = false; }
+        public double Update(in Bar bar)
+        {
+            var signed = _hasPrevious ? (bar.Close > _previous ? bar.Volume : -bar.Volume) : 0;
+            var result = RoundedMomentumRatio.Of(_signed.GetNext(signed, true), _total.GetNext(bar.Volume, true));
+            _previous = bar.Close; _hasPrevious = true;
+            return result;
+        }
+    }
+
+    private sealed class GeneratedVolumeMomentumOscillatorState(int shortLength, int longLength) : IIndicatorState
+    {
+        private double _short, _long;
+        private bool _hasPrevious;
+        public void Reset() { _short = _long = 0; _hasPrevious = false; }
+        public double Update(in Bar bar)
+        {
+            if (!_hasPrevious) { _short = _long = bar.Volume; _hasPrevious = true; return 0; }
+            _short = RoundedSeededEma.Next(bar.Volume, _short, shortLength);
+            _long = RoundedSeededEma.Next(bar.Volume, _long, longLength);
+            return RoundedPercentageChange.Of(_short, _long);
+        }
     }
 
     private sealed class GeneratedValueChartState(int length, bool customRange) : IMultiOutputState, IDisposable
