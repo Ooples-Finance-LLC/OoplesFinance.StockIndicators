@@ -5404,21 +5404,39 @@
       "options": [
         "ProjectionBandsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ProjectionBandsSpecOptions": [
+          "benchmarks/results/remaining-indicators/projectionfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ProjectionBandwidth",
       "options": [
         "ProjectionBandwidthSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ProjectionBandwidthSpecOptions": [
+          "benchmarks/results/remaining-indicators/projectionfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ProjectionOscillator",
       "options": [
         "ProjectionOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ProjectionOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/projectionfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PseudoPolynomialChannel",
@@ -9979,6 +9997,7 @@
     "benchmarks/results/remaining-indicators/price-contracts.json": "d00758a41b725b80c3d2510805eb59de15f021c4d4f84405ab85905df6a62b13",
     "benchmarks/results/remaining-indicators/pricechannels-contracts.json": "6e16cc4d09d897271fd80b8dff330a3834afde19c5becb8b75f23d8000a339a4",
     "benchmarks/results/remaining-indicators/pricecycle-contracts.json": "193bf2b04005029a04a48a184f2bfabca0c79f7e7bdc0a9c3bfc704721843e75",
+    "benchmarks/results/remaining-indicators/projectionfamily-contracts.json": "d8d0de66706b5afbbd426cc0611fe35e693fe5803d2e253d15c9e45f684761c4",
     "benchmarks/results/remaining-indicators/rangealias-contracts.json": "a7cb36562004917f5d80acdc87317428593b534e354b55e84e84543837210bb2",
     "benchmarks/results/remaining-indicators/rangechannels-contracts.json": "94b64b4ee7ec41c76f1353425d225d925f8db97cbe46d0362c565464fee988f1",
     "benchmarks/results/remaining-indicators/rangehealth-contracts.json": "4471e9a1fdde6b0b166b7c6b307a35b5a5a48c4984f6a53dc37de6fe1a7f9c31",
@@ -10236,7 +10255,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "bc93c54c5c57a36e82e463f6c8d90780b9f13cf4cb25273f320ad8646e516260",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8fa4a73f3c1825ba437be9be5d6dd7470a49d8ae5d519f70b8b3e60250c1f04c",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

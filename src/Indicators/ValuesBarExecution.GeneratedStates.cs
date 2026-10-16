@@ -97,6 +97,7 @@ internal static partial class ValuesBarExecution
             or ScalpersChannel
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or FractalChaosBands or FractalChaosOscillator
+            or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
             or UniChannel { UbFac: > double.NegativeInfinity and < double.PositiveInfinity, LbFac: > double.NegativeInfinity and < double.PositiveInfinity }
             or PseudoPolynomialChannel { Morph: > double.NegativeInfinity and < double.PositiveInfinity }
             or HurstCycleChannel { FastMult: > double.NegativeInfinity and < double.PositiveInfinity, SlowMult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -327,6 +328,9 @@ internal static partial class ValuesBarExecution
         FlaggingBands channel => new GeneratedFlaggingBandState(channel.Length, count),
         FractalChaosBands => new GeneratedFractalChaosState(false),
         FractalChaosOscillator => new GeneratedFractalChaosState(true),
+        ProjectionBands channel => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBands, channel.Length),
+        ProjectionOscillator oscillator => new GeneratedProjectionFamilyState(IndicatorName.ProjectionOscillator, oscillator.Length),
+        ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
         UniChannel channel => new GeneratedUniChannelState(Math.Max(1, channel.Length), channel.UbFac, channel.LbFac, channel.Type1, count),
         PseudoPolynomialChannel channel => new GeneratedPseudoPolynomialState(channel.Length, channel.Morph, count),
         ExtendedRecursiveBands channel => new GeneratedExtendedBandState(channel.Length),
@@ -1056,6 +1060,26 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedProjectionFamilyState(IndicatorName family, int length) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.ProjectionFamilyKernel _window = new(family, length, MovingAvgType.WeightedMovingAverage, 4);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.High, bar.Low, true);
+            if (family == IndicatorName.ProjectionBands)
+            {
+                outputs[0] = point.Bands.Upper; outputs[1] = point.Bands.Middle; outputs[2] = point.Bands.Lower;
+            }
+            else
+            {
+                outputs[0] = Streaming.ProjectionBandsSnapshot.Publish(point.Line);
+                outputs[1] = Streaming.ProjectionBandsSnapshot.Publish(point.Mean);
+            }
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedUniChannelState(int length, double upper, double lower, bool additive, int count) : IMultiOutputState, IDisposable
