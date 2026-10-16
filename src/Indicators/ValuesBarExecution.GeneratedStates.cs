@@ -70,6 +70,8 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or SmartEnvelope { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
+            or DEnvelope { DevFactor: > double.NegativeInfinity and < double.PositiveInfinity } or GChannels
             or ChandeTrendScore { Length: < int.MaxValue } or TrendScore { Length: < int.MaxValue }
             or KeltnerChannelMiddle or KeltnerChannels { MultFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or PriceCycleOscillator
@@ -253,6 +255,9 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        SmartEnvelope envelope => new GeneratedSmartEnvelopeState(envelope.Length, envelope.Factor),
+        DEnvelope envelope => new GeneratedDEnvelopeState(envelope.Length, envelope.DevFactor),
+        GChannels channel => new GeneratedGChannelState(channel.Length),
         ChandeTrendScore score => new GeneratedTrendScoreState(Math.Max(1, score.Length), count),
         TrendScore score => new GeneratedTrendScoreState(Math.Max(1, score.Length), count),
         KeltnerChannelMiddle middle => new EmaValueState(middle.Length),
@@ -965,6 +970,39 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedSmartEnvelopeState(int length, double factor) : IMultiOutputState
+    {
+        private readonly SmartEnvelopeWindow _window = new(length, factor);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+    }
+
+    private sealed class GeneratedDEnvelopeState(int length, double factor) : IMultiOutputState
+    {
+        private readonly DEnvelopeWindow _window = new(length, factor);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+    }
+
+    private sealed class GeneratedGChannelState(int length) : IMultiOutputState
+    {
+        private readonly GChannelWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
     }
 
     private sealed class GeneratedTrendScoreState(int endLength, int count) : IIndicatorState, IDisposable
