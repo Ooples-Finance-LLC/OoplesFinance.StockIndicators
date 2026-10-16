@@ -91,6 +91,8 @@ internal static partial class ValuesBarExecution
             or BollingerBandsAtr { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
             or BollingerBandsFibonacciRatios { FibRatio3: > double.NegativeInfinity and < double.PositiveInfinity }
             or BollingerBandsWithAtrPct { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or KirshenbaumBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
+            or SmoothedVolatilityBands { Length1: <= 1_073_741_824, Deviation: > double.NegativeInfinity and < double.PositiveInfinity, BandAdjust: > double.NegativeInfinity and < double.PositiveInfinity }
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
             or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -308,6 +310,8 @@ internal static partial class ValuesBarExecution
         BollingerBandsAvgTrueRange ratio => new GeneratedBollingerAtrState(ratio.MaType, Math.Max(1, ratio.AtrLength), Math.Max(1, ratio.Length), ratio.StdDevMult, count),
         BollingerBandsFibonacciRatios channel => new GeneratedRangeChannelState(channel.Length, channel.FibRatio3, false, count),
         BollingerBandsWithAtrPct channel => new GeneratedAtrPercentBandState(channel.Length, channel.BbLength, channel.StdDevMult, count),
+        KirshenbaumBands channel => new GeneratedKirshenbaumState(channel.Length1, channel.Length2, channel.StdDevFactor, count),
+        SmoothedVolatilityBands channel => new GeneratedSmoothedVolatilityState(channel.Length1, channel.Length2, channel.Deviation, channel.BandAdjust, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
         MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
@@ -1029,6 +1033,30 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedKirshenbaumState(int meanLength, int errorLength, double factor, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly KirshenbaumWindow _window = new(MovingAvgType.ExponentialMovingAverage, meanLength, errorLength, factor, capacityHint: Math.Max(1, count), maxInputCount: count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSmoothedVolatilityState(int length1, int length2, double deviation, double adjustment, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly SmoothedVolatilityWindow _window = new(MovingAvgType.ExponentialMovingAverage, length1, length2, deviation, adjustment, capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedBollingerMiddleState(int length, int count) : IIndicatorState, IDisposable
