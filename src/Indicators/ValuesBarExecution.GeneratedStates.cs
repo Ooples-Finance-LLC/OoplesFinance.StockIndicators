@@ -40,7 +40,11 @@ internal static partial class ValuesBarExecution
             or EhlersHpLpRoofingFilter or EhlersZeroMeanRoofingFilter or EhlersDetrendedLeadingIndicator
             or EhlersCyberCycle or EhlersGaussianFilter
             or EhlersCyberCycleOscillator { Alpha: >= double.MinValue and <= double.MaxValue }
-            or EhlersInstantaneousTrendlineV2 { Alpha: >= double.MinValue and <= double.MaxValue };
+            or EhlersInstantaneousTrendlineV2 { Alpha: >= double.MinValue and <= double.MaxValue }
+            or EhlersBandPassFilterV1 { Bw: >= double.MinValue and <= double.MaxValue }
+            or EhlersBandPassFilterV2 { Bw: >= double.MinValue and <= double.MaxValue }
+            or EhlersCycleBandPassFilter { Delta: >= double.MinValue and <= double.MaxValue }
+            or EhlersSuperPassbandFilter;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -160,6 +164,10 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        EhlersBandPassFilterV1 filter => new GeneratedBandPassV1State(filter.Length, filter.Bw),
+        EhlersBandPassFilterV2 filter => new GeneratedBandPassState(filter.Length, filter.Bw, 1),
+        EhlersCycleBandPassFilter filter => new GeneratedBandPassState(filter.Length, filter.Delta, 2),
+        EhlersSuperPassbandFilter filter => new GeneratedSuperPassbandState(filter.FastLength, filter.SlowLength, filter.Length1, filter.Length2),
         EhlersCyberCycle filter => new GeneratedCyberCycleState(2d / (Math.Max(1, filter.Length) + 1d)),
         EhlersCyberCycleOscillator filter => new GeneratedCyberCycleState(filter.Alpha),
         EhlersInstantaneousTrendlineV2 filter => new GeneratedInstantaneousTrendState(filter.Alpha),
@@ -596,6 +604,38 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedBandPassV1State(int period, double bandwidth) : IMultiOutputState
+    {
+        private readonly ClampedBandPassWindow _window = new(period, bandwidth, 0);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Value;
+            outputs[1] = value.Signal;
+        }
+    }
+
+    private sealed class GeneratedBandPassState(int period, double bandwidth, int variant) : IIndicatorState
+    {
+        private readonly ClampedBandPassWindow _window = new(period, bandwidth, variant);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedSuperPassbandState(int fast, int slow, int numerator, int period) : IMultiOutputState
+    {
+        private readonly SuperPassbandWindow _window = new(fast, slow, numerator, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Upper;
+            outputs[2] = value.Lower;
+        }
     }
 
     private sealed class GeneratedCyberCycleState(double alpha) : IIndicatorState
