@@ -10,7 +10,8 @@ internal static partial class ValuesBarExecution
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
             or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown
-            or Demarker or DeMarker or UlcerIndex or ChoppinessIndex or Natr or AtrPercent or AtrChannelWidth or ChaikinVolatility;
+            or Demarker or DeMarker or UlcerIndex or ChoppinessIndex or Natr or AtrPercent or AtrChannelWidth or ChaikinVolatility
+            or Variance or CoefficientOfVariation or StandardError;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -66,6 +67,9 @@ internal static partial class ValuesBarExecution
         AtrPercent range => new GeneratedAtrDerivedState(range.Length, count),
         AtrChannelWidth range => new GeneratedAtrDerivedState(range.Length, count, range.Multiplier),
         ChaikinVolatility volatility => new GeneratedChaikinVolatilityState(volatility.Length, count),
+        Variance variance => new GeneratedVarianceState(variance.Length, count),
+        CoefficientOfVariation variation => new GeneratedCoefficientState(variation.Length, count),
+        StandardError error => new GeneratedStandardErrorState(error.Length, count),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -180,6 +184,32 @@ internal static partial class ValuesBarExecution
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    // These formulas publish zero until a complete period is available. Avoid
+    // renting a window that cannot fill during this owned finite execution.
+    private sealed class GeneratedVarianceState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactVarianceWindow? _window = Math.Max(1, period) <= count ? new(period) : null;
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.Close, true) ?? 0;
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedCoefficientState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactCoefficientWindow? _window = Math.Max(1, period) <= count ? new(period) : null;
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.Close, true) ?? 0;
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedStandardErrorState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactStandardErrorWindow? _window = Math.Max(1, period) <= count ? new(period, regression: true) : null;
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.Close, true) ?? 0;
+        public void Dispose() => _window?.Dispose();
     }
 
     private sealed class GeneratedChaikinVolatilityState(int period, int count) : IIndicatorState, IDisposable
