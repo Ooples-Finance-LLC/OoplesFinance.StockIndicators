@@ -78,14 +78,26 @@
       "options": [
         "AdaptiveAutonomousRecursiveMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AdaptiveAutonomousRecursiveMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/autonomous-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "AdaptiveAutonomousRecursiveTrailingStop",
       "options": [
         "AdaptiveAutonomousRecursiveTrailingStopSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AdaptiveAutonomousRecursiveTrailingStopSpecOptions": [
+          "benchmarks/results/remaining-indicators/autonomous-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "AdaptiveErgodicCandlestickOscillator",
@@ -324,7 +336,13 @@
       "options": [
         "AutonomousRecursiveMaSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AutonomousRecursiveMaSpecOptions": [
+          "benchmarks/results/remaining-indicators/autonomous-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "AverageAbsoluteErrorNormalization",
@@ -8968,6 +8986,7 @@
     "benchmarks/results/remaining-indicators/aroondpo-contracts.json": "4deb075f23f91bc5220164017b006419fa196497527ff959d95cfc4cc2d72e87",
     "benchmarks/results/remaining-indicators/atrderived-contracts.json": "2c5b26ee352d3b87da89069d04892635d399f8908dc0b93a276ef2b9013d4327",
     "benchmarks/results/remaining-indicators/atrfilter-contracts.json": "6db02e84d16669f802386ef258648ad2d900c1c5a6edd8ba4bb4bcc5fbfe852f",
+    "benchmarks/results/remaining-indicators/autonomous-contracts.json": "60e245417b0ff7046fe6c8bdac3f8d196849e4df65a48aeb5157d07d83e2ce83",
     "benchmarks/results/remaining-indicators/bandpass-contracts.json": "35079de72389da6fa96511f0e1b1270ce600804dd12b183de3b060944cb68cc7",
     "benchmarks/results/remaining-indicators/barflow-contracts.json": "2a207301cf96332bc31deda7a26dc0e5049a472c4a7dbad632a5a2473d3963c7",
     "benchmarks/results/remaining-indicators/chainedma-contracts.json": "0f95ff360a33b19664d7934d6e458cc5bb19c7452d14dcf1887546d07eee82e9",
@@ -9217,7 +9236,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "632e84fbc57190fc79d8e505a6f6f6cf708b4dab36398670e78a40e718f624f7",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "c128dea835937ef0d0705b7c3e90df32fe486b0d6aa8d07644fef461cf5c46f0",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
