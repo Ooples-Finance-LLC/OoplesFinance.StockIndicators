@@ -57,6 +57,7 @@ internal static partial class ValuesBarExecution
             or AtrFilteredEma or AtrFilteredExponentialMovingAverage { Min: > double.NegativeInfinity and < double.PositiveInfinity }
             or AhrensMovingAverage or AlphaDecreasingEma
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
+            or BuffAverage or EquityMovingAverage
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or AdaptiveEma or AdaptiveExponentialMovingAverage
             or AdaptivePriceZoneIndicator { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -189,6 +190,8 @@ internal static partial class ValuesBarExecution
         AtrFilteredEma average => new GeneratedAtrFilteredState(average.Length, 20, 10, 20, 5),
         AhrensMovingAverage average => new GeneratedAhrensState(average.Length),
         AlphaDecreasingEma => new GeneratedAlphaDecreasingState(),
+        BuffAverage average => new GeneratedBuffState(average.Length),
+        EquityMovingAverage average => new GeneratedEquityState(average.Length),
         Vwma average => new GeneratedVolumeWeightedState(average.Length),
         VolumeWeightedMovingAverage average => new GeneratedVolumeWeightedState(average.Length),
         WindowedVolumeWeightedMovingAverage average => new GeneratedBartlettVolumeState(average.Length),
@@ -676,6 +679,26 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedBuffState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly BuffWindow _fast = new(period), _slow = new(20);
+        public void Reset() { _fast.Reset(); _slow.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            outputs[0] = _fast.Next(bar.Close, bar.Volume, true);
+            outputs[1] = _slow.Next(bar.Close, bar.Volume, true);
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedEquityState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly EquityWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedVolumeWeightedState(int period) : IIndicatorState, IDisposable
