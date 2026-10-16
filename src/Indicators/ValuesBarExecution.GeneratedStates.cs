@@ -5,7 +5,16 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal static partial class ValuesBarExecution
 {
+    // The legacy scan uses int j + lag. Preserve its fallback when that can overflow.
+    private static bool IsDemarkCountState(IIndicator indicator) => indicator switch
+    {
+        DemarkSetupIndicator setup => Math.Max(1, setup.Length) <= 1_073_741_824,
+        DemarkReversalPoints reversal => (long)Math.Max(1, reversal.Length1) + Math.Max(1, reversal.Length2) - 1 <= int.MaxValue,
+        _ => false
+    };
+
     private static bool IsGeneratedState(IIndicator indicator) =>
+        IsDemarkCountState(indicator) ||
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
@@ -233,6 +242,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
+        DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
         ContractHigh => new PrefixPriceExtremeState(true),
         ContractLow => new PrefixPriceExtremeState(false),
         IntradayMomentumIndex momentum => new GeneratedIntradayMomentumState(momentum.Length, count),
@@ -928,6 +939,30 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedDemarkCountState(int window, int lag, int count) : IIndicatorState, IDisposable
+    {
+        // Missing comparisons are ties, so an unfillable window always publishes zero.
+        private readonly PooledRingBuffer<sbyte>? _votes = window <= count ? new(window) : null;
+        private readonly PooledRingBuffer<double>? _prices = window <= count && lag <= count ? new(lag) : null;
+        private int _up, _down;
+        public void Reset() { _votes?.Clear(); _prices?.Clear(); _up = _down = 0; }
+        public double Update(in Bar bar)
+        {
+            if (_votes is null) return 0d;
+            var previous = _prices is not null && _prices.Count == lag ? _prices[0] : 0d;
+            sbyte vote = bar.Close > previous ? (sbyte)1 : bar.Close < previous ? (sbyte)-1 : (sbyte)0;
+            if (_votes.Count == window)
+            {
+                var expired = _votes[0];
+                if (expired > 0) _up--; else if (expired < 0) _down--;
+            }
+            if (vote > 0) _up++; else if (vote < 0) _down++;
+            _votes.TryAdd(vote, out _); _prices?.TryAdd(bar.Close, out _);
+            return _up == window || _down == window ? bar.Close : 0d;
+        }
+        public void Dispose() { Reset(); _votes?.Dispose(); _prices?.Dispose(); }
     }
 
     private sealed class GeneratedIntradayMomentumState(int length, int count) : IIndicatorState, IDisposable
