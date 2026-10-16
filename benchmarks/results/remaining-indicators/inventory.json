@@ -865,11 +865,12 @@
       "contract_receipts": {
         "ChandeQuickStickSpecOptions": [
           "benchmarks/results/remaining-indicators/openclose-contracts.json"
+        ],
+        "QstickSpecOptions": [
+          "benchmarks/results/remaining-indicators/candlekernels-contracts.json"
         ]
       },
-      "options_without_receipts": [
-        "QstickSpecOptions"
-      ]
+      "options_without_receipts": []
     },
     {
       "indicator": "ChandeTrendScore",
@@ -1122,7 +1123,13 @@
       "options": [
         "DailyAveragePriceDeltaSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DailyAveragePriceDeltaSpecOptions": [
+          "benchmarks/results/remaining-indicators/candlekernels-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DampedSineWaveWeightedFilter",
@@ -1450,7 +1457,13 @@
       "options": [
         "DrunkardWalkSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DrunkardWalkSpecOptions": [
+          "benchmarks/results/remaining-indicators/candlekernels-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DynamicMomentumIndex",
@@ -9598,6 +9611,7 @@
     "benchmarks/results/remaining-indicators/barflow-contracts.json": "2a207301cf96332bc31deda7a26dc0e5049a472c4a7dbad632a5a2473d3963c7",
     "benchmarks/results/remaining-indicators/bettervolume-contracts.json": "e0cfa38122e21a9d52e314fc70fa56f4fbb9037421f36514435f892fce56e87a",
     "benchmarks/results/remaining-indicators/buffequity-contracts.json": "90833efbadfccd997da3f001072fde598e93d228b1d5d953e6e91a45cbb00313",
+    "benchmarks/results/remaining-indicators/candlekernels-contracts.json": "f8c2c896c6f2ac6867aeb279417959f05ad639cff8d23088968fbb1df40bcb2b",
     "benchmarks/results/remaining-indicators/candlepower-contracts.json": "b5c95d5f471c8babd256a4f31ec9371b777824f14d99a1d38020e8cb62b5c6c2",
     "benchmarks/results/remaining-indicators/chainedma-contracts.json": "0f95ff360a33b19664d7934d6e458cc5bb19c7452d14dcf1887546d07eee82e9",
     "benchmarks/results/remaining-indicators/commoditypair-contracts.json": "9939e93f23b58e37bcbd0ee11d78ad2b1002146d91d06a7b611ae0c571bd783c",
@@ -9886,7 +9900,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "e4244fc3a818afd7577dcbfd7522e07bc40c17cd489aa912a4c509f1b9a3efeb",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8e36ce72afc09c68ae1314dc39eecaa100ed4174f011932c14c7598c6e7cb760",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

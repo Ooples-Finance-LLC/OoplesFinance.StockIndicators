@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or Qstick or DailyAveragePriceDelta or DrunkardWalk
             or DonchianChannel or DonchianChannelUpper or DonchianChannelLower
             or DonchianChannelWidth
             or ChandeQuickStick or DeltaMovingAverage
@@ -249,6 +250,9 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        Qstick quick => new GeneratedQuickStickState(quick.Length),
+        DailyAveragePriceDelta delta => new GeneratedDailyDeltaState(delta.Length, count),
+        DrunkardWalk walk => new GeneratedDrunkardWalkState(walk.Length1),
         DonchianChannel channel => new GeneratedDonchianMiddleState(Math.Max(1, channel.Length), count),
         DonchianChannelUpper channel => new PriceExtremeState(Math.Max(1, channel.Length), count, true),
         DonchianChannelLower channel => new PriceExtremeState(Math.Max(1, channel.Length), count, false),
@@ -953,6 +957,29 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedDailyDeltaState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly DailyDeltaWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, true);
+            outputs[0] = value.Upper; outputs[1] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDrunkardWalkState(int length) : IMultiOutputState
+    {
+        private readonly DrunkardWalkWindow _window = new(Math.Max(1, length));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Up; outputs[1] = value.Down;
+        }
     }
 
     private sealed class GeneratedDonchianMiddleState(int length, int count) : IIndicatorState
