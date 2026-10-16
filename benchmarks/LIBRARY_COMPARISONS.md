@@ -4109,3 +4109,6 @@ Bull Power and Bear Power, including both Indicator aliases, now share one exact
 
 
 Alligator Jaw, Teeth and Lips now reuse shared median-price Wilder smoothing with the original fixed 8/5/3-bar displacements. Clamped periods, delayed startup, warmup, signed-zero behavior, ownership and source fallback remain intact. Validation: 128 focused unit cases, 12 fixture parity cases, 99 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+Average Day Range and Adr now share an exact rolling high-minus-low mean. The final mean is the only rounding stage; unfillable windows allocate no history buffer. Signed ranges, clamps, warmup, error priority and source fallback remain intact. Validation: 32 focused unit cases, 8 fixture parity cases, 100 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.

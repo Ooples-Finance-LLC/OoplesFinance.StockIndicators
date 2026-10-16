@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or Adr or AverageDayRange
             or AlligatorJaw or AlligatorTeeth or AlligatorLips
             or BullPower or BearPower or BullPowerIndicator or BearPowerIndicator
             or AutoLine or AutoLineWithDrift
@@ -226,6 +227,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        Adr range => new GeneratedDayRangeState(range.Length, count),
+        AverageDayRange range => new GeneratedDayRangeState(range.Length, count),
         AlligatorJaw line => new GeneratedAlligatorState(line.Length, 8),
         AlligatorTeeth line => new GeneratedAlligatorState(line.Length, 5),
         AlligatorLips line => new GeneratedAlligatorState(line.Length, 3),
@@ -913,6 +916,28 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedDayRangeState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly int _length = Math.Max(1, length);
+        // An unfillable full-window mean is zero and needs no history allocation.
+        private readonly PooledRingBuffer<(double High, double Low)>? _history = Math.Max(1, length) <= count ? new(length) : null;
+        private ExactMeanAccumulator _sum;
+        public void Reset() { _history?.Clear(); _sum = default; }
+        public double Update(in Bar bar)
+        {
+            if (_history is null) return 0d;
+            _sum.Add(bar.High); _sum.Add(bar.Low, -1);
+            if (_history.Count == _length)
+            {
+                var old = _history[0];
+                _sum.Add(old.High, -1); _sum.Add(old.Low);
+            }
+            _history.TryAdd((bar.High, bar.Low), out _);
+            return _history.Count < _length ? 0d : _sum.Mean(_length);
+        }
+        public void Dispose() { Reset(); _history?.Dispose(); }
     }
 
     private sealed class GeneratedAlligatorState(int length, int offset) : IIndicatorState, IDisposable
