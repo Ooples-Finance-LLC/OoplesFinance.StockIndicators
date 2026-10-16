@@ -7121,7 +7121,13 @@
       "options": [
         "WeightedCloseSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "WeightedCloseSpecOptions": [
+          "benchmarks/results/remaining-indicators/weightedclose-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "WeightedMovingAverage",
@@ -9420,6 +9426,7 @@
     "benchmarks/results/remaining-indicators/volumeweighted-contracts.json": "99f049a25b4be1f5cdf1d2480e7791c52a933056d9a7ba16d50ca249cabe2db5",
     "benchmarks/results/remaining-indicators/vortex-contracts.json": "0b1f6d4b84fc7dfeb7f2915f90f935927419124dc93ca4cfcef5f948ca9194c6",
     "benchmarks/results/remaining-indicators/wamidifference-contracts.json": "6b64bbdee5d6f5300cbd9d3b801c4ea88e6d09242ebaec64ab01f0f6efbcb776",
+    "benchmarks/results/remaining-indicators/weightedclose-contracts.json": "7586cc719ff94988b6d67b03ae358e86f53c94d521b2805621a56baad075553a",
     "benchmarks/results/remaining-indicators/weightedextra-contracts.json": "aa65c815c8faca01a625976a91c39cafaaa81ebd3026feab7146b5754877e3d3",
     "benchmarks/results/remaining-indicators/weightedfilter-contracts.json": "07537a37131c8c03d8a0a700d16cd438f4f079caeed1d402808441d46d59fc4f",
     "benchmarks/results/remaining-indicators/weightedlag-contracts.json": "6439b7a2e9deb71bd85e2786778d69f9625ef0bae2b51097327c5e3463e2d8e3",
