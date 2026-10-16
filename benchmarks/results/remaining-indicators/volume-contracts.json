@@ -1,0 +1,39 @@
+{
+  "batch": "generated-cmf-mfi-force-obv",
+  "types": [
+    "Cmf",
+    "Mfi",
+    "ForceIndex",
+    "Obv"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse ChaikinFlowWindow, RollingMoneyFlowIndex and ForceWindow. OBV computes its exact zero-origin cumulative line and EMA signal together with the existing invalid signal suffix. Custom components retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 35,
+    "fixture_passed": 16,
+    "gpu_passed": 100,
+    "contract_methods": 1340,
+    "hosted_methods": 1328,
+    "unit_trx_sha256": "57888c2f2f164346df844c590683a2b83dc32e8dad25f102fdc1eb8bad4a0ce4",
+    "fixture_trx_sha256": "72a811ee5a9e6d1464750aa8d5140f59293661f5136147fdd7e112907d654729"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
