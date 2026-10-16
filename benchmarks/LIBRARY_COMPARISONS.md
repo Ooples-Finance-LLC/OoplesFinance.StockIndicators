@@ -4091,3 +4091,6 @@ Absolute Strength Index and Absolute Strength MTF now use shared execution. The 
 
 
 Anchored Momentum and Accumulative Swing Index now share their existing exact kernels across Value and Signal outputs. Anchored Momentum retains the facade period clamp, derived anchor and fixed EMA7/signal8 stages; accumulated swing retains original OHLC fields and the selected SMA signal period. Custom components/sources and non-finite swing limits retain fallback. Validation: 125 focused unit cases, 8 fixture parity cases, 94 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Awesome and Accelerator Oscillators now share rounded SMA stages over the exact median price. Fixed slow34 and signal5 stages, binary subtraction, startup zeros and Accelerator first-nonfinite-prefix behavior are preserved. An unfillable fast window requires no period-sized storage; maximum-period tests use bounded independent references instead of allocating the legacy window. Validation: 47 focused unit cases, 8 fixture parity cases, 95 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.

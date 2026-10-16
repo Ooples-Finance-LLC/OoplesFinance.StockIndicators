@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AwesomeOscillator or AcceleratorOscillator
             or AnchoredMomentum
             or AccumulativeSwingIndex { LimitMove: > double.NegativeInfinity and < double.PositiveInfinity }
             or AbsoluteStrengthIndex or AbsoluteStrengthMTFIndicator
@@ -221,6 +222,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        AwesomeOscillator oscillator => new GeneratedAwesomeState(oscillator.Length, count, false),
+        AcceleratorOscillator oscillator => new GeneratedAwesomeState(oscillator.Length, count, true),
         AnchoredMomentum momentum => new GeneratedAnchoredMomentumState(momentum.Length, count),
         AccumulativeSwingIndex swing => new GeneratedAccumulatedSwingState(swing.Length, swing.LimitMove, count),
         AbsoluteStrengthIndex strength => new GeneratedAbsoluteStrengthState(strength.Length),
@@ -895,6 +898,26 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedAwesomeState(int length, int count, bool accelerator) : IIndicatorState, IDisposable
+    {
+        // An incomplete full-window SMA is identically zero; avoid period-sized storage.
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _fast = Math.Max(1, length) <= count ? new(length) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _slow = count >= 34 ? new(34) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _signal = accelerator && count >= 5 ? new(5) : null;
+        private bool _invalidPrefix;
+        public void Reset() { _fast?.Reset(); _slow?.Reset(); _signal?.Reset(); _invalidPrefix = false; }
+        public double Update(in Bar bar)
+        {
+            if (_invalidPrefix) return double.NaN;
+            var median = PriceMean.Of(bar.High, bar.Low);
+            var awesome = (_fast?.Next(median, true) ?? 0d) - (_slow?.Next(median, true) ?? 0d);
+            if (!accelerator) return awesome;
+            if (!FrameworkCompatibility.IsFinite(awesome)) { _invalidPrefix = true; return double.NaN; }
+            return awesome - (_signal?.Next(awesome, true) ?? 0d);
+        }
+        public void Dispose() { Reset(); _fast?.Dispose(); _slow?.Dispose(); _signal?.Dispose(); }
     }
 
     private sealed class GeneratedAnchoredMomentumState(int length, int count) : IMultiOutputState, IDisposable
