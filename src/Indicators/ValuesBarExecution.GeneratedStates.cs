@@ -11,7 +11,7 @@ internal static partial class ValuesBarExecution
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
             or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown
             or Demarker or DeMarker or UlcerIndex or ChoppinessIndex or Natr or AtrPercent or AtrChannelWidth or ChaikinVolatility
-            or Variance or CoefficientOfVariation or StandardError or StdDev { Length: > 0 } or HistoricalVolatility;
+            or Variance or CoefficientOfVariation or StandardError or StdDev { Length: > 0 } or HistoricalVolatility or Kvo or KlingerVolumeOscillator or UltimateOscillator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -67,6 +67,9 @@ internal static partial class ValuesBarExecution
         AtrPercent range => new GeneratedAtrDerivedState(range.Length, count),
         AtrChannelWidth range => new GeneratedAtrDerivedState(range.Length, count, range.Multiplier),
         ChaikinVolatility volatility => new GeneratedChaikinVolatilityState(volatility.Length, count),
+        Kvo oscillator => new GeneratedKlingerState(oscillator.Length, 55, 13),
+        KlingerVolumeOscillator oscillator => new GeneratedKlingerState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
+        UltimateOscillator oscillator => new GeneratedUltimateState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
         StdDev deviation => new GeneratedOrderedDeviationState(deviation.Length, count),
         HistoricalVolatility volatility => new GeneratedHistoricalVolatilityState(Math.Max(1, volatility.Length), count),
         Variance variance => new GeneratedVarianceState(variance.Length, count),
@@ -186,6 +189,27 @@ internal static partial class ValuesBarExecution
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedKlingerState(int fast, int slow, int signal) : IMultiOutputState, IDisposable
+    {
+        private readonly KlingerWindow _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, signal);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true);
+            outputs[0] = point.Line;
+            outputs[1] = point.SignalLine;
+            outputs[2] = point.Histogram;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedUltimateState(int first, int second, int third) : IIndicatorState
+    {
+        private readonly UltimatePressureWindow _window = new(first, second, third);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
     }
 
     private sealed class GeneratedOrderedDeviationState(int period, int count) : IMultiOutputState, IDisposable
