@@ -1,0 +1,37 @@
+{
+  "batch": "vertical-horizontal-average-shared-execution",
+  "types": [
+    "VerticalHorizontalMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share unchanged exact VerticalHorizontalAverageWindow over original closes with observed-input capacity and unchanged startup, rounding and source fallback.",
+  "verification": {
+    "unit_passed": 44,
+    "fixture_passed": 4,
+    "discovery_passed": 81,
+    "gpu_passed": 100,
+    "contract_methods": 1416,
+    "hosted_methods": 1404,
+    "evidence": [
+      {
+        "file": "verticalaverage-unit.trx.gz",
+        "passed_cases": 44,
+        "trx_sha256": "73cdd906d4891dd059047a53611efbb0b7a96bb3dbf5f2e5c4b90a3f3371afe1"
+      },
+      {
+        "file": "verticalaverage-fixture.trx.gz",
+        "passed_cases": 85,
+        "trx_sha256": "428d207043aa73ee570defa2a49c0adffaede92025204e86f7fa0376aa79066c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVerticalAverageBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VerticalHorizontalMovingAverage"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

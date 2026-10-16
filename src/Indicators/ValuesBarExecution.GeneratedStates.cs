@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or VerticalHorizontalFilter
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -211,6 +211,7 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        VerticalHorizontalMovingAverage average => new GeneratedVerticalAverageState(average.Length, count),
         VerticalHorizontalFilter filter => new GeneratedVerticalHorizontalState(filter.Length, count),
         TrigonometricOscillator oscillator => new GeneratedTrigonometricState(oscillator.Length),
         TimeSeriesForecast forecast => new GeneratedForecastState(forecast.Length),
@@ -845,6 +846,14 @@ internal static partial class ValuesBarExecution
         private readonly TrendIntensityWindow _window = new(MovingAvgType.SimpleMovingAverage, period, 60);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedVerticalAverageState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly VerticalHorizontalAverageWindow _window = new(length, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 

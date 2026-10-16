@@ -4044,3 +4044,6 @@ Trigonometric Oscillator and Time Series Forecast now use shared execution with 
 
 
 Vertical Horizontal Filter now shares its unchanged exact range/path kernel and weighted signal average over original closes. The typed facade retains its fixed six-bar signal period and custom-component fallback. Validation: 84 focused unit cases, 4 fixture parity cases, 80 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
+
+
+Vertical Horizontal Moving Average now uses shared execution with its unchanged exact kernel and history capacity bounded by observed input. Original-close input, staged rounding, startup and source fallback remain intact. Validation: 44 focused unit cases, 4 fixture parity cases, 81 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.

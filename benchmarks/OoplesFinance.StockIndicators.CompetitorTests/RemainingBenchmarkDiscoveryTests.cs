@@ -86,6 +86,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingTrendWindowBenchmarks), 24)]
     [InlineData(typeof(RemainingRegressionPairBenchmarks), 16)]
     [InlineData(typeof(RemainingVerticalHorizontalBenchmarks), 8)]
+    [InlineData(typeof(RemainingVerticalAverageBenchmarks), 8)]
     [InlineData(typeof(RemainingAdaptivePairBenchmarks), 16)]
     public void SharedLifecycleRetainsEveryBenchmarkCase(Type type, int count)
     {
