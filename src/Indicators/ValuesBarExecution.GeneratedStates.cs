@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or PriceCycleOscillator
             or Qstick or DailyAveragePriceDelta or DrunkardWalk
             or DonchianChannel or DonchianChannelUpper or DonchianChannelLower
             or DonchianChannelWidth
@@ -250,6 +251,7 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        PriceCycleOscillator cycle => new GeneratedPriceCycleState(cycle.Length, count),
         Qstick quick => new GeneratedQuickStickState(quick.Length),
         DailyAveragePriceDelta delta => new GeneratedDailyDeltaState(delta.Length, count),
         DrunkardWalk walk => new GeneratedDrunkardWalkState(walk.Length1),
@@ -957,6 +959,14 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedPriceCycleState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PriceCycleWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedDailyDeltaState(int length, int count) : IMultiOutputState, IDisposable

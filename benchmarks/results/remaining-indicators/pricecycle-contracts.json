@@ -1,0 +1,37 @@
+{
+  "batch": "price-cycle-shared-execution",
+  "types": [
+    "PriceCycleOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact PriceCycleWindow preserving facade clamps, staged arithmetic, original fields, ownership and both component-average/source fallbacks.",
+  "verification": {
+    "unit_passed": 54,
+    "fixture_passed": 4,
+    "discovery_passed": 112,
+    "gpu_passed": 100,
+    "contract_methods": 1451,
+    "hosted_methods": 1439,
+    "evidence": [
+      {
+        "file": "pricecycle-unit.trx.gz",
+        "passed_cases": 54,
+        "trx_sha256": "9546679e3f49df0ce5161a1b2fdd381a1a45b748a6cd2c073b2a5bdd943f8fae"
+      },
+      {
+        "file": "pricecycle-fixture.trx.gz",
+        "passed_cases": 116,
+        "trx_sha256": "d9c4d318301963fec0124f6277e8a74cb4047b8e7712d06cad5e6b00e2a5e8c4"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingPriceCycleBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "PriceCycleOscillator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
