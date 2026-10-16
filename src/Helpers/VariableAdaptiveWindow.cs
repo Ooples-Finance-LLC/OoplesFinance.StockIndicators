@@ -34,9 +34,14 @@ internal sealed class VariableAdaptiveWindow : IDisposable
     internal (double Value, Signal Trade) Next(OhlcvBar bar, bool final)
     {
         StreamingInputValidation.Validate(bar);
-        var price = Number.Of(bar.Close);
-        return Finish(price, _close.Next(price, final), _open.Next(Number.Of(bar.Open), final),
-            _high.Next(Number.Of(bar.High), final), _low.Next(Number.Of(bar.Low), final), final);
+        return NextValidated(bar.Close, bar.Open, bar.High, bar.Low, final);
+    }
+    // Shared owned-bar execution validates the entire input before updating states.
+    internal (double Value, Signal Trade) NextValidated(double close, double open, double high, double low, bool final)
+    {
+        var price = Number.Of(close);
+        return Finish(price, _close.Next(price, final), _open.Next(Number.Of(open), final),
+            _high.Next(Number.Of(high), final), _low.Next(Number.Of(low), final), final);
     }
     internal static (double[] Values, Signal[] Trades) Calculate(StockData data, MovingAvgType kind, int length)
     {
