@@ -1681,7 +1681,13 @@
       "options": [
         "EhlersCommodityChannelIndexInverseFisherTransformSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersCommodityChannelIndexInverseFisherTransformSpecOptions": [
+          "benchmarks/results/remaining-indicators/commoditypair-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersConvolutionIndicator",
@@ -7223,7 +7229,13 @@
       "options": [
         "WoodieCommodityChannelIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "WoodieCommodityChannelIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/commoditypair-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "WoodiePivotPoints",
@@ -9324,6 +9336,7 @@
     "benchmarks/results/remaining-indicators/bettervolume-contracts.json": "e0cfa38122e21a9d52e314fc70fa56f4fbb9037421f36514435f892fce56e87a",
     "benchmarks/results/remaining-indicators/buffequity-contracts.json": "90833efbadfccd997da3f001072fde598e93d228b1d5d953e6e91a45cbb00313",
     "benchmarks/results/remaining-indicators/chainedma-contracts.json": "0f95ff360a33b19664d7934d6e458cc5bb19c7452d14dcf1887546d07eee82e9",
+    "benchmarks/results/remaining-indicators/commoditypair-contracts.json": "9939e93f23b58e37bcbd0ee11d78ad2b1002146d91d06a7b611ae0c571bd783c",
     "benchmarks/results/remaining-indicators/composed-contracts.json": "c4d8bac264a40537f0cba0270016bb25a1712d58628b5de9d11ba590567979f2",
     "benchmarks/results/remaining-indicators/cycletrend-contracts.json": "eb798f32e5e030d78860e763f109a058090e9f9e67fddd1abbb3766f5344a07d",
     "benchmarks/results/remaining-indicators/decycler-contracts.json": "361382b6273ab5c029503f0b54946883e02b3f6374eda2341cf473c015b4beb5",
@@ -9596,7 +9609,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "98c8fb2f416a30eea9f8070e8b6080a42d9259f629b1bf1998a087f87c0244f5",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "aec1d3f38cb66bb58aeb939ea9bd4a2cc6cba8c1d0ad3b55272678a6aa5a264a",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
