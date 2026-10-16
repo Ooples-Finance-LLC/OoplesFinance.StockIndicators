@@ -22,7 +22,8 @@ internal static partial class ValuesBarExecution
             or AverageTrueRange or ChandeMomentumOscillator or RateOfChange or DetrendedPriceOscillator
             or AccumulationDistributionLine or WilliamsAccumulationDistribution or SmoothedWilliamsAccumulationDistribution
             or EaseOfMovement { Divisor: >= double.MinValue and <= double.MaxValue }
-            or Pvo or PercentageVolumeOscillator or VolumeOscillator or PriceVolumeOscillator;
+            or Pvo or PercentageVolumeOscillator or VolumeOscillator or PriceVolumeOscillator
+            or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -103,6 +104,10 @@ internal static partial class ValuesBarExecution
         SlowSmoothedMovingAverage average => new GeneratedSlowSmoothedState(average.Length, count),
         McNichollMovingAverage average => new GeneratedMcNichollState(average.Length),
         WellRoundedMovingAverage average => new GeneratedWellRoundedState(average.Length),
+        EhlersBetterExponentialMovingAverage average => new GeneratedBetterEmaState(average.Length),
+        HoltExponentialMovingAverage average => new GeneratedHoltState(average.Length),
+        RegularizedEma average => new GeneratedRegularizedState(average.Length),
+        QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
         HullMovingAverage average => new HullValueState(average.Length),
@@ -301,6 +306,35 @@ internal static partial class ValuesBarExecution
             var atr = _window.Next(bar.High, bar.Low, bar.Close, true);
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedBetterEmaState(int period) : IIndicatorState
+    {
+        private readonly BetterEmaWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedHoltState(int period) : IIndicatorState
+    {
+        private readonly HoltWindow _window = new(period, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedRegularizedState(int period) : IIndicatorState
+    {
+        private readonly RegularizedWindow _window = new(period, .5);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedQuickState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly QuickWindowMean _window = new(period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
     }
 
