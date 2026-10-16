@@ -53,7 +53,7 @@ internal static partial class ValuesBarExecution
             or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator
             or Alma or JsaMovingAverage or SelfWeightedMovingAverage
             or SimplifiedLeastSquaresMovingAverage or FisherLeastSquaresMovingAverage or TStepLeastSquaresMovingAverage
-            or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage
+            or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage or AdaptiveLeastSquares
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
@@ -174,6 +174,7 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        AdaptiveLeastSquares average => new GeneratedAdaptiveRangeFitState(average.Length),
         PolynomialLeastSquaresMovingAverage average => new GeneratedPolynomialCellState(average.Length),
         QuadraticRegression average => new GeneratedQuadraticProjectionState(average.Length, count),
         QuadraticLeastSquaresMovingAverage average => new GeneratedQuadraticFitState(average.Length, count),
@@ -642,6 +643,14 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedAdaptiveRangeFitState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly AdaptiveFitWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Value;
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedPolynomialCellState(int period) : IIndicatorState

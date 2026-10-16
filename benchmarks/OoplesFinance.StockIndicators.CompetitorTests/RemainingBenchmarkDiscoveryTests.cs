@@ -49,6 +49,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingLeastSquaresBenchmarks), 16)]
     [InlineData(typeof(RemainingAdaptiveFitBenchmarks), 16)]
     [InlineData(typeof(RemainingPolynomialFitBenchmarks), 24)]
+    [InlineData(typeof(RemainingAdaptiveRangeBenchmarks), 8)]
     [InlineData(typeof(RemainingPoleFilterBenchmarks), 56)]
     [InlineData(typeof(RemainingEstimatorBenchmarks), 24)]
     [InlineData(typeof(RemainingWeightedMeanBenchmarks), 24)]
