@@ -71,6 +71,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingVolumeWeightedBenchmarks), 24)]
     [InlineData(typeof(RemainingBuffEquityBenchmarks), 16)]
     [InlineData(typeof(RemainingVolumeBalanceBenchmarks), 24)]
+    [InlineData(typeof(RemainingVolumeFlowBenchmarks), 8)]
     [InlineData(typeof(RemainingAdaptivePairBenchmarks), 16)]
     public void SharedLifecycleRetainsEveryBenchmarkCase(Type type, int count)
     {

@@ -73,11 +73,13 @@ internal static partial class ValuesBarExecution
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
             bool boundedBatch = indicators.Count > 1 && indicators.All(i => i.Outputs.Count == 1 && IsSharedState(i) && IsBoundedWindowIndicator(i));
             bool pointwiseBatch = indicators.Count > 1 && indicators.All(IsPointwise);
+            bool volumeFlowCustomRange = indicators.Any(i => i is VolumeFlowIndicator)
+                && UsesVolumeFlowCustomRange(source, cancellation);
             if (indicators.Count == 1)
-                nodes.Add(new Node(indicators[0], source.Length, true, false, false));
+                nodes.Add(new Node(indicators[0], source.Length, true, false, false, volumeFlowCustomRange));
             else
                 foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
-                    nodes.Add(new Node(indicator, source.Length, false, boundedBatch, pointwiseBatch));
+                    nodes.Add(new Node(indicator, source.Length, false, boundedBatch, pointwiseBatch, volumeFlowCustomRange));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
             bool singleSma = nodes.Count == 1 && nodes[0].Indicator is Sma;
@@ -624,7 +626,7 @@ internal static partial class ValuesBarExecution
         private readonly object? _state;
         private readonly double[] _scratch;
         internal bool HasScalarState => _state is IIndicatorState;
-        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch)
+        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch, bool volumeFlowCustomRange)
         {
             Indicator = indicator;
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
@@ -733,7 +735,7 @@ internal static partial class ValuesBarExecution
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
                 _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,
-                _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
+                _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count, volumeFlowCustomRange),
                 NormalizedWindowEntropy { Period: <= 4096 } entropy => new EntropyValueState(entropy.Period, count),
                 RangeFractalAverage fractal => new FractalValueState(fractal.Period, count),
                 FilteredDeviationAverage deviation => new DeviationAverageValueState(deviation.Period, deviation.ScaleFactor, count),
