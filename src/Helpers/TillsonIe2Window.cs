@@ -9,11 +9,11 @@ internal sealed class TillsonIe2Window : IDisposable
     private readonly RocBankAverage? _average;
     private readonly IMovingAverageSmoother? _fallback;
     private BigInteger _previous;
-    internal TillsonIe2Window(MovingAvgType kind, int length, bool externalAverage = false)
+    internal TillsonIe2Window(MovingAvgType kind, int length, bool externalAverage = false, int capacityHint = int.MaxValue, bool compactFit = false)
     {
-        length = Math.Max(1, length); _fit = new(length);
+        length = Math.Max(1, length); _fit = new(length, observedHistory: capacityHint < length, compact: compactFit);
         if (externalAverage) return;
-        if (StrengthWindow.Supports(kind)) _average = new(kind, length, int.MaxValue);
+        if (StrengthWindow.Supports(kind)) _average = new(kind, length, capacityHint);
         else _fallback = MovingAverageSmootherFactory.Create(kind, length);
     }
     internal double Next(double price, bool commit, double? average = null)
