@@ -4153,3 +4153,6 @@ Price Cycle Oscillator now reuses its exact distance-to-ATR kernel in shared exe
 
 
 Keltner Channels now compute all three bands with the existing exact EMA/Wilder kernel; Keltner Channel Middle reuses shared EMA state. Independent clamps, multiplier boundaries, invalid-multiplier fallback, original fields, ownership and component/source fallback remain intact. Validation: 152 focused unit cases, 8 parity cases, 113 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Chande Trend Score and Trend Score now maintain their delayed comparison window with a bounded order-statistic tree. Inclusive ties, zero-padded history, zero output below length 11, facade clamps, warmup and legacy int.MaxValue fallback are preserved. The existing selected-source rejection remains unchanged. Validation: 30 focused unit cases, 8 parity cases, 114 discovery cases, 100 local GPU cases and 4 inventory tests passed. An initial test incorrectly assumed source selection was supported; its 22 passes and 8 failures are archived alongside the complete corrected 30-case rerun, with unchanged production binaries. Sixteen timing cases are prepared; measured performance qualification remains pending. Hosted run 38958071125 passed all 41 jobs on ancestor 177b9483.

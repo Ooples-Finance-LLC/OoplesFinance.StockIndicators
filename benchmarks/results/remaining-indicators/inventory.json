@@ -878,7 +878,16 @@
         "ChandeTrendScoreSpecOptions",
         "TrendScoreSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ChandeTrendScoreSpecOptions": [
+          "benchmarks/results/remaining-indicators/trendscore-contracts.json"
+        ],
+        "TrendScoreSpecOptions": [
+          "benchmarks/results/remaining-indicators/trendscore-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ChandeVolatilityIndexDynamicAverageIndicator",
@@ -9687,6 +9696,7 @@
     "benchmarks/results/remaining-indicators/tradevolume-contracts.json": "01039570ca05b133bc6da239e666912c35960397f6e6981e1180fcc637b4f02f",
     "benchmarks/results/remaining-indicators/trendextra-contracts.json": "e8e13e0a9d70bbd8bfd75f749b214629107ada9d7594b84f45acda61ae9ecdd4",
     "benchmarks/results/remaining-indicators/trendrank-contracts.json": "7d60c7e4f05efb5fb635842ffa60a4fa7b328e8cd8d5eb3c4d984082b2c3b537",
+    "benchmarks/results/remaining-indicators/trendscore-contracts.json": "40ca242d290aae794e7cd4c2870c3656b63b3ced673aeddd32dc6172a3507841",
     "benchmarks/results/remaining-indicators/trendwindow-contracts.json": "32e63184f9118c5885bfb89ce0f354437f70cda2d18c3bdcddcbb969e2fec52b",
     "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
     "benchmarks/results/remaining-indicators/ultimatemomentum-contracts.json": "6d4a96b05a9467482b5743abde8458d8ab5aada891c773f658707af86f6d2449",
@@ -9917,7 +9927,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2d3981ddd6c4bc21c9fd840fae9fac44451675cc384af65f8b9d4d335e0c68a6",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "a9423023f1904c4a15618e53539ebbaf97cfb9de733537bcdacc1091e516e7eb",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

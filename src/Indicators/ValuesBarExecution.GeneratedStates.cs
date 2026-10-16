@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or ChandeTrendScore { Length: < int.MaxValue } or TrendScore { Length: < int.MaxValue }
             or KeltnerChannelMiddle or KeltnerChannels { MultFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or PriceCycleOscillator
             or Qstick or DailyAveragePriceDelta or DrunkardWalk
@@ -252,6 +253,8 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        ChandeTrendScore score => new GeneratedTrendScoreState(Math.Max(1, score.Length), count),
+        TrendScore score => new GeneratedTrendScoreState(Math.Max(1, score.Length), count),
         KeltnerChannelMiddle middle => new EmaValueState(middle.Length),
         KeltnerChannels channel => new GeneratedKeltnerChannelState(channel.Length1, channel.Length2, channel.MultFactor, count),
         PriceCycleOscillator cycle => new GeneratedPriceCycleState(cycle.Length, count),
@@ -962,6 +965,33 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedTrendScoreState(int endLength, int count) : IIndicatorState, IDisposable
+    {
+        private readonly int _width = Math.Max(0, endLength - 10);
+        private readonly PooledRingBuffer<double>? _delay = endLength >= 11 && count > 11 ? new(11) : null;
+        private readonly PooledRingBuffer<double>? _values = endLength >= 11 && count > 11 ? new(Math.Min(endLength - 10, count)) : null;
+        private OrderStatisticTree? _ranks;
+        public void Reset() { _delay?.Clear(); _values?.Clear(); _ranks = null; }
+        public double Update(in Bar bar)
+        {
+            if (_width == 0) return 0;
+            if (_delay is not null)
+            {
+                if (_delay.Count == 11)
+                {
+                    _ranks ??= new();
+                    if (_values!.TryAdd(_delay[0], out var expired)) _ranks.Remove(expired);
+                    _ranks.Insert(_delay[0]);
+                }
+                _delay.TryAdd(bar.Close, out _);
+            }
+            var arrived = _ranks?.Count ?? 0;
+            var atOrBelow = (_ranks?.CountLessThanOrEqual(bar.Close) ?? 0) + (bar.Close >= 0 ? _width - arrived : 0);
+            return 2d * atOrBelow - _width;
+        }
+        public void Dispose() { Reset(); _delay?.Dispose(); _values?.Dispose(); }
     }
 
     private sealed class GeneratedKeltnerChannelState(int centerLength, int rangeLength, double multiplier, int count) : IMultiOutputState, IDisposable
