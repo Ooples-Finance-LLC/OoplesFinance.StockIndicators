@@ -4218,3 +4218,6 @@ Projection Bands, Projection Oscillator and Projection Bandwidth now compute rel
 
 
 Vervoort Volatility Bands now compute three outputs together with the unchanged exact kernel. Directional ranges use original low prices; EMA stages, distinct lower multiplier, observed startup, huge periods, warmup, ownership and explicit average/source fallback are preserved. Validation: 94 focused unit cases, 4 parity cases, 134 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
+
+
+Efficient Trend Step Channel and Linear Channels now compute related outputs together. Efficient Trend Step skips unfillable efficiency and doubled-population windows while preserving exact deviation blending and boundary ties. Linear Channels retains its ordinary IEEE recurrence and startup boundary retention without intermediate series. Default helper behavior, clamps, source fallback, validation priority and ownership are preserved. Validation: 104 focused unit cases, 8 parity cases, 135 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
