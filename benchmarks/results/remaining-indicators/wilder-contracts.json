@@ -19,5 +19,30 @@
   },
   "gpu": "No new GPU route. Required-GPU rejection and Auto CPU selection are tested for all three aliases.",
   "performance": "No timing or allocation reduction is claimed yet. Candidate/legacy measurements remain required; no competitor benchmark was rerun.",
-  "remaining_scope": "All other inventory entries still require assessment; this batch does not complete PR 266."
+  "remaining_scope": "All other inventory entries still require assessment; this batch does not complete PR 266.",
+  "benchmark_fixture": {
+    "type": "RemainingWilderBenchmarks",
+    "operations": [
+      "Wwma",
+      "Smma",
+      "ModifiedMa"
+    ],
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 24,
+    "fixture_contract_tests_passed": 12,
+    "fixture_trx_sha256": "75fe7dcbb2ec5917f27e7155f555535eeec1af9b50e869b344cf6387692726a5",
+    "measurement_status": "prepared-not-measured",
+    "baseline": "Same-library legacy route; native SMMA startup contracts are not interchangeable."
+  }
 }
