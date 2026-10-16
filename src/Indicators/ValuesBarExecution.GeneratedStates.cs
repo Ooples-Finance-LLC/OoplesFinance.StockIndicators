@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AutoLine or AutoLineWithDrift
             or AutoFilter or AutoDispersionBands
             or AwesomeOscillator or AcceleratorOscillator
             or AnchoredMomentum
@@ -223,6 +224,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        AutoLine line => new GeneratedAutoLineState(line.Length, count),
+        AutoLineWithDrift line => new GeneratedAutoDriftState(line.Length),
         AutoFilter filter => new GeneratedAutoFilterState(filter.Length),
         AutoDispersionBands bands => new GeneratedAutoDispersionState(bands.Length, bands.SmoothLength, count),
         AwesomeOscillator oscillator => new GeneratedAwesomeState(oscillator.Length, count, false),
@@ -901,6 +904,32 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedAutoLineState(int length, int count) : IIndicatorState, IDisposable
+    {
+        // The legacy translated two-pass deviation has observable rounding.
+        // Its warmup is zero, so unfillable windows need no period-sized storage.
+        private readonly Streaming.RollingStandardDeviation? _deviation = Math.Max(1, length) <= count ? new(length) : null;
+        private double _previous;
+        private bool _started;
+        public void Reset() { _deviation?.Reset(); _previous = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            var deviation = _deviation?.Next(bar.Close, true) ?? 0d;
+            var previous = _started ? _previous : bar.Close;
+            _previous = bar.Close > previous + deviation || bar.Close < previous - deviation ? bar.Close : previous;
+            _started = true;
+            return _previous;
+        }
+        public void Dispose() { Reset(); _deviation?.Dispose(); }
+    }
+
+    private sealed class GeneratedAutoDriftState(int length) : IIndicatorState
+    {
+        private readonly AutoDriftWindow _window = new(Math.Max(1, length));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
 
     private sealed class GeneratedAutoFilterState(int length) : IIndicatorState, IDisposable

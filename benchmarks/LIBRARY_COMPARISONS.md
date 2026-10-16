@@ -4100,3 +4100,6 @@ Hosted run 38940232724 passed 40 jobs on 16c9662f, but contract shard 16 stopped
 
 
 Auto Filter and Auto Dispersion Bands now use shared execution through their existing exact kernels. Auto Dispersion computes all three bands together with input-bounded storage; default averaging, facade period clamps, staged rounding, warmup and component/source fallback remain intact. Validation: 150 focused unit cases, 8 fixture parity cases, 96 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Auto Line and Auto Line with Drift now use shared execution. Auto Line retains the existing translated two-pass deviation and its exceptional-value fallback; unfillable windows avoid period-sized storage. Drift reuses the exact staged kernel, rounded seed and lagged drift. Validation: 93 focused unit cases, 8 fixture parity cases, 97 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
