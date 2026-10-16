@@ -59,7 +59,8 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank
+            or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeFlowIndicator { Coef: > double.NegativeInfinity and < double.PositiveInfinity, Vcoef: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -207,6 +208,9 @@ internal static partial class ValuesBarExecution
         BetterVolumeIndicator volume => new GeneratedBetterVolumeState(volume.Length, volume.LbLength),
         AverageMoneyFlowOscillator flow => new GeneratedAverageMoneyFlowState(flow.Length),
         TradeVolumeIndex volume => new GeneratedTradeVolumeState(volume.Length),
+        TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
+        TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
+        TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         TrendStep step => new GeneratedTrendStepState(step.Length),
         TechnicalRank rank => new GeneratedTechnicalRankState(rank),
         TironeLevels levels => new GeneratedTironeState(levels.Length),
@@ -808,6 +812,34 @@ internal static partial class ValuesBarExecution
         private readonly AverageMoneyFlowWindow _window = new(MovingAvgType.WeightedMovingAverage, period, 3);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendContinuationState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly TrendContinuationWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Plus; outputs[1] = point.Minus;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendTriggerState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly TrendTriggerWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.High, bar.Low, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendIntensityState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly TrendIntensityWindow _window = new(MovingAvgType.SimpleMovingAverage, period, 60);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 

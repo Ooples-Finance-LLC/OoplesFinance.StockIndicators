@@ -4949,11 +4949,11 @@ internal static partial class IndicatorCompute
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides;
-        using var means = context.Rent(input.Count);
-        if (custom) MovingAverage(data, maType, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), means.WritableSpan);
+        using ComputeBuffer? means = custom ? context.Rent(input.Count) : null;
+        if (custom) MovingAverage(data, maType, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), means!.Value.WritableSpan);
         var output = context.Rent(input.Count);
         using var window = new TrendIntensityWindow(maType, fastLength, slowLength);
-        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means!.Value.Span[i] : null);
         return output;
     }
 
