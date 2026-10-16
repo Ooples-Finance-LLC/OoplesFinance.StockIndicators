@@ -4135,3 +4135,6 @@ Conditional Accumulator now shares its gap counter and exact EMA signal state. F
 
 
 Cumulative Sum and Cumulative Volume Index now share exact running accumulators. Small contributions survive cancellation; strict price comparisons, initial volume zero, signed volumes, overflow validation, ownership and source fallback are preserved. Validation: 19 focused unit cases, 8 parity cases, 107 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Chande Quick Stick and Delta Moving Average now reuse their exact open-close averaging kernel in shared execution. Delta computes Value, Signal and Histogram together; independent clamps, zero-padded lag, original open fields, extended arithmetic stages and component/source fallback remain intact. The new fixture mixes positive and negative candle bodies. Validation: 174 focused unit cases, 8 parity cases, 108 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending. Hosted run 38953640688 passed all 41 jobs on ancestor ab4c32b0; run 38958071125 is still validating the later published ancestor 177b9483.

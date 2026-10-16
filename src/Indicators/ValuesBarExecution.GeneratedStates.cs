@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or ChandeQuickStick or DeltaMovingAverage
             or CumulativeSum or CumulativeVolumeIndex
             or ConditionalAccumulator
             or ContractHigh or ContractLow
@@ -246,6 +247,8 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        ChandeQuickStick quick => new GeneratedQuickStickState(quick.Length),
+        DeltaMovingAverage delta => new GeneratedDeltaAverageState(delta.Length1, delta.Length2),
         CumulativeSum => new GeneratedCumulativeState(false),
         CumulativeVolumeIndex => new GeneratedCumulativeState(true),
         ConditionalAccumulator accumulator => new GeneratedConditionalState(accumulator.Length),
@@ -944,6 +947,26 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedQuickStickState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly OpenCloseAverageWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Open, bar.Close, true).Signal;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDeltaAverageState(int length, int lag) : IMultiOutputState, IDisposable
+    {
+        private readonly OpenCloseAverageWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), Math.Max(1, lag));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Open, bar.Close, true);
+            outputs[0] = value.Line; outputs[1] = value.Signal; outputs[2] = value.Histogram;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedCumulativeState(bool volume) : IIndicatorState
