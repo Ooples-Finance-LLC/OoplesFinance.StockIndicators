@@ -15,7 +15,8 @@ internal static partial class ValuesBarExecution
             or Kvo or KlingerVolumeOscillator or UltimateOscillator or Tsi or TrueStrengthIndex
             or ErgodicTrueStrengthIndexV1 or SMIErgodicIndicator
             or HullMovingAverage or TriangularMovingAverage or EhlersZeroLagEma or EhlersZeroLagExponentialMovingAverage
-            or ZeroLowLagMovingAverage or ZeroLagTripleExponentialMovingAverage or SlowSmoothedMovingAverage { Length: > int.MinValue };
+            or ZeroLowLagMovingAverage or ZeroLagTripleExponentialMovingAverage or SlowSmoothedMovingAverage { Length: > int.MinValue }
+            or AbsolutePriceOscillator or PriceOscillator or PriceOscillatorPercent or PercentagePriceOscillator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -44,6 +45,10 @@ internal static partial class ValuesBarExecution
         Cmo momentum => new GeneratedChandeState(momentum.Length, count),
         Trix trix => new GeneratedTrixState(trix.Length),
         Apo oscillator => new GeneratedEmaGapState(oscillator.FastLength, oscillator.SlowLength),
+        AbsolutePriceOscillator oscillator => new GeneratedEmaGapState(oscillator.FastLength, oscillator.SlowLength),
+        PriceOscillator oscillator => new GeneratedEmaGapState(oscillator.ShortLength, oscillator.LongLength),
+        PriceOscillatorPercent oscillator => new GeneratedEmaGapSignalState(oscillator.ShortLength, oscillator.LongLength, oscillator.SignalLength, percentage: true),
+        PercentagePriceOscillator oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, percentage: true),
         Ppo oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, percentage: true),
         Macd oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
         Aroon oscillator => new GeneratedAroonState(Math.Max(1, oscillator.Length)),
