@@ -9,12 +9,14 @@ internal sealed class MovingAverageBandWindow : IDisposable
     private readonly PooledRingBuffer<RocBankValue> _gaps;
     private readonly double _mult;
     private ExactMeanAccumulator _squares;
-    internal MovingAverageBandWindow(MovingAvgType kind, int fastLength, int slowLength, double mult, bool external = false)
+    // A finite bound requires that the caller publish no more than maxInputCount inputs.
+    internal MovingAverageBandWindow(MovingAvgType kind, int fastLength, int slowLength, double mult, bool external = false, int maxInputCount = int.MaxValue)
     {
         if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));
-        fastLength = Math.Max(1, fastLength); slowLength = Math.Max(1, slowLength); _mult = mult; _gaps = new(fastLength);
+        fastLength = Math.Max(1, fastLength); slowLength = Math.Max(1, slowLength); _mult = mult;
+        maxInputCount = Math.Max(1, maxInputCount); _gaps = new(Math.Min(fastLength, maxInputCount));
         if (external) return;
-        if (StrengthWindow.Supports(kind)) { _fast = new(kind, fastLength, int.MaxValue); _slow = new(kind, slowLength, int.MaxValue); }
+        if (StrengthWindow.Supports(kind)) { _fast = new(kind, fastLength, maxInputCount); _slow = new(kind, slowLength, maxInputCount); }
         else { _fastFallback = MovingAverageSmootherFactory.Create(kind, fastLength); _slowFallback = MovingAverageSmootherFactory.Create(kind, slowLength); }
     }
     private static void Square(ref ExactMeanAccumulator sum, RocBankValue value, int sign)
