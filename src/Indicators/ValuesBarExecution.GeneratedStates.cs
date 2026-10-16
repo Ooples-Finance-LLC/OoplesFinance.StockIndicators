@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -211,6 +211,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        TrigonometricOscillator oscillator => new GeneratedTrigonometricState(oscillator.Length),
+        TimeSeriesForecast forecast => new GeneratedForecastState(forecast.Length),
         TrendStep step => new GeneratedTrendStepState(step.Length),
         TechnicalRank rank => new GeneratedTechnicalRankState(rank),
         TironeLevels levels => new GeneratedTironeState(levels.Length),
@@ -840,6 +842,26 @@ internal static partial class ValuesBarExecution
         private readonly TrendIntensityWindow _window = new(MovingAvgType.SimpleMovingAverage, period, 60);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedTrigonometricState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly TrigonometricWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedForecastState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly TimeSeriesForecastWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Upper; outputs[1] = point.Middle; outputs[2] = point.Lower;
+        }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 

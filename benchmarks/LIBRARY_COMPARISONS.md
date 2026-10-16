@@ -4038,3 +4038,6 @@ Trend Step and Technical Rank now use their existing exact kernels in shared exe
 
 
 Trend Continuation Factor, Trend Trigger Factor and Trend Intensity Index now use shared execution with their existing exact kernels. Continuation outputs share one pass, and the default raw intensity path no longer rents an unused mean buffer. The fixed 60-bar intensity slow average and custom callback behavior are preserved. Validation: 134 focused unit cases, 12 fixture parity cases, 78 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Twenty-four timing cases are prepared; quiet-window performance qualification remains pending.
+
+
+Trigonometric Oscillator and Time Series Forecast now use shared execution with their unchanged exact kernels and original closes. Forecast upper, middle and lower outputs share one pass, preserving the primary middle output. Validation: 87 focused unit cases, 8 fixture parity cases, 79 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; quiet-window performance qualification remains pending.
