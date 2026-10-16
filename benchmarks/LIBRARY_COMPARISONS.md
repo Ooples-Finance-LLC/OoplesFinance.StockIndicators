@@ -4177,3 +4177,6 @@ Price Channel, Middle, Upper and Lower now reuse exact EMA and rounded percentag
 
 
 Moving Average Bands and Moving Average Band Width now reuse the exact EMA gap-deviation kernel in shared execution. The four band outputs and scalar width retain staged rounding, seeded startup, finite multipliers, ownership and component/source fallback. Owned batches bound gap history by input count; existing streaming callers retain their original lifetime. Independent int.MaxValue-period checks verify seeded bands and zero width without a period-sized allocation. Validation: 192 focused unit cases, 8 parity cases, 121 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Price Headley Acceleration Bands and Root Moving Average Squared Error Bands now compute all three outputs together with their existing exact kernels and input-bounded history. Extended hidden stages, zero-sum Headley boundaries, scaled RMSE squares, startup, finite-factor eligibility, original fields, ownership and component/source fallback are preserved. Validation: 115 focused unit cases, 8 parity cases, 122 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
