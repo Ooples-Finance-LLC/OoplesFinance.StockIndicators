@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or WamiOscillator or PriceMomentum or VolumeMomentum
             or VolumeZoneOscillator or VolumeMomentumOscillator
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or UltimateMomentumIndicator { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -213,6 +214,9 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        WamiOscillator wami => new GeneratedWamiState(wami.Length, count),
+        PriceMomentum momentum => new GeneratedLaggedDifferenceState(Math.Max(1, momentum.Length), count, false),
+        VolumeMomentum momentum => new GeneratedLaggedDifferenceState(Math.Max(1, momentum.Length), count, true),
         VolumeZoneOscillator zone => new GeneratedVolumeZoneState(zone.Length),
         VolumeMomentumOscillator momentum => new GeneratedVolumeMomentumOscillatorState(momentum.ShortLength, momentum.LongLength),
         ValueChartIndicator chart => new GeneratedValueChartState(chart.Length, valueChartCustomRange),
@@ -870,6 +874,30 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedWamiState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly WamiWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 4, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedLaggedDifferenceState(int period, int count, bool volume) : IIndicatorState
+    {
+        private readonly double[] _lag = new double[Math.Min(period, Math.Max(1, count))];
+        private int _position, _seen;
+        public void Reset() { _position = _seen = 0; }
+        public double Update(in Bar bar)
+        {
+            double value = volume ? bar.Volume : bar.Close;
+            double result = _seen < period ? 0 : value - _lag[_position];
+            _lag[_position] = value;
+            if (++_position == _lag.Length) _position = 0;
+            if (_seen < period) _seen++;
+            return result;
+        }
     }
 
     private sealed class GeneratedVolumeZoneState(int length) : IIndicatorState
