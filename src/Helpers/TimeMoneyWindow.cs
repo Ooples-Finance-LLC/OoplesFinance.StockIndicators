@@ -40,6 +40,13 @@ internal sealed class TimeMoneyWindow : IDisposable
     }
     internal (double[] Outputs, Signal Trade) Next(double price, bool final)
     {
+        var outputs = new double[7];
+        var trade = Next(price, final, outputs);
+        return (outputs, trade);
+    }
+    internal Signal Next(double price, bool final, Span<double> outputs)
+    {
+        if (outputs.Length < 7) throw new ArgumentException("Seven output slots are required.", nameof(outputs));
         StreamingInputValidation.Finite(price, nameof(price));
         var basis = Average(_basis, U(price), final);
         var previousBasis = _bases.Count == _lag ? _bases.Peek() : BigInteger.Zero;
@@ -62,7 +69,6 @@ internal sealed class TimeMoneyWindow : IDisposable
         var previousVariance = _variances.Count == _lag ? _variances.Peek() : BigInteger.Zero;
         var deviationLagged = Root(previousVariance << 1074, BigInteger.One);
         var width = Average(_width, deviationLagged, final);
-        var outputs = new double[7];
         for (var band = 0; band < 3; band++)
         {
             var coefficient = band == 0 ? .01 : band == 1 ? .02 : .03;
@@ -83,7 +89,7 @@ internal sealed class TimeMoneyWindow : IDisposable
             if (_simple) { if (_returns.Count == _length) _returns.Dequeue(); _returns.Enqueue(change); }
             _sum = sum; _squares = squares; _previousSlope = slope;
         }
-        return (outputs, trade);
+        return trade;
     }
     internal void Reset()
     {

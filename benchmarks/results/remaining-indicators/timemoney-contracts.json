@@ -1,0 +1,37 @@
+{
+  "batch": "time-money-shared-execution",
+  "types": [
+    "TimeAndMoneyChannel"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute all seven Time and Money Channel outputs together with the exact default-SMA kernel, writing directly to destination storage. Preserve the allocating wrapper, fixed output order including width in slot six, custom-average fallback, preview, reset and signals.",
+  "verification": {
+    "unit_passed": 83,
+    "fixture_passed": 4,
+    "discovery_passed": 72,
+    "gpu_passed": 100,
+    "contract_methods": 1407,
+    "hosted_methods": 1395,
+    "evidence": [
+      {
+        "file": "timemoney-unit.trx.gz",
+        "passed_cases": 83,
+        "trx_sha256": "9545befa2af6453567e646c42f4acfff153edaae35893b1616ade396962d6201"
+      },
+      {
+        "file": "timemoney-fixture.trx.gz",
+        "passed_cases": 76,
+        "trx_sha256": "2de65558e5da15cca96e57a310cd653c9a2d46d10bea9ad0afa232c129129d68"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTimeMoneyBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TimeAndMoneyChannel"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
