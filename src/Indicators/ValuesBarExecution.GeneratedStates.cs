@@ -74,6 +74,8 @@ internal static partial class ValuesBarExecution
             or StollerAverageRangeChannels { AtrMult: > double.NegativeInfinity and < double.PositiveInfinity } or KeltnerChannelWidth
             or PriceChannel { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
             or PriceChannelMiddle or PriceChannelUpper or PriceChannelLower or PriceLineChannel or PriceCurveChannel
+            or MovingAverageBands { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or MovingAverageBandWidth { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
             or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -273,6 +275,8 @@ internal static partial class ValuesBarExecution
         PriceChannelLower channel => new GeneratedPriceBandState(Math.Max(1, channel.Length), -1),
         PriceLineChannel channel => new GeneratedPriceDriftState(channel.Length, false, count),
         PriceCurveChannel channel => new GeneratedPriceDriftState(channel.Length, true, count),
+        MovingAverageBands channel => new GeneratedMovingAverageBandState(channel.FastLength, channel.SlowLength, channel.Mult, false, count),
+        MovingAverageBandWidth channel => new GeneratedMovingAverageBandState(channel.FastLength, channel.SlowLength, channel.Mult, true, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
         MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
@@ -994,6 +998,19 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedMovingAverageBandState(int fast, int slow, double multiplier, bool width, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly MovingAverageBandWindow _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, multiplier, maxInputCount: count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            if (width) { outputs[0] = value.Width; return; }
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower; outputs[3] = value.Fast;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedPriceBandState(int length, int direction) : IIndicatorState
