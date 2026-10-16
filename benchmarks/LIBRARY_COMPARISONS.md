@@ -4144,3 +4144,6 @@ Donchian Channel Width now shares its exact width and signal kernel, publishing 
 
 
 Donchian Channel, Upper and Lower now reuse bounded exact extrema; the midpoint uses the existing exact mean helper. Earliest signed-zero ties, shortened startup windows, facade clamps, warmup, ownership and source fallback are preserved, including periods through int.MaxValue. Validation: 43 focused unit cases, 12 parity cases, 110 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+Qstick, Daily Average Price Delta and Drunkard Walk now reuse their existing exact candle kernels in shared execution. Paired outputs are computed together, preserving original fields, arithmetic stages, newest Drunkard extremum ties, facade clamps/warmup and component/source fallback. Drunkard Length2 remains a warmup setting with no formula effect. Validation: 295 focused unit cases, 12 parity cases, 111 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
