@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or CumulativeSum or CumulativeVolumeIndex
             or ConditionalAccumulator
             or ContractHigh or ContractLow
             or IntradayMomentumIndex or ChandeIntradayMomentumIndex or RelativeMomentumIndex
@@ -245,6 +246,8 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        CumulativeSum => new GeneratedCumulativeState(false),
+        CumulativeVolumeIndex => new GeneratedCumulativeState(true),
         ConditionalAccumulator accumulator => new GeneratedConditionalState(accumulator.Length),
         ContractHigh => new PrefixPriceExtremeState(true),
         ContractLow => new PrefixPriceExtremeState(false),
@@ -941,6 +944,25 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedCumulativeState(bool volume) : IIndicatorState
+    {
+        private ExactMeanAccumulator _sum;
+        private double _previousClose;
+        private bool _started;
+        public void Reset() { _sum = default; _previousClose = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            if (!volume) _sum.Add(bar.Close);
+            else if (_started)
+            {
+                if (bar.Close > _previousClose) _sum.Add(bar.Volume);
+                else if (bar.Close < _previousClose) _sum.Add(bar.Volume, -1);
+            }
+            _previousClose = bar.Close; _started = true;
+            return _sum.Mean(1);
+        }
     }
 
     private sealed class GeneratedConditionalState(int length) : IMultiOutputState

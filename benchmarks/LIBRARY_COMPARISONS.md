@@ -4132,3 +4132,6 @@ DeMark Setup and Reversal Points now use rolling strict-comparison counts instea
 
 
 Conditional Accumulator now shares its gap counter and exact EMA signal state. First-bar initialization, high/low branch precedence, clamped signal periods, ownership and component/source fallback are preserved. Validation: 16 focused unit cases, 4 parity cases, 106 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
+
+
+Cumulative Sum and Cumulative Volume Index now share exact running accumulators. Small contributions survive cancellation; strict price comparisons, initial volume zero, signed volumes, overflow validation, ownership and source fallback are preserved. Validation: 19 focused unit cases, 8 parity cases, 107 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
