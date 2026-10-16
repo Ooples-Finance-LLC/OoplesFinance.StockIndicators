@@ -3909,3 +3909,16 @@ ExpandingRegularizedEma now caches the exact denominator after the effective sta
 ### Recursive/Ulcer combined diagnostic (2026-10-12)
 
 A single 20-case 10k batch at 5450bd1c covered expanding Rema/Zlema, Holt-Winter, updated Laguerre and Ulcer. All setup validations and measurements completed, but an AiDotNet.Tensors build appeared in the completion process sample and CPU load reached 74% (6% immediately before timing). Overlap cannot be ruled out. All timing is retained as diagnostic only in `results/shared-rollout/recursive-diagnostic-10k/`; no catalog entry changed and qualification stays 186/401. No rerun. Managed LatestOnly allocations were Rema 81,336 B, Zlema 81,464 B, Holt-Winter 81,330 B, Laguerre 81,362 B and Ulcer 171,071 B. The diagnostic still indicates substantial recurrence costs despite lower allocations; it establishes no latency win. BDN iteration warnings/outliers, raw data and process samples are preserved.
+
+### Preserved pivot columns against the cached baseline (2026-10-16)
+
+The preserved 033e31ab pivot-column candidate completed the four builder measurements with no detected interference. The saved native measurements were reused on matching recorded hardware/runtime. All four current builder confidence intervals are below the saved fastest-native interval. These are cross-run comparisons, not same-run qualification; the two interrupted attempts are excluded.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 127.602 | 139,236 | 0.269 | 0.817 |
+| 1,000 | LatestOnly | 119.624 | 90,487 | 0.259 | 0.766 |
+| 10,000 | Full | 1,088.500 | 1,219,718 | 0.228 | 0.606 |
+| 10,000 | LatestOnly | 1,061.522 | 738,594 | 0.225 | 0.591 |
+
+Evidence: `results/shared-rollout/rolling-pivot-shared-cpu/reused-baseline-columns/` contains raw timing, cached-baseline comparisons, immutable candidate hashes and quiet-process receipts. No native or competitor timing was repeated.
