@@ -4059,3 +4059,8 @@ Ultimate Momentum Indicator now shares its unchanged exact kernel with all five 
 
 
 Value Chart now writes all four coordinates directly into shared output storage and uses tuple intermediates instead of temporary coordinate arrays. Its existing array wrapper remains available. The whole-series median/close equality decision is preserved, including signed-zero equality and late differences that affect earlier range handling; NumAtrs remains calculation-inert. Validation: 122 focused unit cases (including mixed Volume Flow roots, independent span publication, bounds, preview and reset checks), 4 fixture parity cases, 85 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.
+
+
+Volume Zone Oscillator and Volume Momentum Oscillator now use shared execution over original volumes. Volume Zone preserves separate rounded EMA stages and signed-volume direction; Momentum preserves first-bar zero, both seeded-average periods and rounded percentage change. Validation: 51 focused unit cases, 8 fixture parity cases, 86 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+Integrated hosted correctness run 38927302926 passed all 42 jobs on commit 25f26911. The saved-duration scheduling repair retained all contract methods, 20 runners and the 45-minute limit. Later indicator batches retain their own local receipts and await integrated hosted validation.
