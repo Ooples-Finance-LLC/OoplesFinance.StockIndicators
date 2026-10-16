@@ -13,7 +13,8 @@ internal static partial class ValuesBarExecution
             or Demarker or DeMarker or UlcerIndex or ChoppinessIndex or Natr or AtrPercent or AtrChannelWidth or ChaikinVolatility
             or Variance or CoefficientOfVariation or StandardError or StdDev { Length: > 0 } or HistoricalVolatility
             or Kvo or KlingerVolumeOscillator or UltimateOscillator or Tsi or TrueStrengthIndex
-            or ErgodicTrueStrengthIndexV1 or SMIErgodicIndicator;
+            or ErgodicTrueStrengthIndexV1 or SMIErgodicIndicator
+            or HullMovingAverage or TriangularMovingAverage or EhlersZeroLagEma or EhlersZeroLagExponentialMovingAverage;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -69,6 +70,10 @@ internal static partial class ValuesBarExecution
         AtrPercent range => new GeneratedAtrDerivedState(range.Length, count),
         AtrChannelWidth range => new GeneratedAtrDerivedState(range.Length, count, range.Multiplier),
         ChaikinVolatility volatility => new GeneratedChaikinVolatilityState(volatility.Length, count),
+        HullMovingAverage average => new HullValueState(average.Length),
+        TriangularMovingAverage average => new GeneratedTriangularState(average.Length),
+        EhlersZeroLagEma average => new GeneratedEhlersZeroLagState(average.Length),
+        EhlersZeroLagExponentialMovingAverage average => new GeneratedEhlersZeroLagState(average.Length),
         Tsi strength => new GeneratedTrueStrengthState([strength.LongLength, strength.ShortLength], 7, count),
         TrueStrengthIndex strength => new GeneratedTrueStrengthState([strength.Length1, strength.Length2], strength.SignalLength, count),
         ErgodicTrueStrengthIndexV1 strength => new GeneratedTrueStrengthState([strength.Length1, strength.Length2, strength.Length3], strength.SignalLength, count),
@@ -194,6 +199,14 @@ internal static partial class ValuesBarExecution
             var atr = _window.Next(bar.High, bar.Low, bar.Close, true);
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEhlersZeroLagState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly EhlersZeroLagWindow _window = new(MovingAvgType.ExponentialMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
     }
 
