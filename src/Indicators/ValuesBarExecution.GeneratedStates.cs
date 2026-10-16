@@ -749,7 +749,9 @@ internal static partial class ValuesBarExecution
             cancellation.ThrowIfCancellationRequested();
             // Preserve the normal input-validation order for invalid source bars.
             if (!AllFieldsFinite(in bar)) return false;
+#pragma warning disable S1244 // Legacy routing requires exact numeric equality, including equal signed zeros.
             if (PriceMean.Of(bar.High, bar.Low, bar.Close) != bar.Close) return true;
+#pragma warning restore S1244
         }
         return false;
     }
