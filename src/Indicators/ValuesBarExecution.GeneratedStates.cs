@@ -24,7 +24,8 @@ internal static partial class ValuesBarExecution
             or EaseOfMovement { Divisor: >= double.MinValue and <= double.MaxValue }
             or Pvo or PercentageVolumeOscillator or VolumeOscillator or PriceVolumeOscillator
             or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage or EhlersLaguerreFilter or EhlersLaguerreRsi
-            or EhlersAdaptiveLaguerreFilter or EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha;
+            or EhlersAdaptiveLaguerreFilter or EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha
+            or RepulsionMovingAverage or CompoundRatioMovingAverage;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -112,6 +113,8 @@ internal static partial class ValuesBarExecution
         EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha strength => new GeneratedSelfAdjustingLaguerreState(strength.Length),
         EhlersLaguerreFilter filter => new GeneratedLaguerreFilterState(filter.Length),
         EhlersLaguerreRsi strength => new GeneratedLaguerreRsiState(strength.Length),
+        RepulsionMovingAverage average => new GeneratedRepulsionState(average.Length, count),
+        CompoundRatioMovingAverage average => new GeneratedCompoundRatioState(average.Length),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -361,6 +364,22 @@ internal static partial class ValuesBarExecution
         private readonly LaguerreRsiWindow _window = new(1 - 2d / (Math.Max(1, period) + 1d));
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedRepulsionState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly RepulsionWindow _window = new(MovingAvgType.SimpleMovingAverage, period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedCompoundRatioState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly CompoundRatioWindow _window = new(MovingAvgType.WeightedMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedQuickState(int period, int count) : IIndicatorState, IDisposable
