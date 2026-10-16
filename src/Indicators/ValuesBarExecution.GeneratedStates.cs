@@ -31,7 +31,9 @@ internal static partial class ValuesBarExecution
             or EhlersIirFilter or EhlersInfiniteImpulseResponseFilter or EhlersFirFilter or EhlersFiniteImpulseResponseFilter or EhlersOptimumEllipticFilter or EhlersModifiedOptimumEllipticFilter
             or Spencer15PointMovingAverage or Spencer21PointMovingAverage or DampedSineWaveWeightedFilter or HendersonWeightedMovingAverage or RightSidedRickerMovingAverage
             or FibonacciWeightedMovingAverage or SquareRootWeightedMovingAverage or SineWma
-            or TillsonIE2 or IIRLeastSquaresEstimate or HullEstimate;
+            or TillsonIE2 or IIRLeastSquaresEstimate or HullEstimate
+            or Ehlers2PoleButterworthFilterV1 or Ehlers2PoleButterworthFilterV2 or Ehlers2PoleSuperSmootherFilterV1 or Ehlers2PoleSuperSmootherFilterV2
+            or Ehlers3PoleButterworthFilterV1 or Ehlers3PoleButterworthFilterV2 or Ehlers3PoleSuperSmootherFilter;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -144,6 +146,13 @@ internal static partial class ValuesBarExecution
         TillsonIE2 average => new GeneratedTillsonIe2State(average.Length, count),
         IIRLeastSquaresEstimate average => new GeneratedIirLeastSquaresState(average.Length),
         HullEstimate average => new GeneratedHullEstimateState(average.Length, count),
+        Ehlers2PoleButterworthFilterV1 filter => new GeneratedTwoPoleState(filter.Length, 0),
+        Ehlers2PoleButterworthFilterV2 filter => new GeneratedTwoPoleState(filter.Length, 1),
+        Ehlers2PoleSuperSmootherFilterV1 filter => new GeneratedTwoPoleState(filter.Length, 2),
+        Ehlers2PoleSuperSmootherFilterV2 filter => new GeneratedTwoPoleState(filter.Length, 3),
+        Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
+        Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
+        Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -548,6 +557,20 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTwoPoleState(int period, int variant) : IIndicatorState
+    {
+        private readonly TwoPoleWindow _window = new(period, variant);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedThreePoleState(int period, int variant) : IIndicatorState
+    {
+        private readonly ThreePoleWindow _window = new(period, variant);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
 
     private sealed class GeneratedQuickState(int period, int count) : IIndicatorState, IDisposable
