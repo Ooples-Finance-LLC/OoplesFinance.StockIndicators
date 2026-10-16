@@ -4126,3 +4126,6 @@ Intraday Momentum Index, its Chande alias and Relative Momentum Index now share 
 
 
 Contract High and Contract Low now reuse the existing shared prefix-extreme state. Strict comparisons retain the earliest equal candidate, including signed-zero ties, and original high/low fields and source fallback are preserved. Validation: 30 focused unit cases (including independent numerical contracts and 8,193-bar signed-zero prefixes), 8 parity cases, 104 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+DeMark Setup and Reversal Points now use rolling strict-comparison counts instead of rescanning each window. Zero-padded startup, signed current-close publication, clamped settings and source fallback are preserved. Settings that overflow the legacy integer index retain fallback; unfillable valid windows allocate no history. Validation: 46 focused unit cases, 8 parity cases, 105 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
