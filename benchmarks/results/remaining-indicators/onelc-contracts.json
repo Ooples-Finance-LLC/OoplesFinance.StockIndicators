@@ -1,0 +1,45 @@
+{
+  "batch": "generated-one-lc-aliases",
+  "types": [
+    "OneLCLeastSquaresMovingAverage",
+    "_1LCLeastSquaresMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Both One LC aliases share the existing exact centered-covariance kernel for Simple, Weighted, Exponential and Wilder averages. Preserve selected average semantics, startup, rounding, errors, ownership and reset; unsupported or invalid average kinds retain legacy graph routing. All eight alias/average combinations have separate timing operations.",
+  "verification": {
+    "unit_passed": 155,
+    "fixture_passed": 32,
+    "discovery_passed": 53,
+    "gpu_passed": 100,
+    "contract_methods": 1388,
+    "hosted_methods": 1376,
+    "evidence": [
+      {
+        "file": "onelc-unit.trx.gz",
+        "passed_cases": 155,
+        "trx_sha256": "47d39036662502677c2c341a95fdd6c8cabf3428e326a8def53109192d9a10be"
+      },
+      {
+        "file": "onelc-fixture.trx.gz",
+        "passed_cases": 85,
+        "trx_sha256": "d59153f05dd9167fac79020b91ea22120582cda369fab170eb2218a117899d11"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingOneLcBenchmarks",
+    "cases": 64,
+    "status": "prepared-not-measured",
+    "operations": [
+      "NamedSma",
+      "NamedWma",
+      "NamedEma",
+      "NamedWilder",
+      "AliasSma",
+      "AliasWma",
+      "AliasEma",
+      "AliasWilder"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

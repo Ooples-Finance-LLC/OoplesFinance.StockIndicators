@@ -54,6 +54,8 @@ internal static partial class ValuesBarExecution
             or Alma or JsaMovingAverage or SelfWeightedMovingAverage
             or SimplifiedLeastSquaresMovingAverage or FisherLeastSquaresMovingAverage or TStepLeastSquaresMovingAverage
             or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage or AdaptiveLeastSquares
+            or OneLCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
+            or _1LCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
@@ -174,6 +176,8 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        OneLCLeastSquaresMovingAverage average => new GeneratedOneLcState(average.Length, average.MaType),
+        _1LCLeastSquaresMovingAverage average => new GeneratedOneLcState(average.Length, average.MaType),
         AdaptiveLeastSquares average => new GeneratedAdaptiveRangeFitState(average.Length),
         PolynomialLeastSquaresMovingAverage average => new GeneratedPolynomialCellState(average.Length),
         QuadraticRegression average => new GeneratedQuadraticProjectionState(average.Length, count),
@@ -643,6 +647,14 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedOneLcState(int period, MovingAvgType kind) : IIndicatorState, IDisposable
+    {
+        private readonly OneLcWindow _window = new(kind, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveRangeFitState(int period) : IIndicatorState, IDisposable
