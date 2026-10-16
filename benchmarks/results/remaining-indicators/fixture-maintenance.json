@@ -1,6 +1,6 @@
 {
   "scope": "Sonar duplication gate and captured fixture/interface/inventory findings; arithmetic unchanged",
-  "status": "local-verification-passed-hosted-quality-gate-pending",
+  "status": "local-verification-and-hosted-quality-gate-passed",
   "fixture_cases_passed": 161,
   "discovery_cases_passed": 12,
   "intended_timing_cases": 280,
@@ -8,5 +8,51 @@
   "gpu_cases_passed": 100,
   "fixture_trx_sha256": "c72f68b8310a09e8484c2d22423068aa40ef9aa7cc8c7e8952b2d90d3360e57c",
   "unit_trx_sha256": "d6b7613de560cb76c9b4882242609a420fb773b5aabf0b1155f1d24c12276533",
-  "changes": "Extract identical benchmark lifecycle, retain operation/period/data/method contracts, verify all outputs, use configured-state exceptions, align state parameter names, extract inventory receipt reader. Unmeasured timing candidates will be refreshed; historical snapshots retained."
+  "changes": "Extract identical benchmark lifecycle, retain operation/period/data/method contracts, verify all outputs, use configured-state exceptions, align state parameter names, extract inventory receipt reader. Unmeasured timing candidates will be refreshed; historical snapshots retained.",
+  "hosted_quality_gate": {
+    "head": "c0a262921e0b6ee6b80693456a09dec48e7b9a6b",
+    "status": "OK",
+    "conditions": [
+      {
+        "status": "OK",
+        "metricKey": "new_reliability_rating",
+        "comparator": "GT",
+        "periodIndex": 1,
+        "errorThreshold": "1",
+        "actualValue": "1"
+      },
+      {
+        "status": "OK",
+        "metricKey": "new_security_rating",
+        "comparator": "GT",
+        "periodIndex": 1,
+        "errorThreshold": "1",
+        "actualValue": "1"
+      },
+      {
+        "status": "OK",
+        "metricKey": "new_maintainability_rating",
+        "comparator": "GT",
+        "periodIndex": 1,
+        "errorThreshold": "1",
+        "actualValue": "1"
+      },
+      {
+        "status": "OK",
+        "metricKey": "new_duplicated_lines_density",
+        "comparator": "GT",
+        "periodIndex": 1,
+        "errorThreshold": "3",
+        "actualValue": "0.0"
+      },
+      {
+        "status": "OK",
+        "metricKey": "new_security_hotspots_reviewed",
+        "comparator": "LT",
+        "periodIndex": 1,
+        "errorThreshold": "100",
+        "actualValue": "100.0"
+      }
+    ]
+  }
 }
