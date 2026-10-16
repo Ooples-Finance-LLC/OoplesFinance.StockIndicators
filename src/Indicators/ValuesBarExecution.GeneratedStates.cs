@@ -82,6 +82,10 @@ internal static partial class ValuesBarExecution
             or MeanAbsoluteDeviationBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or InterquartileRangeBands { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or RangeBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
+            or BollingerBands { HasUnmodifiedDefaultAverage: true, StdDev: > double.NegativeInfinity and < double.PositiveInfinity }
+            or BollingerBandsWidth
+            or BollingerBandsPercentB { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
+            or NarrowSidewaysChannel
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
             or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -289,6 +293,11 @@ internal static partial class ValuesBarExecution
         MeanAbsoluteDeviationBands channel => new GeneratedMadBandState(Math.Max(1, channel.Length), channel.StdDevFactor, count),
         InterquartileRangeBands channel => new GeneratedIqrBandState(Math.Max(1, channel.Length), channel.Mult, count),
         RangeBands channel => new GeneratedRangeBandState(Math.Max(1, channel.Length), channel.StdDevFactor, count),
+        BollingerBands channel => new GeneratedBollingerState(Math.Max(1, channel.Length), Math.Max(.001, channel.StdDev), count, 0),
+        BollingerBandsWidth channel => new GeneratedBollingerState(Math.Max(1, channel.Length), 2, count, 1),
+        BollingerBandsPercentB channel => new GeneratedBollingerState(Math.Max(1, channel.Length), channel.Multiplier, count, 2),
+        // The legacy facade ignores its obsolete Pct option and uses three deviations.
+        NarrowSidewaysChannel channel => new GeneratedBollingerState(Math.Max(1, channel.Length), 3, count, 0),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
         MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
@@ -1010,6 +1019,28 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedBollingerState(int length, double multiplier, int count, int kind) : IMultiOutputState, IDisposable
+    {
+        // Both kernels publish zero until the entire window exists.
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _average = length <= count ? new(length) : null;
+        private readonly ExactPopulationWindow? _deviation = length <= count ? new(length) : null;
+        public void Reset() { _average?.Reset(); _deviation?.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var middle = _average?.Next(bar.Close, true) ?? 0;
+            var deviation = _deviation?.Next(bar.Close, true) ?? 0;
+            if (kind == 1) outputs[0] = BollingerArithmetic.Width(middle, deviation, multiplier);
+            else if (kind == 2) outputs[0] = BollingerArithmetic.Percent(bar.Close, middle, deviation, multiplier);
+            else
+            {
+                outputs[0] = BollingerArithmetic.Band(middle, deviation, multiplier);
+                outputs[1] = middle;
+                outputs[2] = BollingerArithmetic.Band(middle, deviation, -multiplier);
+            }
+        }
+        public void Dispose() { _average?.Dispose(); _deviation?.Dispose(); }
     }
 
     private sealed class GeneratedIqrBandState(int length, double multiplier, int count) : IMultiOutputState, IDisposable
