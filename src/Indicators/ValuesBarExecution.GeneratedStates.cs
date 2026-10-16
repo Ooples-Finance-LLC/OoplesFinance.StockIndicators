@@ -51,7 +51,8 @@ internal static partial class ValuesBarExecution
             or EhlersHannMovingAverage or EhlersHammingMovingAverage or HammingMa
             or EhlersHannWindowIndicator or EhlersHammingWindowIndicator
             or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator
-            or Alma or JsaMovingAverage or SelfWeightedMovingAverage;
+            or Alma or JsaMovingAverage or SelfWeightedMovingAverage
+            or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -171,6 +172,14 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        Lsma average => new GeneratedLsmaState(average.Length, count),
+        LinReg fit => new GeneratedRegressionOutputsState(fit.Length, count),
+        LinearChannelMiddle fit => new GeneratedRegressionOutputsState(fit.Length, count),
+        LinRegSlope fit => new GeneratedRegressionState(fit.Length, count, RegressionReading.Slope),
+        LinearRegressionSlope fit => new GeneratedRegressionState(fit.Length, count, RegressionReading.Slope),
+        LinRegIntercept fit => new GeneratedRegressionState(fit.Length, count, RegressionReading.GlobalIntercept),
+        LinearRegressionIntercept fit => new GeneratedRegressionState(fit.Length, count, RegressionReading.GlobalIntercept),
+        LinearRegressionLine fit => new GeneratedRegressionState(fit.Length, count, RegressionReading.Line),
         Alma average => new GeneratedAlmaState(average.Length, count),
         JsaMovingAverage average => new GeneratedJsaState(average.Length, count),
         SelfWeightedMovingAverage average => new GeneratedSelfWeightedState(average.Length),
@@ -625,6 +634,49 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedLsmaState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly WmaValueState _weighted = new(Math.Max(1, period), count);
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _simple = Math.Max(1, period) > count ? null : new(period);
+        public void Reset() { _weighted.Reset(); _simple?.Reset(); }
+        public double Update(in Bar bar) => LeastSquaresAverage.Combine(_weighted.Update(in bar), _simple?.Next(bar.Close, true) ?? 0);
+        public void Dispose() => _simple?.Dispose();
+    }
+
+    private sealed class GeneratedRegressionOutputsState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly ExactLinearFitWindow _window = new(period, observedHistory: Math.Max(1, period) > count, compact: true);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var fit = _window.Next(bar.Close, true);
+            outputs[0] = fit.Last;
+            outputs[1] = fit.Next;
+            outputs[2] = fit.Slope;
+            outputs[3] = fit.GlobalIntercept;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private enum RegressionReading { Slope, GlobalIntercept, Line }
+
+    private sealed class GeneratedRegressionState(int period, int count, RegressionReading reading) : IIndicatorState, IDisposable
+    {
+        private readonly ExactLinearFitWindow _window = new(period, observedHistory: Math.Max(1, period) > count, compact: true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var fit = _window.Next(bar.Close, true);
+            return reading switch
+            {
+                RegressionReading.Slope => fit.Slope,
+                RegressionReading.GlobalIntercept => fit.GlobalIntercept,
+                _ => fit.Count < Math.Max(1, period) ? 0 : fit.Last
+            };
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAlmaState(int period, int count) : IIndicatorState, IDisposable
