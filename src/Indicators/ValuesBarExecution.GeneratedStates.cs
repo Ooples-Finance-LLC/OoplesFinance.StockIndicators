@@ -59,6 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator
+            or VolumeFlowIndicator { Coef: > double.NegativeInfinity and < double.PositiveInfinity, Vcoef: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or AdaptiveEma or AdaptiveExponentialMovingAverage
             or BryantAdaptiveMovingAverage { Length: >= int.MinValue / 4 and <= int.MaxValue / 4 }
@@ -72,7 +73,7 @@ internal static partial class ValuesBarExecution
             or _1LCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
-    private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
+    private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange) => indicator switch
     {
         HighestHigh high when high.Length >= count => new PrefixPriceExtremeState(true),
         LowestLow low when low.Length >= count => new PrefixPriceExtremeState(false),
@@ -197,6 +198,7 @@ internal static partial class ValuesBarExecution
         UpsideDownsideVolume volume => new GeneratedVolumeBalanceState(volume.Length, VolumeBalanceKind.UpsideDownside),
         TFSVolumeOscillator volume => new GeneratedVolumeBalanceState(volume.Length, VolumeBalanceKind.Tfs),
         VolumeAccumulationOscillator volume => new GeneratedVolumeBalanceState(volume.Length, VolumeBalanceKind.Accumulation),
+        VolumeFlowIndicator volume => new GeneratedVolumeFlowState(volume.Length1, volume.Length2, volume.SignalLength, volume.SmoothLength, volume.Coef, volume.Vcoef, volumeFlowCustomRange),
         BuffAverage average => new GeneratedBuffState(average.Length),
         EquityMovingAverage average => new GeneratedEquityState(average.Length),
         Vwma average => new GeneratedVolumeWeightedState(average.Length),
@@ -709,6 +711,46 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, true);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    // The legacy named-input helper applies its per-bar range policy only when
+    // the entire derived series is not equal to the closes (ordinary == equality).
+    private static bool UsesVolumeFlowCustomRange(Bar[] source, CancellationToken cancellation)
+    {
+        foreach (var bar in source)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            // Preserve the normal input-validation order for invalid source bars.
+            if (!AllFieldsFinite(in bar)) return false;
+            if (PriceMean.Of(bar.High, bar.Low, bar.Close) != bar.Close) return true;
+        }
+        return false;
+    }
+
+    private sealed class GeneratedVolumeFlowState(int flow, int variance, int signal, int smooth, double coefficient, double volumeCoefficient, bool customRange) : IMultiOutputState, IDisposable
+    {
+        private readonly VolumeFlowWindow _window = new(MovingAvgType.SimpleMovingAverage, flow, variance, signal, smooth, coefficient, volumeCoefficient);
+        private double _previousTypical;
+        private bool _started;
+        public void Reset() { _window.Reset(); _previousTypical = 0; _started = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var namedPrice = PriceMean.Of(bar.High, bar.Low, bar.Close);
+            var high = bar.High; var low = bar.Low;
+            if (customRange && !CalculationsHelper.IsWithinBarRange(namedPrice, low, high))
+            {
+                var previous = _started ? _previousTypical : namedPrice;
+                high = Math.Max(previous, namedPrice); low = Math.Min(previous, namedPrice);
+            }
+            var typical = new ExactMeanAccumulator();
+            typical.Add(high); typical.Add(low); typical.Add(bar.Close);
+            var point = _window.Next(typical.Mean(3), bar.Close, bar.Volume, true);
+            outputs[0] = point.Line;
+            outputs[1] = point.Signal;
+            outputs[2] = point.Histogram;
+            _previousTypical = namedPrice; _started = true;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedBuffState(int period) : IMultiOutputState, IDisposable
