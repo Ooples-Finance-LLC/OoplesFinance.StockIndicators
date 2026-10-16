@@ -7,7 +7,8 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
-            or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum;
+            or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
+            or Cci or Cmo or Trix;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -32,6 +33,9 @@ internal static partial class ValuesBarExecution
         Atr range => new GeneratedAtrState(range.Length, count),
         Roc change => new GeneratedRatioState(Math.Max(1, change.Length), count),
         Momentum momentum => new GeneratedMomentumState(Math.Max(1, momentum.Length), count),
+        Cci commodity => new GeneratedCommodityState(commodity.Length, count),
+        Cmo momentum => new GeneratedChandeState(momentum.Length, count),
+        Trix trix => new GeneratedTrixState(trix.Length),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -58,6 +62,36 @@ internal static partial class ValuesBarExecution
             if (_seen < period) _seen++;
             return value;
         }
+    }
+
+    private sealed class GeneratedCommodityState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly CommodityIndexWindow _window = new(MovingAvgType.SimpleMovingAverage, period, .015, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close), true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChandeState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly ChandeMomentumWindow _window = new(Math.Min(Math.Max(1, period), Math.Max(1, count)));
+        private readonly Streaming.EmaState _signal = new(3);
+        public void Reset() { _window.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> output)
+        {
+            double value = _window.Next(bar.Close, true);
+            output[0] = value;
+            output[1] = _signal.GetNext(value, commit: true);
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTrixState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly TrixWindow _window = new(MovingAvgType.ExponentialMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Publish();
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedMomentumState(int period, int count) : IMultiOutputState

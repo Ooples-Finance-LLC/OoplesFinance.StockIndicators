@@ -1,0 +1,38 @@
+{
+  "batch": "generated-cci-cmo-trix",
+  "types": [
+    "Cci",
+    "Cmo",
+    "Trix"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact CommodityIndexWindow, ChandeMomentumWindow with the existing three-period EMA signal, and TrixWindow. CCI reads exact typical price; CMO computes both outputs together; TRIX omits intermediate arrays. Custom components retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 28,
+    "fixture_passed": 12,
+    "gpu_passed": 100,
+    "contract_methods": 1337,
+    "hosted_methods": 1325,
+    "unit_trx_sha256": "031b4b586f4d5f0572a820a1872ea720d50b411126916b3f57c2545aacce6111",
+    "fixture_trx_sha256": "ad4c995bfab888733cdfc633a7b6d819d10d1ce288ce50c10bffc51fa8d8bce2"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingOscillatorBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
