@@ -52,6 +52,7 @@ internal static partial class ValuesBarExecution
             or EhlersHannWindowIndicator or EhlersHammingWindowIndicator
             or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator
             or Alma or JsaMovingAverage or SelfWeightedMovingAverage
+            or SimplifiedLeastSquaresMovingAverage
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
@@ -146,7 +147,7 @@ internal static partial class ValuesBarExecution
         GeneralizedDoubleExponentialMovingAverage average => new GeneratedGeneralizedDoubleState(average.Length, average.VolumeFactor),
         DoubleExponentialSmoothing => new GeneratedDoubleSmoothingState(),
         LightLeastSquaresMovingAverage average => new GeneratedLightLeastSquaresState(average.Length, count),
-        LinearExtrapolation extrapolation => new GeneratedLinearExtrapolationState(extrapolation.Length),
+        LinearExtrapolation extrapolation => new GeneratedLinearExtrapolationState(extrapolation.Length, count),
         RecursiveMovingTrendAverage average => new GeneratedRecursiveTrendState(average.Length),
         EhlersIirFilter filter => new GeneratedEhlersIirState(filter.Length),
         EhlersInfiniteImpulseResponseFilter filter => new GeneratedEhlersIirState(filter.Length),
@@ -172,6 +173,7 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        SimplifiedLeastSquaresMovingAverage average => new GeneratedSimplifiedLsmaState(average.Length, count),
         Lsma average => new GeneratedLsmaState(average.Length, count),
         LinReg fit => new GeneratedRegressionOutputsState(fit.Length, count),
         LinearChannelMiddle fit => new GeneratedRegressionOutputsState(fit.Length, count),
@@ -506,11 +508,11 @@ internal static partial class ValuesBarExecution
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedLinearExtrapolationState(int period) : IIndicatorState
+    private sealed class GeneratedLinearExtrapolationState(int period, int count) : IIndicatorState
     {
-        private readonly LinearExtrapolationWindow _window = new(period);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        private readonly LinearExtrapolationWindow? _window = Math.Max(1, period) >= count ? null : new(period);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.Close, true) ?? 0;
     }
 
     private sealed class GeneratedRecursiveTrendState(int period) : IIndicatorState
@@ -634,6 +636,14 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedSimplifiedLsmaState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly SimplifiedLeastSquaresWindow? _window = count == 0 ? null : new(period, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
     }
 
     private sealed class GeneratedLsmaState(int period, int count) : IIndicatorState, IDisposable
