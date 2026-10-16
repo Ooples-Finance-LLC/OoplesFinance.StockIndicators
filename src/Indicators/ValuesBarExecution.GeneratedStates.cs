@@ -53,6 +53,7 @@ internal static partial class ValuesBarExecution
             or SymmetricallyWeightedMovingAverage or EhlersTriangleMovingAverage or EhlersTriangleWindowIndicator
             or Alma or JsaMovingAverage or SelfWeightedMovingAverage
             or SimplifiedLeastSquaresMovingAverage or FisherLeastSquaresMovingAverage or TStepLeastSquaresMovingAverage
+            or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
@@ -173,6 +174,9 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        PolynomialLeastSquaresMovingAverage average => new GeneratedPolynomialCellState(average.Length),
+        QuadraticRegression average => new GeneratedQuadraticProjectionState(average.Length, count),
+        QuadraticLeastSquaresMovingAverage average => new GeneratedQuadraticFitState(average.Length, count),
         FisherLeastSquaresMovingAverage average => new GeneratedFisherLsmaState(average.Length),
         TStepLeastSquaresMovingAverage average => new GeneratedTStepLsmaState(average.Length),
         SimplifiedLeastSquaresMovingAverage average => new GeneratedSimplifiedLsmaState(average.Length, count),
@@ -638,6 +642,34 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedPolynomialCellState(int period) : IIndicatorState
+    {
+        private readonly PolynomialCellWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedQuadraticProjectionState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly QuadraticProjectionWindow? _window = count == 0 ? null : new(MovingAvgType.SimpleMovingAverage, period, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedQuadraticFitState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.QuadraticLeastSquaresWindow? _window = Math.Max(1, period) > count ? null : new(period);
+        public void Reset() => _window?.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var fit = _window?.Next(bar.Close, 14, true) ?? default;
+            outputs[0] = fit.Value;
+            outputs[1] = fit.Forecast;
+        }
+        public void Dispose() => _window?.Dispose();
     }
 
     private sealed class GeneratedFisherLsmaState(int period) : IIndicatorState, IDisposable

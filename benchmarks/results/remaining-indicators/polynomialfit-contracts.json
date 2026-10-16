@@ -1,0 +1,36 @@
+{
+  "batch": "generated-polynomial-and-quadratic-fits",
+  "types": [
+    "PolynomialLeastSquaresMovingAverage",
+    "QuadraticRegression",
+    "QuadraticLeastSquaresMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share the existing builder polynomial-cell and quadratic-projection kernels. Quadratic LSMA computes value and fixed-horizon forecast together from one exact fit, and omits the fit buffer when the source cannot fill the original period. Preserve original coefficients, startup, output order, exception priority and custom-average graph fallback.",
+  "verification": {
+    "unit_passed": 140,
+    "fixture_passed": 12,
+    "discovery_passed": 51,
+    "gpu_passed": 100,
+    "contract_methods": 1386,
+    "hosted_methods": 1374,
+    "evidence": [
+      {
+        "file": "polynomialfit-unit.trx.gz",
+        "passed_cases": 140,
+        "trx_sha256": "eefb3ccdcb44869bb58f8a3ff2a56c0e2ae541fe802d7dacf9d5b24d9aa32308"
+      },
+      {
+        "file": "polynomialfit-fixture.trx.gz",
+        "passed_cases": 63,
+        "trx_sha256": "c8be28a7dc4cb08b359a508ef3fe7960e024fae7d9cf147644e099fe70e05868"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingPolynomialFitBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
