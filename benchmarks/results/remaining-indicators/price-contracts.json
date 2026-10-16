@@ -1,0 +1,23 @@
+{
+  "batch": "generated-price-average-aliases",
+  "types": [
+    "AveragePrice",
+    "MidRange",
+    "HlcAverage",
+    "OhlcAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Extend shared single-root and mixed pointwise execution with existing PriceMean arithmetic; AveragePrice preserves open/close mean. Composed inputs retain existing fallback.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings, 0 errors",
+    "unit_filter": "FullyQualifiedName~SharedPriceProjectionTests|FullyQualifiedName~SharedPointwiseBatchTests|FullyQualifiedName~SharedGeneratedWilderTests",
+    "passed": 63,
+    "failed": 0,
+    "trx_sha256": "b18a900d378a951fe9e788a47cc5f3228fdd2f7f49c72ca9c88c793726556c06",
+    "gpu_passed": 100,
+    "gpu_receipt": "../shared-rollout/local-gpu-contracts/receipt.json",
+    "discovered_contract_methods": 1331,
+    "hosted_contract_methods": 1319
+  },
+  "performance": "No latency or allocation measurements yet. No competitor benchmark rerun."
+}

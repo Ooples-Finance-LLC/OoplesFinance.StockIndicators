@@ -7,6 +7,17 @@ internal static partial class ValuesBarExecution
 {
     // Reuse the evaluator's guarded arithmetic and operation order, while reading
     // the selected fields from one validated bar instead of materialized columns.
+    private readonly struct AveragePriceKernel : IPointwiseKernel
+    {
+        public bool AlwaysDefined => true;
+        public bool CanOverflow => false;
+        public double Invoke(in Bar bar, out bool defined)
+        {
+            defined = true;
+            return PriceMean.Of(bar.Open, bar.Close);
+        }
+    }
+
     private readonly struct MedianPriceKernel : IPointwiseKernel
     {
         public bool AlwaysDefined => true;
