@@ -5108,7 +5108,8 @@ internal static partial class IndicatorCompute
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         using var window = new MoneyFlowPercentWindow(length, maType);
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var volumes = context.Rent(input.Count); using var flows = context.Rent(input.Count);
+        using ComputeBuffer? volumes = custom ? context.Rent(input.Count) : null;
+        using ComputeBuffer? flows = custom ? context.Rent(input.Count) : null;
         if (custom)
         {
             using var contributions = context.Rent(input.Count);
@@ -5117,11 +5118,11 @@ internal static partial class IndicatorCompute
                 var previous = i == 0 ? 0 : input[i - 1];
                 contributions.WritableSpan[i] = MoneyFlowAccumulationWindow.Flow(Math.Max(data.HighPrices[i], previous), Math.Min(data.LowPrices[i], previous), input[i], data.Volumes[i]).Publish();
             }
-            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(data.Volumes), volumes.WritableSpan);
-            MovingAverage(data, maType, Math.Max(1, length), contributions.Span, flows.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(data.Volumes), volumes!.Value.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), contributions.Span, flows!.Value.WritableSpan);
         }
         var output = context.Rent(input.Count);
-        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, custom ? volumes.Span[i] : null, custom ? flows.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, custom ? volumes!.Value.Span[i] : null, custom ? flows!.Value.Span[i] : null);
         return output;
     }
 
