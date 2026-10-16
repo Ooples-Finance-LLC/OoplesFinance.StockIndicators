@@ -77,6 +77,8 @@ internal static partial class ValuesBarExecution
                 && UsesVolumeFlowCustomRange(source, cancellation);
             bool valueChartCustomRange = indicators.Any(i => i is ValueChartIndicator)
                 && UsesValueChartCustomRange(source, cancellation);
+            if (indicators.Any(i => i is AbsoluteStrengthIndex))
+                ValidateAbsoluteStrengthInput(source, cancellation);
             if (indicators.Count == 1)
                 nodes.Add(new Node(indicators[0], source.Length, true, false, false, volumeFlowCustomRange, valueChartCustomRange));
             else

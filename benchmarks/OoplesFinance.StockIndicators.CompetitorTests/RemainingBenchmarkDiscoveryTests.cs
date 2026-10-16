@@ -97,6 +97,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingCommodityPairBenchmarks), 16)]
     [InlineData(typeof(RemainingVolumeVortexBenchmarks), 24)]
     [InlineData(typeof(RemainingWeightedCloseBenchmarks), 8)]
+    [InlineData(typeof(RemainingAbsoluteStrengthBenchmarks), 16)]
     [InlineData(typeof(RemainingUltimateMomentumBenchmarks), 8)]
     [InlineData(typeof(RemainingAdaptivePairBenchmarks), 16)]
     public void SharedLifecycleRetainsEveryBenchmarkCase(Type type, int count)
