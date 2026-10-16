@@ -60,6 +60,7 @@ internal static partial class ValuesBarExecution
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeFlowIndicator { Coef: > double.NegativeInfinity and < double.PositiveInfinity, Vcoef: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -208,6 +209,12 @@ internal static partial class ValuesBarExecution
         TradeVolumeIndex volume => new GeneratedTradeVolumeState(volume.Length),
         TimeAndMoneyChannel channel => new GeneratedTimeMoneyState(channel.Length1, channel.Length2),
         TraderPressureIndex pressure => new GeneratedTraderPressureState(pressure.Length1, pressure.Length2, pressure.SmoothLength),
+        VortexPositive vortex => new GeneratedVortexState(vortex.Length, true),
+        VortexNegative vortex => new GeneratedVortexState(vortex.Length, false),
+        VortexPlus vortex => new GeneratedVortexState(vortex.Length, true),
+        VortexMinus vortex => new GeneratedVortexState(vortex.Length, false),
+        VortexIndicatorPlus vortex => new GeneratedVortexState(vortex.Length, true),
+        VortexIndicatorMinus vortex => new GeneratedVortexState(vortex.Length, false),
         VolumeAccumulationPercent flow => new GeneratedMoneyFlowPercentState(flow.Length, false),
         TwiggsMoneyFlow flow => new GeneratedMoneyFlowPercentState(flow.Length, true),
         BuffAverage average => new GeneratedBuffState(average.Length),
@@ -798,6 +805,18 @@ internal static partial class ValuesBarExecution
         private readonly AverageMoneyFlowWindow _window = new(MovingAvgType.WeightedMovingAverage, period, 3);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedVortexState(int period, bool positive) : IMultiOutputState, IDisposable
+    {
+        private readonly VortexWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = positive ? point.Plus : point.Minus;
+        }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
