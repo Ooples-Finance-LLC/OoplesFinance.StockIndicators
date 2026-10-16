@@ -4032,3 +4032,6 @@ All six Vortex aliases now use shared execution with the existing exact VortexWi
 
 
 Tirone Levels now computes all eight outputs in one shared pass and writes directly to destination storage, avoiding its per-update output array on this path. The existing wrapper, staged rounding and primary mean at slot three remain compatible. Validation: 46 focused unit cases (including a frozen prior-kernel comparison), 4 fixture parity cases, 76 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.
+
+
+Trend Step and Technical Rank now use their existing exact kernels in shared execution. All nine Technical Rank periods and the original close input remain intact. Validation: 357 unit cases, 8 fixture parity cases, 77 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared for quiet-window qualification; no measured speedup is claimed.
