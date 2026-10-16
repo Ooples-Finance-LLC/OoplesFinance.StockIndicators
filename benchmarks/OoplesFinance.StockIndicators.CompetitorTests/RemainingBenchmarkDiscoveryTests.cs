@@ -23,6 +23,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingRangeHealthBenchmarks), 32)]
     [InlineData(typeof(RemainingAtrDerivedBenchmarks), 32)]
     [InlineData(typeof(RemainingExactStatisticsBenchmarks), 24)]
+    [InlineData(typeof(RemainingPressureFlowBenchmarks), 24)]
     [InlineData(typeof(RemainingOrderedVolatilityBenchmarks), 16)]
     public void SharedLifecycleRetainsEveryBenchmarkCase(Type type, int count)
     {
