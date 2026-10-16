@@ -1,0 +1,23 @@
+{
+  "batch": "generated-wilder-aliases",
+  "formula": "WellesWilderMovingAverage",
+  "types": [
+    "Wwma",
+    "Smma",
+    "ModifiedMa"
+  ],
+  "implementation": "Shared values execution reuses Streaming.WilderState, preserving RoundedWilder arithmetic and period normalization. Plain typed CPU runs omit the legacy runtime. Composed graphs retain existing dispatch.",
+  "status": "cpu-contracts-verified-performance-pending",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings, 0 errors",
+    "unit_filter": "FullyQualifiedName~SharedGeneratedWilderTests|FullyQualifiedName~SharedRecursiveStateTests|FullyQualifiedName~SharedStateExecutionTests",
+    "passed": 67,
+    "failed": 0,
+    "skipped": 0,
+    "trx_sha256": "1bd8d358d8c45c8dd70d4a719ebc2704091adfdde018d505cb81df3aebdcb8dd",
+    "trx_local_path": "C:\\Users\\cheat\\temp\\si-remaining-wilder-results\\wilder.trx"
+  },
+  "gpu": "No new GPU route. Required-GPU rejection and Auto CPU selection are tested for all three aliases.",
+  "performance": "No timing or allocation reduction is claimed yet. Candidate/legacy measurements remain required; no competitor benchmark was rerun.",
+  "remaining_scope": "All other inventory entries still require assessment; this batch does not complete PR 266."
+}

@@ -6,7 +6,8 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
-        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl;
+        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
+            or Wwma or Smma or ModifiedMa;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -19,6 +20,9 @@ internal static partial class ValuesBarExecution
         Wma average => new WmaValueState(Math.Max(1, average.Length), count),
         WilliamsR range => new WilliamsValueState(Math.Max(1, range.Length), count),
         Ema average => new EmaValueState(average.Length),
+        Wwma average => new WilderValueState(average.Length),
+        Smma average => new WilderValueState(average.Length),
+        ModifiedMa average => new WilderValueState(average.Length),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -26,6 +30,13 @@ internal static partial class ValuesBarExecution
     private sealed class EmaValueState(int period) : IIndicatorState
     {
         private readonly Streaming.EmaState _state = new(period);
+        public void Reset() => _state.Reset();
+        public double Update(in Bar bar) => _state.GetNext(bar.Close, commit: true);
+    }
+
+    private sealed class WilderValueState(int period) : IIndicatorState
+    {
+        private readonly Streaming.WilderState _state = new(period);
         public void Reset() => _state.Reset();
         public double Update(in Bar bar) => _state.GetNext(bar.Close, commit: true);
     }
