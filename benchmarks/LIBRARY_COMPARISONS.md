@@ -4112,3 +4112,11 @@ Alligator Jaw, Teeth and Lips now reuse shared median-price Wilder smoothing wit
 
 
 Average Day Range and Adr now share an exact rolling high-minus-low mean. The final mean is the only rounding stage; unfillable windows allocate no history buffer. Signed ranges, clamps, warmup, error priority and source fallback remain intact. Validation: 32 focused unit cases, 8 fixture parity cases, 100 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Wilson Relative Price Channel now shares its exact default EMA kernel across all four outputs. The new span overload avoids per-bar Number and double output arrays while preserving exact signal expressions, publication order, period clamps and component/source fallback. Validation: 123 focused unit cases, 4 fixture parity cases, 92 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending. The two completed 10,000-bar cases now have separate test methods, with saved-duration scheduling weights of 2,495 and 2,420 seconds.
+
+
+Wilson integration passed 84 focused unit cases, two shorter parity cases and 101 discovery cases. Compiled discovery retains exactly the original four Wilson cases; all 1,429 hosted methods are assigned once, with ten known long methods on separate runners. The final combined source also passed 100 fresh GPU cases and 13 scheduler, evidence-verifier and inventory checks. The two long Wilson cases reuse their completed archived parity evidence and await hosted execution under their new names. Prior hosted run 38948015140 on 668cf31a succeeded after retrying only the failed artifact-upload job.
+
+The existing shared routes for Balance of Power, EMA, Highest High, Lowest Low, True Range, WMA and Williams R now have remaining-rollout qualification receipts. Production and unit binaries were reused without rebuilding. Validation: 270 focused existing unit cases, 28 parity cases, 102 discovery cases, 100 local GPU cases and 4 inventory tests passed. Fifty-six timing cases are prepared; measured performance qualification remains pending.
