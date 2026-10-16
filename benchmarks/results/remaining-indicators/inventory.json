@@ -2914,7 +2914,13 @@
       "options": [
         "FastZScoreSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "FastZScoreSpecOptions": [
+          "benchmarks/results/remaining-indicators/standardizedscore-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "FastandSlowKurtosisOscillator",
@@ -3505,14 +3511,26 @@
       "options": [
         "InverseFisherFastZScoreSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "InverseFisherFastZScoreSpecOptions": [
+          "benchmarks/results/remaining-indicators/standardizedscore-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "InverseFisherZScore",
       "options": [
         "InverseFisherZScoreSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "InverseFisherZScoreSpecOptions": [
+          "benchmarks/results/remaining-indicators/standardizedscore-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "JapaneseCorrelationCoefficient",
@@ -7239,7 +7257,13 @@
       "options": [
         "ZScoreSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ZScoreSpecOptions": [
+          "benchmarks/results/remaining-indicators/standardizedscore-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ZeroLagExponentialMovingAverage",
@@ -9336,6 +9360,7 @@
     "benchmarks/results/remaining-indicators/residualfit-contracts.json": "fb9a0e06130c3c90e4ad13d76f0a3bb7e3dd573b52d522aa6e2738e0e8b48a29",
     "benchmarks/results/remaining-indicators/roofing-contracts.json": "c24495d59beef30de42eaf09461f214ff89cf9fa7797d74bd9701fb181baebf1",
     "benchmarks/results/remaining-indicators/specialaverage-contracts.json": "2dfe676fa89b1943d6373b248182426168a70f6779acea994b0f5d5fb1475215",
+    "benchmarks/results/remaining-indicators/standardizedscore-contracts.json": "d1240f8ebf536e3f97147ca9827b2ae966fed47f33b80b637d16fe52de45658c",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
     "benchmarks/results/remaining-indicators/symmetric-contracts.json": "166810cfd981551049dc64f6c3037477b1bfce8487feb4e7fe8c00d718cb43a9",
     "benchmarks/results/remaining-indicators/timemoney-contracts.json": "c1c96bf00dfe99b1dd8fde5db04fb6c06e870b01184fcb1631a696289e702a06",
@@ -9571,7 +9596,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "d63b00189c80f5f689edd80f9f73ae8c8c412980208e3aef4dd91b3af52975e6",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "98c8fb2f416a30eea9f8070e8b6080a42d9259f629b1bf1998a087f87c0244f5",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

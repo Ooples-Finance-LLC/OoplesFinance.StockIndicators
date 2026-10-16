@@ -4070,3 +4070,6 @@ WAMI, Price Momentum and Volume Momentum now use shared execution. WAMI retains 
 
 
 Z-Distance from VWAP now uses shared execution with its unchanged exact kernel and original close/volume inputs. Exact weighted means, historical residuals, radical signal comparisons, period normalization and custom/source fallback are preserved. Validation: 72 focused unit cases, 4 fixture parity cases, 88 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.
+
+
+Z-Score, Fast Z-Score and both inverse-Fisher variants now share their existing exact normalization and inverse transforms. Optional observed-history storage separates the mathematical period from queue size and avoids period-sized allocation for the shared route; existing pooled callers retain their default mode. Validation: 267 focused unit cases (including independent formula references, relative-volume regressions, preview/reset/expiry storage parity and maximum-period analytical warmup), 16 fixture parity cases, 89 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Thirty-two timing cases are prepared; measured performance qualification remains pending.

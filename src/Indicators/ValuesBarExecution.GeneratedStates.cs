@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or ZScore or FastZScore or InverseFisherZScore or InverseFisherFastZScore
             or ZDistanceFromVwap or WamiOscillator or PriceMomentum or VolumeMomentum
             or VolumeZoneOscillator or VolumeMomentumOscillator
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
@@ -214,6 +215,10 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        ZScore score => new GeneratedStandardizedScoreState(score.Length, count, false, false),
+        FastZScore score => new GeneratedStandardizedScoreState(score.Length, count, true, false),
+        InverseFisherZScore score => new GeneratedStandardizedScoreState(score.Length, count, false, true),
+        InverseFisherFastZScore score => new GeneratedStandardizedScoreState(score.Length, count, true, true),
         ZDistanceFromVwap distance => new GeneratedZDistanceState(distance.Length),
         WamiOscillator wami => new GeneratedWamiState(wami.Length, count),
         PriceMomentum momentum => new GeneratedLaggedDifferenceState(Math.Max(1, momentum.Length), count, false),
@@ -875,6 +880,20 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedStandardizedScoreState(int length, int count, bool fast, bool inverse) : IIndicatorState, IDisposable
+    {
+        private readonly StrengthAverage _mean = new(MovingAvgType.SimpleMovingAverage, length, count);
+        private readonly StandardizedScoreWindow _score = new(length, fast, observedHistory: true);
+        public void Reset() { _mean.Reset(); _score.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var average = _mean.Next(new StrengthValue(bar.Close), true).Mantissa;
+            var score = _score.Next(bar.Close, average, true, true);
+            return inverse ? StandardizedScoreWindow.Inverse(score, fast) : score;
+        }
+        public void Dispose() { Reset(); _mean.Dispose(); _score.Dispose(); }
     }
 
     private sealed class GeneratedZDistanceState(int length) : IIndicatorState, IDisposable
