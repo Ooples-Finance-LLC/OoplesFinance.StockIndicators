@@ -7,10 +7,12 @@ import sys
 import xml.etree.ElementTree as ET
 
 PREFIX = "OoplesFinance.StockIndicators.CompetitorTests."
-# Scheduling hints from completed run 38907405150 (2026-10-16), rounded up.
-# These six methods took over ten minutes each. Missing/new methods keep weight
-# one; no method is excluded and every theory case still executes through VSTest.
+# Scheduling hints from hosted run 38907405150 and the saved volumevortex
+# fixture TRX (2026-10-16), rounded up. Missing/new methods keep weight one;
+# no method is excluded and every theory case still executes through VSTest.
 HISTORICAL_SECONDS = {
+    PREFIX + "RemainingVolumeVortexBenchmarkTests.VortexLatest10000": 2176,
+    PREFIX + "RemainingVolumeVortexBenchmarkTests.VortexFull10000": 2173,
     PREFIX + "RemainingAdaptivePairBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit": 1605,
     PREFIX + "RemainingVariableLengthBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit": 1136,
     PREFIX + "RemainingPressureFlowBenchmarkTests.KlingerLatest10000": 942,
