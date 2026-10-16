@@ -33,7 +33,8 @@ internal static partial class ValuesBarExecution
             or FibonacciWeightedMovingAverage or SquareRootWeightedMovingAverage or SineWma
             or TillsonIE2 or IIRLeastSquaresEstimate or HullEstimate
             or Ehlers2PoleButterworthFilterV1 or Ehlers2PoleButterworthFilterV2 or Ehlers2PoleSuperSmootherFilterV1 or Ehlers2PoleSuperSmootherFilterV2
-            or Ehlers3PoleButterworthFilterV1 or Ehlers3PoleButterworthFilterV2 or Ehlers3PoleSuperSmootherFilter;
+            or Ehlers3PoleButterworthFilterV1 or Ehlers3PoleButterworthFilterV2 or Ehlers3PoleSuperSmootherFilter
+            or EhlersDecycler or EhlersHighPassFilterV1 or EhlersLeadingIndicator or EhlersSimpleDecycler;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -153,6 +154,10 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        EhlersDecycler filter => new GeneratedDecyclerState(filter.Length),
+        EhlersHighPassFilterV1 filter => new GeneratedHighPassState(filter.Length),
+        EhlersLeadingIndicator => new GeneratedLeadingState(),
+        EhlersSimpleDecycler filter => new GeneratedSimpleDecyclerState(filter.Length),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -571,6 +576,40 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedDecyclerState(int period) : IIndicatorState
+    {
+        private readonly DecyclerWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedHighPassState(int period) : IIndicatorState
+    {
+        private readonly HighPassWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedLeadingState : IIndicatorState
+    {
+        private readonly LeadingWindow _window = new(.25, .33);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedSimpleDecyclerState(int period) : IMultiOutputState
+    {
+        private readonly SimpleDecyclerWindow _window = new(period, .5, .5);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper;
+            outputs[1] = value.Middle;
+            outputs[2] = value.Lower;
+        }
     }
 
     private sealed class GeneratedQuickState(int period, int count) : IIndicatorState, IDisposable
