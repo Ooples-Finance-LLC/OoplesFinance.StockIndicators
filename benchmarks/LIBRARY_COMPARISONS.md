@@ -4159,3 +4159,6 @@ Chande Trend Score and Trend Score now maintain their delayed comparison window 
 
 
 Smart Envelope, DEnvelope and GChannels now reuse their exact recursive kernels in shared execution, computing all three outputs together. Startup, distinct period clamps, finite factor boundaries, invalid-factor fallback, original fields, ownership and source fallback remain intact. Validation: 140 focused unit cases, 12 parity cases, 115 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+Moving Average Envelope and Moving Average Displaced Envelope now compute their three outputs together with the exact rounded SMA and EMA helpers. Distinct percentage units, delayed startup, finite-factor eligibility, fallback behavior, ownership and unfillable-window allocation bounds are preserved. Validation: 128 focused unit cases, 8 parity cases, 116 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
