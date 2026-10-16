@@ -3213,7 +3213,18 @@
         "KlingerVolumeOscillatorSpecOptions",
         "KvoSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "KlingerVolumeOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/pressureflow-contracts.json"
+        ],
+        "KvoSpecOptions": [
+          "benchmarks/results/remaining-indicators/pressureflow-contracts.json"
+        ]
+      },
+      "options_without_receipts": [
+        "KlingerSignalSpecOptions"
+      ]
     },
     {
       "indicator": "KnowSureThing",
@@ -4957,7 +4968,13 @@
       "options": [
         "SlowSmoothedMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "SlowSmoothedMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/chainedma-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "SmartEnvelope",
@@ -5729,7 +5746,13 @@
       "options": [
         "UltimateOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "UltimateOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/pressureflow-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "UltimateTraderOscillator",
@@ -6279,14 +6302,26 @@
       "options": [
         "ZeroLagTripleExponentialMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ZeroLagTripleExponentialMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/chainedma-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ZeroLowLagMovingAverage",
       "options": [
         "ZeroLowLagMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ZeroLowLagMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/chainedma-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ZigZag",
@@ -8276,6 +8311,7 @@
     "benchmarks/results/remaining-indicators/aroondpo-contracts.json": "4deb075f23f91bc5220164017b006419fa196497527ff959d95cfc4cc2d72e87",
     "benchmarks/results/remaining-indicators/atrderived-contracts.json": "2c5b26ee352d3b87da89069d04892635d399f8908dc0b93a276ef2b9013d4327",
     "benchmarks/results/remaining-indicators/barflow-contracts.json": "2a207301cf96332bc31deda7a26dc0e5049a472c4a7dbad632a5a2473d3963c7",
+    "benchmarks/results/remaining-indicators/chainedma-contracts.json": "0f95ff360a33b19664d7934d6e458cc5bb19c7452d14dcf1887546d07eee82e9",
     "benchmarks/results/remaining-indicators/composed-contracts.json": "c4d8bac264a40537f0cba0270016bb25a1712d58628b5de9d11ba590567979f2",
     "benchmarks/results/remaining-indicators/directionalflow-contracts.json": "7021c51f621c2fc3948293d116c3cf1ae1893ff6a5e60a51ff1ef00d4510e33b",
     "benchmarks/results/remaining-indicators/emagap-contracts.json": "d3a7d421e76aafa2981e666408382c4114495c06c255b634a80ac5640dfd3202",
@@ -8284,6 +8320,7 @@
     "benchmarks/results/remaining-indicators/extrapolation-contracts.json": "2c65abf424b6839269cdb1db4908d6decb5f7d86bd0baf61fcb75c95f260f460",
     "benchmarks/results/remaining-indicators/orderedvol-contracts.json": "5bd5f63b1578750f7281b719af97bbb3bc33e5ee3bbb42128d7839d13588ad44",
     "benchmarks/results/remaining-indicators/oscillator-contracts.json": "a0ecd34360e016bb6e502f553b181f91e17dede91b3028a1184ce78f102a4367",
+    "benchmarks/results/remaining-indicators/pressureflow-contracts.json": "a783a470713879bd3386d7ac46bd9f993589bcbb925ac72a0ff9ca5dc351aee6",
     "benchmarks/results/remaining-indicators/price-contracts.json": "d00758a41b725b80c3d2510805eb59de15f021c4d4f84405ab85905df6a62b13",
     "benchmarks/results/remaining-indicators/rangehealth-contracts.json": "4471e9a1fdde6b0b166b7c6b307a35b5a5a48c4984f6a53dc37de6fe1a7f9c31",
     "benchmarks/results/remaining-indicators/ratio-contracts.json": "3fa30f61f1befe6d233fccacab9ef8628629da2f0cd693346e6336da64f301ea",
@@ -8493,7 +8530,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "abbabb2b72049939051d58061f9271e2f7ee2c6e2f853ea48485c81920b1585e",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "f37054e4206e509e1a28aec17ccde0dd0a43b81aea700fef484c29952dd8bc27",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
