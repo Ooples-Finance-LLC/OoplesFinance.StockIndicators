@@ -85,6 +85,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingTrendRankBenchmarks), 16)]
     [InlineData(typeof(RemainingTrendWindowBenchmarks), 24)]
     [InlineData(typeof(RemainingRegressionPairBenchmarks), 16)]
+    [InlineData(typeof(RemainingUltimatePairBenchmarks), 16)]
     [InlineData(typeof(RemainingWilliamsPairBenchmarks), 16)]
     [InlineData(typeof(RemainingVerticalHorizontalBenchmarks), 8)]
     [InlineData(typeof(RemainingVerticalAverageBenchmarks), 8)]

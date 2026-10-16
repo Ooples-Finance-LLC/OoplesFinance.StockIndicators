@@ -4050,3 +4050,6 @@ Vertical Horizontal Moving Average now uses shared execution with its unchanged 
 
 
 Smoothed Williams R and Enhanced Williams R now use shared execution with their unchanged exact kernels. Smoothed Williams preserves original high/low/close input; Enhanced Williams preserves close/volume input and computes its line and signal together with the default simple average. Both period parameters and source/custom-component fallback remain intact. Validation: 184 focused unit cases, 8 fixture parity cases, 82 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Ultimate Trader Oscillator and Ultimate Volatility Indicator now use shared execution with their unchanged exact kernels. Trader retains the legacy fixed lookback5/range2 and weighted smoothing5/4/4; its facade Length continues to control warmup. Volatility uses original close/open values without retaining batch arrays. Validation: 115 focused unit cases, 8 fixture parity cases, 83 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; quiet-window performance qualification remains pending.

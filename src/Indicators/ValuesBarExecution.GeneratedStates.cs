@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -211,6 +211,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        UltimateTraderOscillator => new GeneratedUltimateTraderState(),
+        UltimateVolatilityIndicator volatility => new GeneratedUltimateVolatilityState(volatility.Length),
         SmoothedWilliamsR williams => new GeneratedSmoothedWilliamsRState(williams.Length, williams.SmoothLength),
         EnhancedWilliamsR williams => new GeneratedEnhancedWilliamsRState(williams.Length, williams.SignalLength),
         VerticalHorizontalMovingAverage average => new GeneratedVerticalAverageState(average.Length, count),
@@ -849,6 +851,32 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedUltimateTraderState : IMultiOutputState, IDisposable
+    {
+        // The typed facade preserves the legacy fixed lookback/range/smoothing periods;
+        // its Length parameter affects warmup, not these calculation stages.
+        private readonly UltimateTraderWindow _window = new(5, 2);
+        private readonly UltimateTraderWindow.Average _first = new(MovingAvgType.WeightedMovingAverage, 5);
+        private readonly UltimateTraderWindow.Average _second = new(MovingAvgType.WeightedMovingAverage, 4);
+        private readonly UltimateTraderWindow.Average _signal = new(MovingAvgType.WeightedMovingAverage, 4);
+        public void Reset() { _window.Reset(); _first.Reset(); _second.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var raw = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, true);
+            var line = _second.Next(_first.Next(raw, true), true);
+            outputs[0] = line; outputs[1] = _signal.Next(line, true);
+        }
+        public void Dispose() { Reset(); _first.Dispose(); _second.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedUltimateVolatilityState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly UltimateVolatilityWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Open, true).Value;
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedSmoothedWilliamsRState(int length, int smoothLength) : IIndicatorState, IDisposable
