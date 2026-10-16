@@ -61,6 +61,8 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or WoodieCommodityChannelIndex
+            or EhlersCommodityChannelIndexInverseFisherTransform { Constant: > 0d and < double.PositiveInfinity }
             or ZScore or FastZScore or InverseFisherZScore or InverseFisherFastZScore
             or ZDistanceFromVwap or WamiOscillator or PriceMomentum or VolumeMomentum
             or VolumeZoneOscillator or VolumeMomentumOscillator
@@ -215,6 +217,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        WoodieCommodityChannelIndex cci => new GeneratedWoodieCciState(cci.FastLength, cci.SlowLength, count),
+        EhlersCommodityChannelIndexInverseFisherTransform cci => new GeneratedInverseCciState(cci.Length, cci.SignalLength, cci.Constant, count),
         ZScore score => new GeneratedStandardizedScoreState(score.Length, count, false, false),
         FastZScore score => new GeneratedStandardizedScoreState(score.Length, count, true, false),
         InverseFisherZScore score => new GeneratedStandardizedScoreState(score.Length, count, false, true),
@@ -880,6 +884,34 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedWoodieCciState(int fast, int slow, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly CommodityIndexWindow _fast = new(MovingAvgType.SimpleMovingAverage, fast, .015, count);
+        private readonly CommodityIndexWindow _slow = new(MovingAvgType.SimpleMovingAverage, slow, .015, count);
+        public void Reset() { _fast.Reset(); _slow.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var price = CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close);
+            var fastValue = _fast.Next(price, true); var slowValue = _slow.Next(price, true);
+            outputs[0] = fastValue; outputs[1] = slowValue; outputs[2] = fastValue - slowValue;
+        }
+        public void Dispose() { Reset(); _fast.Dispose(); _slow.Dispose(); }
+    }
+
+    private sealed class GeneratedInverseCciState(int length, int signal, double constant, int count) : IIndicatorState, IDisposable
+    {
+        private readonly CommodityIndexWindow _cci = new(MovingAvgType.WeightedMovingAverage, length, constant, count);
+        private readonly StrengthAverage _signal = new(MovingAvgType.WeightedMovingAverage, signal, count);
+        public void Reset() { _cci.Reset(); _signal.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var value = _cci.Next(CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close), true);
+            var scaled = .1 * (value - 50);
+            return Math.Tanh(_signal.Next(new StrengthValue(scaled), true).Mantissa);
+        }
+        public void Dispose() { Reset(); _cci.Dispose(); _signal.Dispose(); }
     }
 
     private sealed class GeneratedStandardizedScoreState(int length, int count, bool fast, bool inverse) : IIndicatorState, IDisposable
