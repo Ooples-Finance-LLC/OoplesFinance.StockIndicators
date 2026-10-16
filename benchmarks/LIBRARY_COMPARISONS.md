@@ -4138,3 +4138,6 @@ Cumulative Sum and Cumulative Volume Index now share exact running accumulators.
 
 
 Chande Quick Stick and Delta Moving Average now reuse their exact open-close averaging kernel in shared execution. Delta computes Value, Signal and Histogram together; independent clamps, zero-padded lag, original open fields, extended arithmetic stages and component/source fallback remain intact. The new fixture mixes positive and negative candle bodies. Validation: 174 focused unit cases, 8 parity cases, 108 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending. Hosted run 38953640688 passed all 41 jobs on ancestor ab4c32b0; run 38958071125 is still validating the later published ancestor 177b9483.
+
+
+Donchian Channel Width now shares its exact width and signal kernel, publishing both outputs together. Clamped periods, fixed 22-bar signal smoothing, original fields, extended arithmetic stages, ownership and both component-average/source fallbacks remain intact. Validation: 55 focused unit cases, 4 parity cases, 109 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
