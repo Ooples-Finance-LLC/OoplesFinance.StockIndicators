@@ -44,7 +44,10 @@ internal static partial class ValuesBarExecution
             or EhlersBandPassFilterV1 { Bw: >= double.MinValue and <= double.MaxValue }
             or EhlersBandPassFilterV2 { Bw: >= double.MinValue and <= double.MaxValue }
             or EhlersCycleBandPassFilter { Delta: >= double.MinValue and <= double.MaxValue }
-            or EhlersSuperPassbandFilter;
+            or EhlersSuperPassbandFilter
+            or EhlersEarlyOnsetTrendIndicator { K: >= double.MinValue and <= double.MaxValue }
+            or EhlersImpulseReaction { Q: >= double.MinValue and <= double.MaxValue }
+            or EhlersImpulseResponse { Bw: >= double.MinValue and <= double.MaxValue };
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -164,6 +167,9 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        EhlersEarlyOnsetTrendIndicator filter => new GeneratedEarlyOnsetState(filter.Length1, filter.Length2, filter.K),
+        EhlersImpulseReaction filter => new GeneratedImpulseReactionState(filter.Length1, filter.Length2, filter.Q),
+        EhlersImpulseResponse filter => new GeneratedImpulseResponseState(filter.Length, filter.Bw),
         EhlersBandPassFilterV1 filter => new GeneratedBandPassV1State(filter.Length, filter.Bw),
         EhlersBandPassFilterV2 filter => new GeneratedBandPassState(filter.Length, filter.Bw, 1),
         EhlersCycleBandPassFilter filter => new GeneratedBandPassState(filter.Length, filter.Delta, 2),
@@ -604,6 +610,28 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedEarlyOnsetState(int low, int high, double k) : IIndicatorState
+    {
+        private readonly EarlyOnsetWindow _window = new(low, high, k);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedImpulseReactionState(int lag, int period, double q) : IIndicatorState
+    {
+        private readonly ImpulseReactionWindow _window = new(lag, period, q);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedImpulseResponseState(int period, double bandwidth) : IIndicatorState, IDisposable
+    {
+        private readonly ImpulseResponseWindow _window = new(MovingAvgType.EhlersHannMovingAverage, period, bandwidth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedBandPassV1State(int period, double bandwidth) : IMultiOutputState
