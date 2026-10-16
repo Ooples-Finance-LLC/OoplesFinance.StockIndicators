@@ -1,0 +1,37 @@
+{
+  "batch": "generated-volume-facade-aliases",
+  "types": [
+    "OnBalanceVolume",
+    "NegativeVolumeIndex",
+    "PositiveVolumeIndex",
+    "PriceVolumeTrend"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse OBV, volume-index and price-volume-trend shared states for full-name facades. Volume index state now accepts the facade seed while existing Nvi/Pvi retain their default1000. Preserve both outputs, staged arithmetic and custom-average fallback.",
+  "verification": {
+    "unit_passed": 49,
+    "fixture_passed": 16,
+    "discovery_passed": 24,
+    "gpu_passed": 100,
+    "contract_methods": 1359,
+    "hosted_methods": 1347,
+    "evidence": [
+      {
+        "file": "volumealias-unit.trx.gz",
+        "passed_cases": 49,
+        "trx_sha256": "20627e08fd911d157f066a6f2ea47c976fab75ece605244973ad2e133424ece8"
+      },
+      {
+        "file": "volumealias-fixture.trx.gz",
+        "passed_cases": 40,
+        "trx_sha256": "587b77f957fbc4140017ce03dfafcadb88e3a8e2095147efb02e9bd6516958a0"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeAliasBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
