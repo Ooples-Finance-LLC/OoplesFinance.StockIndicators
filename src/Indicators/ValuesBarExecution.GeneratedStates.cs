@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or ConditionalAccumulator
             or ContractHigh or ContractLow
             or IntradayMomentumIndex or ChandeIntradayMomentumIndex or RelativeMomentumIndex
             or Adr or AverageDayRange
@@ -244,6 +245,7 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        ConditionalAccumulator accumulator => new GeneratedConditionalState(accumulator.Length),
         ContractHigh => new PrefixPriceExtremeState(true),
         ContractLow => new PrefixPriceExtremeState(false),
         IntradayMomentumIndex momentum => new GeneratedIntradayMomentumState(momentum.Length, count),
@@ -939,6 +941,24 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedConditionalState(int length) : IMultiOutputState
+    {
+        private readonly Streaming.EmaState _signal = new(Math.Max(1, length));
+        private double _value, _previousHigh, _previousLow;
+        private bool _started;
+        public void Reset() { _signal.Reset(); _value = _previousHigh = _previousLow = 0; _started = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            if (_started)
+            {
+                if (bar.Low > _previousHigh) _value += 1d;
+                else if (bar.High < _previousLow) _value -= 1d;
+            }
+            _previousHigh = bar.High; _previousLow = bar.Low; _started = true;
+            outputs[0] = _value; outputs[1] = _signal.GetNext(_value, commit: true);
+        }
     }
 
     private sealed class GeneratedDemarkCountState(int window, int lag, int count) : IIndicatorState, IDisposable

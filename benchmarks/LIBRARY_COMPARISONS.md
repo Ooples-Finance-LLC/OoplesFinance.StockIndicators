@@ -4129,3 +4129,6 @@ Contract High and Contract Low now reuse the existing shared prefix-extreme stat
 
 
 DeMark Setup and Reversal Points now use rolling strict-comparison counts instead of rescanning each window. Zero-padded startup, signed current-close publication, clamped settings and source fallback are preserved. Settings that overflow the legacy integer index retain fallback; unfillable valid windows allocate no history. Validation: 46 focused unit cases, 8 parity cases, 105 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Conditional Accumulator now shares its gap counter and exact EMA signal state. First-bar initialization, high/low branch precedence, clamped signal periods, ownership and component/source fallback are preserved. Validation: 16 focused unit cases, 4 parity cases, 106 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
