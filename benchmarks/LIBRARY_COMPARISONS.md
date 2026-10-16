@@ -4106,3 +4106,6 @@ Auto Line and Auto Line with Drift now use shared execution. Auto Line retains t
 
 
 Bull Power and Bear Power, including both Indicator aliases, now share one exact candle kernel across Value and EMA Signal. Original OHLC, previous-close seed, gap/wick branch precedence, extended stages and component/source fallback are preserved. Validation: 186 focused unit cases, 16 fixture parity cases, 98 discovery cases, 100 local GPU cases and 4 inventory tests passed. Thirty-two timing cases are prepared; measured performance qualification remains pending.
+
+
+Alligator Jaw, Teeth and Lips now reuse shared median-price Wilder smoothing with the original fixed 8/5/3-bar displacements. Clamped periods, delayed startup, warmup, signed-zero behavior, ownership and source fallback remain intact. Validation: 128 focused unit cases, 12 fixture parity cases, 99 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.

@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AlligatorJaw or AlligatorTeeth or AlligatorLips
             or BullPower or BearPower or BullPowerIndicator or BearPowerIndicator
             or AutoLine or AutoLineWithDrift
             or AutoFilter or AutoDispersionBands
@@ -225,6 +226,9 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        AlligatorJaw line => new GeneratedAlligatorState(line.Length, 8),
+        AlligatorTeeth line => new GeneratedAlligatorState(line.Length, 5),
+        AlligatorLips line => new GeneratedAlligatorState(line.Length, 3),
         BullPower power => new GeneratedCandlePowerState(true, power.Length, count),
         BearPower power => new GeneratedCandlePowerState(false, power.Length, count),
         BullPowerIndicator power => new GeneratedCandlePowerState(true, power.Length, count),
@@ -909,6 +913,14 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedAlligatorState(int length, int offset) : IIndicatorState, IDisposable
+    {
+        private readonly AlligatorLineWindow _window = new(MovingAvgType.WildersSmoothingMethod, Math.Max(1, length), offset);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(PriceMean.Of(bar.High, bar.Low), true);
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedCandlePowerState(bool bull, int length, int count) : IMultiOutputState, IDisposable
