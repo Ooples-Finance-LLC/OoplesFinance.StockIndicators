@@ -42,6 +42,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingCycleTrendBenchmarks), 32)]
     [InlineData(typeof(RemainingBandPassBenchmarks), 32)]
     [InlineData(typeof(RemainingImpulseBenchmarks), 24)]
+    [InlineData(typeof(RemainingHannHammingBenchmarks), 40)]
     [InlineData(typeof(RemainingPoleFilterBenchmarks), 56)]
     [InlineData(typeof(RemainingEstimatorBenchmarks), 24)]
     [InlineData(typeof(RemainingWeightedMeanBenchmarks), 24)]
