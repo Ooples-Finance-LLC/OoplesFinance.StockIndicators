@@ -1,0 +1,34 @@
+{
+  "batch": "generated-adaptive-price-zone-and-conditional-stage-storage",
+  "types": [
+    "AdaptivePriceZoneIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute upper/middle/lower bands together from the existing exact adaptive-zone kernel using default EMA and original candles. Rent center/width arrays only for external/custom averaging. Preserve finite/nonfinite multiplier routing, period clamp, stage callback order, ownership and lifecycle.",
+  "verification": {
+    "unit_passed": 59,
+    "fixture_passed": 4,
+    "discovery_passed": 59,
+    "gpu_passed": 100,
+    "contract_methods": 1394,
+    "hosted_methods": 1382,
+    "evidence": [
+      {
+        "file": "adaptivezone-unit.trx.gz",
+        "passed_cases": 59,
+        "trx_sha256": "29c90fc563f6914fbeae36a697e9d81d17ee99f3c72d1adabd9e84fc5a747846"
+      },
+      {
+        "file": "adaptivezone-fixture.trx.gz",
+        "passed_cases": 63,
+        "trx_sha256": "a5cce3dba2cf09ce26693b95d0dd2015e4abbe8bf1501da0ede6ed451cf6f21c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveZoneBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
