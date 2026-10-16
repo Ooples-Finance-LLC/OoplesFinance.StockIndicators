@@ -1,0 +1,41 @@
+{
+  "batch": "recursive-envelopes-shared-execution",
+  "types": [
+    "SmartEnvelope",
+    "DEnvelope",
+    "GChannels"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Smart Envelope, DEnvelope and GChannel kernels, computing upper/middle/lower outputs together. Preserve startup, facade clamps, finite factor boundaries and invalid-factor fallback, original fields, ownership and source fallback.",
+  "verification": {
+    "unit_passed": 140,
+    "fixture_passed": 12,
+    "discovery_passed": 115,
+    "gpu_passed": 100,
+    "contract_methods": 1454,
+    "hosted_methods": 1442,
+    "evidence": [
+      {
+        "file": "recursiveenvelopes-unit.trx.gz",
+        "passed_cases": 140,
+        "trx_sha256": "4939ecb99676aa6fee78b1f849d9f3915ee2313997327234ed5c7c9dc83a36d9"
+      },
+      {
+        "file": "recursiveenvelopes-fixture.trx.gz",
+        "passed_cases": 127,
+        "trx_sha256": "65a046b47894d06057660f93e36cf4d2638d27f6dd37f2861d1f29ca4d5e7c67"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRecursiveEnvelopeBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "SmartEnvelope",
+      "DEnvelope",
+      "GChannels"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
