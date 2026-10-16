@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or UltimateMomentumIndicator { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -78,7 +78,7 @@ internal static partial class ValuesBarExecution
             or _1LCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
-    private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange) => indicator switch
+    private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange) => indicator switch
     {
         HighestHigh high when high.Length >= count => new PrefixPriceExtremeState(true),
         LowestLow low when low.Length >= count => new PrefixPriceExtremeState(false),
@@ -212,6 +212,7 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        ValueChartIndicator chart => new GeneratedValueChartState(chart.Length, valueChartCustomRange),
         UltimateMomentumIndicator momentum => new GeneratedUltimateMomentumState(momentum),
         UltimateTraderOscillator => new GeneratedUltimateTraderState(),
         UltimateVolatilityIndicator volatility => new GeneratedUltimateVolatilityState(volatility.Length),
@@ -852,6 +853,28 @@ internal static partial class ValuesBarExecution
         private readonly TrendIntensityWindow _window = new(MovingAvgType.SimpleMovingAverage, period, 60);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private static bool UsesValueChartCustomRange(Bar[] source, CancellationToken cancellation)
+    {
+        foreach (var bar in source)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            if (!AllFieldsFinite(in bar)) return false;
+#pragma warning disable S1244 // Preserve legacy SequenceEqual numeric equality, including equal signed zeros.
+            if (ValueChartWindow.Median(bar.High, bar.Low).Publish() != bar.Close) return true;
+#pragma warning restore S1244
+        }
+        return false;
+    }
+
+    private sealed class GeneratedValueChartState(int length, bool customRange) : IMultiOutputState, IDisposable
+    {
+        private readonly ValueChartWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) =>
+            _window.Next(bar.Open, bar.High, bar.Low, bar.Close, outputs, false, true, customRange);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
