@@ -58,7 +58,7 @@ internal static partial class ValuesBarExecution
             or AhrensMovingAverage or AlphaDecreasingEma or VariableLengthMovingAverage
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
-            or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator
+            or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeFlowIndicator { Coef: > double.NegativeInfinity and < double.PositiveInfinity, Vcoef: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -202,6 +202,7 @@ internal static partial class ValuesBarExecution
         VolumeFlowIndicator volume => new GeneratedVolumeFlowState(volume.Length1, volume.Length2, volume.SignalLength, volume.SmoothLength, volume.Coef, volume.Vcoef, volumeFlowCustomRange),
         FiniteVolumeElements volume => new GeneratedFiniteVolumeState(volume.Length, volume.Factor),
         RelativeVolumeIndicator volume => new GeneratedRelativeVolumeState(volume.Length),
+        BetterVolumeIndicator volume => new GeneratedBetterVolumeState(volume.Length, volume.LbLength),
         BuffAverage average => new GeneratedBuffState(average.Length),
         EquityMovingAverage average => new GeneratedEquityState(average.Length),
         Vwma average => new GeneratedVolumeWeightedState(average.Length),
@@ -775,6 +776,14 @@ internal static partial class ValuesBarExecution
             outputs[1] = point.Demand;
         }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedBetterVolumeState(int period, int lookback) : IIndicatorState, IDisposable
+    {
+        private readonly BetterVolumeWindow _window = new(period, lookback, includeSignals: false);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, true).Value;
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedBuffState(int period) : IMultiOutputState, IDisposable
