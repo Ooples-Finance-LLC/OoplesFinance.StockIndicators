@@ -889,7 +889,13 @@
       "options": [
         "DampedSineWaveWeightedFilterSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DampedSineWaveWeightedFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/weightedfilter-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DampingIndex",
@@ -2925,7 +2931,13 @@
       "options": [
         "HendersonWeightedMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "HendersonWeightedMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/weightedfilter-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "HerrickPayoffIndex",
@@ -4907,7 +4919,13 @@
       "options": [
         "RightSidedRickerMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RightSidedRickerMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/weightedfilter-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RobustWeightingOscillator",
@@ -5213,14 +5231,26 @@
       "options": [
         "Spencer15PointMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "Spencer15PointMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/weightedfilter-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "Spencer21PointMovingAverage",
       "options": [
         "Spencer21PointMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "Spencer21PointMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/weightedfilter-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "SquareRootWeightedMovingAverage",
@@ -8545,6 +8575,7 @@
     "benchmarks/results/remaining-indicators/volumeoscillator-contracts.json": "8b3f1cd18dc55aeb7d6c86e2f5632327aa5fe2db8322f869e6a0b8752251efa4",
     "benchmarks/results/remaining-indicators/volumetrend-contracts.json": "8b4430170b2e074dd9f63b51b279141a5228e1472e43d5e2a6dee464c0f1b747",
     "benchmarks/results/remaining-indicators/weightedextra-contracts.json": "aa65c815c8faca01a625976a91c39cafaaa81ebd3026feab7146b5754877e3d3",
+    "benchmarks/results/remaining-indicators/weightedfilter-contracts.json": "07537a37131c8c03d8a0a700d16cd438f4f079caeed1d402808441d46d59fc4f",
     "benchmarks/results/remaining-indicators/wilder-contracts.json": "39fdbf300716803c9083728024d437259ffaea26d2494463630da52d4b3eb458",
     "src/Builder/Compute/BuilderArmTargets.cs": "86f2cd1f1e2c5cd064bd301a72efcd0b536267d09a611dfdca1480c20cb8e419",
     "src/Enums/IndicatorName.cs": "cad2063df998a7723103c8deb4843d0e07b8c5dcfe26fbcc6bf89212dbb569b4",
@@ -8747,7 +8778,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8aeebc6b198d00a41647a3eb0a2f48d7bde11414d9b7980d8705847625195d96",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "4cde70b6b484e61a00387009a6f312634cadc7751d4ca6bb41e77fe0450f9692",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
