@@ -7967,7 +7967,7 @@
     "benchmarks/competitor-library-manifest.json": "a55ef0e199c0251d6684741d5f8079267108ffbe15f96ae023d692bc5ef7856e",
     "benchmarks/results/remaining-indicators/composed-contracts.json": "c4d8bac264a40537f0cba0270016bb25a1712d58628b5de9d11ba590567979f2",
     "benchmarks/results/remaining-indicators/extrapolation-contracts.json": "2c65abf424b6839269cdb1db4908d6decb5f7d86bd0baf61fcb75c95f260f460",
-    "benchmarks/results/remaining-indicators/price-contracts.json": "70a5bc28e2999bd329bcc98b6d827a18b700622f1f7213427de889c3a715c3b3",
+    "benchmarks/results/remaining-indicators/price-contracts.json": "d00758a41b725b80c3d2510805eb59de15f021c4d4f84405ab85905df6a62b13",
     "benchmarks/results/remaining-indicators/wilder-contracts.json": "39fdbf300716803c9083728024d437259ffaea26d2494463630da52d4b3eb458",
     "src/Builder/Compute/BuilderArmTargets.cs": "86f2cd1f1e2c5cd064bd301a72efcd0b536267d09a611dfdca1480c20cb8e419",
     "src/Enums/IndicatorName.cs": "cad2063df998a7723103c8deb4843d0e07b8c5dcfe26fbcc6bf89212dbb569b4",
