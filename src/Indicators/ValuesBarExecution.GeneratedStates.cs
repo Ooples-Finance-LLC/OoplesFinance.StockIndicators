@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or ContractHigh or ContractLow
             or IntradayMomentumIndex or ChandeIntradayMomentumIndex or RelativeMomentumIndex
             or Adr or AverageDayRange
             or AlligatorJaw or AlligatorTeeth or AlligatorLips
@@ -232,6 +233,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        ContractHigh => new PrefixPriceExtremeState(true),
+        ContractLow => new PrefixPriceExtremeState(false),
         IntradayMomentumIndex momentum => new GeneratedIntradayMomentumState(momentum.Length, count),
         ChandeIntradayMomentumIndex momentum => new GeneratedIntradayMomentumState(momentum.Length, count),
         RelativeMomentumIndex momentum => new GeneratedRelativeMomentumState(momentum.Length, momentum.Momentum, count),
