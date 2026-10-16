@@ -61,6 +61,10 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or WilsonRelativePriceChannel { Overbought: > double.NegativeInfinity and < double.PositiveInfinity,
+                Oversold: > double.NegativeInfinity and < double.PositiveInfinity,
+                UpperNeutralZone: > double.NegativeInfinity and < double.PositiveInfinity,
+                LowerNeutralZone: > double.NegativeInfinity and < double.PositiveInfinity }
             or Vpci or VolumeWeightedRsi or VortexBands
             or WoodieCommodityChannelIndex
             or EhlersCommodityChannelIndexInverseFisherTransform { Constant: > 0d and < double.PositiveInfinity }
@@ -218,6 +222,7 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        WilsonRelativePriceChannel channel => new GeneratedWilsonState(channel),
         Vpci vpci => new GeneratedVpciState(vpci.Length),
         VolumeWeightedRsi rsi => new GeneratedVolumeWeightedRsiState(rsi.Length),
         VortexBands bands => new GeneratedVortexBandsState(bands.Length),
@@ -888,6 +893,16 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedWilsonState(WilsonRelativePriceChannel channel) : IMultiOutputState, IDisposable
+    {
+        private readonly WilsonWindow _window = new(MovingAvgType.ExponentialMovingAverage,
+            Math.Max(1, channel.Length), Math.Max(1, channel.SmoothLength),
+            channel.Oversold, channel.LowerNeutralZone, channel.Overbought, channel.UpperNeutralZone);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true, outputs);
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedVpciState(int length) : IMultiOutputState, IDisposable
