@@ -95,6 +95,7 @@ internal static partial class ValuesBarExecution
             or TrendTraderBands { Mult: > double.NegativeInfinity and < double.PositiveInfinity, BandStep: > double.NegativeInfinity and < double.PositiveInfinity }
             or StandardDeviationChannel or RateOfChangeBands
             or ScalpersChannel
+            or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or HurstCycleChannel { FastMult: > double.NegativeInfinity and < double.PositiveInfinity, SlowMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or HurstBands { InnerMult: > double.NegativeInfinity and < double.PositiveInfinity, OuterMult: > double.NegativeInfinity and < double.PositiveInfinity, ExtremeMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or SmoothedVolatilityBands { Length1: <= 1_073_741_824, Deviation: > double.NegativeInfinity and < double.PositiveInfinity, BandAdjust: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -320,6 +321,10 @@ internal static partial class ValuesBarExecution
         StandardDeviationChannel channel => new GeneratedRegressionChannelState(Math.Max(1, channel.Length), count),
         RateOfChangeBands channel => new GeneratedRocBandState(channel.Length, channel.SmoothLength, count),
         ScalpersChannel channel => new GeneratedScalperChannelState(channel.Length1, channel.Length2, count),
+        FlaggingBands channel => new GeneratedFlaggingBandState(channel.Length, count),
+        ExtendedRecursiveBands channel => new GeneratedExtendedBandState(channel.Length),
+        MotionToAttractionChannels channel => new GeneratedMotionAttractionState(channel.Length),
+        VolumeAdaptiveBands channel => new GeneratedVolumeAdaptiveBandState(channel.Length, count),
         HurstCycleChannel channel => new GeneratedHurstCycleState(channel.FastLength, channel.SlowLength, channel.FastMult, channel.SlowMult, count),
         HurstBands channel => new GeneratedHurstBandState(channel.Length, channel.InnerMult, channel.OuterMult, channel.ExtremeMult, count),
         SmoothedVolatilityBands channel => new GeneratedSmoothedVolatilityState(channel.Length1, channel.Length2, channel.Deviation, channel.BandAdjust, count),
@@ -1044,6 +1049,52 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedFlaggingBandState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly FlaggingBandWindow _window = new(length, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower; outputs[3] = value.Stop;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedExtendedBandState(int length) : IMultiOutputState
+    {
+        private readonly ExtendedBandWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+    }
+
+    private sealed class GeneratedMotionAttractionState(int length) : IMultiOutputState
+    {
+        private readonly MotionAttractionWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+    }
+
+    private sealed class GeneratedVolumeAdaptiveBandState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly VolumeAdaptiveBandWindow _window = new(MovingAvgType.SimpleMovingAverage, length, capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, bar.Volume, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedScalperChannelState(int rangeLength, int averageLength, int count) : IMultiOutputState, IDisposable
