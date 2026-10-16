@@ -94,6 +94,9 @@ internal static partial class ValuesBarExecution
             or KirshenbaumBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or TrendTraderBands { Mult: > double.NegativeInfinity and < double.PositiveInfinity, BandStep: > double.NegativeInfinity and < double.PositiveInfinity }
             or StandardDeviationChannel or RateOfChangeBands
+            or ScalpersChannel
+            or HurstCycleChannel { FastMult: > double.NegativeInfinity and < double.PositiveInfinity, SlowMult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or HurstBands { InnerMult: > double.NegativeInfinity and < double.PositiveInfinity, OuterMult: > double.NegativeInfinity and < double.PositiveInfinity, ExtremeMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or SmoothedVolatilityBands { Length1: <= 1_073_741_824, Deviation: > double.NegativeInfinity and < double.PositiveInfinity, BandAdjust: > double.NegativeInfinity and < double.PositiveInfinity }
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
@@ -316,6 +319,9 @@ internal static partial class ValuesBarExecution
         TrendTraderBands channel => new GeneratedTrendTraderBandState(channel.Length, channel.Mult, channel.BandStep, count),
         StandardDeviationChannel channel => new GeneratedRegressionChannelState(Math.Max(1, channel.Length), count),
         RateOfChangeBands channel => new GeneratedRocBandState(channel.Length, channel.SmoothLength, count),
+        ScalpersChannel channel => new GeneratedScalperChannelState(channel.Length1, channel.Length2, count),
+        HurstCycleChannel channel => new GeneratedHurstCycleState(channel.FastLength, channel.SlowLength, channel.FastMult, channel.SlowMult, count),
+        HurstBands channel => new GeneratedHurstBandState(channel.Length, channel.InnerMult, channel.OuterMult, channel.ExtremeMult, count),
         SmoothedVolatilityBands channel => new GeneratedSmoothedVolatilityState(channel.Length1, channel.Length2, channel.Deviation, channel.BandAdjust, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
@@ -1038,6 +1044,51 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedScalperChannelState(int rangeLength, int averageLength, int count) : IMultiOutputState, IDisposable
+    {
+        // Match the batch extrema's physical-slot tie order for small windows.
+        // Larger windows retain only observed deque entries, without a period-sized ring.
+        private RollingMinMax _high = new(rangeLength), _low = new(rangeLength);
+        private readonly KeltnerWindow _average = new(MovingAvgType.SimpleMovingAverage, averageLength, averageLength, MovingAvgType.SimpleMovingAverage, Math.Max(1, count));
+        public void Reset() { _high = new(rangeLength); _low = new(rangeLength); _average.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            _high.Add(bar.High); _low.Add(bar.Low);
+            var stages = _average.Next(bar.High, bar.Low, bar.Close, true);
+            var midpoint = new ExactMeanAccumulator(); midpoint.Add(_high.Max); midpoint.Add(_low.Min);
+            outputs[0] = _high.Max; outputs[1] = midpoint.Mean(2); outputs[2] = _low.Min;
+            outputs[3] = ScalperChannelWindow.Scalper(stages.Middle, stages.Atr);
+        }
+        public void Dispose() => _average.Dispose();
+    }
+
+    private sealed class GeneratedHurstCycleState(int fastLength, int slowLength, double fastFactor, double slowFactor, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly HurstCycleWindow _window = new(MovingAvgType.WildersSmoothingMethod, fastLength, slowLength, fastFactor, slowFactor, capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.FastUpper; outputs[1] = value.FastMiddle; outputs[2] = value.FastLower;
+            outputs[3] = value.SlowUpper; outputs[4] = value.SlowMiddle; outputs[5] = value.SlowLower;
+            outputs[6] = value.OMed; outputs[7] = value.OShort;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedHurstBandState(int length, double inner, double outer, double extreme, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly HurstBandWindow _window = new(length, inner, outer, extreme, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.UpperExtreme; outputs[1] = value.UpperOuter; outputs[2] = value.UpperInner; outputs[3] = value.Middle;
+            outputs[4] = value.LowerExtreme; outputs[5] = value.LowerOuter; outputs[6] = value.LowerInner;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedTrendTraderBandState(int length, double multiplier, double step, int count) : IMultiOutputState, IDisposable
