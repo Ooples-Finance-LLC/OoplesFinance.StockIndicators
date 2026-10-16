@@ -3632,7 +3632,13 @@
       "options": [
         "LsmaSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "LsmaSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "LeoMovingAverage",
@@ -3698,14 +3704,41 @@
         "LinearRegressionInterceptSpecOptions",
         "LinearRegressionSlopeSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "LinRegInterceptSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ],
+        "LinRegSlopeSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ],
+        "LinRegSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ],
+        "LinearChannelMiddleSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ],
+        "LinearRegressionInterceptSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ],
+        "LinearRegressionSlopeSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "LinearRegressionLine",
       "options": [
         "LinearRegressionLineSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "LinearRegressionLineSpecOptions": [
+          "benchmarks/results/remaining-indicators/regression-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "LinearTrailingStop",
@@ -8861,6 +8894,7 @@
     "benchmarks/results/remaining-indicators/rangehealth-contracts.json": "4471e9a1fdde6b0b166b7c6b307a35b5a5a48c4984f6a53dc37de6fe1a7f9c31",
     "benchmarks/results/remaining-indicators/ratio-contracts.json": "3fa30f61f1befe6d233fccacab9ef8628629da2f0cd693346e6336da64f301ea",
     "benchmarks/results/remaining-indicators/recursiveextra-contracts.json": "bd4b8d492d0d1a6ae0da8bd91a374c5bc3abbb20046825db268a915510ae7c60",
+    "benchmarks/results/remaining-indicators/regression-contracts.json": "d4dcf685acb25640598dc00e7ab31fc0acab5fb5b52d5a050213497b1caef95d",
     "benchmarks/results/remaining-indicators/roofing-contracts.json": "c24495d59beef30de42eaf09461f214ff89cf9fa7797d74bd9701fb181baebf1",
     "benchmarks/results/remaining-indicators/specialaverage-contracts.json": "2dfe676fa89b1943d6373b248182426168a70f6779acea994b0f5d5fb1475215",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
@@ -9077,7 +9111,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8d580bb38fa649c45a84277fe9597d26fdda43f2c91fe2ae0e5797c551d2a88e",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "626b28e10e35b5a0e29cfdf2f967da590d36002aba2185ce4a98af615bd444fe",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
