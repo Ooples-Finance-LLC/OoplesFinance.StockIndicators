@@ -83,7 +83,13 @@
       "options": [
         "AccumulativeSwingIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AccumulativeSwingIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/anchoredswing-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "AdaptiveAutonomousRecursiveMovingAverage",
@@ -231,7 +237,13 @@
       "options": [
         "AnchoredMomentumSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AnchoredMomentumSpecOptions": [
+          "benchmarks/results/remaining-indicators/anchoredswing-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ApirineSlowRelativeStrengthIndex",
@@ -9363,6 +9375,7 @@
     "benchmarks/results/remaining-indicators/adaptivevalueonly-contracts.json": "e1267db76f60e2d7ce61c0db98e96af8d05a3e146fe67d3604f701b6eb121608",
     "benchmarks/results/remaining-indicators/adaptivezone-contracts.json": "7287bf1bbb5fd093f928fdc22665b1d962d7d6c081db067f105f2ed2541a671c",
     "benchmarks/results/remaining-indicators/ahrensalpha-contracts.json": "ff5fb84db1816bd6217db8567463d5387826aa83094eb3c2c92aae6333fdacd1",
+    "benchmarks/results/remaining-indicators/anchoredswing-contracts.json": "0ab63428f3cc94b2c0668ab0c0dd8f901847ca5baa56a49731e6f05851ebec08",
     "benchmarks/results/remaining-indicators/aroondpo-contracts.json": "4deb075f23f91bc5220164017b006419fa196497527ff959d95cfc4cc2d72e87",
     "benchmarks/results/remaining-indicators/atrderived-contracts.json": "2c5b26ee352d3b87da89069d04892635d399f8908dc0b93a276ef2b9013d4327",
     "benchmarks/results/remaining-indicators/atrfilter-contracts.json": "6db02e84d16669f802386ef258648ad2d900c1c5a6edd8ba4bb4bcc5fbfe852f",
@@ -9648,7 +9661,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "7fb1811df732c2c499e927bf00002dea5add81bab8b76e415d1d04a6a8fe3d92",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "fad7be87142a7808c39208cd84da9c1561dca36dccd0fc212132b728a784e861",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

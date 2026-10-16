@@ -61,6 +61,8 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AnchoredMomentum
+            or AccumulativeSwingIndex { LimitMove: > double.NegativeInfinity and < double.PositiveInfinity }
             or AbsoluteStrengthIndex or AbsoluteStrengthMTFIndicator
             or Vpci or VolumeWeightedRsi or VortexBands
             or WoodieCommodityChannelIndex
@@ -219,6 +221,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        AnchoredMomentum momentum => new GeneratedAnchoredMomentumState(momentum.Length, count),
+        AccumulativeSwingIndex swing => new GeneratedAccumulatedSwingState(swing.Length, swing.LimitMove, count),
         AbsoluteStrengthIndex strength => new GeneratedAbsoluteStrengthState(strength.Length),
         AbsoluteStrengthMTFIndicator strength => new GeneratedAbsoluteStrengthMtfState(strength.Length, strength.SmoothLength, count),
         Vpci vpci => new GeneratedVpciState(vpci.Length),
@@ -891,6 +895,30 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedAnchoredMomentumState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly AnchoredMomentumWindow _window = new(MovingAvgType.ExponentialMovingAverage, 7, 8, Math.Max(1, length), count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedAccumulatedSwingState(int length, double limitMove, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly AccumulatedSwingWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), limitMove, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private static void ValidateAbsoluteStrengthInput(Bar[] source, CancellationToken cancellation)
