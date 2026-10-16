@@ -97,6 +97,8 @@ internal static partial class ValuesBarExecution
             or ScalpersChannel
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or FractalChaosBands or FractalChaosOscillator
+            or UniChannel { UbFac: > double.NegativeInfinity and < double.PositiveInfinity, LbFac: > double.NegativeInfinity and < double.PositiveInfinity }
+            or PseudoPolynomialChannel { Morph: > double.NegativeInfinity and < double.PositiveInfinity }
             or HurstCycleChannel { FastMult: > double.NegativeInfinity and < double.PositiveInfinity, SlowMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or HurstBands { InnerMult: > double.NegativeInfinity and < double.PositiveInfinity, OuterMult: > double.NegativeInfinity and < double.PositiveInfinity, ExtremeMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or SmoothedVolatilityBands { Length1: <= 1_073_741_824, Deviation: > double.NegativeInfinity and < double.PositiveInfinity, BandAdjust: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -325,6 +327,8 @@ internal static partial class ValuesBarExecution
         FlaggingBands channel => new GeneratedFlaggingBandState(channel.Length, count),
         FractalChaosBands => new GeneratedFractalChaosState(false),
         FractalChaosOscillator => new GeneratedFractalChaosState(true),
+        UniChannel channel => new GeneratedUniChannelState(Math.Max(1, channel.Length), channel.UbFac, channel.LbFac, channel.Type1, count),
+        PseudoPolynomialChannel channel => new GeneratedPseudoPolynomialState(channel.Length, channel.Morph, count),
         ExtendedRecursiveBands channel => new GeneratedExtendedBandState(channel.Length),
         MotionToAttractionChannels channel => new GeneratedMotionAttractionState(channel.Length),
         VolumeAdaptiveBands channel => new GeneratedVolumeAdaptiveBandState(channel.Length, count),
@@ -1052,6 +1056,32 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedUniChannelState(int length, double upper, double lower, bool additive, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _mean = length <= count ? new(length) : null;
+        public void Reset() => _mean?.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var middle = _mean?.Next(bar.Close, true) ?? 0;
+            outputs[0] = UniChannelArithmetic.Band(middle, upper, additive);
+            outputs[1] = middle;
+            outputs[2] = UniChannelArithmetic.Band(middle, -lower, additive);
+        }
+        public void Dispose() => _mean?.Dispose();
+    }
+
+    private sealed class GeneratedPseudoPolynomialState(int length, double morph, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly PseudoPolynomialWindow _window = new(MovingAvgType.SimpleMovingAverage, length, morph, capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedFractalChaosState(bool oscillator) : IMultiOutputState, IDisposable
