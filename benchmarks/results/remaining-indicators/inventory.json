@@ -6604,7 +6604,13 @@
       "options": [
         "ValueChartIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ValueChartIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/valuechart-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VanillaABCDPattern",
@@ -9306,6 +9312,7 @@
     "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
     "benchmarks/results/remaining-indicators/ultimatemomentum-contracts.json": "6d4a96b05a9467482b5743abde8458d8ab5aada891c773f658707af86f6d2449",
     "benchmarks/results/remaining-indicators/ultimatepair-contracts.json": "977d7050d3468e8b1ad385eefd7549034101ffde0f3dab35c6c7abdc5e98d9dd",
+    "benchmarks/results/remaining-indicators/valuechart-contracts.json": "34625de22bf366efd139df16e3d52aec214baa8651e14ef205842f8b233eff2d",
     "benchmarks/results/remaining-indicators/variablelength-contracts.json": "fed51af6af609d4f6d0c294f545183638cd88fbc6820e4296cdc11bb31ff0acc",
     "benchmarks/results/remaining-indicators/verticalaverage-contracts.json": "b04dffeef1c3f9dc0f94e7d1acc82271334f72bd90779cff57b80a5e7fe8078d",
     "benchmarks/results/remaining-indicators/verticalhorizontal-contracts.json": "c40cc49677391800509e476758328f867d96d8d9b3e99fe0530d1d4308b2b472",
@@ -9525,7 +9532,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "c33d194ac66e3692ad05a8de95bfa5b4d28b942b4ba0cc06d9ddab7d8417ffd8",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "e44a98615594e1d3bb3b7b1c73900b54b2052dc6f96839e1780da55e7ab9038d",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
@@ -9560,7 +9567,7 @@
     "src/Indicators/ValuesBarExecution.VolumeWeightedPrice.cs": "d81fd156c5e6a28467bb3a50d8c532ba788f154785bd0a946c4de4c000f3923b",
     "src/Indicators/ValuesBarExecution.Vortex.cs": "9eade6cecbb89bb9ea2388202af602774069734f55d0d90f6b54b11c507d14aa",
     "src/Indicators/ValuesBarExecution.WeightedChain.cs": "d3abb48e5e9c0978e93556119e4df70ddc754a24c548a93f476fb8cee5d14dc2",
-    "src/Indicators/ValuesBarExecution.cs": "d85a8bd25c58b683233a6db218f1864ef4df7f13b21d7bb1fb0ee485ad5a0e5c",
+    "src/Indicators/ValuesBarExecution.cs": "f9ea1a7a3329e0347646971a2b6723831d85086c9c9ee9d971dc5b3505de7312",
     "src/Indicators/VariablePeriodClassicAverage.cs": "40f099b88deb13e4643e67f6695c2c7835673232724e6c4a2fc62d284501e000",
     "src/Indicators/VolatilityStopSnapshot.cs": "2c63b0980e2efcc292dfac8d601a142ca073e7f3ee6a72fa3f3dfb09c0e8691e",
     "src/Indicators/VolumeConditionedIndex.cs": "beb2d61788972ea12c3d691c9de87ec39ceb1d3b01cb2e5c61f9b3621e63bf60",

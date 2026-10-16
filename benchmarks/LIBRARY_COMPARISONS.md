@@ -4056,3 +4056,6 @@ Ultimate Trader Oscillator and Ultimate Volatility Indicator now use shared exec
 
 
 Ultimate Momentum Indicator now shares its unchanged exact kernel with all five period parameters, the default simple average, and the original typical-price calculation. Finite deviation multipliers use shared execution; nonfinite parameters retain the legacy error route. Validation: 154 focused unit cases, 4 fixture parity cases, 84 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
+
+
+Value Chart now writes all four coordinates directly into shared output storage and uses tuple intermediates instead of temporary coordinate arrays. Its existing array wrapper remains available. The whole-series median/close equality decision is preserved, including signed-zero equality and late differences that affect earlier range handling; NumAtrs remains calculation-inert. Validation: 122 focused unit cases (including mixed Volume Flow roots, independent span publication, bounds, preview and reset checks), 4 fixture parity cases, 85 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.
