@@ -23,7 +23,7 @@ internal static partial class ValuesBarExecution
             or AccumulationDistributionLine or WilliamsAccumulationDistribution or SmoothedWilliamsAccumulationDistribution
             or EaseOfMovement { Divisor: >= double.MinValue and <= double.MaxValue }
             or Pvo or PercentageVolumeOscillator or VolumeOscillator or PriceVolumeOscillator
-            or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage;
+            or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage or EhlersLaguerreFilter or EhlersLaguerreRsi;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -107,6 +107,8 @@ internal static partial class ValuesBarExecution
         EhlersBetterExponentialMovingAverage average => new GeneratedBetterEmaState(average.Length),
         HoltExponentialMovingAverage average => new GeneratedHoltState(average.Length),
         RegularizedEma average => new GeneratedRegularizedState(average.Length),
+        EhlersLaguerreFilter filter => new GeneratedLaguerreFilterState(filter.Length),
+        EhlersLaguerreRsi strength => new GeneratedLaguerreRsiState(strength.Length),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -326,6 +328,20 @@ internal static partial class ValuesBarExecution
     private sealed class GeneratedRegularizedState(int period) : IIndicatorState
     {
         private readonly RegularizedWindow _window = new(period, .5);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedLaguerreFilterState(int period) : IIndicatorState
+    {
+        private readonly LaguerreFilterWindow _window = new(2d / (Math.Max(1, period) + 1d));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedLaguerreRsiState(int period) : IIndicatorState
+    {
+        private readonly LaguerreRsiWindow _window = new(1 - 2d / (Math.Max(1, period) + 1d));
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
