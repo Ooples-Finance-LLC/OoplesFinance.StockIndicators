@@ -56,6 +56,7 @@ internal static partial class ValuesBarExecution
             or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage or AdaptiveLeastSquares
             or AtrFilteredEma or AtrFilteredExponentialMovingAverage { Min: > double.NegativeInfinity and < double.PositiveInfinity }
             or AhrensMovingAverage or AlphaDecreasingEma
+            or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or AdaptiveEma or AdaptiveExponentialMovingAverage
             or AdaptivePriceZoneIndicator { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
             or AutonomousRecursiveMa
@@ -187,6 +188,8 @@ internal static partial class ValuesBarExecution
         AtrFilteredEma average => new GeneratedAtrFilteredState(average.Length, 20, 10, 20, 5),
         AhrensMovingAverage average => new GeneratedAhrensState(average.Length),
         AlphaDecreasingEma => new GeneratedAlphaDecreasingState(),
+        VolumeAdjustedMa average => new GeneratedVolumeAdjustedState(average.Length, .67),
+        VolumeAdjustedMovingAverage average => new GeneratedVolumeAdjustedState(average.Length, average.Factor),
         AdaptiveEma average => new GeneratedAdaptiveEmaState(average.Length, count),
         AdaptiveExponentialMovingAverage average => new GeneratedAdaptiveEmaState(average.Length, count),
         AdaptivePriceZoneIndicator zone => new GeneratedAdaptiveZoneState(zone.Length, zone.Pct, count),
@@ -669,6 +672,14 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedVolumeAdjustedState(int period, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly VolumeAdjustedWindow _window = new(MovingAvgType.SimpleMovingAverage, period, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveZoneState(int period, double pct, int count) : IMultiOutputState, IDisposable
