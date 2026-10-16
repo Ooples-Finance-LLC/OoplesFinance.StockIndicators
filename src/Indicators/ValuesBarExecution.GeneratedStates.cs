@@ -7,7 +7,7 @@ internal static partial class ValuesBarExecution
 {
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
-            or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma;
+            or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -28,6 +28,8 @@ internal static partial class ValuesBarExecution
         Zlema average => new ExtrapolatedEmaValueState(average.Length, triple: false),
         Tma average => new GeneratedTriangularState(average.Length),
         Hma average => new HullValueState(average.Length),
+        Rsi strength => new GeneratedRsiState(strength.Length, count),
+        Atr range => new GeneratedAtrState(range.Length, count),
         Adl line => new AdlValueState(line.Length, count),
         _ => throw new InvalidOperationException("Unqualified generated state.")
     };
@@ -37,6 +39,31 @@ internal static partial class ValuesBarExecution
         private readonly Streaming.EmaState _state = new(period);
         public void Reset() => _state.Reset();
         public double Update(in Bar bar) => _state.GetNext(bar.Close, commit: true);
+    }
+
+    private sealed class GeneratedRsiState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly PriceRsiWindow _line = new(MovingAvgType.WildersSmoothingMethod, period, count);
+        private readonly StrengthAverage _signal = new(MovingAvgType.WildersSmoothingMethod, 3, count);
+        public void Reset() { _line.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> output)
+        {
+            double value = _line.Next(bar.Close, true);
+            double signal = _signal.Next(new StrengthValue(value), true).Mantissa;
+            output[0] = value;
+            output[1] = signal;
+            output[2] = value - signal;
+        }
+        public void Dispose() { _line.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedAtrState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Helpers.KeltnerWindow _window = new(MovingAvgType.WildersSmoothingMethod, 1, period,
+            MovingAvgType.WildersSmoothingMethod, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Atr.Publish();
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class WilderValueState(int period) : IIndicatorState
