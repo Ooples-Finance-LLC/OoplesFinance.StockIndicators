@@ -4067,3 +4067,6 @@ Integrated hosted correctness run 38927302926 passed all 42 jobs on commit 25f26
 
 
 WAMI, Price Momentum and Volume Momentum now use shared execution. WAMI retains its fixed four-bar weighted stage and both default EMA stages through the existing kernel; the difference indicators retain the facade period clamp, zero prefix and binary subtraction with lag storage bounded by input size. Validation: 88 targeted unit cases, 12 fixture parity cases, 87 discovery cases, 100 local GPU cases, and 4 inventory tests passed. The completed unit run also contains 74 incidental Swami cases selected by a case-insensitive substring; the receipt records both groups separately and preserves the full TRX. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+Z-Distance from VWAP now uses shared execution with its unchanged exact kernel and original close/volume inputs. Exact weighted means, historical residuals, radical signal comparisons, period normalization and custom/source fallback are preserved. Validation: 72 focused unit cases, 4 fixture parity cases, 88 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.

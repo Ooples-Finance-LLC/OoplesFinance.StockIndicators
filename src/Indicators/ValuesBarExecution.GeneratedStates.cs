@@ -61,7 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
-            or WamiOscillator or PriceMomentum or VolumeMomentum
+            or ZDistanceFromVwap or WamiOscillator or PriceMomentum or VolumeMomentum
             or VolumeZoneOscillator or VolumeMomentumOscillator
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or UltimateMomentumIndicator { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -214,6 +214,7 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        ZDistanceFromVwap distance => new GeneratedZDistanceState(distance.Length),
         WamiOscillator wami => new GeneratedWamiState(wami.Length, count),
         PriceMomentum momentum => new GeneratedLaggedDifferenceState(Math.Max(1, momentum.Length), count, false),
         VolumeMomentum momentum => new GeneratedLaggedDifferenceState(Math.Max(1, momentum.Length), count, true),
@@ -874,6 +875,14 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedZDistanceState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly ZDistanceWindow _window = new(MovingAvgType.VolumeWeightedAveragePrice, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedWamiState(int length, int count) : IIndicatorState, IDisposable
