@@ -4082,3 +4082,6 @@ VPCI, Volume Weighted RSI and Vortex Bands now use shared execution through exis
 
 
 Integrated hosted run 38935309364 passed on bd99fef5. The subsequent merge of the score, commodity-pair and volume/vortex batches passed 115 focused shared-execution unit cases, 91 discovery cases, 100 fresh local GPU cases and 4 inventory tests. Completed per-batch parity evidence is retained; hosted validation of this combined head remains pending.
+
+
+Weighted Close qualification now records its existing shared pointwise kernel and mixed-batch dispatch. The kernel preserves PriceMean.Of(high, low, close, close); TickerData uses doubles, so the legacy casts do not add decimal rounding. No production code changed, and the verified 16c9662f production binary was reused. Validation: 53 focused unit cases, 4 fixture parity cases, 92 discovery cases, 100 fresh local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
