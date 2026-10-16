@@ -6940,7 +6940,16 @@
         "OneLCLeastSquaresMovingAverageSpecOptions",
         "_1LCLeastSquaresMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "OneLCLeastSquaresMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/onelc-contracts.json"
+        ],
+        "_1LCLeastSquaresMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/onelc-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "_3HMA",
@@ -8930,6 +8939,7 @@
     "benchmarks/results/remaining-indicators/impulse-contracts.json": "dd3ac11ad33787e1847326a8f77b748edfff022c1e178383521f5c3c94230054",
     "benchmarks/results/remaining-indicators/laguerre-contracts.json": "2718bb13a5a667fabb6789e6a5816b79c155eb08eec10f5a5c59858057d6b267",
     "benchmarks/results/remaining-indicators/leastsquares-contracts.json": "7e007c555d499b0bccb58e0205ae1d2d9a133a36b3e651d0160039a8c3d0337e",
+    "benchmarks/results/remaining-indicators/onelc-contracts.json": "37585e178c05f37e7d3660483fe89469d00df864824585ca5c83955f9984571b",
     "benchmarks/results/remaining-indicators/orderedvol-contracts.json": "5bd5f63b1578750f7281b719af97bbb3bc33e5ee3bbb42128d7839d13588ad44",
     "benchmarks/results/remaining-indicators/oscillator-contracts.json": "a0ecd34360e016bb6e502f553b181f91e17dede91b3028a1184ce78f102a4367",
     "benchmarks/results/remaining-indicators/oscillatoralias-contracts.json": "cf98dfcaf7b380585620d7c4debd7789055f96b87f6915b5ad5348bd7fd8f1db",
@@ -9158,7 +9168,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "001a18d9219d30f942bf7f9c552b75310199fc47effb7b51ad4329b0032432bd",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "440da4995d0570baf55c47692b2998f941e32ac095d0673220ea95b67738ba9a",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
