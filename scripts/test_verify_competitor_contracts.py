@@ -29,6 +29,29 @@ class ContractShardsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 contracts.assignment(bad, shard, total)
 
+    def test_known_long_methods_stay_separate_when_inventory_grows(self):
+        heavy = set(contracts.HISTORICAL_SECONDS)
+        for count in (40, 123):
+            methods = sorted(heavy | {f"NewMethod{i:03}" for i in range(count)})
+            for total in (len(heavy), 20):
+                shards = [contracts.assignment(methods, i, total) for i in range(total)]
+                self.assertEqual(methods, sorted(name for shard in shards for name in shard))
+                self.assertTrue(all(shards))
+                self.assertTrue(all(len(heavy.intersection(shard)) <= 1 for shard in shards))
+                self.assertEqual(shards, [contracts.assignment(methods, i, total) for i in range(total)])
+
+    def test_unknown_methods_keep_even_deterministic_assignment(self):
+        methods = [f"NewMethod{i:03}" for i in range(123)]
+        for i in range(20):
+            self.assertEqual(methods[i::20], contracts.assignment(methods, i, 20))
+
+    def test_fewer_runners_still_execute_every_known_method_once(self):
+        methods = sorted(contracts.HISTORICAL_SECONDS)
+        for total in (1, 2, 3, len(methods)):
+            shards = [contracts.assignment(methods, i, total) for i in range(total)]
+            self.assertEqual(methods, sorted(name for shard in shards for name in shard))
+            self.assertTrue(all(shards))
+
     def test_evidence_rejects_missing_extra_skipped_and_failed_methods(self):
         xml = '''<TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
           <TestDefinitions><UnitTest id="1"><TestMethod className="A" name="B"/></UnitTest></TestDefinitions>
