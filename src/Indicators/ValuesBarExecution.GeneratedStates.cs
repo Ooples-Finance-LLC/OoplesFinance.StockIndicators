@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or IntradayMomentumIndex or ChandeIntradayMomentumIndex or RelativeMomentumIndex
             or Adr or AverageDayRange
             or AlligatorJaw or AlligatorTeeth or AlligatorLips
             or BullPower or BearPower or BullPowerIndicator or BearPowerIndicator
@@ -231,6 +232,9 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        IntradayMomentumIndex momentum => new GeneratedIntradayMomentumState(momentum.Length, count),
+        ChandeIntradayMomentumIndex momentum => new GeneratedIntradayMomentumState(momentum.Length, count),
+        RelativeMomentumIndex momentum => new GeneratedRelativeMomentumState(momentum.Length, momentum.Momentum, count),
         Adr range => new GeneratedDayRangeState(range.Length, count),
         AverageDayRange range => new GeneratedDayRangeState(range.Length, count),
         AlligatorJaw line => new GeneratedAlligatorState(line.Length, 8),
@@ -921,6 +925,27 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedIntradayMomentumState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly IntradayGainLossWindow _window = new(Math.Max(1, length), count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Open, true);
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedRelativeMomentumState(int length, int momentum, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly RelativeMomentumWindow _window = new(MovingAvgType.WildersSmoothingMethod,
+            Math.Max(1, length), Math.Max(1, momentum), count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal; outputs[2] = point.Histogram;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedDayRangeState(int length, int count) : IIndicatorState, IDisposable
