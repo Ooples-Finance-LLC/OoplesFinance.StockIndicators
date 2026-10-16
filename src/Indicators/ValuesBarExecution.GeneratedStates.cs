@@ -58,7 +58,7 @@ internal static partial class ValuesBarExecution
             or AhrensMovingAverage or AlphaDecreasingEma or VariableLengthMovingAverage
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
-            or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator
+            or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeFlowIndicator { Coef: > double.NegativeInfinity and < double.PositiveInfinity, Vcoef: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -201,6 +201,7 @@ internal static partial class ValuesBarExecution
         VolumeAccumulationOscillator volume => new GeneratedVolumeBalanceState(volume.Length, VolumeBalanceKind.Accumulation),
         VolumeFlowIndicator volume => new GeneratedVolumeFlowState(volume.Length1, volume.Length2, volume.SignalLength, volume.SmoothLength, volume.Coef, volume.Vcoef, volumeFlowCustomRange),
         FiniteVolumeElements volume => new GeneratedFiniteVolumeState(volume.Length, volume.Factor),
+        RelativeVolumeIndicator volume => new GeneratedRelativeVolumeState(volume.Length),
         BuffAverage average => new GeneratedBuffState(average.Length),
         EquityMovingAverage average => new GeneratedEquityState(average.Length),
         Vwma average => new GeneratedVolumeWeightedState(average.Length),
@@ -760,6 +761,19 @@ internal static partial class ValuesBarExecution
         private readonly FiniteVolumeWindow _window = new(MovingAvgType.SimpleMovingAverage, period, factor);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedRelativeVolumeState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly RelativeVolumeWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.Volume, true);
+            outputs[0] = point.Score;
+            outputs[1] = point.Demand;
+        }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 

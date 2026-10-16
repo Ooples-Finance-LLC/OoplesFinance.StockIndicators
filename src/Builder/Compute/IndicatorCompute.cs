@@ -20383,13 +20383,13 @@ internal static partial class IndicatorCompute
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides;
-        using var means = context.Rent(data.Count);
-        if (custom) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), means.WritableSpan);
+        using ComputeBuffer? means = custom ? context.Rent(data.Count) : null;
+        if (custom) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), means!.Value.WritableSpan);
         var output = context.Rent(data.Count);
         using var window = new RelativeVolumeWindow(maType, length);
         for (var i = 0; i < data.Count; i++)
         {
-            var (score, demand) = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            var (score, demand) = window.Next(input[i], data.Volumes[i], true, custom ? means!.Value.Span[i] : null);
             output.WritableSpan[i] = demandPrice ? demand : score;
         }
         return output;
