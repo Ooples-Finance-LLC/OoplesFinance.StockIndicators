@@ -4123,3 +4123,6 @@ The existing shared routes for Balance of Power, EMA, Highest High, Lowest Low, 
 
 
 Intraday Momentum Index, its Chande alias and Relative Momentum Index now share their existing gain/loss kernels. Relative Momentum computes Value, Signal and Histogram together with independent lookback/lag clamps and the original zero-loss convention. The new fixture includes both gains and losses. Validation: 187 focused unit cases, 12 new parity cases, 103 discovery cases, 100 local GPU cases, 24 existing-fixture compatibility cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+Contract High and Contract Low now reuse the existing shared prefix-extreme state. Strict comparisons retain the earliest equal candidate, including signed-zero ties, and original high/low fields and source fallback are preserved. Validation: 30 focused unit cases (including independent numerical contracts and 8,193-bar signed-zero prefixes), 8 parity cases, 104 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
