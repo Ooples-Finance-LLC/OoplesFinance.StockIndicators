@@ -1,0 +1,36 @@
+{
+  "batch": "generated-trend-extras",
+  "types": [
+    "LightLeastSquaresMovingAverage",
+    "LinearExtrapolation",
+    "RecursiveMovingTrendAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing least-squares, extrapolation and recursive trend numerical kernels through shared owned execution. Bound Light Least Squares buffers by owned input count and preserve zero startup at unfillable periods. Preserve staggered lag startup, exact staged rounding and warmup/error contracts.",
+  "verification": {
+    "unit_passed": 130,
+    "fixture_passed": 12,
+    "discovery_passed": 33,
+    "gpu_passed": 100,
+    "contract_methods": 1368,
+    "hosted_methods": 1356,
+    "evidence": [
+      {
+        "file": "trendextra-unit.trx.gz",
+        "passed_cases": 130,
+        "trx_sha256": "2dd19d8e1cab3b8070e903997274a0a4ad42e73424905cbffc51c253f1f38b8b"
+      },
+      {
+        "file": "trendextra-fixture.trx.gz",
+        "passed_cases": 45,
+        "trx_sha256": "4712d3926d87be1c199cfa87d638cc23e3f0aaff5159acf5e3c4b9b0328d3be1"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTrendExtraBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

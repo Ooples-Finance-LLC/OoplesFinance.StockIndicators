@@ -3347,7 +3347,13 @@
       "options": [
         "LightLeastSquaresMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "LightLeastSquaresMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/trendextra-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "LindaRaschke3_10Oscillator",
@@ -3368,7 +3374,13 @@
       "options": [
         "LinearExtrapolationSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "LinearExtrapolationSpecOptions": [
+          "benchmarks/results/remaining-indicators/trendextra-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "LinearQuadraticConvergenceDivergenceOscillator",
@@ -4667,7 +4679,13 @@
       "options": [
         "RecursiveMovingTrendAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RecursiveMovingTrendAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/trendextra-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RecursiveRelativeStrengthIndex",
@@ -8489,6 +8507,7 @@
     "benchmarks/results/remaining-indicators/recursiveextra-contracts.json": "bd4b8d492d0d1a6ae0da8bd91a374c5bc3abbb20046825db268a915510ae7c60",
     "benchmarks/results/remaining-indicators/specialaverage-contracts.json": "2dfe676fa89b1943d6373b248182426168a70f6779acea994b0f5d5fb1475215",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
+    "benchmarks/results/remaining-indicators/trendextra-contracts.json": "e8e13e0a9d70bbd8bfd75f749b214629107ada9d7594b84f45acda61ae9ecdd4",
     "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
     "benchmarks/results/remaining-indicators/volume-contracts.json": "1e80ae57d2f76d8978e29acfecc682a114126173f7f51d34dc6aa7d36a327ad2",
     "benchmarks/results/remaining-indicators/volumealias-contracts.json": "19020aca691f72ae8cde5ba154f47ca1fb0d25edda731ccc20f7ca08dcefe4fb",
@@ -8697,7 +8716,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "327bc06c4cc04cf54ce5004027790aa25319dca80aaffbb5e9316d9eaad193af",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "780f26b4c86f34dc156c0047fec72fc86140cb1ed2615efe61e9588fd6e69c83",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
