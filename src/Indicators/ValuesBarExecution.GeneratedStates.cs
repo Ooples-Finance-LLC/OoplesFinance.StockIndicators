@@ -70,6 +70,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or KeltnerChannelMiddle or KeltnerChannels { MultFactor: > double.NegativeInfinity and < double.PositiveInfinity }
             or PriceCycleOscillator
             or Qstick or DailyAveragePriceDelta or DrunkardWalk
             or DonchianChannel or DonchianChannelUpper or DonchianChannelLower
@@ -251,6 +252,8 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        KeltnerChannelMiddle middle => new EmaValueState(middle.Length),
+        KeltnerChannels channel => new GeneratedKeltnerChannelState(channel.Length1, channel.Length2, channel.MultFactor, count),
         PriceCycleOscillator cycle => new GeneratedPriceCycleState(cycle.Length, count),
         Qstick quick => new GeneratedQuickStickState(quick.Length),
         DailyAveragePriceDelta delta => new GeneratedDailyDeltaState(delta.Length, count),
@@ -959,6 +962,19 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedKeltnerChannelState(int centerLength, int rangeLength, double multiplier, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly KeltnerWindow _window = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, centerLength), Math.Max(1, rangeLength), capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var stages = _window.Next(bar.High, bar.Low, bar.Close, true);
+            var value = KeltnerWindow.Bands(stages.Middle, stages.Atr, multiplier);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedPriceCycleState(int length, int count) : IIndicatorState, IDisposable

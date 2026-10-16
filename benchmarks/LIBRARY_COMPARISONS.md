@@ -4150,3 +4150,6 @@ Qstick, Daily Average Price Delta and Drunkard Walk now reuse their existing exa
 
 
 Price Cycle Oscillator now reuses its exact distance-to-ATR kernel in shared execution. Facade clamps, staged arithmetic, original candle fields, ownership and both component-average/source fallbacks remain intact. Validation: 54 focused unit cases, 4 parity cases, 112 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending. Existing Price Volume Oscillator qualification and timing evidence are reused unchanged.
+
+
+Keltner Channels now compute all three bands with the existing exact EMA/Wilder kernel; Keltner Channel Middle reuses shared EMA state. Independent clamps, multiplier boundaries, invalid-multiplier fallback, original fields, ownership and component/source fallback remain intact. Validation: 152 focused unit cases, 8 parity cases, 113 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
