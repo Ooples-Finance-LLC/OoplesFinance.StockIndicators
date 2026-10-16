@@ -26,7 +26,8 @@ internal static partial class ValuesBarExecution
             or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage or EhlersLaguerreFilter or EhlersLaguerreRsi
             or EhlersAdaptiveLaguerreFilter or EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha
             or RepulsionMovingAverage or CompoundRatioMovingAverage or GeneralizedDoubleEma or DoubleExponentialSmoothing
-            or GeneralizedDoubleExponentialMovingAverage { VolumeFactor: >= double.MinValue and <= double.MaxValue };
+            or GeneralizedDoubleExponentialMovingAverage { VolumeFactor: >= double.MinValue and <= double.MaxValue }
+            or LightLeastSquaresMovingAverage or LinearExtrapolation or RecursiveMovingTrendAverage;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -119,6 +120,9 @@ internal static partial class ValuesBarExecution
         GeneralizedDoubleEma average => new GeneratedGeneralizedDoubleState(average.Length, .7),
         GeneralizedDoubleExponentialMovingAverage average => new GeneratedGeneralizedDoubleState(average.Length, average.VolumeFactor),
         DoubleExponentialSmoothing => new GeneratedDoubleSmoothingState(),
+        LightLeastSquaresMovingAverage average => new GeneratedLightLeastSquaresState(average.Length, count),
+        LinearExtrapolation extrapolation => new GeneratedLinearExtrapolationState(extrapolation.Length),
+        RecursiveMovingTrendAverage average => new GeneratedRecursiveTrendState(average.Length),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -397,6 +401,28 @@ internal static partial class ValuesBarExecution
     private sealed class GeneratedDoubleSmoothingState : IIndicatorState
     {
         private readonly DoubleSmoothingWindow _window = new(.01, .9);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedLightLeastSquaresState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly LightLeastSquaresWindow _window = new(MovingAvgType.SimpleMovingAverage, period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedLinearExtrapolationState(int period) : IIndicatorState
+    {
+        private readonly LinearExtrapolationWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedRecursiveTrendState(int period) : IIndicatorState
+    {
+        private readonly RecursiveTrendWindow _window = new(period);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
