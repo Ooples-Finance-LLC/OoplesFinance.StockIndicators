@@ -6132,7 +6132,13 @@
       "options": [
         "TraderPressureIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TraderPressureIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/traderpressure-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "TradersDynamicIndex",
@@ -9164,6 +9170,7 @@
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
     "benchmarks/results/remaining-indicators/symmetric-contracts.json": "166810cfd981551049dc64f6c3037477b1bfce8487feb4e7fe8c00d718cb43a9",
     "benchmarks/results/remaining-indicators/timemoney-contracts.json": "c1c96bf00dfe99b1dd8fde5db04fb6c06e870b01184fcb1631a696289e702a06",
+    "benchmarks/results/remaining-indicators/traderpressure-contracts.json": "4787173dfbbde9724daa9d8e57138ede4973d56ec046031da846adea818cdf0f",
     "benchmarks/results/remaining-indicators/tradevolume-contracts.json": "01039570ca05b133bc6da239e666912c35960397f6e6981e1180fcc637b4f02f",
     "benchmarks/results/remaining-indicators/trendextra-contracts.json": "e8e13e0a9d70bbd8bfd75f749b214629107ada9d7594b84f45acda61ae9ecdd4",
     "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
@@ -9382,7 +9389,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "cfa447303c26fef611ef751f9932b425950a53549b6096c507f1b07c5f2adbf1",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "7ca9f8384b658d4793805ed81331c05a05c33c6f745d13c69d4e579a211350a6",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
