@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or Vpci or VolumeWeightedRsi or VortexBands
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or UltimateMomentumIndicator { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -212,6 +213,9 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        Vpci vpci => new GeneratedVpciState(vpci.Length),
+        VolumeWeightedRsi rsi => new GeneratedVolumeWeightedRsiState(rsi.Length),
+        VortexBands bands => new GeneratedVortexBandsState(bands.Length),
         ValueChartIndicator chart => new GeneratedValueChartState(chart.Length, valueChartCustomRange),
         UltimateMomentumIndicator momentum => new GeneratedUltimateMomentumState(momentum),
         UltimateTraderOscillator => new GeneratedUltimateTraderState(),
@@ -867,6 +871,38 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedVpciState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly VpciWindow _window = new(MovingAvgType.SimpleMovingAverage, 5, 20, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.Volume, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedVolumeWeightedRsiState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly VolumeWeightedRsiWindow _window = new(MovingAvgType.WeightedMovingAverage, length, 3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Volume, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedVortexBandsState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly VortexBandWindow _window = new(MovingAvgType.McNichollMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Upper; outputs[1] = point.Middle; outputs[2] = point.Lower;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedValueChartState(int length, bool customRange) : IMultiOutputState, IDisposable
