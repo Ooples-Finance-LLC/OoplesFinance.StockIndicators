@@ -95,15 +95,15 @@ internal static partial class ValuesBarExecution
         private readonly WindowExtremeDeque _low = new(Math.Max(2, period), false);
         private long _index;
         public void Reset() { _high.Reset(); _low.Reset(); _index = 0; }
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             _high.Add(bar.Close); _low.Add(bar.Close);
             double up = (double)(period - (_index - _high.Index)) / period * 100;
             double down = (double)(period - (_index - _low.Index)) / period * 100;
             _index++;
-            output[0] = up - down;
-            output[1] = up;
-            output[2] = down;
+            outputs[0] = up - down;
+            outputs[1] = up;
+            outputs[2] = down;
         }
     }
 
@@ -119,11 +119,11 @@ internal static partial class ValuesBarExecution
     {
         private readonly VolumeIndexWindow _window = new(MovingAvgType.ExponentialMovingAverage, period, positive, 1000);
         public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             var value = _window.Next(bar.Close, bar.Volume, true);
-            output[0] = value.Line;
-            output[1] = value.Signal;
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
         }
         public void Dispose() => _window.Dispose();
     }
@@ -132,12 +132,12 @@ internal static partial class ValuesBarExecution
     {
         private readonly DirectionalIndexWindow _window = new(MovingAvgType.WildersSmoothingMethod, Math.Max(1, period), Math.Max(1, count));
         public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             var value = _window.Next(bar.High, bar.Low, bar.Close, true);
-            output[0] = value.Plus;
-            output[1] = value.Minus;
-            output[2] = value.Adx;
+            outputs[0] = value.Plus;
+            outputs[1] = value.Minus;
+            outputs[2] = value.Adx;
         }
         public void Dispose() => _window.Dispose();
     }
@@ -146,11 +146,11 @@ internal static partial class ValuesBarExecution
     {
         private readonly MassIndexWindow _window = new(MovingAvgType.ExponentialMovingAverage, averagePeriod, averagePeriod, sumPeriod, 9, count);
         public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             var value = _window.Next(bar.High, bar.Low, true);
-            output[0] = value.Value;
-            output[1] = value.Signal;
+            outputs[0] = value.Value;
+            outputs[1] = value.Signal;
         }
         public void Dispose() => _window.Dispose();
     }
@@ -174,11 +174,11 @@ internal static partial class ValuesBarExecution
     {
         private readonly PriceVolumeTrendWindow _window = new(MovingAvgType.ExponentialMovingAverage, period);
         public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             var value = _window.Next(bar.Close, bar.Volume, true);
-            output[0] = value.Line;
-            output[1] = value.Signal;
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
         }
         public void Dispose() => _window.Dispose();
     }
@@ -207,15 +207,15 @@ internal static partial class ValuesBarExecution
         private double _previous;
         private bool _invalidSignal;
         public void Reset() { _signal.Reset(); _sum = default; _previous = 0; _invalidSignal = false; }
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             if (bar.Close > _previous) _sum.Add(bar.Volume);
             else if (bar.Close < _previous) _sum.Add(bar.Volume, -1);
             _previous = bar.Close;
             double value = _sum.Mean(1);
             _invalidSignal |= !double.IsFinite(value);
-            output[0] = value;
-            output[1] = _invalidSignal ? double.NaN : _signal.GetNext(value, commit: true);
+            outputs[0] = value;
+            outputs[1] = _invalidSignal ? double.NaN : _signal.GetNext(value, commit: true);
         }
     }
 
@@ -262,14 +262,14 @@ internal static partial class ValuesBarExecution
         private readonly Streaming.EmaState _signal = new(signalPeriod);
         private bool _invalidSignal;
         public void Reset() { _line.Reset(); _signal.Reset(); _invalidSignal = false; }
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             double value = _line.Update(bar);
             _invalidSignal |= double.IsInfinity(value);
             double signal = _invalidSignal ? double.NaN : _signal.GetNext(value, commit: true);
-            output[0] = value;
-            output[1] = signal;
-            output[2] = value - signal;
+            outputs[0] = value;
+            outputs[1] = signal;
+            outputs[2] = value - signal;
         }
     }
 
@@ -278,11 +278,11 @@ internal static partial class ValuesBarExecution
         private readonly ChandeMomentumWindow _window = new(Math.Min(Math.Max(1, period), Math.Max(1, count)));
         private readonly Streaming.EmaState _signal = new(3);
         public void Reset() { _window.Reset(); _signal.Reset(); }
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             double value = _window.Next(bar.Close, true);
-            output[0] = value;
-            output[1] = _signal.GetNext(value, commit: true);
+            outputs[0] = value;
+            outputs[1] = _signal.GetNext(value, commit: true);
         }
         public void Dispose() => _window.Dispose();
     }
@@ -301,13 +301,13 @@ internal static partial class ValuesBarExecution
         private readonly WmaValueState _signal = new(period, count);
         private bool _invalidSignal;
         public void Reset() { _ratio.Reset(); _signal.Reset(); _invalidSignal = false; }
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             double value = _ratio.Update(bar);
             _invalidSignal |= !double.IsFinite(value);
-            output[0] = value;
+            outputs[0] = value;
             // FiniteSignalInput invalidates the entire dependent suffix.
-            output[1] = _invalidSignal ? double.NaN
+            outputs[1] = _invalidSignal ? double.NaN
                 : _signal.Update(new Bar(default, 0, 0, 0, value, 0));
         }
     }
@@ -317,13 +317,13 @@ internal static partial class ValuesBarExecution
         private readonly PriceRsiWindow _line = new(MovingAvgType.WildersSmoothingMethod, period, count);
         private readonly StrengthAverage _signal = new(MovingAvgType.WildersSmoothingMethod, 3, count);
         public void Reset() { _line.Reset(); _signal.Reset(); }
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             double value = _line.Next(bar.Close, true);
             double signal = _signal.Next(new StrengthValue(value), true).Mantissa;
-            output[0] = value;
-            output[1] = signal;
-            output[2] = value - signal;
+            outputs[0] = value;
+            outputs[1] = signal;
+            outputs[2] = value - signal;
         }
         public void Dispose() { _line.Dispose(); _signal.Dispose(); }
     }
@@ -387,11 +387,11 @@ internal static partial class ValuesBarExecution
         private readonly MoneyFlowAccumulationWindow _line = new();
         private readonly RocBankAverage _signal = new(MovingAvgType.ExponentialMovingAverage, period, count);
         public void Reset() { _line.Reset(); _signal.Reset(); }
-        public void Update(in Bar bar, Span<double> output)
+        public void Update(in Bar bar, Span<double> outputs)
         {
             var value = _line.Next(bar.High, bar.Low, bar.Close, bar.Volume, commit: true);
-            output[0] = value.Publish();
-            output[1] = _signal.Next(value, true).Publish();
+            outputs[0] = value.Publish();
+            outputs[1] = _signal.Next(value, true).Publish();
         }
         public void Dispose() => _signal.Dispose();
     }
