@@ -17,7 +17,8 @@ internal static partial class ValuesBarExecution
             or HullMovingAverage or TriangularMovingAverage or EhlersZeroLagEma or EhlersZeroLagExponentialMovingAverage
             or ZeroLowLagMovingAverage or ZeroLagTripleExponentialMovingAverage or SlowSmoothedMovingAverage { Length: > int.MinValue }
             or AbsolutePriceOscillator or PriceOscillator or PriceOscillatorPercent or PercentagePriceOscillator
-            or McNichollMovingAverage or WellRoundedMovingAverage or WellesWilderSummation or WildersSummationMethod;
+            or McNichollMovingAverage or WellRoundedMovingAverage or WellesWilderSummation or WildersSummationMethod
+            or OnBalanceVolume or NegativeVolumeIndex or PositiveVolumeIndex or PriceVolumeTrend;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -58,6 +59,10 @@ internal static partial class ValuesBarExecution
         Mfi flow => new GeneratedMoneyFlowState(flow.Length, count),
         ForceIndex force => new GeneratedForceState(force.Length),
         Obv volume => new GeneratedObvState(volume.Length),
+        OnBalanceVolume volume => new GeneratedObvState(volume.Length),
+        NegativeVolumeIndex volume => new GeneratedVolumeIndexState(volume.Length, false, volume.InitialValue),
+        PositiveVolumeIndex volume => new GeneratedVolumeIndexState(volume.Length, true, volume.InitialValue),
+        PriceVolumeTrend volume => new GeneratedVolumeTrendState(volume.Length),
         Nvi volume => new GeneratedVolumeIndexState(volume.Length, positive: false),
         Pvi volume => new GeneratedVolumeIndexState(volume.Length, positive: true),
         Vroc volume => new GeneratedVolumeRatioState(Math.Max(1, volume.Length), count),
@@ -162,9 +167,9 @@ internal static partial class ValuesBarExecution
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedVolumeIndexState(int period, bool positive) : IMultiOutputState, IDisposable
+    private sealed class GeneratedVolumeIndexState(int period, bool positive, int initialValue = 1000) : IMultiOutputState, IDisposable
     {
-        private readonly VolumeIndexWindow _window = new(MovingAvgType.ExponentialMovingAverage, period, positive, 1000);
+        private readonly VolumeIndexWindow _window = new(MovingAvgType.ExponentialMovingAverage, period, positive, initialValue);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         {

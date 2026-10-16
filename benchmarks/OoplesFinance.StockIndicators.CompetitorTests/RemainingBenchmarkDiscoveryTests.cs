@@ -30,6 +30,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingChainedAverageBenchmarks), 24)]
     [InlineData(typeof(RemainingOscillatorAliasBenchmarks), 32)]
     [InlineData(typeof(RemainingRecursiveExtraBenchmarks), 32)]
+    [InlineData(typeof(RemainingVolumeAliasBenchmarks), 32)]
     public void SharedLifecycleRetainsEveryBenchmarkCase(Type type, int count)
     {
         var cases = BenchmarkConverter.TypeToBenchmarks(type).BenchmarksCases;
