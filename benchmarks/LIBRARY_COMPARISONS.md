@@ -4088,3 +4088,6 @@ Weighted Close qualification now records its existing shared pointwise kernel an
 
 
 Absolute Strength Index and Absolute Strength MTF now use shared execution. The Index retains fixed 21/34 smoothing and the typed positive-close domain, including raw finite-input priority and domain validation before any root calculations. MTF shares the default SMA Bulls/Bears computation with input-bounded storage. Validation: 190 focused unit cases (including existing commodity-pair regressions and mixed-root error priority), 8 fixture parity cases, 93 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Anchored Momentum and Accumulative Swing Index now share their existing exact kernels across Value and Signal outputs. Anchored Momentum retains the facade period clamp, derived anchor and fixed EMA7/signal8 stages; accumulated swing retains original OHLC fields and the selected SMA signal period. Custom components/sources and non-finite swing limits retain fallback. Validation: 125 focused unit cases, 8 fixture parity cases, 94 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
