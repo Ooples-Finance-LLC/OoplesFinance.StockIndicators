@@ -98,6 +98,7 @@ internal static partial class ValuesBarExecution
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or FractalChaosBands or FractalChaosOscillator
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
+            or VervoortVolatilityBands { DevMult: > double.NegativeInfinity and < double.PositiveInfinity, LowBandMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or UniChannel { UbFac: > double.NegativeInfinity and < double.PositiveInfinity, LbFac: > double.NegativeInfinity and < double.PositiveInfinity }
             or PseudoPolynomialChannel { Morph: > double.NegativeInfinity and < double.PositiveInfinity }
             or HurstCycleChannel { FastMult: > double.NegativeInfinity and < double.PositiveInfinity, SlowMult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -331,6 +332,7 @@ internal static partial class ValuesBarExecution
         ProjectionBands channel => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBands, channel.Length),
         ProjectionOscillator oscillator => new GeneratedProjectionFamilyState(IndicatorName.ProjectionOscillator, oscillator.Length),
         ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
+        VervoortVolatilityBands channel => new GeneratedVervoortVolatilityState(channel.Length1, channel.Length2, channel.DevMult, channel.LowBandMult),
         UniChannel channel => new GeneratedUniChannelState(Math.Max(1, channel.Length), channel.UbFac, channel.LbFac, channel.Type1, count),
         PseudoPolynomialChannel channel => new GeneratedPseudoPolynomialState(channel.Length, channel.Morph, count),
         ExtendedRecursiveBands channel => new GeneratedExtendedBandState(channel.Length),
@@ -1060,6 +1062,18 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedVervoortVolatilityState(int length1, int length2, double deviation, double lowerMultiplier) : IMultiOutputState, IDisposable
+    {
+        private readonly VervoortVolatilityWindow _window = new(MovingAvgType.ExponentialMovingAverage, length1, length2, deviation, lowerMultiplier);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, bar.Low, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedProjectionFamilyState(IndicatorName family, int length) : IMultiOutputState, IDisposable

@@ -4215,3 +4215,6 @@ The initial run passed 115 cases and failed one test that unintentionally select
 
 
 Projection Bands, Projection Oscillator and Projection Bandwidth now compute related outputs together through their exact family kernel. Lag pairing, weighted signal stages, observed history, original fields and explicit component/source fallback are preserved. Hidden overflowing band values retain finite oscillator and bandwidth outputs. Validation: 137 focused unit cases, 12 parity cases, 133 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+Vervoort Volatility Bands now compute three outputs together with the unchanged exact kernel. Directional ranges use original low prices; EMA stages, distinct lower multiplier, observed startup, huge periods, warmup, ownership and explicit average/source fallback are preserved. Validation: 94 focused unit cases, 4 parity cases, 134 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
