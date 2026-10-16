@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or BullPower or BearPower or BullPowerIndicator or BearPowerIndicator
             or AutoLine or AutoLineWithDrift
             or AutoFilter or AutoDispersionBands
             or AwesomeOscillator or AcceleratorOscillator
@@ -224,6 +225,10 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        BullPower power => new GeneratedCandlePowerState(true, power.Length, count),
+        BearPower power => new GeneratedCandlePowerState(false, power.Length, count),
+        BullPowerIndicator power => new GeneratedCandlePowerState(true, power.Length, count),
+        BearPowerIndicator power => new GeneratedCandlePowerState(false, power.Length, count),
         AutoLine line => new GeneratedAutoLineState(line.Length, count),
         AutoLineWithDrift line => new GeneratedAutoDriftState(line.Length),
         AutoFilter filter => new GeneratedAutoFilterState(filter.Length),
@@ -904,6 +909,19 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedCandlePowerState(bool bull, int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly CandlePowerWindow _window = new(bull, MovingAvgType.ExponentialMovingAverage,
+            Math.Max(1, length), capacityHint: count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAutoLineState(int length, int count) : IIndicatorState, IDisposable
