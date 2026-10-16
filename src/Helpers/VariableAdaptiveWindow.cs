@@ -12,7 +12,7 @@ internal sealed class VariableAdaptiveWindow : IDisposable
     internal VariableAdaptiveWindow(MovingAvgType kind, int length)
     { _close = new(kind, length); _open = new(kind, length); _high = new(kind, length); _low = new(kind, length); }
 
-    private (double Value, Signal Trade) Finish(Number price, Number close, Number open, Number high, Number low, bool final)
+    private (double Value, Signal Trade) Finish(Number price, Number close, Number open, Number high, Number low, bool final, bool includeSignals = true)
     {
         var width = high - low; var body = close - open;
         if (body.Sign < 0) body = body.Times(-1);
@@ -25,9 +25,13 @@ internal sealed class VariableAdaptiveWindow : IDisposable
         }
         var previous = _hasPrevious ? _previous : price;
         var value = previous + gain * (price - previous);
-        var margin = price - value; var oldMargin = _previousPrice - previous; var change = margin - oldMargin;
-        var trade = margin.Sign > 0 && change.Sign > 0 ? Signal.StrongBuy : margin.Sign < 0 && change.Sign < 0 ? Signal.StrongSell
-            : margin.Sign > 0 ? Signal.Buy : margin.Sign < 0 ? Signal.Sell : Signal.None;
+        var trade = Signal.None;
+        if (includeSignals)
+        {
+            var margin = price - value; var oldMargin = _previousPrice - previous; var change = margin - oldMargin;
+            trade = margin.Sign > 0 && change.Sign > 0 ? Signal.StrongBuy : margin.Sign < 0 && change.Sign < 0 ? Signal.StrongSell
+                : margin.Sign > 0 ? Signal.Buy : margin.Sign < 0 ? Signal.Sell : Signal.None;
+        }
         if (final) { _previous = value; _previousPrice = price; _hasPrevious = true; }
         return (value.Publish(), trade);
     }
@@ -37,11 +41,11 @@ internal sealed class VariableAdaptiveWindow : IDisposable
         return NextValidated(bar.Close, bar.Open, bar.High, bar.Low, final);
     }
     // Shared owned-bar execution validates the entire input before updating states.
-    internal (double Value, Signal Trade) NextValidated(double close, double open, double high, double low, bool final)
+    internal (double Value, Signal Trade) NextValidated(double close, double open, double high, double low, bool final, bool includeSignals = true)
     {
         var price = Number.Of(close);
         return Finish(price, _close.Next(price, final), _open.Next(Number.Of(open), final),
-            _high.Next(Number.Of(high), final), _low.Next(Number.Of(low), final), final);
+            _high.Next(Number.Of(high), final), _low.Next(Number.Of(low), final), final, includeSignals);
     }
     internal static (double[] Values, Signal[] Trades) Calculate(StockData data, MovingAvgType kind, int length)
     {
