@@ -6658,7 +6658,15 @@
         "VerticalHorizontalFilterSpecOptions",
         "VhfSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VerticalHorizontalFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/verticalhorizontal-contracts.json"
+        ]
+      },
+      "options_without_receipts": [
+        "VhfSpecOptions"
+      ]
     },
     {
       "indicator": "VerticalHorizontalMovingAverage",
@@ -9199,7 +9207,7 @@
     "benchmarks/results/remaining-indicators/adaptiveema-contracts.json": "f3e735dd8253034440769d7345b98db2ff38b7e339bdf04a77583ae7c53d6345",
     "benchmarks/results/remaining-indicators/adaptivefit-contracts.json": "39427aafc7a10e0e45970abc24164552b55f9c2b341f9661e99409e45005269e",
     "benchmarks/results/remaining-indicators/adaptivelaguerre-contracts.json": "d15e91c082d7554c57ab5c75a4c81faca0806082a59a2743a3c2c66e161b683e",
-    "benchmarks/results/remaining-indicators/adaptivepair-contracts.json": "c171e2181ba5e428e008c59a2b90a6678a3d1096917031053d82788a4b1fb5ff",
+    "benchmarks/results/remaining-indicators/adaptivepair-contracts.json": "ce687718266f0d036ab024420f07ef79a8551463157450795f63bf450cfb8f5c",
     "benchmarks/results/remaining-indicators/adaptiverange-contracts.json": "52a4a36b67d2632a5efca47cc7835aa5811bf3170cc12c02ccd60ea039e98535",
     "benchmarks/results/remaining-indicators/adaptivevalueonly-contracts.json": "e1267db76f60e2d7ce61c0db98e96af8d05a3e146fe67d3604f701b6eb121608",
     "benchmarks/results/remaining-indicators/adaptivezone-contracts.json": "7287bf1bbb5fd093f928fdc22665b1d962d7d6c081db067f105f2ed2541a671c",
@@ -9261,6 +9269,7 @@
     "benchmarks/results/remaining-indicators/trendwindow-contracts.json": "32e63184f9118c5885bfb89ce0f354437f70cda2d18c3bdcddcbb969e2fec52b",
     "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
     "benchmarks/results/remaining-indicators/variablelength-contracts.json": "fed51af6af609d4f6d0c294f545183638cd88fbc6820e4296cdc11bb31ff0acc",
+    "benchmarks/results/remaining-indicators/verticalhorizontal-contracts.json": "c40cc49677391800509e476758328f867d96d8d9b3e99fe0530d1d4308b2b472",
     "benchmarks/results/remaining-indicators/volume-contracts.json": "1e80ae57d2f76d8978e29acfecc682a114126173f7f51d34dc6aa7d36a327ad2",
     "benchmarks/results/remaining-indicators/volumeadjusted-contracts.json": "97f74b034b1ca2b8cb1b1d61728f09306b41dfd8944c220961fd743d7a0a6233",
     "benchmarks/results/remaining-indicators/volumealias-contracts.json": "19020aca691f72ae8cde5ba154f47ca1fb0d25edda731ccc20f7ca08dcefe4fb",
@@ -9476,7 +9485,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "d0a70df88c0353fee78b8a92197d7b8193402c674e0483c2aede6dc0ef225a18",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2973f39848e48ca45d7852babf197754008fc01c1c88cca58fec097695f65651",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

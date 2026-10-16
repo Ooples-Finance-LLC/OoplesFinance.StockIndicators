@@ -4041,3 +4041,6 @@ Trend Continuation Factor, Trend Trigger Factor and Trend Intensity Index now us
 
 
 Trigonometric Oscillator and Time Series Forecast now use shared execution with their unchanged exact kernels and original closes. Forecast upper, middle and lower outputs share one pass, preserving the primary middle output. Validation: 87 focused unit cases, 8 fixture parity cases, 79 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; quiet-window performance qualification remains pending.
+
+
+Vertical Horizontal Filter now shares its unchanged exact range/path kernel and weighted signal average over original closes. The typed facade retains its fixed six-bar signal period and custom-component fallback. Validation: 84 focused unit cases, 4 fixture parity cases, 80 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.

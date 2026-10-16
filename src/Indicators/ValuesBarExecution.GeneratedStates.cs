@@ -59,7 +59,7 @@ internal static partial class ValuesBarExecution
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
-            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast
+            or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or VerticalHorizontalFilter
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or VortexPositive or VortexNegative or VortexPlus or VortexMinus or VortexIndicatorPlus or VortexIndicatorMinus
             or FiniteVolumeElements { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -211,6 +211,7 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        VerticalHorizontalFilter filter => new GeneratedVerticalHorizontalState(filter.Length, count),
         TrigonometricOscillator oscillator => new GeneratedTrigonometricState(oscillator.Length),
         TimeSeriesForecast forecast => new GeneratedForecastState(forecast.Length),
         TrendStep step => new GeneratedTrendStepState(step.Length),
@@ -845,6 +846,20 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedVerticalHorizontalState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly VerticalHorizontalWindow _window = new(length, Math.Max(1, count));
+        private readonly RocBankAverage _signal = new(MovingAvgType.WeightedMovingAverage, 6, Math.Max(1, count));
+        public void Reset() { _window.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value;
+            outputs[1] = _signal.Next(new RocBankValue(value), true).Publish();
+        }
+        public void Dispose() { _window.Dispose(); _signal.Dispose(); }
     }
 
     private sealed class GeneratedTrigonometricState(int period) : IMultiOutputState, IDisposable
