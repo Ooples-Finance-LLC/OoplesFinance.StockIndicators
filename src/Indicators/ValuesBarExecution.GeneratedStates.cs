@@ -47,7 +47,9 @@ internal static partial class ValuesBarExecution
             or EhlersSuperPassbandFilter
             or EhlersEarlyOnsetTrendIndicator { K: >= double.MinValue and <= double.MaxValue }
             or EhlersImpulseReaction { Q: >= double.MinValue and <= double.MaxValue }
-            or EhlersImpulseResponse { Bw: >= double.MinValue and <= double.MaxValue };
+            or EhlersImpulseResponse { Bw: >= double.MinValue and <= double.MaxValue }
+            or EhlersHannMovingAverage or EhlersHammingMovingAverage or HammingMa
+            or EhlersHannWindowIndicator or EhlersHammingWindowIndicator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -167,6 +169,11 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        EhlersHannMovingAverage filter => new GeneratedHannMeanState(filter.Length, count),
+        EhlersHammingMovingAverage filter => new GeneratedHammingMeanState(filter.Length, count),
+        HammingMa filter => new GeneratedHammingMeanState(filter.Length, count),
+        EhlersHannWindowIndicator filter => new GeneratedHannIndicatorState(filter.Length),
+        EhlersHammingWindowIndicator filter => new GeneratedHammingIndicatorState(filter.Length),
         EhlersEarlyOnsetTrendIndicator filter => new GeneratedEarlyOnsetState(filter.Length1, filter.Length2, filter.K),
         EhlersImpulseReaction filter => new GeneratedImpulseReactionState(filter.Length1, filter.Length2, filter.Q),
         EhlersImpulseResponse filter => new GeneratedImpulseResponseState(filter.Length, filter.Bw),
@@ -610,6 +617,48 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedHannMeanState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly HannWindowMean? _window = count == 0 ? null : new(period, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedHammingMeanState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly HammingWindowMean? _window = count == 0 ? null : new(period, 3, count);
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window!.Next(bar.Close, true);
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedHannIndicatorState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly HannIndicatorWindow _window = new(MovingAvgType.EhlersHannMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Open, bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Roc;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedHammingIndicatorState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly HammingIndicatorWindow _window = new(MovingAvgType.EhlersHammingMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Open, bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Roc;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedEarlyOnsetState(int low, int high, double k) : IIndicatorState
