@@ -4023,3 +4023,6 @@ Time and Money Channel now computes all seven outputs in one shared pass and wri
 
 
 Trader Pressure Index now computes net, bulls and bears in one shared pass using the existing exact weighted-average kernel and original high/low inputs. Validation: 321 focused unit cases, 4 fixture parity cases, 73 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared for quiet-window qualification; no measured speedup is claimed.
+
+
+Volume Accumulation Percent and Twiggs Money Flow now use shared execution with their existing exact kernel. The default raw Twiggs path avoids two unused intermediate buffers, while custom-average callback order remains intact. Validation: 91 focused unit cases, 8 fixture parity cases, 74 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
