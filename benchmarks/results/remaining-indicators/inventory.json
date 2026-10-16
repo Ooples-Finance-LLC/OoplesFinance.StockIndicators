@@ -614,13 +614,14 @@
       ],
       "status": "contract-receipts-recorded-performance-pending",
       "contract_receipts": {
+        "BollingerBandsMiddleSpecOptions": [
+          "benchmarks/results/remaining-indicators/bollingeratrfamily-contracts.json"
+        ],
         "BollingerBandsSpecOptions": [
           "benchmarks/results/remaining-indicators/bollingerfamily-contracts.json"
         ]
       },
-      "options_without_receipts": [
-        "BollingerBandsMiddleSpecOptions"
-      ]
+      "options_without_receipts": []
     },
     {
       "indicator": "BollingerBandsAverageTrueRange",
@@ -628,14 +629,29 @@
         "BollingerBandsAtrSpecOptions",
         "BollingerBandsAvgTrueRangeSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "BollingerBandsAtrSpecOptions": [
+          "benchmarks/results/remaining-indicators/bollingeratrfamily-contracts.json"
+        ],
+        "BollingerBandsAvgTrueRangeSpecOptions": [
+          "benchmarks/results/remaining-indicators/bollingeratrfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "BollingerBandsFibonacciRatios",
       "options": [
         "BollingerBandsFibonacciRatiosSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "BollingerBandsFibonacciRatiosSpecOptions": [
+          "benchmarks/results/remaining-indicators/bollingeratrfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "BollingerBandsPercentB",
@@ -668,7 +684,13 @@
       "options": [
         "BollingerBandsWithAtrPctSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "BollingerBandsWithAtrPctSpecOptions": [
+          "benchmarks/results/remaining-indicators/bollingeratrfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "BreakoutRelativeStrengthIndex",
@@ -9811,6 +9833,7 @@
     "benchmarks/results/remaining-indicators/bandpass-contracts.json": "35079de72389da6fa96511f0e1b1270ce600804dd12b183de3b060944cb68cc7",
     "benchmarks/results/remaining-indicators/barflow-contracts.json": "2a207301cf96332bc31deda7a26dc0e5049a472c4a7dbad632a5a2473d3963c7",
     "benchmarks/results/remaining-indicators/bettervolume-contracts.json": "e0cfa38122e21a9d52e314fc70fa56f4fbb9037421f36514435f892fce56e87a",
+    "benchmarks/results/remaining-indicators/bollingeratrfamily-contracts.json": "794eb41860c0a5148d51c70ae7e14c17f7160f0727ae88d58a8c6c112ccab486",
     "benchmarks/results/remaining-indicators/bollingerfamily-contracts.json": "f927d2b5e033cf9e6756feb46ee8fd26e2d111173d74855eb52c7bcbe049eb02",
     "benchmarks/results/remaining-indicators/buffequity-contracts.json": "90833efbadfccd997da3f001072fde598e93d228b1d5d953e6e91a45cbb00313",
     "benchmarks/results/remaining-indicators/candlekernels-contracts.json": "f8c2c896c6f2ac6867aeb279417959f05ad639cff8d23088968fbb1df40bcb2b",
@@ -10111,7 +10134,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "d7b9239a9ad72c22f225ac7781bfb83fd780d07dd502af27084e9bc67cde6cfb",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "cea626734c7681e2b8d2a4cad5bc2132e5b0b99122c5d4a6f22b518a1d80e4ce",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

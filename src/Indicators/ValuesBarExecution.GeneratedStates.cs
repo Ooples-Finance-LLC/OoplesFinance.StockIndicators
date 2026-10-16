@@ -15,6 +15,7 @@ internal static partial class ValuesBarExecution
 
     private static bool IsGeneratedState(IIndicator indicator) =>
         IsDemarkCountState(indicator) ||
+        indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
@@ -86,6 +87,10 @@ internal static partial class ValuesBarExecution
             or BollingerBandsWidth
             or BollingerBandsPercentB { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
             or NarrowSidewaysChannel
+            or BollingerBandsMiddle
+            or BollingerBandsAtr { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
+            or BollingerBandsFibonacciRatios { FibRatio3: > double.NegativeInfinity and < double.PositiveInfinity }
+            or BollingerBandsWithAtrPct { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
             or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -298,6 +303,11 @@ internal static partial class ValuesBarExecution
         BollingerBandsPercentB channel => new GeneratedBollingerState(Math.Max(1, channel.Length), channel.Multiplier, count, 2),
         // The legacy facade ignores its obsolete Pct option and uses three deviations.
         NarrowSidewaysChannel channel => new GeneratedBollingerState(Math.Max(1, channel.Length), 3, count, 0),
+        BollingerBandsMiddle channel => new GeneratedBollingerMiddleState(Math.Max(1, channel.Length), count),
+        BollingerBandsAtr ratio => new GeneratedBollingerAtrState(MovingAvgType.SimpleMovingAverage, 22, Math.Max(1, ratio.Length), ratio.Multiplier, count),
+        BollingerBandsAvgTrueRange ratio => new GeneratedBollingerAtrState(ratio.MaType, Math.Max(1, ratio.AtrLength), Math.Max(1, ratio.Length), ratio.StdDevMult, count),
+        BollingerBandsFibonacciRatios channel => new GeneratedRangeChannelState(channel.Length, channel.FibRatio3, false, count),
+        BollingerBandsWithAtrPct channel => new GeneratedAtrPercentBandState(channel.Length, channel.BbLength, channel.StdDevMult, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
         MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
@@ -1019,6 +1029,35 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedBollingerMiddleState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _average = length <= count ? new(length) : null;
+        public void Reset() => _average?.Reset();
+        public double Update(in Bar bar) => _average?.Next(bar.Close, true) ?? 0;
+        public void Dispose() => _average?.Dispose();
+    }
+
+    private sealed class GeneratedBollingerAtrState(MovingAvgType kind, int atrLength, int length, double multiplier, int count) : IIndicatorState, IDisposable
+    {
+        // The only published ratio is zero while its full deviation window is unfilled.
+        private readonly BollingerAtrWindow? _window = length <= count ? new(kind, atrLength, length, multiplier, capacityHint: Math.Max(1, count)) : null;
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.High, bar.Low, bar.Close, true).Value ?? 0;
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedAtrPercentBandState(int length, int centerLength, double multiplier, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly AtrPercentBandWindow _window = new(MovingAvgType.SimpleMovingAverage, length, centerLength, multiplier, capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedBollingerState(int length, double multiplier, int count, int kind) : IMultiOutputState, IDisposable
