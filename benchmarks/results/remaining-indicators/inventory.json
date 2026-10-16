@@ -3152,7 +3152,13 @@
       "options": [
         "ExtendedRecursiveBandsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ExtendedRecursiveBandsSpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptiveboundaries-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "FXSniperIndicator",
@@ -3296,7 +3302,13 @@
       "options": [
         "FlaggingBandsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "FlaggingBandsSpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptiveboundaries-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "FloorPivotPoints",
@@ -4549,7 +4561,13 @@
       "options": [
         "MotionToAttractionChannelsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "MotionToAttractionChannelsSpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptiveboundaries-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "MotionToAttractionTrailingStop",
@@ -7371,7 +7389,13 @@
       "options": [
         "VolumeAdaptiveBandsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VolumeAdaptiveBandsSpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptiveboundaries-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VolumeAdjustedMovingAverage",
@@ -9857,6 +9881,7 @@
     "benchmarks/results/remaining-indicators/absoluteerrorbands-contracts.json": "615b27192c66bee661de9b256b0484523a09c650749305a160801f9bd831daec",
     "benchmarks/results/remaining-indicators/absolutestrength-contracts.json": "da3e0e0aa9eaa8846e46877e15ea6b85903c61a96065b9602f72380b80667a4b",
     "benchmarks/results/remaining-indicators/accumulation-contracts.json": "a32bad053acce60fc6a0d7b470c5b368a0a68ed33c03133e8794fedb523c7200",
+    "benchmarks/results/remaining-indicators/adaptiveboundaries-contracts.json": "7bc552bf7133bf83dbe4c79f1052050fc4137f8942278437aecaba6dd3b3de4a",
     "benchmarks/results/remaining-indicators/adaptiveema-contracts.json": "f3e735dd8253034440769d7345b98db2ff38b7e339bdf04a77583ae7c53d6345",
     "benchmarks/results/remaining-indicators/adaptivefit-contracts.json": "39427aafc7a10e0e45970abc24164552b55f9c2b341f9661e99409e45005269e",
     "benchmarks/results/remaining-indicators/adaptivelaguerre-contracts.json": "d15e91c082d7554c57ab5c75a4c81faca0806082a59a2743a3c2c66e161b683e",
@@ -10185,7 +10210,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "484984347aa758e1d1200ee0cd29595f5ca7f162628add123170c6d90815c023",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "5564dafd710d1c9eedb51126881d4a2c940894d39c33cd9cb9419795b3066c8e",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
