@@ -92,6 +92,8 @@ internal static partial class ValuesBarExecution
             or BollingerBandsFibonacciRatios { FibRatio3: > double.NegativeInfinity and < double.PositiveInfinity }
             or BollingerBandsWithAtrPct { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or KirshenbaumBands { StdDevFactor: > double.NegativeInfinity and < double.PositiveInfinity }
+            or TrendTraderBands { Mult: > double.NegativeInfinity and < double.PositiveInfinity, BandStep: > double.NegativeInfinity and < double.PositiveInfinity }
+            or StandardDeviationChannel or RateOfChangeBands
             or SmoothedVolatilityBands { Length1: <= 1_073_741_824, Deviation: > double.NegativeInfinity and < double.PositiveInfinity, BandAdjust: > double.NegativeInfinity and < double.PositiveInfinity }
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
@@ -311,6 +313,9 @@ internal static partial class ValuesBarExecution
         BollingerBandsFibonacciRatios channel => new GeneratedRangeChannelState(channel.Length, channel.FibRatio3, false, count),
         BollingerBandsWithAtrPct channel => new GeneratedAtrPercentBandState(channel.Length, channel.BbLength, channel.StdDevMult, count),
         KirshenbaumBands channel => new GeneratedKirshenbaumState(channel.Length1, channel.Length2, channel.StdDevFactor, count),
+        TrendTraderBands channel => new GeneratedTrendTraderBandState(channel.Length, channel.Mult, channel.BandStep, count),
+        StandardDeviationChannel channel => new GeneratedRegressionChannelState(Math.Max(1, channel.Length), count),
+        RateOfChangeBands channel => new GeneratedRocBandState(channel.Length, channel.SmoothLength, count),
         SmoothedVolatilityBands channel => new GeneratedSmoothedVolatilityState(channel.Length1, channel.Length2, channel.Deviation, channel.BandAdjust, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
@@ -1033,6 +1038,52 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedTrendTraderBandState(int length, double multiplier, double step, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly TrendTraderWindow _window = new(MovingAvgType.WeightedMovingAverage, length, multiplier, step, capacityHint: Math.Max(1, count), maxInputCount: count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRegressionChannelState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly ExactRegressionChannelWindow? _window = length <= count ? new(length, 2) : null;
+        // Deviation stays zero for an unfilled window, but the partial fit still evolves.
+        private readonly ExactLinearFitWindow? _fit = length > count ? new(length, observedHistory: true) : null;
+        public void Reset() { _window?.Reset(); _fit?.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            if (_window is not null)
+            {
+                var value = _window.Next(bar.Close, true);
+                outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+            }
+            else
+            {
+                var fit = _fit!.Next(bar.Close, true);
+                outputs[0] = fit.Offset(0, 2); outputs[1] = fit.Last; outputs[2] = fit.Offset(0, -2);
+            }
+        }
+        public void Dispose() { _window?.Dispose(); _fit?.Dispose(); }
+    }
+
+    private sealed class GeneratedRocBandState(int length, int smoothLength, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly RocBandWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, smoothLength, capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = 0; outputs[2] = -value.Upper; outputs[3] = value.Roc;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedKirshenbaumState(int meanLength, int errorLength, double factor, int count) : IMultiOutputState, IDisposable
