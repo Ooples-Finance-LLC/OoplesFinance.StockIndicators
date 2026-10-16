@@ -4026,3 +4026,6 @@ Trader Pressure Index now computes net, bulls and bears in one shared pass using
 
 
 Volume Accumulation Percent and Twiggs Money Flow now use shared execution with their existing exact kernel. The default raw Twiggs path avoids two unused intermediate buffers, while custom-average callback order remains intact. Validation: 91 focused unit cases, 8 fixture parity cases, 74 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+All six Vortex aliases now use shared execution with the existing exact VortexWindow and original candle fields. Positive/negative output mappings and source fallback remain intact. Validation: 237 focused unit cases, 24 fixture parity cases, 75 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Forty-eight timing cases are prepared; no measured speedup is claimed before quiet-window qualification.
