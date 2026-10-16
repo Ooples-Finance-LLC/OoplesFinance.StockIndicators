@@ -7,6 +7,17 @@ import sys
 import xml.etree.ElementTree as ET
 
 PREFIX = "OoplesFinance.StockIndicators.CompetitorTests."
+# Scheduling hints from completed run 38907405150 (2026-10-16), rounded up.
+# These six methods took over ten minutes each. Missing/new methods keep weight
+# one; no method is excluded and every theory case still executes through VSTest.
+HISTORICAL_SECONDS = {
+    PREFIX + "RemainingAdaptivePairBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit": 1605,
+    PREFIX + "RemainingVariableLengthBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit": 1136,
+    PREFIX + "RemainingPressureFlowBenchmarkTests.KlingerLatest10000": 942,
+    PREFIX + "RemainingPressureFlowBenchmarkTests.KvoLatest10000": 934,
+    PREFIX + "RemainingPressureFlowBenchmarkTests.KvoFull10000": 928,
+    PREFIX + "RemainingPressureFlowBenchmarkTests.KlingerFull10000": 805,
+}
 # This is VSTest's literal XML namespace identifier, never a network request.
 NS = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}  # NOSONAR
 
@@ -28,7 +39,16 @@ def discover(output):
 def assignment(methods, shard, total):
     if methods != sorted(set(methods)) or not 0 <= shard < total <= len(methods):
         raise ValueError("Invalid contract inventory or shard")
-    return methods[shard::total]
+    buckets = [[] for _ in range(total)]
+    loads = [0] * total
+    # Assign the longest known methods first, with stable name/index tie breaks.
+    # Unlike positional striding, adding a method cannot group the known long
+    # fixtures together just by shifting their positions in the inventory.
+    for name in sorted(methods, key=lambda name: (-HISTORICAL_SECONDS.get(name, 1), name)):
+        target = min(range(total), key=lambda index: (loads[index], index))
+        buckets[target].append(name)
+        loads[target] += HISTORICAL_SECONDS.get(name, 1)
+    return sorted(buckets[shard])
 
 
 def verify_trx(path, expected):
