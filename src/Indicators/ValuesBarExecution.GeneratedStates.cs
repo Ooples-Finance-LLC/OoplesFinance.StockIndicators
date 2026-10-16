@@ -23,7 +23,8 @@ internal static partial class ValuesBarExecution
             or AccumulationDistributionLine or WilliamsAccumulationDistribution or SmoothedWilliamsAccumulationDistribution
             or EaseOfMovement { Divisor: >= double.MinValue and <= double.MaxValue }
             or Pvo or PercentageVolumeOscillator or VolumeOscillator or PriceVolumeOscillator
-            or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage or EhlersLaguerreFilter or EhlersLaguerreRsi;
+            or EhlersBetterExponentialMovingAverage or HoltExponentialMovingAverage or RegularizedEma or QuickMovingAverage or EhlersLaguerreFilter or EhlersLaguerreRsi
+            or EhlersAdaptiveLaguerreFilter or EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -107,6 +108,8 @@ internal static partial class ValuesBarExecution
         EhlersBetterExponentialMovingAverage average => new GeneratedBetterEmaState(average.Length),
         HoltExponentialMovingAverage average => new GeneratedHoltState(average.Length),
         RegularizedEma average => new GeneratedRegularizedState(average.Length),
+        EhlersAdaptiveLaguerreFilter filter => new GeneratedAdaptiveLaguerreState(filter.Length),
+        EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha strength => new GeneratedSelfAdjustingLaguerreState(strength.Length),
         EhlersLaguerreFilter filter => new GeneratedLaguerreFilterState(filter.Length),
         EhlersLaguerreRsi strength => new GeneratedLaguerreRsiState(strength.Length),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
@@ -330,6 +333,20 @@ internal static partial class ValuesBarExecution
         private readonly RegularizedWindow _window = new(period, .5);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedAdaptiveLaguerreState(int period) : IIndicatorState
+    {
+        private readonly AdaptiveLaguerreWindow _window = new(period, 5);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedSelfAdjustingLaguerreState(int period) : IIndicatorState
+    {
+        private readonly SelfAdjustingLaguerreWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.Open, bar.High, bar.Low, true);
     }
 
     private sealed class GeneratedLaguerreFilterState(int period) : IIndicatorState
