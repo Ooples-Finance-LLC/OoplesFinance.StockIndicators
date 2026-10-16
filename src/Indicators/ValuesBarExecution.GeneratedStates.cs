@@ -96,6 +96,7 @@ internal static partial class ValuesBarExecution
             or StandardDeviationChannel or RateOfChangeBands
             or ScalpersChannel
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
+            or FractalChaosBands or FractalChaosOscillator
             or HurstCycleChannel { FastMult: > double.NegativeInfinity and < double.PositiveInfinity, SlowMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or HurstBands { InnerMult: > double.NegativeInfinity and < double.PositiveInfinity, OuterMult: > double.NegativeInfinity and < double.PositiveInfinity, ExtremeMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or SmoothedVolatilityBands { Length1: <= 1_073_741_824, Deviation: > double.NegativeInfinity and < double.PositiveInfinity, BandAdjust: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -322,6 +323,8 @@ internal static partial class ValuesBarExecution
         RateOfChangeBands channel => new GeneratedRocBandState(channel.Length, channel.SmoothLength, count),
         ScalpersChannel channel => new GeneratedScalperChannelState(channel.Length1, channel.Length2, count),
         FlaggingBands channel => new GeneratedFlaggingBandState(channel.Length, count),
+        FractalChaosBands => new GeneratedFractalChaosState(false),
+        FractalChaosOscillator => new GeneratedFractalChaosState(true),
         ExtendedRecursiveBands channel => new GeneratedExtendedBandState(channel.Length),
         MotionToAttractionChannels channel => new GeneratedMotionAttractionState(channel.Length),
         VolumeAdaptiveBands channel => new GeneratedVolumeAdaptiveBandState(channel.Length, count),
@@ -1049,6 +1052,27 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedFractalChaosState(bool oscillator) : IMultiOutputState, IDisposable
+    {
+        private readonly PooledRingBuffer<double> _highs = new(4), _lows = new(4);
+        private double _upper, _lower;
+        public void Reset() { _highs.Clear(); _lows.Clear(); _upper = _lower = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            Streaming.StreamingFractal.Find(_highs, _lows, bar.High, bar.Low, out var up, out var down);
+            var upper = up ?? _upper; var lower = down ?? _lower;
+            if (oscillator) outputs[0] = upper != _upper ? 1 : lower != _lower ? -1 : 0;
+            else
+            {
+                var midpoint = new ExactMeanAccumulator(); midpoint.Add(upper); midpoint.Add(lower);
+                outputs[0] = upper; outputs[1] = midpoint.Mean(2); outputs[2] = lower;
+            }
+            _highs.TryAdd(bar.High, out _); _lows.TryAdd(bar.Low, out _);
+            _upper = upper; _lower = lower;
+        }
+        public void Dispose() { _highs.Dispose(); _lows.Dispose(); }
     }
 
     private sealed class GeneratedFlaggingBandState(int length, int count) : IMultiOutputState, IDisposable
