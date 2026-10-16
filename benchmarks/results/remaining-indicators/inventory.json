@@ -5106,14 +5106,35 @@
         "PriceChannelSpecOptions",
         "PriceChannelUpperSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PriceChannelLowerSpecOptions": [
+          "benchmarks/results/remaining-indicators/pricechannels-contracts.json"
+        ],
+        "PriceChannelMiddleSpecOptions": [
+          "benchmarks/results/remaining-indicators/pricechannels-contracts.json"
+        ],
+        "PriceChannelSpecOptions": [
+          "benchmarks/results/remaining-indicators/pricechannels-contracts.json"
+        ],
+        "PriceChannelUpperSpecOptions": [
+          "benchmarks/results/remaining-indicators/pricechannels-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PriceCurveChannel",
       "options": [
         "PriceCurveChannelSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PriceCurveChannelSpecOptions": [
+          "benchmarks/results/remaining-indicators/pricechannels-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PriceCycleOscillator",
@@ -5140,7 +5161,13 @@
       "options": [
         "PriceLineChannelSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PriceLineChannelSpecOptions": [
+          "benchmarks/results/remaining-indicators/pricechannels-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PriceMomentum",
@@ -9751,6 +9778,7 @@
     "benchmarks/results/remaining-indicators/polynomialfit-contracts.json": "f8d2c2dcede02bb18c105d60cac4c44b9758004738f81c75019942536d3ed33d",
     "benchmarks/results/remaining-indicators/pressureflow-contracts.json": "a783a470713879bd3386d7ac46bd9f993589bcbb925ac72a0ff9ca5dc351aee6",
     "benchmarks/results/remaining-indicators/price-contracts.json": "d00758a41b725b80c3d2510805eb59de15f021c4d4f84405ab85905df6a62b13",
+    "benchmarks/results/remaining-indicators/pricechannels-contracts.json": "6e16cc4d09d897271fd80b8dff330a3834afde19c5becb8b75f23d8000a339a4",
     "benchmarks/results/remaining-indicators/pricecycle-contracts.json": "193bf2b04005029a04a48a184f2bfabca0c79f7e7bdc0a9c3bfc704721843e75",
     "benchmarks/results/remaining-indicators/rangealias-contracts.json": "a7cb36562004917f5d80acdc87317428593b534e354b55e84e84543837210bb2",
     "benchmarks/results/remaining-indicators/rangechannels-contracts.json": "94b64b4ee7ec41c76f1353425d225d925f8db97cbe46d0362c565464fee988f1",
@@ -10004,7 +10032,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8e4ace6e25a1830917668f387eb2fac90d4849cd593a53b88add8c7bf81b5cb4",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "57075ec829baf06b43a5160cc052eb573e412d0e5cff0dab49bfdeb44e894164",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
