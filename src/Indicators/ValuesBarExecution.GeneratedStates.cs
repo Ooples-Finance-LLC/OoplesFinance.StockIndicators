@@ -55,7 +55,7 @@ internal static partial class ValuesBarExecution
             or SimplifiedLeastSquaresMovingAverage or FisherLeastSquaresMovingAverage or TStepLeastSquaresMovingAverage
             or PolynomialLeastSquaresMovingAverage or QuadraticRegression or QuadraticLeastSquaresMovingAverage or AdaptiveLeastSquares
             or AtrFilteredEma or AtrFilteredExponentialMovingAverage { Min: > double.NegativeInfinity and < double.PositiveInfinity }
-            or AhrensMovingAverage or AlphaDecreasingEma
+            or AhrensMovingAverage or AlphaDecreasingEma or VariableLengthMovingAverage
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or AdaptiveEma or AdaptiveExponentialMovingAverage
             or AdaptivePriceZoneIndicator { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -188,6 +188,7 @@ internal static partial class ValuesBarExecution
         AtrFilteredEma average => new GeneratedAtrFilteredState(average.Length, 20, 10, 20, 5),
         AhrensMovingAverage average => new GeneratedAhrensState(average.Length),
         AlphaDecreasingEma => new GeneratedAlphaDecreasingState(),
+        VariableLengthMovingAverage average => new GeneratedVariableLengthState(average.Length, average.MaxLength),
         VolumeAdjustedMa average => new GeneratedVolumeAdjustedState(average.Length, .67),
         VolumeAdjustedMovingAverage average => new GeneratedVolumeAdjustedState(average.Length, average.Factor),
         AdaptiveEma average => new GeneratedAdaptiveEmaState(average.Length, count),
@@ -672,6 +673,19 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedVariableLengthState(int minimum, int maximum) : IMultiOutputState, IDisposable
+    {
+        private readonly VariableLengthWindow _window = new(MovingAvgType.SimpleMovingAverage, minimum, maximum);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Length;
+            outputs[1] = point.Value;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedVolumeAdjustedState(int period, double factor) : IIndicatorState, IDisposable
