@@ -60,7 +60,13 @@
       "options": [
         "AcceleratorOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AcceleratorOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/awesome-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "AccumulationDistributionLine",
@@ -477,7 +483,13 @@
       "options": [
         "AwesomeOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "AwesomeOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/awesome-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "BalanceOfPower",
@@ -9381,6 +9393,7 @@
     "benchmarks/results/remaining-indicators/atrfilter-contracts.json": "6db02e84d16669f802386ef258648ad2d900c1c5a6edd8ba4bb4bcc5fbfe852f",
     "benchmarks/results/remaining-indicators/autonomous-contracts.json": "60e245417b0ff7046fe6c8bdac3f8d196849e4df65a48aeb5157d07d83e2ce83",
     "benchmarks/results/remaining-indicators/averagemoneyflow-contracts.json": "80df3130d859f0aae6408721499e485d33855121443c454677de0aaef5ba3b23",
+    "benchmarks/results/remaining-indicators/awesome-contracts.json": "f129e3f86facc00250bb5acaacce7d8098c7e24ee140ff623a24968f405cbde5",
     "benchmarks/results/remaining-indicators/bandpass-contracts.json": "35079de72389da6fa96511f0e1b1270ce600804dd12b183de3b060944cb68cc7",
     "benchmarks/results/remaining-indicators/barflow-contracts.json": "2a207301cf96332bc31deda7a26dc0e5049a472c4a7dbad632a5a2473d3963c7",
     "benchmarks/results/remaining-indicators/bettervolume-contracts.json": "e0cfa38122e21a9d52e314fc70fa56f4fbb9037421f36514435f892fce56e87a",
@@ -9661,7 +9674,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "fad7be87142a7808c39208cd84da9c1561dca36dccd0fc212132b728a784e861",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "72fc5a204d9427853a122240b0140556b17c7057eb0854aabbfed4726083f745",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
