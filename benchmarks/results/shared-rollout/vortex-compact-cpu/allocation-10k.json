@@ -1,0 +1,41 @@
+{
+  "Operation": "Skender.GetVortex",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        822336,
+        822656,
+        822000
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        340872,
+        340872,
+        340872
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1800512,
+        1800512,
+        1800512
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1821984,
+        1821984,
+        1821984
+      ]
+    }
+  ],
+  "ProductionCommit": "69dfc49c",
+  "Evidence": "Allocation-only warmed process-wide measurements; all raw samples retained. Native eager results retained without output normalization. Quotes and worker overlap prepared outside measurement. No latency qualification."
+}

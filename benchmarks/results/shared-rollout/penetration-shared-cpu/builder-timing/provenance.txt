@@ -1,0 +1,4 @@
+Source commit 3f5e29cd. Production SHA256 b6bb3ae9e149650617c10a49891aa0adf44d859a71f0565746412538f24cdd13.
+8 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedPenetrationBenchmarks*Builder*. Native methods execute only for setup correctness validation, not as timed benchmarks. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+26 focused tests passed; build and allocation evidence in parent directory. No full-suite claim.

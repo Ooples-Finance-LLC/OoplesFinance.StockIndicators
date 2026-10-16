@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetVwma",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        645768,
+        645768,
+        645768
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        164640,
+        165296,
+        164640
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1400440,
+        1400440,
+        1400440
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1503528,
+        1503528,
+        1503528
+      ]
+    }
+  ]
+}

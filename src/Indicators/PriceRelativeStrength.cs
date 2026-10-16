@@ -86,7 +86,7 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
                 )
             );
 
-    private sealed class State(
+    internal sealed class State(
         int? period,
         int? mean,
         CandlePriceField evaluation,

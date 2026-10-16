@@ -1,0 +1,10 @@
+{
+  "production_commit": "de075b57",
+  "count": 10000,
+  "warmup": 100,
+  "iterations": 3000,
+  "profile": "dotnet-sampled-thread-time",
+  "qualification": "Diagnostic only. Includes worker waits and startup; not CPU utilization or latency qualification.",
+  "after": "f2d80d43 plus shared ExactTypicalPrice working-tree change",
+  "after_contention": "Unit test discovery/execution was active; diagnostic profile only."
+}

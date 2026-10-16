@@ -88,7 +88,7 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
 
     /// <summary>One when all outputs are present; otherwise zero.</summary>
     public IIndicatorOutput IsDefined => Outputs[3];
-    private long First =>
+    internal long First =>
         (long)Period - 1 + (Average == EnvelopeAverage.Hma ? (int)Math.Sqrt(Period) - 1 : 0);
 
     /// <inheritdoc/>
@@ -186,7 +186,7 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
             _ => new PlainMean(period, average == EnvelopeAverage.Ema),
         };
 
-    private sealed class State(int period, double percent, EnvelopeAverage average, long first)
+    internal sealed class State(int period, double percent, EnvelopeAverage average, long first)
         : IMultiOutputState,
             IDisposable
     {

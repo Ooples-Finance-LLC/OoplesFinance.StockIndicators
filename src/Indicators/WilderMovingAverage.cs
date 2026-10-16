@@ -66,6 +66,7 @@ public sealed class WilderMovingAverage
 
     private sealed class State(int period, bool seedWithAverage) : IIndicatorState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _previousWeight = new(period - 1);
         private int _seedCount;
         private ExactMeanAccumulator _seedSum;
         private double _previous;
@@ -93,7 +94,7 @@ public sealed class WilderMovingAverage
             else
             {
                 var numerator = new ExactMeanAccumulator();
-                numerator.Add(_previous, period - 1);
+                numerator.AddProduct(new ExactMeanAccumulator.ProductFactor(_previous), _previousWeight);
                 numerator.Add(bar.Close);
                 _previous = numerator.Mean(period);
             }

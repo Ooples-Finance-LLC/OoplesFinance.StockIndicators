@@ -108,7 +108,7 @@ public sealed class ClassicMacd : MultiOutputIndicatorBase, IIndicatorValidation
                 )
             );
 
-    private sealed class State : IMultiOutputState, IDisposable
+    internal sealed class State : IMultiOutputState, IDisposable
     {
         private readonly IWideAverageState _fast,
             _slow,
@@ -136,9 +136,9 @@ public sealed class ClassicMacd : MultiOutputIndicatorBase, IIndicatorValidation
 
         public void Dispose()
         {
-            foreach (var state in new[] { _fast, _slow, _signal })
-                if (state is IDisposable disposable)
-                    disposable.Dispose();
+            if (_fast is IDisposable fast) fast.Dispose();
+            if (_slow is IDisposable slow) slow.Dispose();
+            if (_signal is IDisposable signal) signal.Dispose();
         }
 
         public void Update(in Bar bar, Span<double> outputs)

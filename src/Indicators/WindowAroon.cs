@@ -31,6 +31,11 @@ public sealed class WindowAroon : MultiOutputIndicatorBase, IIndicatorValidation
     /// <summary>Whether the oldest rather than newest equal extreme wins.</summary>
     public bool OldestTie { get; }
 
+    // Selected ages and index differences have magnitude at most Period.
+    // Their integer numerators fit below 2^38, so conversion is exact and
+    // IEEE division performs the contract's single final rounding.
+    internal static double Percentage(long value, int period) => (100L * value) / (double)period;
+
     /// <summary>Percentage age of the selected highest high.</summary>
     public IIndicatorOutput Up => Outputs[0];
 
@@ -91,7 +96,7 @@ public sealed class WindowAroon : MultiOutputIndicatorBase, IIndicatorValidation
         return result;
     }
 
-    private sealed class State(int period, bool extra, bool oldest) : IMultiOutputState
+    internal sealed class State(int period, bool extra, bool oldest) : IMultiOutputState
     {
         private readonly long _size = (long)period + (extra ? 1 : 0);
         private readonly WindowExtremeDeque _high =
@@ -121,11 +126,5 @@ public sealed class WindowAroon : MultiOutputIndicatorBase, IIndicatorValidation
             _index++;
         }
 
-        private static double Percentage(long value, int period)
-        {
-            var sum = new ExactMeanAccumulator();
-            sum.Add(value, 100);
-            return sum.Mean(period);
-        }
     }
 }

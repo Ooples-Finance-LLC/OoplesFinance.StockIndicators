@@ -45,7 +45,7 @@ public sealed class FirstValueEma : IndicatorBase, IMovingAverage, IIndicatorVal
         return result;
     }
 
-    private sealed class State(int period) : IIndicatorState
+    internal sealed class State(int period) : IIndicatorState
     {
         private bool _initialized;
         private double _previous;

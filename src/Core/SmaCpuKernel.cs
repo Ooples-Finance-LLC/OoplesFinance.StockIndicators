@@ -1,5 +1,9 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
+#if !NETFRAMEWORK
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+#endif
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Core;
@@ -102,6 +106,80 @@ internal static class SmaCpuKernel
     }
 
 #if !NETFRAMEWORK
+    // An in-place consumer may observe only the completed mean. Original input
+    // slots are reused, and warmup callbacks may run after complete windows.
+    internal interface IMeanConsumer { double Consume(double mean, int index); }
+    internal readonly struct MeanIdentity : IMeanConsumer
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double Consume(double mean, int index) => mean;
+    }
+
+    // A whole-series grid certificate proves every prefix and window difference
+    // is exactly representable. Only then may this SIMD scan replace rolling
+    // additions. It is deliberately stricter than the usual period certificate.
+    internal static bool TryProcessPrefixInPlace<TConsumer>(double[] values, int length,
+        GridSummary summary, ref TConsumer consumer, CancellationToken cancellation)
+        where TConsumer : struct, IMeanConsumer
+    {
+        if (!Vector256.IsHardwareAccelerated || values.Length < 256 || length < 2
+            || length > values.Length || !summary.Certifies(values.Length)) return false;
+        cancellation.ThrowIfCancellationRequested();
+        double carry = 0;
+        int i = 0;
+        for (; i <= values.Length - 4; i += 4)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var v = Vector256.LoadUnsafe(ref values[0], (nuint)i);
+            if (Avx2.IsSupported)
+            {
+                v += Avx.Blend(Avx2.Permute4x64(v, 0x90), Vector256<double>.Zero, 1);
+                v += Avx.Blend(Avx2.Permute4x64(v, 0x40), Vector256<double>.Zero, 3);
+            }
+            else
+            {
+                v += Vector256.Create(0d, v.GetElement(0), v.GetElement(1), v.GetElement(2));
+                v += Vector256.Create(0d, 0d, v.GetElement(0), v.GetElement(1));
+            }
+            v += Vector256.Create(carry);
+            v.StoreUnsafe(ref values[0], (nuint)i);
+            carry = v.GetElement(3);
+        }
+        for (; i < values.Length; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = carry += values[i];
+        }
+
+        // Traverse backwards: every needed earlier prefix remains intact until
+        // its final read. No duplicate prefix array or period-sized ring is needed.
+        int end = values.Length;
+        var divisor = Vector256.Create((double)length);
+        for (; end - length >= 4; end -= 4)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            int first = end - 4;
+            var means = (Vector256.LoadUnsafe(ref values[0], (nuint)first)
+                - Vector256.LoadUnsafe(ref values[0], (nuint)(first - length))) / divisor;
+            if (typeof(TConsumer) == typeof(MeanIdentity))
+                means.StoreUnsafe(ref values[0], (nuint)first);
+            else for (int lane = 0; lane < 4; lane++)
+                values[first + lane] = consumer.Consume(means.GetElement(lane), first + lane);
+        }
+        for (i = end - 1; i >= length; i--)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = consumer.Consume((values[i] - values[i - length]) / length, i);
+        }
+        values[length - 1] = consumer.Consume(values[length - 1] / length, length - 1);
+        for (i = 0; i < length - 1; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = consumer.Consume(0, i);
+        }
+        return true;
+    }
+
     // Certify the already-owned close column in SIMD batches. Floating-point
     // arithmetic is unchanged: these reductions operate only on IEEE encodings.
     internal static void Summarize(ReadOnlySpan<double> values, out GridSummary grid,
@@ -159,9 +237,24 @@ internal static class SmaCpuKernel
     internal static void ProcessInPlace(double[] values, int length, bool certified,
         CancellationToken cancellation, bool boundedPositive = false)
     {
+        var consumer = new MeanIdentity();
+        ProcessInPlace(values, length, certified, ref consumer, cancellation, boundedPositive);
+    }
+
+    internal static void ProcessInPlace<TConsumer>(double[] values, int length, bool certified,
+        ref TConsumer consumer, CancellationToken cancellation, bool boundedPositive = false)
+        where TConsumer : struct, IMeanConsumer
+    {
         cancellation.ThrowIfCancellationRequested();
-        if (length == 1) return;
-        if (length > values.Length) { Array.Clear(values); return; }
+        if (length == 1 || length > values.Length)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                values[i] = consumer.Consume(length == 1 ? values[i] : 0, i);
+            }
+            return;
+        }
         if (certified)
         {
             // Compact results overwrite only closes already evicted from the sum.
@@ -180,30 +273,40 @@ internal static class SmaCpuKernel
                 double mean = sum / length;
                 int expired = i - warmup;
                 sum -= values[expired];
-                values[expired] = mean;
+                values[expired] = consumer.Consume(mean, i);
             }
             values.AsSpan(0, values.Length - warmup).CopyTo(values.AsSpan(warmup));
-            values.AsSpan(0, warmup).Clear();
+            for (int i = 0; i < warmup; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                values[i] = consumer.Consume(0, i);
+            }
             cancellation.ThrowIfCancellationRequested();
             return;
         }
         if (boundedPositive)
         {
-            ProcessBoundedPositive(values, length, cancellation);
+            ProcessBoundedPositive(values, length, ref consumer, cancellation);
             return;
         }
         var pending = new double[length];
         var reader = new DoubleReader();
-        var consumer = new DelayedStore(values, pending);
-        ProcessGuarded<double, DoubleReader, DelayedStore>(values, Span<double>.Empty,
-            length, ref reader, ref consumer, cancellation);
-        consumer.Flush(cancellation);
+        var delayed = new DelayedStore<TConsumer>(values, pending, consumer);
+        ProcessGuarded<double, DoubleReader, DelayedStore<TConsumer>>(values, Span<double>.Empty,
+            length, ref reader, ref delayed, cancellation);
+        delayed.Flush(cancellation);
+        consumer = delayed.Consumer;
     }
 
     internal struct PositiveRangeSummary
     {
         private long _minimum = long.MaxValue, _maximum = long.MinValue;
         public PositiveRangeSummary() { }
+        internal void Merge(PositiveRangeSummary other)
+        {
+            _minimum = Math.Min(_minimum, other._minimum);
+            _maximum = Math.Max(_maximum, other._maximum);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Include(double value)
         {
@@ -218,6 +321,74 @@ internal static class SmaCpuKernel
             && _maximum >= _minimum && _maximum - _minimum <= (1L << 52);
     }
 
+    // Requires the bounded-positive or period grid proof. Split at rebuilds,
+    // preserving the scalar guarded loop's exact sum, eviction and rebuild order.
+    // Capture preceding windows before any writes. Worker-local pooled scratch
+    // retains original closes while results go directly to final positions.
+    // Only scratch is pooled: published values always retain owned storage.
+    internal static void ProcessRebasedParallel(double[] values, int length,
+        int participants, CancellationToken cancellation)
+    {
+        if (length < 2 || length > 4096) throw new ArgumentOutOfRangeException(nameof(length));
+        if (participants < 1 || (values.Length - length) / length < participants)
+            throw new ArgumentOutOfRangeException(nameof(participants));
+        cancellation.ThrowIfCancellationRequested();
+        int intervals = (values.Length - length) / length;
+        var edges = new double[participants * length];
+        int Begin(int chunk) => length + (int)((long)intervals * chunk / participants) * length;
+        double firstSum = 0;
+        for (int i = 0; i < length; i++) firstSum += values[i];
+        double firstMean = firstSum / length;
+        int scratchLength = 0;
+        for (int chunk = 0; chunk < participants; chunk++)
+        {
+            values.AsSpan(Begin(chunk) - length, length).CopyTo(edges.AsSpan(chunk * length, length));
+            int end = chunk == participants - 1 ? values.Length : Begin(chunk + 1);
+            scratchLength = Math.Max(scratchLength, end - Begin(chunk) + length);
+        }
+        AiDotNet.Tensors.Helpers.CpuParallelSettings.LightweightParallel(participants, participants,
+            () => System.Buffers.ArrayPool<double>.Shared.Rent(scratchLength), (chunk, scratch) =>
+        {
+            int start = Begin(chunk);
+            int end = chunk == participants - 1 ? values.Length : Begin(chunk + 1);
+            var input = scratch.AsSpan(0, end - start + length);
+            edges.AsSpan(chunk * length, length).CopyTo(input);
+            values.AsSpan(start, end - start).CopyTo(input.Slice(length));
+            var output = values.AsSpan(start, end - start);
+            ProcessRebasedRegion(input, output, length, cancellation);
+        }, scratch => System.Buffers.ArrayPool<double>.Shared.Return(scratch));
+        cancellation.ThrowIfCancellationRequested();
+        values.AsSpan(0, length - 1).Clear();
+        values[length - 1] = firstMean;
+        cancellation.ThrowIfCancellationRequested();
+    }
+
+    // Input starts with the preceding window at a scheduled rebuild boundary.
+    // It must be owned, disjoint from output, and grid/bounded-positive proven.
+    internal static void ProcessRebasedRegion(ReadOnlySpan<double> input, Span<double> output,
+        int length, CancellationToken cancellation)
+    {
+        double sum = 0;
+        for (int j = 0; j < length; j++) sum += input[j];
+        int untilRebuild = length;
+        for (int i = length; i < input.Length; i++)
+        {
+            if (cancellation.IsCancellationRequested) return;
+            sum += input[i];
+            sum -= input[i - length];
+            output[i - length] = sum / length;
+            if (--untilRebuild == 0)
+            {
+                if (i + 1 < input.Length)
+                {
+                    sum = 0;
+                    for (int j = i - length + 1; j <= i; j++) sum += input[j];
+                }
+                untilRebuild = length;
+            }
+        }
+    }
+
     // Preserve the guarded loop's floating-point operations and rebuild cadence.
     // This proof ONLY removes guard bookkeeping; it is not the grid certificate.
     // Between rebuilds at most 3L additions/subtractions affect error. With M<=2m,
@@ -228,7 +399,8 @@ internal static class SmaCpuKernel
     // operand: neither 1e-4 cancellation/rebuild trigger can fire. Exponent bounds
     // exclude overflow, subnormal means and outward-bound underflow. Unqualified
     // input always uses the original guarded path.
-    private static void ProcessBoundedPositive(double[] values, int length, CancellationToken cancellation)
+    private static void ProcessBoundedPositive<TConsumer>(double[] values, int length,
+        ref TConsumer consumer, CancellationToken cancellation) where TConsumer : struct, IMeanConsumer
     {
         double sum = 0;
         for (int i = 0; i < length; i++)
@@ -236,7 +408,7 @@ internal static class SmaCpuKernel
             cancellation.ThrowIfCancellationRequested();
             sum += values[i];
         }
-        double firstMean = sum / length;
+        double firstMean = consumer.Consume(sum / length, length - 1);
         // The first scheduled rebuild repeats precisely the additions above.
         // Retain that sum; all later rebuilds keep the original cadence/order.
         int untilRebuild = length;
@@ -248,7 +420,7 @@ internal static class SmaCpuKernel
             sum -= values[expired];
             // Only the expired close is overwritten. Rebuilds start one slot
             // later, so they continue to read original input without a ring.
-            values[expired] = sum / length;
+            values[expired] = consumer.Consume(sum / length, i);
             if (--untilRebuild == 0)
             {
                 sum = 0;
@@ -261,19 +433,25 @@ internal static class SmaCpuKernel
             }
         }
         values.AsSpan(0, values.Length - length).CopyTo(values.AsSpan(length));
-        values.AsSpan(0, length - 1).Clear();
+        for (int i = 0; i < length - 1; i++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            values[i] = consumer.Consume(0, i);
+        }
         values[length - 1] = firstMean;
         cancellation.ThrowIfCancellationRequested();
     }
 
-    private struct DelayedStore(double[] values, double[] pending) : IConsumer
+    private struct DelayedStore<TConsumer>(double[] values, double[] pending, TConsumer consumer) : IConsumer
+        where TConsumer : struct, IMeanConsumer
     {
+        internal TConsumer Consumer = consumer;
         private int _slot;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Consume(double input, double mean, int index)
         {
             if (index >= pending.Length) values[index - pending.Length] = pending[_slot];
-            pending[_slot] = mean;
+            pending[_slot] = Consumer.Consume(mean, index);
             if (++_slot == pending.Length) _slot = 0;
             return mean;
         }
@@ -293,6 +471,12 @@ internal static class SmaCpuKernel
         private int _lowest = 2047, _highest;
         private ulong _significands;
         public GridSummary() { }
+        internal void Merge(GridSummary other)
+        {
+            _lowest = Math.Min(_lowest, other._lowest);
+            _highest = Math.Max(_highest, other._highest);
+            _significands |= other._significands;
+        }
         internal static GridSummary FromMagnitudes(long nonzeroMinimum, long maximum, long combined) => new()
         {
             _lowest = nonzeroMinimum == long.MaxValue ? 2047 : (int)(nonzeroMinimum >> 52),

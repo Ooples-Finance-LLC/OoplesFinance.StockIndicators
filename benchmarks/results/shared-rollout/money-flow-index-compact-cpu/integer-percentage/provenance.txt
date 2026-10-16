@@ -1,0 +1,12 @@
+Source: ca02f799 plus MFI Int64 percentage publisher and independent integer tests in this commit.
+Initial: 24 CPU/GPU/native cases completed, process exit zero, --filter *SharedGpuMoneyFlowIndexBenchmarks*. Helper snapshot archived in initial/MoneyFlowPercentage.cs.gz. No competing .NET work observed in sampled checks for this initial run.
+Final helper preserves the exact small-operand floating-point division shortcut and narrows proven quotient/remainder widths. Initial CPU timing is prototype evidence, not final-source qualification. GPU code is unchanged; catalog gpu_current retains the initial run and its same-run native comparators.
+First final CPU attempt was interrupted after external Tensors production build PID 29128 appeared; see interrupted/provenance.txt and partial log.
+Second final CPU attempt completed all 16 cases and exited zero before our stop request, but Tensors test-project build PID 17236 appeared during it: dotnet build tests\AiDotNet.Tensors.Tests\AiDotNet.Tensors.Tests.csproj -f net10.0 -v q -nologo. Reports in diagnostic-final are excluded from qualification. No external process was stopped.
+All runs used Release net10 benchmark DLL, --warmupCount 10 --iterationCount 10 --exporters json csv. Final CPU filter: *SharedMoneyFlowIndexBenchmarks*. Raw reports/logs retain warnings and outliers.
+Final production net10 build: zero warnings/errors. Final unit checks: 33 passed, zero skips. MFI competitor/fixture checks: 18 passed. Final benchmark build: 12 existing warnings, zero errors.
+Catalog CPU qualification remains pending for both MFI APIs; measured CPU coverage remains 192/401. Managed per-call allocations exclude retained workspace and device memory.
+baseline SHA256 a77c11502b0a95f828adb6bd443ef14f3ac9be3dc399c93727351fcf2276699a
+initial SHA256 1524e6abcd95d56bafc31850cd1b12ea4a172dc636759ae7b5a681eea75e60ca
+final SHA256 9b84e9f352f4008c0c3e161b0bb6caf20d95a65ed657d8a0c968f8ba148d1103
+harness SHA256 45e21d5a0b226d28fe13d1b80bea3651c96c7f3010e37151461bab276f8b01fe

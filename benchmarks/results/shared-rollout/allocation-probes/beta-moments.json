@@ -1,0 +1,60 @@
+{
+  "production_commit": "c026c0eb2df4bc7549f394b6468be7c4b76da6b8",
+  "target_framework": "net10.0",
+  "counter": "GC.GetTotalAllocatedBytes(precise: true)",
+  "warmup_calls_per_arm": 10,
+  "result_lifetime": "Retained through sample; disposable results released after sample.",
+  "qualification": "Allocation-only probe; no latency measurements or catalog qualification increase.",
+  "commands": [
+    "--alloc-shared TaLib.Functions.Beta 10000 5"
+  ],
+  "reports": [
+    {
+      "Operation": "TaLib.Functions.Beta",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            7452568,
+            7453264,
+            7452568,
+            7451664,
+            7452568
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            6971544,
+            6970640,
+            6971544,
+            6971544,
+            6971544
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            79896,
+            79896,
+            79896,
+            79896,
+            79896
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            80280,
+            80280,
+            80280,
+            80280,
+            80280
+          ]
+        }
+      ]
+    }
+  ]
+}

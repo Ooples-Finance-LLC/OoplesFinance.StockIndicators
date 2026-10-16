@@ -65,7 +65,7 @@ public sealed class DelayedDarkCloudCoverPattern : IndicatorBase, IIndicatorVali
         return result;
     }
 
-    private sealed class State(int period, int delay) : IIndicatorState
+    internal sealed class State(int period, int delay) : IIndicatorState
     {
         private Bar _previous;
         private bool _initialized;

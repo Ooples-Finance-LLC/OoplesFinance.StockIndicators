@@ -1,0 +1,252 @@
+{
+  "production_commit": "24fc7e309b47a6f9d855d65d05c837aeb2b76b68",
+  "target_framework": "net10.0",
+  "counter": "GC.GetTotalAllocatedBytes(precise: true)",
+  "warmup_calls_per_arm": 10,
+  "result_lifetime": "Retained through sample; disposable results released after sample.",
+  "qualification": "Allocation-only probe; no latency measurements or catalog qualification increase.",
+  "commands": [
+    "--alloc-shared QuanTAlib.Dema 10000 5",
+    "--alloc-shared QuanTAlib.Tema 10000 5",
+    "--alloc-shared QuanTAlib.Qema 10000 5",
+    "--alloc-shared QuanTAlib.Historical 10000 5",
+    "--alloc-shared QuanTAlib.Realized 10000 5"
+  ],
+  "reports": [
+    {
+      "Operation": "QuanTAlib.Dema",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            564184,
+            564184,
+            564184,
+            564184,
+            564184
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            83160,
+            83160,
+            95496,
+            83160,
+            83160
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            480320,
+            480320,
+            480320,
+            480320,
+            480320
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            1882552,
+            1882552,
+            1882552,
+            1882552,
+            1882552
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "QuanTAlib.Tema",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            564232,
+            564232,
+            564232,
+            564232,
+            564232
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            83208,
+            83208,
+            83208,
+            83208,
+            83208
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            480336,
+            480336,
+            480336,
+            480336,
+            480336
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            1882680,
+            1882680,
+            1882680,
+            1882680,
+            1882680
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "QuanTAlib.Qema",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            870856,
+            870856,
+            871512,
+            870856,
+            870856
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            389832,
+            389832,
+            389832,
+            390488,
+            389832
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            2082208,
+            2082208,
+            2082208,
+            2082208,
+            2082208
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            9097656,
+            9097656,
+            9097656,
+            9097656,
+            9097656
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "QuanTAlib.Historical",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            4156832,
+            4157488,
+            4156832,
+            4157488,
+            4169192
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            3676464,
+            3675808,
+            3676464,
+            3675808,
+            3676464
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            4301240,
+            4301240,
+            4301240,
+            4301240,
+            4301240
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            4312176,
+            4312176,
+            4312176,
+            4312176,
+            4312176
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "QuanTAlib.Realized",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            4196264,
+            4195608,
+            4196264,
+            4195608,
+            4196264
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            3715240,
+            3714584,
+            3715240,
+            3714584,
+            3715240
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            480656,
+            480656,
+            480656,
+            480656,
+            480656
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            1885048,
+            1885048,
+            1885048,
+            1885048,
+            1885048
+          ]
+        }
+      ]
+    }
+  ]
+}

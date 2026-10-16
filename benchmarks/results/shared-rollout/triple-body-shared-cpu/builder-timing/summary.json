@@ -1,0 +1,334 @@
+[
+  {
+    "operation": "TaLib.Candles.ThreeInside",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 38117.421875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 38117.421875,
+              "StandardError": 451.20196170425527,
+              "Level": 12,
+              "Margin": 2157.157136915922,
+              "Lower": 35960.26473808408,
+              "Upper": 40274.57901191592
+            },
+            "allocated_bytes": 84663
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 32156.39377170139,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 32156.39377170139,
+              "StandardError": 424.84634291537463,
+              "Level": 12,
+              "Margin": 2141.7801757227485,
+              "Lower": 30014.61359597864,
+              "Upper": 34298.17394742414
+            },
+            "allocated_bytes": 35629
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 272786.50390625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 272786.50390625,
+              "StandardError": 2440.928530770113,
+              "Level": 12,
+              "Margin": 11669.865930910439,
+              "Lower": 261116.63797533957,
+              "Upper": 284456.36983716046
+            },
+            "allocated_bytes": 589055
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 233233.515625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 233233.515625,
+              "StandardError": 740.4764800777169,
+              "Level": 12,
+              "Margin": 3540.1533222167354,
+              "Lower": 229693.36230278327,
+              "Upper": 236773.66894721673
+            },
+            "allocated_bytes": 107649
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 56332.954915364586,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-threeinside-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 662617.48046875,
+        "allocated_bytes": 120371,
+        "evidence": "results/2026-10-06-library-comparisons/talib-threeinside-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.TwoCrows",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 29217.84396701389,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 29217.84396701389,
+              "StandardError": 224.5110700954563,
+              "Level": 12,
+              "Margin": 1131.828876908869,
+              "Lower": 28086.015090105022,
+              "Upper": 30349.67284392276
+            },
+            "allocated_bytes": 73336
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 25330.601806640625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 25330.601806640625,
+              "StandardError": 470.80213572256673,
+              "Level": 12,
+              "Margin": 2250.863855540758,
+              "Lower": 23079.737951099865,
+              "Upper": 27581.465662181385
+            },
+            "allocated_bytes": 24299
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 200348.6083984375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 200348.6083984375,
+              "StandardError": 306.2620009081149,
+              "Level": 12,
+              "Margin": 1656.2289206153255,
+              "Lower": 198692.37947782216,
+              "Upper": 202004.83731905284
+            },
+            "allocated_bytes": 577727
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 163592.10205078125,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 163592.10205078125,
+              "StandardError": 411.3966024831403,
+              "Level": 12,
+              "Margin": 2224.7844945017787,
+              "Lower": 161367.31755627948,
+              "Upper": 165816.88654528302
+            },
+            "allocated_bytes": 96312
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 25876.9037882487,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-twocrows-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 335428.0110677083,
+        "allocated_bytes": 120369,
+        "evidence": "results/2026-10-06-library-comparisons/talib-twocrows-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.UpsideGapTwoCrows",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 37170.65700954861,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 37170.65700954861,
+              "StandardError": 305.9919283741702,
+              "Level": 12,
+              "Margin": 1542.5987702417765,
+              "Lower": 35628.05823930683,
+              "Upper": 38713.25577979039
+            },
+            "allocated_bytes": 84665
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 32124.38720703125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 32124.38720703125,
+              "StandardError": 206.4859033830245,
+              "Level": 12,
+              "Margin": 987.1910540299897,
+              "Lower": 31137.19615300126,
+              "Upper": 33111.57826106124
+            },
+            "allocated_bytes": 35629
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 275922.109375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 275922.109375,
+              "StandardError": 2548.3398403486326,
+              "Level": 12,
+              "Margin": 12183.390012604616,
+              "Lower": 263738.7193623954,
+              "Upper": 288105.4993876046
+            },
+            "allocated_bytes": 589055
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 234470.1953125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 234470.1953125,
+              "StandardError": 1781.7903723739598,
+              "Level": 12,
+              "Margin": 8518.584014432749,
+              "Lower": 225951.61129806726,
+              "Upper": 242988.77932693274
+            },
+            "allocated_bytes": 107650
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 46787.750244140625,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-upsidegaptwocrows-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 624844.6940104166,
+        "allocated_bytes": 120372,
+        "evidence": "results/2026-10-06-library-comparisons/talib-upsidegaptwocrows-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.UniqueThreeRiver",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 37896.65771484375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 37896.65771484375,
+              "StandardError": 682.4384461120618,
+              "Level": 12,
+              "Margin": 3262.678555243884,
+              "Lower": 34633.97915959987,
+              "Upper": 41159.33627008763
+            },
+            "allocated_bytes": 84665
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 33190.489366319445,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 33190.489366319445,
+              "StandardError": 655.8614222897578,
+              "Level": 12,
+              "Margin": 3306.3977499303423,
+              "Lower": 29884.0916163891,
+              "Upper": 36496.88711624979
+            },
+            "allocated_bytes": 35629
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 264062.44140625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 264062.44140625,
+              "StandardError": 505.01882541093084,
+              "Level": 12,
+              "Margin": 2414.4508578758055,
+              "Lower": 261647.9905483742,
+              "Upper": 266476.8922641258
+            },
+            "allocated_bytes": 589055
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 232266.328125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 232266.328125,
+              "StandardError": 681.9047768479427,
+              "Level": 12,
+              "Margin": 3260.1271291430335,
+              "Lower": 229006.20099585695,
+              "Upper": 235526.45525414305
+            },
+            "allocated_bytes": 107649
+          }
+        },
+        "evidence": "results/shared-rollout/triple-body-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json"
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 50767.88330078125,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-uniquethreeriver-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 640853.125,
+        "allocated_bytes": 120371,
+        "evidence": "results/2026-10-06-library-comparisons/talib-uniquethreeriver-short.json.gz"
+      }
+    ]
+  }
+]

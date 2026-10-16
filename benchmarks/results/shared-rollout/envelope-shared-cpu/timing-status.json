@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "reason": "16 builder-only cases completed exit0 without observed competing jobs.",
+  "source_commit": "0633c0ca",
+  "reuse_binaries": true,
+  "next_filter": "*SharedEnvelopeBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preflight_evidence": "preflight-processes.jsonl",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-envelope-binaries-0633c0ca",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-envelope-builder-20261013-b",
+  "evidence": "builder-timing"
+}

@@ -1,0 +1,134 @@
+[
+  {
+    "bars": 1000,
+    "method": "BuilderFull",
+    "mean_ns": 127602.03125,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 127602.03125,
+      "StandardError": 1668.889796769942,
+      "Level": 12,
+      "Margin": 7978.816231716954,
+      "Lower": 119623.21501828305,
+      "Upper": 135580.84748171695
+    },
+    "allocated_bytes": 139236,
+    "saved_builder_mean_ns": 474330.78125,
+    "cross_run_previous_builder_ratio": 0.2690148653514145,
+    "saved_fastest_native": "NativeParallel",
+    "saved_native": {
+      "mean_ns": 156175.21701388888,
+      "confidence_interval": {
+        "N": 9,
+        "Mean": 156175.21701388888,
+        "StandardError": 428.21890543733326,
+        "Level": 12,
+        "Margin": 2158.782293479839,
+        "Lower": 154016.43472040904,
+        "Upper": 158333.9993073687
+      },
+      "allocated_bytes": 562315
+    },
+    "cross_run_native_mean_ratio": 0.8170440463588546,
+    "cross_run_intervals_separated_in_builder_favor": true
+  },
+  {
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 119623.5546875,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 119623.5546875,
+      "StandardError": 818.8936574766301,
+      "Level": 12,
+      "Margin": 3915.058992493373,
+      "Lower": 115708.49569500663,
+      "Upper": 123538.61367999337
+    },
+    "allocated_bytes": 90487,
+    "saved_builder_mean_ns": 462630.224609375,
+    "cross_run_previous_builder_ratio": 0.2585727181757417,
+    "saved_fastest_native": "NativeParallel",
+    "saved_native": {
+      "mean_ns": 156175.21701388888,
+      "confidence_interval": {
+        "N": 9,
+        "Mean": 156175.21701388888,
+        "StandardError": 428.21890543733326,
+        "Level": 12,
+        "Margin": 2158.782293479839,
+        "Lower": 154016.43472040904,
+        "Upper": 158333.9993073687
+      },
+      "allocated_bytes": 562315
+    },
+    "cross_run_native_mean_ratio": 0.7659573456962875,
+    "cross_run_intervals_separated_in_builder_favor": true
+  },
+  {
+    "bars": 10000,
+    "method": "BuilderFull",
+    "mean_ns": 1088500.15625,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 1088500.15625,
+      "StandardError": 7713.028213589835,
+      "Level": 12,
+      "Margin": 36875.31365186053,
+      "Lower": 1051624.8425981395,
+      "Upper": 1125375.4699018605
+    },
+    "allocated_bytes": 1219718,
+    "saved_builder_mean_ns": 4773400,
+    "cross_run_previous_builder_ratio": 0.22803455739095824,
+    "saved_fastest_native": "NativeParallel",
+    "saved_native": {
+      "mean_ns": 1796072.96875,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 1796072.96875,
+        "StandardError": 9470.205325253104,
+        "Level": 12,
+        "Margin": 45276.22381841307,
+        "Lower": 1750796.744931587,
+        "Upper": 1841349.192568413
+      },
+      "allocated_bytes": 5278685
+    },
+    "cross_run_native_mean_ratio": 0.6060445066480543,
+    "cross_run_intervals_separated_in_builder_favor": true
+  },
+  {
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 1061522.421875,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 1061522.421875,
+      "StandardError": 6799.086578255285,
+      "Level": 12,
+      "Margin": 32505.838585883794,
+      "Lower": 1029016.5832891162,
+      "Upper": 1094028.2604608838
+    },
+    "allocated_bytes": 738594,
+    "saved_builder_mean_ns": 4716926.041666667,
+    "cross_run_previous_builder_ratio": 0.22504538178002137,
+    "saved_fastest_native": "NativeParallel",
+    "saved_native": {
+      "mean_ns": 1796072.96875,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 1796072.96875,
+        "StandardError": 9470.205325253104,
+        "Level": 12,
+        "Margin": 45276.22381841307,
+        "Lower": 1750796.744931587,
+        "Upper": 1841349.192568413
+      },
+      "allocated_bytes": 5278685
+    },
+    "cross_run_native_mean_ratio": 0.5910241066730045,
+    "cross_run_intervals_separated_in_builder_favor": true
+  }
+]

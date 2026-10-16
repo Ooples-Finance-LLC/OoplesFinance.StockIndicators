@@ -145,7 +145,7 @@ internal static class StochasticSmaComparison
         decimal?,
         decimal?
     > ScalarTuple(
-        (decimal High, decimal Low, decimal Close)[] values,
+        IEnumerable<(decimal High, decimal Low, decimal Close)> values,
         int p,
         string variant,
         int k,
@@ -165,7 +165,7 @@ internal static class StochasticSmaComparison
         (decimal? K, decimal? D, decimal? J),
         (decimal? K, decimal? D, decimal? J)
     > Tuple(
-        (decimal High, decimal Low, decimal Close)[] values,
+        IEnumerable<(decimal High, decimal Low, decimal Close)> values,
         int p,
         string variant,
         int k,

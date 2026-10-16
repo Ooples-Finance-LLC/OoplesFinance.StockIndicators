@@ -41,6 +41,11 @@ internal static class HeikinAshiComparison
     private static ComparisonSeries Native(CompetitorData d, int _)
     {
         var rows = d.Quotes.GetHeikinAshi().ToArray();
+        return Normalize(rows);
+    }
+
+    internal static ComparisonSeries Normalize(IReadOnlyList<HeikinAshiResult> rows)
+    {
         return Series([
             rows.Select(r => (double)r.Open).ToArray(),
             rows.Select(r => (double)r.High).ToArray(),

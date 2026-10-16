@@ -1,4 +1,5 @@
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 using static OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic;
@@ -10,7 +11,7 @@ internal static class MedianAdaptiveComparison
     internal static ComparisonPair Pair(double threshold = .002) =>
         new(
             "QuanTAlib.Maaf",
-            nameof(MedianAdaptiveSnapshot),
+            nameof(MedianAdaptiveAverage),
             (d, p) =>
             {
                 var native = new QuanTAlib.Maaf(p, threshold);
@@ -21,12 +22,20 @@ internal static class MedianAdaptiveComparison
                 );
             },
             (d, p) =>
-                new(0, MedianAdaptiveSnapshot.Calculate(d.IndicatorBars, p, threshold).ToArray()),
+                new(0, Owned(d.IndicatorBars, p, threshold)),
             (d, p) => new(0, Reference(d.Closes, p, threshold, false)),
             MinimumInputCount: 0,
             CompetitorReference: (d, p) => new(0, Reference(d.Closes, p, threshold, true)),
             ErrorBudget: IndicatorErrorBudget.Exact
         );
+
+    internal static double[] Owned(Bar[] bars, int period, double threshold)
+    {
+        var indicator = new MedianAdaptiveAverage(period, threshold);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
+        return run[indicator].ToArray();
+    }
 
     internal static double[] Reference(double[] prices, int period, double threshold, bool native)
     {

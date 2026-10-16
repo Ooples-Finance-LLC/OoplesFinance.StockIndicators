@@ -1,0 +1,58 @@
+{
+  "productionCommit": "c923dba4",
+  "command": "dotnet-trace collect --profile dotnet-sampled-thread-time -- dotnet <benchmark.dll> --profile-mfi 10000 20000",
+  "limitation": "Elevated PerfView launch canceled by Windows user. EventPipe sampled thread time is not CPU utilization; inlining limits phase attribution. Stack filter includes all worker threads beneath ComputeMoneyFlowColumn.",
+  "tracePath": "C:\\Users\\cheat\\temp\\si-mfi-c923dba4-perfview\\mfi.nettrace",
+  "sampledStackMilliseconds": 49522.18670544757,
+  "exclusive": [
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.ComputeMoneyFlowColumn(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int32,int32,class OoplesFinance.StockIndicators.Indicators.WindowMoneyFlowIndex,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken)",
+      "percentOfFilteredStackTime": 86.13432872709214
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.AccumulateIntegerFlow(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class OoplesFinance.StockIndicators.Indicators.Bar&,int32,value class System.Int128&,value class System.Int128&)",
+      "percentOfFilteredStackTime": 4.2514046002719965
+    },
+    {
+      "frame": "System.Private.CoreLib.il!System.Int128.BigMul(value class System.Int128,value class System.Int128,value class System.Int128&)",
+      "percentOfFilteredStackTime": 4.0183546473246405
+    },
+    {
+      "frame": "System.Private.CoreLib.il!System.UInt128.BigMul(value class System.UInt128,value class System.UInt128,value class System.UInt128&)",
+      "percentOfFilteredStackTime": 1.5907625279550892
+    },
+    {
+      "frame": "System.Private.CoreLib.il!System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+      "percentOfFilteredStackTime": 0.8891097793935894
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.TryRatio(value class System.Int128,int32,value class System.Int128,int32,float64&)",
+      "percentOfFilteredStackTime": 0.7529540194284747
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Ratio(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic)",
+      "percentOfFilteredStackTime": 0.5541362642252109
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Normalize()",
+      "percentOfFilteredStackTime": 0.3877940545929353
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Magnitude(value class System.Int128)",
+      "percentOfFilteredStackTime": 0.30550891838508437
+    },
+    {
+      "frame": "System.Private.CoreLib.il!System.UInt128.op_RightShift(value class System.UInt128,int32)",
+      "percentOfFilteredStackTime": 0.234731752556662
+    },
+    {
+      "frame": "System.Private.CoreLib.il!System.Int128.op_CheckedAddition(value class System.Int128,value class System.Int128)",
+      "percentOfFilteredStackTime": 0.148790348067148
+    },
+    {
+      "frame": "System.Private.CoreLib.il!System.Math.BigMul(unsigned int64,unsigned int64)",
+      "percentOfFilteredStackTime": 0.1450133843363617
+    }
+  ],
+  "inclusiveCheckedMultiplyPercent": 6.8389017284881835
+}

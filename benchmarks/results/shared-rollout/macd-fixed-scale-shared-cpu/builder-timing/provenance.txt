@@ -1,0 +1,4 @@
+Source commit c981c221. Production SHA256 ee107722f1c94d8f6b7524ce3bfa6d2f2cd723caa25d600abade5c77d43a826d.
+4 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedMacdBenchmarks*TaLib.Functions.MacdFix*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+44 focused tests passed; build and verification evidence in parent directory. No full-suite claim.

@@ -1,0 +1,374 @@
+[
+  {
+    "operation": "Skender.GetPmo",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 932087.0370370371,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 932087.0370370371,
+              "StandardError": 20295.894357249483,
+              "Level": 12,
+              "Margin": 102317.80244270296,
+              "Lower": 829769.2345943341,
+              "Upper": 1034404.83947974
+            },
+            "allocated_bytes": 82911
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 867717.265625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 867717.265625,
+              "StandardError": 8546.21264989031,
+              "Level": 12,
+              "Margin": 40858.69560867681,
+              "Lower": 826858.5700163232,
+              "Upper": 908575.9612336768
+            },
+            "allocated_bytes": 34124
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getpmo-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.9527295097482491,
+          "BuilderLatestOnly": 0.8869341727001703
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 9009279.797979798,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 9009279.797979798,
+              "StandardError": 61766.20240730705,
+              "Level": 12,
+              "Margin": 311382.2916253743,
+              "Lower": 8697897.506354423,
+              "Upper": 9320662.089605173
+            },
+            "allocated_bytes": 804001
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 8881254.545454547,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 8881254.545454547,
+              "StandardError": 63813.84079022654,
+              "Level": 12,
+              "Margin": 321705.0621251536,
+              "Lower": 8559549.483329393,
+              "Upper": 9202959.6075797
+            },
+            "allocated_bytes": 322913
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getpmo-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 4.388063674049322,
+          "BuilderLatestOnly": 4.325707639764205
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 978333.3333333334,
+        "allocated_bytes": 277944,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getpmo-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 2053133.3333333333,
+        "allocated_bytes": 2810472,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getpmo-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetTsi",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1431465.9375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1431465.9375,
+              "StandardError": 5312.396626598419,
+              "Level": 12,
+              "Margin": 25398.103886583285,
+              "Lower": 1406067.8336134166,
+              "Upper": 1456864.0413865834
+            },
+            "allocated_bytes": 82956
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1433329.296875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1433329.296875,
+              "StandardError": 12469.060511598731,
+              "Level": 12,
+              "Margin": 59613.488318257965,
+              "Lower": 1373715.808556742,
+              "Upper": 1492942.785193258
+            },
+            "allocated_bytes": 34201
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-gettsi-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 1.949517801207554,
+          "BuilderLatestOnly": 1.9520555159910116
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 14835767.142857144,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 14835767.142857144,
+              "StandardError": 92441.61790727811,
+              "Level": 12,
+              "Margin": 441955.294395297,
+              "Lower": 14393811.848461846,
+              "Upper": 15277722.437252441
+            },
+            "allocated_bytes": 804510
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 14523980.952380951,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 14523980.952380951,
+              "StandardError": 167077.7979132942,
+              "Level": 12,
+              "Margin": 842290.2099580606,
+              "Lower": 13681690.74242289,
+              "Upper": 15366271.162339013
+            },
+            "allocated_bytes": 323422
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-gettsi-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 16.700675958188153,
+          "BuilderLatestOnly": 16.349697132136153
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 734266.6666666666,
+        "allocated_bytes": 213480,
+        "evidence": "results/2026-10-06-library-comparisons/skender-gettsi-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 888333.3333333334,
+        "allocated_bytes": 2067768,
+        "evidence": "results/2026-10-06-library-comparisons/skender-gettsi-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetTrix",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 877978.7109375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 877978.7109375,
+              "StandardError": 6399.1092108791,
+              "Level": 12,
+              "Margin": 34605.63083179758,
+              "Lower": 843373.0801057024,
+              "Upper": 912584.3417692976
+            },
+            "allocated_bytes": 91254
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 886367.5,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 886367.5,
+              "StandardError": 10714.30773535735,
+              "Level": 12,
+              "Margin": 51224.168687433266,
+              "Lower": 835143.3313125668,
+              "Upper": 937591.6686874332
+            },
+            "allocated_bytes": 42497
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-gettrix-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.9052882394956178,
+          "BuilderLatestOnly": 0.9139379618491149
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 8965687.5,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 8965687.5,
+              "StandardError": 24465.2817257565,
+              "Level": 12,
+              "Margin": 132305.36934079663,
+              "Lower": 8833382.130659204,
+              "Upper": 9097992.869340796
+            },
+            "allocated_bytes": 884321
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 8789058.585858587,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 8789058.585858587,
+              "StandardError": 65110.43856817236,
+              "Level": 12,
+              "Margin": 328241.60754445515,
+              "Lower": 8460816.978314131,
+              "Upper": 9117300.193403043
+            },
+            "allocated_bytes": 403247
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-gettrix-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 7.056633041242523,
+          "BuilderLatestOnly": 6.91761353698598
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 969833.3333333334,
+        "allocated_bytes": 206520,
+        "evidence": "results/2026-10-06-library-comparisons/skender-gettrix-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1270533.3333333333,
+        "allocated_bytes": 1997856,
+        "evidence": "results/2026-10-06-library-comparisons/skender-gettrix-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.Trix",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 912416.7534722222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 912416.7534722222,
+              "StandardError": 5807.539741979129,
+              "Level": 12,
+              "Margin": 29277.581639841326,
+              "Lower": 883139.1718323809,
+              "Upper": 941694.3351120636
+            },
+            "allocated_bytes": 91254
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 905816.50390625,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 905816.50390625,
+              "StandardError": 3914.4235523296725,
+              "Level": 12,
+              "Margin": 21168.742696392408,
+              "Lower": 884647.7612098577,
+              "Upper": 926985.2466026423
+            },
+            "allocated_bytes": 42497
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-trix-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 6.49561048983547,
+          "BuilderLatestOnly": 6.448622476788681
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 9504382.777777778,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 9504382.777777778,
+              "StandardError": 68092.33314196282,
+              "Level": 12,
+              "Margin": 343274.2488528724,
+              "Lower": 9161108.528924905,
+              "Upper": 9847657.026630651
+            },
+            "allocated_bytes": 884418
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 9532169.999999998,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 9532169.999999998,
+              "StandardError": 100239.40866126616,
+              "Level": 12,
+              "Margin": 479235.85034325154,
+              "Lower": 9052934.149656747,
+              "Upper": 10011405.85034325
+            },
+            "allocated_bytes": 403247
+          }
+        },
+        "evidence": "results/shared-rollout/seeded-momentum-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededMomentumBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-trix-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 29.310390967653507,
+          "BuilderLatestOnly": 29.39608347039473
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 140466.66666666666,
+        "allocated_bytes": 47608,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-trix-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 324266.6666666667,
+        "allocated_bytes": 416272,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-trix-short.json.gz"
+      }
+    ]
+  }
+]

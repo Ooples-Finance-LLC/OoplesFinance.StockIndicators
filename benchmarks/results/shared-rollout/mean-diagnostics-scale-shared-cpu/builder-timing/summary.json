@@ -1,0 +1,97 @@
+[
+  {
+    "operation": "Skender.GetSmaAnalysis",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 13705860,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 13705860,
+              "StandardError": 1597423.8787210903,
+              "Level": 12,
+              "Margin": 7637143.924745964,
+              "Lower": 6068716.075254036,
+              "Upper": 21343003.924745962
+            },
+            "allocated_bytes": 20471784
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 7079044.444444444,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 7079044.444444444,
+              "StandardError": 20731.58680270337,
+              "Level": 12,
+              "Margin": 104514.26113405428,
+              "Lower": 6974530.1833103895,
+              "Upper": 7183558.705578499
+            },
+            "allocated_bytes": 20423504
+          }
+        },
+        "evidence": "results/shared-rollout/mean-diagnostics-scale-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getsmaanalysis-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 71888547.5,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 71888547.5,
+              "StandardError": 843794.111039947,
+              "Level": 12,
+              "Margin": 4034105.8842969155,
+              "Lower": 67854441.61570309,
+              "Upper": 75922653.38429691
+            },
+            "allocated_bytes": 207470136
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 69184986.1111111,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 69184986.1111111,
+              "StandardError": 454841.7797652108,
+              "Level": 12,
+              "Margin": 2292996.3344079596,
+              "Lower": 66891989.77670314,
+              "Upper": 71477982.44551906
+            },
+            "allocated_bytes": 206989132
+          }
+        },
+        "evidence": "results/shared-rollout/mean-diagnostics-scale-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getsmaanalysis-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 667800,
+        "allocated_bytes": 296504,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getsmaanalysis-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1648550,
+        "allocated_bytes": 2887496,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getsmaanalysis-short.json.gz"
+      }
+    ]
+  }
+]

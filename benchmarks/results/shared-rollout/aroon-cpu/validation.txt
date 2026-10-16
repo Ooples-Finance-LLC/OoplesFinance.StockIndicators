@@ -1,0 +1,13 @@
+Aroon CPU arithmetic and allocation qualification for five native APIs.
+
+Age/index differences have magnitude at most Period (positive Int32), so 100*age is an exactly representable integer below 2^38. One binary64 division therefore preserves exact final rounding without an ExactMeanAccumulator per output. Startup, signed zero and oldest/newest ties retain their contracts.
+
+The shared builder stores the three identical presence outputs in one run-owned column. All public outputs remain addressable as read-only spans, and distinct indicator instances/runs retain separate backing storage. This removes two double arrays (160048 bytes at 10k) without exposing storage choices through the facade.
+
+17 focused tests passed, zero skipped, including independent rational rounding checks through Int32.MaxValue, all six outputs, extra-bar/oldest-tie combinations, extreme prices, startup, both histories and cross-run/indicator ownership. Twenty inventory tests passed; Release net10 benchmark build passed.
+
+40 initial native/builder cases and 20 final builder cases passed their independent scan/value/presence checks. Five warmups and fifteen measurements per case. Only final builder rows enter qualification; native rows retain the initial measured arms. Raw source provenance is verified. The initial campaign includes the arithmetic improvement but predates presence-column sharing; it does not measure the old arithmetic implementation.
+
+Native contracts: TA-Lib Aroon returns two defined-suffix double arrays, AroonOsc one; Skender GetAroon eagerly returns its public result list with three nullable values; Trady uses public AroonByTuple/AroonOscillatorByTuple and returns Compute lists directly. Parallel calls use P/P-1 seeds as appropriate, and Trady requests only the needed output range. Quote/decimal conversion and enumerable worker input preparation are outside timing. Native result records remain native; output normalization and independent validation occur only in setup. The period-20 positive binary-grid fixture avoids Skender's documented nonpositive-high seed discrepancy and gives exact percentage multiples under each rounding contract.
+
+At 10k Full allocation is about 786.49 KiB versus 942.83 KiB before sharing; LatestOnly is 316.79 versus 473.09 KiB. Latency changes are modest. Full versus fastest native at 10k: Skender 683.46/490.09 us; TA-Lib Aroon 678.79/23.80 us; TA-Lib oscillator 701.24/15.94 us; Trady Aroon 681.95/10196.15 us; Trady oscillator 689.42/9848.14 us. Both Trady mappings clearly win at 1k/10k in both modes. Skender and TA-Lib remain losses. GPU Aroon remains unqualified. Direct qualification increases to 101/401 APIs.

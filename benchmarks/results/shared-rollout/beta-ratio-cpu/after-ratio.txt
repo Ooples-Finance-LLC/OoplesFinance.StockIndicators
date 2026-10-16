@@ -1,0 +1,42 @@
+Top 25 Functions (Exclusive)                                                  Inclusive           Exclusive           
+1.  Monitor.Wait(class System.Object,int32)                                   75.16%              75.16%              
+2.  ValuesBarExecution+ReturnBetaKernel.Update(value class OoplesFinance.S    18.89%              5.91%               
+    tockIndicators.Indicators.Bar&)                                            
+3.  ReturnBetaWindow.Accumulate(value class OoplesFinance.StockIndicators.    6.92%               5.21%               
+    Helpers.RocBankValue,value class OoplesFinance.StockIndicators.Helpers                                            
+    .RocBankValue,int32)                                            
+4.  ReturnBetaWindow+Moments.Beta(bool)                                       5.62%               3.52%               
+5.  Thread.<PollGC>g__PollGCWorker|70_0()                                     2.43%               2.43%               
+6.  PersistentParallelExecutor.RunParticipantChunks(class Job,int32)          20.86%              1.9%                
+7.  CertifiedCompactRatio.TryDivide(value class System.UInt128,value class    1%                  0.92%               
+     System.UInt128,int32,float64&)                                            
+8.  PersistentParallelExecutor.WorkerLoop(int32)                              96.15%              0.39%               
+9.  OpenClNativeBindings.CreateCommandQueue(int,int,unsigned int64,int32&)    0.33%               0.33%               
+                                                
+10. ReturnBetaWindow+Moments.Add(value class OoplesFinance.StockIndicators    1.41%               0.31%               
+    .Helpers.JurikDyadic,value class OoplesFinance.StockIndicators.Helpers                                            
+    .JurikDyadic,int32)                                            
+11. JurikDyadic.AddExact(value class OoplesFinance.StockIndicators.Helpers    0.8%                0.3%                
+    .JurikDyadic)                                            
+12. JurikDyadic.Multiply(float64)                                             0.48%               0.25%               
+13. ManualResetEventSlim.Wait(int32,value class System.Threading.Cancellat    75.48%              0.24%               
+    ionToken)                                            
+14. Int128.BigMul(value class System.Int128,value class System.Int128,valu    0.36%               0.24%               
+    e class System.Int128&)                                            
+15. JurikDyadic.Subtract(value class OoplesFinance.StockIndicators.Helpers    0.65%               0.23%               
+    .JurikDyadic)                                            
+16. DirectOpenClGpuBuffer.Finalize()                                          0.23%               0.23%               
+17. JurikDyadic.Normalize()                                                   0.3%                0.18%               
+18. JurikDyadic.Ratio(value class OoplesFinance.StockIndicators.Helpers.Ju    1.25%               0.16%               
+    rikDyadic)                                            
+19. JurikDyadic.Magnitude(value class System.Int128)                          0.23%               0.16%               
+20. ReturnBetaWindow.Add(float64,float64)                                     1.85%               0.12%               
+21. JurikDyadic.Multiply(value class OoplesFinance.StockIndicators.Helpers    0.39%               0.12%               
+    .JurikDyadic)                                            
+22. UInt128.op_RightShift(value class System.UInt128,int32)                   0.12%               0.11%               
+23. UInt128.BigMul(value class System.UInt128,value class System.UInt128,v    0.11%               0.09%               
+    alue class System.UInt128&)                                            
+24. JurikDyadic.Shift(value class System.Int128,int32,value class System.I    0.25%               0.09%               
+    nt128&)                                            
+25. Int128.op_CheckedSubtraction(value class System.Int128,value class Sys    0.09%               0.09%               
+    tem.Int128)                                            

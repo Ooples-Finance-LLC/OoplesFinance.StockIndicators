@@ -1,0 +1,55 @@
+{
+  "Operation": "Trady.Indicator.AverageTrueRange",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        562544,
+        562544,
+        562544
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        81136,
+        81136,
+        81136
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        562392,
+        562392,
+        562392
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        80984,
+        80984,
+        80984
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        14687872,
+        14686872,
+        14687832
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        68617248,
+        68625672,
+        70150960
+      ]
+    }
+  ]
+}

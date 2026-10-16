@@ -100,7 +100,7 @@ public sealed class WindowStochasticKdj : MultiOutputIndicatorBase, IIndicatorVa
                 )
             );
 
-    private sealed class State(WindowStochasticKdj owner) : IMultiOutputState
+    internal sealed class State(WindowStochasticKdj owner) : IMultiOutputState
     {
         private static readonly BigInteger Grid = BigInteger.One << 1074;
         private readonly FiftySeedStochastic.RawState _raw = new(owner.Period, 0);

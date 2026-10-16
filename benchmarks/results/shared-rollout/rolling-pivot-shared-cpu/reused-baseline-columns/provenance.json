@@ -1,0 +1,18 @@
+{
+  "base_commit": "033e31abd34f64f15c0a32fa3f779973e4124420",
+  "source_files_sha256": {
+    "src/Helpers/ExactMeanAccumulator.cs": "c40be947c95802f8881ce24a69c627b4d011e7dee93cbe8096455a0bcfa92b17",
+    "src/Indicators/PivotLevelSnapshots.cs": "bcba8ca8b5d4f9e38617d0757fd82cd5a0740f739bdec459688e8722035e9043",
+    "src/Indicators/ValuesBarExecution.Pivots.cs": "64afefd7352681b0af32ee036659eeefedcb5922d2d0eb423aabe170091a7725",
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs": "6253f42dbc02b13ab90b070ab872c0f7bfbce170bad425d97710b801dea04418",
+    "src/Indicators/ValuesBarExecution.cs": "3f1c016235fb3465d6fb5968bff7555c93bc7817bfd5e902a4e4c68249eeaa4b"
+  },
+  "binary_sha256": {
+    "OoplesFinance.StockIndicators.dll": "2fc2828c7ba32dc26e0b6226a22c99a174821489231f0287c6ccf9688a736831",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "83c6d19f88ebd6f31912492a88c5442fa890da4ce1175b0505bbaca387524835"
+  },
+  "saved_baseline": "benchmarks/results/shared-rollout/rolling-pivot-shared-cpu/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPivotBenchmarks-report-full-compressed.json",
+  "filter": "*SharedPivotBenchmarks*Builder*",
+  "interpretation": "Saved-baseline cross-run comparison, not same-run qualification. Native methods were not timed; existing setup correctness checks still execute. Fixture inputs, output ownership, native methods and worker settings are unchanged. Same recorded runtime and hardware. The monitor includes .NET hosts, reusable MSBuild nodes, compiler processes and their live descendants. Existing processes were permitted only after at least 60 seconds of low CPU activity. Combined background CPU was limited to 1% of one logical core plus 0.1 CPU seconds of timer allowance, checked across each consecutive sample and the entire window. New process identities or activity above that bound invalidate the run. Process identities and CPU totals were sampled every ten seconds and at completion. Brief unobserved activity and non-CPU contention cannot be excluded.",
+  "validation": "22 focused unit, 12 pivot comparator and 100 local GPU cases passed with zero skips."
+}

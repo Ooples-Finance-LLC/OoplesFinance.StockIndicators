@@ -140,6 +140,7 @@ public sealed class AverageTrueRangeWithDetails
 
 internal sealed class SeededAtrWindow(int period)
 {
+    private readonly ExactMeanAccumulator.ProductCoefficient _priorWeight = new(period - 1);
     internal double Percent(double close)
     {
         if (!HasAverage || close == 0)
@@ -178,20 +179,9 @@ internal sealed class SeededAtrWindow(int period)
             return;
         }
         HasRange = true;
-        var high = ExactVarianceWindow.Units(bar.High);
-        var low = ExactVarianceWindow.Units(bar.Low);
-        var previous = ExactVarianceWindow.Units(_previousClose);
-        var range = System.Numerics.BigInteger.Max(
-            high - low,
-            System.Numerics.BigInteger.Max(
-                System.Numerics.BigInteger.Abs(high - previous),
-                System.Numerics.BigInteger.Abs(low - previous)
-            )
-        );
-        // Convert the exact selected difference once, retaining an extended exponent when needed.
-        var difference = new ExactMeanAccumulator();
-        difference.Add(double.Epsilon, range);
-        Range = RocBankValue.Round(difference);
+        // The shared range helper compares exact differences on compact binary
+        // scales and retains the same extended-exponent rounding boundary.
+        Range = FearGreedWindow.TrueRange(bar.High, bar.Low, _previousClose);
         if (_seedCount < period)
         {
             Range.AddTo(ref _seed);
@@ -204,7 +194,9 @@ internal sealed class SeededAtrWindow(int period)
         else
         {
             var sum = new ExactMeanAccumulator();
-            Average.AddTo(ref sum, period - 1);
+            if (Average.UpperShift == 0)
+                sum.AddProduct(new ExactMeanAccumulator.ProductFactor(Average.Mantissa), _priorWeight);
+            else Average.AddTo(ref sum, period - 1);
             Range.AddTo(ref sum);
             Average = RocBankValue.Round(sum, count: period);
         }

@@ -1,0 +1,158 @@
+[
+  {
+    "Operation": "TaLib.Candles.ThreeInside",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          589032,
+          589032,
+          589032
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          107624,
+          107624,
+          107624
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.TwoCrows",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          577704,
+          577704,
+          577704
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          96296,
+          96296,
+          96296
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.UpsideGapTwoCrows",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          589032,
+          589032,
+          589032
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          107624,
+          107624,
+          107624
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.UniqueThreeRiver",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          589032,
+          589032,
+          589032
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          107624,
+          107624,
+          107624
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  }
+]

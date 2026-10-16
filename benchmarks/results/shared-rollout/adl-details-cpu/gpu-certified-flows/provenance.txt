@@ -1,0 +1,8 @@
+Production: 6838104e; benchmark fixture changes are in this commit. Published AiDotNet.Tensors 0.134.4.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared-gpu Skender.GetAdl 10000 3
+Probe completed with exit zero. Setup validates all five GPU columns bit-for-bit against CPU, with CPU/native/reference comparisons and actual GPU execution checks. Native parallel includes prefix replay to preserve mean rounding; alternative native strategies remain unqualified.
+Benchmark build succeeded with 60 existing warnings. All 63 focused fixture/allocation-probe cases passed. Production binaries reused; no production changes in this batch.
+Per-call managed allocation only; retained staging/device memory excluded. Five-column GPU workspace capacity is 40*N host plus 80*N device bytes under the existing 56 MiB retention cap. Full-history allocations vary slightly across samples; raw values retained.
+Latency not measured: live Tensors GPU-related tests (PID 39340) and Evolution execution tests (PID 39108) observed at the pre-timing process check. No timing claim or catalog qualification added.
+OoplesFinance.StockIndicators.dll SHA256 a53ac559aac37dddebf3bf6ff7c11754d4967732619220b90e2864dacfbf311b
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 f45446e82992ab49f66ca1e4c9a018eb26088c142ee2267c94ac52d261234992

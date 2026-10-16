@@ -1,0 +1,468 @@
+{
+  "policy": "Reuse recorded competitor timings by default; benchmark changed builder paths only.",
+  "source": "User instruction, 2026-10-13",
+  "index": "catalog.json.gz",
+  "saved_serial_results": "pairs[].measurements[].saved_competitor",
+  "qualified_results": "pairs[].current[].methods.NativeSingle and NativeParallel, with report paths in each row's evidence",
+  "reuse_checks": [
+    "competitor implementation and package version",
+    "input fixture and parameters",
+    "output materialization and worker count",
+    "runtime and hardware"
+  ],
+  "comparison": "Identify saved-baseline comparisons explicitly. Preserve dates, confidence intervals and report provenance. Do not present them as same-run comparisons.",
+  "missing_or_incompatible": "Record the gap; do not silently rerun competitors or claim a qualified win. Establish a new baseline only when required by the agreed scope.",
+  "builder_only_results": "pairs[].builder_only; excluded from measured_current_apis until a compatible comparison is available",
+  "saved_artifact_audit": {
+    "date": "2026-10-15",
+    "catalog_sha256": "55b722f067dad474154ddf286686fbb8625700243d8f3dc008bb577d50299264",
+    "builder_only_mappings": 119,
+    "runtime_mismatch_mappings": 102,
+    "mappings_without_saved_native_method_pair": 117,
+    "overlap": 100,
+    "retained_native_method_pair_mappings": [
+      "QuanTAlib.Kama",
+      "Skender.GetKama"
+    ],
+    "repository_json_artifacts_scanned": 1651,
+    "benchmark_reports_read": 968,
+    "matching_operation_or_pair_id_parallel_rows": 0,
+    "scope": "Searched repository JSON artifacts and named BDN reports in external si-* temporary folders, excluding preserved snapshots and bin/obj. Searched parallel/eight-worker methods keyed to the 117 target mappings. Unkeyed benchmark types retain their separate or grouped comparison families; no baseline was promoted. Two unreadable external reports were excluded. File counts include copied artifacts, not unique benchmark runs.",
+    "next_action": "Preserve the gaps. Matching runtime alone is insufficient. Any required new baseline must match fixture, output materialization, runtime and worker count, and be saved once for reuse.",
+    "invalidate_when": "Catalog classification or saved result artifacts change.",
+    "external_named_bdn_reports_considered": 999,
+    "external_benchmark_reports_read": 997,
+    "external_unreadable_reports": 2,
+    "external_matching_operation_or_pair_id_parallel_rows": 0,
+    "fixture_gap_example": {
+      "builder_only_harness": "SharedStrengthBenchmarks : SharedMappedBenchmarkBase",
+      "timed_methods": [
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ],
+      "older_serial_method": "LibraryPairBenchmarks.Competitor returns normalized ComparisonSeries; it is not a direct native arm.",
+      "requirement": "Direct native serial and full-prefix parallel arms implemented and verified by 19 passing contract cases. First quiet-window timings remain pending; no baseline has been promoted.",
+      "implemented_fixture": "SharedSkenderStrengthBenchmarks",
+      "implemented_operations": [
+        "Skender.GetRsi",
+        "Skender.GetAdx"
+      ],
+      "additional_implemented_fixture": {
+        "name": "SharedTradyStrengthBenchmarks",
+        "operations": [
+          "Trady.Indicator.RelativeStrength",
+          "Trady.Indicator.RelativeStrengthIndex",
+          "Trady.Indicator.NetMomentumOscillator",
+          "Trady.Indicator.RelativeMomentum",
+          "Trady.Indicator.RelativeMomentumIndex"
+        ],
+        "contract_cases_passed": 46,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ema_family_fixture": {
+        "name": "SharedSkenderEmaFamilyBenchmarks",
+        "operations": [
+          "Skender.GetMacd",
+          "Skender.GetPvo",
+          "Skender.GetPmo",
+          "Skender.GetTsi",
+          "Skender.GetTrix"
+        ],
+        "contract_cases_passed": 81,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_smoothing_fixture": {
+        "name": "SharedSkenderSmoothingBenchmarks",
+        "operations": [
+          "Skender.GetAlligator",
+          "Skender.GetGator",
+          "Skender.GetElderRay"
+        ],
+        "contract_cases_passed": 43,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_finite_window_fixture": {
+        "name": "SharedSkenderFiniteWindowBenchmarks",
+        "operations": [
+          "Skender.GetAwesome",
+          "Skender.GetBop",
+          "Skender.GetCci"
+        ],
+        "contract_cases_passed": 49,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_atr_family_fixture": {
+        "name": "SharedSkenderAtrFamilyBenchmarks",
+        "operations": [
+          "Skender.GetAtrStop",
+          "Skender.GetSuperTrend",
+          "Skender.GetChandelier",
+          "Skender.GetKeltner",
+          "Skender.GetStarcBands"
+        ],
+        "contract_cases_passed": 56,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_stochastic_fixture": {
+        "name": "SharedSkenderStochasticBenchmarks",
+        "operations": [
+          "Skender.GetStoch",
+          "Skender.GetStochRsi",
+          "Skender.GetSmi"
+        ],
+        "contract_cases_passed": 73,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_roc_fixture": {
+        "name": "SharedSkenderRocBenchmarks",
+        "operations": [
+          "Skender.GetRoc",
+          "Skender.GetRocWb"
+        ],
+        "contract_cases_passed": 35,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_candle_fixture": {
+        "name": "SharedSkenderCandleBenchmarks",
+        "operations": [
+          "Skender.GetDoji",
+          "Skender.GetMarubozu",
+          "Skender.GetHeikinAshi"
+        ],
+        "contract_cases_passed": 56,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_statistics_fixture": {
+        "name": "SharedSkenderStatisticsBenchmarks",
+        "operations": [
+          "Skender.GetBeta",
+          "Skender.GetCorrelation",
+          "Skender.GetEpma"
+        ],
+        "contract_cases_passed": 43,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_diagnostics_fixture": {
+        "name": "SharedSkenderDiagnosticsBenchmarks",
+        "operations": [
+          "Skender.GetMaEnvelopes",
+          "Skender.GetSmaAnalysis",
+          "Skender.GetPrs",
+          "Skender.GetStdDevChannels"
+        ],
+        "contract_cases_passed": 54,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_average_fixture": {
+        "name": "SharedTradyAverageBenchmarks",
+        "operations": [
+          "Trady.Indicator.ExponentialMovingAverage",
+          "Trady.Indicator.WeightedMovingAverage",
+          "Trady.Indicator.SimpleMovingAverageOscillator",
+          "Trady.Indicator.ExponentialMovingAverageOscillator"
+        ],
+        "contract_cases_passed": 65,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_macd_fixture": {
+        "name": "SharedTradyMacdBenchmarks",
+        "operations": [
+          "Trady.Indicator.MovingAverageConvergenceDivergence",
+          "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram"
+        ],
+        "contract_cases_passed": 33,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_directional_fixture": {
+        "name": "SharedTradyNativeDirectionalBenchmarks",
+        "operations": [
+          "Trady.Indicator.PlusDirectionalMovement",
+          "Trady.Indicator.MinusDirectionalMovement",
+          "Trady.Indicator.PlusDirectionalIndicator",
+          "Trady.Indicator.MinusDirectionalIndicator",
+          "Trady.Indicator.DirectionalMovementIndex",
+          "Trady.Indicator.AverageDirectionalIndex",
+          "Trady.Indicator.AverageDirectionalIndexRating"
+        ],
+        "contract_cases_passed": 99,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_stochastic_fixture": {
+        "name": "SharedTradyNativeStochasticBenchmarks",
+        "operations": [
+          "Trady.Indicator.RawStochasticsValue",
+          "Trady.Indicator.Stochastics+Fast",
+          "Trady.Indicator.Stochastics+Slow",
+          "Trady.Indicator.Stochastics+Full",
+          "Trady.Indicator.StochasticsOscillator+Fast",
+          "Trady.Indicator.StochasticsOscillator+Slow",
+          "Trady.Indicator.StochasticsOscillator+Full"
+        ],
+        "contract_cases_passed": 127,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_stochastic_momentum_fixture": {
+        "name": "SharedTradyStochasticMomentumBenchmarks",
+        "operations": [
+          "Trady.Indicator.StochasticsMomentum",
+          "Trady.Indicator.StochasticsMomentumIndex",
+          "Trady.Indicator.StochasticsRsiOscillator"
+        ],
+        "contract_cases_passed": 52,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_atr_channel_fixture": {
+        "name": "SharedTradyAtrChannelBenchmarks",
+        "operations": [
+          "Trady.Indicator.ChandelierExit",
+          "Trady.Indicator.KeltnerChannels"
+        ],
+        "contract_cases_passed": 25,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_cci_adaptive_fixture": {
+        "name": "SharedTradyCciAdaptiveBenchmarks",
+        "operations": [
+          "Trady.Indicator.CommodityChannelIndex",
+          "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+        ],
+        "contract_cases_passed": 31,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_native_volume_fixture": {
+        "name": "SharedTradyNativeVolumeBenchmarks",
+        "operations": [
+          "Trady.Indicator.PositiveVolumeIndex",
+          "Trady.Indicator.NegativeVolumeIndex",
+          "Trady.Indicator.AccumulationDistributionLine"
+        ],
+        "contract_cases_passed": 69,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_trady_native_candle_fixture": {
+        "name": "SharedTradyNativeCandleBenchmarks",
+        "operations": [
+          "Trady.Candlestick.DarkCloudCover",
+          "Trady.Candlestick.DragonifyDoji",
+          "Trady.Candlestick.RisingThreeMethods",
+          "Trady.Candlestick.FallingThreeMethods"
+        ],
+        "contract_cases_passed": 65,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_star_reversal_fixture": {
+        "name": "SharedTaStarReversalBenchmarks",
+        "operations": [
+          "TaLib.Candles.MorningStar",
+          "TaLib.Candles.EveningStar",
+          "TaLib.Candles.MorningDojiStar",
+          "TaLib.Candles.EveningDojiStar",
+          "TaLib.Candles.AbandonedBaby"
+        ],
+        "contract_cases_passed": 61,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_reversal_continuation_fixture": {
+        "name": "SharedTaReversalContinuationBenchmarks",
+        "operations": [
+          "TaLib.Candles.AdvanceBlock",
+          "TaLib.Candles.Stalled",
+          "TaLib.Candles.ThreeStarsInSouth",
+          "TaLib.Candles.ThreeBlackCrows",
+          "TaLib.Candles.IdenticalThreeCrows",
+          "TaLib.Candles.ThreeWhiteSoldiers",
+          "TaLib.Candles.PiercingLine",
+          "TaLib.Candles.DarkCloudCover"
+        ],
+        "contract_cases_passed": 153,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_multibar_fixture": {
+        "name": "SharedTaMultiBarNativeBenchmarks",
+        "operations": [
+          "TaLib.Candles.Breakaway",
+          "TaLib.Candles.ConcealingBabySwallow",
+          "TaLib.Candles.LadderBottom",
+          "TaLib.Candles.MatHold",
+          "TaLib.Candles.RisingFallingThreeMethods",
+          "TaLib.Candles.Hikkake",
+          "TaLib.Candles.HikkakeModified",
+          "TaLib.Candles.TasukiGap",
+          "TaLib.Candles.Tristar",
+          "TaLib.Candles.UpDownSideGapThreeMethods"
+        ],
+        "contract_cases_passed": 111,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "reused_ta_triple_body_fixture": {
+        "name": "SharedTripleBodyBenchmarks",
+        "operations": [
+          "TaLib.Candles.ThreeInside",
+          "TaLib.Candles.TwoCrows",
+          "TaLib.Candles.UpsideGapTwoCrows",
+          "TaLib.Candles.UniqueThreeRiver"
+        ],
+        "contract_cases_passed": 32,
+        "timing_status": "First compatible native baseline pending. Existing implementation reused; saved serial-only fixture differs; catalog unchanged."
+      },
+      "implemented_ta_window_fixture": {
+        "name": "SharedTaWindowNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.AvgDev",
+          "TaLib.Functions.Accbands"
+        ],
+        "contract_cases_passed": 27,
+        "timing_status": "First native baselines pending; catalog qualification unchanged."
+      },
+      "implemented_ta_macd_fixture": {
+        "name": "SharedTaMacdNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Macd",
+          "TaLib.Functions.MacdFix",
+          "TaLib.Functions.MacdExt"
+        ],
+        "contract_cases_passed": 46,
+        "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_stochastic_fixture": {
+        "name": "SharedTaStochasticNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Stoch",
+          "TaLib.Functions.StochF",
+          "TaLib.Functions.StochRsi"
+        ],
+        "contract_cases_passed": 40,
+        "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_average_fixture": {
+        "name": "SharedTaAverageNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Ma",
+          "TaLib.Functions.Apo",
+          "TaLib.Functions.Ppo"
+        ],
+        "contract_cases_passed": 40,
+        "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_adaptive_rate_fixture": {
+        "name": "SharedTaAdaptiveRateNativeBenchmarks",
+        "operations": [
+          "TaLib.Functions.Trix",
+          "TaLib.Functions.Kama",
+          "TaLib.Functions.Mavp"
+        ],
+        "contract_cases_passed": 40,
+        "timing_status": "First native baselines pending; catalog unchanged."
+      },
+      "implemented_ta_hilbert_fixtures": {
+        "names": [
+          "SharedTaHilbertNativeBenchmarks",
+          "SharedTaHilbertTrendModeBenchmarks"
+        ],
+        "operations": [
+          "TaLib.Functions.HtDcPhase",
+          "TaLib.Functions.HtSine",
+          "TaLib.Functions.HtTrendline",
+          "TaLib.Functions.HtTrendMode"
+        ],
+        "contract_cases_passed": 54,
+        "timing_status": "First native baselines pending; catalog unchanged."
+      }
+    },
+    "kama_matching_runtime_builder_queue": {
+      "operations": [
+        "QuanTAlib.Kama",
+        "Skender.GetKama"
+      ],
+      "baselines": {
+        "QuanTAlib.Kama": {
+          "path": "benchmarks/results/shared-rollout/seeded-adaptive-shared-cpu/quanta/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+          "sha256": "cf9390bf371230ed63c438f1779dde1dd9dd4c1d8f8db5d5151098a0dcef9031",
+          "environment": {
+            "ProcessorName": "AMD Ryzen 9 3950X",
+            "Architecture": "X64",
+            "LogicalCoreCount": 32,
+            "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+          }
+        },
+        "Skender.GetKama": {
+          "path": "benchmarks/results/shared-rollout/seeded-adaptive-shared-cpu/skender/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+          "sha256": "c196f7801c28aa431bcccc87ad3cdbf7b96fcb6b464d3c02a7236b84bd3e052d",
+          "environment": {
+            "ProcessorName": "AMD Ryzen 9 3950X",
+            "Architecture": "X64",
+            "LogicalCoreCount": 32,
+            "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+          }
+        }
+      },
+      "contract_cases_passed": 10,
+      "timing_status": "Only eight matching-runtime builder cases queued; native measurements reused."
+    }
+  },
+  "snapshot_native_fixtures": {
+    "skender_retrospective": {
+      "operations": [
+        "Skender.GetDpo",
+        "Skender.GetFcb"
+      ],
+      "contract_cases_passed": 43,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained, not builder qualification."
+    },
+    "skender_hurst": {
+      "operations": [
+        "Skender.GetHurst"
+      ],
+      "contract_cases_passed": 19,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained."
+    },
+    "skender_ichimoku": {
+      "operations": [
+        "Skender.GetIchimoku"
+      ],
+      "contract_cases_passed": 33,
+      "timing_status": "First native baseline pending; standalone snapshot retained."
+    },
+    "trady_ichimoku": {
+      "operations": [
+        "Trady.Indicator.IchimokuCloud"
+      ],
+      "contract_cases_passed": 30,
+      "timing_status": "First native baseline pending; extended snapshot retained."
+    },
+    "parabolic": {
+      "operations": [
+        "TaLib.Functions.Sar",
+        "TaLib.Functions.SarExt",
+        "Skender.GetParabolicSar",
+        "Trady.Indicator.ParabolicStopAndReverse"
+      ],
+      "contract_cases_passed": 98,
+      "timing_status": "First native baseline pending; standalone snapshots retained."
+    },
+    "skender_volatility_stop": {
+      "operations": [
+        "Skender.GetVolatilityStop"
+      ],
+      "contract_cases_passed": 21,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained."
+    },
+    "skender_pivots": {
+      "operations": [
+        "Skender.GetPivotPoints",
+        "Skender.GetPivots"
+      ],
+      "contract_cases_passed": 61,
+      "timing_status": "First native baseline pending; standalone snapshot contract retained."
+    },
+    "skender_charts": {
+      "operations": [
+        "Skender.GetRenko",
+        "Skender.GetRenkoAtr",
+        "Skender.GetZigZag"
+      ],
+      "contract_cases_passed": 61,
+      "timing_status": "First native baseline pending. Renko serial/parallel; ZigZag original serial API, with no valid independent partitioning path established."
+    }
+  }
+}

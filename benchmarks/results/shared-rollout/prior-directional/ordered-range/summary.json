@@ -1,0 +1,14 @@
+{
+  "base_commit": "9c7eec28ee20460fe5e8b2bc35b7544eb9380002",
+  "source_sha256": {
+    "src/Indicators/PriorSeededDirectionalMeasure.cs": "b716a3769bbcbea585ca5ec431161f3c3d5bdae59ba2d01aeb57673882683ca2",
+    "tests/ModelsTests/SelectedDirectionalStateTests.cs": "adf64972e4e5ecee5ed499e81efb4a76db87f255f89b9927437044f1e2c3521c"
+  },
+  "verification": {
+    "unit_cases": 14,
+    "comparator_cases": 23,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Ordered high/low true range selects exact endpoints before one exact subtraction; inverted candles retain existing arithmetic. One extra previous-close scalar per state. Work reduction, not measured latency."
+}

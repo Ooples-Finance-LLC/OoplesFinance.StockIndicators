@@ -1,0 +1,44 @@
+{
+  "baseCommit": "ee6304fa",
+  "productionChange": "WindowChoppinessIndex compact state reuses WindowExtremeDeque for amortized constant-time extrema.",
+  "measurement": "Warmed managed total allocation, includes worker threads. No latency qualification; other repository jobs active. LatestOnly increases 4864 bytes versus prior scan-based state.",
+  "report": {
+    "Operation": "Skender.GetChop",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          651248,
+          651248,
+          651248
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          170120,
+          170120,
+          170120
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          1640512,
+          1640512,
+          1640512
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          1660416,
+          1660416,
+          1661424
+        ]
+      }
+    ]
+  }
+}

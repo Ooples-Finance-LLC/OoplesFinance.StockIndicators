@@ -57,7 +57,11 @@ public sealed class WindowUltimateOscillator
 
     /// <inheritdoc/>
     protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState([ShortPeriod, MiddlePeriod, LongPeriod], ZeroRangeContribution);
+#else
         new State([ShortPeriod, MiddlePeriod, LongPeriod], ZeroRangeContribution);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -83,6 +87,77 @@ public sealed class WindowUltimateOscillator
                 )
             );
 
+#if !NETFRAMEWORK
+    internal sealed class CompactState(int[] periods, bool zero, int count = 0) : IMultiOutputState
+    {
+        // All three windows refer to the same observations. Retain each exact
+        // interval once and evict independently at each configured lag.
+        private (JurikDyadic Pressure, JurikDyadic Range)[] _history =
+            new (JurikDyadic, JurikDyadic)[Math.Min(periods[2], Math.Max(0, count - 1))];
+        private int _next, _seen;
+        private readonly JurikDyadic[] _pressure = new JurikDyadic[3], _range = new JurikDyadic[3];
+        private double _previous;
+        private bool _started;
+
+        public void Reset()
+        {
+            Array.Clear(_history); Array.Clear(_pressure); Array.Clear(_range);
+            _next = _seen = 0; _previous = 0; _started = false;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (!_started) { _started = true; _previous = bar.Close; return; }
+            double low = Math.Min(bar.Low, _previous);
+            var pressure = ExactTrueInterval.Difference(bar.Close, low);
+            var range = zero ? ExactTrueInterval.Range(bar.High, bar.Low, _previous)
+                : ExactTrueInterval.Difference(Math.Max(bar.High, _previous), low);
+            _previous = bar.Close;
+            if (_seen == _history.Length && _history.Length < periods[2])
+            {
+                // Before the longest window fills, storage is chronological;
+                // no old observation has been overwritten. Grow lazily for streams.
+                int capacity = (int)Math.Min(periods[2], Math.Max(4L, 2L * _history.Length));
+                Array.Resize(ref _history, capacity);
+                _next = _seen;
+            }
+            for (int k = 0; k < 3; k++)
+            {
+                if (_seen >= periods[k])
+                {
+                    int index = _next - periods[k];
+                    if (index < 0) index += _history.Length;
+                    var old = _history[index];
+                    _pressure[k].Subtract(old.Pressure); _range[k].Subtract(old.Range);
+                }
+                _pressure[k].AddExact(pressure); _range[k].AddExact(range);
+            }
+            _history[_next] = (pressure, range);
+            if (++_next == _history.Length) _next = 0;
+            if (_seen < periods[2]) _seen++;
+            if (_seen < periods[2]) return;
+            var numerator = new JurikDyadic();
+            var denominator = JurikDyadic.FromDouble(1);
+            for (int k = 0; k < 3; k++)
+            {
+                if (_range[k].Sign == 0)
+                {
+                    if (!zero) return;
+                    continue;
+                }
+                numerator.Multiply(_range[k]);
+                var term = _pressure[k];
+                term.Multiply(4 >> k); term.Multiply(denominator);
+                numerator.AddExact(term);
+                denominator.Multiply(_range[k]);
+            }
+            numerator.Multiply(100); denominator.Multiply(7);
+            output[0] = numerator.Ratio(denominator);
+            output[1] = 1;
+        }
+    }
+#else
     private sealed class State(int[] periods, bool zero) : IMultiOutputState
     {
         private readonly Queue<(BigInteger Pressure, BigInteger Range)>[] _windows =
@@ -157,4 +232,5 @@ public sealed class WindowUltimateOscillator
             output[1] = 1;
         }
     }
+#endif
 }

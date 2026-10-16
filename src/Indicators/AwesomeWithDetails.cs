@@ -117,7 +117,7 @@ public sealed class AwesomeWithDetails : MultiOutputIndicatorBase, IIndicatorVal
         }
     }
 
-    private sealed class State(int fast, int slow, bool chained) : IMultiOutputState
+    internal sealed class State(int fast, int slow, bool chained) : IMultiOutputState
     {
         private readonly MeanWindow _fast = new(fast),
             _slow = new(slow);

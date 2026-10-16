@@ -1,0 +1,49 @@
+{
+  "note": "Descriptive cross-run comparison, same CPU/runtime/architecture/core count, original library measurement retained; no competitor win claim.",
+  "measurements": [
+    {
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_mean_ms": 9.533424242424243,
+      "new_mean_ms": 13.70586,
+      "old_allocated_bytes": 27863836,
+      "new_allocated_bytes": 20471784,
+      "mean_change_percent": 43.7663912931536,
+      "allocation_change_percent": -26.529197200270627,
+      "new_upper_below_old_lower": false
+    },
+    {
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 9.4336,
+      "new_mean_ms": 7.0790444444444445,
+      "old_allocated_bytes": 27815142,
+      "new_allocated_bytes": 20423504,
+      "mean_change_percent": -24.959247323986133,
+      "allocation_change_percent": -26.57415158980673,
+      "new_upper_below_old_lower": true
+    },
+    {
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_mean_ms": 93.50745,
+      "new_mean_ms": 71.8885475,
+      "old_allocated_bytes": 282767244,
+      "new_allocated_bytes": 207470136,
+      "mean_change_percent": -23.11997867549591,
+      "allocation_change_percent": -26.628652928413445,
+      "new_upper_below_old_lower": true
+    },
+    {
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 94.1664225,
+      "new_mean_ms": 69.1849861111111,
+      "old_allocated_bytes": 282286260,
+      "new_allocated_bytes": 206989132,
+      "mean_change_percent": -26.529027784706273,
+      "allocation_change_percent": -26.67403223947209,
+      "new_upper_below_old_lower": true
+    }
+  ]
+}

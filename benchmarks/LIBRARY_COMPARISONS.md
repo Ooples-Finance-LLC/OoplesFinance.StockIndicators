@@ -1,6 +1,6 @@
 # Full-library comparisons
 
-Stacked on #246. The reflected manifest inventories 421 public API families from
+Delivered in [PR #255](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/255), targeting `master`. The reflected manifest inventories 421 public API families from
 Skender.Stock.Indicators 2.7.3, TALib.NETCore 0.5.0, Trady.Analysis 3.2.8, and
 QuanTAlib 1.0.0. There are 401 paired families, 16 unavailable implementations with
 verified counterparts (including two explicitly owned definitions), 4 utilities,
@@ -9,6 +9,206 @@ and no pending families.
 `paired` means full-trajectory correctness and both performance runners exist;
 it does not claim that timings have been collected. `pending` makes neither claim.
 The production library has no competitor package dependency.
+
+## Shared rollout status (2026-10-16)
+
+The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 269 with recorded native comparisons, 117 with builder-only measurements, and 15 snapshot-only mappings. Of the 269 native-comparison mappings, 245 have both standard sizes in their current catalog rows; 24 lack either 1k or 10k coverage. These are coverage counts, not speedup counts. Two stale KAMA qualification labels now agree with their latest builder-only rows; historical native measurements remain retained. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
+
+All 132 remaining catalog-label gaps have prepared comparisons: 117 builder-only mappings and 15 snapshot mappings. A supplemental audit also identified the 24 partial-size native mappings: Connors fills one through its own candidate, and eight additional fixtures cover the other 23 with 92 missing-size CPU cases. All 23 fixture cases and 100 GPU cases passed. The queue now has 56 preserved stages. The [initial queue audit](results/shared-rollout/prepared-queue-coverage.json) covers its first 46 stages; the [size audit and validation](results/shared-rollout/missing-native-sizes/contracts/summary.json) records the additional coverage and the 29 saved reports checked for reuse. Previously measured native sizes are excluded from the new stages. Five queued stages are archived: pivot columns, Rickshaw, Asin, SMA and Skender RSI/ADX. The two newly cataloged Skender mappings are measured gaps, with no clear latency wins; cross-run worker comparisons remain separate from same-run qualification. Fixture preparation covers these gaps; measurements, result review and qualification remain unfinished.
+
+### Tillson polynomial candidate (2026-10-15)
+
+Shared CPU Tillson publication now evaluates the exact finite-difference Horner polynomial, retaining one final rounding and the existing stage recurrence. This replaces four wide coefficient products with three factor products. All 17 focused unit, 26 comparator and 100 GPU cases passed. The isolated 256-publication allocation test used 178,512 bytes versus 180,264 for the prior expression (1,752 bytes less, about 1%). This small allocation result does not establish end-to-end allocation or latency improvement. Twelve builder-only timing cases will reuse the three compatible saved native baselines; native methods, inputs and package references are unchanged. [Evidence](results/shared-rollout/tillson-horner/contracts/summary.json). Qualification remains unchanged.
+
+### ALMA retained price factors (2026-10-15)
+
+Modern ALMA caches the exact binary decoding of each inserted price. A complete period-20 window now decodes one new price instead of all 20 retained prices; cached factors and validity flags make queue entries larger. Deferred invalid-state errors, eviction, reset, signed zero and all output contracts are preserved. All 21 unit, 16 comparator and 100 GPU cases passed, including zero steady-state per-bar allocation. Eight builder-only cases reuse the unchanged native fixture and compatible saved report. [Evidence](results/shared-rollout/alma-price-cache/contracts/summary.json). This is a work reduction with a storage tradeoff; latency and total allocation remain unmeasured.
+
+### Certified logarithm first term (2026-10-15)
+
+The fixed logarithm series initializes its directed sums from the first endpoints, eliminating two divisions by one per nonzero series evaluation. Subsequent terms and the certified tail bound are unchanged. All 4 independent logarithm unit tests, 10 volatility comparator tests and 100 local GPU cases passed. Eight queued builder-only timing cases reuse the saved compatible native baseline; latency remains unmeasured. [Evidence](results/shared-rollout/log-first-term/contracts/summary.json).
+
+### Connors sorted return index (2026-10-15)
+
+Connors retains a sorted exact-return index alongside its inclusive nullable history. At rank period 100, binary searches require at most 14 comparisons for insertion and eviction instead of the 101-comparison rank scan. Array shifts remain linear and the index adds storage; no latency or total allocation improvement is claimed. Exact ties, excluded returns, startup, reset and all eight outputs are preserved. All 262 focused unit, 10 comparator and 100 GPU cases passed, including zero warmed per-update allocation after reset. Six queued timing cases reuse the existing 10k native baseline and measure the missing 1k native arms once. [Evidence](results/shared-rollout/connors-rank-index/contracts/summary.json).
+
+### Eight-pilot timing gate
+
+The table below summarizes the existing catalog, before the latest worker/history repairs. Ratio = builder mean / fastest saved native mean; **below 1 is faster**. Each native choice is the faster of the recorded serial and parallel paths. These historical measurements must not be presented as timings of `86380f4d` or as results of the new candidates.
+
+| Competitor mapping | 1k Full / Latest | 10k Full / Latest | Recorded clear wins at both sizes and modes |
+|---|---:|---:|---|
+| `QuanTAlib.Atr` | 0.759 / 0.536 | 0.601 / 0.378 | Yes |
+| `QuanTAlib.Jma` | 0.834 / 0.802 | 0.885 / 0.851 | Yes |
+| `Skender.GetFractal` | 0.555 / 0.506 | 0.555 / 0.486 | Yes |
+| `Skender.GetRollingPivots` | 3.037 / 2.962 | 2.658 / 2.626 | No |
+| `TaLib.Candles.RickshawMan` | 3.388 / 3.410 | 3.704 / 3.689 | No |
+| `TaLib.Functions.Asin` | 3.295 / 2.540 | 3.330 / 1.308 | No |
+| `TaLib.Functions.Sma` | 3.424 / 2.673 | 6.466 / 1.696 | No |
+| `Trady.Candlestick.BullishShortDay` | 0.012 / 0.011 | 0.003 / 0.003 | Yes |
+
+### Implemented and verified follow-ups
+
+| Candidate commit | Change | Focused local verification | New latency qualification |
+|---|---|---|---|
+| `9a66e1bd` | Rolling pivots reuse exact decoded OHLC factors and bounded workers while retaining all 18 outputs. | 28 unit + 24 comparator + 100 GPU cases | Pending |
+| `29c34f23` | Rickshaw workers replay the complete longer prior-range window; oversized windows retain the scalar path. | 18 unit + 6 comparator + 100 GPU cases | Pending |
+| `332edbfb` | Asin uses exact workers from 512 bars; Full transfers chunked owned history. | 22 unit + 9 comparator + 100 GPU cases | Pending |
+| `86380f4d` | Accepted Full SMA workers allocate chunked history and publish it only after validation, fallback replay and cancellation checks succeed. | 55 unit + 4 comparator + 100 GPU cases | Pending |
+
+All listed local cases passed with zero skips. Each candidate passed 71 hosted checks with 7 intentional skips. For the latest SMA commit, [CI](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056679), [competitor correctness](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056541), and [CodeQL](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/38595056698) succeeded. The [local GPU receipt](results/shared-rollout/local-gpu-contracts/receipt.json) records 100 passing cases; 1,317 contract methods remain assigned to hosted CI in the fresh inventory after the direct-native fixture batches. Correctness checks do not establish latency wins.
+
+### Rolling-pivot column storage (2026-10-15)
+
+Identical presence flags and permanently absent levels now share run-owned storage. Every style still exposes all 18 outputs, with exact values and presence, raw-input validation priority, cancellation, and Full/Latest ownership preserved. Storage is never shared between indicator roots or separate runs.
+
+| Style | Distinct arrays before / after | Retained array payload removed at 1k / 10k bars |
+|---|---:|---:|
+| Standard, Fibonacci, Woodie | 18 / 9 | 72,000 / 720,000 B |
+| Camarilla | 18 / 10 | 64,000 / 640,000 B |
+| DeMark | 18 / 5 | 104,000 / 1,040,000 B |
+
+These are exact payload reductions from tested buffer ownership, excluding array headers; they are not total allocation measurements or latency wins. The production net10 build passed with zero warnings/errors; 18 focused unit cases, 12 independent comparator cases, and 100 local GPU cases passed with zero skips. Tests cover all styles, serial/workers, mixed roots, extremes, validation order, rebuild isolation, source mutation and disposal. [Source hashes, storage counts and compressed test results](results/shared-rollout/rolling-pivot-shared-cpu/column-storage/summary.json) retain the evidence. Matching-runtime timing remains pending. The later pivot commit `033e31ab`, including this storage change, passed 71 hosted checks with 7 intentional skips.
+
+Pivot publication now also validates each distinct array only once, at its earliest owning output slot: 9 scans for Standard/Fibonacci/Woodie, 10 for Camarilla and 5 for DeMark, instead of 18. All outputs remain published, and tests for all five styles preserve the first overflow slot and the priority of later invalid raw input. The net10 production build passed with zero warnings/errors; 22 unit, 12 comparator and 100 local GPU cases passed with zero skips. [Source-bound validation evidence](results/shared-rollout/rolling-pivot-shared-cpu/unique-validation/summary.json) records these checks. This removes duplicate validation work without claiming a measured latency gain.
+
+Serial and worker pivot execution now writes each defined level and the shared presence flag once, leaving permanently absent columns at their allocated positive zero. Output-column stores per bar fall from 18 to 8 for Standard/Fibonacci/Woodie, 10 for Camarilla and 4 for DeMark. All 18 public columns retain exact values, including signed zero. Expanded regression coverage checks wide, subnormal and signed-zero inputs with one and eight workers on both sides of worker dispatch. The net10 production build and 22 unit, 12 comparator and 100 GPU cases passed (zero skips). [Source-bound store-reduction evidence](results/shared-rollout/rolling-pivot-shared-cpu/unique-stores/summary.json) retains the checks; latency remains unqualified.
+
+### Percentile-candle rank decisions (2026-10-15)
+
+All eight body/shadow percentile candle indicators now stop exact history comparisons when either rank outcome is certain. Previously only a successful rank decision stopped the scan. A zero percentile now skips history comparisons entirely; warmup, candle direction and window updates remain unchanged. For a full 20-bar window at percentile 1, a current length below every prior length now needs one exact comparison instead of 19. This is a derived work reduction, not a measured latency claim.
+
+The net10 production build passed with zero warnings/errors; 19 focused unit cases, 48 comparator cases and 100 local GPU cases passed with zero skips. Independent reference checks cover all eight patterns, ascending/descending lengths, ties, eviction, extreme decimal percentiles, subnormals, wide values, repeated previews, reset, worker boundaries and both history modes. [Source hashes and compressed test results](results/shared-rollout/percentile-candles/decided-ranks/summary.json) retain the evidence. Latest pivot source `033e31ab` also completed 71 hosted checks with 7 intentional skips; percentile-candle commit `4f65f7f4` subsequently passed 71 hosted checks with 7 intentional skips.
+
+### Rolling-percentile equal endpoints (2026-10-15)
+
+Fractional ranks with equal finite interpolation endpoints now return that value directly, avoiding exact weighted arithmetic on repeated values. Fractional zero remains canonical positive zero; integer ranks retain the selected signed-zero bits and existing tie ordering. Warmup averaging, eviction and reset remain unchanged.
+
+The net10 production build passed with zero warnings/errors; 14 focused unit, 14 comparator and 100 local GPU cases passed with zero skips. Bit-exact regression checks cover constant plateaus and transitions through maximum finite values, subnormals, alternating signed zeros, adjacent values, extreme binary fractions, warmup, eviction, reset and worker replay. [Source hashes and compressed test results](results/shared-rollout/rolling-percentile-cpu/equal-endpoints/summary.json) retain the evidence. This reduces arithmetic work without claiming a measured latency gain. The follow-up analysis fixes passed with commit `20d4302a`: 71 hosted checks succeeded with 7 intentional skips.
+
+### Return-beta moment products (2026-10-15)
+
+In All mode, standard and directional moment windows now share one exact square and cross-product for each nonzero return insertion or eviction. This removes the duplicate pair of products without retaining extra history. Up-only and Down-only selections also skip moment conversion for excluded returns; raw return calculation, publication and window eviction still occur. Standard-only beta retains its existing arithmetic.
+
+The net10 production build passed with zero warnings/errors; 35 focused unit, 27 comparator and 100 local GPU cases passed with zero skips. Independent reference checks cover all selections and output slots, wide/subnormal returns, excluded runs evicting included observations, reset, workers, ownership and input-error priority. Existing zero-per-bar-allocation assertions also pass. Hosted analysis found exact-equality and complexity findings in the preceding rolling-percentile change; interpolation is now a separate helper, with its deliberate exact comparison documented. Pivot validation also has explicit braces. Another 36 percentile/pivot unit cases passed after these analysis fixes. [Source hashes and compressed test results](results/shared-rollout/compact-return/shared-products/summary.json) retain the evidence. Product counts describe reduced work, not measured latency. Commit `20d4302a` passed 71 hosted checks with 7 intentional skips, including Sonar analysis.
+
+### Unchanged percentile and mode windows (2026-10-15)
+
+Rolling percentiles now skip two binary searches and sorted-list removal/insertion when the incoming value equals the outgoing nonzero value. Zero replacements retain the original tie ordering. Rolling mode reuses its prior full-window result when replacement leaves frequencies unchanged, including equivalent signed zeros. Both still rotate history for future eviction; mode retains one additional scalar result per state. This covers five QuanTAlib/Trady mappings without changing their public outputs.
+
+The net10 production build passed with zero warnings/errors; 24 focused unit, 22 comparator and 100 local GPU cases passed with zero skips. Independent references cover periodic and constant windows, later eviction, warmup, reset, wide/subnormal values, signed-zero bits, workers, ownership and input rejection. [Source hashes and compressed test results](results/shared-rollout/order-statistics/unchanged-windows/summary.json) retain the evidence. Commit `84a89e99` passed all 71 hosted checks with 7 intentional skips, including Sonar analysis. Fresh latency qualification remains pending.
+
+### Unchanged paired windows (2026-10-15)
+
+Correlation and full pair-statistics builders reuse the preceding values and presence when a full window replaces a pair with an equal pair. Certified integer columns also skip unchanged moment updates. Wide fallback still rotates its state for later eviction. Each worker computes its first published row independently, so reuse never reads another worker's output. No additional retained history is introduced; captured-input validation, cancellation and output-error ordering remain intact.
+
+The net10 production build passed with zero warnings/errors; 20 focused unit, 13 comparator and 100 local GPU cases passed with zero skips. Bit-exact checks cover periodic windows, later eviction, both flat-correlation settings, worker seeds, wide/subnormal and signed-zero inputs, every output, ownership and input-error priority. [Source hashes and compressed test results](results/shared-rollout/pair-statistics/unchanged-windows/summary.json) retain the evidence. This reduces computation without claiming a latency win. Commit `08a6edf9` passed all 71 hosted checks with 7 intentional skips; fresh latency qualification remains pending.
+
+### Compact ALMA weight products (2026-10-15)
+
+Modern Arnaud Legoux windows retain normalized mantissa/exponent factors for Gaussian weights instead of general dyadic arithmetic states. Each weighted term now forms the exact product of two at-most-53-bit mantissas directly in Int128, avoiding general multiplication dispatch and normalization. Exact accumulation and final rounding, weight generation, window ordering, startup, reset and the framework fallback remain unchanged.
+
+The net10 production build passed with zero warnings/errors. All 120 selected unit cases passed, including 18 directly relevant shared ALMA cases; the remaining cases cover legacy ALMA/composition paths. All 16 ALMA comparator cases and 100 local GPU cases passed with zero skips. Independent references cover wide cancellation, subnormals, signed zero, underflowed weights, extreme parameters, both startup modes, reset and worker ownership. Existing zero-per-bar-allocation assertions pass. [Source hashes and compressed test results](results/shared-rollout/alma/compact-products/summary.json) retain the evidence. This reduces stored representation and arithmetic work without claiming measured latency. The combined production changes passed all 71 hosted checks with 7 intentional skips at `d90d37ad`.
+
+### Compact sinc coefficients and history (2026-10-15)
+
+Modern WindowedSinc retains normalized mantissa/exponent factors for both shared coefficients and per-state price history instead of general dyadic arithmetic states. Each weighted term forms an exact Int128 product of two at-most-53-bit mantissas, including negative sinc coefficients. Exact accumulation and final rounding, coefficient generation, oldest-first ordering, newest-price startup extension, lazy history growth and reset remain unchanged.
+
+The net10 production build passed with zero warnings/errors; 15 focused unit, 7 comparator and 100 local GPU cases passed with zero skips. Bit-exact references cover all five window functions, odd/even taps, wide cancellation, subnormals, signed zero, full-width mantissas, startup and reset. Worker boundaries, ownership, overflow/input-error priority, cancellation and unsupported GPU rejection remain covered. Existing zero-per-bar-allocation assertions pass. [Source hashes and compressed test results](results/shared-rollout/windowed-sinc/compact-products/summary.json) retain the evidence. This reduces representation and computation without claiming measured latency. The combined production changes passed all 71 hosted checks with 7 intentional skips at `d90d37ad`.
+
+### Compact exact shared weighted kernels (2026-10-15)
+
+Gaussian, sine and non-affine normalized-convolution windows now use the existing exact Int128 dyadic accumulator on modern runtimes. Decoded coefficient factors replace the larger coefficient-with-limit records, and each weighted term uses an exact product of at most 106 mantissa bits. Ordinary floating-point products no longer require BigInteger merely because they exceed 64 bits. Wider exponent spans still use the exact fallback. Prefix normalization, zero-mass averaging, cached coefficients, lazy history growth, wrap order and reset remain unchanged; the framework path retains its existing arithmetic.
+
+The net10 production build passed with zero warnings/errors; 25 focused unit, 32 comparator and 100 local GPU cases passed with zero skips. New warmed period-20 tests assert zero per-bar managed allocations for Gaussian, sine and a non-affine floating-point convolution. Independent references cover signed/zero-mass kernels, extreme and subnormal values, partial resets, ring growth, worker boundaries, mixed roots, ownership, overflow/input-error priority and cancellation. [Source hashes and compressed test results](results/shared-rollout/weighted-kernels/compact-products/summary.json) retain the evidence. This reduces representation and computation without claiming measured latency. The combined production changes passed all 71 hosted checks with 7 intentional skips at `d90d37ad`.
+
+### Ordered directional true-range endpoints (2026-10-15)
+
+Selected TA-style directional indicators now choose the extended endpoints of ordered high/low candles using exact comparisons, then compute one exact difference for true range. This replaces three differences and two exact maximum comparisons on that path. Inverted candles retain the original formula. One additional previous-close scalar preserves endpoint selection without decoding retained factors; DX's separate current-close range update retains its native recurrence.
+
+The net10 production build passed with zero warnings/errors; 14 focused unit, 23 comparator and 100 local GPU cases passed with zero skips. Independent references cover all selected measures, periods and suppression settings, gaps above/below the range, flat and inverted candles, current-close DX updates, signed zero, subnormals, extended unpublished stages and reset. Builder/native-prefix setup checks cover worker thresholds and both history modes; raw input validation remains covered. [Source hashes and compressed test results](results/shared-rollout/prior-directional/ordered-range/summary.json) retain the evidence. This reduces exact arithmetic work without claiming measured latency. The combined production changes passed all 71 hosted checks with 7 intentional skips at `d90d37ad`.
+
+### Evidence still required
+
+- The four pilot repairs, KAMA runtime updates, Tillson candidate and ALMA candidate reuse compatible saved native baselines and measure builder paths only. The other queued stages establish missing compatible baselines once. Every stage preserves its candidate binaries and source hashes; runtime and hardware checks govern saved-baseline reuse under the [baseline reuse policy](results/shared-rollout/baseline-reuse-policy.json).
+- The completed pivot worker attempt is **diagnostic only**: its monitor omitted reusable MSBuild nodes and standalone compiler activity. Its latency ratios are excluded from the table and from qualification. Interrupted attempts are also excluded. The corrected monitor includes compiler processes and descendants and distinguishes the benchmark's own process tree from competing work.
+- The remaining builder-only evidence gaps overlap as follows. Matching runtime alone does not establish a best-path comparison.
+
+| Builder-only cohort | Mappings | Evidence still needed |
+|---|---:|---|
+| Runtime mismatch and no saved native serial/parallel method pair | 100 | Matching-runtime builder evidence and compatible native baselines |
+| Runtime mismatch with both native methods retained | 2 (KAMA) | Matching-runtime builder evidence, with fixture and materialization compatibility checked |
+| No recorded runtime mismatch, but no saved native method pair | 17 | Compatible native baselines and resolution of fixture/output-contract differences |
+
+The 102 runtime-mismatched mappings account for 204 size rows. The saved-artifact audit inspected 1,651 repository JSON artifacts (968 benchmark reports) and found no parallel rows keyed to the other 117 mappings; unkeyed reports retain their separate comparison families. A bounded external follow-up read 997 named BDN reports from SI temporary folders, excluded two unreadable reports, and likewise found no keyed matches. These are file counts, not unique benchmark runs; [audit scope and invalidation rules](results/shared-rollout/baseline-reuse-policy.json) retain the limits of this search. Establish a missing baseline only when required for qualification, save it for reuse, and do not rerun compatible saved competitors. Some gaps also require benchmark implementation: older builder-only harnesses and normalized `LibraryPairBenchmarks.Competitor` results do not provide direct native serial/parallel measurements. The following fixtures now expose both eager native arms and both builder histories at 1,000 and 10,000 bars. Their first direct-native timings remain pending, so qualified coverage is unchanged.
+
+| Direct-native fixture | Mappings | Passing contract cases | Benchmark cases | Evidence |
+| --- | ---: | ---: | ---: | --- |
+| Skender RSI / ADX | 2 | 19 | 16 | [Strength](results/shared-rollout/skender-strength/direct-native-contracts/summary.json) |
+| Trady strength family | 5 | 46 | 40 | [Trady strength](results/shared-rollout/trady-strength/direct-native-contracts/summary.json) |
+| Skender MACD / PVO / PMO / TSI / TRIX | 5 | 81 | 40 | [EMA family](results/shared-rollout/skender-ema-family/direct-native-contracts/summary.json) |
+| Skender Alligator / Gator / Elder Ray | 3 | 43 | 24 | [Smoothing](results/shared-rollout/skender-smoothing/direct-native-contracts/summary.json) |
+| Skender Awesome / BOP / CCI | 3 | 49 | 24 | [Finite windows](results/shared-rollout/skender-finite-window/direct-native-contracts/summary.json) |
+| Skender ATR Stop / SuperTrend / Chandelier / Keltner / Starc | 5 | 56 | 40 | [ATR family](results/shared-rollout/skender-atr-family/direct-native-contracts/summary.json) |
+| Skender Stochastic / Stochastic RSI / SMI | 3 | 73 | 24 | [Stochastic](results/shared-rollout/skender-stochastic/direct-native-contracts/summary.json) |
+| Skender ROC / ROC with bands | 2 | 35 | 16 | [ROC](results/shared-rollout/skender-roc/direct-native-contracts/summary.json) |
+| Skender Doji / Marubozu / Heikin-Ashi | 3 | 56 | 24 | [Candles](results/shared-rollout/skender-candle/direct-native-contracts/summary.json) |
+| Skender Beta / Correlation / EPMA | 3 | 43 | 24 | [Statistics](results/shared-rollout/skender-statistics/direct-native-contracts/summary.json) |
+| Skender MA envelopes / SMA analysis / PRS / deviation channels | 4 | 54 | 32 | [Diagnostics](results/shared-rollout/skender-diagnostics/direct-native-contracts/summary.json) |
+| Trady EMA / WMA / SMA oscillator / EMA oscillator | 4 | 65 | 32 | [Averages](results/shared-rollout/trady-average/direct-native-contracts/summary.json) |
+| Trady MACD / MACD histogram | 2 | 33 | 16 | [MACD](results/shared-rollout/trady-macd/direct-native-contracts/summary.json) |
+| Trady directional movement / DI / DX / ADX / ADXR | 7 | 99 | 56 | [Directional](results/shared-rollout/trady-native-directional/direct-native-contracts/summary.json) |
+| Trady raw / Fast / Slow / Full stochastic and differences | 7 | 127 | 56 | [Trady stochastic](results/shared-rollout/trady-native-stochastic/direct-native-contracts/summary.json) |
+| Trady stochastic momentum / smoothed momentum / stochastic RSI | 3 | 52 | 24 | [Momentum](results/shared-rollout/trady-stochastic-momentum/direct-native-contracts/summary.json) |
+| Trady Chandelier / Keltner channels | 2 | 25 | 16 | [ATR channels](results/shared-rollout/trady-atr-channel/direct-native-contracts/summary.json) |
+| Trady CCI / KAMA | 2 | 31 | 16 | [CCI / adaptive](results/shared-rollout/trady-cci-adaptive/direct-native-contracts/summary.json) |
+| Trady positive / negative volume index / ADL | 3 | 69 | 24 | [Volume](results/shared-rollout/trady-native-volume/direct-native-contracts/summary.json) |
+| Trady Dark Cloud Cover / Dragonify Doji / rising and falling three methods | 4 | 65 across two runs | 32 | [Trady candles](results/shared-rollout/trady-native-candle/direct-native-contracts/summary.json) |
+| TA-Lib morning / evening stars, doji stars and Abandoned Baby | 5 | 61 | 40 | [Star reversals](results/shared-rollout/ta-star-reversal/direct-native-contracts/summary.json) |
+| TA-Lib exhaustion / crows and soldiers / penetration patterns | 8 | 153 | 64 | [Reversal / continuation](results/shared-rollout/ta-reversal-continuation/direct-native-contracts/summary.json) |
+| TA-Lib multi-bar / Hikkake / gap patterns | 10 | 111 | 80 | [Multi-bar](results/shared-rollout/ta-multibar-native/direct-native-contracts/summary.json) |
+| TA-Lib existing triple-body patterns | 4 | 32 | 32 | [Triple body](results/shared-rollout/ta-triple-body/direct-native-contracts/summary.json) |
+| TA-Lib AvgDev / Accbands | 2 | 27 | 16 | [Windows](results/shared-rollout/ta-window-native/direct-native-contracts/summary.json) |
+| TA-Lib MACD / fixed MACD / extended MACD | 3 | 46 | 24 | [MACD](results/shared-rollout/ta-macd-native/direct-native-contracts/summary.json) |
+| TA-Lib Stoch / StochF / StochRsi | 3 | 40 | 24 | [Stochastic](results/shared-rollout/ta-stochastic-native/direct-native-contracts/summary.json) |
+| TA-Lib MA / APO / PPO | 3 | 40 | 24 | [Averages](results/shared-rollout/ta-average-native/direct-native-contracts/summary.json) |
+| TA-Lib Trix / KAMA / Mavp | 3 | 40 | 24 | [Adaptive / rate](results/shared-rollout/ta-adaptive-rate-native/direct-native-contracts/summary.json) |
+| TA-Lib Hilbert phase / sine / trendline / trend mode | 4 | 54 | 32 | [Hilbert](results/shared-rollout/ta-hilbert-native/direct-native-contracts/summary.json) |
+
+The two remaining KAMA runtime gaps reuse their saved .NET 10.0.12 native serial/parallel measurements. Ten existing fixture tests passed; fixture generation, native implementations and package references match baseline source 93cb7084. Only eight builder cases are queued on the matching runtime. [Compatibility evidence](results/shared-rollout/kama-baseline-reuse/contracts/summary.json) preserves baseline hashes and cross-run limitations.
+
+All 15 snapshot mappings retain their standalone output contracts; these comparisons do not establish BuildAsync performance. Fourteen mappings have eager native serial/parallel arms. ZigZag has its original eager serial arm because independent partitioning has not been established for its unbounded future retraces. All listed contract cases and the associated 100-case local GPU checks passed; first timings remain pending.
+
+| Snapshot fixture | Mappings | Passing contract cases | Timing cases | Contract retained |
+| --- | ---: | ---: | ---: | --- |
+| [DPO / Fractal Chaos Bands](results/shared-rollout/skender-retrospective-native/direct-native-contracts/summary.json) | 2 | 43 | 12 | DPO uses 11 future bars; FCB replays confirmed bands. |
+| [Hurst](results/shared-rollout/skender-hurst-native/direct-native-contracts/summary.json) | 1 | 19 | 6 | Twenty preceding closes; both exponents retained. |
+| [Skender Ichimoku](results/shared-rollout/skender-ichimoku-native/direct-native-contracts/summary.json) | 1 | 33 | 6 | 77 preceding and 26 future bars; five shifted fields. |
+| [Trady Ichimoku](results/shared-rollout/trady-ichimoku-native/direct-native-contracts/summary.json) | 1 | 30 | 6 | Explicit native coordinates retain Count + 51 rows. |
+| [Parabolic SAR variants](results/shared-rollout/parabolic-native/direct-native-contracts/summary.json) | 4 | 98 | 24 | TA packed doubles, Skender reversals and Trady sequential cache behavior. |
+| [Volatility Stop](results/shared-rollout/skender-volatility-stop-native/direct-native-contracts/summary.json) | 1 | 21 | 6 | Prefix replay falls back to full input until startup suppression is final. |
+| [Calendar / trend pivots](results/shared-rollout/skender-pivot-native/direct-native-contracts/summary.json) | 2 | 61 | 12 | Calendar prefixes; 22 future bars for retrospective trend lines. |
+| [Renko / ATR Renko / ZigZag](results/shared-rollout/skender-chart-native/direct-native-contracts/summary.json) | 3 | 61 | 16 | ATR size computed inside timing; ZigZag uses the original serial API. |
+
+The table includes 113 newly implemented mappings and four mappings from the existing triple-body fixture. Its 32 tests passed using current binaries; the existing 100-case GPU receipt was reverified. The saved serial-only triple-body comparison uses different inputs, so this existing four-arm fixture is queued for its first compatible native baseline.
+
+The packed TA harness retains native integer or double columns, including integer TrendMode outputs. All 247 affected contract cases passed, plus 100 GPU cases. Seven queued packed fixtures use the latest common source state before first timing.
+
+The packed TA harness now supports prepared native inputs and full owner-output checks for Trix/KAMA. All 193 affected cases across five fixture families passed, plus 100 GPU cases. All five queued candidates use this verified common source state before first timing.
+
+The TA window and MACD fixtures share packed output allocation, native alignment checks and worker joining. All 73 affected contract cases passed, plus 100 GPU cases. Their preserved timing candidates use this shared source state before their first measurements.
+
+The three TA candle fixtures share native packing, alignment and worker overlap mechanics. All 325 affected cases passed, including shifted Hikkake formation/confirmation examples across worker boundaries. The three queued candidates use the latest verified shared source state before their first timing runs. The linked multi-bar evidence contains the updated source hashes and combined test record.
+
+Trady candle evidence covers 64 passing follow-up cases plus the completed 10,000-bar Falling Three Methods case retained from an intentionally stopped run. That earlier run is not reported as passing. Its completed case also verified repeated output ownership; the follow-up retains those repeat checks through 1,000 bars and checks both native paths against independent references at every size. The pinned native LongDay implementation rebuilds full-series percentiles inside individual predicate evaluations; diagnostic test durations are not performance measurements. [Coverage verifier and source evidence](results/shared-rollout/trady-native-candle/direct-native-contracts/verify-case-coverage.py) retain this distinction.
+
+The seven Skender fixture families share partition setup, eager native result joining and date checks. All 356 affected contract cases passed after this consolidation ([evidence](results/shared-rollout/skender-native-support/summary.json)); first native timings remain pending.
+
+The evidence retains source hashes, native API/materialization choices and independent arithmetic/output checks. Each batch refreshes the required 100-case local GPU receipt. All 71 hosted checks passed for combined strength/EMA-family commit 1006ef85, with 7 intentional skips; later fixture batches await hosted verification.
+
+- Snapshot-only measurements retain their separate API contract; they do not establish builder or GPU performance. Auto remains CPU; RequiredGPU executes a supported device path or rejects it.
+
+The sections below retain the historical implementation and measurement record. Their dated coverage totals are milestones, not the current aggregate.
 
 ## Implemented comparisons
 
@@ -1277,6 +1477,15 @@ Full trajectories checked 64,504 values. Eight timing cases passed; the complete
 archive verifies 1,140 cases across 285 pairs. Explicit-alpha/compensated single
 EMA and QEMA use the separate convention described below.
 
+The compensated CPU stages now reuse the exact dyadic blend helper. Certified
+subtractions use fused multiply-add; other differences, compensation products
+and final combinations retain exact arithmetic and their original rounding.
+The net10.0 build, 12 focused unit tests and 32 comparison/setup tests passed.
+DEMA/TEMA state updates allocate zero managed bytes over 4,000 ordinary inputs
+after JIT warmup and state reset, including seeding/compensation startup. Existing
+seeded variants are covered by the same regression tests. These are state-level
+allocation checks; updated builder latency is pending consolidated timing.
+
 ## Mass-normalized single and quadruple EMA
 
 `MassNormalizedEma` covers Quan's compensated integer-period and explicit-alpha
@@ -1302,6 +1511,15 @@ and output/startup/stage corruption. Complete trajectories checked 122,384 value
 The outstanding EMA configuration list is now empty. Its unchanged SMA-seeded
 benchmark retains valid archived timings; four new QEMA timing cases passed.
 The complete archive verifies 1,144 cases across 286 pairs.
+
+The shared mass-normalized stage now returns the exact input on its first
+update and uses certified fused blends after compensation has ended. Zero blends
+retain the exact path to preserve negative underflow. The startup mass recurrence
+and cutoff-transition update retain their existing arithmetic. The net10.0 build,
+six focused state tests and 16 comparison tests passed. Single and quadruple EMA
+steady-state updates allocate zero managed bytes over 4,000 ordinary inputs after
+warmup in the regression dataset. Startup beyond the first update can still
+allocate; updated builder latency remains pending consolidated timing.
 
 ## Adjusted skewness and excess kurtosis
 
@@ -1656,6 +1874,13 @@ passed. The full timing archive verifies 1,300 arms across 325 pairs with no
 unmeasured pair. Final complete correctness union and current-head gates remain
 required before readiness.
 
+
+T3 now caches the four exact cubic coefficients and their common denominator
+once per state, removing repeated fixed-factor products from each update.
+All three seed modes and classical-average composition share this path. The
+net10.0 build, three extended-value/reset tests and 25 T3/classical-average
+comparison tests passed. Updated allocation and latency measurements remain
+pending; smoothing stages still use their existing exact arithmetic.
 
 ## Triple EMA rate and optional signal
 
@@ -2487,6 +2712,98 @@ order-statistic/rational and staged-native references cover odd/even periods,
 negative/zero medians, threshold neighbors, extreme prices, huge periods, fresh
 calls, prefixes and output/threshold mutations. Archive: 1,548 arms /387 pairs.
 
+## Seeded ATR shared allocation reduction (timing pending)
+
+`SeededAtrWindow` now reuses the existing compact exact true-range helper and a
+cached smoothing coefficient instead of constructing padded minimum-unit integers
+for every candle. Seed rounding, extended unpublished ranges, inverted candles,
+reset and presence are unchanged. This shared window also serves ATR bands,
+trailing/chandelier/volatility stops, directional measures and ATR Renko.
+
+Five focused tests passed, including zero managed allocation for 4,000 ordinary
+streaming updates after warmup. All 118 selected comparison tests passed across
+the shared consumers. This is a state-allocation result, not a measured builder
+latency win or direct competitor qualification. Timing remains pending. The new
+`SharedSeededAtrBenchmarks` fixture covers Skender ATR, TA-Lib ATR/NATR and Trady
+ATR at 1k/10k, with both builder history modes and native serial/parallel results.
+Native workers replay full prefixes; Trady uses its public tuple path. Four setup
+tests passed at 64/513/1k/10k, checking exact values and every presence flag against
+independent native and builder references. All 53 inventory checks passed.
+
+
+## Triangular CPU and GPU execution (timing pending)
+
+`TriangularWindowAverage` now reuses the pilot's exact-sum certificate for its
+unrounded box-sum convolution. Certified modern-.NET CPU states use double sums; rejection
+promotes every retained sum before including the new value. A concrete typed
+kernel uses P-1 replay bars in the shared bounded parallel loop. Reset, startup
+zeros, signed-zero canonicalization and extreme-value fallback remain intact.
+
+Required GPU uses mode 2 of the existing cached weighted-average kernel, through
+AiDotNet.Tensors 0.134.4. Each 64-output tile seeds the triangular total and two
+box sums, then updates them without intermediate series or intermediate rounding.
+The existing weighted-mass certificate limits supported periods to 1..65535 and
+rejects uncertified inputs after validating all raw bars. Auto remains CPU.
+
+Validation passed 36 focused CPU/GPU tests (no skips), including WMA mode-cache
+regressions, 10 independent comparison/setup tests and 52 inventory checks.
+`SharedTriangularBenchmarks` includes both history modes, required-device GPU and
+native serial/eight-worker paths for QuanTAlib.Trima and TaLib.Functions.Trima at
+1k/10k. Timing qualification is pending a quiet machine; concurrent test processes
+in other repositories prevented a reliable campaign. Neither API has been added
+to the 176 qualified count, and no new latency/allocation win is claimed yet.
+
+## Selected TA directional builder qualification
+
+`PriorSeededDirectionalMeasure` skips unused movement/range streams and allocates
+rating history only for ADXR. It retains decoded price factors and uses the existing
+compact exact accumulator and `RocBankValue` for rounded stages. Exact dominance
+is decided before rounding; seed sums round at their original boundary. Unpublished
+DI values retain an extended upper exponent so DX/ADX can remain finite even when
+publishing DI would overflow. Suppression, presence and DX's extra range update
+remain unchanged. Nine focused unit tests and 23 independent comparison/setup
+tests passed, including reset, subnormals, source composition and extreme DI ratios.
+
+`SharedTaDirectionalBenchmarks` compares all seven APIs at 1k/10k against direct
+packed native arrays. Parallel native workers replay complete prefixes because
+bounded overlap changes recursive results. The original 56 cases and native rows
+remain in `ta-directional-cpu`; `scaled-directional` holds the 28 updated builder
+cases. Every updated case clearly improved, with 96.0-99.8% lower allocation.
+At 10k, LatestOnly +DM fell from 11.55 ms / 15.95 MiB to 2.20 ms / 159.74 KiB;
+ADX fell from 50.16 ms / 72.74 MiB to 7.68 ms / 169.64 KiB. Native serial remains
+faster: +DM 87.21 us / 78.04 KiB; ADX 138.09 us / 77.89 KiB. All builder arms still
+lose to native. The catalog selects the new builders and retains original natives.
+
+Directional profiling can be replayed with the benchmark executable's
+`--profile-directional Adx 10000 4000` arguments. It validates the existing
+benchmark setup, warms 100 builds, then repeatedly builds and disposes LatestOnly
+results. An EventPipe sampled-thread trace of commit `c0f54212` attributed 97.8%
+of time beneath `ValuesBarExecution.Execute` to `Node.Append`, including 62.7%
+in directional `State.Update` and 14.6% in `Direction`. Inlined arithmetic is
+attributed to callers; these percentages do not establish dispatch-only cost.
+The trace is diagnostic, not benchmark qualification. A subsequent quotient/remainder
+rewrite passed 17 focused unit tests and 23 comparison tests, but its 14 timing
+cases showed no win during concurrent work in another repository. That production
+experiment was reverted; the qualified results above remain unchanged.
+
+## Shared SMA builder qualification
+
+`SharedSmaBenchmarks` compares Full/LatestOnly with native serial and parallel
+QuanTAlib, Skender tuple, TA-Lib packed-array, and Trady tuple paths at 1k/10k.
+An integer-grid oracle checks every published value, startup presence, packed
+ranges, and worker replay. No native result mapping is timed. The 32-case
+qualification and original native rows are preserved in `sma-cpu`.
+
+The existing fused SMA dispatch now starts at 8,192 rather than 65,536 bars.
+Its worker caps, certificates, fallback replay and arithmetic are unchanged.
+All eight affected 10k builder cases clearly improved: Full 75-88 us versus
+109-113 us before; LatestOnly 19-20 us versus about 52 us. LatestOnly allocation
+increased from 81.10 to 81.68 KiB. Both modes beat QuanTAlib, Skender and Trady
+at both measured sizes; TA-Lib remains faster and smaller (10k parallel 11.56 us,
+78.45 KiB). The follow-up builder rows are in `sma-threshold`; 1k and native rows
+remain selected from the original campaign. Validation passed 107 execution
+tests, four comparison tests spanning seven sizes, and 50 inventory checks.
+
 ## Exact Fibonacci and oldest-first sinc kernels
 
 `FibonacciWeightedSnapshot` normalizes exact integer Fibonacci weights over the
@@ -2495,6 +2812,27 @@ native floating overflow. `WindowedSincSnapshot` implements Afirma's published
 response for all five windows, extending startup with the newest price. Its
 unused cubic calculation is omitted. Undefined kernels are rejected explicitly;
 complete weighted ratios round once. Kernel storage scales with period/taps.
+
+`FibonacciWeightedAverage` adds the builder route with two exact running sums,
+using F(k-2)=F(k)-F(k-1) and explicit removal of the expired term. The normalized
+prefix mass is retained after warmup. Bounded CPU workers replay period-1 bars;
+Required GPU rejects this indicator. The independent doubling-identity reference,
+long-period eviction/reset, extreme binary64 values, and worker boundaries are
+covered. In the eight-arm `fibonacci-cpu` campaign, both builder modes beat native
+serial and parallel at 1k/10k. At 10k, Full/LatestOnly measured 201.38/186.27 us and
+557.99/88.23 KiB versus native parallel 295.31 us and 2583.04 KiB. The LatestOnly
+99.9% interval was wide (144.74-227.80 us), still below native's 289.85-300.78 us.
+
+`WindowedSinc` adds the shared CPU builder path for Afirma. The snapshot and
+builder reuse coefficient generation; decoded products and the exact denominator
+are shared across workers. Private price rings retain oldest-first order and
+repeat the newest value through missing startup taps. GPU remains unsupported.
+Fourteen unit/registration tests, 15 independent comparison/setup tests, and eight
+timing cases passed. At 10k, Full/LatestOnly measured 1449.94/1382.38 us with
+4803.99/4334.23 KiB, versus native parallel 525.49 us and 481.80 KiB. Both builder
+modes beat native serial latency but lose to parallel and allocate substantially
+more. This is a qualified rollout path, not a performance win; wide exact-product
+accumulation remains an optimization target.
 
 Eight tests, 95,728 trajectory comparisons and eight timing arms passed.
 The archive verifier passed 1,556 arms across all 389 paired families.
@@ -2561,3 +2899,1082 @@ Momentum Index completed last. Builds and correctness workers were stopped
 before the timing run. Results are machine-specific observations, with the
 BenchmarkDotNet environment, sample errors and allocation measurements retained
 in the archive.
+
+
+## Trady directional allocation reduction (timing pending)
+
+`WindowDirectionalMeasure` now retains compact rounded movement stages and reuses
+the existing `JurikDyadic` exact arithmetic for weighted recurrence and DI/DX
+ratios. Raw movements skip ATR state; single-direction outputs skip the unused
+smoothing stream; rating history exists only for a positive rating lag.
+Extended unpublished stages, strict exact dominance, early ADX seeding and
+missing-value propagation retain their original rounding/presence contracts.
+
+The net10.0 production build, 17 focused unit tests and 47 directional comparison
+tests passed. All seven measures allocate zero managed bytes across 4,000 ordinary
+streaming updates after 1,000 warmups in the regression dataset. Independent
+reference checks cover reset, extremes/subnormals, exact ties, periods 1/3/20 and
+int.MaxValue, and lags 0/2. This is a state-allocation result, not an end-to-end
+builder latency claim. Consolidated timing remains deferred; qualification stays
+at 176/401 APIs.
+
+
+## Certified log-return fixed-width execution (timing pending)
+
+`CertifiedLogReturn` now evaluates its directed 96-bit atanh interval with fixed
+integer limbs on modern runtimes. Exact mantissa normalization, directed products,
+and a geometric tail bound preserve the certificate: both endpoints must round
+to the same binary64 value. Unresolved intervals use the existing adaptive
+arbitrary-precision path; .NET Framework retains that path throughout.
+
+The net10.0 production build, six focused log-return tests and ten logarithmic
+volatility comparison tests passed. Checks cover adjacent prices, signed inputs,
+subnormals, exponent extremes, reduction boundaries and explicit fallback. The
+ordinary-return regression dataset allocates zero managed bytes over 4,000 calls
+after 1,000 warmups. This does not include rolling moments or builder output
+storage, and no latency claim or qualification increase is made pending timing.
+
+
+## Compact logarithmic-volatility rolling moments (timing pending)
+
+`WindowLogVolatility` reuses the existing exact dyadic representation for rolling
+sums and squares. Ordinary updates fit fixed-width integers; larger exponent
+spans and products retain arbitrary-precision fallback. Realized volatility skips
+the unused running sum. Publication retains exact annualization and the existing
+certified square root, and shared root bit-length checks no longer allocate a
+byte array on modern runtimes.
+
+The net10.0 production build, 22 focused unit tests and ten volatility comparison
+tests passed. Ordinary rolling-moment add/remove operations allocate zero managed
+bytes over 4,000 updates after warmup in the regression dataset. This excludes
+square-root publication, which can still allocate. Exact-reference tests cover
+wide cancellation, subnormal roots, copied state, missing returns, reset and
+irreversible realized-volatility poisoning. Timing qualification remains unchanged.
+
+The shared integer-root helper now uses fixed-width Newton iterations when its
+input fits 128 bits, retaining arbitrary precision for larger values. This
+follow-up passed 91 focused unit tests and ten volatility comparison tests. Its
+iterations allocate no scratch objects over 4,000 warmed-up calls; conversion
+and final midpoint arithmetic can still allocate. Latency remains unmeasured.
+
+
+## Allocation-only observations after shared CPU updates
+
+`--alloc-shared <operation> 10000 5` reuses the existing independently validated
+benchmark methods, prebuilt inputs and native serial/parallel implementations.
+It warms each arm ten times, counts managed allocations across all process threads,
+and retains each result through the sample before disposing it outside the sample.
+No timing is collected. Seven probe tests passed, including worker allocation
+accounting and result disposal; all five 10k fixture setups verified their outputs.
+
+Median KiB per call (five samples; EMA commit `24fc7e30`, volatility commit `e45827ba`):
+
+| Operation | Builder Full | Builder LatestOnly | Native serial | Native parallel |
+|---|---:|---:|---:|---:|
+| Quan DEMA | 550.96 | 81.21 | 469.06 | 1838.43 |
+| Quan TEMA | 551.01 | 81.26 | 469.08 | 1838.55 |
+| Quan QEMA | 850.45 | 380.70 | 2033.41 | 8884.43 |
+| Quan Historical | 630.22 | 160.47 | 4200.43 | 4211.11 |
+| Quan Realized | 630.22 | 160.47 | 469.39 | 1840.87 |
+
+Full retains additional OHLCV history; realized volatility Full still exceeds
+native serial allocation. LatestOnly now allocates less than both native arms
+for all five operations. The original samples, including observed variation,
+remain in `results/shared-rollout/allocation-probes/recent-cpu.json`; the updated
+volatility samples are in `results/shared-rollout/allocation-probes/root-publication.json`.
+The compact root publication path passed 15 focused unit tests and ten volatility
+comparison tests, including rounding ties, subnormals, overflow and wide fallback.
+These allocation-only observations do not replace BenchmarkDotNet timing evidence
+or raise the 176/401 direct qualification count. The targeted queued volatility
+campaign selects `*SharedLogVolatilityBenchmarks.BuilderLatestOnly(*Count: 10000)`
+and `*SharedLogVolatilityBenchmarks.Native*(*Count: 10000)` (six cases), avoiding
+unnecessary reruns of unrelated sizes and methods.
+
+
+## Sum-seeded directional allocation follow-up
+
+The Skender-compatible sum-seeded directional engine now uses the existing compact exact dyadic arithmetic for movement selection, smoothed sums, DI/DX and ADX. Extended unpublished values, once-rounded recurrences, missed seeds and period-delayed rating presence are preserved. Five focused unit tests and ten independent comparison tests passed, including bitwise reference/reset checks over ordinary, extreme and mixed-exponent inputs. After warmup, 4,000 ordinary state updates allocate zero managed bytes. Production and benchmark builds passed. This is state-level allocation evidence, not an end-to-end timing win; the timing qualification count remains 176/401.
+
+
+## Return-beta compact rolling moments
+
+Return beta now reuses compact exact products and rolling sums, with arbitrary-precision fallback for wide exponent spans. Both scalar and full-statistics APIs preserve bitwise reference outputs, selection/presence rules, reset and extended unpublished returns. Production/benchmark builds, six focused unit tests, 21 comparison/probe tests and 53 inventory checks passed. Ordinary warmed-up rolling updates allocate zero bytes over 4,000 updates; this excludes beta publication.
+
+An allocation-only probe of the existing 10k beta benchmark fixture measured median Full 7,452,568 bytes, LatestOnly 6,971,544 bytes, TA-Lib serial 79,896 bytes and TA-Lib parallel 80,280 bytes (five samples per arm). LatestOnly is below the archived 16,408,312-byte measurement but remains far above native allocation; publication still falls back to arbitrary precision. Original samples are in `results/shared-rollout/allocation-probes/beta-moments.json`. No latency qualification or win is claimed; 176/401 APIs remain timing-qualified.
+
+
+## Compact ratio publication follow-up
+
+The existing compact dyadic ratio helper now computes rounding-grid quotient bits with bounded remainder arithmetic when shifting the numerator would exceed 128 bits. This avoids arbitrary-precision scratch allocations while preserving exact ties, signed underflow and overflow. Production/benchmark builds, 26 focused unit tests and 60 beta/directional comparison tests passed. Complete scalar beta updates, including publication, allocate zero bytes over 4,000 warmed-up updates on the benchmark price sequence.
+
+Five allocation-only samples at 10k bars were identical: Full 647,080 bytes, LatestOnly 166,056 bytes, TA-Lib serial 79,896 bytes and parallel 80,280 bytes. LatestOnly dropped from the preceding 6,971,544-byte median to 162.16 KiB, but still loses allocation to native serial (78.02 KiB). Wide operands retain the exact fallback. Raw evidence: `results/shared-rollout/allocation-probes/beta-publication.json`. Latency remains unmeasured after this change; qualification stays 176/401.
+
+
+## Seeded true-strength allocation follow-up
+
+The Skender-compatible true-strength engine now retains signed/absolute changes, both EMA stages and the signal in existing compact exact arithmetic, with wide-value fallback. Once-rounded extended values, the shortened smoothing-one startup, absent signal-one output, poisoned missing signals and reset behavior remain bitwise equivalent to the independent rational reference. Production/benchmark builds and all 18 focused unit/comparison tests passed. On ordinary prices, 4,000 state updates including startup after reset allocate zero managed bytes. This is state-level allocation evidence; no new end-to-end timing or competitor win is claimed, and qualification remains 176/401.
+
+
+## Seeded price-momentum allocation follow-up
+
+The Skender-compatible PMO engine now uses compact exact arithmetic for percent returns, both smoothing stages, the tenfold scaling boundary and the signal. Once-rounded extended values, smoothing-one overshoot, zero-prior-price poisoning, output presence and reset remain bitwise equivalent to the independent rational reference. Production/benchmark builds, seven focused unit tests and nine seeded-momentum comparison tests passed. On ordinary prices, 4,000 state updates including startup after reset allocate zero managed bytes. End-to-end latency and allocation qualification remain pending; this does not change the 176/401 timing-qualified count.
+
+
+## Shared strength publication allocation follow-up
+
+Nullable and Wilder strength/momentum formulas now reuse compact exact ratios for quotient and percentage publication. Common exponents cancel before publication, preserving unpublished means below the binary64 floor and retaining wide-value fallback. Production/benchmark builds, three focused arithmetic tests (including 1,000 rational-reference cases) and 30 nullable/Wilder comparison tests passed. Ordinary quotient, unsigned percentage and signed percentage publication allocates zero bytes across 4,000 repetitions. Gain/loss smoothing and input differences still allocate; this is not a zero-allocation state or an end-to-end performance claim. Timing qualification remains 176/401.
+
+
+## Shared strength smoothing allocation follow-up
+
+Positive strength means now retain their 53-bit mantissa in a long and use compact exact arithmetic for ordinary smoothing at a relative exponent. Certified exact price differences avoid minimum-unit padding after seeding. Large exponent gaps retain the established wide recurrence; positive means below the binary64 floor remain alive. All five nullable strength/momentum and three Wilder conventions allocate zero bytes across 4,000 ordinary updates after seeding. Startup still uses the existing exact seed accumulator.
+
+Production/benchmark builds, 19 focused arithmetic/allocation tests and 30 independent nullable/Wilder comparison tests passed. Differential tests cover both recurrence types, periods through int.MaxValue, and unpublished exponents from -5000 through +5000. End-to-end timing and allocation qualification remain pending; the timing-qualified count stays 176/401.
+
+
+## Direct Wilder-strength allocation evidence
+
+A direct RSI/CMO fixture now measures both builder history modes against TA-Lib serial and eight-worker prefix replay. Setup validates complete builder values/presence against the independent reference and requires native parallel to match native serial bitwise. The benchmark build, 14 setup/probe tests and 54 inventory checks passed. Production code was unchanged.
+
+At 10k bars, both RSI and CMO allocation probes measured medians of Full 664,680 bytes, LatestOnly 183,656 bytes, native serial 79,896 bytes and native parallel 439,736 bytes. Five samples per arm, including small runtime-allocation variation, are preserved in `results/shared-rollout/allocation-probes/wilder-strength.json`. LatestOnly (179.35 KiB) still loses allocation to native serial (78.02 KiB); startup and retained outputs remain costs. No timing win is claimed.
+
+The six-case volatility timing attempt began after an idle preflight but a new AiDotNet build overlapped it. All six rows completed, but none enter qualification. The rejected report and reason are retained in `results/shared-rollout/rejected/volatility-08640579.json.gz`. Timing qualification remains 176/401.
+
+
+## Shared strength seed allocation follow-up
+
+Nullable/Wilder strength seed differences now accumulate on natural binary scales. Normalizing before rounding preserves means below the binary64 floor without padding each input to minimum-subnormal units. All eight state variants allocate zero bytes over 4,000 ordinary updates including startup after reset. Production/benchmark builds, 23 focused unit tests and 34 independent comparison/setup tests passed.
+
+Five allocation-only samples for each 10k RSI/CMO arm were identical: Full 644,296 bytes, LatestOnly 163,272 bytes, native serial 79,896 bytes and native parallel 439,736 bytes. LatestOnly dropped from 179.35 to 159.45 KiB but remains above native serial (78.02 KiB). Raw samples are in `results/shared-rollout/allocation-probes/wilder-strength-seed.json`. No new timing qualification is claimed; coverage remains 176/401.
+
+
+## Shared strength integer recurrence follow-up
+
+Ordinary positive-strength weighted sums now use a guarded signed-64-bit path and the existing exact ratio rounder, avoiding repeated general dyadic construction when the complete numerator fits. Conservative product/shift bounds and a separate addition check retain the wider path otherwise. Production/benchmark builds, 24 focused arithmetic/allocation tests and 34 nullable/Wilder comparison/setup tests passed. Product, shift and sum boundary cases match the wide recurrence. State allocation remains zero for the tested ordinary updates including reset startup. Latency benefit is not yet measured; no timing qualification count or competitor-win claim changes.
+
+
+## Seeded ATR trailing-band allocation follow-up
+
+The seeded ATR trailing-stop layer now keeps rounded widths and candidate bands in compact exact arithmetic instead of padding them to minimum-subnormal units. Exact comparison signs preserve ties and reversals; midpoint arithmetic is skipped for the other basis modes. Production/benchmark builds, eight focused unit tests and ten independent comparison tests passed. All three price-basis modes allocate zero bytes over 4,000 ordinary state updates including startup after reset, while extreme unpublished bands retain the wide fallback. End-to-end timing and allocation qualification remain pending; coverage stays 176/401.
+
+
+### RSI timing and guarded strength arithmetic
+
+The completed four-arm 10k RSI campaign on production commit `3d07822e` measured Full 3,562.19 us / 644,383 bytes, LatestOnly 3,409.84 us / 163,518 bytes, TA-Lib serial 126.24 us / 79,903 bytes, and TA-Lib parallel 179.09 us / 439,744 bytes. LatestOnly remains about 27 times slower than the fastest native arm. Direct timing qualification is now **177/401 APIs**, not a win count. Raw results and machine observations are in `results/shared-rollout/wilder-strength-cpu/`.
+
+One unprivileged sampled-thread-time trace located active work in `ValuesBarExecution.Node.Append`; waiting worker threads dominate the overall totals. A JIT disassembly check confirmed that the 11,801-byte Tier1 method includes inlined RSI arithmetic, so this does not isolate dispatch overhead. The profile context and compressed disassembly are retained beside the timing evidence.
+
+The subsequent shared strength helper change certifies same-sign, nearby-price subtraction directly and uses guarded integer percentage numerators and denominators when aligned operands fit 56 bits. Both retain exact fallback, unpublished extended exponents and once-rounded publication. These paths serve nullable and Wilder strength indicators. The archived timing predates these guards; no post-change speedup is claimed.
+
+Validation: net10.0 production and benchmark builds passed; all 26 focused strength unit tests, 34 nullable/Wilder comparison and fixture tests, and 54 inventory checks passed. The profiling CLI smoke check passed. Existing ordinary-state allocation assertions still pass. PR #255 has five review threads, all resolved.
+
+
+### Shared compact quotient/remainder execution
+
+Compact mean and dyadic ratio publication now share one guarded quotient/remainder operation. The x64 path uses the processor's 128-by-64 DIV when the divisor fits 64 bits and the numerator's upper limb is smaller than the divisor; this proves the quotient fits and excludes a zero divisor. Wider quotients/divisors and other CPUs retain `UInt128.DivRem`. Dyadic ratios also stop calculating `/` and `%` separately. Rounding, signed zero and overflow behavior are unchanged. This reuses the existing arithmetic across strength, directional, beta and other shared consumers.
+
+The net10.0 production/benchmark builds, 38 focused unit tests and 59 strength/directional/beta comparison tests passed. All 12 primitive/rounding tests also passed with `DOTNET_EnableHWIntrinsic=0`, using the same binaries. Integer-reference tests cover 4,000 random divisions and hardware overflow boundaries; existing rational-reference and allocation assertions passed. A JIT-only RSI replay confirmed one DIV instruction in the guarded Tier1 path (`results/shared-rollout/arithmetic/compact-divrem-disasm.txt.gz`). No timing campaign was run and no latency win is claimed; direct timing qualification remains 177/401 APIs.
+
+
+### RSI two-arm checkpoint and direct recurrence mantissas
+
+A focused checkpoint on production commit `1f92c82f`, after three shared-arithmetic batches, measured 10k RSI LatestOnly at **1,762.89 us / 163,313 bytes**, versus TA-Lib serial **127.48 us / 79,904 bytes**. LatestOnly is about 48.3% faster than the preceding 3,409.84 us campaign on `3d07822e`, while native timing stayed close to its prior 126.24 us. The remaining latency loss is about 13.8 times and allocation about 2.04 times native. This measures the combined batches; it does not attribute improvement to an individual change. Confidence intervals were 1,708.37-1,817.42 us for the builder and 125.90-129.06 us for native. Both rows completed with statistics; preflight/completion process checks found no other dotnet builds/tests. The 11-second run finished before a separate mid-run sample. The two-arm report is retained as diagnostic evidence in `results/shared-rollout/wilder-strength-cpu/rsi-two-arm-checkpoint.json.gz`; it does not replace four-arm qualification or raise the 177/401 count.
+
+The subsequent strength recurrence change stores the once-rounded integer quotient directly as the normalized 53-bit mantissa and extended exponent, removing an intermediate binary64 encode/decode. Exact ties-to-even, mantissa carry, small-dividend 128-bit rounding and the existing wide/.NET Framework fallback are preserved. Production/benchmark builds, 29 focused unit tests and 34 nullable/Wilder comparison/setup tests passed. Ordinary-state allocation assertions still pass. This subsequent change has not been timed.
+
+
+### Shared Hilbert phase-filter allocation rollout
+
+The shared Hilbert phase filter now retains price/filter histories, FIR stages, in-phase/quadrature readings and homodyne products in the existing compact exact dyadic representation. Every logical rounding boundary is preserved: the FIR sum before correction, corrected FIR output, difference/sum before blending, and homodyne product sum before blending. Wider operands retain the exact fallback; zero-phase/period retention and extended unpublished upper exponents are unchanged. Exact unit import/export bridges preserve compatibility with consumers still using padded units. Cycle period/phasor use direct binary64 inputs and publications.
+
+This shared filter feeds ten competitor APIs across cycle period/phasor, phase/sine/trend signals, seeded/delayed trendlines and seeded/delayed MAMA/FAMA. The production and benchmark builds, nine focused arithmetic/allocation tests and 48 independent comparison tests passed. All four startup/control configurations allocate zero managed bytes over 4,000 ordinary phase-filter updates, including startup after reset. Bridge tests preserve exact imported bits through cancellation, wide values, subnormal ties and extended-range publication. Signal projections, trend averaging and adaptive-average layers still have padded-unit costs; these are not complete allocation-free pipelines. No new end-to-end timing or competitor win is claimed, and timing qualification remains 177/401 APIs.
+
+
+### Hilbert signal projections and trend means
+
+Hilbert phase/sine/trend projections, rolling trend means, weighted trend smoothing and seeded trendline midpoints now reuse compact exact arithmetic. Projection coefficients for the bounded 0-50-bar windows are cached with the original binary64 angle operation order. Tiny near-axis terms are accumulated separately and added exactly before the single final rounding; no term is discarded. Trend deviation comparisons preserve the exact 1.5% threshold, and wide inputs retain the fallback. Shared compact mean publication now divides without rebuilding an arbitrary-precision accumulator and preserves extended rounded means.
+
+Production/benchmark builds, all 17 focused unit tests and 69 independent Hilbert/phase/directional comparison tests passed. Delayed and both seeded trendline state configurations allocate zero bytes over 4,000 ordinary updates including startup after reset. Phase, sine and trend signal states each allocate 2,874,880 bytes over that workload; wide projection tails remain. These are state-only observations, not builder/native measurements. Evidence is in `results/shared-rollout/allocation-probes/hilbert-signals.json`. No new timing campaign or competitor win is claimed; timing qualification remains 177/401 APIs.
+
+
+### Compact phase-adaptive MAMA/FAMA state
+
+Seeded and delayed MAMA/FAMA now retain their seed and both adaptive averages in compact exact arithmetic and accept ordinary closes/midpoints without padded-unit conversion. The update uses the existing certified fused blend when possible, otherwise exact `old + alpha * (new - old)` followed by the original stage rounding. This preserves the exact complement of alpha, including gains where binary64 `1 - alpha` would be rounded. Wide composition still imports/exports exact rounded units at the existing interface boundary.
+
+Production/benchmark builds, nine focused unit tests and 31 independent seeded/delayed phase, classical-average and wide MACD-composition tests passed. All six ordinary configuration probes allocate zero managed bytes over 4,000 state updates including startup after reset. Constant-gain tests compare both stages with the original integer recurrence at alpha 0.1, 1 and the minimum subnormal, including unpublished values above binary64 range. Unit import/export for wide composition can still allocate. No new end-to-end timing or competitor win is claimed; qualification remains 177/401 APIs.
+
+
+### Direct Hilbert builder/native fixture and first timing qualification
+
+`SharedHilbertBenchmarks` now measures cycle period, phasor and MAMA/FAMA through Full/LatestOnly `BuildAsync()` and direct TA-Lib serial/full-prefix parallel calls. Native APIs write all mature outputs into disjoint spans of one retained packed array; no full-length expansion or nullable adapter is timed. Setup checks native outputs bitwise against an independent native-stage model, both builder histories bitwise against the exact reference, every presence column, and native prefix replay. Minimum 33-bar and uneven 65-bar cases, suppressed settings, and allocation-probe integration passed. The benchmark build, all 22 fixture/probe tests and 55 inventory checks passed; unchanged production binaries are from `7a518455`.
+
+Five allocation-only 10k samples per arm produced these medians (bytes):
+
+| API | Full | LatestOnly | Native serial | Native parallel |
+|---|---:|---:|---:|---:|
+| HtDcPeriod | 646,000 | 164,976 | 80,176 | 442,232 |
+| HtPhasor | 806,408 | 325,384 | 159,920 | 880,824 |
+| Mama | 806,608 | 325,584 | 159,920 | 880,824 |
+
+Raw samples, including occasional larger observations, are in `results/shared-rollout/allocation-probes/hilbert-native.json`. Builder value/presence columns still cost about twice native packed output storage. State-level zero allocation does not mean zero allocation per build.
+
+One four-arm 10k HtDcPeriod timing run completed after an idle preflight, with no other dotnet build/test workloads observed before, during or after it. Means were Full 31,806.57 us / 646,124 bytes, LatestOnly 31,654.61 us / 166,808 bytes, native serial 972.22 us / 80,236 bytes, and native parallel 1,026.52 us / 442,292 bytes. LatestOnly remains about 32.6 times slower than native serial. The small Full/LatestOnly latency difference shows history retention is not the main latency cost. BDN timing/allocation observations are distinct from the allocation-only probe above. Raw timing/context are in `results/shared-rollout/hilbert-cpu/period-10k*`; direct timing qualification rises to **178/401 APIs**, not a win count. Phasor/MAMA timings remain pending.
+
+
+### Certified Hilbert arithmetic and circular histories (2026-10-11)
+
+The prior 10k cycle-period campaign exposed a 32.6-times LatestOnly/native-serial latency loss. An unprivileged sampled-thread-time trace identified FIR arithmetic, exact products/rounding and history copying among active work; waiting threads dominate its totals. `results/shared-rollout/hilbert-cpu/phase-trace-summary.json` records the command, observations and attribution limits. Append includes inlined arithmetic and is not solely dispatch overhead.
+
+HilbertRoundedKernel now certifies local two-product sums using FMA residuals and error-free sums, falling back to existing exact dyadic arithmetic when any certificate fails. Bounded product exponents prevent lost underflow residuals. FIR differences must be exact, and the sum still rounds before the correction product. Blends retain both literal binary64 coefficients .2 and .8. Smoothing divides only after certifying the weighted total is exact. Circular histories preserve all lags while removing per-bar struct shifts. This is a local CPU arithmetic change, not the broader pending compiler or GPU rollout.
+
+Adversarial review covered overflow/underflow guards, cancellation, rounding ties, stage boundaries, canonical dyadic zero, and history cursor/reset ordering. Independent integer-reference tests cover accepted and rejected exponent ranges, ordinary price-scale blends, ties and subnormals. The first coverage assertion exposed deliberately conservative rejection for unrelated exponent scales; representative ordinary blends are now also tested, with an explicit acceptance floor. No approximate result is accepted.
+
+Validation: net10.0 production and benchmark builds passed; 23 focused arithmetic/allocation tests and 48 independent Hilbert/phase comparison tests passed. Initial allocation checks exposed tier-transition sensitivity (8080/8136 bytes); all 23 passed with tiering disabled, then passed normally after increasing warmup to three reset/replays. Zero-allocation assertions and measured startup/reset coverage remain unchanged. Commands: `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark build with `-f net10.0 --no-restore -p:BuildProjectReferences=false`; unit and comparison `dotnet test -c Release --no-restore -p:BuildProjectReferences=false` filtered respectively to HilbertRoundedKernelTests/CompactHilbertPhaseTests/CompactPhaseAdaptiveTests and the six affected Hilbert/phase comparison classes. Logs: `C:/Users/cheat/temp/si-hilbert-certified-*`. No new latency claim follows from these checks.
+
+
+### Hilbert certified-kernel checkpoint and tighter certificates (2026-10-11)
+
+One four-arm 10k cycle-period run on production `01164679` completed with 20 warmups and 15 requested measurement iterations. Raw report: `results/shared-rollout/hilbert-cpu/period-10k-certified.json.gz`; source/fixture/contention context is adjacent. Preflight CPU was 2%, completion 6%; process samples before, during and after found no competing dotnet build/test workload. This was sampled observation, not a continuous isolation guarantee.
+
+| Arm | Mean ns | CI lower / upper ns | BDN allocation bytes |
+|---|---:|---:|---:|
+| Full | 16264460.58 | 16129162.28 / 16399758.88 | 646132 |
+| LatestOnly | 16586580.61 | 16100995.70 / 17072165.52 | 166182 |
+| Native serial | 966709.11 | 957141.48 / 976276.75 | 80236 |
+| Native parallel | 1045051.82 | 1030252.20 / 1059851.45 | 442295 |
+
+LatestOnly improved about 47.6% from the preceding 31.65 ms campaign but remains 17.2 times slower than native serial and uses 2.07 times its managed allocation. The inventory replaces only HtDcPeriod's current evidence; timing-qualified coverage remains 178/401 APIs, not a win count. The original report remains archived.
+
+The subsequent arithmetic follow-up is NOT included in those timings. When residual sums are inexact, it now bounds all omitted terms outward and accepts only when the entire exact-result enclosure lies strictly inside the candidate's rounding cell. The original product exponent bounds prevent lost underflow residuals. Uncertain midpoints still fall back to exact arithmetic; exact tails preserve ties-to-even directly. Both final phase additions now use the existing rounded SumProduct primitive, retaining the prior stage boundaries and wide fallback. The ordinary blend regression now requires over 5900 of 6000 cases to certify, all checked against independent integer arithmetic, plus explicit midpoint rejection and separated-residual cases.
+
+Production/benchmark net10.0 builds, 24 focused arithmetic/allocation tests, 48 independent Hilbert/phase comparison tests and 55 inventory checks passed. Commands follow the preceding batch with unchanged build-reference restrictions and test filters. Logs: `C:/Users/cheat/temp/si-hilbert-cell-*`.
+
+
+### Borrowed Hilbert arithmetic operands (2026-10-11)
+
+Hilbert FIR, smoothing, blend and homodyne helpers now take unchanged arithmetic inputs by readonly reference, including circular-history entries. TryDouble and its bitwise conversion helper are readonly, so those reads do not require defensive struct copies. Stage backing fields allow internal references while published internal properties continue to return value snapshots. Mutable exact fallback products explicitly copy operands before updating them. The shared JurikDyadic.SumProduct primitive uses the same ownership rule, benefiting its Hilbert and Jurik callers.
+
+Adversarial review checked reference aliasing, fallback mutation, history writes after reads, and reset coverage. Ratio can promote its receiver, so the phase-control calculation retains its prior value-property snapshot. A new aliased-operand test covers compact, simple, subnormal and wide extended inputs; it checks unrounded operand differences as well as exact product-sum results, preventing hidden low-bit mutation. No rounding rules, output shape or allocation assertions changed. No timing campaign was run for this batch; the latest measured 16.59 ms LatestOnly result still identifies production 01164679.
+
+Validation: final net10.0 production/benchmark builds, 31 focused arithmetic/allocation tests and 54 independent Hilbert/phase/Jurik comparisons passed. Production used `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark build and test projects used `-p:BuildProjectReferences=false`. Unit filters added CompactProductArithmeticTests and CompactRatioArithmeticTests to the preceding Hilbert filters; comparison filters added JurikComparisonTests. Logs: `C:/Users/cheat/temp/si-hilbert-borrow-*`, with final build/unit logs explicitly suffixed `-final`.
+
+
+### Compact window-relative Ulcer Index (2026-10-11)
+
+The archived normalized-adapter report for Skender.GetUlcerIndex recorded 330348728 owned allocation bytes at 10000 bars. This historical prioritization evidence is not a current builder/native measurement. WindowUlcerIndex still used padded BigInteger prices, percentage drawdowns and squared sums inside every complete window.
+
+The state now retains doubles and reuses JurikDyadic for exact differences, percentage division, rounded drawdown squares, accumulation and the final correctly rounded RMS. Percentages beyond binary64 retain the existing RocBankValue rounded significand and extended exponent before squaring. Peaks still restart at zero for each window; missing positive prefixes remain absent, storage grows lazily, and nonfinite inputs retain their existing rejection. No GPU behavior or public builder contract changed.
+
+Adversarial review covered per-stage rounding, finite roots of overflowing individual percentages, signed-zero/missing-prefix behavior, extreme exponent spans, and maximum-period startup. Nine unit cases passed against the original integer-window formula, including reset and wide/subnormal inputs. Ordinary periods 1, 3, 14 and 50 each allocated zero bytes across 4000 updates after capacity warmup, including startup after reset. These state observations exclude construction/output storage and do not establish builder/native wins.
+
+Production and benchmark net10.0 builds plus nine independent UlcerComparisonTests passed, covering lifecycle, builder chaining, native routes and extreme-value output behavior. Commands: production `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark build with `-f net10.0 --no-restore -p:BuildProjectReferences=false`; unit/comparison `dotnet test -c Release --no-restore -p:BuildProjectReferences=false` filtered to CompactUlcerTests and UlcerComparisonTests. Logs: `C:/Users/cheat/temp/si-ulcer-compact-*`. No timing campaign ran for this batch; qualification coverage remains 178/401 APIs.
+
+
+### Compact exact Connors return ranking (2026-10-11)
+
+ConnorsStrengthSnapshot previously retained padded integer return numerators/denominators and allocated cross-products for every inclusive-window rank comparison. It now reuses ReturnOrderStatistic.ReturnKey, comparing current/previous ratios exactly (the common minus-one return offset cancels). Nonpositive previous prices remain excluded through nullable keys; the initial zero return remains an explicit 1/1 key. Inclusive window eviction, strict ties, integer-truncated percentile and all four output/startup conventions are unchanged. The scan no longer creates a per-row LINQ predicate closure.
+
+The shared return-key comparator now uses existing JurikDyadic exact products/differences, retaining arbitrary-precision fallback for wide exponent spans. Its prior zero/negative-denominator normalization remains unchanged for builder, core, batch and streaming callers. Adversarial tests cover extreme and overflowing cross-products, distinct near-ties, equivalent fractions, eviction and repeated queries.
+
+On the regression input (1000 closes: 100 + (i * 13 % 101) / 8, default periods), Calculate allocated 95488 bytes, including output records, both RSI states and lazily grown rank history, after three warmup calls. The focused comparator test allocated zero bytes over 4000 ordinary comparisons. These are current-thread allocation observations on a synthetic workload, not competitor timing or a matched comparison with the historical report. Output records and tree nodes still allocate where applicable. Direct builder/native qualification remains pending; catalog coverage remains 178/401.
+
+Production/benchmark net10.0 builds, 253 focused unit cases and five Connors competitor comparisons passed. Production used `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark build and test commands used `-p:BuildProjectReferences=false`. Unit filter: CompactConnorsTests, ReturnOrderStatisticTests, ConnorsNumericalTests; comparison filter: ConnorsComparisonTests. The numerical cases cover batch/builder/core/streaming routes, customer stages, preview/reset and input validation. Logs: `C:/Users/cheat/temp/si-connors-compact-*`. No timing campaign ran for this batch.
+
+
+### Compact Dynamic Momentum moments and exact period selection (2026-10-11)
+
+DynamicMomentumSnapshot now reuses JurikDyadic for rolling nullable moments, the exact variance radicand, its rounded root and the nullable deviation mean. The divisor remains present-count times configured deviation length. The volatility ratio divides the two already-rounded binary64 stages once; positive infinity retains the lower-limit rule. Selected RSI trajectories still use the complete original history and remain cached per selected period.
+
+The snapshot's exact integer period rule differs from the existing convenience helper's tolerance convention. A separate SelectExact helper clamps through exact products, then verifies the rounded quotient's integer candidate and decrements if division rounded upward across a boundary. Positive Int32 clamps bound the candidate before conversion. Tests compare with the original integer division at neighboring binary64 values around period boundaries, subnormal/extreme ratios and maximum Int32 parameters. Existing nullable/wide/tiny reference tests and all output/presence mutation checks pass.
+
+On 1000 closes of 100 + (i * 13 % 101) / 8, configured with both period limits equal to 5, the snapshot allocated 48928 bytes after three warmups, including nullable output/deviation arrays and the cached RSI trajectory. This single-period regression observation is not a default-configuration benchmark or a matched competitor measurement. Direct builder adaptation and native timing qualification remain pending; catalog coverage stays 178/401.
+
+Production/benchmark net10.0 builds, two focused unit tests and six DynamicMomentumComparisonTests passed. Production used `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark build/tests used `-p:BuildProjectReferences=false`. Unit filter: CompactDynamicMomentumTests. Logs: `C:/Users/cheat/temp/si-dynamic-compact-*`. No timing campaign ran for this batch.
+
+
+### Connors strength through BuildAsync (2026-10-11)
+
+`ConnorsStrength` now exposes the snapshot convention as a normal eight-output builder indicator: close RSI, streak RSI, percent rank and combined strength, each with its own presence output. Configure it with `ConfigureIndicators(new ConnorsStrength())` and use the existing BuildAsync endpoint. The snapshot facade and builder share one incremental state; the builder path does not materialize ConnorsStrengthValue records.
+
+State retains the verified compact return-key ranking, inclusive window, initial zero return, nonpositive-denominator exclusions, delayed streak/combined publication and exact final mean. Storage grows lazily and reset clears both RSI states and rank history. The original batch recurrence with independent padded-integer return ordering is retained as the validation reference; the separate competitor reference continues to check strength arithmetic independently.
+
+The competitor comparison now executes BuildAsync and checks every value/presence pair. The manifest and catalog map Skender.GetConnorsRsi to ConnorsStrength; archived measurements remain historical, and direct four-arm timing qualification is still pending. Coverage remains 178/401 APIs.
+
+Validation: net10.0 production/benchmark builds, ten builder/arithmetic/allocation tests, five competitor comparison tests and 55 inventory checks passed. Builder tests cover Full/LatestOnly, close-input chaining, all eight columns after disposal, reset, lifecycle validation and maximum periods. The shared state allocated zero bytes over 1000 ordinary updates after capacity warmup, including startup after reset. Production used `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark/test projects used `-p:BuildProjectReferences=false`. Unit filters: ConnorsStrengthBuilderTests and CompactConnorsTests; comparison filter: ConnorsComparisonTests; inventory: `python -m unittest discover -s benchmarks -p test_shared_rollout_inventory.py`. Logs: `C:/Users/cheat/temp/si-connors-builder-*`, with final benchmark/unit logs suffixed `-final`. No timing campaign ran.
+
+
+### Direct Connors CPU comparison and shared-route registration (2026-10-11)
+
+SharedConnorsBenchmarks retains all four native nullable outputs directly from Skender 2.7.3's eager tuple API List, avoiding quote conversion and measured normalization/copying. The native parallel arm joins result references after complete-prefix replay in up to eight chunks, including all temporary native work. Source inspection covered ConnorsRsi.Api.cs, ConnorsRsi.Series.cs and tuple sorting in the local Stock.Indicators checkout; setup verifies the actual package's outputs and eager result type. Independent native/owned references, dates, all values/masks, minimal startup and uneven prefix boundaries are checked outside measurement. The allocation probe and inventory parser recognize the fixture.
+
+One four-arm run at 10000 bars used 20 warmups and 15 requested measurement iterations on production d2f1e196 / fixture 02f617e4. Preflight CPU was 4%, completion 8%; process samples before, during and after found no competing dotnet builds/tests. Raw report and source/context metadata: `results/shared-rollout/connors-cpu/initial-10k.json.gz` and adjacent context JSON.
+
+| Arm | Mean ns | CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 146784482.69 | 145219861.86 / 148349103.52 | 1136682 |
+| LatestOnly | 147742092.86 | 146645938.06 / 148838247.65 | 1139194 |
+| Native serial | 2112779.91 | 2016747.47 / 2208812.35 | 3081824 |
+| Native parallel | 9174206.06 | 8507527.39 / 9840884.73 | 13952993 |
+
+LatestOnly allocated about 63% less than native serial but took about 70 times as long. Similar Full/LatestOnly allocations exposed a missing ConnorsStrength entry in SharedCpuStates: the new builder indicator used the general route. The registration is now added, with a regression asserting that LatestOnly avoids full bar storage. This routing correction is NOT included in the report above. The first attempt collected no measurements because BDN rejected an IEnumerable return signature; the fixture now declares the native List type without adding a copy. No second timing campaign was run after the routing correction.
+
+The catalog retains other evidence and adds Connors qualification: 179/401 APIs timing-qualified, not wins. Remaining Connors latency costs still require optimization; neither the storage regression nor the allocation advantage establishes a latency win.
+
+Verification: final production/benchmark net10.0 builds, eleven builder/arithmetic/allocation tests, ten fixture/reference comparison tests and 56 inventory checks passed. The new Full-versus-LatestOnly storage regression passed after registration. Builds use `-f net10.0 --no-restore` and benchmark/test projects use `-p:BuildProjectReferences=false`. Unit filters: ConnorsStrengthBuilderTests and CompactConnorsTests; comparison filters: SharedConnorsBenchmarkTests and ConnorsComparisonTests. Logs: `C:/Users/cheat/temp/si-connors-fixture-*` and `si-connors-routing-*`.
+
+
+### Fixed-width exact return ordering (2026-10-11)
+
+On modern runtimes, ReturnOrderStatistic.ReturnKey now decodes each retained price once with the existing ProductFactor representation. Comparisons multiply the unsigned significands into two UInt128 products, compare signs and top exponents, and align only when the top exponents coincide. Each binary64 cross-product needs at most 106 bits; equal top exponents bound any alignment to that same width. This avoids general arithmetic structs, normalization and arbitrary-precision subtraction in the repeated rank-comparison loop, including for extreme finite exponent spans. NETFRAMEWORK retains the prior exact fallback. The change is local to return ranking, not a new general dot-product backend.
+
+Adversarial review checked negative denominators, the explicit zero-previous convention, signed zero, equal rational returns, subnormals, product overflow beyond binary64, exponent alignment and sign reversal. Tests include 2000 full-significand randomized comparisons across the finite exponent range against padded integer products, antisymmetry/self-equality, existing edge/tie cases, tree eviction and all Connors execution routes. A mixed ordinary/extreme-key workload allocates zero bytes over 4000 comparisons. Cached factors enlarge each retained key; no new end-to-end allocation or latency claim is made.
+
+Production/benchmark net10.0 builds, 262 focused unit cases and ten fixture/reference comparisons passed. Production used `dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore`; benchmark/test projects used `-p:BuildProjectReferences=false`. Unit filters: CompactConnorsTests, ReturnOrderStatisticTests, ConnorsNumericalTests, ConnorsStrengthBuilderTests. Comparison filters: SharedConnorsBenchmarkTests and ConnorsComparisonTests. Logs: `C:/Users/cheat/temp/si-return-key-fixed-*`. No timing campaign ran; the saved 147.74 ms Connors baseline predates both shared-route registration and this comparator change. Coverage remains 179/401 APIs, not wins.
+
+
+### Monotone return-order certificate (2026-10-11)
+
+ReturnKey caches the rounded current/previous ratio once per retained key on modern runtimes. IEEE division is monotone, so strictly different rounded values prove the exact ordering. Equal rounded values never prove equality: they fall through to the fixed-width exact cross-product comparator. The hot public comparison stays small; exact comparison remains separate. A cached double adds bounded storage per key.
+
+Adversarial coverage includes two distinct finite rational ratios that round to the same binary64 value, shared positive infinity after overflow, shared zero after underflow, opposite signs at underflow, and the existing full-significand/exponent integer-reference tests. Production/benchmark net10.0 builds, 263 focused unit cases and ten fixture/reference comparisons passed. Builds/tests retain the prior framework and BuildProjectReferences restrictions. Logs: `C:/Users/cheat/temp/si-return-key-monotone-*`. Timing remains a separate checkpoint; correctness and zero-allocation comparison tests do not establish a speedup.
+
+
+### Connors combined routing/comparator timing checkpoint (2026-10-11)
+
+One unchanged four-arm 10000-bar fixture run on production 4f12c9cc completed after shared CPU registration, fixed-width exact products and monotone ratio certificates. It used 20 warmups and 15 requested iterations. Preflight/completion CPU samples were 5%/7%, with no competing dotnet builds/tests observed; the run completed before the next process sample, so there is no during-run contention observation. Raw report: `results/shared-rollout/connors-cpu/certified-order-10k.json.gz`, with adjacent source/context metadata.
+
+| Arm | Mean ns | CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 15731235.00 | 14885415.08 / 16577054.92 | 1138650 |
+| LatestOnly | 14379008.33 | 14272908.78 / 14485107.88 | 658639 |
+| Native serial | 2115466.05 | 2044725.30 / 2186206.80 | 3081968 |
+| Native parallel | 8815172.73 | 8257947.59 / 9372397.87 | 13952775 |
+
+LatestOnly latency fell about 90.3% from the initial 147.74 ms baseline, but remains 6.8 times slower than native serial. Allocation is about 78.6% lower than native serial; the Full/LatestOnly storage distinction is now visible. This measures the three changes together and does not attribute a separate speedup to each. Only Connors's current catalog entry is replaced; both raw reports remain archived and coverage remains 179/401 APIs, not wins. No further timing campaign ran.
+
+
+### Dynamic Momentum shared builder integration (2026-10-11)
+
+`DynamicMomentumStrength` now runs behind `BuildAsync()` and is registered in
+`SharedCpuStates`. Full and LatestOnly retain value/presence outputs. The state
+keeps one close-price history, a rolling deviation window and one lazily created
+RSI calculator per encountered period. A reselected period catches up from its
+last consumed price; no complete per-period output arrays are retained. History
+is still O(bars), since a previously unseen period needs the original RSI seed.
+The existing nullable snapshot facade remains unchanged.
+
+Adversarial review covered calendar smoothing startup before/after deviation
+startup, full-history seeding across period changes, reset of cached calculators,
+lazy maximum periods, exact wide/tiny arithmetic, chained inputs and retained
+columns after disposal. The competitor adapter now uses the builder; independent
+pairwise-distance and RSI references remain in the comparison tests.
+
+Validation (Release, net10.0):
+- Production build: passed, zero warnings/errors.
+- Benchmark build with `-p:BuildProjectReferences=false`: passed.
+- Unit filter `DynamicMomentumStrengthBuilderTests|CompactDynamicMomentumTests|NullableStrength`: 13 passed.
+- Competitor filter `DynamicMomentumComparisonTests`: 10 passed.
+- `python -m unittest test_shared_rollout_inventory.py` from `benchmarks`: 56 passed.
+- Warmed state replay including reset: zero bytes over 1,000 ordinary bars with
+  selectable RSI periods 1..8. LatestOnly saves at least 40 bytes/bar versus Full
+  on the 1,000-bar default-period regression. These are focused regressions,
+  not competitor timing measurements. Existing benchmark/test warnings remain.
+
+Logs: `C:/Users/cheat/temp/si-dynamic-builder-{production,benchmark-build,unit,comparisons}.log`.
+No timing campaign was run for this batch. Catalog timing qualification remains
+179/401 APIs; this integration does not establish a performance win or GPU support.
+
+
+### Dynamic Momentum direct benchmark fixture (2026-10-11)
+
+`SharedDynamicMomentumBenchmarks` now compares CPU `BuildAsync()` Full and
+LatestOnly with Trady 3.2.8's native tuple API. Native serial returns the eager
+`List<decimal?>` directly, without result conversion/copying. Native parallel
+uses up to eight independent calculators, full input prefixes for original RSI
+seeding, and public `Compute(startIndex, endIndex)` ranges to avoid producing
+unassigned outputs. Prefix construction, indicator construction, internal native
+work and output assembly remain inside the measured method. Input conversion
+is setup-only for both sides. This parallel arm is our public-API composition,
+not a claim that Trady supplies a built-in parallel DMI method.
+
+Setup checks native serial/parallel against an independent decimal reference,
+owned values and presence against the pairwise-distance/RSI reference, and
+cross-library presence and values (absolute tolerance 1e-9) on the fixture.
+Tests at counts 1, 7, 11, 33, 65 and 127 cover startup, period changes and uneven
+worker ranges. All six fixture tests plus ten Dynamic Momentum comparisons
+passed; benchmark build passed with existing warnings; 57 inventory checks
+passed. No production rebuild was needed. Logs:
+`C:/Users/cheat/temp/si-dynamic-fixture-{build,tests}.log`.
+
+The fixture is registered in the allocation probe and qualification parser.
+No new performance samples were collected; qualification remains 179/401.
+Historical normalized measurements (not this fixture) report about 1.60 GB
+allocated per native 1,000-bar call and 161.85 GB per 10,000-bar call. Plan the
+first direct timing run around that cost rather than using routine long warmups.
+The tuple result type and range behavior were verified against the pinned NuGet
+package; source inspected in the saved Trady DynamicMomentumIndex and
+AnalyzableBase files explains repeated volatility histories and per-output RSI.
+
+
+### Deferred RSI output calculation during Dynamic Momentum replay (2026-10-11)
+
+Dynamic Momentum now advances skipped RSI bars without computing their discarded
+final ratios. The original gain/loss recurrence, exact rounding, seed history,
+lag history and nullable poisoning remain active for every price. Only the last
+bar requested from a selected period computes its output. Other callers publish
+by default. No public configuration or BuildAsync contract changes.
+
+Adversarial review confirmed that final ratio calculation cannot mutate the
+readonly gain/loss values. Five formula cases compare sparsely published outputs
+bit-for-bit against the independent rational reference across ordinary, tiny,
+subnormal and wide prices, nullable seed/later gaps, and reset with different
+publication schedules. Release net10.0 production/benchmark builds passed;
+18 unit cases and 32 fixture/reference comparisons passed, including the warmed
+zero-allocation state replay. Existing benchmark/test warnings remain.
+Logs: `C:/Users/cheat/temp/si-dynamic-deferred-{production,benchmark-build,unit,comparisons}.log`.
+No isolated latency benefit is claimed for this change.
+
+
+### Dynamic Momentum direct CPU checkpoint, 1,000 bars (2026-10-11)
+
+Production `a84f3926`, fixture `f812f96c`, defaults 5/10/14/30/5. One short
+campaign: three warmups, five requested measured iterations. All four arms passed
+setup's native/owned independent references, presence and cross-library checks.
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 3,389,977.78 | 3,021,938.35 / 3,758,017.20 | 88,417 |
+| LatestOnly | 1,521,032.81 | 1,459,014.30 / 1,583,051.33 | 39,724 |
+| Native serial | 827,887,706.25 | 788,728,375.74 / 867,047,036.76 | 1,604,493,684 |
+| Native parallel | 803,154,550.00 | 764,390,738.96 / 841,918,361.04 | 2,923,740,664 |
+
+Full and LatestOnly both have nonoverlapping intervals below both native arms.
+LatestOnly's mean is approximately 528 times faster than the fastest measured
+native mean. Native serial/parallel intervals overlap, so the run does not prove
+parallel is faster than serial. The result combines all prior implementation
+changes and does not isolate the benefit of deferred output calculation.
+
+Limitations: short run; native serial retained four samples after BDN removed
+one outlier. BDN warned that Full's minimum observed iteration was 29.506 ms,
+below its recommended 100 ms. CPU was 6% before and 8% after; no competing dotnet
+build/test/run processes were observed at those samples. The next process sample
+was after the 84-second run completed, so there is no during-run observation or
+claim of continuous isolation. No 10,000-bar or GPU conclusion follows.
+
+Raw JSON and run context are archived in
+`results/shared-rollout/dynamic-momentum-cpu/deferred-output-1k*`.
+Log: `C:/Users/cheat/temp/si-dynamic-a84f3926.log`.
+The inventory parser accepted all four arms. Only this pair's current evidence
+was added to the catalog; measured coverage is now 180/401 APIs, not a win count.
+
+
+### Ulcer Index direct fixture and exact peak shortcut (2026-10-11)
+
+The shared CPU state skips percentage arithmetic at a new/equal positive peak:
+its drawdown is exactly zero. The zero-peak absence check precedes this shortcut.
+Extended unpublished drawdowns, exact squares and final RMS rounding remain.
+
+`SharedUlcerBenchmarks` compares BuildAsync Full/LatestOnly with Skender 2.7.3's
+public tuple serial API and up to eight independent native workers. Each worker
+has P-1 input overlap; full-prefix replay is unnecessary for window-local peaks.
+Native eager lists retain dates and nullable UI values directly. Native sorting,
+calculation, overlap outputs and output assembly are timed; tuple/chunk preparation
+is setup-only. This parallel arm composes public native calls; it is not a claim
+that Skender ships a parallel Ulcer API.
+
+Setup checks native bits/dates/presence against the staged native reference,
+owned bits/presence against the independent exact reference, and cross-library
+agreement within 1e-9. Fixture counts 1, 13, 14, 15, 31 and 65 exercise startup,
+full windows and uneven overlap. Production/benchmark Release net10.0 builds,
+nine compact arithmetic/allocation cases, 15 fixture/reference cases and 58
+inventory tests passed. Existing benchmark/test warnings remain. The four-arm
+fixture is registered in the allocation probe and qualification parser.
+Logs: `C:/Users/cheat/temp/si-ulcer-direct-{production,benchmark-build,unit,comparisons}.log`.
+
+
+### Ulcer Index direct CPU checkpoint, 10,000 bars (2026-10-11)
+
+Production/fixture `2ffd53fc`, period 14, three warmups and five requested iterations.
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 15,948,168.75 | 11,362,814.63 / 20,533,522.87 | 644,628 |
+| LatestOnly | 16,184,630.00 | 14,603,152.07 / 17,766,107.93 | 164,837 |
+| Native serial | 1,692,545.00 | 1,595,554.10 / 1,789,535.90 | 921,023 |
+| Native parallel | 444,929.98 | 430,077.96 / 459,782.01 | 1,011,806 |
+
+LatestOnly allocates 83.7% less than the fastest native path but its mean latency
+is 36.4 times higher. Both builder intervals are above both native intervals.
+This is a loss; zero steady-state allocation does not establish a speed win.
+The next optimization target is CPU execution, including repeated exact
+percentage arithmetic and window-level parallel execution, preserving the
+existing once-rounded percentage and exact sum-of-squares contract.
+
+Short-run limitations: Full and NativeParallel each retained four samples after
+one outlier removal. BDN warned about minimum iterations of 61.921 ms (Full) and
+94.869 ms (LatestOnly). CPU was 16% before and 14% after; no competing dotnet
+build/test/run processes were seen at those samples. The 16.6-second run finished
+before the next process sample, so no during-run or continuous-isolation claim.
+No isolated benefit is attributed to the positive-peak shortcut.
+
+Raw report/context: `results/shared-rollout/ulcer-cpu/positive-peak-10k*`.
+Log: `C:/Users/cheat/temp/si-ulcer-2ffd53fc.log`. The qualification parser accepted
+all four arms. Only this pair was added; coverage is 181/401 APIs, not a win count.
+
+
+### Ulcer rolling contribution cache (2026-10-11)
+
+The shared Ulcer state now retains each price's last prefix peak and rounded
+extended drawdown in a lazily grown ring. Unchanged peaks reuse their exact
+contribution. Expiration removes the outgoing contribution; changed peaks remove
+and replace their drawdown squares in the exact running sum. The final RMS still
+rounds once. Windows with a nonpositive prefix remain absent but maintain valid
+suffix contributions so expiration recovers correctly. Reset clears the sum,
+ring position and entries while retaining capacity.
+
+Storage increases from one double per retained price to a price/peak/extended
+contribution entry, bounded by O(period). This avoids repeated division and
+squaring at unchanged peaks; it is not an O(1) worst-case window algorithm.
+A descending sequence can still change every prefix peak. No public API,
+rounding contract or GPU behavior changes.
+
+Adversarial review covered expiring maxima, plateaus, absent-prefix recovery,
+overflowed unpublished percentages, tiny inputs, maximum periods and reversed
+replay after reset. Production/benchmark Release net10.0 builds passed, along
+with 12 compact arithmetic/allocation cases and 15 fixture/reference cases.
+Ordinary warmed state replay still allocates zero bytes. Existing benchmark/test
+warnings remain. Logs: `C:/Users/cheat/temp/si-ulcer-cache-{production,benchmark-build,unit,comparisons}.log`.
+No new timing run was performed; the 2ffd53fc latency-loss checkpoint remains the
+latest measured result. This cache change is not claimed as a measured win.
+
+
+### Ulcer bounded CPU worker integration (2026-10-11)
+
+Standalone Ulcer now uses the existing bounded-window executor and published
+AiDotNet.Tensors worker scheduler. Each worker owns an exact cached state seeded
+with P-1 captured bars, writes disjoint values/presence, and retains the existing
+input-before-output validation and cancellation order. The default 8,192-bar
+threshold, up-to-eight-worker limit, shared scheduling gate and serial fallback
+for periods above 4,096 remain unchanged. Chained/mixed configurations keep their
+existing routes. Required GPU still rejects unsupported Ulcer execution.
+
+Adversarial review confirmed that seed outputs are not published, presence is
+finite by construction, only the primary RMS needs overflow validation, and
+exact cache eviction is independent of preceding history after P-1 seeds.
+Production/benchmark Release net10.0 builds, 21 unit cases and 15 fixture/reference
+cases passed. Tests compare one/eight workers, Full/LatestOnly, zero/one inputs,
+periods 1/14/4096/4097/int.MaxValue, invalid captured tails versus earlier overflow,
+cancellation, later-run recovery and owned data after disposal/source mutation.
+Logs: `C:/Users/cheat/temp/si-ulcer-parallel-{production,benchmark-build,unit,comparisons}.log`.
+Existing benchmark/test warnings remain. No scheduler policy or public API changed.
+
+
+### Ulcer cached/parallel CPU checkpoint, 10,000 bars (2026-10-11)
+
+Production `f7fa53c5`, unchanged fixture `2ffd53fc`, period14, ten warmups and ten
+requested measured iterations. Full/LatestOnly/native serial retained ten;
+native parallel retained eight. No minimum-iteration-time warning was emitted.
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 1,173,533.13 | 1,109,888.23 / 1,237,178.02 | 653,627 |
+| LatestOnly | 1,107,439.45 | 1,100,926.47 / 1,113,952.43 | 172,670 |
+| Native serial | 1,791,964.38 | 1,634,578.73 / 1,949,350.02 | 921,116 |
+| Native parallel | 462,756.05 | 456,512.26 / 468,999.85 | 1,011,809 |
+
+LatestOnly latency fell about 93.2% from the initial 16.18ms checkpoint. Both
+builder intervals are below native serial but above native parallel. LatestOnly
+still loses by 2.4 times against the fastest measured native mean while allocating
+82.9% less. Allocation is higher than the initial serial builder due to bounded
+cached/worker storage. This measures the cache and parallel integration together;
+no isolated attribution or overall Ulcer win is claimed.
+
+CPU was 6% before, 9% in one during-run sample, and 11% after. No competing dotnet
+build/test/run processes were observed at those samples; not continuous isolation.
+All four setup validations passed. Raw/context are archived at
+`results/shared-rollout/ulcer-cpu/cached-parallel-10k*`; log is
+`C:/Users/cheat/temp/si-ulcer-f7fa53c5.log`. Only Ulcer current evidence was replaced,
+retaining the original checkpoint. Coverage remains 181/401 APIs, not a win count.
+
+
+### Ulcer sampled profile and borrowed ring entries (2026-10-11)
+
+Added benchmark-only `--profile-ulcer <bars> <iterations>`, using the validated
+four-arm fixture setup, 100 LatestOnly warmups and a disposing builder loop.
+An unprivileged `dotnet-trace` dotnet-sampled-thread-time capture at production
+`f7fa53c5` ran 10,000 bars / 2,000 iterations and exited successfully. Global
+thread-time samples were 73.47% Monitor.Wait; treating that as arithmetic cost
+would misdiagnose the idle worker pool.
+
+Filtering sampled stacks containing UlcerKernel gives about 20,148.71 ms summed
+across threads: State.Update has 42.89% exclusive, SqrtMean 20.86% exclusive /
+24.70% inclusive, Drawdown 12.98% exclusive / 18.95% inclusive, and the kernel
+adapter 6.47% exclusive. These include inlined callees; State.Update's samples
+are not all dispatch or storage overhead. Setup and warmup remain in the trace,
+while the kernel filter excludes unrelated idle/startup stacks. This is sampled
+stack time, not a new latency result or proof of benefit from a later change.
+
+The modern CPU state now borrows ring entries by reference for its scan, after
+all List growth is complete. Helpers cannot resize or retain the span. The
+NETFRAMEWORK path keeps indexed copies. No arithmetic or rounding changes.
+Production/benchmark Release net10.0 builds, 21 unit cases and 15 fixture/reference
+cases passed; existing benchmark/test warnings remain. No timing rerun: the
+f7fa53c5 checkpoint remains authoritative and still loses to native parallel.
+
+Trace and filtered summary: `results/shared-rollout/ulcer-cpu/cached-parallel-profile*`.
+The summary records the exact capture command and trace/runner hashes. Convert
+the decompressed trace with `dotnet-trace convert --format Speedscope` to inspect
+all stacks, or use `dotnet-trace report <trace> topN --verbose` for global totals.
+Logs: `C:/Users/cheat/temp/si-ulcer-trace-collect.log` and
+`C:/Users/cheat/temp/si-ulcer-borrow-{production,benchmark-build,unit,comparisons}.log`.
+
+
+### Ulcer prefix-only cache repair (2026-10-11)
+
+On expiration, repair stops when a surviving prefix peak equals its cached peak:
+all subsequent surviving peaks are then unchanged. The new last entry is always
+computed separately. Initial sentinel peaks prevent premature stopping on the
+first full window; period one has no surviving prefix. Presence is equivalent
+to the first price being positive. Exact contributions and absent suffix recovery
+retain their contracts; descending windows can still require O(period) repair.
+Production/benchmark Release net10.0 builds, 22 unit cases and 15 fixture/reference
+cases passed. The new test exhausts 1,024 five-price patterns at each of periods
+2, 3 and 4 against the independent reference. Existing tests cover extreme values,
+reset, zero-allocation replay and parallel boundaries. Logs:
+`C:/Users/cheat/temp/si-ulcer-prefix-{production,benchmark-build,unit,comparisons}.log`.
+
+
+### Ulcer prefix-repair checkpoint, 10,000 bars (2026-10-11)
+
+Production `40c75e34`, unchanged fixture `2ffd53fc`, period14; ten warmups and ten
+requested measured iterations (LatestOnly retained nine, other arms ten).
+
+| Arm | Mean ns | 99.9% CI lower / upper ns | Allocated bytes |
+|---|---:|---:|---:|
+| Full | 984,848.83 | 978,148.68 / 991,548.98 | 653,627 |
+| LatestOnly | 953,642.19 | 949,474.52 / 957,809.86 | 172,670 |
+| Native serial | 1,950,154.06 | 1,856,617.43 / 2,043,690.70 | 921,067 |
+| Native parallel | 508,480.39 | 501,987.70 / 514,973.08 | 1,011,808 |
+
+LatestOnly improved about 13.9% from 1.107ms with unchanged allocation, but remains
+1.9 times slower than native parallel. Native parallel also moved from 0.463ms to
+0.508ms; not all ratio improvement is attributable to owned changes. This combines
+borrowed ring access and prefix repair. Both builders beat serial but lose to
+parallel with nonoverlapping intervals. No minimum-iteration warning was emitted.
+CPU samples before/during/after were 12%/9%/8%; no competing dotnet build/test/run
+processes were observed at those points, not continuous isolation.
+Raw/context: `results/shared-rollout/ulcer-cpu/prefix-repair-10k*`;
+log: `C:/Users/cheat/temp/si-ulcer-40c75e34.log`. All setup validations passed.
+Only Ulcer current evidence was updated; previous checkpoints remain archived.
+Coverage remains 181/401 APIs, not a win count.
+
+
+### Relative Volatility shared builder integration (2026-10-11)
+
+`RelativeVolatilityStrength` now executes through BuildAsync and SharedCpuStates;
+the competitor adapter and mapping use that path. Two bounded legs retain exact
+price changes, sample-deviation moments and smoothed deviations with JurikDyadic.
+Ordinary arithmetic avoids padded BigInteger values. Previous close starts at
+zero; available-history windows, singleton zero deviation and once-rounded stages
+remain unchanged. Overflowed unpublished roots/means retain extended exponents
+before the final bounded percentage. The snapshot API stays unchanged as a batch
+reference; pairwise squared-distance/reference-root tests remain independent.
+
+Adversarial review covered exact rather than rounded changes, squared exponent
+scaling for overflowed roots, lazy maximum periods, and reset of all four queues.
+Release net10.0 production/benchmark builds, nine unit cases, eight independent
+comparison cases and 58 inventory checks passed. Ordinary 1,000-bar state replay
+including reset allocates zero bytes after capacity warmup. Full/LatestOnly and
+chained results survive disposal; LatestOnly saves at least 40 bytes/bar on the
+1,000-bar regression. Existing benchmark/test warnings remain. Logs:
+`C:/Users/cheat/temp/si-rvi-builder-{production,benchmark-build,unit,comparisons}.log`.
+No native timing was run and no performance win is claimed. Direct fixture,
+timing and GPU work remain; measured coverage stays 181/401 APIs.
+
+
+### Relative Volatility direct CPU fixture (2026-10-11)
+
+`SharedRelativeVolatilityBenchmarks` compares Full/LatestOnly BuildAsync against
+QuanTAlib 1.0.0 Rvi serial and up-to-eight-worker public-API composition. All arms
+retain the value column; native calls write directly into the retained array.
+Input TValue preparation is setup-only, while state construction, native nested
+allocations, overlap calculation and output storage are timed. Each worker gets
+2P-1 preceding prices: P smoothed deviations need P changes each, and the oldest
+change needs its preceding price. The synthetic first change expires before the
+first assigned output. Rvi, Stddev and Sma source was inspected; runtime setup
+checks exact serial/parallel parity against the independent native reference.
+
+Setup also checks builder bits against the independent pairwise-distance/root
+reference and cross-library agreement within 1e-9. Counts 1/13/14/27/28/65/127
+exercise startup and uneven worker boundaries at period14. Benchmark build,
+15 fixture/reference cases and 59 inventory checks passed, with existing warnings.
+The fixture is registered in the allocation probe and qualification parser.
+Logs: `C:/Users/cheat/temp/si-rvi-fixture-{build,tests}.log`.
+No production change or timing campaign in this batch; coverage stays 181/401.
+
+
+### Relative Volatility shared parallel CPU execution
+
+RelativeVolatilityStrength now uses the existing bounded-window CPU executor for standalone and mixed scalar roots. Each worker replays 2P-1 preceding prices; its deviation/smoothing states retain the original period P. Replay windows above 4096 stay serial, and periods whose doubled window would overflow use the generic shared-state route. Scheduler thresholds are unchanged.
+
+Adversarial review checked synthetic first-change expiry, mixed-root dispatch, replay-length versus state-period separation and overflow-safe routing. Production and benchmark builds passed; 31 focused unit cases and 16 independent comparison/fixture cases passed. Coverage includes 1/8 workers, both history modes, exact wide-value seams, periods 2/14/2048/2049 and near integer limits, empty/one inputs, captured invalid tails, cancellation, recovery and retained ownership. The direct fixture now checks 8,193 bars against its independent reference.
+
+Commands: production net10.0 Release build; benchmark net10.0 Release build with BuildProjectReferences=false; focused unit filter SharedRelativeVolatilityWindowTests|RelativeVolatilityStrengthBuilderTests|SharedUlcerWindowTests; competitor filter RelativeVolatilityComparisonTests|SharedRelativeVolatilityBenchmarkTests. Existing framework/analyzer warnings remain in the test build. Timing is deferred while competing jobs remain active; no new timing qualification, speedup or GPU support is claimed.
+
+
+### Median Adaptive shared builder and combined diagnostic checkpoint (`415d6ed4`)
+
+`MedianAdaptiveAverage` replaces the comparison adapter's snapshot execution with shared CPU `BuildAsync()` state. Lazy history and reusable sorted storage eliminate per-candidate lists/sorts: one sort per mature bar, then deletion of the two oldest occurrences for each shorter suffix. Exact dyadic arithmetic preserves signed median comparisons, once-rounded smoothing, duplicate values and maximum-period startup. The original snapshot and independent count-based order-statistic oracle remain references. QuanTAlib 1.0.0 source (`Maaf.Calculation`) performs `TakeLast(length).OrderBy(...).ToList()` for every candidate. Native parallel requires full prefix replay because both candidate and filter retain recursive state; construction, replay and result writes are inside the measured methods.
+
+Production/benchmark builds passed. Ten focused MedianAdaptiveAverageBuilderTests, 12 comparison/direct-fixture cases and 60 inventory checks passed. The first unit run had four diagnostic-string assertion failures; values passed, and assertions were corrected to each history mode's documented execution reason before the successful rerun. Warmed 1,000-update state replay after reset allocates zero bytes. Test builds retain existing framework/analyzer warnings.
+
+The allocation-only four-arm probe at 1,000 bars returned identical totals across three samples (after ten warmups): Full 61,264 B; LatestOnly 12,576 B; native serial 3,466,992 B; native parallel 15,673,112 B. Allocation counts include all process threads, construction and retained results; setup and disposal are excluded. LatestOnly allocates 99.64% less than native serial on this fixture. This is not timing evidence. Raw output, parsed results and context are in `results/shared-rollout/median-adaptive-cpu/reused-buffers-allocation-1k*`.
+
+One combined ten-warmup/ten-iteration timing campaign covered both new CPU fixtures at 10,000 bars:
+
+| Indicator | Arm | Mean ms | Allocation B |
+|---|---|---:|---:|
+| Median Adaptive | Full | 12.871 | 565,724 |
+| Median Adaptive | LatestOnly | 12.905 | 85,540 |
+| Median Adaptive | Native serial | 23.028 | 34,437,299 |
+| Median Adaptive | Native parallel | 38.802 | 154,793,940 |
+| Relative Volatility | Full | 2.169 | 614,910 |
+| Relative Volatility | LatestOnly | 3.277 | 133,890 |
+| Relative Volatility | Native serial | 14.066 | 10,326,512 |
+| Relative Volatility | Native parallel | 3.890 | 10,474,968 |
+
+These are diagnostics, not newly qualified wins. CPU samples before/during/after were 50/43/90%; no competing dotnet build/test/run appeared in the first two samples, but an AiDotNet.Tensors build appeared after the run. Its creation time was unavailable when rechecked, so overlap is unknown. No continuous isolation is claimed. Relative Volatility intervals overlap (LatestOnly 1.498-5.056ms, native parallel 2.110-5.669ms) and it received minimum-iteration-time warnings. All arms retained ten samples. Reports and context are archived as `initial-10k-diagnostic*` in each indicator's CPU folder and validated with the inventory parser; neither report was merged into timing qualifications. Coverage remains 181/401, not a win count. GPU support and further performance work remain pending.
+
+
+### Klinger compact shared builder (`d904dee4`)
+
+`KlingerVolumeWithSignal` replaces the Klinger comparison's snapshot adapter with shared CPU `BuildAsync()` execution. Compact exact running state and three SMA-seeded EMA states publish oscillator, signal and independent presence outputs. State retains no bar history or intermediate trajectories. Exact HLC comparisons, cancelling/zero range branches, extended unpublished force/averages, output rounding and maximum-period startup match the batch reference. The existing generated `KlingerVolumeOscillator` API is unchanged. The public snapshot still rejects unrepresentable outputs; its internal reference path exposes signed infinities so the validation framework can verify finite prefixes and runtime rejection.
+
+Reviewed Skender.Stock.Indicators **2.7.3** source: `GetKvo` eagerly converts quotes and calls `CalcKvo`; the latter allocates seven full-length intermediate arrays and result objects. The direct serial fixture retains that result collection without a normalization copy. Native workers call the public API on full prefixes because all three EMAs retain recursive state; prefix arrays/results, quote conversion and output writes remain measured. Setup compares both outputs and their independent masks against the owned rational and staged-native references, including startup and uneven worker boundaries.
+
+Production/benchmark builds, eight focused `KlingerVolumeWithSignalBuilderTests`, 12 `KlingerComparisonTests|SharedKlingerBenchmarkTests` cases and 61 inventory checks passed. Tests cover Full/LatestOnly retention after disposal, wide/tiny inputs, exact force cancellation above binary64 range, maximum periods, invalid-input precedence, cancellation/recovery, reset and zero allocations across 1,000 ordinary warmed state updates. An initial lifecycle failure exposed the throwing-reference contract mismatch; the internal reference correction passed the rerun and preserves public snapshot overflow tests. Existing framework/analyzer warnings remain in test builds.
+
+One allocation-only probe at 1,000 bars (defaults 34/55/13, ten warmups, three measured samples per arm) produced identical totals in every sample:
+
+| Arm | Allocated bytes |
+|---|---:|
+| Builder Full | 84,776 |
+| Builder LatestOnly | 36,088 |
+| Native serial | 212,608 |
+| Native parallel | 967,832 |
+
+LatestOnly allocates **83.03% less than native serial**. These totals include all managed process threads and retained outputs, excluding setup/disposal. The probe preceded the validation-only correction; execution state and benchmark methods did not change. Raw output, parsed results and context are archived in `results/shared-rollout/klinger-cpu/compact-state-allocation-1k*`. No timing run was added while other repositories' tests were active. Timing qualification stays **181/401** and GPU support remains pending; these allocation figures are not performance-win qualifications.
+
+
+### Single-stochastic Schaff cycle shared builder
+
+`SingleStochasticCycle` replaces the Schaff comparison's snapshot adapter with shared CPU `BuildAsync()` state. It reuses the compact SMA-seeded dyadic EMA arithmetic extracted from Klinger without changing the recurrence. Two lazy monotonic queues replace repeated minimum/maximum scans of arbitrary-precision MACD history. Each candidate is inserted/removed once; equal candidates keep the newest position because only the extreme value matters. A three-element smoothing ring preserves the complete-window SMA and independent presence output. Extended unpublished MACD values never need a finite double proxy for comparisons.
+
+Skender.Stock.Indicators 2.7.3 `src/s-z/Stc/Stc.Series.cs` was reviewed: it materializes MACD results, transformed quotes, stochastic results and final STC results. The builder fuses these stages into one state update. The original `SchaffTrendCycleSnapshot` remains an independent BigInteger batch reference, and the generated Schaff indicators retain their existing APIs.
+
+Production net10.0 Release and benchmark builds passed; the benchmark/test builds retain existing framework/analyzer warnings. Eighteen focused unit cases (`SingleStochasticCycleBuilderTests|KlingerVolumeWithSignalBuilderTests`), 17 independent comparison/fixture cases (`SchaffCycleComparisonTests|KlingerComparisonTests|SharedKlingerBenchmarkTests`) and 61 inventory checks passed. Verification covers Full/LatestOnly value/presence retention after disposal, owned bars, exact startup, flat/tied windows, queue growth/wrap/eviction, reversed replay after reset, maximum periods, invalid inputs, cancellation and explicit GPU rejection. Independent wide/subnormal comparisons passed. Both cycle and Klinger state replays allocate zero bytes over 1,000 ordinary updates after reset/capacity warmup.
+
+The manifest/catalog now map `Skender.GetStc` to `SingleStochasticCycle`; existing qualification evidence was preserved. No direct STC timing fixture or CPU/GPU win is claimed in this batch. Timing coverage remains 181/401; the full rollout is incomplete.
+
+
+### Schaff direct native fixture and allocation checkpoint (`8af126b4`)
+
+`SharedSchaffCycleBenchmarks` measures Full/LatestOnly `BuildAsync()` and direct Skender serial/parallel execution, with defaults cycle10/fast23/slow50. The pinned 2.7.3 tuple API eagerly sorts/materializes its input and executes STC; its result collection is retained directly. This values-only route avoids decimal quote conversion. Setup verifies the quote overload gives identical values/presence, verifies serial versus full-prefix parallel replay exactly, and checks independent owned/native references. This route choice is based on avoiding conversion work, not a claim of universal fastest-overload timing. Input preparation and reference checks are outside measurement; native constructor/collection work, prefix replay and result writes remain inside.
+
+Benchmark build and 13 focused `SchaffCycleComparisonTests|SharedSchaffCycleBenchmarkTests` cases passed, including counts1/49/50/58/59/60/61/127 around independent EMA, stochastic and final smoothing startup. The 62 inventory checks passed. Existing production binaries from `f958a4da` were reused; no unchanged production rebuild or unit-suite rerun was needed.
+
+At 1,000 bars, the allocation-only probe used ten warmups and three samples per arm, with identical totals in each sample:
+
+| Arm | Allocated bytes |
+|---|---:|
+| Builder Full | 69,704 |
+| Builder LatestOnly | 21,016 |
+| Native serial (tuple) | 547,256 |
+| Native parallel (tuple prefixes) | 2,466,832 |
+
+LatestOnly allocates **96.16% less than native serial**. Counts include all managed threads and retained results, excluding setup/disposal. Parsed/raw evidence and source hashes are in `results/shared-rollout/schaff-cycle-cpu/compact-state-allocation-1k*`. Other repository tests were active and CPU was 87% at inspection, so no timing campaign was started. This does not establish a latency or GPU win; timing qualification remains 181/401.
+
+
+### Certified endpoint-weighted GPU execution
+
+`EndpointWeightedAverage` now executes through the published AiDotNet.Tensors 0.134.4 OpenCL runtime, reusing the existing weighted-average kernel, cached program and bounded workspace. This covers the `QuanTAlib.Epma` and `QuanTAlib.Mma` mappings, including fixed-weight and available-mean startup. Each device work item handles 64 outputs, seeds its preceding window, then maintains sum and signed weighted sum without a host-computed output series. Auto remains CPU; explicit GPU requests execute on-device or reject.
+
+Newest-first coefficients are `2P-1-3*lag`. After publication, subtracting three times the window sum shifts all weights; evicting the oldest coefficient then adds `(P+1)*expired`. Every numerator/intermediate is bounded by `2P^2` times the certified input bound (period one is identity). This stricter certificate replaces the positive-weight triangular mass for endpoint requests only. Periods above 32,767 reject because the certificate's term count must fit Int32. Off-grid/wide inputs reject rather than silently using CPU; complete finite-input validation still precedes certificate rejection. The final quotient rounds once.
+
+The net10.0 Release production build passed with zero warnings/errors. The focused unit command filtered `TensorsEndpointWeightedGpuExecutionTests|TensorsWeightedAverageGpuExecutionTests|TensorsTriangularGpuExecutionTests|TensorsRollingSumGpuExecutionTests`; **39 cases passed, zero skipped** on the available GPU. Coverage includes both history modes, both startup conventions, periods1/2/3/20/65/4096/32767, 64-output block boundaries, signed zeros, period-one subnormal identity, exact CPU bit comparisons, invalid-input precedence, unsupported periods/inputs, cancellation, recovery and retained owned bars after disposal. Existing WMA/triangular/sum kernels passed shared-dispatch regressions. Test builds retain preexisting framework/analyzer warnings.
+
+No latency or allocation benchmark was run for the new GPU path while other repositories' test jobs were active. Device execution is verified, but comparison against the best native CPU path, other devices and graph fusion remain pending. Timing qualification remains 181/401 and the full rollout is incomplete.
+
+
+### Endpoint GPU six-path allocation comparison (`c2f66129`)
+
+`SharedGpuEndpointBenchmarks` reuses the existing independent Epma/Mma CPU/native checks and adds GPU Full/LatestOnly. The complete GPU `BuildAsync()` call includes input staging, device transfer, dispatch and readback. Setup requires actual GPU execution and exact parity with the independently validated CPU output. Native serial retains its direct value array; native parallel measures construction, P-1 seed replay and output writes. The period is20. The shared allocation probe now reports all six methods for these two APIs; its existing four-method cases are unchanged.
+
+The benchmark build, 13 shared allocation-probe regression cases and 63 inventory checks passed. Both actual GPU allocation probes passed setup/reference/backend assertions and all six methods. At 1,000 bars, ten warmups followed by three samples per method produced identical values in every sample:
+
+| Method | Epma bytes | Mma bytes |
+|---|---:|---:|
+| CPU Full | 66,424 | 66,424 |
+| CPU LatestOnly | 17,736 | 17,736 |
+| GPU Full | 59,744 | 59,744 |
+| GPU LatestOnly | 11,056 | 11,056 |
+| Native serial | 262,408 | 219,808 |
+| Native parallel | 293,848 | 227,728 |
+
+These are warmed-workspace **managed allocations**, including worker threads and retained results. They exclude setup, cached kernel/workspace creation and disposal after each sample; they do not measure total device/resident/native memory. Raw/parsed evidence and context are archived under `results/shared-rollout/endpoint-gpu/*-allocation-1k*`. CPU was71% during fixture inspection with other repository test jobs active, so no latency campaign was started. No GPU speedup or new timing qualification is claimed; coverage stays181/401. Only the selected four CPU/native methods of this fixture can be fed to the current timing-qualification parser; six-method GPU reports require separate comparison evidence.
+
+
+### Certified integer-affine convolution GPU execution
+
+`NormalizedConvolution` now uses the shared weighted GPU recurrence when its copied kernel is an exact Int32 arithmetic progression. First weight and step are scalar arguments, so coefficient sets do not create additional compiled-program keys or device coefficient buffers. Endpoint-weighted averages use this same parameterized recurrence. The source remains staged and validated on the host; output arithmetic executes on-device through AiDotNet.Tensors 0.134.4.
+
+For period P, first coefficient F and step S, the certificate uses `P * max(1, abs(F), abs(F+S*P), abs(S))`. This bounds every weighted partial sum, the shifted window before eviction, the ordinary window sum and the `S*sum` operand. A division-before-multiplication check rejects bounds outside Int32 without overflowing the host calculation. Kernels outside exact integer progressions, oversized coefficient bounds or uncertified input grids reject explicitly. The exact signed prefix mass remains the divisor; zero mass uses available count while retaining signed weights. A one-element zero kernel yields zero, while nonzero one-element kernels preserve identity and canonical zero.
+
+The net10.0 Release production build passed with zero warnings/errors. The focused filter `TensorsAffineConvolutionGpuExecutionTests|TensorsEndpointWeightedGpuExecutionTests|TensorsWeightedAverageGpuExecutionTests|TensorsTriangularGpuExecutionTests|TensorsRollingSumGpuExecutionTests` passed **53 cases with zero skips** on the available GPU. Coverage includes exact CPU bit comparisons, both history modes, 64-output block boundaries, ascending/descending/negative/zero weights, zero prefix/full mass, large coefficients, one-element subnormal identity, unsupported coefficients/inputs, validation precedence, cancellation and workspace recovery. All preexisting weighted-family device cases passed after the kernel signature change. Test builds retain existing framework/analyzer warnings.
+
+This extends actual GPU execution for the affine subset of the QuanTAlib.Convolution mapping; it does not claim arbitrary convolution support or a GPU speedup. No new benchmark campaign was started under concurrent machine load. Timing qualification remains181/401 and broader GPU/graph rollout is incomplete.
+
+
+### Affine convolution six-path GPU comparison (`4ee6d76c`)
+
+`SharedGpuConvolutionBenchmarks` reuses independent weighted-window CPU/native references and verifies actual GPU execution with exact output parity. It measures complete CPU/GPU Full/LatestOnly builds against direct native serial and P-1-seeded native parallel calls. The fixture uses twenty newest-first coefficients1..20; coefficient arrays and indicator construction are inside measured methods, while source preparation and reference checks are setup-only.
+
+The benchmark build, 13 shared allocation-probe regression cases and 64 inventory checks passed. The real six-path GPU probe completed all backend/reference assertions. At 1,000 bars after ten warmups, three managed-allocation samples yielded:
+
+| Method | Allocated bytes |
+|---|---:|
+| CPU Full | 66,928 / 66,928 / 67,360 |
+| CPU LatestOnly | 18,240 (all three) |
+| GPU Full | 60,248 (all three) |
+| GPU LatestOnly | 11,560 (all three) |
+| Native serial | 220,272 (all three) |
+| Native parallel | 231,440 (all three) |
+
+The 432-byte CPU Full variation is preserved without attribution. These totals include all managed threads and retained results; they exclude cached kernel/workspace creation, setup and post-sample disposal, and do not measure total device/native memory. Raw/parsed evidence and exact revisions are under `results/shared-rollout/affine-convolution-gpu/allocation-1k*`. Other build/test processes remained active (25% CPU at inspection), so no timing run was started. Timing qualification remains181/401; device parity and managed-allocation savings do not prove a speedup.
+
+
+### Retrospective regression builder integration
+
+`RegressionWithFinalLine` routes the `Skender.GetSlope` comparison through `BuildAsync()`. The shared CPU path writes rolling statistics and explicit presence directly into run-owned columns, aliases the three identical full-window presence columns, and completes only the final fitted-line window after all raw inputs are validated. The existing historical fallback preserves selected sources and warmup coordinates; live sources reject this retrospective calculation. `RegressionSnapshot` remains unchanged.
+
+Focused checks cover independent rational references, all ten outputs, repainting, flat windows, subnormal variance, incomplete/maximum periods, mixed roots, chaining, warmup, input-before-output validation, cancellation and ownership after disposal. This batch removes snapshot row objects but retains the existing exact regression arithmetic. It adds no timing or allocation measurement and establishes no speed win; the 181/401 timing-qualified count is unchanged.
+
+Verification: net10.0 production and comparison builds passed; 13 focused unit cases, 8 regression comparison cases and 64 inventory checks passed, with no skipped tests.
+
+
+### Compact shared regression moments
+
+`WindowRegressionStatistics.State` now keeps one observed-history queue and reuses the existing exact dyadic accumulator for sums, squares, weighted moments and fitted coordinates. This removes the duplicate fit-window history and routine minimum-subnormal-unit BigInteger expansion for both rolling statistics and retrospective regression consumers. Wide exponent spans retain arbitrary-precision fallback; no rounded slope or intercept is reused to derive another output.
+
+The net10.0 production/comparison builds, 15 focused unit cases and 12 independent regression/channel comparison cases passed with no skips. Differential tests matched the previous state bit-for-bit across resets, full/partial windows, random fractions, extreme magnitudes, signed zero and subnormals. A warmed 1,000-bar eighth-unit price fixture, including final-line reads, allocated zero managed bytes on the current thread. This excludes state construction, history growth and result columns, and does not establish total BuildAsync allocations or a latency win. No timing benchmark was rerun; qualification remains 181/401.
+
+
+### Direct regression statistics allocation comparison
+
+`SharedRegressionStatisticsBenchmarks` retains all five native outputs and presence for QuanTAlib.Slope and Skender.GetSlope. QuanTAlib uses packed rows and P-1 seed replay on the nonconstant fixture; Skender uses its public tuple collection, full prefixes for global intercepts, and only the final prefix's decimal line overlay. Setup checks independent centered references and serial/parallel parity outside measurement.
+
+At 1,000 bars and period 20, all three warmed samples agreed:
+
+| API | Builder Full bytes | Builder LatestOnly bytes | Native serial bytes | Native parallel bytes |
+|---|---:|---:|---:|---:|
+| QuanTAlib.Slope | 134,160 | 85,472 | 442,600 | 466,576 |
+| Skender.GetSlope | 118,144 | 69,456 | 164,400 | 750,680 |
+
+These process-wide managed allocations include construction and retained outputs; setup and post-sample disposal are excluded. Production revision e76348e0, fixture revision 30a3eae4, raw samples and limitations are archived in `results/shared-rollout/regression-statistics-cpu/`. The fixture build, 23 focused tests and 65 inventory checks passed with no skips. An AiDotNet build was active at pre-probe inspection; no timing benchmark was run and qualification remains 181/401.
+
+
+### Retrospective regression channels through BuildAsync
+
+`RegressionWithChannels` now supplies the Skender.GetStdDevChannels builder comparison. Complete blocks align to the final input length; appending bars can repaint all blocks. The shared writer uses compact regression moments and extended rounded widths, publishing directly into five owned columns for seven outputs (the three presence outputs share storage). The historical fallback handles selected sources and warmup. Null period fits the complete input and requires at least two bars; explicit periods preserve absent leading rows. Live sources reject retrospective execution. `RegressionChannelSnapshot` keeps its public behavior. Rolling `WindowRegressionStatistics` also shares its three identical presence columns.
+
+The net10.0 production/comparison builds, 25 focused unit cases, 21 regression/channel/fixture comparison cases and 65 inventory checks passed with zero skips. Coverage includes independent references, block shifts, whole-input fits, all values/presence, ownership after disposal, validation order, cancellation inside block publication, warmup and selected sources. No allocation or timing probe was repeated for this batch; prior allocation checkpoints retain their recorded revisions. Timing qualification remains 181/401 and this is not a latency-win claim.
+
+
+### Certified linear regression GPU outputs
+
+`WindowLinearRegression` now runs endpoint, forecast, slope and oldest-candle intercept on the existing cached weighted GPU kernel. Each 64-row worker maintains exact sum and newest-first lag sum; the selected rational output is rounded once. Available-history startup and period-one zero slope are preserved. The 2P^2 term certificate bounds numerator products, signed totals and lag shifts through period 32767; slope denominators remain exactly representable integers. Unsupported periods, off-certificate inputs and Angle reject required GPU execution rather than silently using CPU. Auto remains CPU.
+
+The net10.0 production build and 62 real-device regression/weighted-family cases passed with zero skips. Checks cover bitwise CPU parity, startup, worker boundaries, largest-period eviction, ownership after disposal, input-before-certificate validation, rejection/recovery and cancellation. No timing or allocation probe was run for this extension; no GPU speedup is claimed and timing qualification remains 181/401.
+
+
+### Certified CPU linear regression recurrence
+
+The finite builder now specializes WindowLinearRegression periods through 32767 using the same certified sum/lag recurrence as the GPU. Endpoint, forecast, slope, intercept and CPU angle avoid general exact-state updates while the input certificate holds. A failed certificate seeds the existing exact state from the retained chronological window, preserving arbitrary finite inputs and selected-output overflow behavior. The existing AiDotNet.Tensors bounded engine supplies parallel overlap replay and mixed-root execution; larger periods keep the original path.
+
+The net10.0 production/comparison builds, 21 focused CPU/GPU cases and 10 independent regression comparisons passed with zero skips. Checks include late certificate failure after ring wrap, mixed parallel roots, large-period fallback, signed zero, unpublished overflow, raw validation priority, cancellation and owned results. A warmed 1,000-bar certified state replay allocated zero managed bytes, excluding construction and output storage.
+
+
+A focused 10k-bar, period-20 LinearRegSlope run at revision 432e31fc used ten warmups and ten requested measurement iterations. Full averaged 79.995 us / 567,118 B; LatestOnly 47.413 us / 86,086 B; native serial 182.744 us / 79,912 B; native parallel 49.496 us / 80,292 B. LatestOnly's confidence interval [45.843, 48.983] us narrowly overlaps native parallel [48.923, 50.068] us: approximately matched, not a proven win. Full remains slower than native parallel. The previous saved LatestOnly checkpoint was 1,771.148 us on this workload, with native parallel 50.085 us; it is a historical comparison, not a simultaneous control.
+
+CPU load was 13 percent before and 2 percent after; no competing build/test was observed at either sample. No continuous process trace was captured. Raw report, log, source hashes and limitations are in `results/shared-rollout/certified-regression-cpu/`. Only this API's 10k current entry was replaced, preserving its earlier 1k evidence and all other APIs. The timing-qualified count stays 181/401.
+
+
+At revision bdc51f7e, standalone typed regression workers hold mutable value-type state directly and cache complete-window coefficients/denominators. This removes a state object per worker without adding coefficient fields to boxed mixed-batch states. The production/fixture builds, 21 CPU/GPU cases and 30 comparison/probe cases passed with zero skips.
+
+A 10k-bar period-20 slope allocation-only probe returned identical values across three samples: Full 566,416 B, LatestOnly 85,392 B, native serial 79,904 B and native parallel 80,288 B. LatestOnly still allocates 5,104 B more than native parallel. Raw samples and context are archived beside the previous timing run in `results/shared-rollout/certified-regression-cpu/slope-value-allocation-10k*`. The probe and prior BDN report use different measurement harnesses; their byte difference is not an isolated before/after measurement. No timing rerun was performed, and the catalog retains the earlier timing checkpoint unchanged.
+
+### GPU scalar regression allocation checkpoint (2026-10-12)
+
+The endpoint, slope, intercept and forecast fixtures now compare CPU/GPU Full and LatestOnly against native serial/parallel. Setup verifies actual device execution and exact builder output bits, including startup against the independent integer oracle. Three warmed 1k/P20 samples per arm agreed: CPU Full 59,992 B, LatestOnly 11,304 B; GPU Full 59,792 B, LatestOnly 11,104 B; native serial 7,904 B, parallel 8,288 B. Native retains 981 completed-window values; builder also computes and retains startup values (1,000 total), and Full owns OHLCV. Cached GPU memory is excluded. These are managed allocations, not latency wins; qualification remains 181/401. Evidence: `results/shared-rollout/gpu-regression/`. Use `--alloc-shared-gpu TaLib.Functions.LinearRegSlope 1000 3` for explicit GPU sampling; ordinary regression allocation probes remain CPU-only.
+
+### Shared execution setup allocation reduction (2026-10-12)
+
+Shared values execution skips single-root deduplication, creates filtered nodes only for the row-wise route, fills output columns directly, reserves published-output capacity and avoids unused scratch buffers and snapshot closures. Three identical slope allocation samples show Full saves 728 B and LatestOnly saves 832 B against the same prior probes. At 10k, CPU LatestOnly uses 84,560 B versus native parallel 80,288 B (4,272 B remaining gap). At 1k, GPU LatestOnly uses 10,272 B versus native parallel 8,288 B. Evidence: `results/shared-rollout/shared-setup/`. No timing was run and qualification remains 181/401. Verification: production net10.0 build clean; 142 focused cases passed, one stale existing test still expected supported RollingPriceSum GPU execution to reject.
+
+### Lazy legacy builder setup (2026-10-12)
+
+The facade now creates legacy graph dictionaries and callback catalogs on first use, instead of on every typed build. Existing per-builder identity, callback fallback and named-source behavior are retained. One six-arm slope probe (1k/P20; three identical samples) saves another 928 B in every builder arm: CPU Full 58,336 B, LatestOnly 9,544 B; GPU Full 58,136 B, LatestOnly 9,344 B; native serial 7,904 B, parallel 8,288 B. Evidence: `results/shared-rollout/lazy-legacy-setup/`. Production net10.0 build is clean; 107 focused unit cases passed, zero skips. The previously reported stale GPU rejection test is unchanged and outside this selection. No timing run or coverage increase.
+
+### Compact scalar LatestOnly result (2026-10-12)
+
+Nonempty single-output shared runs now retain their output array and latest bar in one owner implementing both result and snapshot interfaces. This removes the output dictionary and separate snapshot allocation while preserving lookup errors, replay rejection, warmup and disposal lifetime. Three identical 1k/P20 slope samples show another 280 B saved for CPU/GPU LatestOnly: 9,264 B / 9,064 B respectively, versus native serial 7,904 B and parallel 8,288 B. Full allocation is unchanged. Evidence: `results/shared-rollout/scalar-latest-result/`. Production net10.0 build clean; 81 focused tests passed with zero skips. No timing run or qualification increase.
+
+### Fisher shared-state optimization (2026-10-12)
+
+`WindowFisherTransform` now reuses lazy rolling minimum/maximum deques instead of scanning a retained queue each update. Midpoint and range ratios use the existing compact exact dyadic arithmetic with wide fallback; smoothing and logarithm rounding are unchanged. Five focused state cases and eight independent volatility/Fisher comparisons passed, including startup, flat windows, expiration, resets, period one/int.MaxValue, extreme values and subnormals. A warmed 1,000-update ordinary midpoint sequence, including reset startup, allocated zero current-thread managed bytes. This is state-only evidence, not total builder allocation or a native speed win. Production net10.0 build passed with zero warnings/errors. Timing was deferred because AiDotNet.Tensors tests were running; direct Fisher native/builder timing remains unqualified and the catalog stays 181/401.
+
+### Direct Fisher native/builder fixture (2026-10-12)
+
+`SharedFisherBenchmarks` uses the published Skender 2.7.3 eager tuple API and builder close-input mode, retaining Fisher, trigger and presence. Exact recursive parallel replay includes every prefix and temporary result; setup validates native dates and bitwise serial/parallel agreement plus independent native/exact references and all builder columns. Three identical warmed 1k/P20 allocation samples measured Full 83,288 B, LatestOnly 34,496 B, native serial 124,448 B and native parallel 570,232 B. The 32 focused comparison/probe tests and 67 inventory tests passed. Evidence/source links: `results/shared-rollout/fisher-cpu/`. Timing remains deferred because another tensors test process was active; the catalog remains 181/401, with Fisher unqualified for timing.
+
+### Compact path-ratio arithmetic and Fisher timing diagnostic (2026-10-12)
+
+`WindowPathRatio`, shared by Skender CMO and Trady EfficiencyRatio, now stores compact exact rolling steps and path sums and rounds only the final ratio. The wide fallback and nullable endpoint/step rules are preserved. Six state/differential tests and 15 independent comparison cases passed; ordinary warmed 1,000-update state checks allocate zero managed bytes in both conventions, including reset startup. Production net10.0 build is clean. This is state-level allocation evidence, not total builder/native timing.
+
+One 10k Fisher four-arm run was attempted on production `4b244e81`/fixture `a6ed67b6`. It measured LatestOnly 1.512 ms and native serial 1.367 ms, but a new AiDotNet.Tensors net471 build was active at completion (CPU 36%). Contention overlap cannot be ruled out, so the report is diagnostic only and excluded from qualification. The run was not repeated. Raw evidence/context: `results/shared-rollout/fisher-cpu/diagnostic-10k*`. Coverage stays 181/401; neither change establishes a native speed win.
+
+### Path-ratio bounded CPU execution (2026-10-12)
+
+Standalone `WindowPathRatio` now uses the shared bounded CPU engine, with P preceding prices for each worker to reconstruct exactly P changes. It publishes value/presence directly without per-worker output scratch arrays. The calculator retains one price queue and the outgoing predecessor instead of a second queue of exact step structs; nullable gaps and exact eviction remain unchanged. Period arithmetic is guarded, large replay windows remain serial, and int.MaxValue retains the prior state route. The existing 8,192-row scheduling threshold is unchanged. Production net10.0 build passed cleanly; 13 focused state/worker cases and 15 competitor comparisons passed. Tests cover one/eight worker budgets, both history modes, flat runs, limits around the 4,096-price parallel window, reset/nullable semantics, ignored-field validation, cancellation and recovery. No timing or builder-allocation sampling was repeated; no speed claim or qualification increase.
+
+### Direct path-ratio fixtures and allocation evidence (2026-10-12)
+
+`SharedPathRatioBenchmarks` compares builder Full/LatestOnly with Skender CMO and Trady EfficiencyRatio public tuple APIs. Serial arms retain native lists. Parallel arms seed P preceding prices and retain assigned native outputs, including local input/result costs; Trady uses its public output-range API. Setup checks independent references, nullable/presence contracts, Skender dates/bit patterns and exact Trady decimals. All 41 comparison/probe tests and 68 inventory checks passed. Three warmed 1k/P20 samples: CMO Full 67,432 B, LatestOnly 18,640 B, native serial 108,456 B, native parallel 135,880 B. Efficiency Full 67,432 B, LatestOnly 18,640-19,536 B, native serial 556,704 B, native parallel 554,136-554,472 B; all samples are retained. Source/context and raw evidence: `results/shared-rollout/path-ratio-cpu/`. These are allocation observations; no timing was run and qualification stays 181/401.
+
+### Path-ratio 10k timing qualification (2026-10-12)
+
+One eight-case timing batch on production `143fe7ad` / fixture `71af8461` completed with no competing build/test observed before, in two mid-run samples, or after. CPU was 6% before and 17% after; reusable MSBuild nodes and a dotnet --version process were present. Sampling is not a continuous exclusivity trace. Ten warmups and ten measurement iterations were requested; retained sample counts and 99.9% confidence intervals are in the raw report.
+
+| API / 10k, P20 | Full mean us / bytes | LatestOnly mean us / bytes | Fastest tested native mean us / bytes | Result |
+|---|---:|---:|---:|---|
+| Skender.GetCmo | 414.20 / 653,108 | 372.74 / 171,906 | parallel 247.95 / 1,179,864 | Both builder modes lose latency |
+| Trady.Indicator.EfficiencyRatio | 297.38 / 653,045 | 267.20 / 171,907 | parallel 2,099.99 / 5,529,251 | Both builder modes win with nonoverlapping intervals |
+
+EfficiencyRatio LatestOnly is about 7.86x faster than the fastest tested native arm; CMO LatestOnly remains 1.50x slower despite lower allocation. This qualifies the two 10k workloads only; all previous catalog entries are preserved. Coverage rises to 183/401 APIs, not a win count. Raw report, process samples and context: `results/shared-rollout/path-ratio-cpu/cpu-native-10k*`. No rerun was performed.
+
+### Guarded CMO percentage publication (2026-10-12)
+
+The signed path-ratio convention now avoids integer promotion for multiplication by 100 only when both numerator and denominator are exactly representable binary64 values and a finite product passes an exact FMA residual check. Because the integer factor keeps the residual on the binary64 subnormal grid, a nonzero residual cannot round to zero. Inexact/overflowing products and wide operands use the previous exact path. Thirteen state/worker cases and 41 comparison/probe cases passed, including rounded products, overflowing products with finite ratios, subnormals, nullable gaps and worker seeds. Production net10.0 build is clean. The earlier CMO timing loss remains the saved checkpoint; this change is not retimed and adds no qualification or speed claim.
+
+### Certified path-ratio GPU kernel (2026-10-12)
+
+Required-GPU `WindowPathRatio` now executes CMO/efficiency value and presence columns in one cached OpenCL kernel through the existing AiDotNet.Tensors workspace. Each work item handles 64 output rows and seeds P preceding prices. The shared binary-grid certificate bounds path sums by 2P price terms and signed percentage numerators by 200; uncertified inputs reject after complete raw validation. All-missing windows (P >= count) execute on-device without arithmetic certification, including int.MaxValue periods. Kernel programs and workspace are reused across periods, and Auto remains CPU. Production net10.0 build passed cleanly; 56 focused CPU/GPU cases passed with zero skips, covering exact bits, flat/startup presence, 64-row boundaries, completed 4096-period windows, huge incomplete periods, malformed ignored fields, cancellation, rejection/recovery, retained history and existing weighted/regression/sum device paths. GPU allocation/latency is not measured yet; timing qualification stays 183/401.
+
+### Path-ratio GPU allocation fixtures (2026-10-12)
+
+The six-arm GPU fixture checks exact values and presence in both histories and requires the GPU backend. Benchmark build, 42 comparison/probe tests and 69 inventory tests passed. Three warmed 1k/P20 samples on AMD gfx1012 gave GPU Full 66,208 B and LatestOnly 17,416 B for both operations; CPU LatestOnly was 18,640 B. CMO native serial/parallel allocated 108,456/135,880 B. Efficiency native serial allocated 556,704 B and parallel 554,136-554,192 B; CPU Full varied 67,432-67,768 B. All samples and raw logs are archived in `results/shared-rollout/path-ratio-gpu/`. These count all managed threads and exclude cached device/workspace memory; no latency or new qualification claim (183/401).
+
+### Certified CPU path-ratio recurrence (2026-10-12)
+
+The bounded CPU builder kernel now reuses the SMA binary-grid certificate with the same 2P/200 term bounds as the path-ratio GPU kernel. Certified rows use a fixed price ring and double recurrence instead of per-row dyadic arithmetic. Failure promotes once by replaying retained raw prices in chronological order into the existing exact calculator; incomplete windows avoid state allocation. Scheduling and public contracts are unchanged. Production net10.0 build passed with zero warnings/errors; 21 state/worker tests and 15 independent comparison tests passed, including early/late certificate failure, ring wrap, worker boundaries, subnormals, extreme finite values, both conventions and histories. This implementation batch was not benchmarked; the earlier CMO loss and 183/401 timing coverage remain the recorded evidence.
+
+### Certified CMO CPU/GPU timing (2026-10-12)
+
+One six-arm 10k/P20 comparison at ff9e16d3 measured CPU Full 91.83 us / 645,542 B and LatestOnly 57.71 us / 164,406 B versus native serial 741.57 us / 1,081,723 B and native parallel 272.28 us / 1,179,863 B. Both CPU history modes clearly win by nonoverlapping reported confidence intervals; LatestOnly is 4.72x faster than the fastest tested native arm. GPU Full 583.75 us / 642,580 B and LatestOnly 553.11 us / 161,440 B lose to native parallel at this size. Auto remains CPU. Raw six-arm report, CPU qualification projection, source hashes and process samples: `results/shared-rollout/path-ratio-certified-cpu/`. CPU load was 5% before and 9% after; no competing build/test was observed before, during or after, but sampling is not continuous exclusivity proof. Ten warmups/iterations were requested. BDN warned that the shortest Full iteration was 44.182 ms and removed one GPU Full/two GPU LatestOnly outliers; raw samples are retained and no rerun was performed. Only the CMO 10k catalog entry changed; qualification stays 183/401.
+
+### Certified Ulcer percentage contributions (2026-10-12)
+
+WindowUlcerIndex now reuses the common-grid certificate with a 200-price-term bound to compute each changed percentage contribution with exact subtraction/multiplication and one binary64 division. Cached contributions, exact squared accumulation and final root rounding remain unchanged. Once a value rejects certification, the existing extended arithmetic handles subsequent contributions; reset restores certification. Production net10.0 build passed cleanly. All 24 state/worker tests and 15 independent comparison/fixture tests passed, including late rejection after ring wrap, scaled inputs, absent-prefix recovery, extreme values, subnormals, parallel boundaries and zero warmed state allocations. No allocation probe or timing rerun was performed. The saved Ulcer loss remains current evidence and timing coverage stays 183/401.
+
+### Compact zero-seeded Laguerre stages and direct fixture (2026-10-12)
+
+ZeroSeedLaguerreFilter now uses shared compact dyadic differences and one rounded SumProduct per stage, preserving extended exponent fallback and exact final weighted publication. FMA is used only for exactly representable operands. Eleven state tests compare the frozen previous algorithm across endpoints, subnormals, wide intermediates and resets; ordinary warmed updates allocate zero bytes. The four-arm direct QuanTAlib.Ltma fixture checks independent native/exact references, both history modes and full-prefix native parallel replay. Production build is clean; benchmark build, 46 comparison/probe cases and 70 inventory checks passed. Three warmed 1k samples: Full 58,272 B, LatestOnly 9,200 B, native serial 48,384 B, native parallel 191,064 B. Full still allocates more than native serial. Package-pinned source, contracts and raw evidence: `results/shared-rollout/zero-seed-laguerre-cpu/`. No latency run or qualification increase (183/401).
+
+### Laguerre and triangular 10k qualification (2026-10-12)
+
+One 16-case batch at 54441b95 qualifies three pending APIs, raising timing coverage to 186/401 (not a win count). Triangular LatestOnly took 66.57 us / 88,819 B versus QuanTAlib parallel 344.99 us / 2,643,560 B; Full 102.71 us / 570,221 B also won. Against TA-Lib the same builder took 68.03 us LatestOnly and 99.62 us Full, losing to native parallel 10.65 us / 80,329 B. Triangular GPU LatestOnly took 423.13-434.18 us and Full 489.35-496.49 us, losing to both parallel competitors. Laguerre LatestOnly took 3,144.85 us / 81,373 B and Full 3,316.97 us / 565,408 B versus native serial 353.83 us / 480,404 B (faster than native parallel 420.53 us). Reported confidence intervals do not overlap for these wins/losses. Raw reports, CPU qualification projections, source hashes and process samples: `results/shared-rollout/laguerre-triangular-10k/`. No competing build/test was seen before, during or at completion; CPU load was 14% before and 5% after, without continuous exclusivity proof. Ten warmups/iterations requested. BDN warned of a 12.404 ms minimum Laguerre Full iteration and removed triangular outliers detailed in context; raw data retained, no rerun. All unrelated catalog entries are preserved.
+
+### Guarded Laguerre binary64 kernel (2026-10-12)
+
+The Laguerre state now attempts four certified exact-difference/FMA updates before using compact dyadic stages. Its final weighted mean retains error-free addition residuals and outward-rounded bounds; only a quotient whose strict rounding cell contains the exact result is accepted. One adjacent quotient may be tested, while ties, cancellation outside the proof bounds and wide exponents use the existing exact path. No state is published until the whole fast update succeeds. Production net10.0 build is clean; 12 state tests (including 4,000 deterministic mean comparisons against exact accumulation) and 18 independent comparison/fixture cases passed. Zero warmed state allocation checks still pass. No timing rerun: the saved 3.14 ms LatestOnly loss remains current evidence; coverage stays 186/401.
+
+### Compact and certified Holt-Winter stages (2026-10-12)
+
+HoltWinterForecast now uses compact exact state with guarded complete-stage product sums. Error-free product/addition residuals and outward bounds certify a single final rounding; uncertain ties, subnormal half terms and wide values use the compact/extended fallback. Period-one identity, initial signed zero, resets and finite factors outside [0,1] retain their contracts. The initial compact-only implementation still allocated 5,712 B per 1,000 period-20 updates; the guarded stages removed these allocations without weakening the assertion. Final production/benchmark builds passed, as did 11 state tests and 21 independent comparison/fixture tests. The initial fixture/probe batch passed 50 cases and inventory passed 71 checks. The new four-arm fixture measures native state creation and full-prefix parallel replay. Three warmed 1k samples: Full 58,240 B, LatestOnly 9,168 B, native serial 48,376 B, native parallel 191,000 B. Full still allocates more than native serial. Package-pinned source and raw evidence: `results/shared-rollout/holt-winter-cpu/`. No latency run or qualification increase (186/401).
+
+### Compact expanding EMA recurrences (2026-10-12)
+
+ExpandingRegularizedEma now caches the exact denominator after the effective startup period stops changing and computes its numerator with compact dyadic arithmetic. ExpandingZeroLagEma uses the same compact arithmetic for its complete lag-adjusted ratio. Wide coefficients, maximum periods, seed/signed-zero behavior and complete-ratio rounding retain the established fallback contracts. Production and benchmark builds passed; 10 state tests (frozen prior algorithms plus zero warmed allocation), 58 comparison/probe cases and 72 inventory checks passed. The new four-arm fixture covers QuanTAlib.Rema and QuanTAlib.Zlema with independent native/exact references and full-prefix native parallel replay. Package-pinned source: `lib/averages/Rema.cs` and `Zlema.cs` at QuanTAlib commit a2af99711d22a2833af2eb18054f0049a3fb0224 (package 1.0.0). Timing is pending; qualification stays 186/401.
+
+### Recursive/Ulcer combined diagnostic (2026-10-12)
+
+A single 20-case 10k batch at 5450bd1c covered expanding Rema/Zlema, Holt-Winter, updated Laguerre and Ulcer. All setup validations and measurements completed, but an AiDotNet.Tensors build appeared in the completion process sample and CPU load reached 74% (6% immediately before timing). Overlap cannot be ruled out. All timing is retained as diagnostic only in `results/shared-rollout/recursive-diagnostic-10k/`; no catalog entry changed and qualification stays 186/401. No rerun. Managed LatestOnly allocations were Rema 81,336 B, Zlema 81,464 B, Holt-Winter 81,330 B, Laguerre 81,362 B and Ulcer 171,071 B. The diagnostic still indicates substantial recurrence costs despite lower allocations; it establishes no latency win. BDN iteration warnings/outliers, raw data and process samples are preserved.
+
+### Preserved pivot columns against the cached baseline (2026-10-16)
+
+The preserved 033e31ab pivot-column candidate completed the four builder measurements with no detected interference. The saved native measurements were reused on matching recorded hardware/runtime. All four current builder confidence intervals are below the saved fastest-native interval. These are cross-run comparisons, not same-run qualification; the two interrupted attempts are excluded.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 127.602 | 139,236 | 0.269 | 0.817 |
+| 1,000 | LatestOnly | 119.624 | 90,487 | 0.259 | 0.766 |
+| 10,000 | Full | 1,088.500 | 1,219,718 | 0.228 | 0.606 |
+| 10,000 | LatestOnly | 1,061.522 | 738,594 | 0.225 | 0.591 |
+
+Evidence: `results/shared-rollout/rolling-pivot-shared-cpu/reused-baseline-columns/` contains raw timing, cached-baseline comparisons, immutable candidate hashes and quiet-process receipts. No native or competitor timing was repeated.
+
+### Preserved Rickshaw workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. The current means are 0.202-0.428 times the saved builder means. Only 10k LatestOnly has a confidence interval below the saved fastest-native interval; 1k Full remains slower, and the other two cases do not establish a latency win. The native baseline was reused, so comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: |
+| 1,000 | Full | 34.323 | 61,237 | 1.448 |
+| 1,000 | LatestOnly | 23.806 | 12,203 | 1.005 |
+| 10,000 | Full | 210.944 | 565,628 | 0.994 |
+| 10,000 | LatestOnly | 158.305 | 84,215 | 0.746 |
+
+Evidence: `results/shared-rollout/rickshaw-shared-cpu/reused-baseline-workers/`. Preserve the 1k Full gap and the two inconclusive cases for further optimization; this result does not qualify every Rickshaw workload as faster than native.
+
+### Preserved Asin workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. All four remain slower than the cached fastest native mean; none establishes a performance win. Native measurements were reused on matching recorded hardware/runtime, so these are cross-run comparisons.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 17.160 | 66,567 | 1.009 | 3.327 |
+| 1,000 | LatestOnly | 11.957 | 17,971 | 0.913 | 2.318 |
+| 10,000 | Full | 89.567 | 642,974 | 0.913 | 3.041 |
+| 10,000 | LatestOnly | 45.931 | 161,988 | 1.192 | 1.559 |
+
+Evidence: `results/shared-rollout/asin-shared-cpu/reused-baseline-workers/`. Recording accepts a missing final process command line only after matching the previously proven PID, creation time and monotonic CPU total; changed identities, unexpected commands and background CPU limits remain enforced. The completed measurement was recorded without rerunning it.
+
+### Preserved SMA workers against the cached baseline (2026-10-16)
+
+Four builder measurements completed without detected interference. All four remain slower than the saved fastest TALib native mean and none establishes a latency win. Identical builder code and inputs are timed once under the TALib operation label; cached native results are reused on matching recorded hardware/runtime. Comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 9.615 | 57,741 | 1.134 | 3.884 |
+| 1,000 | LatestOnly | 6.746 | 9,035 | 1.019 | 2.725 |
+| 10,000 | Full | 66.570 | 562,618 | 0.890 | 5.757 |
+| 10,000 | LatestOnly | 20.302 | 81,631 | 1.035 | 1.756 |
+
+Evidence: `results/shared-rollout/sma-cpu/reused-baseline-workers/`. These gaps remain open; no competitor measurement was repeated.
+
+### Skender RSI/ADX first direct-native baseline (2026-10-16)
+
+All 16 native/builder cases completed in one run without detected interference. Native serial and full-prefix parallel results are now cached for reuse. Every builder case remains slower than the fastest native mean; no workload qualifies as a latency win. The interrupted first attempt is excluded.
+
+| Operation | Bars | Builder history | Mean (us) | Managed bytes | Builder / fastest native |
+| --- | ---: | --- | ---: | ---: | ---: |
+| Skender.GetRsi | 1,000 | Full | 243.886 | 66,401 | 4.149 |
+| Skender.GetRsi | 1,000 | LatestOnly | 225.026 | 17,643 | 3.828 |
+| Skender.GetRsi | 10,000 | Full | 2,403.441 | 642,914 | 2.650 |
+| Skender.GetRsi | 10,000 | LatestOnly | 2,379.979 | 161,784 | 2.624 |
+| Skender.GetAdx | 1,000 | Full | 1,475.513 | 116,590 | 12.400 |
+| Skender.GetAdx | 1,000 | LatestOnly | 1,715.316 | 67,834 | 14.415 |
+| Skender.GetAdx | 10,000 | Full | 16,911.649 | 1,126,086 | 11.838 |
+| Skender.GetAdx | 10,000 | LatestOnly | 16,881.285 | 644,989 | 11.817 |
+
+Evidence: `results/shared-rollout/skender-strength/first-native-baseline/`. Comparisons are from the same run on the preserved 2e533ff2 candidate. RSI and ADX latency gaps remain open; retain these native baselines when measuring later candidates.

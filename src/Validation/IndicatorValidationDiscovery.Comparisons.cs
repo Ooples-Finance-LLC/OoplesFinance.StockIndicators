@@ -10,12 +10,15 @@ public static partial class IndicatorValidationDiscovery
         if (type == typeof(WindowSampleShape)) return 3;
         if (type == typeof(AlignedEmaMacd)) return parameter == "signalPeriod" ? 1 : 2;
         if (type == typeof(SeededPriceMomentum)) return parameter == "period" ? 2 : 1;
+        if (type == typeof(KlingerVolumeWithSignal)) return parameter == "signalPeriod" ? 1 : 3;
         return type == typeof(ReverseEngineeringRsi) || type == typeof(GaussianWeightedAverage)
             || type == typeof(Indicators.HullWindow) || type == typeof(NormalizedWindowEntropy)
             || type == typeof(RangeFractalAverage) || type == typeof(SeededAtrTrailingStop)
             || type == typeof(StandardDeviationWithDetails) || type == typeof(SumSeededDirectionalIndex)
             || type == typeof(WindowChoppinessIndex) || type == typeof(WindowLogVolatility)
             || type == typeof(WindowMoneyFlowIndex) || type == typeof(WindowRegressionStatistics)
+            || type == typeof(RegressionWithFinalLine) || type == typeof(RegressionWithChannels)
+            || type == typeof(ConnorsStrength) || type == typeof(RelativeVolatilityStrength)
             ? 2 : 1;
     }
 
@@ -42,7 +45,8 @@ public static partial class IndicatorValidationDiscovery
             AtLeast("teethPeriod", Value("lipsPeriod") + 1);
             AtLeast("jawPeriod", Value("teethPeriod") + 1);
         }
-        if (type == typeof(AwesomeWithDetails)) AtLeast("slowPeriod", Value("fastPeriod") + 1);
+        if (type == typeof(AwesomeWithDetails) || type == typeof(KlingerVolumeWithSignal)
+            || type == typeof(SingleStochasticCycle)) AtLeast("slowPeriod", Value("fastPeriod") + 1);
         if (type == typeof(WindowUltimateOscillator))
         {
             AtLeast("middlePeriod", Value("shortPeriod") + 1);

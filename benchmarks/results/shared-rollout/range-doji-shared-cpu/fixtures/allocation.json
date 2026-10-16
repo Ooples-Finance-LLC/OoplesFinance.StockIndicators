@@ -1,0 +1,197 @@
+[
+  {
+    "Operation": "TaLib.Candles.Doji",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          563008,
+          563008,
+          563664
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          81600,
+          81600,
+          81600
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          80976,
+          80976,
+          80976
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.DragonflyDoji",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          563008,
+          563008,
+          563664
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          81600,
+          81600,
+          81600
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.GravestoneDoji",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          563008,
+          563008,
+          563664
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          81600,
+          81600,
+          81600
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          80976,
+          80976,
+          80976
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.LongLeggedDoji",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          563008,
+          563008,
+          563664
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          81600,
+          81600,
+          81600
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          80976,
+          80976,
+          80976
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.TakuriLine",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          563008,
+          563008,
+          563664
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          81600,
+          81600,
+          81600
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          80976,
+          80976,
+          80976
+        ]
+      }
+    ]
+  }
+]

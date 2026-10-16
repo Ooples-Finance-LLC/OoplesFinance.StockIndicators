@@ -1,0 +1,41 @@
+{
+  "Operation": "Skender.GetUltimate",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        688176,
+        687520,
+        687520
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        206392,
+        206392,
+        206392
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1560488,
+        1560488,
+        1560488
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1594776,
+        1594776,
+        1594776
+      ]
+    }
+  ],
+  "ProductionCommit": "fcb52483",
+  "Evidence": "Allocation-only warmed process-wide measurements; raw samples retained. Native results retained directly, input preparation and agreement checks outside measured calls. No latency qualification."
+}

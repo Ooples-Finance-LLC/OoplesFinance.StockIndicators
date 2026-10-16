@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "source_commit": "8401a013",
+  "preserved_executable_directory": "C:\\Users\\cheat\\temp\\si-seeded-double-binaries-8401a013",
+  "competitor_timing": "reuse saved results; no native setup or timing",
+  "completed_stem": "si-seeded-double-builder-20261013-a",
+  "evidence": "builder-timing",
+  "reason": "16cases completed exit0 uninterrupted; no competing .NET jobs observed."
+}

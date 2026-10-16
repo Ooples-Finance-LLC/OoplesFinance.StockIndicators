@@ -75,14 +75,14 @@ public sealed class WilderStrengthOscillator
                 )
             );
 
-    private sealed class State(int period, WilderStrengthConvention convention, int unstable)
+    internal sealed class State(int period, WilderStrengthConvention convention, int unstable)
         : IMultiOutputState
     {
         private bool _started;
         private double _previous;
         private int _count,
             _skipped;
-        private BigInteger _gainSeed,
+        private ExactMeanAccumulator _gainSeed,
             _lossSeed;
         private PositiveStrengthValue _gain,
             _loss;
@@ -93,8 +93,8 @@ public sealed class WilderStrengthOscillator
             _previous = 0;
             _count = 0;
             _skipped = 0;
-            _gainSeed = 0;
-            _lossSeed = 0;
+            _gainSeed = default;
+            _lossSeed = default;
             _gain = default;
             _loss = default;
         }
@@ -108,26 +108,35 @@ public sealed class WilderStrengthOscillator
                 _previous = bar.Close;
                 return;
             }
-            var difference =
-                ExactVarianceWindow.Units(bar.Close) - ExactVarianceWindow.Units(_previous);
+            var previous = _previous;
             _previous = bar.Close;
-            var gain = BigInteger.Max(difference, 0);
-            var loss = BigInteger.Max(-difference, 0);
             if (_count < period)
             {
-                _gainSeed += gain;
-                _lossSeed += loss;
+                if (bar.Close > previous)
+                {
+                    _gainSeed.Add(bar.Close); _gainSeed.Add(previous, -1);
+                }
+                else if (bar.Close < previous)
+                {
+                    _lossSeed.Add(previous); _lossSeed.Add(bar.Close, -1);
+                }
                 if (++_count < period)
                     return;
                 _gain = PositiveStrengthValue.Seed(_gainSeed, period);
                 _loss = PositiveStrengthValue.Seed(_lossSeed, period);
-                _gainSeed = 0;
-                _lossSeed = 0;
+                _gainSeed = default;
+                _lossSeed = default;
+            }
+            else if (PositiveStrengthValue.TryDifference(bar.Close, previous, out var compactChange))
+            {
+                _gain = _gain.Update(Math.Max(compactChange, 0), period);
+                _loss = _loss.Update(Math.Max(-compactChange, 0), period);
             }
             else
             {
-                _gain = _gain.Update(gain, period);
-                _loss = _loss.Update(loss, period);
+                var difference = ExactVarianceWindow.Units(bar.Close) - ExactVarianceWindow.Units(previous);
+                _gain = _gain.Update(BigInteger.Max(difference, 0), period);
+                _loss = _loss.Update(BigInteger.Max(-difference, 0), period);
             }
             if (_skipped < unstable)
             {

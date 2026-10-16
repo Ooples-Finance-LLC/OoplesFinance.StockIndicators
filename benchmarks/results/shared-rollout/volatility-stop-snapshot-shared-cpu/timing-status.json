@@ -1,0 +1,12 @@
+{
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "next_filter": "*SharedVolatilityStopSnapshotBenchmarks*Snapshot*",
+  "reason": "2 snapshot-only cases completed exit0 without observed competing jobs.",
+  "source_commit": "e499e2fb",
+  "reuse_binaries": true,
+  "status": "completed",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-volatilitystop-binaries-e499e2fb",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-volatilitystop-snapshot-20261013-a",
+  "evidence": "snapshot-timing"
+}

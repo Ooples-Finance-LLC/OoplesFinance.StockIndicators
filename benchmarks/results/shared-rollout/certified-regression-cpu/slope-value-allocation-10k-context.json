@@ -1,0 +1,15 @@
+{
+  "production_and_probe_commit": "bdc51f7e",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared TaLib.Functions.LinearRegSlope 10000 3",
+  "warmups_per_arm": 10,
+  "samples_per_arm": 3,
+  "period": 20,
+  "prices": "10 + (i % 101) / 8d",
+  "sha256": {
+    "src/Indicators/ValuesBarExecution.Regression.cs": "7400e23b3eda134b8a104a97a79f5e660359bf76d8e071c68368c1de845a0fe6",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/SharedAllocationProbe.cs": "94b71487963e3353671c15ef834268e020b1927a8350b3d2c7ff2c13136680d7"
+  },
+  "scope": "All managed threads; construction and retained outputs included, setup and post-sample disposal excluded. Native serial and parallel retain packed full-window output; builder also returns startup and Full owns OHLCV.",
+  "validation": "Production and fixture builds, 21 focused CPU/GPU cases and 30 comparison/probe cases passed with zero skips.",
+  "limitations": "Allocation only. Three samples agreed for every arm. The previous BDN timing/allocation checkpoint used a different measurement harness and is retained separately; do not infer an exact before/after byte reduction from that comparison or combine its latency with these allocation values. LatestOnly still allocates 5104 B more than native parallel. No new timing measurement or qualification change."
+}

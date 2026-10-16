@@ -1,0 +1,7 @@
+Rejected experiment: limit standalone Full midpoint execution to four workers instead of eight.
+Six cases, five warmups and fifteen measured iterations; 68 focused tests passed before timing.
+Full close/high-low at 1k: 19.69/19.61 us (retained eight-worker evidence: 17.60/17.57).
+At 10k: 164.71/156.70 us (retained: 107.93/102.69); at 100k: 1695.49/1825.89 us (retained: 1499.74/1413.94).
+The experiment was reverted. These rows are not current-implementation qualifications.
+Prior evidence: ../midpoint-direct-dispatch/midpoint-native.json.gz.
+This is a historical comparison, not an interleaved controlled experiment; no beneficial evidence justified retaining the cap.

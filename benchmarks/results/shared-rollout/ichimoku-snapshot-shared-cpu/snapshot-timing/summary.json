@@ -1,0 +1,132 @@
+[
+  {
+    "operation": "Skender.GetIchimoku",
+    "snapshot": [
+      {
+        "bars": 1000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 253984.11458333334,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 253984.11458333334,
+              "StandardError": 377.60558099591555,
+              "Level": 12,
+              "Margin": 1903.6250661110612,
+              "Lower": 252080.48951722228,
+              "Upper": 255887.7396494444
+            },
+            "allocated_bytes": 132232
+          }
+        },
+        "evidence": "results/shared-rollout/ichimoku-snapshot-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedIchimokuSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getichimoku-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.03082842800585858
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 2946070.659722222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 2946070.659722222,
+              "StandardError": 97229.2237589648,
+              "Level": 12,
+              "Margin": 490162.2137520488,
+              "Lower": 2455908.445970173,
+              "Upper": 3436232.873474271
+            },
+            "allocated_bytes": 1285405
+          }
+        },
+        "evidence": "results/shared-rollout/ichimoku-snapshot-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedIchimokuSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getichimoku-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.2008894561514764
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 8238633.333333333,
+        "allocated_bytes": 329184,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getichimoku-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 14665133.333333334,
+        "allocated_bytes": 3218232,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getichimoku-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.IchimokuCloud",
+    "snapshot": [
+      {
+        "bars": 1000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 275833.90625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 275833.90625,
+              "StandardError": 2713.5145075966116,
+              "Level": 12,
+              "Margin": 12973.075657910467,
+              "Lower": 262860.8305920895,
+              "Upper": 288806.9819079105
+            },
+            "allocated_bytes": 179352
+          }
+        },
+        "evidence": "results/shared-rollout/ichimoku-snapshot-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedIchimokuSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-ichimokucloud-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.019252867420726048
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 2917339.7569444445,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 2917339.7569444445,
+              "StandardError": 14693.663028290763,
+              "Level": 12,
+              "Margin": 74075.24322037553,
+              "Lower": 2843264.513724069,
+              "Upper": 2991415.00016482
+            },
+            "allocated_bytes": 1692493
+          }
+        },
+        "evidence": "results/shared-rollout/ichimoku-snapshot-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedIchimokuSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-ichimokucloud-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.05714936357371666
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 14326900,
+        "allocated_bytes": 5261296,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-ichimokucloud-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 51047633.333333336,
+        "allocated_bytes": 37755888,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-ichimokucloud-short.json.gz"
+      }
+    ]
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "change": "Maintain a sorted exact-return index alongside inclusive nullable FIFO history. Lower-bound lookup gives strict rank and locates interchangeable exact ties for eviction. Nonpositive previous prices remain excluded. Reset clears both retained structures.",
+  "tradeoff": "Default rank period100: at most14 binary-search comparisons for insertion and eviction instead of101 scan comparisons per published update. Array shifts remain linear and retained index storage is additional. No latency or total allocation improvement claimed. Existing warmed replay including reset remains allocation-free.",
+  "validation": {
+    "unit_cases": 262,
+    "comparator_cases": 10,
+    "gpu_cases": 100
+  },
+  "baselines": {
+    "Skender.GetConnorsRsi": {
+      "path": "benchmarks/results/shared-rollout/connors-cpu/certified-order-10k.json.gz",
+      "sha256": "0420b7ea4140e448a32d69f8c887f39a91e3c280de42e35f54d0fc19a74a45c2"
+    }
+  },
+  "baseline_host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9606)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.401",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "baseline_compatibility": "Fixture through native methods and benchmark project are text-identical to02f617e4. Only builder helper extraction changed. Saved native baseline covers10000bars only; monitoring limitations remain documented in adjacent original context.",
+  "benchmark_cases": 6,
+  "measurement_plan": "Four builder cases at1000/10000bars plus first native serial/parallel cases at1000bars. Reuse saved10000bar native results without rerunning them. Compare1000bars within run and10000bars descriptively across runs.",
+  "source_sha256": {
+    "src/Indicators/ConnorsStrength.cs": "e6774d3502f8d2616398c82d591123eafd79a25a4453b8ba8a2d94834c898a80",
+    "tests/ModelsTests/ConnorsStrengthBuilderTests.cs": "22625c6766a31fd575587ded83210898dda9acfc12747acd370dede2b6e88b70",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedConnorsBenchmarks.cs": "4e7c008150a2c1e04c62003d08eda4828838ec7b0fb5aae179da060a56b55c85",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj": "446d66bc4203623646569b1a43bbf04224b5a726be53b920f8c0ce0e0ae30d13"
+  }
+}

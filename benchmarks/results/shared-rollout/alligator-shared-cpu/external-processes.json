@@ -1,0 +1,22 @@
+[
+  {
+    "ProcessId": 37860,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tensors.Tests -f net10.0 --filter \"FullyQualifiedName~WebGpu|FullyQualifiedName~Dawn|FullyQualifiedName~Hip_|FullyQualifiedName~HipTensor|FullyQualifiedName~Mel\""
+  },
+  {
+    "ProcessId": 35216,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" exec \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\vstest.console.dll\" --testAdapterPath:C:\\Users\\cheat\\.nuget\\packages\\coverlet.collector\\6.0.4\\build\\netstandard2.0\\ --framework:\".NETCoreApp,Version=v10.0\" --testCaseFilter:\"FullyQualifiedName~WebGpu|FullyQualifiedName~Dawn|FullyQualifiedName~Hip_|FullyQualifiedName~HipTensor|FullyQualifiedName~Mel\" C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.dll --logger:Console;Verbosity=minimal --nologo --artifactsProcessingMode-collect --testSessionCorrelationId:37860_542d3622-7364-40ab-8a50-784b9e5ca9c4"
+  },
+  {
+    "ProcessId": 22368,
+    "Name": "testhost.exe",
+    "CommandLine": "\"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\testhost.exe\"  --runtimeconfig \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.runtimeconfig.json\" --depsfile \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Tensors-wt\\spectral-parity\\tests\\AiDotNet.Tensors.Tests\\bin\\Debug\\net10.0\\AiDotNet.Tensors.Tests.deps.json\" --port 57371 --endpoint 127.0.0.1:057371 --role client --parentprocessid 35216 --telemetryoptedin false"
+  },
+  {
+    "ProcessId": 20468,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tests/AiDotNetTests.csproj -f net10.0 --filter FullyQualifiedName~ForecasterFusedTrainingTests -nologo -v q --logger trx;LogFileName=C:\\Users\\cheat\\AppData\\Local\\Temp\\claude\\C--Users-cheat\\e0895c24-7292-4070-bcd2-12cd785acd56\\scratchpad\\fft2.trx"
+  }
+]

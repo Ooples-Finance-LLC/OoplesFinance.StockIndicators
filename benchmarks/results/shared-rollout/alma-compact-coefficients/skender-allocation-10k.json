@@ -1,0 +1,1 @@
+{"Operation":"Skender.GetAlma","Count":10000,"Repetitions":5,"Arms":[{"Method":"BuilderFull","Bytes":[645224,645224,645224,645224,645224]},{"Method":"BuilderLatestOnly","Bytes":[164504,164096,164096,164096,164096]},{"Method":"NativeSingle","Bytes":[1000648,1000648,1000648,1000648,1000648]},{"Method":"NativeParallel","Bytes":[1017432,1017432,1017432,1017432,1017432]}]}

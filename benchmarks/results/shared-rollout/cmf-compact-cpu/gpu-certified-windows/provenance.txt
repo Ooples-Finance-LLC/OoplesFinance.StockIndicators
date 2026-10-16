@@ -1,0 +1,11 @@
+Source: dca2514b plus CMF GPU execution, fixture and tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedGpuCmfBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-cmf-gpu-timing
+All twelve cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. Harness build: 60 existing warnings, zero errors. All 65 focused CMF CPU/GPU, ADL GPU and Force Index GPU cases passed, zero skips; all 29 CMF reference/fixture/allocation tests passed. Production/test/harness production DLL SHA256 matched.
+Setup independently validates CPU/native arithmetic and compares every GPU column bitwise for both histories; each GPU invocation confirms device execution.
+Two device stages compute multiplier/flow and full-window CMF/presence. Host only validates and normalizes HLCV, requiring power-of-two ranges, exact products and signed window sums bounded by 2^52, and flow grid [-500,500]. CMF division uses exact midpoint checks and integer fallback; all four outputs are device results. Unsupported inputs reject; Auto remains CPU. Native parallel uses period-1 overlap with invocation/conversion/publication costs measured.
+Catalog CPU current rows and historical measurements remain unchanged; gpu_current includes same-run CPU/native comparators. Win qualification uses upper builder CI below both native lower bounds.
+All three warmed allocation samples are retained. Managed allocations exclude retained host staging/device buffers. Warnings/outliers remain in raw log.
+Four-column packed workspace uses 32*N host plus 64*N device bytes; retention threshold MaxRetainedCount*7/12 preserves the shared 56 MiB cap. Incompatible layouts are disposed. Coverage remains 198/401 APIs; coverage is not wins. Remaining CPU/GPU latency and rollout gaps stay open.
+OoplesFinance.StockIndicators.dll SHA256 516352e7a1374b906cd41e9567b523d6b8204f316026a664fe5fbe0324d5fd29
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 d97ad24c529b2d13d626c39f87fceb8894e5395fbccc74da4cfe753fd2b86766

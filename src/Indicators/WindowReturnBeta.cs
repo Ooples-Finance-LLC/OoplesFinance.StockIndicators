@@ -1,6 +1,11 @@
 using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
+#if !NETFRAMEWORK
+using BetaHistoryValue = OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.ProductFactor;
+#else
+using BetaHistoryValue = OoplesFinance.StockIndicators.Helpers.RocBankValue;
+#endif
 
 namespace OoplesFinance.StockIndicators.Indicators;
 
@@ -80,10 +85,10 @@ public sealed class WindowReturnBeta : MultiOutputIndicatorBase, IIndicatorValid
                 )
             );
 
-    private sealed class State(int period, CandlePriceField market, CandlePriceField evaluation)
+    internal sealed class State(int period, CandlePriceField market, CandlePriceField evaluation, int capacity = 0)
         : IMultiOutputState
     {
-        private readonly ReturnBetaWindow _window = new(period, ReturnBetaSelection.Standard);
+        private readonly ReturnBetaWindow _window = new(period, ReturnBetaSelection.Standard, capacity);
 
         public void Reset() => _window.Reset();
 
@@ -205,7 +210,7 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
-    private sealed class State(
+    internal sealed class State(
         int period,
         ReturnBetaSelection selection,
         CandlePriceField market,
@@ -223,9 +228,9 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 PairStatisticsWindow.Select(bar, market),
                 PairStatisticsWindow.Select(bar, evaluation)
             );
-            output[5] = ExactMeanAccumulator.UnitRatio(_window.EvaluationReturn, 1);
+            output[5] = _window.EvaluationReturnValue;
             output[12] = 1;
-            output[6] = ExactMeanAccumulator.UnitRatio(_window.MarketReturn, 1);
+            output[6] = _window.MarketReturnValue;
             output[13] = 1;
             for (var i = 0; i < 3; i++)
             {
@@ -261,30 +266,38 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
     }
 }
 
-internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection)
+internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection, int capacity = 0)
 {
-    private readonly Queue<(BigInteger X, BigInteger Y)> _history = new();
-    private readonly Moments[] _moments = [new(), new(), new()];
+    private readonly Queue<(BetaHistoryValue X, BetaHistoryValue Y)> _history = new(Math.Min(period, capacity));
+    private readonly Moments? _standard = selection is ReturnBetaSelection.Standard or ReturnBetaSelection.All ? new() : null;
+    private readonly Moments? _up = selection is ReturnBetaSelection.Up or ReturnBetaSelection.All ? new() : null;
+    private readonly Moments? _down = selection is ReturnBetaSelection.Down or ReturnBetaSelection.All ? new() : null;
     private bool _started;
     private double _previousMarket,
         _previousEvaluation;
-    internal BigInteger MarketReturn { get; private set; }
-    internal BigInteger EvaluationReturn { get; private set; }
+    private RocBankValue _marketReturn, _evaluationReturn;
+    // Retain rounded returns at binary64 precision with an extended upper
+    // exponent. Only callers explicitly requesting minimum units expand them.
+    internal BigInteger MarketReturn => ExactVarianceWindow.Units(_marketReturn.Mantissa) << _marketReturn.UpperShift;
+    internal BigInteger EvaluationReturn => ExactVarianceWindow.Units(_evaluationReturn.Mantissa) << _evaluationReturn.UpperShift;
+    internal double MarketReturnValue => _marketReturn.UpperShift == 0 ? _marketReturn.Mantissa : _marketReturn.Publish();
+    internal double EvaluationReturnValue => _evaluationReturn.UpperShift == 0 ? _evaluationReturn.Mantissa : _evaluationReturn.Publish();
 
     internal void Reset()
     {
         _history.Clear();
-        foreach (var m in _moments)
-            m.Reset();
+        _standard?.Reset();
+        _up?.Reset();
+        _down?.Reset();
         _started = false;
         _previousMarket = _previousEvaluation = 0;
-        MarketReturn = EvaluationReturn = 0;
+        _marketReturn = _evaluationReturn = default;
     }
 
     internal void Add(double market, double evaluation)
     {
-        MarketReturn = Return(market, _previousMarket);
-        EvaluationReturn = Return(evaluation, _previousEvaluation);
+        _marketReturn = Return(market, _previousMarket);
+        _evaluationReturn = Return(evaluation, _previousEvaluation);
         _previousMarket = market;
         _previousEvaluation = evaluation;
         if (!_started)
@@ -297,71 +310,108 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
             var old = _history.Dequeue();
             Accumulate(old.X, old.Y, -1);
         }
-        _history.Enqueue((MarketReturn, EvaluationReturn));
-        Accumulate(MarketReturn, EvaluationReturn, 1);
+        // The compact history entry has the same size as a rounded return and
+        // reuses its exact decoding when it is evicted from the rolling window.
+        var marketReturn = new BetaHistoryValue(_marketReturn.Mantissa, _marketReturn.UpperShift);
+        var evaluationReturn = new BetaHistoryValue(_evaluationReturn.Mantissa, _evaluationReturn.UpperShift);
+        _history.Enqueue((marketReturn, evaluationReturn));
+        Accumulate(marketReturn, evaluationReturn, 1);
     }
 
-    private static BigInteger Return(double current, double previous)
+    private static RocBankValue Return(double current, double previous)
     {
         if (previous == 0)
-            return 0;
-        var denominator = ExactVarianceWindow.Units(previous);
-        var numerator = (ExactVarianceWindow.Units(current) - denominator) << 1074;
-        if (denominator.Sign < 0)
+            return default;
+#if !NETFRAMEWORK
+        double difference = current - previous;
+        double virtualPrevious = difference - current;
+        double error = (current - (difference - virtualPrevious)) + (-previous - virtualPrevious);
+        // TwoSum certifies an exact subtraction. Hardware division then gives
+        // the required single rounding, including gradual underflow. A rounded
+        // subtraction or an extended-range result retains the accumulator path.
+        if (double.IsFinite(difference) && error == 0)
         {
-            numerator = -numerator;
-            denominator = -denominator;
+            double value = difference / previous;
+            if (double.IsFinite(value)) return value == 0 ? default : new RocBankValue(value);
         }
-        return RocBankValue.RoundUnits(numerator, denominator);
+#endif
+        var numerator = new ExactMeanAccumulator();
+        numerator.Add(current);
+        numerator.Add(previous, -1);
+        var rounded = RocBankValue.Round(numerator, previous);
+        // The minimum-unit contract discards the sign of a rounded zero.
+        return rounded.Mantissa == 0 ? default : rounded;
     }
 
-    private bool Included(int slot) =>
-        selection == ReturnBetaSelection.All || (int)selection == slot;
-
-    private void Accumulate(BigInteger x, BigInteger y, int sign)
+    private void Accumulate(BetaHistoryValue x, BetaHistoryValue y, int sign)
     {
-        if (Included(0))
-            _moments[0].Add(x, y, sign);
-        if (x.Sign > 0 && Included(1))
-            _moments[1].Add(x, y, sign);
-        if (x.Sign < 0 && Included(2))
-            _moments[2].Add(x, y, sign);
+        var directional = x.Mantissa > 0 ? _up : x.Mantissa < 0 ? _down : null;
+        if (_standard is null && directional is null) return;
+        static JurikDyadic Compact(BetaHistoryValue value)
+        {
+#if !NETFRAMEWORK
+            return JurikDyadic.FromFactor(in value);
+#else
+            var result = JurikDyadic.FromDouble(value.Mantissa);
+            if (value.UpperShift != 0) result.ScaleByPowerOfTwo(value.UpperShift);
+            return result;
+#endif
+        }
+        var left = Compact(x);
+        var right = Compact(y);
+        // Standard and directional subsets consume the same exact products.
+        // Compute them once for insertion or eviction, without retaining copies.
+        var square = left;
+        square.Square();
+        var product = left;
+        product.Multiply(right);
+        _standard?.Add(left, right, in square, in product, sign);
+        directional?.Add(left, right, in square, in product, sign);
     }
 
     internal double? Beta(int slot, bool flatZero) =>
-        _history.Count < period || !Included(slot) ? null : _moments[slot].Beta(flatZero);
+        _history.Count < period ? null : (slot switch { 0 => _standard, 1 => _up, 2 => _down, _ => null })?.Beta(flatZero);
 
     private sealed class Moments
     {
         private int _count;
-        private BigInteger _x,
-            _y,
-            _xx,
-            _xy;
+        private JurikDyadic _x, _y, _xx, _xy;
 
         internal void Reset()
         {
             _count = 0;
-            _x = _y = _xx = _xy = 0;
+            _x = _y = _xx = _xy = default;
         }
 
-        internal void Add(BigInteger x, BigInteger y, int sign)
+        internal void Add(JurikDyadic x, JurikDyadic y, in JurikDyadic xx, in JurikDyadic xy, int sign)
         {
             _count += sign;
-            _x += sign * x;
-            _y += sign * y;
-            _xx += sign * x * x;
-            _xy += sign * x * y;
+            if (sign > 0)
+            {
+                _x.AddExact(x); _y.AddExact(y);
+                _xx.AddExact(xx); _xy.AddExact(xy);
+            }
+            else
+            {
+                _x.Subtract(x); _y.Subtract(y);
+                _xx.Subtract(xx); _xy.Subtract(xy);
+            }
         }
 
         internal double? Beta(bool flatZero)
         {
-            var denominator = _count * _xx - _x * _x;
-            return denominator.IsZero
-                ? flatZero
-                    ? 0
-                    : null
-                : ExactMeanAccumulator.UnitRatio((_count * _xy - _x * _y) << 1074, denominator);
+            var denominator = _xx;
+            denominator.Multiply(_count);
+            var square = _x;
+            square.Square();
+            denominator.Subtract(square);
+            if (denominator.Sign == 0) return flatZero ? 0 : null;
+            var numerator = _xy;
+            numerator.Multiply(_count);
+            var cross = _x;
+            cross.Multiply(_y);
+            numerator.Subtract(cross);
+            return numerator.Ratio(denominator);
         }
     }
 }

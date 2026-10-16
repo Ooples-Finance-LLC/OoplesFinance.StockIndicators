@@ -18,7 +18,7 @@ internal static class RegressionStatisticsComparison
     );
     internal static readonly ComparisonPair SnapshotPair = new(
         "Skender.GetSlope",
-        "RegressionSnapshot",
+        "RegressionWithFinalLine",
         Skender,
         Snapshot,
         (d, p) => Reference(d, p, false, true),
@@ -94,14 +94,15 @@ internal static class RegressionStatisticsComparison
 
     private static ComparisonSeries Snapshot(CompetitorData data, int period)
     {
-        var rows = RegressionSnapshot.Calculate(data.IndicatorBars, period);
-        return Series([
-            rows.Select(r => r.Slope).ToArray(),
-            rows.Select(r => r.Intercept).ToArray(),
-            rows.Select(r => r.StandardDeviation).ToArray(),
-            rows.Select(r => r.RSquared).ToArray(),
-            rows.Select(r => r.Line).ToArray(),
-        ]);
+        var indicator = new RegressionWithFinalLine(period);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
+        return Series(Enumerable.Range(0, 5).Select(slot =>
+        {
+            var output = run[indicator.Outputs[slot]].ToArray();
+            var presence = run[indicator.Outputs[slot + 5]].ToArray();
+            return output.Select((value, i) => presence[i] > 0 ? (double?)value : null).ToArray();
+        }).ToArray());
     }
 
     // Independent centered batch regression. Decimal moments keep fixture subtraction,

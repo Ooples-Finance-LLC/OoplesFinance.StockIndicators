@@ -1,0 +1,535 @@
+using System.Text.Json;
+
+namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
+
+/// <summary>Allocation-only observations of the validated shared benchmark arms.</summary>
+public static class SharedAllocationProbe
+{
+    public sealed record Arm(string Method, long[] Bytes);
+    public sealed record Report(string Operation, int Count, int Repetitions, Arm[] Arms);
+
+    public static Report Run(string operation, int count, int repetitions, bool includeGpu = false)
+    {
+        if (count < 64) throw new ArgumentOutOfRangeException(nameof(count));
+        if (repetitions is < 1 or > 50) throw new ArgumentOutOfRangeException(nameof(repetitions));
+        bool gpuRegression = operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
+            or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.Tsf";
+        bool weightedPrice = operation is "Skender.GetVwap" or "Skender.GetVwma" or "Trady.Indicator.VolumeWeightedAveragePrice";
+        bool seededAtr = operation is "Skender.GetAtr" or "TaLib.Functions.Atr" or "TaLib.Functions.Natr" or "Trady.Indicator.AverageTrueRange";
+        bool regressionStatistics = operation is "QuanTAlib.Slope" or "Skender.GetSlope";
+        bool gpuPathRatio = operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio";
+        bool obv = operation is "TaLib.Functions.Obv" or "Skender.GetObv" or "Trady.Indicator.OnBalanceVolume";
+        if (includeGpu && !gpuPathRatio && !gpuRegression && !regressionStatistics && !obv && !weightedPrice && !seededAtr && operation is not ("QuanTAlib.Atr" or "QuanTAlib.Epma" or "QuanTAlib.Mma" or "QuanTAlib.Convolution" or "Skender.GetVortex" or "TaLib.Functions.UltOsc" or "Skender.GetUltimate" or "TaLib.Functions.Mfi" or "Skender.GetMfi" or "Skender.GetAdl" or "Skender.GetForceIndex" or "Skender.GetCmf"))
+            throw new ArgumentException("No GPU allocation fixture for this operation.", nameof(operation));
+        Action setup, cleanup;
+        Func<object>[] methods;
+        string[] names = ["BuilderFull", "BuilderLatestOnly", "NativeSingle", "NativeParallel"];
+        if (operation is "TaLib.Candles.ThreeInside" or "TaLib.Candles.TwoCrows" or "TaLib.Candles.UpsideGapTwoCrows" or "TaLib.Candles.UniqueThreeRiver")
+        {
+            var fixture = new SharedTripleBodyBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.Hammer" or "TaLib.Candles.HangingMan" or "TaLib.Candles.InvertedHammer" or "TaLib.Candles.ShootingStar")
+        {
+            var fixture = new SharedContextReversalBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.MatchingLow" or "TaLib.Candles.StickSandwich" or "TaLib.Candles.ThreeLineStrike" or "TaLib.Candles.ThreeOutside")
+        {
+            var fixture = new SharedSequenceCandleBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.Counterattack" or "TaLib.Candles.SeparatingLines" or "TaLib.Candles.GapSideBySideWhiteLines")
+        {
+            var fixture = new SharedMatchedLinesBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.Kicking" or "TaLib.Candles.KickingByLength")
+        {
+            var fixture = new SharedKickingCandleBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.OnNeck" or "TaLib.Candles.InNeck" or "TaLib.Candles.Thrusting")
+        {
+            var fixture = new SharedNeckCandleBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.Harami" or "TaLib.Candles.HaramiCross" or "TaLib.Candles.HomingPigeon" or "TaLib.Candles.DojiStar")
+        {
+            var fixture = new SharedContainmentCandleBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Candles.Doji" or "TaLib.Candles.DragonflyDoji" or "TaLib.Candles.GravestoneDoji" or "TaLib.Candles.LongLeggedDoji" or "TaLib.Candles.TakuriLine")
+        {
+            var fixture = new SharedRangeDojiBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "TaLib.Candles.RickshawMan")
+        {
+            var fixture = new SharedRickshawBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "TaLib.Functions.Asin")
+        {
+            var fixture = new SharedAsinBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetRollingPivots")
+        {
+            var fixture = new SharedPivotBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetFractal")
+        {
+            var fixture = new SharedRetrospectiveBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Jma")
+        {
+            var fixture = new SharedJurikBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Htit" or "Skender.GetHtTrendline")
+        {
+            var fixture = new SharedHilbertTrendlineBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Mama" or "Skender.GetMama")
+        {
+            var fixture = new SharedSeededPhaseBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Rma")
+        {
+            var fixture = new SharedReverseWilderBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Vidya")
+        {
+            var fixture = new SharedDeviationRatioBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Kama" or "Skender.GetKama")
+        {
+            var fixture = new SharedSeededAdaptiveBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "Skender.GetT3" or "TaLib.Functions.T3" or "QuanTAlib.T3")
+        {
+            var fixture = new SharedTillsonBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Mgdi" or "Skender.GetDynamic")
+        {
+            var fixture = new SharedQuarticDynamicBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Dsma")
+        {
+            var fixture = new SharedDeviationAverageBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Frama")
+        {
+            var fixture = new SharedFractalBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Entropy")
+        {
+            var fixture = new SharedEntropyBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Curvature")
+        {
+            var fixture = new SharedCurvatureBenchmarks { Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Atr")
+        {
+            var fixture = new SharedScaledTrueRangeBenchmarks { Count = count, ValidateGpu = includeGpu };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = includeGpu
+                ? [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly, fixture.NativeSingle, fixture.NativeParallel]
+                : [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+            if (includeGpu) names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && gpuRegression)
+        {
+            var fixture = new SharedGpuRegressionBenchmarks { Operation = operation[(operation.LastIndexOf('.') + 1)..], Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && seededAtr)
+        {
+            var fixture = new SharedGpuSeededAtrBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                () => fixture.NativeSingle(), () => fixture.NativeParallel()];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && gpuPathRatio)
+        {
+            var fixture = new SharedGpuPathRatioBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && operation == "Skender.GetVortex")
+        {
+            var fixture = new SharedGpuVortexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && operation is "TaLib.Functions.UltOsc" or "Skender.GetUltimate")
+        {
+            var fixture = new SharedGpuUltimateBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && operation is "TaLib.Functions.Mfi" or "Skender.GetMfi")
+        {
+            var fixture = new SharedGpuMoneyFlowIndexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && operation == "Skender.GetAdl")
+        {
+            var fixture = new SharedGpuAdlDetailsBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && operation == "Skender.GetForceIndex")
+        {
+            var fixture = new SharedGpuForceIndexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && weightedPrice)
+        {
+            var fixture = new SharedGpuVolumeWeightedPriceBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && operation == "Skender.GetCmf")
+        {
+            var fixture = new SharedGpuCmfBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (includeGpu && obv)
+        {
+            var fixture = new SharedGpuObvBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (operation is "QuanTAlib.Historical" or "QuanTAlib.Realized")
+        {
+            var fixture = new SharedLogVolatilityBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Dema" or "QuanTAlib.Tema" or "QuanTAlib.Qema")
+        {
+            var fixture = new SharedNativeEmaBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Functions.UltOsc" or "Skender.GetUltimate")
+        {
+            var fixture = new SharedUltimateBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetChop")
+        {
+            var fixture = new SharedChoppinessBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetVortex")
+        {
+            var fixture = new SharedVortexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "Skender.GetChaikinOsc" or "TaLib.Functions.AdOsc")
+        {
+            var fixture = new SharedSmoothedAccumulationBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "Skender.GetAtr" or "TaLib.Functions.Atr" or "TaLib.Functions.Natr" or "Trady.Indicator.AverageTrueRange")
+        {
+            var fixture = new SharedSeededAtrBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, () => fixture.NativeSingle(), () => fixture.NativeParallel()];
+        }
+        else if (operation is "Skender.GetVwap" or "Skender.GetVwma" or "Trady.Indicator.VolumeWeightedAveragePrice")
+        {
+            var fixture = new SharedVolumeWeightedPriceBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetCmf")
+        {
+            var fixture = new SharedCmfBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetForceIndex")
+        {
+            var fixture = new SharedForceIndexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetAdl")
+        {
+            var fixture = new SharedAdlDetailsBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (obv)
+        {
+            var fixture = new SharedObvBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Functions.Mfi" or "Skender.GetMfi")
+        {
+            var fixture = new SharedMoneyFlowIndexBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "TaLib.Functions.Cci")
+        {
+            var fixture = new SharedCommodityChannelBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Functions.Beta" or "TaLib.Functions.Correl")
+        {
+            var fixture = new SharedPairInputBenchmarks { Operation = operation[(operation.LastIndexOf('.') + 1)..], Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Functions.Rsi" or "TaLib.Functions.Cmo")
+        {
+            var fixture = new SharedWilderStrengthBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Functions.HtDcPeriod" or "TaLib.Functions.HtPhasor" or "TaLib.Functions.Mama")
+        {
+            var fixture = new SharedHilbertBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "Skender.GetCmo" or "Trady.Indicator.EfficiencyRatio")
+        {
+            var fixture = new SharedPathRatioBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetFisherTransform")
+        {
+            var fixture = new SharedFisherBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetConnorsRsi")
+        {
+            var fixture = new SharedConnorsBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Trady.Indicator.DynamicMomentumIndex")
+        {
+            var fixture = new SharedDynamicMomentumBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetUlcerIndex")
+        {
+            var fixture = new SharedUlcerBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Rvi")
+        {
+            var fixture = new SharedRelativeVolatilityBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Rema" or "QuanTAlib.Zlema")
+        {
+            var fixture = new SharedExpandingRecurrenceBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Hwma")
+        {
+            var fixture = new SharedHoltWinterBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Alma" or "Skender.GetAlma")
+        {
+            var fixture = new SharedAlmaWindowBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Afirma")
+        {
+            var fixture = new SharedWindowedSincBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Trima" or "TaLib.Functions.Trima")
+        {
+            var fixture = new SharedTriangularBenchmarks { Operation = operation, Count = count, IncludeGpuValidation = false };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Ltma")
+        {
+            var fixture = new SharedZeroSeedLaguerreBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "QuanTAlib.Maaf")
+        {
+            var fixture = new SharedMedianAdaptiveBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetKvo")
+        {
+            var fixture = new SharedKlingerBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope"
+            or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.LinearRegAngle" or "TaLib.Functions.Tsf")
+        {
+            var fixture = new SharedRegressionBenchmarks { Operation = operation[(operation.LastIndexOf('.') + 1)..], Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (regressionStatistics && includeGpu)
+        {
+            var fixture = new SharedGpuRegressionStatisticsBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (regressionStatistics)
+        {
+            var fixture = new SharedRegressionStatisticsBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation == "Skender.GetStc")
+        {
+            var fixture = new SharedSchaffCycleBenchmarks { Operation = operation, Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.NativeSingle, fixture.NativeParallel];
+        }
+        else if (operation is "QuanTAlib.Epma" or "QuanTAlib.Mma")
+        {
+            var fixture = new SharedGpuEndpointBenchmarks { Operation = operation == "QuanTAlib.Epma" ? "Epma" : "Mma", Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else if (operation == "QuanTAlib.Convolution")
+        {
+            var fixture = new SharedGpuConvolutionBenchmarks { Operation = "Convolution", Count = count };
+            setup = fixture.Setup; cleanup = fixture.Cleanup;
+            methods = [fixture.BuilderFull, fixture.BuilderLatestOnly, fixture.GpuFull, fixture.GpuLatestOnly,
+                fixture.NativeSingle, fixture.NativeParallel];
+            names = ["BuilderFull", "BuilderLatestOnly", "GpuFull", "GpuLatestOnly", "NativeSingle", "NativeParallel"];
+        }
+        else throw new ArgumentException("Unsupported shared allocation operation.", nameof(operation));
+
+        var arms = new Arm[methods.Length];
+        try
+        {
+            // Reuse each benchmark's agreement checks and prepare identical inputs
+            // outside the measured arms. Exact contracts have separate reference tests.
+            setup();
+            for (int arm = 0; arm < methods.Length; arm++)
+            {
+                for (int warmup = 0; warmup < 10; warmup++) Measure(methods[arm]);
+                var samples = new long[repetitions];
+                for (int sample = 0; sample < samples.Length; sample++) samples[sample] = Measure(methods[arm]);
+                arms[arm] = new Arm(names[arm], samples);
+            }
+        }
+        finally { cleanup(); }
+        return new Report(operation, count, repetitions, arms);
+    }
+
+    // Count all managed threads because native/builder parallel arms can allocate
+    // on workers. No timings are collected. Retain the owned result through the
+    // end of each sample and release disposable results outside that sample.
+    public static long Measure(Func<object> action)
+    {
+        object? result = null;
+        long before = GC.GetTotalAllocatedBytes(precise: true);
+        try
+        {
+            result = action();
+            long bytes = GC.GetTotalAllocatedBytes(precise: true) - before;
+            GC.KeepAlive(result);
+            return bytes;
+        }
+        finally { (result as IDisposable)?.Dispose(); }
+    }
+
+    public static void Write(TextWriter output, string operation, int count, int repetitions, bool includeGpu = false) =>
+        output.WriteLine(JsonSerializer.Serialize(Run(operation, count, repetitions, includeGpu)));
+}

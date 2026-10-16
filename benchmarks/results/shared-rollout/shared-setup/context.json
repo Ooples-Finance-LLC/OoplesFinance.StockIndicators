@@ -1,0 +1,20 @@
+{
+  "parentRevision": "0607c86b",
+  "productionRevision": "accompanying commit",
+  "date": "2026-10-12",
+  "period": 20,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "verification": "net10.0 production build: zero warnings/errors. Focused unit run: 142 passed, zero skipped, one stale preexisting GPU rejection assertion failed (RollingPriceSum now supports GPU). GPU probe checks actual device and both-history bit parity.",
+  "observations": [
+    "Compared to the same saved probe, Full allocated 728 fewer bytes; LatestOnly allocated 832 fewer bytes, on CPU and GPU.",
+    "10k CPU LatestOnly 84560 B still exceeds native parallel 80288 B by 4272 B.",
+    "1k GPU LatestOnly 10272 B still exceeds native parallel 8288 B by 1984 B."
+  ],
+  "limits": [
+    "No timing or qualification increase.",
+    "All managed threads counted; owned results retained during each sample; disposal afterwards.",
+    "Cached GPU/workspace memory excluded.",
+    "Native returns completed-window values; builder also retains startup values. Full owns OHLCV."
+  ]
+}

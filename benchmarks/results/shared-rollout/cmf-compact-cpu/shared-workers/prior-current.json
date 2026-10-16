@@ -1,0 +1,128 @@
+[
+  {
+    "bars": 1000,
+    "evidence": "results/shared-rollout/cmf-compact-cpu/certified-flow/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCmfBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 102991.62326388889,
+        "allocated_bytes": 83704,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 102991.62326388889,
+          "StandardError": 2836.1044837674112,
+          "Level": 12,
+          "Margin": 14297.668935851912,
+          "Lower": 88693.95432803698,
+          "Upper": 117289.2921997408
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 96935.95703125,
+        "allocated_bytes": 34954,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 96935.95703125,
+          "StandardError": 268.07873229621157,
+          "Level": 12,
+          "Margin": 1281.6609849032309,
+          "Lower": 95654.29604634678,
+          "Upper": 98217.61801615322
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 176551.09375,
+        "allocated_bytes": 305047,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 176551.09375,
+          "StandardError": 12143.483559962568,
+          "Level": 12,
+          "Margin": 58056.93337291927,
+          "Lower": 118494.16037708073,
+          "Upper": 234608.02712291927
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 63335.87890625,
+        "allocated_bytes": 362092,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 63335.87890625,
+          "StandardError": 524.0384623949815,
+          "Level": 12,
+          "Margin": 2505.382079687707,
+          "Lower": 60830.496826562296,
+          "Upper": 65841.26098593771
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 1.6261181662346151,
+    "full_clear_win": false,
+    "latest_mean_ratio": 1.530506226569224,
+    "latest_clear_win": false
+  },
+  {
+    "bars": 10000,
+    "evidence": "results/shared-rollout/cmf-compact-cpu/certified-flow/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCmfBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 995991.09375,
+        "allocated_bytes": 804156,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 995991.09375,
+          "StandardError": 8846.930001044795,
+          "Level": 12,
+          "Margin": 42296.39897722409,
+          "Lower": 953694.6947727759,
+          "Upper": 1038287.4927272241
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 965218.359375,
+        "allocated_bytes": 323022,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 965218.359375,
+          "StandardError": 10600.9467851144,
+          "Level": 12,
+          "Margin": 57328.67479265957,
+          "Lower": 907889.6845823404,
+          "Upper": 1022547.0341676596
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 2104224.4791666665,
+        "allocated_bytes": 3041533,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 2104224.4791666665,
+          "StandardError": 13243.407617503566,
+          "Level": 12,
+          "Margin": 66764.0627421729,
+          "Lower": 2037460.4164244935,
+          "Upper": 2170988.5419088393
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 739237.5390625,
+        "allocated_bytes": 3170165,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 739237.5390625,
+          "StandardError": 9838.385743442035,
+          "Level": 12,
+          "Margin": 47036.46221314222,
+          "Lower": 692201.0768493578,
+          "Upper": 786274.0012756422
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 1.3473221273545097,
+    "full_clear_win": false,
+    "latest_mean_ratio": 1.3056944599960232,
+    "latest_clear_win": false
+  }
+]

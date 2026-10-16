@@ -1,0 +1,128 @@
+[
+  {
+    "bars": 1000,
+    "evidence": "results/shared-rollout/sequence-candle-shared-cpu/threeoutside/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSequenceCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 23108.275146484375,
+        "allocated_bytes": 62318,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 23108.275146484375,
+          "StandardError": 141.82748334532005,
+          "Level": 12,
+          "Margin": 678.0647999702521,
+          "Lower": 22430.210346514123,
+          "Upper": 23786.339946454627
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 17768.01025390625,
+        "allocated_bytes": 13282,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 17768.01025390625,
+          "StandardError": 195.58039897856983,
+          "Level": 12,
+          "Margin": 935.0527907811322,
+          "Lower": 16832.957463125116,
+          "Upper": 18703.063044687384
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 2925.2410888671875,
+        "allocated_bytes": 4064,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 2925.2410888671875,
+          "StandardError": 43.7253705872629,
+          "Level": 12,
+          "Margin": 209.04717450770374,
+          "Lower": 2716.1939143594836,
+          "Upper": 3134.2882633748914
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 3863.5177612304688,
+        "allocated_bytes": 8784,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 3863.5177612304688,
+          "StandardError": 46.96978949165582,
+          "Level": 12,
+          "Margin": 224.55845767748636,
+          "Lower": 3638.9593035529824,
+          "Upper": 4088.076218907955
+        }
+      }
+    },
+    "fastest_measured_native": "NativeSingle",
+    "full_mean_ratio": 7.8996138931691116,
+    "full_clear_win": false,
+    "latest_mean_ratio": 6.074032776829,
+    "latest_clear_win": false
+  },
+  {
+    "bars": 10000,
+    "evidence": "results/shared-rollout/sequence-candle-shared-cpu/threeoutside/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSequenceCandleBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 135773.53515625,
+        "allocated_bytes": 566700,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 135773.53515625,
+          "StandardError": 1165.0339829450595,
+          "Level": 12,
+          "Margin": 5569.925630568942,
+          "Lower": 130203.60952568105,
+          "Upper": 141343.46078681893
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 107919.013671875,
+        "allocated_bytes": 85295,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 107919.013671875,
+          "StandardError": 726.1695373471994,
+          "Level": 12,
+          "Margin": 3471.753079669004,
+          "Lower": 104447.260592206,
+          "Upper": 111390.766751544
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 27842.60986328125,
+        "allocated_bytes": 40066,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 27842.60986328125,
+          "StandardError": 431.34795123549765,
+          "Level": 12,
+          "Margin": 2062.2368484107137,
+          "Lower": 25780.373014870536,
+          "Upper": 29904.846711691964
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 17593.3447265625,
+        "allocated_bytes": 80809,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 17593.3447265625,
+          "StandardError": 133.59682498240986,
+          "Level": 12,
+          "Margin": 638.7147418233285,
+          "Lower": 16954.62998473917,
+          "Upper": 18232.05946838583
+        }
+      }
+    },
+    "fastest_measured_native": "NativeParallel",
+    "full_mean_ratio": 7.717323639504351,
+    "full_clear_win": false,
+    "latest_mean_ratio": 6.134081685385182,
+    "latest_clear_win": false
+  }
+]

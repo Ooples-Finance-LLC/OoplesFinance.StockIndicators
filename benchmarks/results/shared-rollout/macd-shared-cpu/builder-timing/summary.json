@@ -1,0 +1,667 @@
+[
+  {
+    "operation": "TaLib.Functions.Macd",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 2750941.4930555555,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 2750941.4930555555,
+              "StandardError": 10825.616530275465,
+              "Level": 12,
+              "Margin": 54575.239404000065,
+              "Lower": 2696366.2536515556,
+              "Upper": 2805516.7324595554
+            },
+            "allocated_bytes": 3548482
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 2809015.7118055555,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 2809015.7118055555,
+              "StandardError": 25782.90292353723,
+              "Level": 12,
+              "Margin": 129979.48852584498,
+              "Lower": 2679036.2232797104,
+              "Upper": 2938995.2003314006
+            },
+            "allocated_bytes": 3499725
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-macd-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 29312078.125,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 29312078.125,
+              "StandardError": 89371.06527771037,
+              "Level": 12,
+              "Margin": 483308.2215235473,
+              "Lower": 28828769.903476454,
+              "Upper": 29795386.346523546
+            },
+            "allocated_bytes": 36238296
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 29328280,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 29328280,
+              "StandardError": 135225.9656607742,
+              "Level": 12,
+              "Margin": 646503.5209946327,
+              "Lower": 28681776.479005367,
+              "Upper": 29974783.520994633
+            },
+            "allocated_bytes": 35757280
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-macd-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 248233.33333333334,
+        "allocated_bytes": 121584,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-macd-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 411783.3333333333,
+        "allocated_bytes": 1156920,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-macd-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.MacdFix",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 8202030.76923077,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 8202030.76923077,
+              "StandardError": 20558.567138166294,
+              "Level": 12,
+              "Margin": 103642.01615961768,
+              "Lower": 8098388.753071153,
+              "Upper": 8305672.785390387
+            },
+            "allocated_bytes": 5357396
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 8126605.555555556,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 8126605.555555556,
+              "StandardError": 34757.30533168173,
+              "Level": 12,
+              "Margin": 175222.1921226865,
+              "Lower": 7951383.363432869,
+              "Upper": 8301827.747678243
+            },
+            "allocated_bytes": 5308703
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-macdfix-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 84503472.22222222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 84503472.22222222,
+              "StandardError": 280116.89141309966,
+              "Level": 12,
+              "Margin": 1412154.8058921688,
+              "Lower": 83091317.41633005,
+              "Upper": 85915627.0281144
+            },
+            "allocated_bytes": 54750896
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 84377090,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 84377090,
+              "StandardError": 459143.7557986484,
+              "Level": 12,
+              "Margin": 2195126.160246246,
+              "Lower": 82181963.83975375,
+              "Upper": 86572216.16024625
+            },
+            "allocated_bytes": 54269808
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-macdfix-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 251633.33333333334,
+        "allocated_bytes": 122592,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-macdfix-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 399500,
+        "allocated_bytes": 1151976,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-macdfix-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.MacdExt",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 776573.125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 776573.125,
+              "StandardError": 3096.850391381267,
+              "Level": 12,
+              "Margin": 14805.771008831949,
+              "Lower": 761767.3539911681,
+              "Upper": 791378.8960088319
+            },
+            "allocated_bytes": 2962188
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 796428.4765625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 796428.4765625,
+              "StandardError": 12582.475979859943,
+              "Level": 12,
+              "Margin": 60155.71775775827,
+              "Lower": 736272.7588047418,
+              "Upper": 856584.1943202582
+            },
+            "allocated_bytes": 2913394
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-macdext-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 8037076.068376069,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 8037076.068376069,
+              "StandardError": 79067.13864568998,
+              "Level": 12,
+              "Margin": 398601.5954389247,
+              "Lower": 7638474.472937144,
+              "Upper": 8435677.663814994
+            },
+            "allocated_bytes": 28142738
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 7137956.666666667,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 7137956.666666667,
+              "StandardError": 16893.846677283305,
+              "Level": 12,
+              "Margin": 80768.00418202022,
+              "Lower": 7057188.662484647,
+              "Upper": 7218724.670848687
+            },
+            "allocated_bytes": 27660834
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-macdext-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 268233.3333333333,
+        "allocated_bytes": 122824,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-macdext-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 360400,
+        "allocated_bytes": 1158112,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-macdext-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetMacd",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 2988181.9444444445,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 2988181.9444444445,
+              "StandardError": 26221.634202572648,
+              "Level": 12,
+              "Margin": 141803.51719548268,
+              "Lower": 2846378.4272489618,
+              "Upper": 3129985.4616399272
+            },
+            "allocated_bytes": 3670588
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 3023753.472222222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 3023753.472222222,
+              "StandardError": 30504.24867123674,
+              "Level": 12,
+              "Margin": 153781.23448360633,
+              "Lower": 2869972.237738616,
+              "Upper": 3177534.706705828
+            },
+            "allocated_bytes": 3621962
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getmacd-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 32041130,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 32041130,
+              "StandardError": 594021.4524956148,
+              "Level": 12,
+              "Margin": 2839964.6377689783,
+              "Lower": 29201165.362231024,
+              "Upper": 34881094.63776898
+            },
+            "allocated_bytes": 37368600
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 31173850,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 31173850,
+              "StandardError": 183456.61387398106,
+              "Level": 12,
+              "Margin": 992111.8149665799,
+              "Lower": 30181738.18503342,
+              "Upper": 32165961.81496658
+            },
+            "allocated_bytes": 36887512
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getmacd-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 1175500,
+        "allocated_bytes": 465008,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getmacd-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1262400,
+        "allocated_bytes": 4782248,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getmacd-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetPvo",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 3219862.5,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 3219862.5,
+              "StandardError": 11252.975239016156,
+              "Level": 12,
+              "Margin": 60854.76806970369,
+              "Lower": 3159007.7319302964,
+              "Upper": 3280717.2680697036
+            },
+            "allocated_bytes": 4304944
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 3291196.40625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 3291196.40625,
+              "StandardError": 43678.25989343269,
+              "Level": 12,
+              "Margin": 208821.9423987008,
+              "Lower": 3082374.463851299,
+              "Upper": 3500018.348648701
+            },
+            "allocated_bytes": 4256093
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getpvo-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 34835513.88888889,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 34835513.88888889,
+              "StandardError": 842900.8517847331,
+              "Level": 12,
+              "Margin": 4249320.641585375,
+              "Lower": 30586193.247303512,
+              "Upper": 39084834.53047426
+            },
+            "allocated_bytes": 43860088
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 32743859.375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 32743859.375,
+              "StandardError": 171439.61875269454,
+              "Level": 12,
+              "Margin": 927125.3171322002,
+              "Lower": 31816734.0578678,
+              "Upper": 33670984.6921322
+            },
+            "allocated_bytes": 43378928
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getpvo-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 1040300,
+        "allocated_bytes": 382248,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getpvo-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1245733.3333333333,
+        "allocated_bytes": 3961248,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getpvo-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.MovingAverageConvergenceDivergence",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 2891001.909722222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 2891001.909722222,
+              "StandardError": 37752.035076224645,
+              "Level": 12,
+              "Margin": 190319.53944712112,
+              "Lower": 2700682.3702751007,
+              "Upper": 3081321.4491693433
+            },
+            "allocated_bytes": 3656988
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 2907125.46875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 2907125.46875,
+              "StandardError": 26859.64211441454,
+              "Level": 12,
+              "Margin": 128413.60100312337,
+              "Lower": 2778711.8677468766,
+              "Upper": 3035539.0697531234
+            },
+            "allocated_bytes": 3608236
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergence-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 28975550,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 28975550,
+              "StandardError": 153854.37640473177,
+              "Level": 12,
+              "Margin": 735564.324351841,
+              "Lower": 28239985.67564816,
+              "Upper": 29711114.32435184
+            },
+            "allocated_bytes": 36562864
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 28896033.333333332,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 28896033.333333332,
+              "StandardError": 139247.4925592119,
+              "Level": 12,
+              "Margin": 701989.1404404229,
+              "Lower": 28194044.19289291,
+              "Upper": 29598022.473773755
+            },
+            "allocated_bytes": 36081776
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergence-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 7135833.333333333,
+        "allocated_bytes": 4691528,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergence-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 25926700,
+        "allocated_bytes": 35524240,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergence-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 2646011.1328125,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 2646011.1328125,
+              "StandardError": 23052.235050199175,
+              "Level": 12,
+              "Margin": 124663.77892704,
+              "Lower": 2521347.35388546,
+              "Upper": 2770674.91173954
+            },
+            "allocated_bytes": 3560946
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 2579675,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 2579675,
+              "StandardError": 8048.640987445749,
+              "Level": 12,
+              "Margin": 40575.65751920478,
+              "Lower": 2539099.342480795,
+              "Upper": 2620250.657519205
+            },
+            "allocated_bytes": 3512173
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergencehistogram-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 26248802.777777776,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 26248802.777777776,
+              "StandardError": 116478.80875790451,
+              "Level": 12,
+              "Margin": 587205.2511445853,
+              "Lower": 25661597.52663319,
+              "Upper": 26836008.02892236
+            },
+            "allocated_bytes": 35602960
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 25151621.875,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 25151621.875,
+              "StandardError": 71197.97010635643,
+              "Level": 12,
+              "Margin": 385030.2578498188,
+              "Lower": 24766591.61715018,
+              "Upper": 25536652.13284982
+            },
+            "allocated_bytes": 35120864
+          }
+        },
+        "evidence": "results/shared-rollout/macd-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMacdBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergencehistogram-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 9333900,
+        "allocated_bytes": 4937040,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergencehistogram-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 35812733.333333336,
+        "allocated_bytes": 37219952,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-movingaverageconvergencedivergencehistogram-short.json.gz"
+      }
+    ]
+  }
+]

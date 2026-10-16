@@ -1,0 +1,13 @@
+Containment candle sharedCPU qualification;priorHEADab0691eb. Productionunchanged;verifiednet10binaryreused fromrange-doji-shared-cpu/restored-build.log.gz. Harness60existingwarnings0errors.9unit/state/facade+126competitor/golden/reference/fixture=135passed0failed0skipped.
+NamesHarami/HaramiCross/HomingPigeon/DojiStar,period10,warmup11. RepeatedContainmentCandleComparison.Fixture,dyadicOHLC;independentdecimal decisions exact againstbothbuildermodes/native serial/parallel. Positive/negative(whereapplicable)/nonmatchesasserted. Fixturetests2/10/11/12/65/1k/10k. Eagerint[]native;serialpackedalignmentinplace;parallel<=8workers,min2inputspercall,11precedingbaroverlap. Dyadicfixture rolling sums exactlyrepresentable. Nativeallocation/preparation/packeddiscards/dispatchtimed,inputoutside;status/rangechecked. DeferredExecutionValidatorpass.
+Unitoriginalstate/independentcontract coversperiod1/3/10/intMax-1,empty/startup/expiration,wide/subnormal/signedzero/randomexponents,FullOHLCV/Latest/source mutation/disposal,mixedroots,cancel/rawvalidation/AutoCPU. Existingstate256warmedordinaryupdates0bytes all4;constructionexcluded,notwholeBuildAsyncallocationclaim.
+All4mappings10kallocFull564032/564688/564032 Latest82624all3 serial40064all3 parallel81032all3;managedexcludesretainedpools. Allocationcommand --alloc-shared TaLib.Candles.NAME 10000 3. Allocationgapremains.
+UnitfilterContainmentSharedExecutionTests;competitorfilterSharedContainmentCandleBenchmarkTests|ContainmentCandleTests. Release --no-restore -p:BuildProjectReferences=false -p:GeneratePackageOnBuild=false -m:1. Productionnotrebuilt. Timingpending;catalog249/401unchanged. NoGPUchange;pendingRMAdispatcher/staleRollingPriceSum approvalsunchanged;no fullsuitegreenclaim.
+kind=3; existing256=0; construction excluded
+kind=2; existing256=0; construction excluded
+kind=0; existing256=0; construction excluded
+kind=1; existing256=0; construction excluded
+src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll SHA256 06b438cf8cab266db107e434c00bc4dbe04ad1720546d23d11dd8a41e12c1670
+tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll SHA256 06b438cf8cab266db107e434c00bc4dbe04ad1720546d23d11dd8a41e12c1670
+benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll SHA256 06b438cf8cab266db107e434c00bc4dbe04ad1720546d23d11dd8a41e12c1670
+benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 8fd8cd34295cc04753a365005f346364662cca6dc7049beafbae1d3099473418

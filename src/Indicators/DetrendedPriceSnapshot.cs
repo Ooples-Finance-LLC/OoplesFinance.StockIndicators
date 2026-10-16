@@ -24,10 +24,8 @@ public static class DetrendedPriceSnapshot
         foreach (var bar in bars)
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
-        var result = Enumerable
-            .Range(0, bars.Count)
-            .Select(_ => new DetrendedPriceValue(null, null))
-            .ToArray();
+        // Create each immutable row once, after its final presence is known.
+        var result = new DetrendedPriceValue[bars.Count];
         var offset = period / 2 + 1;
         var sum = new ExactMeanAccumulator();
         for (var end = 0; end < bars.Count; end++)
@@ -46,6 +44,7 @@ public static class DetrendedPriceSnapshot
                 throw new OverflowException("Detrended price is not representable.");
             result[end - offset] = new(value, mean);
         }
+        for (int i = 0; i < result.Length; i++) result[i] ??= new(null, null);
         return result;
     }
 }

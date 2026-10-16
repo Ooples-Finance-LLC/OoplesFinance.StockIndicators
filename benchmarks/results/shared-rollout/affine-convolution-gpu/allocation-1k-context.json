@@ -1,0 +1,11 @@
+{
+  "production_commit": "cb7339c8",
+  "fixture_commit": "4ee6d76c",
+  "fixture_sha256": "73e04d35f304075db4090c72bedbc152e197630301fd52e2598ebe4110d0637c",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared QuanTAlib.Convolution 1000 3",
+  "kernel": "20 newest-first integer weights 1 through 20",
+  "warmups_per_arm": 10,
+  "samples_per_arm": 3,
+  "scope": "Six retained-result paths: CPU/GPU Full/LatestOnly and native serial/parallel. Includes all managed threads, indicator construction and output publication. GPU includes transfer/dispatch/readback with already cached kernel/workspace. Native parallel includes P-1 seed replay. Setup checks independent owned/native formulas, native serial/parallel bit parity, exact GPU versus validated CPU output and actual GPU execution.",
+  "limitations": "Managed allocations only, not total device or native memory. Setup, cached workspace creation and disposal after samples excluded. CPU Full samples were 66928,66928,67360 bytes; retain the 432-byte variation without attribution. All other paths were stable across three samples. No latency campaign: machine load25 percent with other build/test processes active at inspection. No universal convolution or GPU-speedup claim."
+}

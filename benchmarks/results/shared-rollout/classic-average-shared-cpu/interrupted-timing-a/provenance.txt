@@ -1,0 +1,1 @@
+Source e8262621. Attempt A interrupted by external AiDotNet.Tensors WebGPU/Dawn test PID8368. Monitor stopped only own PID38968. Session23320 terminal exit2. Diagnostic evidence excluded from catalog. No native benchmark calls. Next fresh stem si-classicavg-builder-20261013-b.

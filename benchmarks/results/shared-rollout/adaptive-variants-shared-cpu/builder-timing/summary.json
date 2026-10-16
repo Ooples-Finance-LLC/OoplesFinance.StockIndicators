@@ -1,0 +1,188 @@
+[
+  {
+    "operation": "TaLib.Functions.Kama",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 416655.3125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 416655.3125,
+              "StandardError": 4328.754693713966,
+              "Level": 12,
+              "Margin": 20695.39779089864,
+              "Lower": 395959.9147091014,
+              "Upper": 437350.7102908986
+            },
+            "allocated_bytes": 83994
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 430136.796875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 430136.796875,
+              "StandardError": 6385.357109033525,
+              "Level": 12,
+              "Margin": 30527.834159854418,
+              "Lower": 399608.9627151456,
+              "Upper": 460664.6310348544
+            },
+            "allocated_bytes": 35267
+          }
+        },
+        "evidence": "results/shared-rollout/adaptive-variants-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-kama-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 2.5099717620481927,
+          "BuilderLatestOnly": 2.5911855233433734
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 4304200.625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 4304200.625,
+              "StandardError": 80281.51067007115,
+              "Level": 12,
+              "Margin": 383818.8846746374,
+              "Lower": 3920381.7403253624,
+              "Upper": 4688019.509674638
+            },
+            "allocated_bytes": 804623
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 4130752.0833333335,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 4130752.0833333335,
+              "StandardError": 23630.427020331146,
+              "Level": 12,
+              "Margin": 119128.20006571105,
+              "Lower": 4011623.8832676224,
+              "Upper": 4249880.283399045
+            },
+            "allocated_bytes": 323524
+          }
+        },
+        "evidence": "results/shared-rollout/adaptive-variants-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-kama-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 18.15607687710911,
+          "BuilderLatestOnly": 17.42443229752531
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 166000,
+        "allocated_bytes": 39488,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-kama-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 237066.66666666666,
+        "allocated_bytes": 336776,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-kama-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 486495.1953125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 486495.1953125,
+              "StandardError": 19990.874252403613,
+              "Level": 12,
+              "Margin": 95574.62229081994,
+              "Lower": 390920.57302168006,
+              "Upper": 582069.8176033199
+            },
+            "allocated_bytes": 84022
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 423587.255859375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 423587.255859375,
+              "StandardError": 3957.2418236480735,
+              "Level": 12,
+              "Margin": 21400.298877302903,
+              "Lower": 402186.9569820721,
+              "Upper": 444987.5547366779
+            },
+            "allocated_bytes": 35268
+          }
+        },
+        "evidence": "results/shared-rollout/adaptive-variants-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-kaufmanadaptivemovingaverage-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.015536177306179084,
+          "BuilderLatestOnly": 0.013527218305705649
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 4397761.458333333,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 4397761.458333333,
+              "StandardError": 59746.24418874764,
+              "Level": 12,
+              "Margin": 301199.0652885042,
+              "Lower": 4096562.393044829,
+              "Upper": 4698960.523621838
+            },
+            "allocated_bytes": 804622
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 4188209.375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 4188209.375,
+              "StandardError": 28172.250401917387,
+              "Level": 12,
+              "Margin": 134689.0664835188,
+              "Lower": 4053520.308516481,
+              "Upper": 4322898.441483519
+            },
+            "allocated_bytes": 323514
+          }
+        },
+        "evidence": "results/shared-rollout/adaptive-variants-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-kaufmanadaptivemovingaverage-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.016922487972825067,
+          "BuilderLatestOnly": 0.016116136231493314
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 31313700,
+        "allocated_bytes": 2734392,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-kaufmanadaptivemovingaverage-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 259876766.66666666,
+        "allocated_bytes": 25870792,
+        "evidence": "results/2026-10-06-library-comparisons/trady-indicator-kaufmanadaptivemovingaverage-short.json.gz"
+      }
+    ]
+  }
+]

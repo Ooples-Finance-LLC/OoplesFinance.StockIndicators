@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Ltma",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        58272,
+        58272,
+        58272
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        9200,
+        9200,
+        9200
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        48384,
+        48384,
+        48384
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        191064,
+        191064,
+        191064
+      ]
+    }
+  ]
+}

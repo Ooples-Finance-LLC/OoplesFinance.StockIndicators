@@ -5,6 +5,34 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class OwnedHistoryBatchTests
 {
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(1023)] [InlineData(1024)]
+    [InlineData(1025)] [InlineData(10000)] [InlineData(32769)]
+    public void FusedChunkStoragePreservesParallelWritesWithoutLargeBarArrays(int count)
+    {
+        var buffer = new OwnedBarBuffer(count);
+        var expected = Enumerable.Range(0, count).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i),
+            i, -i, double.Epsilon, i % 2 == 0 ? -0d : 0d, double.MaxValue)).ToArray();
+        Parallel.For(0, count, i => buffer[i] = expected[i]);
+        var history = new OwnedBarHistory();
+        buffer.TransferTo(history);
+        Assert.Equal(expected, history.ToArray());
+        var flattened = new List<Bar>();
+        for (int i = 0; i < history.ChunkCount; i++)
+        {
+            Assert.InRange(history.Chunk(i).Length, 1, 1024);
+            flattened.AddRange(history.Chunk(i).ToArray());
+        }
+        Assert.Equal(expected, flattened);
+        for (int i = 0; i < count; i++)
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i].Close), BitConverter.DoubleToInt64Bits(history[i].Close));
+        Assert.Throws<InvalidOperationException>(() => history.Add(default));
+        Assert.Throws<InvalidOperationException>(() => new OwnedBarBuffer(0).TransferTo(history));
+        var later = new OwnedBarBuffer(count);
+        for (int i = 0; i < count; i++) later[i] = default;
+        Assert.Equal(expected, history.ToArray());
+    }
+
     [Fact]
     public void ContiguousHistoryPreservesChunkViewsSlicesAndEnumeration()
     {

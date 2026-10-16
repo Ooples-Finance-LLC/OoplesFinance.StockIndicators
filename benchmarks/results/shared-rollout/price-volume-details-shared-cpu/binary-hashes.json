@@ -1,0 +1,6 @@
+{
+  "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "49380e0c320b4ea153adf100b09aeb9298df3d6191caed406dbcdd0616474e4c",
+  "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "49380e0c320b4ea153adf100b09aeb9298df3d6191caed406dbcdd0616474e4c",
+  "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "49380e0c320b4ea153adf100b09aeb9298df3d6191caed406dbcdd0616474e4c",
+  "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "e19164c2394bfbb5ee1bb8a5c0770b5bd0e9115743b3cbc0f4c360d41bdd0532"
+}

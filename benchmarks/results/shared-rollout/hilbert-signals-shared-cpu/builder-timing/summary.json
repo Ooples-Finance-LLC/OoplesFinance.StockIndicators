@@ -1,0 +1,374 @@
+[
+  {
+    "operation": "TaLib.Functions.HtDcPhase",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 4659685,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 4659685,
+              "StandardError": 93976.41889502564,
+              "Level": 12,
+              "Margin": 449293.04375250236,
+              "Lower": 4210391.956247497,
+              "Upper": 5108978.043752503
+            },
+            "allocated_bytes": 484692
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 4501206.597222222,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 4501206.597222222,
+              "StandardError": 18916.392563551675,
+              "Level": 12,
+              "Margin": 95363.31255856981,
+              "Lower": 4405843.284663652,
+              "Upper": 4596569.909780792
+            },
+            "allocated_bytes": 436048
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-htdcphase-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 1.9981496569468267,
+          "BuilderLatestOnly": 1.9301915082428054
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 47040356.25,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 47040356.25,
+              "StandardError": 164423.3329775776,
+              "Level": 12,
+              "Margin": 889182.0679481886,
+              "Lower": 46151174.18205181,
+              "Upper": 47929538.31794819
+            },
+            "allocated_bytes": 4812716
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 55972810,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 55972810,
+              "StandardError": 1451317.9925798862,
+              "Level": 12,
+              "Margin": 6938624.455006808,
+              "Lower": 49034185.54499319,
+              "Upper": 62911434.45500681
+            },
+            "allocated_bytes": 4331628
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-htdcphase-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 8.301239338235293,
+          "BuilderLatestOnly": 9.877554705882352
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 2332000,
+        "allocated_bytes": 38728,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-htdcphase-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 5666666.666666667,
+        "allocated_bytes": 334720,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-htdcphase-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.HtSine",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 4552654.375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 4552654.375,
+              "StandardError": 19478.962850983622,
+              "Level": 12,
+              "Margin": 93127.21862956199,
+              "Lower": 4459527.156370438,
+              "Upper": 4645781.593629562
+            },
+            "allocated_bytes": 501072
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 4450180.9375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 4450180.9375,
+              "StandardError": 9134.059720226063,
+              "Level": 12,
+              "Margin": 43669.14106507547,
+              "Lower": 4406511.796434925,
+              "Upper": 4493850.078565075
+            },
+            "allocated_bytes": 452320
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-htsine-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 3.6877533008424237,
+          "BuilderLatestOnly": 3.6047474923047846
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 46889612.5,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 46889612.5,
+              "StandardError": 147425.1277131887,
+              "Level": 12,
+              "Margin": 704826.648372808,
+              "Lower": 46184785.85162719,
+              "Upper": 47594439.14837281
+            },
+            "allocated_bytes": 4972988
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 51366240,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 51366240,
+              "StandardError": 1271610.080284265,
+              "Level": 12,
+              "Margin": 6079456.635557356,
+              "Lower": 45286783.36444265,
+              "Upper": 57445696.63555735
+            },
+            "allocated_bytes": 4491900
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-htsine-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 7.571878128734296,
+          "BuilderLatestOnly": 8.294777637825792
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 1234533.3333333333,
+        "allocated_bytes": 74000,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-htsine-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 6192600,
+        "allocated_bytes": 667712,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-htsine-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.HtTrendMode",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 5204676.041666667,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 5204676.041666667,
+              "StandardError": 42561.0728436647,
+              "Level": 12,
+              "Margin": 214563.36766022342,
+              "Lower": 4990112.6740064435,
+              "Upper": 5419239.4093268905
+            },
+            "allocated_bytes": 487472
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 5307267.013888889,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 5307267.013888889,
+              "StandardError": 48623.23674165026,
+              "Level": 12,
+              "Margin": 245124.58744050967,
+              "Lower": 5062142.42644838,
+              "Upper": 5552391.601329398
+            },
+            "allocated_bytes": 438728
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendmode-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 3.413723108288332,
+          "BuilderLatestOnly": 3.481012055721959
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 54379409.375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 54379409.375,
+              "StandardError": 620969.5909537197,
+              "Level": 12,
+              "Margin": 3358130.5950808492,
+              "Lower": 51021278.77991915,
+              "Upper": 57737539.97008085
+            },
+            "allocated_bytes": 4815324
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 54156834.375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 54156834.375,
+              "StandardError": 294429.60662530776,
+              "Level": 12,
+              "Margin": 1592240.7224281526,
+              "Lower": 52564593.65257185,
+              "Upper": 55749075.09742815
+            },
+            "allocated_bytes": 4334308
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendmode-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 8.196768191581565,
+          "BuilderLatestOnly": 8.163218807702453
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 1524633.3333333333,
+        "allocated_bytes": 36792,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendmode-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 6634250,
+        "allocated_bytes": 297408,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendmode-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.HtTrendline",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1887056.9444444445,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1887056.9444444445,
+              "StandardError": 11975.307697930673,
+              "Level": 12,
+              "Margin": 60371.18373104809,
+              "Lower": 1826685.7607133964,
+              "Upper": 1947428.1281754926
+            },
+            "allocated_bytes": 70946
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1938612.03125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1938612.03125,
+              "StandardError": 12188.106179391676,
+              "Level": 12,
+              "Margin": 58270.270215706485,
+              "Lower": 1880341.7610342936,
+              "Upper": 1996882.3014657064
+            },
+            "allocated_bytes": 22194
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendline-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 2.794260036196117,
+          "BuilderLatestOnly": 2.870600243706811
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 19967874.074074075,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 19967874.074074075,
+              "StandardError": 289308.1657362266,
+              "Level": 12,
+              "Margin": 1458490.8270517625,
+              "Lower": 18509383.247022312,
+              "Upper": 21426364.901125837
+            },
+            "allocated_bytes": 648693
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 19679351.666666668,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 19679351.666666668,
+              "StandardError": 217236.2870759184,
+              "Level": 12,
+              "Margin": 1038587.6987168116,
+              "Lower": 18640763.967949856,
+              "Upper": 20717939.36538348
+            },
+            "allocated_bytes": 167557
+          }
+        },
+        "evidence": "results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendline-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 14.48101680620355,
+          "BuilderLatestOnly": 14.271775811637296
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 675333.3333333334,
+        "allocated_bytes": 40208,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendline-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1378900,
+        "allocated_bytes": 337592,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-httrendline-short.json.gz"
+      }
+    ]
+  }
+]

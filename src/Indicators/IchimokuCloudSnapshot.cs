@@ -39,7 +39,10 @@ public static class IchimokuCloudSnapshot
         long? endIndex = null
     )
     {
-        var values = Calculate(bars, conversionPeriod, basePeriod, spanBPeriod, 0, 0);
+        Validate(bars, conversionPeriod, basePeriod, spanBPeriod, 0, 0);
+        var (conversion, basis, spanB) = CaptureMidpoints(bars, conversionPeriod, basePeriod, spanBPeriod);
+        var closes = new double[bars.Count];
+        for (int i = 0; i < closes.Length; i++) closes[i] = bars[i].Close;
         var first = startIndex ?? 1L - basePeriod;
         var last = endIndex ?? (long)bars.Count - 1 + basePeriod;
         if (first > last)
@@ -50,19 +53,24 @@ public static class IchimokuCloudSnapshot
         {
             for (var index = first; ; index++)
             {
-                var current = index >= 0 && index < values.Count ? values[(int)index] : null;
+                double? c = index >= conversionPeriod - 1L && index < closes.Length ? conversion[(int)index] : null;
+                double? k = index >= basePeriod - 1L && index < closes.Length ? basis[(int)index] : null;
+                double? a = null, b = null;
                 // Bounds are tested before shifting, avoiding overflow even for Int64 endpoints.
-                var lead =
-                    index >= basePeriod && index - basePeriod < values.Count
-                        ? values[(int)(index - basePeriod)]
-                        : null;
+                if (index >= basePeriod && index - basePeriod < closes.Length)
+                {
+                    int source = (int)(index - basePeriod);
+                    if (source >= conversionPeriod - 1 && source >= basePeriod - 1)
+                        a = Midpoint(conversion[source], basis[source]);
+                    if (source >= spanBPeriod - 1) b = spanB[source];
+                }
                 var lag =
-                    index >= 1L - basePeriod && index <= (long)values.Count - basePeriod
-                        ? values[(int)(index + basePeriod - 1)].Lagging
+                    index >= 1L - basePeriod && index <= (long)closes.Length - basePeriod
+                        ? (double?)closes[(int)(index + basePeriod - 1)]
                         : null;
                 yield return new(
                     index,
-                    new(current?.Conversion, current?.Base, lead?.LeadingA, lead?.LeadingB, lag)
+                    new(c, k, a, b, lag)
                 );
                 if (index == last)
                     yield break;
@@ -80,6 +88,42 @@ public static class IchimokuCloudSnapshot
         int? backwardOffset = null
     )
     {
+        Validate(bars, conversionPeriod, basePeriod, spanBPeriod, forwardOffset, backwardOffset);
+        var forward = forwardOffset ?? basePeriod;
+        var backward = backwardOffset ?? basePeriod;
+        var (conversion, basis, spanB) = CaptureMidpoints(bars, conversionPeriod, basePeriod, spanBPeriod);
+        var result = new IchimokuCloudValue[bars.Count];
+        var leadingStart = Math.Max(2L * forward, Math.Max(conversionPeriod, basePeriod)) - 1;
+        for (var i = 0; i < bars.Count; i++)
+        {
+            double? a = null,
+                b = null;
+            var source = (long)i - forward;
+            if (source >= 0)
+            {
+                if (
+                    i >= leadingStart
+                    && source >= conversionPeriod - 1L
+                    && source >= basePeriod - 1L
+                )
+                    a = Midpoint(conversion[(int)source], basis[(int)source]);
+                if (source >= spanBPeriod - 1L) b = spanB[(int)source];
+            }
+            var future = (long)i + backward;
+            result[i] = new(
+                i >= conversionPeriod - 1 ? conversion[i] : null,
+                i >= basePeriod - 1 ? basis[i] : null,
+                a,
+                b,
+                future < bars.Count ? bars[(int)future].Close : null
+            );
+        }
+        return result;
+    }
+
+    private static void Validate(IReadOnlyList<Bar> bars, int conversionPeriod, int basePeriod,
+        int spanBPeriod, int? forwardOffset, int? backwardOffset)
+    {
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (conversionPeriod < 1)
             throw new ArgumentOutOfRangeException(nameof(conversionPeriod));
@@ -96,36 +140,17 @@ public static class IchimokuCloudSnapshot
         foreach (var b in bars)
             if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low) || !FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
+    }
+
+    private static (double[] Conversion, double[] Base, double[] SpanB) CaptureMidpoints(
+        IReadOnlyList<Bar> bars, int conversionPeriod, int basePeriod, int spanBPeriod)
+    {
+        // Presence is determined solely by each complete-window boundary.
         var conversion = Midpoints(bars, conversionPeriod);
-        var basis = Midpoints(bars, basePeriod);
-        var spanB = Midpoints(bars, spanBPeriod);
-        var result = new IchimokuCloudValue[bars.Count];
-        var leadingStart = Math.Max(2L * forward, Math.Max(conversionPeriod, basePeriod)) - 1;
-        for (var i = 0; i < bars.Count; i++)
-        {
-            double? a = null,
-                b = null;
-            var source = (long)i - forward;
-            if (source >= 0)
-            {
-                if (
-                    i >= leadingStart
-                    && conversion[(int)source] is double c
-                    && basis[(int)source] is double k
-                )
-                    a = Midpoint(c, k);
-                b = spanB[(int)source];
-            }
-            var future = (long)i + backward;
-            result[i] = new(
-                conversion[i],
-                basis[i],
-                a,
-                b,
-                future < bars.Count ? bars[(int)future].Close : null
-            );
-        }
-        return result;
+        var basis = basePeriod == conversionPeriod ? conversion : Midpoints(bars, basePeriod);
+        var spanB = spanBPeriod == conversionPeriod ? conversion
+            : spanBPeriod == basePeriod ? basis : Midpoints(bars, spanBPeriod);
+        return (conversion, basis, spanB);
     }
 
     private static double Midpoint(double high, double low)
@@ -136,11 +161,10 @@ public static class IchimokuCloudSnapshot
         return sum.Mean(2);
     }
 
-    private static double?[] Midpoints(IReadOnlyList<Bar> bars, int period)
+    private static double[] Midpoints(IReadOnlyList<Bar> bars, int period)
     {
-        var result = new double?[bars.Count];
-        if (period > bars.Count)
-            return result;
+        if (period > bars.Count) return [];
+        var result = new double[bars.Count];
         var highs = new WindowExtremeDeque(period, true);
         var lows = new WindowExtremeDeque(period, false);
         for (var i = 0; i < bars.Count; i++)

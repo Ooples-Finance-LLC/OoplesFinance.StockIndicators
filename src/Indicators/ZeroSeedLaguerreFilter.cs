@@ -68,46 +68,47 @@ public sealed class ZeroSeedLaguerreFilter : IndicatorBase, IIndicatorValidation
         return result;
     }
 
-    private sealed class State(double gamma) : IIndicatorState
+    internal sealed class State(double gamma) : IIndicatorState
     {
-        private readonly RocBankValue[] _stages = new RocBankValue[4];
+        private readonly JurikDyadic[] _stages = new JurikDyadic[4];
 
         public void Reset() => Array.Clear(_stages, 0, _stages.Length);
 
-        private static void Product(
-            ref ExactMeanAccumulator sum,
-            RocBankValue value,
-            double coefficient
-        )
-        {
-            var product = new ExactMeanAccumulator();
-            product.AddProduct(value.Mantissa, -coefficient);
-            product.ScaleByPowerOfTwo(value.UpperShift);
-            sum.Subtract(product);
-        }
-
         public double Update(in Bar bar)
         {
-            var sum = new ExactMeanAccumulator();
-            sum.Add(bar.Close);
-            sum.AddProduct(bar.Close, -gamma);
-            Product(ref sum, _stages[0], gamma);
-            var current = RocBankValue.Round(sum);
+#if !NETFRAMEWORK
+            Span<double> nextStages = stackalloc double[4];
+            if (LaguerreRoundedKernel.TryUpdate(_stages, bar.Close, gamma, nextStages, out double fastOutput))
+            {
+                for (int stage = 0; stage < 4; stage++) _stages[stage] = JurikDyadic.FromDouble(nextStages[stage]);
+                return fastOutput;
+            }
+#endif
+            var price = JurikDyadic.FromDouble(bar.Close);
+            var difference = _stages[0];
+            difference.Subtract(price);
+            // Exact differences feed one rounded stage update. SumProduct uses
+            // FMA only when both operands are exactly representable doubles;
+            // wider intermediates retain the established extended exponent.
+            var current = JurikDyadic.SumProduct(price, difference, gamma);
             var prior = _stages[0];
             _stages[0] = current;
             for (var stage = 1; stage < 4; stage++)
             {
-                var next = new ExactMeanAccumulator();
-                prior.AddTo(ref next);
-                Product(ref next, _stages[stage], gamma);
-                Product(ref next, current, -gamma);
+                difference = _stages[stage];
+                difference.Subtract(current);
+                var next = JurikDyadic.SumProduct(prior, difference, gamma);
                 prior = _stages[stage];
-                current = RocBankValue.Round(next);
+                current = next;
                 _stages[stage] = current;
             }
-            var output = new ExactMeanAccumulator();
-            for (var stage = 0; stage < 4; stage++)
-                _stages[stage].AddTo(ref output, stage is 1 or 2 ? 2 : 1);
+            var output = _stages[0];
+            for (var stage = 1; stage < 4; stage++)
+            {
+                var term = _stages[stage];
+                if (stage < 3) term.Multiply(2);
+                output.AddExact(term);
+            }
             return output.Mean(6);
         }
     }

@@ -1,0 +1,9 @@
+{
+  "production_commit": "d2f1e196",
+  "fixture_commit": "02f617e4",
+  "warmup_count": 20,
+  "iteration_count": 15,
+  "fixture_sha256": "4bbe7f8512517b008e797eedfa3f20b6a267ea2d435aa5474fec667833608d8d",
+  "contention_observation": "Preflight CPU 4%, completion 8%. No competing dotnet builds/tests observed before, during or after; reusable MSBuild nodes and dotnet --version present. Sampled observation, not continuous isolation.",
+  "limitation": "This baseline predates shared CPU registry registration of ConnorsStrength. Both builder history modes used the general path. Native tuple API retains its result List directly; parallel includes full-prefix replay and native temporaries."
+}

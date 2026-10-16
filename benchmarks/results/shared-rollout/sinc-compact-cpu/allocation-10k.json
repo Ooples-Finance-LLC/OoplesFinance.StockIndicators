@@ -1,0 +1,1 @@
+{"Operation":"QuanTAlib.Afirma","Count":10000,"Repetitions":5,"Arms":[{"Method":"BuilderFull","Bytes":[584864,584864,584864,584864,584864]},{"Method":"BuilderLatestOnly","Bytes":[103456,103456,103456,103456,103456]},{"Method":"NativeSingle","Bytes":[480968,480968,480968,480968,480968]},{"Method":"NativeParallel","Bytes":[493336,493336,493336,493336,493336]}]}

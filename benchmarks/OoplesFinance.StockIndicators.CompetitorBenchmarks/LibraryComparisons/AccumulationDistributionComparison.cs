@@ -237,9 +237,12 @@ internal static class AccumulationDistributionComparison
         return Pack(multipliers, flows, lines, averages, averagePeriod, skender, false);
     }
 
-    private static ComparisonSeries TradyReference(CompetitorData data)
+    private static ComparisonSeries TradyReference(CompetitorData data) =>
+        Mask(TradyDecimalReference(data).Select(v => (double?)v).ToArray());
+
+    internal static decimal?[] TradyDecimalReference(CompetitorData data)
     {
-        var values = new double?[data.Count];
+        var values = new decimal?[data.Count];
         decimal total = 0;
         for (var i = 0; i < data.Count; i++)
         {
@@ -262,9 +265,9 @@ internal static class AccumulationDistributionComparison
                     ratio = ((close - low) - (high - close)) / (high - low);
                 total += ratio * (decimal)data.Volumes[i];
             }
-            values[i] = (double)total;
+            values[i] = total;
         }
-        return Mask(values);
+        return values;
     }
 
     private static ComparisonSeries Pack(

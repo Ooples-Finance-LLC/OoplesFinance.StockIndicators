@@ -1,0 +1,41 @@
+{
+  "Operation": "TaLib.Functions.UltOsc",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        668640,
+        669296,
+        668640
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        187512,
+        187512,
+        187512
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        79840,
+        79840,
+        79840
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        80280,
+        80280,
+        80280
+      ]
+    }
+  ],
+  "Production": "b87b4996 plus shared circular Ultimate history change",
+  "Evidence": "Allocation-only warmed process-wide measurements; all raw samples retained. No latency qualification."
+}

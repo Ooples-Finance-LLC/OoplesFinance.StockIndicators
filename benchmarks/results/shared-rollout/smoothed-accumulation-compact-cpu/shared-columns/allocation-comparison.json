@@ -1,0 +1,114 @@
+[
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "method": "BuilderFull",
+    "before_bytes": [
+      1123760,
+      1123736,
+      1123736
+    ],
+    "after_bytes": [
+      964368,
+      963688,
+      963688
+    ]
+  },
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "method": "BuilderLatestOnly",
+    "before_bytes": [
+      642608,
+      642608,
+      642608
+    ],
+    "after_bytes": [
+      482560,
+      483216,
+      482560
+    ]
+  },
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "method": "NativeSingle",
+    "before_bytes": [
+      3880816,
+      3880816,
+      3880816
+    ],
+    "after_bytes": [
+      3880816,
+      3880816,
+      3880816
+    ]
+  },
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "method": "NativeParallel",
+    "before_bytes": [
+      17547472,
+      17561960,
+      17547472
+    ],
+    "after_bytes": [
+      17547472,
+      17560400,
+      17547472
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "method": "BuilderFull",
+    "before_bytes": [
+      1123760,
+      1123736,
+      1123736
+    ],
+    "after_bytes": [
+      723616,
+      724296,
+      723616
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "method": "BuilderLatestOnly",
+    "before_bytes": [
+      642608,
+      642608,
+      642608
+    ],
+    "after_bytes": [
+      242488,
+      242488,
+      242488
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "method": "NativeSingle",
+    "before_bytes": [
+      79992,
+      79992,
+      79992
+    ],
+    "after_bytes": [
+      79992,
+      79992,
+      79992
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "method": "NativeParallel",
+    "before_bytes": [
+      440304,
+      440304,
+      440304
+    ],
+    "after_bytes": [
+      440304,
+      440304,
+      440304
+    ]
+  }
+]

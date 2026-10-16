@@ -1,0 +1,12 @@
+{
+  "production_commit": "f958a4da",
+  "fixture_commit": "8af126b4",
+  "fixture_sha256": "4edd2d57a8395a4bd4bdeb4fa7a5311b2157e998173ccb66c02be01c89958bed",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared Skender.GetStc 1000 3",
+  "warmups": 10,
+  "samples_per_arm": 3,
+  "competitor_package": "Skender.Stock.Indicators 2.7.3",
+  "scope": "Managed allocations across all process threads including construction, execution and retained results; setup and result disposal excluded. Native serial retains the public tuple API result collection. Native parallel replays full prefixes and retains disjoint ranges. Tuple and quote overloads agree exactly in setup. Both native arms retain value/presence semantics.",
+  "limitations": "No timing collected: observed CPU 87% and other repository test jobs active. No claim that the tuple overload is universally fastest; it avoids decimal quote conversion and is the direct values-only route. CPU/GPU timing qualification remains pending.",
+  "source_review": "https://github.com/facioquo/stock-indicators-dotnet/blob/2.7.3/src/s-z/Stc/Stc.Api.cs"
+}

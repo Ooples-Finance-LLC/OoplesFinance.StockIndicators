@@ -1,0 +1,34 @@
+[
+  {
+    "bars": 1000,
+    "method": "BuilderFull",
+    "before_ns": 305427.03125,
+    "after_ns": 143770.83333333334,
+    "ratio": 0.4707207241773344,
+    "clear_improvement": true
+  },
+  {
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 237144.7998046875,
+    "after_ns": 146499.560546875,
+    "ratio": 0.6177641705301237,
+    "clear_improvement": true
+  },
+  {
+    "bars": 10000,
+    "method": "BuilderFull",
+    "before_ns": 2408356.5625,
+    "after_ns": 1453896.09375,
+    "ratio": 0.6036880569880316,
+    "clear_improvement": true
+  },
+  {
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 2369516.5625,
+    "after_ns": 1368235.78125,
+    "ratio": 0.577432461500256,
+    "clear_improvement": true
+  }
+]

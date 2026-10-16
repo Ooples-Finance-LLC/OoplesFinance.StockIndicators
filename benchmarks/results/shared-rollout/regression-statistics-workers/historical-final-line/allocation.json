@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetSlope",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        1123368,
+        1123368,
+        1123368
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        642240,
+        642240,
+        642240
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1640400,
+        1640400,
+        1640400
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        7464664,
+        7464664,
+        7464664
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "bars": 1000,
+    "method": "GpuFull",
+    "before_ns": 6668411.851851853,
+    "after_ns": 1982210.5902777778,
+    "ratio": 0.29725377410924425,
+    "clear_improvement": true
+  },
+  {
+    "bars": 1000,
+    "method": "GpuLatestOnly",
+    "before_ns": 6662679.375,
+    "after_ns": 1978619.375,
+    "ratio": 0.2969705224634196,
+    "clear_improvement": true
+  },
+  {
+    "bars": 10000,
+    "method": "GpuFull",
+    "before_ns": 64399062.5,
+    "after_ns": 17165712.962962963,
+    "ratio": 0.26655221825570774,
+    "clear_improvement": true
+  },
+  {
+    "bars": 10000,
+    "method": "GpuLatestOnly",
+    "before_ns": 64290785,
+    "after_ns": 17337261.666666664,
+    "ratio": 0.2696694661088158,
+    "clear_improvement": true
+  }
+]

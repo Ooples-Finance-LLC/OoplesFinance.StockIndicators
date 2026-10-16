@@ -1,0 +1,26 @@
+{
+  "scope": "State-only allocation regression workload; one measured replay after warmup/reset, 4000 ordinary bars including startup. Not a BuildAsync or competitor benchmark.",
+  "prices": "100 + (i * 13 % 101) / 8d",
+  "measurement": "GC.GetAllocatedBytesForCurrentThread",
+  "production_base": "3a4e72c8 plus the compact Hilbert signal/trend-mean batch",
+  "signal_states": [
+    {
+      "kind": "Phase",
+      "allocated_bytes": 2874880
+    },
+    {
+      "kind": "Sine",
+      "allocated_bytes": 2874880
+    },
+    {
+      "kind": "Trend",
+      "allocated_bytes": 2874880
+    }
+  ],
+  "trendline_states": {
+    "DelayedHilbertTrendline": 0,
+    "SeededHilbertTrendline_midpoint": 0,
+    "SeededHilbertTrendline_close": 0
+  },
+  "limitations": "Signal projection wide tails still allocate. No end-to-end timing or competitor win claimed."
+}

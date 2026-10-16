@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "source_commit": "59f778dc",
+  "reuse_binaries": true,
+  "next_filter": "*SharedRocBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-roc-binaries-59f778dc",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "reason": "8 builder-only cases completed exit0 without observed competing jobs.",
+  "interruption_evidence": "interrupted-timing-a",
+  "completed_stem": "si-roc-builder-20261013-b",
+  "evidence": "builder-timing"
+}

@@ -1,0 +1,11 @@
+Source: 0a9cda9d plus certified Force Index GPU quotient and regression tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedGpuForceIndexBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-force-gpu-certified
+All twelve cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. Harness build: 60 existing warnings, zero errors. All 35 Force Index CPU/GPU unit tests and 33 volume recurrence/Force Index fixture tests passed, zero skips. Production/test/harness production DLL SHA256 matched.
+Floating division supplies a quotient guess only. Nonoverflowing two-limb multiplication, exact subtraction and remainder bounds certify the integer quotient; failed certificates retain bitwise division. Existing ties-to-even/subnormal/signed-zero publication is unchanged. Setup independently validates CPU/native arithmetic and every GPU column/history; each GPU invocation confirms device execution.
+GPU workers replay complete prefixes for exact recurrence. Native parallel also replays complete prefixes; its costs are measured and no optimality claim is made.
+Catalog CPU current rows and historical measurements remain unchanged; gpu_current includes same-run CPU/native comparators. Win qualification uses upper builder CI below both native lower bounds.
+All three warmed allocation samples are retained. Managed allocations exclude retained host staging/device buffers. Warnings/outliers remain in raw log.
+Coverage remains 197/401 APIs; coverage is not wins. CPU/GPU latency gaps and remaining rollout remain open.
+OoplesFinance.StockIndicators.dll SHA256 a99eb6ec9a5114cda5e16b88d177fc70a11438dbd5de055cc9fe4be420af7e5f
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 2712188f4400021558db680ee11ee8e539eb8ced3de3eead7756213cceef67a0

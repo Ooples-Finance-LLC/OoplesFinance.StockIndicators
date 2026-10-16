@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -101,16 +100,16 @@ public sealed class WindowDirectionalMeasure
                 )
             );
 
-    private sealed class State(DirectionalWindowMeasure measure, int period, int lag)
+    internal sealed class State(DirectionalWindowMeasure measure, int period, int lag)
         : IMultiOutputState
     {
-        private readonly SeededAtrWindow _atr = new(period);
-        private readonly Queue<double?> _history = new();
-        private BigInteger _positive,
-            _negative,
-            _seedPositive,
-            _seedNegative;
-        private Bar _previous;
+        private readonly SeededAtrWindow? _atr = measure >= DirectionalWindowMeasure.PositiveIndicator ? new(period) : null;
+        private readonly Queue<double?>? _history = measure == DirectionalWindowMeasure.EarlyRating && lag > 0 ? new() : null;
+        private readonly bool _needsPositive = measure != DirectionalWindowMeasure.NegativeIndicator;
+        private readonly bool _needsNegative = measure != DirectionalWindowMeasure.PositiveIndicator;
+        private RocBankValue _positive, _negative;
+        private ExactMeanAccumulator _seedPositive, _seedNegative;
+        private double _previousHigh, _previousLow;
         private bool _started,
             _averageStarted;
         private int _count;
@@ -118,10 +117,11 @@ public sealed class WindowDirectionalMeasure
 
         public void Reset()
         {
-            _atr.Reset();
-            _history.Clear();
-            _positive = _negative = _seedPositive = _seedNegative = 0;
-            _previous = default;
+            _atr?.Reset();
+            _history?.Clear();
+            _positive = _negative = default;
+            _seedPositive = _seedNegative = default;
+            _previousHigh = _previousLow = 0;
             _started = _averageStarted = false;
             _count = 0;
             _average = null;
@@ -136,86 +136,108 @@ public sealed class WindowDirectionalMeasure
             }
         }
 
+        private static ExactMeanAccumulator Difference(double left, double right)
+        {
+            var sum = new ExactMeanAccumulator(); sum.Add(left); sum.Add(right, -1); return sum;
+        }
+
+        private RocBankValue Smooth(RocBankValue previous, RocBankValue current)
+        {
+            var sum = Exact(previous);
+            sum.Multiply(period - 1);
+            sum.AddExact(Exact(current));
+            return DivideRounded(sum, JurikDyadic.FromDouble(period));
+        }
+
+        private static JurikDyadic Exact(RocBankValue value)
+        {
+            var result = JurikDyadic.FromDouble(value.Mantissa);
+            if (value.UpperShift != 0) result.ScaleByPowerOfTwo(value.UpperShift);
+            return result;
+        }
+
+        private static RocBankValue DivideRounded(JurikDyadic numerator, JurikDyadic denominator)
+        {
+            for (var shift = 0; ; shift += 1024)
+            {
+                var value = numerator.Ratio(denominator);
+                if (!double.IsInfinity(value)) return new RocBankValue(value, shift);
+                numerator.ScaleByPowerOfTwo(-1024);
+            }
+        }
+
+        private RocBankValue Direction(RocBankValue movement)
+        {
+            var numerator = Exact(movement);
+            numerator.Multiply(100);
+            // DI is rounded before DX but remains unpublished and may exceed
+            // binary64's upper exponent. Preserve that range until publication.
+            return DivideRounded(numerator, Exact(_atr!.Average));
+        }
+
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
             var first = !_started;
             _started = true;
-            var up = first
-                ? BigInteger.Zero
-                : ExactVarianceWindow.Units(bar.High) - ExactVarianceWindow.Units(_previous.High);
-            var down = first
-                ? BigInteger.Zero
-                : ExactVarianceWindow.Units(_previous.Low) - ExactVarianceWindow.Units(bar.Low);
-            _previous = bar;
+            var up = first || measure == DirectionalWindowMeasure.NegativeMovement
+                ? default : Difference(bar.High, _previousHigh);
+            var down = first || measure == DirectionalWindowMeasure.PositiveMovement
+                ? default : Difference(_previousLow, bar.Low);
+            _previousHigh = bar.High; _previousLow = bar.Low;
             if (measure <= DirectionalWindowMeasure.NegativeMovement)
             {
                 if (!first)
-                    Publish(
-                        ExactMeanAccumulator.UnitRatio(
-                            measure == DirectionalWindowMeasure.PositiveMovement ? up : down,
-                            BigInteger.One
-                        ),
-                        output
-                    );
+                    Publish((measure == DirectionalWindowMeasure.PositiveMovement ? up : down).Mean(1), output);
                 return;
             }
-            _atr.Add(bar);
+            _atr!.Add(bar);
             double? dx = 0;
             if (!first)
             {
-                var p = RocBankValue.RoundUnits(
-                    up > 0 && up > down ? up : BigInteger.Zero,
-                    BigInteger.One
-                );
-                var m = RocBankValue.RoundUnits(
-                    down > 0 && down > up ? down : BigInteger.Zero,
-                    BigInteger.One
-                );
+                var dominance = up; dominance.Subtract(down);
+                var p = _needsPositive && up.Sign > 0 && dominance.Sign > 0 ? RocBankValue.Round(up) : default;
+                var m = _needsNegative && down.Sign > 0 && dominance.Sign < 0 ? RocBankValue.Round(down) : default;
                 if (_count < period)
                 {
-                    _seedPositive += p;
-                    _seedNegative += m;
+                    if (_needsPositive) p.AddTo(ref _seedPositive);
+                    if (_needsNegative) m.AddTo(ref _seedNegative);
                     if (++_count == period)
                     {
-                        _positive = RocBankValue.RoundUnits(_seedPositive, period);
-                        _negative = RocBankValue.RoundUnits(_seedNegative, period);
-                        _seedPositive = _seedNegative = 0;
+                        if (_needsPositive) _positive = RocBankValue.Round(_seedPositive, count: period);
+                        if (_needsNegative) _negative = RocBankValue.Round(_seedNegative, count: period);
+                        _seedPositive = _seedNegative = default;
                     }
                 }
                 else
                 {
-                    _positive = RocBankValue.RoundUnits(_positive * (period - 1) + p, period);
-                    _negative = RocBankValue.RoundUnits(_negative * (period - 1) + m, period);
+                    if (_needsPositive) _positive = Smooth(_positive, p);
+                    if (_needsNegative) _negative = Smooth(_negative, m);
                 }
             }
             if (_atr.HasAverage && _atr.Average.Mantissa != 0) // NOSONAR: Exact zero range defines missing DI.
             {
-                var range =
-                    ExactVarianceWindow.Units(_atr.Average.Mantissa) << _atr.Average.UpperShift;
-                var pdi = RocBankValue.RoundUnits((100 * _positive) << 1074, range);
-                var mdi = RocBankValue.RoundUnits((100 * _negative) << 1074, range);
+                var pdi = _needsPositive ? Direction(_positive) : default;
+                var mdi = _needsNegative ? Direction(_negative) : default;
                 if (
                     measure
                     is DirectionalWindowMeasure.PositiveIndicator
                         or DirectionalWindowMeasure.NegativeIndicator
                 )
                 {
-                    Publish(
-                        ExactMeanAccumulator.UnitRatio(
-                            measure == DirectionalWindowMeasure.PositiveIndicator ? pdi : mdi,
-                            BigInteger.One
-                        ),
-                        output
-                    );
+                    Publish((measure == DirectionalWindowMeasure.PositiveIndicator ? pdi : mdi).Publish(), output);
                     return;
                 }
-                dx = (pdi + mdi).IsZero
-                    ? null
-                    : ExactMeanAccumulator.UnitRatio(
-                        (100 * BigInteger.Abs(pdi - mdi)) << 1074,
-                        pdi + mdi
-                    );
+                var total = Exact(pdi);
+                total.AddExact(Exact(mdi));
+                var difference = Exact(pdi);
+                difference.Subtract(Exact(mdi));
+                difference.Multiply(100);
+                if (difference.Sign < 0)
+                {
+                    difference.Multiply(-1);
+                }
+                dx = total.Sign == 0 ? null : difference.Ratio(total);
             }
             else if (
                 measure
@@ -232,22 +254,17 @@ public sealed class WindowDirectionalMeasure
             {
                 if (!_averageStarted)
                 {
-                    _average =
-                        dx.HasValue
-                            ? ExactMeanAccumulator.UnitRatio(
-                                ExactVarianceWindow.Units(dx.Value),
-                                period
-                            )
-                        : period > 1 ? 0
-                        : null;
+                    var seed = new ExactMeanAccumulator();
+                    if (dx.HasValue) seed.Add(dx.Value);
+                    _average = dx.HasValue ? seed.Mean(period) : period > 1 ? 0 : null;
                     _averageStarted = true;
                 }
                 else if (_average.HasValue && dx.HasValue)
                 {
-                    var sum = new ExactMeanAccumulator();
-                    sum.Add(_average.Value, period - 1);
+                    var sum = JurikDyadic.FromDouble(_average.Value);
+                    sum.Multiply(period - 1);
                     sum.Add(dx.Value);
-                    _average = sum.Mean(period);
+                    _average = sum.Ratio(JurikDyadic.FromDouble(period));
                 }
                 else
                     _average = null;
@@ -259,10 +276,10 @@ public sealed class WindowDirectionalMeasure
             }
             var prior =
                 lag == 0 ? _average
-                : _history.Count == lag ? _history.Dequeue()
+                : _history!.Count == lag ? _history.Dequeue()
                 : null;
             if (lag > 0)
-                _history.Enqueue(_average);
+                _history!.Enqueue(_average);
             if (prior.HasValue && _average.HasValue)
             {
                 var sum = new ExactMeanAccumulator();

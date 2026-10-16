@@ -1,0 +1,42 @@
+{
+  "status": "54 focused contract cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderDiagnosticsBenchmarks.cs": "646ef5112fb57a81ccf7e0b888281a03927a2d45bdea5af8e3677c913934a579",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderBenchmarkBase.cs": "3c1b7cfd3e6ceeece53783532284da7d11a6b0dfab3ab9748b9ab469dd5d04d8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderDiagnosticsBenchmarkTests.cs": "fd11aa9a22fda131d00cab90b1d62247c1b3e22ea92e4836be8026b2eed5811f"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "MaEnvelopes.Api.cs": "58b180de8b08133445178b98cf0d725bde6bd7eef4fd6a4ac8318b9134a067e4",
+    "MaEnvelopes.Models.cs": "6fb3b5f8aca666f6a812242d13511a1488cc5740a42a28a40faf95e7a4c36f0f",
+    "MaEnvelopes.Series.cs": "65fc3d0861f03a5ffd781e3f90aeadfb478ca41a788a1d5473b69a1d199eed40",
+    "Prs.Api.cs": "57062146b76950a22c4323697bdecd26158e20379370309c3a974544ecaeef8b",
+    "Prs.Models.cs": "293a958efc653ee0b13cce32ab3f2243d785a4064cd1d21bf59a909be0af9da1",
+    "Prs.Series.cs": "2ddc541853cfcdae8c4f84a47351fdde75fec53620de73b3393a1f87c82e91d0",
+    "Sma.Analysis.cs": "f6f4ee09af4f3aba4f4c54516536a38ece8201d5d27e38e631c0c4c2b2e40076",
+    "Sma.Api.cs": "072c912a4ee1acff52db1accff168cdcc44eb189b6007776cc545842a587d8c8",
+    "Sma.Models.cs": "1c3055dd29e81b8ec5ba57bba903560d9918f11cf9d38b3022ae4bf5d3369185",
+    "Sma.Series.cs": "54c310937590287b7858e2f59d05f58c631798e20111932780e8174aa3596dac",
+    "StdDevChannels.Api.cs": "207e288112fc88e7a4972632bc7cb50ddcd879adc102b3f5065d7525bad0b12d",
+    "StdDevChannels.Models.cs": "adf71236c619e895c6fb5016e8bf94f6a770eadbce5de86e1dff9279595341c9",
+    "StdDevChannels.Series.cs": "027d5246721303956fc9733fc0b78b6e5bb1935e313f03d30221affaf0ac9cd4",
+    "Slope.Series.cs": "e5e92db452179c0407d1b506a585e63997d1ba4309942480c1cca400b3dc8d3c"
+  },
+  "operations": [
+    "Skender.GetMaEnvelopes",
+    "Skender.GetSmaAnalysis",
+    "Skender.GetPrs",
+    "Skender.GetStdDevChannels"
+  ],
+  "contract": "Public tuple APIs. Moving-average envelopes return a deferred projection and are materialized to List inside both timed arms. Other native APIs return eager Lists. Envelopes and SMA analysis use 19 preceding bars; PRS20/SMA3 uses 20 preceding bars with at least 20 input quotes per worker. Channels retain absolute regression indices through full prefixes and align worker ends to the full-series right-anchored 20-bar blocks. Native calculation and joining stay timed; normalization and references stay outside. Explicit checks retain the shared envelope presence flag, the seven channel output columns, latest values and post-disposal ownership. Exact independent native references and serial/parallel/repeated checks cover values, presence, dates, worker boundaries and result ownership.",
+  "validation": {
+    "comparator_cases_passed": 54,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1261,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 32
+}

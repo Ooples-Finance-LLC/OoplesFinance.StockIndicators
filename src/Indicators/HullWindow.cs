@@ -124,7 +124,7 @@ public sealed class HullWindow : MultiOutputIndicatorBase, IIndicatorValidationC
         return (sum / new ReferenceFraction(mass)).RoundExtendedBinary64();
     }
 
-    private sealed class State(int period, int halfPeriod, int rootPeriod, bool expanding)
+    internal sealed class State(int period, int halfPeriod, int rootPeriod, bool expanding)
         : IMultiOutputState
     {
         private readonly WeightedStage _half = new(halfPeriod),

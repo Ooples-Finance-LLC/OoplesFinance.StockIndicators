@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -96,33 +95,45 @@ public sealed class SeededAtrTrailingStop : MultiOutputIndicatorBase, IIndicator
                 )
             );
 
-    private sealed class State(SeededAtrTrailingStop owner) : IMultiOutputState
+    internal sealed class State(SeededAtrTrailingStop owner) : IMultiOutputState
     {
         private readonly SeededAtrWindow _atr = new(owner.Period);
-        private BigInteger _upper,
+        private JurikDyadic _upper,
             _lower,
             _previous;
         private bool _ready,
             _bullish;
-        private static readonly BigInteger Grid = BigInteger.One << 1074;
 
         public void Reset()
         {
             _atr.Reset();
-            _upper = _lower = _previous = 0;
+            _upper = _lower = _previous = default;
             _ready = _bullish = false;
+        }
+
+        private static int Compare(JurikDyadic left, JurikDyadic right)
+        {
+            left.Subtract(right);
+            return left.Sign;
         }
 
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
             _atr.Add(bar);
-            var close = ExactVarianceWindow.Units(bar.Close);
+            var close = JurikDyadic.FromDouble(bar.Close);
             if (_atr.HasAverage)
             {
-                var high = ExactVarianceWindow.Units(bar.High);
-                var low = ExactVarianceWindow.Units(bar.Low);
-                var midpoint = RocBankValue.RoundUnits(high + low, 2);
+                var high = JurikDyadic.FromDouble(bar.High);
+                var low = JurikDyadic.FromDouble(bar.Low);
+                var midpoint = new JurikDyadic();
+                if (owner.Basis == AtrTrailBasis.Midpoint)
+                {
+                    midpoint = high;
+                    midpoint.AddExact(low);
+                    midpoint.ScaleByPowerOfTwo(-1);
+                    midpoint = midpoint.Rounded();
+                }
                 var upperBasis =
                     owner.Basis == AtrTrailBasis.Close ? close
                     : owner.Basis == AtrTrailBasis.HighLow ? high
@@ -131,32 +142,31 @@ public sealed class SeededAtrTrailingStop : MultiOutputIndicatorBase, IIndicator
                     owner.Basis == AtrTrailBasis.Close ? close
                     : owner.Basis == AtrTrailBasis.HighLow ? low
                     : midpoint;
-                var average =
-                    ExactVarianceWindow.Units(_atr.Average.Mantissa) << _atr.Average.UpperShift;
-                var width = RocBankValue.RoundUnits(
-                    average * ExactVarianceWindow.Units(owner.Multiplier),
-                    Grid
-                );
-                var upper = RocBankValue.RoundUnits(upperBasis + width, 1);
-                var lower = RocBankValue.RoundUnits(lowerBasis - width, 1);
+                var width = JurikDyadic.FromDouble(_atr.Average.Mantissa);
+                if (_atr.Average.UpperShift != 0) width.ScaleByPowerOfTwo(_atr.Average.UpperShift);
+                width.Multiply(owner.Multiplier);
+                width = width.Rounded();
+                var upper = upperBasis;
+                upper.AddExact(width);
+                upper = upper.Rounded();
+                var lower = lowerBasis;
+                lower.Subtract(width);
+                lower = lower.Rounded();
                 if (!_ready)
                 {
                     _ready = true;
                     _bullish =
-                        close >= (owner.Basis == AtrTrailBasis.Midpoint ? midpoint : _previous);
+                        Compare(close, owner.Basis == AtrTrailBasis.Midpoint ? midpoint : _previous) >= 0;
                     _upper = upper;
                     _lower = lower;
                 }
-                if (upper < _upper || _previous > _upper)
+                if (Compare(upper, _upper) < 0 || Compare(_previous, _upper) > 0)
                     _upper = upper;
-                if (lower > _lower || _previous < _lower)
+                if (Compare(lower, _lower) > 0 || Compare(_previous, _lower) < 0)
                     _lower = lower;
-                _bullish = close > (_bullish ? _lower : _upper);
+                _bullish = Compare(close, _bullish ? _lower : _upper) > 0;
                 var slot = _bullish ? 2 : 1;
-                output[0] = output[slot] = ExactMeanAccumulator.UnitRatio(
-                    _bullish ? _lower : _upper,
-                    1
-                );
+                output[0] = output[slot] = (_bullish ? _lower : _upper).Mean(1);
                 output[3] = output[slot + 3] = 1;
             }
             _previous = close;

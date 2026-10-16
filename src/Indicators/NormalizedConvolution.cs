@@ -10,6 +10,10 @@ namespace OoplesFinance.StockIndicators.Indicators;
 public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationContract
 {
     private readonly double[] _kernel;
+    private readonly int _firstWeight, _weightStep;
+    internal bool HasAffineKernel { get; }
+    internal int AffineFirstWeight => _firstWeight;
+    internal int AffineWeightStep => _weightStep;
 
     /// <summary>Creates a filter from a nonempty finite newest-first kernel.</summary>
     public NormalizedConvolution(IEnumerable<double> kernel)
@@ -22,6 +26,7 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
                 nameof(kernel)
             );
         Kernel = Array.AsReadOnly(_kernel);
+        HasAffineKernel = TryIntegerProgression(_kernel, out _firstWeight, out _weightStep);
     }
 
     /// <summary>Immutable newest-first weights supplied at construction.</summary>
@@ -31,8 +36,30 @@ public sealed class NormalizedConvolution : IndicatorBase, IIndicatorValidationC
     public override int WarmupBars => _kernel.Length - 1;
 
     /// <inheritdoc/>
-    protected internal override object CreateState() =>
-        new NormalizedKernelState(_kernel.Length, lag => _kernel[lag]);
+    protected internal override object CreateState() => HasAffineKernel
+        ? new AffineConvolutionState(_kernel.Length, _firstWeight, _weightStep)
+        : new NormalizedKernelState(_kernel.Length, lag => _kernel[lag]);
+
+    // Exact equality is the eligibility proof: accepting even a one-ULP
+    // near-progression would change the filter's coefficients and results.
+#pragma warning disable S1244
+    private static bool TryIntegerProgression(double[] kernel, out int first, out int step)
+    {
+        first = step = 0;
+        if (kernel[0] < int.MinValue || kernel[0] > int.MaxValue || kernel[0] != Math.Truncate(kernel[0])) return false;
+        first = (int)kernel[0];
+        if (kernel.Length == 1) return true;
+        double difference = kernel[1] - first;
+        if (difference < int.MinValue || difference > int.MaxValue || difference != Math.Truncate(difference)) return false;
+        step = (int)difference;
+        for (int i = 1; i < kernel.Length; i++)
+        {
+            long expected = first + (long)step * i;
+            if (expected < int.MinValue || expected > int.MaxValue || kernel[i] != expected) return false;
+        }
+        return true;
+    }
+#pragma warning restore S1244
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -107,7 +134,7 @@ public sealed class EndpointWeightedAverage
         : IIndicatorState,
             IDisposable
     {
-        private readonly ExactLinearFitWindow _fit = new(period, observedHistory: true);
+        private readonly ExactLinearFitWindow _fit = new(period, observedHistory: true, compact: true);
 
         public void Reset() => _fit.Reset();
 
@@ -118,30 +145,146 @@ public sealed class EndpointWeightedAverage
     }
 }
 
-internal sealed class NormalizedKernelState(int length, Func<int, double> weight) : IIndicatorState
+// Exact FIR recurrence for integer arithmetic progressions, newest coefficient first.
+// Shifting the old window adds step*sum; the evicted sample then has coefficient
+// first+step*length. Partial windows retain the same coefficients and exact mass.
+internal sealed class AffineConvolutionState(int length, int first, int step, bool averageDuringWarmup = false) : IIndicatorState
 {
     private readonly Queue<double> _history = new();
+    private ExactMeanAccumulator _sum, _weighted;
+    private long _mass;
+    private readonly long _evictionWeight = -(first + (long)step * length);
 
-    public void Reset() => _history.Clear();
+    public void Reset()
+    {
+        _history.Clear();
+        _sum = _weighted = default;
+        _mass = 0;
+    }
 
     public double Update(in Bar bar)
     {
-        if (_history.Count == length)
-            _history.Dequeue();
-        _history.Enqueue(bar.Close);
-        var numerator = new ExactMeanAccumulator();
-        var denominator = new ExactMeanAccumulator();
-        var lag = _history.Count;
-        foreach (var price in _history)
+        if (step == 1) _weighted.AddExact(_sum);
+        else if (step == -1) _weighted.Subtract(_sum);
+        else if (step == -3)
         {
-            var coefficient = weight(--lag);
-            numerator.AddProduct(price, coefficient);
-            denominator.Add(coefficient);
+            // Endpoint weights shift by -3. Exact subtraction keeps ordinary
+            // windows in the compact accumulator without Multiply's wide normalization.
+            _weighted.Subtract(_sum);
+            _weighted.Subtract(_sum);
+            _weighted.Subtract(_sum);
         }
-        return denominator.IsExactlyZero
-            ? numerator.Mean(_history.Count)
-            : numerator.Ratio(denominator);
+        else if (step != 0)
+        {
+            var shift = _sum;
+            shift.Multiply(step);
+            _weighted.AddExact(shift);
+        }
+        if (_history.Count == length)
+        {
+            double oldest = _history.Dequeue();
+            if (_evictionWeight is >= int.MinValue and <= int.MaxValue)
+                _weighted.Add(oldest, (int)_evictionWeight);
+            else _weighted.Add(oldest, new System.Numerics.BigInteger(_evictionWeight));
+            _sum.Add(oldest, -1);
+        }
+        else _mass += first + (long)step * _history.Count;
+        _history.Enqueue(bar.Close);
+        _sum.Add(bar.Close);
+        _weighted.Add(bar.Close, first);
+        if (averageDuringWarmup && _history.Count < length) return _sum.Mean(_history.Count);
+        if (_mass == 0) return _weighted.Mean(_history.Count);
+        // The mass fits long: every retained coefficient is an Int32 and there
+        // are at most Int32.MaxValue of them. Preserve the existing zero sign.
+        if (_mass > 0) return _weighted.Mean(_mass);
+        if (_weighted.IsExactlyZero) return 0;
+        return -_weighted.Mean(-_mass);
     }
+}
+
+internal sealed class NormalizedKernelState(int length, Func<int, double> weight) : IIndicatorState
+{
+    private ExactMeanAccumulator.ProductFactor[] _history = [];
+#if NETFRAMEWORK
+    private ExactMeanAccumulator.ProductCoefficient[] _coefficients = [];
+    private ExactMeanAccumulator _denominator;
+#else
+    private ExactMeanAccumulator.ProductFactor[] _coefficients = [];
+    private JurikDyadic _denominator;
+#endif
+    private int _count, _position, _cachedCoefficients;
+
+    public void Reset()
+    {
+        _count = _position = 0;
+        _denominator = default;
+    }
+
+    public double Update(in Bar bar)
+    {
+        if (_count < length)
+        {
+            if (_count == _history.Length)
+            {
+                // Growth occurs only while filling, when retained prices are
+                // contiguous. Cap storage at the requested window, not a power of two.
+                int capacity = _count == 0 ? Math.Min(length, 4)
+                    : _count <= length / 2 ? _count * 2 : length;
+                Array.Resize(ref _history, capacity);
+                Array.Resize(ref _coefficients, capacity);
+                _position = _count;
+            }
+            if (_cachedCoefficients == _count)
+            {
+#if NETFRAMEWORK
+                _coefficients[_count] = new ExactMeanAccumulator.ProductCoefficient(weight(_count));
+#else
+                _coefficients[_count] = new ExactMeanAccumulator.ProductFactor(weight(_count));
+#endif
+                _cachedCoefficients++;
+            }
+#if NETFRAMEWORK
+            _denominator.AddFactor(_coefficients[_count].Factor);
+#else
+            _denominator.AddExact(JurikDyadic.FromFactor(in _coefficients[_count]));
+#endif
+            _count++;
+        }
+        _history[_position] = new ExactMeanAccumulator.ProductFactor(bar.Close);
+        if (++_position == _history.Length) _position = 0;
+        var history = _history; var coefficients = _coefficients;
+        int oldest = _count == length ? _position : 0, lag = _count;
+        // Preserve oldest-to-newest accumulation order without enumerator state
+        // or a wrap/modulo branch on every product.
+#if NETFRAMEWORK
+        var numerator = new ExactMeanAccumulator();
+        for (int i = oldest; i < _count; i++)
+            numerator.AddProduct(in history[i], in coefficients[--lag]);
+        for (int i = 0; i < oldest; i++)
+            numerator.AddProduct(in history[i], in coefficients[--lag]);
+        return _denominator.IsExactlyZero ? numerator.Mean(_count) : numerator.Ratio(_denominator);
+#else
+        var numerator = new JurikDyadic();
+        for (int i = oldest; i < _count; i++)
+            AddProduct(in history[i], in coefficients[--lag], ref numerator);
+        for (int i = 0; i < oldest; i++)
+            AddProduct(in history[i], in coefficients[--lag], ref numerator);
+        return _denominator.Sign == 0 ? numerator.Mean(_count) : numerator.Ratio(_denominator);
+#endif
+    }
+
+#if !NETFRAMEWORK
+    private static void AddProduct(in ExactMeanAccumulator.ProductFactor price,
+        in ExactMeanAccumulator.ProductFactor coefficient, ref JurikDyadic numerator)
+    {
+        // Finite mantissas need at most 106 product bits. The accumulator retains
+        // exact wider-exponent fallback without allocating for ordinary kernels.
+        var product = JurikDyadic.FromBinaryProduct(
+            (Int128)price.Mantissa * coefficient.Mantissa,
+            price.Scale + coefficient.Scale - 2148);
+        numerator.AddExact(product);
+    }
+#endif
 }
 
 internal static class NormalizedKernelReference

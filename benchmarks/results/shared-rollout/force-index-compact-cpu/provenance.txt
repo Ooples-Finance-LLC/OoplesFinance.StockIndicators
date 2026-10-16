@@ -1,0 +1,8 @@
+Production commit: 55cf1553. Direct Force Index fixture is included in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared Skender.GetForceIndex 10000 3
+Process exit zero. All four arms stable across three allocation samples. Setup checks owned/native arithmetic against separate independent references bit-for-bit, then checks presence and agreement within 1e-10 on this dyadic fixture. Native and exact recurrences have different rounding boundaries.
+Native serial retains its eager result collection. Native parallel replays complete prefixes to preserve recursive state; replay, quote conversion and owned-row publication are measured. Other native parallel strategies remain unqualified.
+Benchmark build succeeded with 60 existing warnings. All 63 focused fixture/probe checks passed. Production binaries reused.
+Latency deferred: pre-launch check observed Tensors GPU-related test PID 30236 (GenericFftBackendParity, GenericFftReadiness, WebGpuBatchExecutionKernelsTests, WebGpuShaderCompilation). No timing process launched and no catalog qualification added.
+OoplesFinance.StockIndicators.dll SHA256 85627a7a8bf4a98aa76e7641ca87b03094119a00a92b68af3abee13958d4faac
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 e7ed0439a60cdfaa1b383d46d82384015c48e7801670b69e683cade538a5096f

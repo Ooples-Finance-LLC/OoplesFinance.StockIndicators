@@ -1,0 +1,41 @@
+{
+  "Operation": "QuanTAlib.Dema",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        562528,
+        562528,
+        562528
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        81120,
+        81120,
+        81120
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        480320,
+        480320,
+        480320
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1882552,
+        1882552,
+        1882552
+      ]
+    }
+  ],
+  "production_commit": "944572c2",
+  "qualification": "allocation-only; no latency qualification"
+}

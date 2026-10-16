@@ -119,11 +119,9 @@ public sealed class HoltWinterForecast : IndicatorBase, IMovingAverage, IIndicat
         return values;
     }
 
-    private sealed class State(int period, double a, double b, double c) : IIndicatorState
+    internal sealed class State(int period, double a, double b, double c) : IIndicatorState
     {
-        private RocBankValue _level,
-            _velocity,
-            _acceleration;
+        private JurikDyadic _level, _velocity, _acceleration;
         private bool _started;
 
         public void Reset()
@@ -132,17 +130,12 @@ public sealed class HoltWinterForecast : IndicatorBase, IMovingAverage, IIndicat
             _started = false;
         }
 
-        private static void Product(
-            ref ExactMeanAccumulator sum,
-            RocBankValue value,
-            double factor,
-            int shift = 0
-        )
+        private static JurikDyadic Forecast(JurikDyadic level, JurikDyadic velocity, JurikDyadic acceleration)
         {
-            var term = new ExactMeanAccumulator();
-            term.AddProduct(value.Mantissa, factor);
-            term.ScaleByPowerOfTwo(value.UpperShift + shift);
-            sum.AddExact(term);
+            acceleration.ScaleByPowerOfTwo(-1);
+            level.AddExact(velocity);
+            level.AddExact(acceleration);
+            return level;
         }
 
         public double Update(in Bar bar)
@@ -150,36 +143,39 @@ public sealed class HoltWinterForecast : IndicatorBase, IMovingAverage, IIndicat
             if (!_started || period == 1)
             {
                 _started = true;
-                _level = new RocBankValue(bar.Close);
+                _level = JurikDyadic.FromDouble(bar.Close);
                 return bar.Close;
             }
-            var f = new ExactMeanAccumulator();
-            _level.AddTo(ref f);
-            _velocity.AddTo(ref f);
-            Product(ref f, _acceleration, 1, -1);
-            Product(ref f, _level, -a);
-            Product(ref f, _velocity, -a);
-            Product(ref f, _acceleration, -a, -1);
-            f.AddProduct(bar.Close, a);
-            var level = RocBankValue.Round(f);
-            var v = new ExactMeanAccumulator();
-            _velocity.AddTo(ref v);
-            _acceleration.AddTo(ref v);
-            Product(ref v, _velocity, -b);
-            Product(ref v, _acceleration, -b);
-            Product(ref v, level, b);
-            Product(ref v, _level, -b);
-            var velocity = RocBankValue.Round(v);
-            var acc = new ExactMeanAccumulator();
-            _acceleration.AddTo(ref acc);
-            Product(ref acc, _acceleration, -c);
-            Product(ref acc, velocity, c);
-            Product(ref acc, _velocity, -c);
-            var acceleration = RocBankValue.Round(acc);
-            var result = new ExactMeanAccumulator();
-            level.AddTo(ref result);
-            velocity.AddTo(ref result);
-            Product(ref result, acceleration, 1, -1);
+#if !NETFRAMEWORK
+            if (_level.TryDouble(out double oldLevel) && _velocity.TryDouble(out double oldVelocity)
+                && _acceleration.TryDouble(out double oldAcceleration)
+                && HoltWinterRoundedKernel.TryUpdate(oldLevel, oldVelocity, oldAcceleration,
+                    bar.Close, a, b, c, out double fastLevel, out double fastVelocity,
+                    out double fastAcceleration, out double fastOutput))
+            {
+                _level = JurikDyadic.FromDouble(fastLevel);
+                _velocity = JurikDyadic.FromDouble(fastVelocity);
+                _acceleration = JurikDyadic.FromDouble(fastAcceleration);
+                return fastOutput;
+            }
+#endif
+            var forecast = Forecast(_level, _velocity, _acceleration);
+            var difference = JurikDyadic.FromDouble(bar.Close);
+            difference.Subtract(forecast);
+            var level = JurikDyadic.SumProduct(forecast, difference, a);
+
+            var trend = _velocity;
+            trend.AddExact(_acceleration);
+            difference = level;
+            difference.Subtract(_level);
+            difference.Subtract(trend);
+            var velocity = JurikDyadic.SumProduct(trend, difference, b);
+
+            difference = velocity;
+            difference.Subtract(_velocity);
+            difference.Subtract(_acceleration);
+            var acceleration = JurikDyadic.SumProduct(_acceleration, difference, c);
+            var result = Forecast(level, velocity, acceleration);
             _level = level;
             _velocity = velocity;
             _acceleration = acceleration;

@@ -1,0 +1,12 @@
+{
+  "status": "excluded-diagnostic",
+  "production_base": "b65b38ef",
+  "production_change": "Exact-subtraction return certificate in ReturnBetaWindow.Return",
+  "count": 10000,
+  "warmup_count": 10,
+  "iteration_count": 10,
+  "reason": "AiDotNet test-project build PID 17280 was observed live during benchmark execution; BDN also reported short observed iteration times for two arms.",
+  "competing_build_start": "2026-10-12T11:47:12.8906057-04:00",
+  "competing_build_cpu_seconds_at_completion": 12.78125,
+  "catalog_updated": false
+}

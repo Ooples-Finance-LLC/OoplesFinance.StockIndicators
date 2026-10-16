@@ -1,0 +1,18 @@
+{
+  "base_commit": "a9ab56bb",
+  "verification": {
+    "focused_cpu_gpu_tests": 92,
+    "final_midpoint_concurrency_confirmation_tests": 5,
+    "skipped": 0,
+    "inventory_tests": 17,
+    "benchmark_cases": 24,
+    "warmups": 5,
+    "measured_iterations": 15
+  },
+  "execution": "Required GPU supports standalone nonempty WindowRangeMidpoint for close or high/low windows. One device work item scans the available window and publishes its midpoint. Host work validates/stages inputs and owns snapshots, then dispatches, reads back and validates output; it does not compute midpoint values. Window periods are runtime arguments under two fixed cache keys. Existing AiDotNet.Tensors 0.134.4 buffers, queue lock and retained-workspace payload cap are reused without new scratch columns.",
+  "rounding": "For finite binary64 operands, a finite sum can be halved with correct rounding: if the final half is subnormal, addition is exact on the binary64 subnormal lattice. If the sum overflows, both operands have exactly representable normal halves, so their half-sum rounds the exact midpoint once without overflow. Exact zero sums publish positive zero; negative nonzero subnormal sums can round to negative zero and retain that sign. FP64 is required, contraction is disabled and relaxed/flush math is not enabled.",
+  "adversarial_review": "Independent rational references check both price sources, both history modes, period one/three/twenty/Int32.MaxValue, startup and warmup, extrema and subnormal exponent boundaries, signed underflow and zero. Source mutation verifies owned snapshots. Different-period/source GPU work is launched on separate tasks to exercise shared workspace isolation; invalid fields, cancellation and subsequent recovery preserve prior outputs. Empty, sourced and mixed Required-GPU requests remain unsupported.",
+  "comparison": "all-paths contains CPU/GPU Full/LatestOnly and native serial/parallel at 10k/100k. Timings include staging, transfers, device work, readback, validation and publication after compilation/workspace warmup. cpu-native preserves the prior 1k rows, selects the latest CPU builder rows and the fastest retained native arms at each size, and checks every selected row against its source report. Device-resident allocations are not represented by managed allocation columns.",
+  "result": "At 100k bars, close/high-low GPU Full is 2.144/2.330 ms and GPU LatestOnly is 1.140/1.584 ms; CPU Full is 1.500/1.414 ms and CPU LatestOnly is 0.746/0.734 ms. Native parallel is 0.520/0.605 ms. The GPU routes are correct but do not win against CPU or best native on this host at either measured size. Auto remains CPU. Qualification remains 91 APIs; these two mappings gain GPU support, not a new performance-win claim.",
+  "limitations": "The device scan performs work proportional to available window length for each output. Large-period crossover and other GPU hardware are not qualified by this period-20 campaign. The full rollout, remaining native comparisons and pending arithmetic redesign remain incomplete."
+}

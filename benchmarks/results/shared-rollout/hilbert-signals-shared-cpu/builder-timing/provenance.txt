@@ -1,0 +1,4 @@
+Source commit 24cb588f. Production SHA256 1eb2191928602b2756aea3584f2a7d73b3c118759ed9b10f6756300e577ee5e4.
+16 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedHilbertSignalBenchmarks*Builder*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+51 focused tests passed; build and verification evidence in parent directory. No full-suite claim.

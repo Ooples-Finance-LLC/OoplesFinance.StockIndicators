@@ -1,0 +1,11 @@
+Small-window index CPU scan qualification.
+
+Periods up to 32 retain the winning index and rescan a double ring only when the winner expires. Reverse rescans with strict comparison and forward nonstrict updates preserve newest equal indices. Larger windows retain the shared deque to avoid O(N*period) rescans at large periods. Full and mixed worker origins remain absolute.
+
+99 focused tests passed with zero skips. New cases cover monotone rising/falling values, repeated winners, periods 1/2/20/32/33, longer shared seeds, standalone and mixed batches, and independent index scans. The benchmark Release net10 build passed.
+
+Twelve builder cases used five warmups and fifteen measurements, retaining prior fastest native source rows. Eleven means improved. At 10k MaxIndex Full/Latest moved 73.63/45.56 to 62.80/33.07 us, MinIndex 79.58/51.65 to 64.64/40.65 us, and MinMaxIndex 121.15/93.24 to 104.28/74.40 us. All still lose against native.
+
+The anomalous 1k MaxIndex LatestOnly campaign result was 19.35 us versus its Full 15.01 us. A focused confirmation with ten warmups and thirty measurements returned 11.21 us. The qualification conservatively retains 19.35 us; both raw runs are archived. No best-run substitution was made. BDN reported short minimum iterations for two campaign cases; confidence intervals are retained.
+
+The saved period-20 fixture measures mixed prices, not monotone worst-case performance. The scan cap bounds rescans to 32 elements; correctness tests cover adverse orderings. Direct qualification remains 96/401 APIs.
