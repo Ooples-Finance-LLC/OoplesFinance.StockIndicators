@@ -11,7 +11,9 @@ internal static partial class ValuesBarExecution
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
             or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown
             or Demarker or DeMarker or UlcerIndex or ChoppinessIndex or Natr or AtrPercent or AtrChannelWidth or ChaikinVolatility
-            or Variance or CoefficientOfVariation or StandardError or StdDev { Length: > 0 } or HistoricalVolatility or Kvo or KlingerVolumeOscillator or UltimateOscillator;
+            or Variance or CoefficientOfVariation or StandardError or StdDev { Length: > 0 } or HistoricalVolatility
+            or Kvo or KlingerVolumeOscillator or UltimateOscillator or Tsi or TrueStrengthIndex
+            or ErgodicTrueStrengthIndexV1 or SMIErgodicIndicator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -67,6 +69,10 @@ internal static partial class ValuesBarExecution
         AtrPercent range => new GeneratedAtrDerivedState(range.Length, count),
         AtrChannelWidth range => new GeneratedAtrDerivedState(range.Length, count, range.Multiplier),
         ChaikinVolatility volatility => new GeneratedChaikinVolatilityState(volatility.Length, count),
+        Tsi strength => new GeneratedTrueStrengthState([strength.LongLength, strength.ShortLength], 7, count),
+        TrueStrengthIndex strength => new GeneratedTrueStrengthState([strength.Length1, strength.Length2], strength.SignalLength, count),
+        ErgodicTrueStrengthIndexV1 strength => new GeneratedTrueStrengthState([strength.Length1, strength.Length2, strength.Length3], strength.SignalLength, count),
+        SMIErgodicIndicator strength => new GeneratedTrueStrengthState([strength.FastLength, strength.SlowLength], strength.SignalLength, count),
         Kvo oscillator => new GeneratedKlingerState(oscillator.Length, 55, 13),
         KlingerVolumeOscillator oscillator => new GeneratedKlingerState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
         UltimateOscillator oscillator => new GeneratedUltimateState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
@@ -189,6 +195,20 @@ internal static partial class ValuesBarExecution
             return multiplier.HasValue ? AtrDerivedWindow.Width(atr, multiplier.Value) : AtrDerivedWindow.Percent(atr, bar.Close);
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTrueStrengthState(int[] lengths, int signal, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly StrengthWindow _line = new(MovingAvgType.ExponentialMovingAverage, lengths, count);
+        private readonly StrengthAverage _signal = new(MovingAvgType.ExponentialMovingAverage, signal, count);
+        public void Reset() { _line.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double value = _line.Next(bar.Close, true);
+            outputs[0] = value;
+            outputs[1] = _signal.Next(new StrengthValue(value), true).Mantissa;
+        }
+        public void Dispose() { _line.Dispose(); _signal.Dispose(); }
     }
 
     private sealed class GeneratedKlingerState(int fast, int slow, int signal) : IMultiOutputState, IDisposable

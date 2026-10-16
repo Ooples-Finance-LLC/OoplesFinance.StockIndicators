@@ -2419,7 +2419,13 @@
       "options": [
         "ErgodicTrueStrengthIndexV1SpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ErgodicTrueStrengthIndexV1SpecOptions": [
+          "benchmarks/results/remaining-indicators/truestrength-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ErgodicTrueStrengthIndexV2",
@@ -4760,7 +4766,13 @@
       "options": [
         "SMIErgodicIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "SMIErgodicIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/truestrength-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ScalpersChannel",
@@ -5584,7 +5596,16 @@
         "TrueStrengthIndexSpecOptions",
         "TsiSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TrueStrengthIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/truestrength-contracts.json"
+        ],
+        "TsiSpecOptions": [
+          "benchmarks/results/remaining-indicators/truestrength-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "TurboScaler",
@@ -8255,6 +8276,7 @@
     "benchmarks/results/remaining-indicators/rangehealth-contracts.json": "4471e9a1fdde6b0b166b7c6b307a35b5a5a48c4984f6a53dc37de6fe1a7f9c31",
     "benchmarks/results/remaining-indicators/ratio-contracts.json": "3fa30f61f1befe6d233fccacab9ef8628629da2f0cd693346e6336da64f301ea",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
+    "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
     "benchmarks/results/remaining-indicators/volume-contracts.json": "1e80ae57d2f76d8978e29acfecc682a114126173f7f51d34dc6aa7d36a327ad2",
     "benchmarks/results/remaining-indicators/volumetrend-contracts.json": "8b4430170b2e074dd9f63b51b279141a5228e1472e43d5e2a6dee464c0f1b747",
     "benchmarks/results/remaining-indicators/wilder-contracts.json": "39fdbf300716803c9083728024d437259ffaea26d2494463630da52d4b3eb458",
@@ -8459,7 +8481,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "529064afd2eb7814784a013c9812ee32e63b90fbf33b0d0a8208451709caa1c5",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8ff7def3ee45b29fb5a3699e52b8a482057a37aa5367939192754a4ade3b33bf",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
