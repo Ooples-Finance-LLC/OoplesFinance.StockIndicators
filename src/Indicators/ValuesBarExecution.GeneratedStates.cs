@@ -98,6 +98,8 @@ internal static partial class ValuesBarExecution
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or FractalChaosBands or FractalChaosOscillator
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
+            or EfficientTrendStepChannel
+            or LinearChannels { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or VervoortVolatilityBands { DevMult: > double.NegativeInfinity and < double.PositiveInfinity, LowBandMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or UniChannel { UbFac: > double.NegativeInfinity and < double.PositiveInfinity, LbFac: > double.NegativeInfinity and < double.PositiveInfinity }
             or PseudoPolynomialChannel { Morph: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -332,6 +334,8 @@ internal static partial class ValuesBarExecution
         ProjectionBands channel => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBands, channel.Length),
         ProjectionOscillator oscillator => new GeneratedProjectionFamilyState(IndicatorName.ProjectionOscillator, oscillator.Length),
         ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
+        EfficientTrendStepChannel channel => new GeneratedEfficientTrendStepState(channel.Length, channel.FastLength, channel.SlowLength, count),
+        LinearChannels channel => new GeneratedLinearChannelState(Math.Max(1, channel.Length), channel.Mult),
         VervoortVolatilityBands channel => new GeneratedVervoortVolatilityState(channel.Length1, channel.Length2, channel.DevMult, channel.LowBandMult),
         UniChannel channel => new GeneratedUniChannelState(Math.Max(1, channel.Length), channel.UbFac, channel.LbFac, channel.Type1, count),
         PseudoPolynomialChannel channel => new GeneratedPseudoPolynomialState(channel.Length, channel.Morph, count),
@@ -1062,6 +1066,40 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedEfficientTrendStepState(int length, int fast, int slow, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly EfficientTrendStepWindow _window = new(length, fast, slow, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedLinearChannelState(int length, double multiplier) : IMultiOutputState
+    {
+        private double _previous, _older, _upper, _lower;
+        private int _history;
+        public void Reset() { _previous = _older = _upper = _lower = 0; _history = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var step = 1d / length;
+            var previous = _history >= 1 ? _previous : bar.Close;
+            var older = _history >= 2 ? _older : bar.Close;
+            var predicted = bar.Close + ((previous - older) * multiplier);
+            var center = predicted > previous + step ? previous + step : predicted < previous - step ? previous - step : previous;
+            var upper = center + (Math.Abs(center - previous) * multiplier);
+            var lower = center - (Math.Abs(center - previous) * multiplier);
+#pragma warning disable S1244 // Preserve the batch/native boundary retention rule exactly.
+            _upper = upper == center ? _upper : upper; _lower = lower == center ? _lower : lower;
+#pragma warning restore S1244
+            outputs[0] = _upper; outputs[1] = _lower;
+            _older = _previous; _previous = center; _history = Math.Min(2, _history + 1);
+        }
     }
 
     private sealed class GeneratedVervoortVolatilityState(int length1, int length2, double deviation, double lowerMultiplier) : IMultiOutputState, IDisposable
