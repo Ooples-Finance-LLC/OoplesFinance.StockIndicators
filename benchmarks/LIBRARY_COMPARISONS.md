@@ -3922,3 +3922,29 @@ The preserved 033e31ab pivot-column candidate completed the four builder measure
 | 10,000 | LatestOnly | 1,061.522 | 738,594 | 0.225 | 0.591 |
 
 Evidence: `results/shared-rollout/rolling-pivot-shared-cpu/reused-baseline-columns/` contains raw timing, cached-baseline comparisons, immutable candidate hashes and quiet-process receipts. No native or competitor timing was repeated.
+
+### Preserved Rickshaw workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. The current means are 0.202-0.428 times the saved builder means. Only 10k LatestOnly has a confidence interval below the saved fastest-native interval; 1k Full remains slower, and the other two cases do not establish a latency win. The native baseline was reused, so comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: |
+| 1,000 | Full | 34.323 | 61,237 | 1.448 |
+| 1,000 | LatestOnly | 23.806 | 12,203 | 1.005 |
+| 10,000 | Full | 210.944 | 565,628 | 0.994 |
+| 10,000 | LatestOnly | 158.305 | 84,215 | 0.746 |
+
+Evidence: `results/shared-rollout/rickshaw-shared-cpu/reused-baseline-workers/`. Preserve the 1k Full gap and the two inconclusive cases for further optimization; this result does not qualify every Rickshaw workload as faster than native.
+
+### Preserved Asin workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. All four remain slower than the cached fastest native mean; none establishes a performance win. Native measurements were reused on matching recorded hardware/runtime, so these are cross-run comparisons.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 17.160 | 66,567 | 1.009 | 3.327 |
+| 1,000 | LatestOnly | 11.957 | 17,971 | 0.913 | 2.318 |
+| 10,000 | Full | 89.567 | 642,974 | 0.913 | 3.041 |
+| 10,000 | LatestOnly | 45.931 | 161,988 | 1.192 | 1.559 |
+
+Evidence: `results/shared-rollout/asin-shared-cpu/reused-baseline-workers/`. Recording accepts a missing final process command line only after matching the previously proven PID, creation time and monotonic CPU total; changed identities, unexpected commands and background CPU limits remain enforced. The completed measurement was recorded without rerunning it.
