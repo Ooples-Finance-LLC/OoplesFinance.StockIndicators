@@ -6917,7 +6917,13 @@
       "options": [
         "VpciSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VpciSpecOptions": [
+          "benchmarks/results/remaining-indicators/volumevortex-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VolumeRateOfChange",
@@ -6967,7 +6973,13 @@
       "options": [
         "VolumeWeightedRsiSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VolumeWeightedRsiSpecOptions": [
+          "benchmarks/results/remaining-indicators/volumevortex-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VolumeZoneOscillator",
@@ -6981,7 +6993,13 @@
       "options": [
         "VortexBandsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VortexBandsSpecOptions": [
+          "benchmarks/results/remaining-indicators/volumevortex-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VortexIndicator",
@@ -9323,6 +9341,7 @@
     "benchmarks/results/remaining-indicators/volumeflow-contracts.json": "7d26c75048233314610d4d26b227b917b0a9527dcea2c59ade48fbbf80365425",
     "benchmarks/results/remaining-indicators/volumeoscillator-contracts.json": "8b3f1cd18dc55aeb7d6c86e2f5632327aa5fe2db8322f869e6a0b8752251efa4",
     "benchmarks/results/remaining-indicators/volumetrend-contracts.json": "8b4430170b2e074dd9f63b51b279141a5228e1472e43d5e2a6dee464c0f1b747",
+    "benchmarks/results/remaining-indicators/volumevortex-contracts.json": "19b6e59c2af7e9af55b8f4dc10aef92c8ce08551969549a27fd49704f776e42b",
     "benchmarks/results/remaining-indicators/volumeweighted-contracts.json": "99f049a25b4be1f5cdf1d2480e7791c52a933056d9a7ba16d50ca249cabe2db5",
     "benchmarks/results/remaining-indicators/vortex-contracts.json": "0b1f6d4b84fc7dfeb7f2915f90f935927419124dc93ca4cfcef5f948ca9194c6",
     "benchmarks/results/remaining-indicators/weightedextra-contracts.json": "aa65c815c8faca01a625976a91c39cafaaa81ebd3026feab7146b5754877e3d3",
@@ -9532,7 +9551,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "e44a98615594e1d3bb3b7b1c73900b54b2052dc6f96839e1780da55e7ab9038d",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "5da93380a0302905d4c9400a8681fa8580be22a2910639d5993a489b37210ea1",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

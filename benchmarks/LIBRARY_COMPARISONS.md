@@ -4059,3 +4059,8 @@ Ultimate Momentum Indicator now shares its unchanged exact kernel with all five 
 
 
 Value Chart now writes all four coordinates directly into shared output storage and uses tuple intermediates instead of temporary coordinate arrays. Its existing array wrapper remains available. The whole-series median/close equality decision is preserved, including signed-zero equality and late differences that affect earlier range handling; NumAtrs remains calculation-inert. Validation: 122 focused unit cases (including mixed Volume Flow roots, independent span publication, bounds, preview and reset checks), 4 fixture parity cases, 85 discovery cases, 100 local GPU cases, and 4 inventory tests passed. Eight timing cases are prepared; quiet-window performance qualification remains pending.
+
+
+Integrated hosted correctness run 38927302926 passed all 42 jobs on commit 25f26911. The saved-duration contract scheduling repair retained all methods, 20 contract runners and the 45-minute limit. Value Chart commit fed7b287 is subsequently published with complete local evidence; integrated validation of that newer head remains pending.
+
+VPCI, Volume Weighted RSI and Vortex Bands now use shared execution through existing exact kernels, preserving fixed VPCI price periods, weighted RSI smoothing and default McNicholl bands with upper-band primary output. Validation: 167 focused unit cases, 12 fixture parity cases, 86 discovery cases and 100 source-matched local GPU cases passed. Twenty-four timing cases are prepared; measured performance qualification remains pending. No competitor timing run was repeated.
