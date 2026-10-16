@@ -70,6 +70,8 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or MovingAverageSupportResistance or MovingAverageChannel
+            or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
             or MovingAverageEnvelope { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
             or MovingAverageDisplacedEnvelope { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
             or SmartEnvelope { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -257,6 +259,9 @@ internal static partial class ValuesBarExecution
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
         DemarkSetupIndicator setup => new GeneratedDemarkCountState(Math.Max(1, setup.Length), Math.Max(1, setup.Length), count),
         DemarkReversalPoints reversal => new GeneratedDemarkCountState(Math.Max(1, reversal.Length1), Math.Max(1, reversal.Length2), count),
+        MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
+        MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
+        HighLowBands channel => new GeneratedHighLowBandsState(Math.Max(1, channel.Length), channel.PctShift, count),
         MovingAverageEnvelope envelope => new GeneratedAverageEnvelopeState(Math.Max(1, envelope.Length), envelope.Pct, count),
         MovingAverageDisplacedEnvelope envelope => new GeneratedDisplacedEnvelopeState(Math.Max(1, envelope.Length1), Math.Max(1, envelope.Length2), envelope.Pct, count),
         SmartEnvelope envelope => new GeneratedSmartEnvelopeState(envelope.Length, envelope.Factor),
@@ -974,6 +979,48 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedSupportResistanceState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly SupportResistanceWindow? _window = length <= count ? new(MovingAvgType.SimpleMovingAverage, length) : null;
+        public void Reset() => _window?.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var middle = _window?.Next(bar.Close, true) ?? 0;
+            outputs[0] = HighLowBandsWindow.Shift(middle, 2);
+            outputs[1] = middle;
+            outputs[2] = SupportResistanceWindow.Lower(middle, 2);
+        }
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedAverageChannelState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly PriceAverageChannelWindow? _window = length <= count ? new(MovingAvgType.SimpleMovingAverage, length) : null;
+        public void Reset() => _window?.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window?.Next(bar.High, bar.Low, true) ?? default;
+            outputs[0] = value.Upper;
+            outputs[1] = value.Middle;
+            outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedHighLowBandsState(int length, double percent, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly HighLowBandsWindow? _window = length <= count ? new(MovingAvgType.SimpleMovingAverage, length) : null;
+        public void Reset() => _window?.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var middle = _window?.Next(bar.Close, true) ?? 0;
+            outputs[0] = HighLowBandsWindow.Shift(middle, percent);
+            outputs[1] = middle;
+            outputs[2] = HighLowBandsWindow.Shift(middle, -percent);
+        }
+        public void Dispose() => _window?.Dispose();
     }
 
     private sealed class GeneratedAverageEnvelopeState(int length, double fraction, int count) : IMultiOutputState, IDisposable
