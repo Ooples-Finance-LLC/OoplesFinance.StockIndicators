@@ -35,7 +35,9 @@ internal static partial class ValuesBarExecution
             or Ehlers2PoleButterworthFilterV1 or Ehlers2PoleButterworthFilterV2 or Ehlers2PoleSuperSmootherFilterV1 or Ehlers2PoleSuperSmootherFilterV2
             or Ehlers3PoleButterworthFilterV1 or Ehlers3PoleButterworthFilterV2 or Ehlers3PoleSuperSmootherFilter
             or EhlersDecycler or EhlersHighPassFilterV1 or EhlersLeadingIndicator or EhlersSimpleDecycler
-            or EhlersHighPassFilterV2 or EhlersDecyclerOscillatorV1 or EhlersDecyclerOscillatorV2;
+            or EhlersHighPassFilterV2 or EhlersDecyclerOscillatorV1 or EhlersDecyclerOscillatorV2
+            or EhlersRoofingFilter or EhlersRoofingFilterV1 or EhlersRoofingFilterV2 or EhlersRoofingFilterIndicator
+            or EhlersHpLpRoofingFilter or EhlersZeroMeanRoofingFilter or EhlersDetrendedLeadingIndicator;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -155,6 +157,13 @@ internal static partial class ValuesBarExecution
         Ehlers3PoleButterworthFilterV1 filter => new GeneratedThreePoleState(filter.Length, 0),
         Ehlers3PoleButterworthFilterV2 filter => new GeneratedThreePoleState(filter.Length, 1),
         Ehlers3PoleSuperSmootherFilter filter => new GeneratedThreePoleState(filter.Length, 2),
+        EhlersRoofingFilter filter => new GeneratedRoofingV1State(filter.HpLength, filter.LpLength),
+        EhlersRoofingFilterV1 filter => new GeneratedRoofingV1State(filter.Length1, filter.Length2),
+        EhlersRoofingFilterV2 filter => new GeneratedRoofingV2State(filter.UpperLength, filter.LowerLength, false),
+        EhlersRoofingFilterIndicator filter => new GeneratedRoofingV2State(filter.Length1, filter.Length2, true),
+        EhlersHpLpRoofingFilter filter => new GeneratedHpLpRoofingState(filter.Length1, filter.Length2, false),
+        EhlersZeroMeanRoofingFilter filter => new GeneratedHpLpRoofingState(filter.Length1, filter.Length2, true),
+        EhlersDetrendedLeadingIndicator filter => new GeneratedDetrendedLeadingState(filter.Length),
         EhlersHighPassFilterV2 filter => new GeneratedHighPassV2State(filter.Length),
         EhlersDecyclerOscillatorV1 filter => new GeneratedDecyclerOscillatorState(filter.Length),
         EhlersDecyclerOscillatorV2 filter => new GeneratedDecyclerV2State(filter.FastLength, filter.SlowLength),
@@ -580,6 +589,44 @@ internal static partial class ValuesBarExecution
         private readonly ThreePoleWindow _window = new(period, variant);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedRoofingV1State(int high, int low) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.EhlersRoofingV1Window _window = new(MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, high, low);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRoofingV2State(int high, int low, bool original) : IIndicatorState
+    {
+        private readonly Streaming.EhlersRoofingFilterV2Kernel _window = new(high, low, original);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedHpLpRoofingState(int high, int low, bool zero) : IIndicatorState
+    {
+        private readonly HpLpRoofingWindow _window = new(high, low);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var value = _window.Next(bar.Close, true);
+            return zero ? value.Zero : value.Roof;
+        }
+    }
+
+    private sealed class GeneratedDetrendedLeadingState(int period) : IMultiOutputState
+    {
+        private readonly DetrendedLeadingWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, true);
+            outputs[0] = value.Dsp;
+            outputs[1] = value.Deli;
+        }
     }
 
     private sealed class GeneratedHighPassV2State(int period) : IIndicatorState, IDisposable
