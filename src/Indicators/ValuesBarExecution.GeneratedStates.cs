@@ -27,7 +27,8 @@ internal static partial class ValuesBarExecution
             or EhlersAdaptiveLaguerreFilter or EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha
             or RepulsionMovingAverage or CompoundRatioMovingAverage or GeneralizedDoubleEma or DoubleExponentialSmoothing
             or GeneralizedDoubleExponentialMovingAverage { VolumeFactor: >= double.MinValue and <= double.MaxValue }
-            or LightLeastSquaresMovingAverage or LinearExtrapolation or RecursiveMovingTrendAverage;
+            or LightLeastSquaresMovingAverage or LinearExtrapolation or RecursiveMovingTrendAverage
+            or EhlersIirFilter or EhlersInfiniteImpulseResponseFilter or EhlersFirFilter or EhlersFiniteImpulseResponseFilter or EhlersOptimumEllipticFilter or EhlersModifiedOptimumEllipticFilter;
 
     private static object CreateGeneratedState(IIndicator indicator, int count) => indicator switch
     {
@@ -123,6 +124,12 @@ internal static partial class ValuesBarExecution
         LightLeastSquaresMovingAverage average => new GeneratedLightLeastSquaresState(average.Length, count),
         LinearExtrapolation extrapolation => new GeneratedLinearExtrapolationState(extrapolation.Length),
         RecursiveMovingTrendAverage average => new GeneratedRecursiveTrendState(average.Length),
+        EhlersIirFilter filter => new GeneratedEhlersIirState(filter.Length),
+        EhlersInfiniteImpulseResponseFilter filter => new GeneratedEhlersIirState(filter.Length),
+        EhlersFirFilter filter => new GeneratedEhlersFirState(),
+        EhlersFiniteImpulseResponseFilter filter => new GeneratedEhlersFirState(),
+        EhlersOptimumEllipticFilter filter => new GeneratedEllipticState(false),
+        EhlersModifiedOptimumEllipticFilter filter => new GeneratedEllipticState(true),
         QuickMovingAverage average => new GeneratedQuickState(average.Length, count),
         WellesWilderSummation sum => new GeneratedWilderSumState(sum.Length),
         WildersSummationMethod sum => new GeneratedWilderSumState(sum.Length),
@@ -423,6 +430,29 @@ internal static partial class ValuesBarExecution
     private sealed class GeneratedRecursiveTrendState(int period) : IIndicatorState
     {
         private readonly RecursiveTrendWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedEhlersIirState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly EhlersIirWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEhlersFirState : IIndicatorState, IDisposable
+    {
+        private readonly EhlersFirWindow _window = new();
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEllipticState(bool modified) : IIndicatorState
+    {
+        private readonly EllipticWindow _window = new(modified);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
     }
