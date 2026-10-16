@@ -4165,3 +4165,6 @@ Moving Average Envelope and Moving Average Displaced Envelope now compute their 
 
 
 Moving Average Support/Resistance, Moving Average Channel and High/Low Bands now reuse their exact SMA kernels in shared execution and compute all three outputs together. Rounded stages, high/low fields, facade clamps, finite-shift eligibility, component fallback, ownership and unfillable-window allocation bounds are preserved. Validation: 167 focused unit cases, 12 parity cases, 117 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
+
+
+High/Low Moving Average now computes all three outputs together using its exact weighted-extrema kernel. The owned batch supplies an input-count storage bound, preserving newest equal-extremum ties, weighted startup, exact midpoint, original fields and component/source fallback. Existing streaming callers retain the original unbounded lifetime. An independent int.MaxValue-period check verifies weighted startup without a period-sized allocation. Validation: 55 focused unit cases, 4 parity cases, 118 discovery cases, 100 local GPU cases and 4 inventory tests passed. Eight timing cases are prepared; measured performance qualification remains pending.
