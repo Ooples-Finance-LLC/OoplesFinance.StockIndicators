@@ -4097,3 +4097,6 @@ Awesome and Accelerator Oscillators now share rounded SMA stages over the exact 
 
 
 Hosted run 38940232724 passed 40 jobs on 16c9662f, but contract shard 16 stopped after 45 minutes and the union check was skipped; this run is not accepted as complete validation. Its Vortex Bands 10,000-bar Full and LatestOnly cases are now separate contract methods, preserving all 12 original input combinations. Saved passing local durations (36m12s and 36m16s) place them on separate runners while retaining 20 runners and the 45-minute limit. Validation: compiled case mapping, 10 shorter parity cases, 95 discovery cases, 100 fresh GPU cases and 9 scheduler/evidence-verifier tests passed. The two long cases retain their archived local evidence and await execution under their new names in the next hosted run.
+
+
+Auto Filter and Auto Dispersion Bands now use shared execution through their existing exact kernels. Auto Dispersion computes all three bands together with input-bounded storage; default averaging, facade period clamps, staged rounding, warmup and component/source fallback remain intact. Validation: 150 focused unit cases, 8 fixture parity cases, 96 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.

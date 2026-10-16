@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
             or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator or RelativeVolumeIndicator or BetterVolumeIndicator
             or AverageMoneyFlowOscillator or TradeVolumeIndex or TimeAndMoneyChannel or TironeLevels or TrendStep or TechnicalRank or TrigonometricOscillator or TimeSeriesForecast or UltimateTraderOscillator or UltimateVolatilityIndicator or ValueChartIndicator or SmoothedWilliamsR or EnhancedWilliamsR or VerticalHorizontalFilter or VerticalHorizontalMovingAverage
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
+            or AutoFilter or AutoDispersionBands
             or AwesomeOscillator or AcceleratorOscillator
             or AnchoredMomentum
             or AccumulativeSwingIndex { LimitMove: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -222,6 +223,8 @@ internal static partial class ValuesBarExecution
         TrendContinuationFactor trend => new GeneratedTrendContinuationState(trend.Length),
         TrendTriggerFactor trend => new GeneratedTrendTriggerState(trend.Length),
         TrendIntensityIndex trend => new GeneratedTrendIntensityState(trend.Length),
+        AutoFilter filter => new GeneratedAutoFilterState(filter.Length),
+        AutoDispersionBands bands => new GeneratedAutoDispersionState(bands.Length, bands.SmoothLength, count),
         AwesomeOscillator oscillator => new GeneratedAwesomeState(oscillator.Length, count, false),
         AcceleratorOscillator oscillator => new GeneratedAwesomeState(oscillator.Length, count, true),
         AnchoredMomentum momentum => new GeneratedAnchoredMomentumState(momentum.Length, count),
@@ -898,6 +901,27 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedAutoFilterState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly AutoFilterWindow _window = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Line;
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedAutoDispersionState(int length, int smoothLength, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly AutoDispersionWindow _window = new(MovingAvgType.WeightedMovingAverage,
+            Math.Max(1, length), Math.Max(1, smoothLength), capacityHint: Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Upper; outputs[1] = point.Middle; outputs[2] = point.Lower;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAwesomeState(int length, int count, bool accelerator) : IIndicatorState, IDisposable
