@@ -19,5 +19,31 @@
     "discovered_contract_methods": 1331,
     "hosted_contract_methods": 1319
   },
-  "performance": "No latency or allocation measurements yet. No competitor benchmark rerun."
+  "performance": "No latency or allocation measurements yet. No competitor benchmark rerun.",
+  "benchmark_fixture": {
+    "type": "RemainingPriceAverageBenchmarks",
+    "operations": [
+      "AveragePrice",
+      "MidRange",
+      "HlcAverage",
+      "OhlcAverage"
+    ],
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "fixture_contract_tests_passed": 16,
+    "fixture_trx_sha256": "1d74a7a544cf5730ed771c1b6e956a12c64e62afa7250b636aeeb378df4b22a6",
+    "measurement_status": "prepared-not-measured",
+    "baseline": "Same-library legacy route with identical asymmetric OHLC input."
+  }
 }
