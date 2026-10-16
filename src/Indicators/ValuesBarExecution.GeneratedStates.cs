@@ -70,6 +70,10 @@ internal static partial class ValuesBarExecution
             or AnchoredMomentum
             or AccumulativeSwingIndex { LimitMove: > double.NegativeInfinity and < double.PositiveInfinity }
             or AbsoluteStrengthIndex or AbsoluteStrengthMTFIndicator
+            or WilsonRelativePriceChannel { Overbought: > double.NegativeInfinity and < double.PositiveInfinity,
+                Oversold: > double.NegativeInfinity and < double.PositiveInfinity,
+                UpperNeutralZone: > double.NegativeInfinity and < double.PositiveInfinity,
+                LowerNeutralZone: > double.NegativeInfinity and < double.PositiveInfinity }
             or Vpci or VolumeWeightedRsi or VortexBands
             or WoodieCommodityChannelIndex
             or EhlersCommodityChannelIndexInverseFisherTransform { Constant: > 0d and < double.PositiveInfinity }
@@ -246,6 +250,7 @@ internal static partial class ValuesBarExecution
         AccumulativeSwingIndex swing => new GeneratedAccumulatedSwingState(swing.Length, swing.LimitMove, count),
         AbsoluteStrengthIndex strength => new GeneratedAbsoluteStrengthState(strength.Length),
         AbsoluteStrengthMTFIndicator strength => new GeneratedAbsoluteStrengthMtfState(strength.Length, strength.SmoothLength, count),
+        WilsonRelativePriceChannel channel => new GeneratedWilsonState(channel),
         Vpci vpci => new GeneratedVpciState(vpci.Length),
         VolumeWeightedRsi rsi => new GeneratedVolumeWeightedRsiState(rsi.Length),
         VortexBands bands => new GeneratedVortexBandsState(bands.Length),
@@ -1081,6 +1086,16 @@ internal static partial class ValuesBarExecution
             var point = _window.Next(bar.Close, true);
             outputs[0] = point.Bulls; outputs[1] = point.Bears;
         }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedWilsonState(WilsonRelativePriceChannel channel) : IMultiOutputState, IDisposable
+    {
+        private readonly WilsonWindow _window = new(MovingAvgType.ExponentialMovingAverage,
+            Math.Max(1, channel.Length), Math.Max(1, channel.SmoothLength),
+            channel.Oversold, channel.LowerNeutralZone, channel.Overbought, channel.UpperNeutralZone);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true, outputs);
         public void Dispose() { Reset(); _window.Dispose(); }
     }
 
