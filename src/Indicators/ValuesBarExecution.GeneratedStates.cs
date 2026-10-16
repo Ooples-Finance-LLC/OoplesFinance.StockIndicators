@@ -58,6 +58,7 @@ internal static partial class ValuesBarExecution
             or AhrensMovingAverage or AlphaDecreasingEma or VariableLengthMovingAverage
             or Vwma or VolumeWeightedMovingAverage or WindowedVolumeWeightedMovingAverage
             or BuffAverage or EquityMovingAverage
+            or UpsideDownsideVolume or TFSVolumeOscillator or VolumeAccumulationOscillator
             or VolumeAdjustedMa or VolumeAdjustedMovingAverage { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or AdaptiveEma or AdaptiveExponentialMovingAverage
             or BryantAdaptiveMovingAverage { Length: >= int.MinValue / 4 and <= int.MaxValue / 4 }
@@ -193,6 +194,9 @@ internal static partial class ValuesBarExecution
         AhrensMovingAverage average => new GeneratedAhrensState(average.Length),
         AlphaDecreasingEma => new GeneratedAlphaDecreasingState(),
         VariableLengthMovingAverage average => new GeneratedVariableLengthState(average.Length, average.MaxLength),
+        UpsideDownsideVolume volume => new GeneratedVolumeBalanceState(volume.Length, VolumeBalanceKind.UpsideDownside),
+        TFSVolumeOscillator volume => new GeneratedVolumeBalanceState(volume.Length, VolumeBalanceKind.Tfs),
+        VolumeAccumulationOscillator volume => new GeneratedVolumeBalanceState(volume.Length, VolumeBalanceKind.Accumulation),
         BuffAverage average => new GeneratedBuffState(average.Length),
         EquityMovingAverage average => new GeneratedEquityState(average.Length),
         Vwma average => new GeneratedVolumeWeightedState(average.Length),
@@ -697,6 +701,14 @@ internal static partial class ValuesBarExecution
             outputs[1] = point.Value;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVolumeBalanceState(int period, VolumeBalanceKind kind) : IIndicatorState, IDisposable
+    {
+        private readonly VolumeBalanceWindow _window = new(period, kind);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedBuffState(int period) : IMultiOutputState, IDisposable
