@@ -72,6 +72,8 @@ internal static partial class ValuesBarExecution
             or TrendContinuationFactor or TrendTriggerFactor or TrendIntensityIndex or TraderPressureIndex or VolumeAccumulationPercent or TwiggsMoneyFlow
             or AverageTrueRangeChannel { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
             or StollerAverageRangeChannels { AtrMult: > double.NegativeInfinity and < double.PositiveInfinity } or KeltnerChannelWidth
+            or PriceChannel { Pct: > double.NegativeInfinity and < double.PositiveInfinity }
+            or PriceChannelMiddle or PriceChannelUpper or PriceChannelLower or PriceLineChannel or PriceCurveChannel
             or HighLowMovingAverage
             or MovingAverageSupportResistance or MovingAverageChannel
             or HighLowBands { PctShift: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -265,6 +267,12 @@ internal static partial class ValuesBarExecution
         AverageTrueRangeChannel channel => new GeneratedRangeChannelState(channel.Length, channel.Multiplier, true, count),
         StollerAverageRangeChannels channel => new GeneratedRangeChannelState(channel.Length, channel.AtrMult, false, count),
         KeltnerChannelWidth channel => new GeneratedKeltnerWidthState(channel.Length, count),
+        PriceChannel channel => new EmaValueState(Math.Max(1, channel.Length)),
+        PriceChannelMiddle channel => new EmaValueState(Math.Max(1, channel.Length)),
+        PriceChannelUpper channel => new GeneratedPriceBandState(Math.Max(1, channel.Length), 1),
+        PriceChannelLower channel => new GeneratedPriceBandState(Math.Max(1, channel.Length), -1),
+        PriceLineChannel channel => new GeneratedPriceDriftState(channel.Length, false, count),
+        PriceCurveChannel channel => new GeneratedPriceDriftState(channel.Length, true, count),
         HighLowMovingAverage channel => new GeneratedHighLowAverageState(channel.Length, count),
         MovingAverageSupportResistance channel => new GeneratedSupportResistanceState(Math.Max(1, channel.Length), count),
         MovingAverageChannel channel => new GeneratedAverageChannelState(Math.Max(1, channel.Length), count),
@@ -986,6 +994,25 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         return false;
+    }
+
+    private sealed class GeneratedPriceBandState(int length, int direction) : IIndicatorState
+    {
+        private readonly EmaValueState _average = new(length);
+        public void Reset() => _average.Reset();
+        public double Update(in Bar bar) => RoundedPercentageBand.Of(_average.Update(bar), .06, direction);
+    }
+
+    private sealed class GeneratedPriceDriftState(int length, bool curve, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly PriceDriftWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, curve, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Upper; outputs[1] = value.Middle; outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedRangeChannelState(int length, double multiplier, bool rounded, int count) : IMultiOutputState, IDisposable
