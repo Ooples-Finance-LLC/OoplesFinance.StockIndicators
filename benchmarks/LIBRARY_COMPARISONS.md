@@ -4180,3 +4180,6 @@ Moving Average Bands and Moving Average Band Width now reuse the exact EMA gap-d
 
 
 Price Headley Acceleration Bands and Root Moving Average Squared Error Bands now compute all three outputs together with their existing exact kernels and input-bounded history. Extended hidden stages, zero-sum Headley boundaries, scaled RMSE squares, startup, finite-factor eligibility, original fields, ownership and component/source fallback are preserved. Validation: 115 focused unit cases, 8 parity cases, 122 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Mean Absolute Error Bands and Mean Absolute Deviation Bands now share exact cumulative-error and rolling-deviation kernels with rounded SMA centers, computing all three outputs together. Their distinct startup semantics, finite-factor eligibility, original fields, ownership and component/source fallback are preserved. Owned batches bound retained history by input count; independent int.MaxValue-period checks distinguish cumulative errors from partial-window deviations while centers remain zero. Validation: 59 focused unit cases, 8 parity cases, 123 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
