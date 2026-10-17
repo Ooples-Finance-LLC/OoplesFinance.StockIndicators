@@ -98,6 +98,7 @@ internal static partial class ValuesBarExecution
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or FractalChaosBands or FractalChaosOscillator
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
+            or CloseToCloseVolatility or DownsideDeviation
             or PrimeNumberOscillator or PrimeNumberBands
             or EfficientTrendStepChannel
             or LinearChannels { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -335,6 +336,8 @@ internal static partial class ValuesBarExecution
         ProjectionBands channel => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBands, channel.Length),
         ProjectionOscillator oscillator => new GeneratedProjectionFamilyState(IndicatorName.ProjectionOscillator, oscillator.Length),
         ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
+        CloseToCloseVolatility volatility => new GeneratedCloseVolatilityState(Math.Max(1, volatility.Length), count),
+        DownsideDeviation deviation => new GeneratedDownsideDeviationState(Math.Max(1, deviation.Length), count),
         PrimeNumberOscillator oscillator => new GeneratedPrimeOscillatorState(oscillator.Length),
         PrimeNumberBands channel => new GeneratedPrimeBandState(channel.Length),
         EfficientTrendStepChannel channel => new GeneratedEfficientTrendStepState(channel.Length, channel.FastLength, channel.SlowLength, count),
@@ -3066,6 +3069,30 @@ internal static partial class ValuesBarExecution
             outputs[1] = _signal?.Next(value, true) ?? 0;
         }
         public void Dispose() { _line?.Dispose(); _signal?.Dispose(); }
+    }
+
+    private sealed class GeneratedCloseVolatilityState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingStandardDeviation? _deviation = period <= count ? new(period) : null;
+        private double _previous;
+        public void Reset() { _deviation?.Reset(); _previous = 0; }
+        public double Update(in Bar bar)
+        {
+            // Include the startup zero, then retain the batch's translated two-pass deviation.
+            var result = (_deviation?.Next(StableLogRatio.OfSameSign(bar.Close, _previous), true) ?? 0) * Math.Sqrt(252);
+            _previous = bar.Close;
+            return result;
+        }
+        public void Dispose() => _deviation?.Dispose();
+    }
+
+    private sealed class GeneratedDownsideDeviationState(int period, int count) : IIndicatorState, IDisposable
+    {
+        // A full return window needs period preceding prices plus the current price.
+        private readonly ExactDownsideWindow? _window = period < count ? new(period) : null;
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.Close, true) ?? 0;
+        public void Dispose() => _window?.Dispose();
     }
 
     private sealed class GeneratedHistoricalVolatilityState(int period, int count) : IIndicatorState, IDisposable
