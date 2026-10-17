@@ -1,0 +1,48 @@
+{
+  "batch": "ohlc-volatility-cached-terms",
+  "types": [
+    "ParkinsonVolatility",
+    "RogersSatchellVolatility",
+    "YangZhangVolatility"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Cache per-candle stable log terms for Parkinson, Rogers-Satchell and Yang-Zhang while retaining oldest-first floating-point folds. Preserve original candle fields, warmup, skipped undefined residuals with full variance divisors, nonpositive-period fallback, zero signs, source fallback and ownership; avoid allocating unfillable windows.",
+  "verification": {
+    "unit_passed": 40,
+    "fixture_passed": 12,
+    "discovery_passed": 145,
+    "gpu_passed": 100,
+    "contract_methods": 1484,
+    "hosted_methods": 1472,
+    "evidence": [
+      {
+        "file": "ohlcvolatility-unit.trx.gz",
+        "passed_cases": 40,
+        "trx_sha256": "8d4c793e9b72aaba20c2dd83c003a178301a5f4e92fb06aa73a1135fec85519f"
+      },
+      {
+        "file": "ohlcvolatility-fixture.trx.gz",
+        "passed_cases": 157,
+        "trx_sha256": "0a67863dff18cf1983360f55af02ddee544d6e25bb9b6d3f7309a6ef0703a99e"
+      }
+    ],
+    "initial_candidate": {
+      "file": "ohlcvolatility-unit-initial.trx.gz",
+      "passed_cases": 32,
+      "failed_cases": 2,
+      "trx_sha256": "5b95f45b8b91b62db84f0e03f734ad6e217552e1264b4af44225c16324bf56be",
+      "interpretation": "The unfillable-window shortcut initially suppressed checked-arithmetic overflow for extreme Parkinson and Yang-Zhang periods. Those ranges now retain the legacy fallback. Boundary cases were added and all affected checks rerun on corrected production."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingOhlcVolatilityBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ParkinsonVolatility",
+      "RogersSatchellVolatility",
+      "YangZhangVolatility"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

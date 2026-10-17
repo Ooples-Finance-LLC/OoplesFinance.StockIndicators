@@ -101,6 +101,8 @@ internal static partial class ValuesBarExecution
             or StatisticalVolatility or VolatilityQualityIndex
             or VolatilityRatio or VolatilitySwitchIndicator
             or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
+            or ParkinsonVolatility { Length: > 0 and <= 536_870_911 } or RogersSatchellVolatility { Length: > 0 }
+            or YangZhangVolatility { Length: < int.MaxValue }
             or EhlersRecursiveMedianFilter or EhlersRecursiveMedianOscillator
             or EhlersMedianAverageAdaptiveFilter { Threshold: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolatilityIndexDynamicAverageIndicator { Alpha1: >= 0 and < double.PositiveInfinity, Alpha2: >= 0 and < double.PositiveInfinity }
@@ -358,6 +360,9 @@ internal static partial class ValuesBarExecution
         RelativeVolatilityIndexLow volatility => new GeneratedSeededRelativeVolatilityState(false, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
         TypicalPriceVolatility volatility => new GeneratedTypicalVolatilityState(Math.Max(1, volatility.Length), count),
+        ParkinsonVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.Parkinson, volatility.Length, count),
+        RogersSatchellVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.RogersSatchell, volatility.Length, count),
+        YangZhangVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.YangZhang, volatility.Length, count),
         StandardDeviationVolatility volatility => new GeneratedResidualVolatilityState(volatility.Length),
         ClosedFormDistanceVolatility volatility => new GeneratedClosedDistanceState(volatility.Length),
         EhlersRecursiveMedianFilter median => new GeneratedRecursiveMedianState(median.Length),
@@ -3201,6 +3206,14 @@ internal static partial class ValuesBarExecution
         private readonly MedianAdaptiveWindow _window = new(length, threshold);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator estimator, int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly OhlcVolatilityWindow _window = new(estimator, length, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(in bar);
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedTypicalVolatilityState(int length, int count) : IIndicatorState, IDisposable
