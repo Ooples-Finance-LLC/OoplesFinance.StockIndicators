@@ -4332,3 +4332,6 @@ Ehlers Hurst coefficient, noise elimination and Spearman rank indicators now reu
 
 
 Four Ehlers adaptive V1 RSI, Fisher, stochastic and commodity facades now reuse exact MAMA-cycle kernels in shared execution. Paired outputs, hidden Fisher fraction, positive parameter validation, CCI typical-price versus close-cycle inputs, sources and lifecycle are preserved. Validation: 35 unit cases, 16 parity cases, 168 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Adaptive cyber cycle, adaptive center of gravity and smoothed adaptive momentum now reuse exact kernels in shared execution. Validation: 51 unit cases, 12 parity cases, 169 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending.

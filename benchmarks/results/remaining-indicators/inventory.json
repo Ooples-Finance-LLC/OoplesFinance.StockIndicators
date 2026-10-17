@@ -1777,7 +1777,13 @@
       "options": [
         "EhlersAdaptiveCenterOfGravityOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAdaptiveCenterOfGravityOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptivecycle-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveCommodityChannelIndexV1",
@@ -1804,7 +1810,13 @@
       "options": [
         "EhlersAdaptiveCyberCycleSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAdaptiveCyberCycleSpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptivecycle-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveLaguerreFilter",
@@ -3078,7 +3090,13 @@
       "options": [
         "EhlersSmoothedAdaptiveMomentumSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersSmoothedAdaptiveMomentumSpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptivecycle-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersSnakeUniversalTradingFilter",
@@ -10476,6 +10494,7 @@
     "benchmarks/results/remaining-indicators/absolutestrength-contracts.json": "da3e0e0aa9eaa8846e46877e15ea6b85903c61a96065b9602f72380b80667a4b",
     "benchmarks/results/remaining-indicators/accumulation-contracts.json": "a32bad053acce60fc6a0d7b470c5b368a0a68ed33c03133e8794fedb523c7200",
     "benchmarks/results/remaining-indicators/adaptiveboundaries-contracts.json": "7bc552bf7133bf83dbe4c79f1052050fc4137f8942278437aecaba6dd3b3de4a",
+    "benchmarks/results/remaining-indicators/adaptivecycle-contracts.json": "a7a74f6aa2e32a6d607065196fe1cf63c2ad7e5f96593c4239303e6ce38f4c48",
     "benchmarks/results/remaining-indicators/adaptiveema-contracts.json": "f3e735dd8253034440769d7345b98db2ff38b7e339bdf04a77583ae7c53d6345",
     "benchmarks/results/remaining-indicators/adaptivefit-contracts.json": "39427aafc7a10e0e45970abc24164552b55f9c2b341f9661e99409e45005269e",
     "benchmarks/results/remaining-indicators/adaptivelaguerre-contracts.json": "d15e91c082d7554c57ab5c75a4c81faca0806082a59a2743a3c2c66e161b683e",
@@ -10842,7 +10861,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "1ab020e18e6dfc48af562a6419d66918d37a65ee5fb22e91c69266178331a122",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "b4d7eac864ab1fed9f2f61f23f62661c23c40d7602b93ef29af4bcb6828af015",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
