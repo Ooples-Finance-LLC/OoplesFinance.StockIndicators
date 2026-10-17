@@ -102,6 +102,7 @@ internal static partial class ValuesBarExecution
             or VolatilityRatio or VolatilitySwitchIndicator
             or VolatilityWaveMovingAverage
             or GarmanKlassVolatility
+            or HistoricalVolatilityPercentile
             or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
             or ParkinsonVolatility { Length: > 0 and <= 536_870_911 } or RogersSatchellVolatility { Length: > 0 }
             or YangZhangVolatility { Length: < int.MaxValue }
@@ -363,6 +364,7 @@ internal static partial class ValuesBarExecution
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
         VolatilityWaveMovingAverage average => new GeneratedVolatilityWaveState(average.Length),
         GarmanKlassVolatility volatility => new GeneratedGarmanKlassState(volatility.Length, count),
+        HistoricalVolatilityPercentile volatility => new GeneratedHistoricalRankState(volatility.Length, volatility.AnnualLength),
         TypicalPriceVolatility volatility => new GeneratedTypicalVolatilityState(Math.Max(1, volatility.Length), count),
         ParkinsonVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.Parkinson, volatility.Length, count),
         RogersSatchellVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.RogersSatchell, volatility.Length, count),
@@ -3210,6 +3212,37 @@ internal static partial class ValuesBarExecution
         private readonly MedianAdaptiveWindow _window = new(length, threshold);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedHistoricalRankState(int length, int annualLength) : IMultiOutputState, IDisposable
+    {
+        private readonly int _length = Math.Max(1, length), _annual = Math.Max(1, annualLength);
+        private readonly Streaming.RollingWindowSum _logs = new(Math.Max(1, length));
+        private readonly Streaming.RollingWindowSum _residuals = new(Math.Max(1, length));
+        private readonly Streaming.EmaState _signal = new(length);
+        private RollingOrderStatistic _order = new(Math.Max(1, annualLength));
+        private double _previous;
+
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var log = StableLogRatio.OfSameSign(bar.Close, _previous);
+            var sum = _logs.Add(log, out var count);
+            var residual = log - sum / count;
+            var squares = _residuals.Add(residual * residual, out _);
+            var volatility = _length > 1 ? Math.Sqrt(Math.Max(0, squares / (_length - 1))) * Math.Sqrt(_annual) : 0;
+            _order.Add(volatility);
+            var rank = (double)_order.CountLessThan(VolatilityRank.StrictBoundary(volatility)) / _annual * 100;
+            outputs[0] = rank;
+            outputs[1] = _signal.GetNext(rank, true);
+            _previous = bar.Close;
+        }
+
+        public void Reset()
+        {
+            _logs.Reset(); _residuals.Reset(); _signal.Reset(); _previous = 0;
+            _order.Dispose(); _order = new(_annual);
+        }
+        public void Dispose() { _logs.Dispose(); _residuals.Dispose(); _order.Dispose(); }
     }
 
     private sealed class GeneratedGarmanKlassState(int length, int count) : IMultiOutputState, IDisposable
