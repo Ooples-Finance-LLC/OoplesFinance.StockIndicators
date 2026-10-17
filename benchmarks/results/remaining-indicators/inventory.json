@@ -5830,14 +5830,26 @@
       "options": [
         "RelativeVolatilityIndexHighSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RelativeVolatilityIndexHighSpecOptions": [
+          "benchmarks/results/remaining-indicators/relativevolatility-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RelativeVolatilityIndexLow",
       "options": [
         "RelativeVolatilityIndexLowSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RelativeVolatilityIndexLowSpecOptions": [
+          "benchmarks/results/remaining-indicators/relativevolatility-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RelativeVolatilityIndexV1",
@@ -5845,14 +5857,29 @@
         "RelativeVolatilityIndexSpecOptions",
         "RviVolatilitySpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RelativeVolatilityIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/relativevolatility-contracts.json"
+        ],
+        "RviVolatilitySpecOptions": [
+          "benchmarks/results/remaining-indicators/relativevolatility-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RelativeVolatilityIndexV2",
       "options": [
         "RelativeVolatilityIndexV2SpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RelativeVolatilityIndexV2SpecOptions": [
+          "benchmarks/results/remaining-indicators/relativevolatility-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RelativeVolumeIndicator",
@@ -10087,6 +10114,7 @@
     "benchmarks/results/remaining-indicators/recursiveextra-contracts.json": "bd4b8d492d0d1a6ae0da8bd91a374c5bc3abbb20046825db268a915510ae7c60",
     "benchmarks/results/remaining-indicators/regression-contracts.json": "d4dcf685acb25640598dc00e7ab31fc0acab5fb5b52d5a050213497b1caef95d",
     "benchmarks/results/remaining-indicators/regressionpair-contracts.json": "e73203bcfd2f86498263cce1a6460fda0bc9b0d2d20a26f3a6bed3d46b69bcf1",
+    "benchmarks/results/remaining-indicators/relativevolatility-contracts.json": "9f24891630b62f47d0d60294c55ad29fef334c2e9b068127ab2724c63005356f",
     "benchmarks/results/remaining-indicators/relativevolume-contracts.json": "d7535c03025dd2a9eac2439b05e9a275462e7f747fd2dcdea0a97589ed21a47c",
     "benchmarks/results/remaining-indicators/residualfit-contracts.json": "fb9a0e06130c3c90e4ad13d76f0a3bb7e3dd573b52d522aa6e2738e0e8b48a29",
     "benchmarks/results/remaining-indicators/returnvolatility-contracts.json": "b11878817729561f0d808443207d16da8e06aadd8b0fa7fcd62d26929a3b494c",
@@ -10340,7 +10368,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2532b9ec8c1ac492e6095d0cebc4c3b78c48e422b195f44e773f074a0df7b638",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "0bb0483a2ae0deba2522cb5103177a6619bf57881f2168ee822a0265ade8bb04",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

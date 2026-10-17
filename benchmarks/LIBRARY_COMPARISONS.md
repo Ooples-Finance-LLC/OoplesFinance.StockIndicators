@@ -4235,3 +4235,6 @@ Volatility Ratio and Volatility Switch Indicator now reuse their exact kernels w
 
 
 Volatility Stop and Welles Wilder Volatility System now reuse exact stop kernels without builder intermediates. Seeded trailing boundaries, trend/extrema decisions, extended ATR values, finite factors, original OHLC fields, clamps and component/source fallback are preserved. Statistical/Quality and Ratio/Switch states were integrated unchanged from their independently verified commits; the integrated build receives their focused classes and a mixed-six-family test. Validation: 174 focused unit cases, 8 parity cases, 140 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Relative Volatility V1 (including both typed aliases), V2, High and Low now reuse their exact deviation/directional kernels without intermediate series. V2 computes its two legs together. Unfillable deviation windows avoid allocation, preserving V1/V2 zero-denominator100 and High/Low preseed0/postseedzero50. Original high/low fields, clamps, source/component fallback and ownership are preserved. Validation: 71 focused unit cases, 20 parity cases, 141 discovery cases, 100 local GPU cases and 4 inventory tests passed. Forty timing cases are prepared; measured performance qualification remains pending.
