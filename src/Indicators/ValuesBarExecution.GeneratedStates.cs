@@ -103,6 +103,7 @@ internal static partial class ValuesBarExecution
             or VolatilityWaveMovingAverage
             or GarmanKlassVolatility
             or HistoricalVolatilityPercentile
+            or StandardErrorCore or ErgodicMeanDeviationIndicator
             or EhlersDeviationScaledMovingAverage { Length: <= 1_073_741_823 }
             or EhlersFisherizedDeviationScaledOscillator or EhlersDeviationScaledSuperSmoother
             or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
@@ -367,6 +368,8 @@ internal static partial class ValuesBarExecution
         VolatilityWaveMovingAverage average => new GeneratedVolatilityWaveState(average.Length),
         GarmanKlassVolatility volatility => new GeneratedGarmanKlassState(volatility.Length, count),
         HistoricalVolatilityPercentile volatility => new GeneratedHistoricalRankState(volatility.Length, volatility.AnnualLength),
+        StandardErrorCore error => new GeneratedMeanErrorState(error.Length, count),
+        ErgodicMeanDeviationIndicator deviation => new GeneratedErgodicDeviationState(deviation.Length1, deviation.Length2, deviation.Length3, deviation.SignalLength),
         EhlersDeviationScaledMovingAverage average => new GeneratedDeviationScaledState(average.Length, DeviationScaledWindow.ResolveSlow(average.Length), false),
         EhlersFisherizedDeviationScaledOscillator oscillator => new GeneratedDeviationScaledState(oscillator.Length, 40, true),
         EhlersDeviationScaledSuperSmoother average => new GeneratedDeviationSuperState(average.Length),
@@ -3240,6 +3243,27 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedMeanErrorState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactStandardErrorWindow? _window = Math.Max(1, length) <= count ? new(length, false) : null;
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.Close, true) ?? 0;
+        public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedErgodicDeviationState(int mean, int first, int second, int signal) : IMultiOutputState, IDisposable
+    {
+        private readonly ResidualAverageWindow _window = new(MovingAvgType.ExponentialMovingAverage, mean, MovingAvgType.ExponentialMovingAverage, first, second, signal);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Value;
+            outputs[1] = point.Signal;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedHistoricalRankState(int length, int annualLength) : IMultiOutputState, IDisposable

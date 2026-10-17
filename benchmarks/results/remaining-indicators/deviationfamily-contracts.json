@@ -25,7 +25,25 @@
         "passed_cases": 161,
         "trx_sha256": "e61c29eabacc01d74c263d2a5cdc9cc2b05220f070204af0bc8791797744aef0"
       }
-    ]
+    ],
+    "integration": {
+      "base": "3007ebbf",
+      "integrated_candidate": "d7229fb8",
+      "evidence": [
+        {
+          "file": "deviation-residual-integration-unit.trx.gz",
+          "passed_cases": 46,
+          "trx_sha256": "a4f7caf19477aab6c1a837761dbd3f013183997d1824c5310004382c59f892e5"
+        },
+        {
+          "file": "deviation-residual-integration-fixture.trx.gz",
+          "passed_cases": 170,
+          "trx_sha256": "95edbb9792e379451717baac4f6d8519eab529a1521b3b00b4a9c3753d108b5a"
+        }
+      ],
+      "gpu_source_sha256": "cba95604d2b38ebe48bab2b6a9bb23adf0df31486b955170064916fb11c8ad60",
+      "interpretation": "Integrated residual states match the preserved candidate exactly. Prior Ehlers states and domain validation remain unchanged. Added cross-batch mixed-root coverage and revalidated 46 focused unit cases, 20 parity cases, 150 discovery cases and 100 GPU cases. Unchanged independent numerical cases retain their original archived evidence."
+    }
   },
   "benchmark_fixture": {
     "type": "RemainingDeviationFamilyBenchmarks",
