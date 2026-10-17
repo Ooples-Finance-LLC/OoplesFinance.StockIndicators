@@ -4296,3 +4296,6 @@ Ehlers All-Pass Phase Shifter, both Center of Gravity aliases and all nine Cheby
 
 
 Ehlers Kaufman Adaptive Moving Average and Simple Cycle now reuse exact incremental kernels in shared execution. Travel/gain arithmetic, cycle startup, wide coefficients, nonfinite-alpha fallback, clamped periods, sources and lifecycle are preserved. Validation: 25 unit cases, 8 parity cases, 156 discovery cases, 100 local GPU cases and four inventory checks passed. Sixteen timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers AM Detector now publishes amplitude line and signal together through the exact envelope and two-stage SMA kernel. Original open/close fields, wide distances, expiring maxima, startup, components/source fallback and lifecycle are preserved. Validation: 21 unit cases, 4 parity cases, 157 discovery cases, 100 local GPU cases and four inventory checks passed. Eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

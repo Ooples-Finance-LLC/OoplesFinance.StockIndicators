@@ -1757,7 +1757,13 @@
       "options": [
         "EhlersAMDetectorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAMDetectorSpecOptions": [
+          "benchmarks/results/remaining-indicators/amdetector-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveBandPassFilter",
@@ -10261,6 +10267,7 @@
     "benchmarks/results/remaining-indicators/adaptivezone-contracts.json": "7287bf1bbb5fd093f928fdc22665b1d962d7d6c081db067f105f2ed2541a671c",
     "benchmarks/results/remaining-indicators/ahrensalpha-contracts.json": "ff5fb84db1816bd6217db8567463d5387826aa83094eb3c2c92aae6333fdacd1",
     "benchmarks/results/remaining-indicators/alligator-contracts.json": "f496f59c0a618e91070be8184244c8568f77925f839522a3129962fe9a66891b",
+    "benchmarks/results/remaining-indicators/amdetector-contracts.json": "4fc336e7e4030f998b4d0dc3c15acdf44288fbab846d655f4b1b91e9af5d1486",
     "benchmarks/results/remaining-indicators/anchoredswing-contracts.json": "0ab63428f3cc94b2c0668ab0c0dd8f901847ca5baa56a49731e6f05851ebec08",
     "benchmarks/results/remaining-indicators/aroondpo-contracts.json": "4deb075f23f91bc5220164017b006419fa196497527ff959d95cfc4cc2d72e87",
     "benchmarks/results/remaining-indicators/atrderived-contracts.json": "2c5b26ee352d3b87da89069d04892635d399f8908dc0b93a276ef2b9013d4327",
@@ -10606,7 +10613,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "bf9aecccb7dab25bbc3c02c4d3e964a70c89f42da360540ea3ceb5b1557d8abb",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2b3150cbdf6544d494324f69cc66a0691ea91e1034fd7d2b20768b2fd0a7209e",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
