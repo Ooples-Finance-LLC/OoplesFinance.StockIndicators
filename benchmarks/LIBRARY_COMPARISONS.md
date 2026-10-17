@@ -4314,3 +4314,6 @@ FRAMA, Ehlers FRAMA, both Fisher Transform aliases and both Ehlers inverse-RSI F
 
 
 Ehlers Universal Oscillator, Universal Trading Filter and Snake Universal Trading Filter now publish related outputs together through exact incremental kernels. Hidden nine-bar signal, distinct Snake output order, independent smoothing/RMS periods, wide arithmetic, finite parameter eligibility, components/source fallback and lifecycle are preserved. Validation: 64 unit cases, 12 parity cases, 162 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Voss Predictive Filter now publishes prediction and filter outputs together through its exact incremental kernel. Phase rescue and overflow fallback, prediction-order clamps, startup, source selection and lifecycle are preserved. Validation: 29 unit cases, four parity cases, 163 discovery cases, 100 local GPU cases and four inventory checks passed. Eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

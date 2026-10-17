@@ -13,8 +13,20 @@ internal static partial class ValuesBarExecution
         _ => false
     };
 
+    private static bool IsVossShared(EhlersVossPredictiveFilter filter)
+    {
+        if (!double.IsFinite(filter.Predict) || !double.IsFinite(filter.Bw)) return false;
+        var length = Math.Max(1, filter.Length);
+        var phase = filter.Bw * 2 * Math.PI / length;
+        if (!double.IsInfinity(phase)) return true;
+        var exact = new ExactMeanAccumulator();
+        exact.AddProduct(filter.Bw, 2 * Math.PI);
+        return double.IsFinite(exact.Mean(length));
+    }
+
     private static bool IsGeneratedState(IIndicator indicator) =>
         IsDemarkCountState(indicator) ||
+        indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
@@ -421,6 +433,7 @@ internal static partial class ValuesBarExecution
         EhlersUniversalOscillator oscillator => new GeneratedUniversalOscillatorState(oscillator.Length),
         EhlersUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Mult, false),
         EhlersSnakeUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Bw, true),
+        EhlersVossPredictiveFilter filter => new GeneratedVossState(filter.Length, filter.Predict, filter.Bw),
         EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
@@ -3538,6 +3551,19 @@ internal static partial class ValuesBarExecution
             outputs[2] = value.Lower;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVossState(int length, double predict, double bandwidth) : IMultiOutputState, IDisposable
+    {
+        private readonly VossPredictiveWindow _window = new(length, predict, bandwidth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Voss;
+            outputs[1] = value.Filter;
+        }
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedAmDetectorState(int envelope, int smooth) : IMultiOutputState, IDisposable
