@@ -4238,3 +4238,6 @@ Volatility Stop and Welles Wilder Volatility System now reuse exact stop kernels
 
 
 Relative Volatility V1 (including both typed aliases), V2, High and Low now reuse their exact deviation/directional kernels without intermediate series. V2 computes its two legs together. Unfillable deviation windows avoid allocation, preserving V1/V2 zero-denominator100 and High/Low preseed0/postseedzero50. Original high/low fields, clamps, source/component fallback and ownership are preserved. Validation: 71 focused unit cases, 20 parity cases, 141 discovery cases, 100 local GPU cases and 4 inventory tests passed. Forty timing cases are prepared; measured performance qualification remains pending.
+
+
+Both Volatility Index Dynamic Average aliases now compute their two recursive outputs together through the exact existing volatility normalization kernel. EMA defaults, nonnegative finite gains, extrapolation, seed and unfillable startup, original fields, source/component fallback and ownership are preserved. Validation: 27 focused unit cases, 8 parity cases, 142 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
