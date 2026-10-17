@@ -100,6 +100,8 @@ internal static partial class ValuesBarExecution
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
             or StatisticalVolatility or VolatilityQualityIndex
             or VolatilityRatio or VolatilitySwitchIndicator
+            or RelativeVolatilityIndex or RviVolatility or RelativeVolatilityIndexV2
+            or RelativeVolatilityIndexHigh or RelativeVolatilityIndexLow
             or VolatilityStop { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
             or WellesWilderVolatilitySystem { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or CloseToCloseVolatility or DownsideDeviation
@@ -344,6 +346,11 @@ internal static partial class ValuesBarExecution
         VolatilityQualityIndex volatility => new GeneratedVolatilityQualityState(volatility.FastLength, volatility.SlowLength),
         VolatilityStop volatility => new GeneratedVolatilityStopState(volatility.Length, volatility.Multiplier),
         WellesWilderVolatilitySystem volatility => new GeneratedWilderVolatilityState(volatility.Length1, volatility.Length2, volatility.Factor),
+        RelativeVolatilityIndex volatility => new GeneratedRelativeVolatilityState(volatility.Length, 14, false, count),
+        RviVolatility volatility => new GeneratedRelativeVolatilityState(volatility.Length, 14, false, count),
+        RelativeVolatilityIndexV2 volatility => new GeneratedRelativeVolatilityState(volatility.Length, volatility.SmoothLength, true, count),
+        RelativeVolatilityIndexHigh volatility => new GeneratedSeededRelativeVolatilityState(true, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
+        RelativeVolatilityIndexLow volatility => new GeneratedSeededRelativeVolatilityState(false, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
         VolatilitySwitchIndicator volatility => new GeneratedVolatilitySwitchState(volatility.Length),
         CloseToCloseVolatility volatility => new GeneratedCloseVolatilityState(Math.Max(1, volatility.Length), count),
@@ -3119,6 +3126,33 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRelativeVolatilityState(int length, int smooth, bool paired, int count) : IIndicatorState, IDisposable
+    {
+        private readonly RelativeVolatilityWindow? _first = Math.Max(1, length) <= count ? new(MovingAvgType.WildersSmoothingMethod, length, smooth, capacityHint: count) : null;
+        private readonly RelativeVolatilityWindow? _second = paired && Math.Max(1, length) <= count ? new(MovingAvgType.WildersSmoothingMethod, length, smooth, capacityHint: count) : null;
+        public void Reset() { _first?.Reset(); _second?.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var first = _first?.Next(paired ? bar.High : bar.Close, true) ?? 100;
+            return paired ? Helpers.RelativeVolatilityWindow.Mean(first, _second?.Next(bar.Low, true) ?? 100) : first;
+        }
+        public void Dispose() { _first?.Dispose(); _second?.Dispose(); }
+    }
+
+    private sealed class GeneratedSeededRelativeVolatilityState(bool high, int length, int deviation, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RelativeVolatilityIndexCore? _window = length < count && deviation <= count ? new(length, deviation) : null;
+        private int _seen;
+        public void Reset() { _window?.Reset(); _seen = 0; }
+        public double Update(in Bar bar)
+        {
+            if (_window is not null) return _window.Next(high ? bar.High : bar.Low, true);
+            // No deviation can appear, or the seed cannot finish within this owned input.
+            return _seen++ < length ? 0 : 50;
+        }
+        public void Dispose() => _window?.Dispose();
     }
 
     private sealed class GeneratedVolatilityRatioState(int length) : IIndicatorState
