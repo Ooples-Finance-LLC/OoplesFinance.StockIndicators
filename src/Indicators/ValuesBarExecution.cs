@@ -78,15 +78,17 @@ internal static partial class ValuesBarExecution
                 && UsesVolumeFlowCustomRange(source, cancellation);
             bool valueChartCustomRange = indicators.Any(i => i is ValueChartIndicator)
                 && UsesValueChartCustomRange(source, cancellation);
+            bool vervoortModifiedCustomRange = indicators.Any(i => i is VervoortModifiedBollingerBandIndicator)
+                && UsesVervoortModifiedCustomRange(source, cancellation);
             if (indicators.Any(i => i is PrimeNumberOscillator or PrimeNumberBands or ClosedFormDistanceVolatility))
                 ValidatePrimeGraphInput(source, indicators, cancellation);
             else if (indicators.Any(i => i is AbsoluteStrengthIndex))
                 ValidateAbsoluteStrengthInput(source, cancellation);
             if (indicators.Count == 1)
-                nodes.Add(new Node(indicators[0], source.Length, true, false, false, volumeFlowCustomRange, valueChartCustomRange));
+                nodes.Add(new Node(indicators[0], source.Length, true, false, false, volumeFlowCustomRange, valueChartCustomRange, vervoortModifiedCustomRange));
             else
                 foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
-                    nodes.Add(new Node(indicator, source.Length, false, boundedBatch, pointwiseBatch, volumeFlowCustomRange, valueChartCustomRange));
+                    nodes.Add(new Node(indicator, source.Length, false, boundedBatch, pointwiseBatch, volumeFlowCustomRange, valueChartCustomRange, vervoortModifiedCustomRange));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
             bool singleSma = nodes.Count == 1 && nodes[0].Indicator is Sma;
@@ -633,7 +635,7 @@ internal static partial class ValuesBarExecution
         private readonly object? _state;
         private readonly double[] _scratch;
         internal bool HasScalarState => _state is IIndicatorState;
-        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch, bool volumeFlowCustomRange, bool valueChartCustomRange)
+        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange)
         {
             Indicator = indicator;
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
@@ -742,7 +744,7 @@ internal static partial class ValuesBarExecution
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
                 _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,
-                _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count, volumeFlowCustomRange, valueChartCustomRange),
+                _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count, volumeFlowCustomRange, valueChartCustomRange, vervoortModifiedCustomRange),
                 NormalizedWindowEntropy { Period: <= 4096 } entropy => new EntropyValueState(entropy.Period, count),
                 RangeFractalAverage fractal => new FractalValueState(fractal.Period, count),
                 FilteredDeviationAverage deviation => new DeviationAverageValueState(deviation.Period, deviation.ScaleFactor, count),

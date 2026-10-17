@@ -19,6 +19,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingResidualPairBenchmarks), 16)]
     [InlineData(typeof(RemainingErgodicFamilyBenchmarks), 32)]
     [InlineData(typeof(RemainingErgodicAdaptiveSelectionBenchmarks), 16)]
+    [InlineData(typeof(RemainingVervoortModifiedBenchmarks), 8)]
     [InlineData(typeof(RemainingVolatilityStopBenchmarks), 16)]
     [InlineData(typeof(RemainingStatisticalQualityBenchmarks), 16)]
     [InlineData(typeof(RemainingRatioSwitchBenchmarks), 16)]

@@ -101,9 +101,9 @@ public sealed class SharedGeneratedVolatilityGeometryTests
     [Fact]
     public async Task GraphDomainsFollowRootOrderAfterAllRawFiniteChecks()
     {
-        IIndicator[] roots = [new ClosedFormDistanceVolatility(2), new PrimeNumberOscillator(2), new AbsoluteStrengthIndex(2)];
+        IIndicator[] roots = [new ClosedFormDistanceVolatility(2), new PrimeNumberOscillator(2), new AbsoluteStrengthIndex(2), new VervoortModifiedBollingerBandIndicator(2, 2, 1)];
         Bar[] bars = [new(default, 1, 1, 1, -1, 1), new(default, 1, -1, 0, 1, 1), new(default, double.MaxValue, 1, 0, 1, 1)];
-        foreach (var order in new[] { roots, roots.Reverse().ToArray(), new[] { roots[1], roots[0], roots[2] } })
+        foreach (var order in new[] { roots, roots.Reverse().ToArray(), new[] { roots[1], roots[3], roots[0], roots[2] } })
         {
             await Compare(order, bars);
             var invalid = bars.ToArray(); invalid[^1] = new(default, 1, 2, 0, 1, double.NaN);
