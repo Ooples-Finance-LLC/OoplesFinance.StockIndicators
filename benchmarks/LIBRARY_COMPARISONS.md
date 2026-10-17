@@ -4299,3 +4299,6 @@ Ehlers Kaufman Adaptive Moving Average and Simple Cycle now reuse exact incremen
 
 
 Ehlers AM Detector now publishes amplitude line and signal together through the exact envelope and two-stage SMA kernel. Original open/close fields, wide distances, expiring maxima, startup, components/source fallback and lifecycle are preserved. Validation: 21 unit cases, 4 parity cases, 157 discovery cases, 100 local GPU cases and four inventory checks passed. Eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Simple Derivative, Simple Clip, Simple Window and Triple Delay Detrender now publish related outputs together through exact incremental kernels. Independent periods, ignored Clip Length2, original open, RMS clipping, delay startup, wide arithmetic, components/source fallback and lifecycle are preserved. Validation: 73 unit cases, 16 parity cases, 158 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

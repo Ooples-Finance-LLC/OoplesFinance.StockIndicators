@@ -109,6 +109,7 @@ internal static partial class ValuesBarExecution
             or ErgodicCandlestickOscillator or ErgodicMovingAverageConvergenceDivergence
             or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
             or EhlersAllPassPhaseShifter or EhlersCenterOfGravityOscillator or EhlersCenterofGravityOscillator or EhlersChebyshevLowPassFilter
+            or EhlersSimpleDerivIndicator or EhlersSimpleClipIndicator or EhlersSimpleWindowIndicator or EhlersTripleDelayLineDetrender
             or EhlersAMDetector
             or EhlersKaufmanAdaptiveMovingAverage
             or EhlersSimpleCycleIndicator { Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -390,6 +391,10 @@ internal static partial class ValuesBarExecution
         EhlersCenterOfGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
         EhlersCenterofGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
         EhlersChebyshevLowPassFilter => new GeneratedChebyshevWaveState(),
+        EhlersSimpleDerivIndicator filter => new GeneratedEhlersDerivState(filter.Length, filter.SignalLength),
+        EhlersSimpleClipIndicator filter => new GeneratedEhlersClipState(filter.Length1, filter.Length3, filter.SignalLength),
+        EhlersSimpleWindowIndicator filter => new GeneratedEhlersSimpleWindowState(filter.Length),
+        EhlersTripleDelayLineDetrender filter => new GeneratedTripleDelayState(filter.Length),
         EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
@@ -3312,6 +3317,58 @@ internal static partial class ValuesBarExecution
             for (var wave = 0; wave < _windows.Length; wave++) outputs[wave] = _windows[wave].Next(bar.Close, true);
         }
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedEhlersDerivState(int length, int signal) : IMultiOutputState, IDisposable
+    {
+        private readonly EhlersDerivWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, signal);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEhlersClipState(int lag, int length, int signal) : IMultiOutputState, IDisposable
+    {
+        private readonly EhlersClipWindow _window = new(MovingAvgType.ExponentialMovingAverage, lag, length, signal);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEhlersSimpleWindowState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly EhlersSimpleWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Open, bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Roc;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTripleDelayState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly TripleDelayWindow _window = new(MovingAvgType.EhlersModifiedOptimumEllipticFilter, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAmDetectorState(int envelope, int smooth) : IMultiOutputState, IDisposable
