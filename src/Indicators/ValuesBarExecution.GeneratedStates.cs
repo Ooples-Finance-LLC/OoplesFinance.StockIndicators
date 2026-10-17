@@ -114,6 +114,8 @@ internal static partial class ValuesBarExecution
             or EhlersStochasticCyberCycle { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
             or EhlersModifiedRelativeStrengthIndex or EhlersModifiedStochasticIndicator or EhlersMovingAverageDifferenceIndicator
             or EhlersRocketRelativeStrengthIndex { ObosLevel: > double.NegativeInfinity and < double.PositiveInfinity, Mult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or Frama { Length: < int.MaxValue } or EhlersFrama { Length: < int.MaxValue }
+            or FisherTransform or EhlersFisherTransform or EhlersInverseFisherTransform or EhlersRelativeStrengthIndexInverseFisherTransform
             or EhlersAMDetector
             or EhlersKaufmanAdaptiveMovingAverage
             or EhlersSimpleCycleIndicator { Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -407,6 +409,12 @@ internal static partial class ValuesBarExecution
         EhlersModifiedStochasticIndicator oscillator => new GeneratedModifiedStochasticState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
         EhlersRocketRelativeStrengthIndex oscillator => new GeneratedRocketRsiState(oscillator.Length1, oscillator.Length2, oscillator.Mult),
         EhlersMovingAverageDifferenceIndicator oscillator => new GeneratedAverageDifferenceState(oscillator.FastLength, oscillator.SlowLength, count),
+        Frama average => new GeneratedFramaState(average.Length),
+        EhlersFrama average => new GeneratedFramaState(average.Length),
+        FisherTransform oscillator => new GeneratedFisherState(oscillator.Length),
+        EhlersFisherTransform oscillator => new GeneratedFisherState(oscillator.Length),
+        EhlersInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, 9, count),
+        EhlersRelativeStrengthIndexInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, oscillator.SignalLength, count),
         EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
@@ -3460,6 +3468,43 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedFramaState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly FramaWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedFisherState(int length) : IIndicatorState
+    {
+        private RollingMinMax _range = new(length);
+        private double _normalized, _previous;
+        public void Reset() { _range = new(length); _normalized = _previous = 0; }
+        public double Update(in Bar bar)
+        {
+            _range.Add(bar.Close);
+            var ratio = FisherArithmetic.Position(bar.Close, _range.Min, _range.Max);
+            var value = (0.33 * 2 * (ratio - 0.5)) + (0.67 * _normalized);
+            _normalized = Math.Max(-0.999, Math.Min(0.999, value));
+            _previous = FisherArithmetic.Transform(_normalized) + (0.5 * _previous);
+            return _previous;
+        }
+    }
+
+    private sealed class GeneratedInverseRsiFisherState(int length, int smooth, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PriceRsiWindow _rsi = new(MovingAvgType.WeightedMovingAverage, length, count);
+        private readonly StrengthAverage _average = new(MovingAvgType.WeightedMovingAverage, smooth, count);
+        public void Reset() { _rsi.Reset(); _average.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var value = .1 * (_rsi.Next(bar.Close, true) - 50);
+            return Math.Tanh(_average.Next(new StrengthValue(value), true).Mantissa);
+        }
+        public void Dispose() { _rsi.Dispose(); _average.Dispose(); }
     }
 
     private sealed class GeneratedAmDetectorState(int envelope, int smooth) : IMultiOutputState, IDisposable

@@ -4308,3 +4308,6 @@ Ehlers Stochastic Center of Gravity, Stochastic, Stochastic Cyber Cycle and Rela
 
 
 Ehlers Modified RSI, Modified Stochastic, Rocket RSI and Moving Average Difference now reuse exact incremental kernels in shared execution. Independent periods, wide arithmetic, related outputs, finite Rocket option eligibility, components/source fallback and lifecycle are preserved. Validation: 88 unit cases, 16 parity cases, 160 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+FRAMA, Ehlers FRAMA, both Fisher Transform aliases and both Ehlers inverse-RSI Fisher facades now use shared incremental execution. Fisher normalization no longer retains a full intermediate history. Exact operation order, original ranges, odd-period overflow fallback, hidden nine-bar smoothing, alias defaults, components/source fallback and lifecycle are preserved. Validation: 94 unit cases, 24 parity cases, 161 discovery cases, 100 local GPU cases and four inventory checks passed. Forty-eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
