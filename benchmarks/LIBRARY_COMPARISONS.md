@@ -4287,3 +4287,6 @@ Initial unit failures exposed missing whole-series OHLC equality routing and per
 
 
 Vervoort Modified integration retains the preserved exact state, helpers and whole-series range prepass while preserving newer graph-domain validation. Thirteen focused unit cases (including mixed-root and domain-order checks), 153 discovery cases, 100 local GPU cases and four inventory checks passed. The archived 99-unit/four-parity candidate evidence is reused; expensive completed suites were not replayed. Its eight preserved timing cases remain queued.
+
+
+Five Ehlers filters (Filter, Average Error, Distance Coefficient, Reflex and Trendflex) now reuse exact incremental kernels in shared execution. The hidden five-bar lag, period clamping, extreme arithmetic, source fallback, warmup and lifecycle are preserved. Validation: 63 unit cases, 20 parity cases, 154 discovery cases, 100 local GPU cases and four inventory checks passed. Forty timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

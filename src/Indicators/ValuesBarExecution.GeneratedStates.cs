@@ -108,6 +108,7 @@ internal static partial class ValuesBarExecution
             or ErgodicCommoditySelectionIndex { PointValue: > double.NegativeInfinity and < double.PositiveInfinity }
             or ErgodicCandlestickOscillator or ErgodicMovingAverageConvergenceDivergence
             or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
+            or EhlersFilter or EhlersAverageErrorFilter or EhlersDistanceCoefficientFilter or EhlersReflexIndicator or EhlersTrendflexIndicator
             or EhlersDeviationScaledMovingAverage { Length: <= 1_073_741_823 }
             or EhlersFisherizedDeviationScaledOscillator or EhlersDeviationScaledSuperSmoother
             or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
@@ -381,6 +382,11 @@ internal static partial class ValuesBarExecution
         ErgodicPercentagePriceOscillator oscillator => new GeneratedEmaGapSignalState(32, oscillator.Length, 5, percentage: true),
         ErgodicTrueStrengthIndexV2 strength => new GeneratedErgodicStrengthPairState([strength.Length1, strength.Length2, strength.Length3], [strength.Length4, strength.Length5, strength.Length6], strength.SignalLength, count),
         ErgodicMeanDeviationIndicator deviation => new GeneratedErgodicDeviationState(deviation.Length1, deviation.Length2, deviation.Length3, deviation.SignalLength),
+        EhlersFilter filter => new GeneratedEhlersDistanceState(filter.Length),
+        EhlersAverageErrorFilter filter => new GeneratedAverageErrorState(filter.Length),
+        EhlersDistanceCoefficientFilter filter => new GeneratedDistanceCoefficientState(filter.Length),
+        EhlersReflexIndicator filter => new GeneratedTrendflexState(filter.Length, true),
+        EhlersTrendflexIndicator filter => new GeneratedTrendflexState(filter.Length, false),
         EhlersDeviationScaledMovingAverage average => new GeneratedDeviationScaledState(average.Length, DeviationScaledWindow.ResolveSlow(average.Length), false),
         EhlersFisherizedDeviationScaledOscillator oscillator => new GeneratedDeviationScaledState(oscillator.Length, 40, true),
         EhlersDeviationScaledSuperSmoother average => new GeneratedDeviationSuperState(average.Length),
@@ -3268,6 +3274,38 @@ internal static partial class ValuesBarExecution
         private readonly MedianAdaptiveWindow _window = new(length, threshold);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedEhlersDistanceState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly EhlersDistanceFilterWindow _window = new(length, 5);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAverageErrorState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly AverageErrorWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedDistanceCoefficientState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly DistanceCoefficientWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedTrendflexState(int length, bool reflex) : IIndicatorState, IDisposable
+    {
+        private readonly TrendflexWindow _window = new(length, reflex);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedDeviationScaledState(int fast, int slow, bool fisher) : IIndicatorState, IDisposable
