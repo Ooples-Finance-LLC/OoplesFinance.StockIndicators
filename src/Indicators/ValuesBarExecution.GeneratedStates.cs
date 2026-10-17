@@ -100,6 +100,8 @@ internal static partial class ValuesBarExecution
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
             or StatisticalVolatility or VolatilityQualityIndex
             or VolatilityRatio or VolatilitySwitchIndicator
+            or EhlersRecursiveMedianFilter or EhlersRecursiveMedianOscillator
+            or EhlersMedianAverageAdaptiveFilter { Threshold: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolatilityIndexDynamicAverageIndicator { Alpha1: >= 0 and < double.PositiveInfinity, Alpha2: >= 0 and < double.PositiveInfinity }
             or ChandeVolatilityIndexDynamicAverageIndicator { Alpha1: >= 0 and < double.PositiveInfinity, Alpha2: >= 0 and < double.PositiveInfinity }
             or RelativeVolatilityIndex or RviVolatility or RelativeVolatilityIndexV2
@@ -354,6 +356,9 @@ internal static partial class ValuesBarExecution
         RelativeVolatilityIndexHigh volatility => new GeneratedSeededRelativeVolatilityState(true, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         RelativeVolatilityIndexLow volatility => new GeneratedSeededRelativeVolatilityState(false, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
+        EhlersRecursiveMedianFilter median => new GeneratedRecursiveMedianState(median.Length),
+        EhlersRecursiveMedianOscillator median => new GeneratedRecursiveMedianOscillatorState(median.Length1, median.Length2, median.Length3),
+        EhlersMedianAverageAdaptiveFilter median => new GeneratedMedianAdaptiveState(median.Length, median.Threshold),
         VolatilityIndexDynamicAverageIndicator average => new GeneratedVolatilityIndexState(average.Length, average.Alpha1, average.Alpha2),
         ChandeVolatilityIndexDynamicAverageIndicator average => new GeneratedVolatilityIndexState(average.Length, average.Alpha1, average.Alpha2),
         VolatilitySwitchIndicator volatility => new GeneratedVolatilitySwitchState(volatility.Length),
@@ -3170,6 +3175,28 @@ internal static partial class ValuesBarExecution
             outputs[1] = point.Second;
         }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    // The legacy typed facade ignores Alpha and fixes the smoothing period at 12.
+    private sealed class GeneratedRecursiveMedianState(int length) : IIndicatorState
+    {
+        private readonly RecursiveMedianWindow _window = new(length, 12);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedRecursiveMedianOscillatorState(int length1, int length2, int length3) : IIndicatorState
+    {
+        private readonly RecursiveMedianOscillatorWindow _window = new(length1, length2, length3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedMedianAdaptiveState(int length, double threshold) : IIndicatorState
+    {
+        private readonly MedianAdaptiveWindow _window = new(length, threshold);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
     }
 
     private sealed class GeneratedVolatilityRatioState(int length) : IIndicatorState

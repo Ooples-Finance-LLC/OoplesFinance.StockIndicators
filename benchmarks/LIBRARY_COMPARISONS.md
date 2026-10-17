@@ -4241,3 +4241,6 @@ Relative Volatility V1 (including both typed aliases), V2, High and Low now reus
 
 
 Both Volatility Index Dynamic Average aliases now compute their two recursive outputs together through the exact existing volatility normalization kernel. EMA defaults, nonnegative finite gains, extrapolation, seed and unfillable startup, original fields, source/component fallback and ownership are preserved. Validation: 27 focused unit cases, 8 parity cases, 142 discovery cases, 100 local GPU cases and 4 inventory tests passed. Sixteen timing cases are prepared; measured performance qualification remains pending.
+
+
+Ehlers Recursive Median Filter, Recursive Median Oscillator and Median Average Adaptive Filter now stream through their existing ordered-window and adaptive-search kernels. Clamped periods, ties, independent oscillator periods, fixed smoothing12 and ignored Alpha of the legacy recursive facade, thresholds, original fields, source fallback and ownership are preserved. Validation: 42 focused unit cases, 12 parity cases, 143 discovery cases, 100 local GPU cases and 4 inventory tests passed. Twenty-four timing cases are prepared; measured performance qualification remains pending.
