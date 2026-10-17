@@ -1,0 +1,18 @@
+{
+  "base_commit": "332edbfbe60f7ad70a2ba9e042a3288d9a4a1f8a",
+  "source_files_sha256": {
+    "src/Indicators/FusedBarExecution.cs": "bf232cd1fd2d68edaa74ac5ba6e09ce9dbf13c038e67f6ffc09a52c412f6c188",
+    "src/Indicators/OwnedBarBuffer.cs": "bf140ae07d7ad37a606ecc628193c83c98857dc525d911d8417df89b01a4cfb6",
+    "src/Indicators/OwnedBarHistory.cs": "a9aaeb0eea6c464816095600f62350541ebaa2dc93788cdecca89eea2cd0f45c",
+    "src/Indicators/PriceCircularTransform.cs": "184ef4ea0ebdb97c6b290ae1f1ccf31bdc63bacfd1962b12a8def550113905fb",
+    "src/Indicators/ValuesBarExecution.cs": "1b7ecede607548792c3507a1a1995aea08111ee93c9cf6b41d2114742dee459b"
+  },
+  "binary_sha256": {
+    "OoplesFinance.StockIndicators.dll": "5d8d1568b40759c79b5ae1eaa2888200ba7af2cf5847daef57279930fee62d81",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "da822d0e2d927994bdc5ab96e5eb13d0134877efda14a83d995b3521acae9f84"
+  },
+  "saved_baseline": "benchmarks/results/shared-rollout/asin-shared-cpu/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAsinBenchmarks-report-full-compressed.json",
+  "filter": "*SharedAsinBenchmarks*Builder*",
+  "interpretation": "Saved-baseline cross-run comparison, not same-run qualification. Native methods were not timed; existing setup correctness checks still execute. Fixture inputs, output ownership, native methods and worker settings are unchanged. Same recorded runtime and hardware. The monitor includes .NET hosts, reusable MSBuild nodes, compiler processes and their live descendants. Existing processes were permitted only after at least 60 seconds of low CPU activity. Combined background CPU was limited to 1% of one logical core plus 0.1 CPU seconds of timer allowance, checked across each consecutive sample and the entire window. New process identities or activity above that bound invalidate the run. Process identities and CPU totals were sampled every ten seconds and at completion. Brief unobserved activity and non-CPU contention cannot be excluded.",
+  "validation": "22 focused unit, 9 Asin comparator and 100 local GPU cases passed with zero skips."
+}

@@ -1,0 +1,167 @@
+[
+  {
+    "Time": "2026-10-16T10:24:26.4591138Z",
+    "Processes": [
+      {
+        "ProcessId": 4760,
+        "ParentProcessId": 11724,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4690500Z",
+        "CpuSeconds": 0.078125
+      },
+      {
+        "ProcessId": 11724,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.AI.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4613410Z",
+        "CpuSeconds": 391.765625
+      },
+      {
+        "ProcessId": 13508,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.Server.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4716420Z",
+        "CpuSeconds": 389.9375
+      },
+      {
+        "ProcessId": 32176,
+        "ParentProcessId": 13508,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4787120Z",
+        "CpuSeconds": 0.0625
+      }
+    ]
+  },
+  {
+    "Time": "2026-10-16T10:24:41.7465783Z",
+    "Processes": [
+      {
+        "ProcessId": 4760,
+        "ParentProcessId": 11724,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4690500Z",
+        "CpuSeconds": 0.078125
+      },
+      {
+        "ProcessId": 11724,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.AI.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4613410Z",
+        "CpuSeconds": 391.765625
+      },
+      {
+        "ProcessId": 13508,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.Server.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4716420Z",
+        "CpuSeconds": 389.9375
+      },
+      {
+        "ProcessId": 32176,
+        "ParentProcessId": 13508,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4787120Z",
+        "CpuSeconds": 0.0625
+      }
+    ]
+  },
+  {
+    "Time": "2026-10-16T10:24:57.0265187Z",
+    "Processes": [
+      {
+        "ProcessId": 4760,
+        "ParentProcessId": 11724,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4690500Z",
+        "CpuSeconds": 0.078125
+      },
+      {
+        "ProcessId": 11724,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.AI.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4613410Z",
+        "CpuSeconds": 391.796875
+      },
+      {
+        "ProcessId": 13508,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.Server.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4716420Z",
+        "CpuSeconds": 389.96875
+      },
+      {
+        "ProcessId": 32176,
+        "ParentProcessId": 13508,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4787120Z",
+        "CpuSeconds": 0.0625
+      }
+    ]
+  },
+  {
+    "Time": "2026-10-16T10:25:12.3132339Z",
+    "Processes": [
+      {
+        "ProcessId": 4760,
+        "ParentProcessId": 11724,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4690500Z",
+        "CpuSeconds": 0.078125
+      },
+      {
+        "ProcessId": 11724,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.AI.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4613410Z",
+        "CpuSeconds": 391.796875
+      },
+      {
+        "ProcessId": 13508,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.Server.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4716420Z",
+        "CpuSeconds": 389.96875
+      },
+      {
+        "ProcessId": 32176,
+        "ParentProcessId": 13508,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4787120Z",
+        "CpuSeconds": 0.0625
+      }
+    ]
+  },
+  {
+    "Time": "2026-10-16T10:25:27.6054172Z",
+    "Processes": [
+      {
+        "ProcessId": 4760,
+        "ParentProcessId": 11724,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4690500Z",
+        "CpuSeconds": 0.078125
+      },
+      {
+        "ProcessId": 11724,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.AI.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4613410Z",
+        "CpuSeconds": 391.8125
+      },
+      {
+        "ProcessId": 13508,
+        "ParentProcessId": 20904,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Users\\cheat\\source\\worktrees\\course-investor-app\\artifacts\\lessons\\Release\\Course.Server.dll\"",
+        "CreationTime": "2026-10-16T09:25:26.4716420Z",
+        "CpuSeconds": 390.046875
+      },
+      {
+        "ProcessId": 32176,
+        "ParentProcessId": 13508,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-16T09:25:26.4787120Z",
+        "CpuSeconds": 0.0625
+      }
+    ]
+  }
+]

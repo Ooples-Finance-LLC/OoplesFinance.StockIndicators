@@ -1,0 +1,134 @@
+[
+  {
+    "bars": 1000,
+    "method": "BuilderFull",
+    "mean_ns": 9614.822048611111,
+    "confidence_interval": {
+      "N": 9,
+      "Mean": 9614.822048611111,
+      "StandardError": 179.50944585526244,
+      "Level": 12,
+      "Margin": 904.9619442395906,
+      "Lower": 8709.86010437152,
+      "Upper": 10519.783992850702
+    },
+    "allocated_bytes": 57741,
+    "saved_builder_mean_ns": 8475.767299107143,
+    "cross_run_previous_builder_ratio": 1.1343895731568703,
+    "saved_fastest_native": "NativeSingle",
+    "saved_native": {
+      "mean_ns": 2475.503104073661,
+      "confidence_interval": {
+        "N": 14,
+        "Mean": 2475.503104073661,
+        "StandardError": 12.812496149489617,
+        "Level": 12,
+        "Margin": 54.07939024167636,
+        "Lower": 2421.4237138319845,
+        "Upper": 2529.582494315337
+      },
+      "allocated_bytes": 7904
+    },
+    "cross_run_native_mean_ratio": 3.883987070260209,
+    "cross_run_intervals_separated_in_builder_favor": false
+  },
+  {
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 6746.13037109375,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 6746.13037109375,
+      "StandardError": 70.91422753747182,
+      "Level": 12,
+      "Margin": 339.0347228623192,
+      "Lower": 6407.0956482314305,
+      "Upper": 7085.1650939560695
+    },
+    "allocated_bytes": 9035,
+    "saved_builder_mean_ns": 6617.44140625,
+    "cross_run_previous_builder_ratio": 1.0194469368058487,
+    "saved_fastest_native": "NativeSingle",
+    "saved_native": {
+      "mean_ns": 2475.503104073661,
+      "confidence_interval": {
+        "N": 14,
+        "Mean": 2475.503104073661,
+        "StandardError": 12.812496149489617,
+        "Level": 12,
+        "Margin": 54.07939024167636,
+        "Lower": 2421.4237138319845,
+        "Upper": 2529.582494315337
+      },
+      "allocated_bytes": 7904
+    },
+    "cross_run_native_mean_ratio": 2.725155286613211,
+    "cross_run_intervals_separated_in_builder_favor": false
+  },
+  {
+    "bars": 10000,
+    "method": "BuilderFull",
+    "mean_ns": 66569.873046875,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 66569.873046875,
+      "StandardError": 1105.3289514338962,
+      "Level": 12,
+      "Margin": 5284.481094052245,
+      "Lower": 61285.391952822756,
+      "Upper": 71854.35414092724
+    },
+    "allocated_bytes": 562618,
+    "saved_builder_mean_ns": 74760.87472098214,
+    "cross_run_previous_builder_ratio": 0.8904373215980005,
+    "saved_fastest_native": "NativeParallel",
+    "saved_native": {
+      "mean_ns": 11562.585856119791,
+      "confidence_interval": {
+        "N": 15,
+        "Mean": 11562.585856119791,
+        "StandardError": 100.30354502547502,
+        "Level": 12,
+        "Margin": 415.3022253571196,
+        "Lower": 11147.283630762671,
+        "Upper": 11977.88808147691
+      },
+      "allocated_bytes": 80328
+    },
+    "cross_run_native_mean_ratio": 5.757351675070262,
+    "cross_run_intervals_separated_in_builder_favor": false
+  },
+  {
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 20301.84326171875,
+    "confidence_interval": {
+      "N": 9,
+      "Mean": 20301.84326171875,
+      "StandardError": 199.64936160307005,
+      "Level": 12,
+      "Margin": 1006.493410871452,
+      "Lower": 19295.3498508473,
+      "Upper": 21308.3366725902
+    },
+    "allocated_bytes": 81631,
+    "saved_builder_mean_ns": 19606.885704627402,
+    "cross_run_previous_builder_ratio": 1.0354445661366471,
+    "saved_fastest_native": "NativeParallel",
+    "saved_native": {
+      "mean_ns": 11562.585856119791,
+      "confidence_interval": {
+        "N": 15,
+        "Mean": 11562.585856119791,
+        "StandardError": 100.30354502547502,
+        "Level": 12,
+        "Margin": 415.3022253571196,
+        "Lower": 11147.283630762671,
+        "Upper": 11977.88808147691
+      },
+      "allocated_bytes": 80328
+    },
+    "cross_run_native_mean_ratio": 1.7558220552345984,
+    "cross_run_intervals_separated_in_builder_favor": false
+  }
+]
