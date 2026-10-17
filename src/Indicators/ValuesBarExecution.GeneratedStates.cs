@@ -104,6 +104,8 @@ internal static partial class ValuesBarExecution
             or GarmanKlassVolatility
             or HistoricalVolatilityPercentile
             or StandardErrorCore or ErgodicMeanDeviationIndicator
+            or ErgodicCandlestickOscillator or ErgodicMovingAverageConvergenceDivergence
+            or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
             or EhlersDeviationScaledMovingAverage { Length: <= 1_073_741_823 }
             or EhlersFisherizedDeviationScaledOscillator or EhlersDeviationScaledSuperSmoother
             or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
@@ -369,6 +371,10 @@ internal static partial class ValuesBarExecution
         GarmanKlassVolatility volatility => new GeneratedGarmanKlassState(volatility.Length, count),
         HistoricalVolatilityPercentile volatility => new GeneratedHistoricalRankState(volatility.Length, volatility.AnnualLength),
         StandardErrorCore error => new GeneratedMeanErrorState(error.Length, count),
+        ErgodicCandlestickOscillator candle => new GeneratedErgodicCandleState(candle.Length, count),
+        ErgodicMovingAverageConvergenceDivergence oscillator => new GeneratedEmaGapSignalState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
+        ErgodicPercentagePriceOscillator oscillator => new GeneratedEmaGapSignalState(32, oscillator.Length, 5, percentage: true),
+        ErgodicTrueStrengthIndexV2 strength => new GeneratedErgodicStrengthPairState([strength.Length1, strength.Length2, strength.Length3], [strength.Length4, strength.Length5, strength.Length6], strength.SignalLength, count),
         ErgodicMeanDeviationIndicator deviation => new GeneratedErgodicDeviationState(deviation.Length1, deviation.Length2, deviation.Length3, deviation.SignalLength),
         EhlersDeviationScaledMovingAverage average => new GeneratedDeviationScaledState(average.Length, DeviationScaledWindow.ResolveSlow(average.Length), false),
         EhlersFisherizedDeviationScaledOscillator oscillator => new GeneratedDeviationScaledState(oscillator.Length, 40, true),
@@ -3243,6 +3249,33 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedErgodicCandleState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly ErgodicCandleWindow _window = new(MovingAvgType.ExponentialMovingAverage, 32, length, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, true);
+            outputs[0] = point.Eco; outputs[1] = point.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedErgodicStrengthPairState(int[] first, int[] second, int signal, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly StrengthWindow _first = new(MovingAvgType.ExponentialMovingAverage, first, count);
+        private readonly StrengthWindow _second = new(MovingAvgType.ExponentialMovingAverage, second, count);
+        private readonly StrengthAverage _signal = new(MovingAvgType.ExponentialMovingAverage, signal, count);
+        public void Reset() { _first.Reset(); _second.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            outputs[0] = _first.Next(bar.Close, true);
+            var value = _second.Next(bar.Close, true);
+            outputs[1] = value; outputs[2] = _signal.Next(new StrengthValue(value), true).Mantissa;
+        }
+        public void Dispose() { _first.Dispose(); _second.Dispose(); _signal.Dispose(); }
     }
 
     private sealed class GeneratedMeanErrorState(int length, int count) : IIndicatorState, IDisposable
