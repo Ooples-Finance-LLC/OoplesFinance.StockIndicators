@@ -99,6 +99,7 @@ internal static partial class ValuesBarExecution
             or FractalChaosBands or FractalChaosOscillator
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
             or StatisticalVolatility or VolatilityQualityIndex
+            or VolatilityRatio or VolatilitySwitchIndicator
             or CloseToCloseVolatility or DownsideDeviation
             or PrimeNumberOscillator or PrimeNumberBands
             or EfficientTrendStepChannel
@@ -339,6 +340,8 @@ internal static partial class ValuesBarExecution
         ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
         StatisticalVolatility volatility => new GeneratedStatisticalVolatilityState(volatility.Length1, volatility.Length2),
         VolatilityQualityIndex volatility => new GeneratedVolatilityQualityState(volatility.FastLength, volatility.SlowLength),
+        VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
+        VolatilitySwitchIndicator volatility => new GeneratedVolatilitySwitchState(volatility.Length),
         CloseToCloseVolatility volatility => new GeneratedCloseVolatilityState(Math.Max(1, volatility.Length), count),
         DownsideDeviation deviation => new GeneratedDownsideDeviationState(Math.Max(1, deviation.Length), count),
         PrimeNumberOscillator oscillator => new GeneratedPrimeOscillatorState(oscillator.Length),
@@ -3095,6 +3098,21 @@ internal static partial class ValuesBarExecution
             var point = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, true);
             outputs[0] = point.Line; outputs[1] = point.Fast; outputs[2] = point.Slow;
         }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedVolatilityRatioState(int length) : IIndicatorState
+    {
+        private readonly VolatilityRatioWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
+    }
+
+    private sealed class GeneratedVolatilitySwitchState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly VolatilitySwitchWindow _window = new(MovingAvgType.WeightedMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Value(bar.Close, true);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
