@@ -15,6 +15,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingOhlcVolatilityBenchmarks), 24)]
     [InlineData(typeof(RemainingGarmanKlassBenchmarks), 8)]
     [InlineData(typeof(RemainingHistoricalRankBenchmarks), 8)]
+    [InlineData(typeof(RemainingDeviationFamilyBenchmarks), 24)]
     [InlineData(typeof(RemainingVolatilityStopBenchmarks), 16)]
     [InlineData(typeof(RemainingStatisticalQualityBenchmarks), 16)]
     [InlineData(typeof(RemainingRatioSwitchBenchmarks), 16)]
