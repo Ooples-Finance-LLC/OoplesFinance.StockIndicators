@@ -985,7 +985,13 @@
       "options": [
         "CloseToCloseVolatilitySpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "CloseToCloseVolatilitySpecOptions": [
+          "benchmarks/results/remaining-indicators/returnvolatility-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ClosedFormDistanceVolatility",
@@ -1513,7 +1519,13 @@
       "options": [
         "DownsideDeviationSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DownsideDeviationSpecOptions": [
+          "benchmarks/results/remaining-indicators/returnvolatility-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DrunkardWalk",
@@ -10027,7 +10039,7 @@
     "benchmarks/results/remaining-indicators/price-contracts.json": "d00758a41b725b80c3d2510805eb59de15f021c4d4f84405ab85905df6a62b13",
     "benchmarks/results/remaining-indicators/pricechannels-contracts.json": "6e16cc4d09d897271fd80b8dff330a3834afde19c5becb8b75f23d8000a339a4",
     "benchmarks/results/remaining-indicators/pricecycle-contracts.json": "193bf2b04005029a04a48a184f2bfabca0c79f7e7bdc0a9c3bfc704721843e75",
-    "benchmarks/results/remaining-indicators/primefamily-contracts.json": "8f4ae6f54eea914989067f2c3e411efb34395d56f446e1fa7ab90cf1e095307c",
+    "benchmarks/results/remaining-indicators/primefamily-contracts.json": "cd56ac162262fcbe8c8e62729dc7b9eb2f71bc852ad59983fbf5c75f71a6f9da",
     "benchmarks/results/remaining-indicators/projectionfamily-contracts.json": "d8d0de66706b5afbbd426cc0611fe35e693fe5803d2e253d15c9e45f684761c4",
     "benchmarks/results/remaining-indicators/rangealias-contracts.json": "a7cb36562004917f5d80acdc87317428593b534e354b55e84e84543837210bb2",
     "benchmarks/results/remaining-indicators/rangechannels-contracts.json": "94b64b4ee7ec41c76f1353425d225d925f8db97cbe46d0362c565464fee988f1",
@@ -10040,6 +10052,7 @@
     "benchmarks/results/remaining-indicators/regressionpair-contracts.json": "e73203bcfd2f86498263cce1a6460fda0bc9b0d2d20a26f3a6bed3d46b69bcf1",
     "benchmarks/results/remaining-indicators/relativevolume-contracts.json": "d7535c03025dd2a9eac2439b05e9a275462e7f747fd2dcdea0a97589ed21a47c",
     "benchmarks/results/remaining-indicators/residualfit-contracts.json": "fb9a0e06130c3c90e4ad13d76f0a3bb7e3dd573b52d522aa6e2738e0e8b48a29",
+    "benchmarks/results/remaining-indicators/returnvolatility-contracts.json": "b11878817729561f0d808443207d16da8e06aadd8b0fa7fcd62d26929a3b494c",
     "benchmarks/results/remaining-indicators/roofing-contracts.json": "c24495d59beef30de42eaf09461f214ff89cf9fa7797d74bd9701fb181baebf1",
     "benchmarks/results/remaining-indicators/scalperhurst-contracts.json": "49088bf1bbcab08c416cec9ae693854076266a6aa5ad662fdc18489fcb6d9572",
     "benchmarks/results/remaining-indicators/specialaverage-contracts.json": "2dfe676fa89b1943d6373b248182426168a70f6779acea994b0f5d5fb1475215",
@@ -10288,7 +10301,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "fdcfbacc8ca4b0afcc1733f55f0cfb182b3ffceca24fef40d505ef8b01b84a30",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "aac394c26ccd4852a7a92c271e3c6923da62fd5eb1963db9809b8be3540a9885",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
