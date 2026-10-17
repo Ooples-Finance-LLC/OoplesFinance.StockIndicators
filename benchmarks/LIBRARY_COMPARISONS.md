@@ -4311,3 +4311,6 @@ Ehlers Modified RSI, Modified Stochastic, Rocket RSI and Moving Average Differen
 
 
 FRAMA, Ehlers FRAMA, both Fisher Transform aliases and both Ehlers inverse-RSI Fisher facades now use shared incremental execution. Fisher normalization no longer retains a full intermediate history. Exact operation order, original ranges, odd-period overflow fallback, hidden nine-bar smoothing, alias defaults, components/source fallback and lifecycle are preserved. Validation: 94 unit cases, 24 parity cases, 161 discovery cases, 100 local GPU cases and four inventory checks passed. Forty-eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Universal Oscillator, Universal Trading Filter and Snake Universal Trading Filter now publish related outputs together through exact incremental kernels. Hidden nine-bar signal, distinct Snake output order, independent smoothing/RMS periods, wide arithmetic, finite parameter eligibility, components/source fallback and lifecycle are preserved. Validation: 64 unit cases, 12 parity cases, 162 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
