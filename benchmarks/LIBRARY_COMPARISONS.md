@@ -4302,3 +4302,6 @@ Ehlers AM Detector now publishes amplitude line and signal together through the 
 
 
 Ehlers Simple Derivative, Simple Clip, Simple Window and Triple Delay Detrender now publish related outputs together through exact incremental kernels. Independent periods, ignored Clip Length2, original open, RMS clipping, delay startup, wide arithmetic, components/source fallback and lifecycle are preserved. Validation: 73 unit cases, 16 parity cases, 158 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Stochastic Center of Gravity, Stochastic, Stochastic Cyber Cycle and Relative Vigor now reuse exact incremental kernels in shared execution. Hidden roofing periods, cyber alpha clamping including infinities, NaN fallback, wide candle ratios, related output slots, components/source fallback and lifecycle are preserved. Validation: 73 unit cases, 16 parity cases, 159 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

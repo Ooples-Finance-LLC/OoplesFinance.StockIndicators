@@ -1,0 +1,43 @@
+{
+  "batch": "ehlers-stochastic-vigor-shared-execution",
+  "types": [
+    "EhlersStochasticCenterOfGravityOscillator",
+    "EhlersStochastic",
+    "EhlersStochasticCyberCycle",
+    "EhlersRelativeVigorIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact stochastic gravity, roofing, cyber and vigor kernels; preserve hidden roofing periods, clamped cyber alpha including infinities, NaN fallback, wide candle ratios, related outputs, components/source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 73,
+    "fixture_passed": 16,
+    "discovery_passed": 159,
+    "gpu_passed": 100,
+    "contract_methods": 1500,
+    "hosted_methods": 1488,
+    "evidence": [
+      {
+        "file": "ehlersstochasticvigor-unit.trx.gz",
+        "passed_cases": 73,
+        "trx_sha256": "ff20a06f7e7b11251796dcf9217909dbd6b25c442084327050bb9874e2049e64"
+      },
+      {
+        "file": "ehlersstochasticvigor-fixture.trx.gz",
+        "passed_cases": 175,
+        "trx_sha256": "acf1e7b9f8d9b5941950c55aaf96830b9578c48ac93ac252975da8cf976dcad4"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersStochasticVigorBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersStochasticCenterOfGravityOscillator",
+      "EhlersStochastic",
+      "EhlersStochasticCyberCycle",
+      "EhlersRelativeVigorIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

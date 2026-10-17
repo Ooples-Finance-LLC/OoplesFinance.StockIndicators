@@ -110,6 +110,8 @@ internal static partial class ValuesBarExecution
             or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
             or EhlersAllPassPhaseShifter or EhlersCenterOfGravityOscillator or EhlersCenterofGravityOscillator or EhlersChebyshevLowPassFilter
             or EhlersSimpleDerivIndicator or EhlersSimpleClipIndicator or EhlersSimpleWindowIndicator or EhlersTripleDelayLineDetrender
+            or EhlersStochasticCenterOfGravityOscillator or EhlersStochastic or EhlersRelativeVigorIndex
+            or EhlersStochasticCyberCycle { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
             or EhlersAMDetector
             or EhlersKaufmanAdaptiveMovingAverage
             or EhlersSimpleCycleIndicator { Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -395,6 +397,10 @@ internal static partial class ValuesBarExecution
         EhlersSimpleClipIndicator filter => new GeneratedEhlersClipState(filter.Length1, filter.Length3, filter.SignalLength),
         EhlersSimpleWindowIndicator filter => new GeneratedEhlersSimpleWindowState(filter.Length),
         EhlersTripleDelayLineDetrender filter => new GeneratedTripleDelayState(filter.Length),
+        EhlersStochasticCenterOfGravityOscillator oscillator => new GeneratedStochasticGravityState(oscillator.Length, count),
+        EhlersStochastic oscillator => new GeneratedRoofingStochasticState(oscillator.Length),
+        EhlersStochasticCyberCycle oscillator => new GeneratedStochasticCyberState(oscillator.Length, Math.Max(.01, Math.Min(.99, oscillator.Alpha))),
+        EhlersRelativeVigorIndex oscillator => new GeneratedEhlersVigorState(oscillator.Length, oscillator.SignalLength, count),
         EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
@@ -3366,6 +3372,48 @@ internal static partial class ValuesBarExecution
         {
             var value = _window.Next(bar.Close, true);
             outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedStochasticGravityState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly StochasticGravityWindow _window = new(length, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRoofingStochasticState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly RoofingStochasticWindow _window = new(MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, 48, 10, length, false);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedStochasticCyberState(int length, double alpha) : IMultiOutputState, IDisposable
+    {
+        private readonly StochasticCyberWindow _window = new(length, alpha);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedEhlersVigorState(int length, int signal, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly EhlersVigorWindow _window = new(MovingAvgType.SimpleMovingAverage, length, signal, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, true);
+            outputs[0] = value.Value;
             outputs[1] = value.Signal;
         }
         public void Dispose() => _window.Dispose();
