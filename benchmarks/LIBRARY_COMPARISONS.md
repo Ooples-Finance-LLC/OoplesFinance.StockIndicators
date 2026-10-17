@@ -4329,3 +4329,6 @@ Ehlers correlation trend, cycle, angle and market-state indicators now reuse exa
 
 
 Ehlers Hurst coefficient, noise elimination and Spearman rank indicators now reuse exact kernels and chronological scratch buffers in shared execution. Zero padding, ties, independent Hurst periods, noise scratch-overflow fallback, selected sources and lifecycle are preserved. Validation: 46 unit cases, 12 parity cases, 167 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers autocorrelation, periodogram, adaptive band-pass and zero-crossing cycle indicators now reuse exact incremental kernels in shared execution. Adaptive outputs publish together; lag clamps, bandwidth validation, selected sources and lifecycle are preserved. Validation: 73 unit cases, 16 parity cases, 168 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

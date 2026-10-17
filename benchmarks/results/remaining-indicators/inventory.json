@@ -1770,7 +1770,13 @@
       "options": [
         "EhlersAdaptiveBandPassFilterSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAdaptiveBandPassFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/autocorrelationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveCenterOfGravityOscillator",
@@ -1894,14 +1900,26 @@
       "options": [
         "EhlersAutoCorrelationIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAutoCorrelationIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/autocorrelationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAutoCorrelationPeriodogram",
       "options": [
         "EhlersAutoCorrelationPeriodogramSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAutoCorrelationPeriodogramSpecOptions": [
+          "benchmarks/results/remaining-indicators/autocorrelationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAutoCorrelationReversals",
@@ -3288,7 +3306,13 @@
       "options": [
         "EhlersZeroCrossingsDominantCycleSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersZeroCrossingsDominantCycleSpecOptions": [
+          "benchmarks/results/remaining-indicators/autocorrelationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersZeroLagExponentialMovingAverage",
@@ -10466,6 +10490,7 @@
     "benchmarks/results/remaining-indicators/aroondpo-contracts.json": "4deb075f23f91bc5220164017b006419fa196497527ff959d95cfc4cc2d72e87",
     "benchmarks/results/remaining-indicators/atrderived-contracts.json": "2c5b26ee352d3b87da89069d04892635d399f8908dc0b93a276ef2b9013d4327",
     "benchmarks/results/remaining-indicators/atrfilter-contracts.json": "6db02e84d16669f802386ef258648ad2d900c1c5a6edd8ba4bb4bcc5fbfe852f",
+    "benchmarks/results/remaining-indicators/autocorrelationfamily-contracts.json": "94952e57c5438f4ceccc70c5dd0c55368ecf3fb538de61b5345f6fe924df70ac",
     "benchmarks/results/remaining-indicators/autolinepair-contracts.json": "f9db21d1898a6ff6e48a671747977cadd7ab9a9976242121a00e6c73ab5c292b",
     "benchmarks/results/remaining-indicators/autonomous-contracts.json": "60e245417b0ff7046fe6c8bdac3f8d196849e4df65a48aeb5157d07d83e2ce83",
     "benchmarks/results/remaining-indicators/autopair-contracts.json": "e9fea1f28919bfe38f99b347171c1e7590f09892df3ef54f1ae37b0e5771ac23",
@@ -10817,7 +10842,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "df934aa21d0d80fd17d8c95965ac17842ae05c19ec6efedeb521e6c23bc85bf6",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "e7eed77f7780999f6ac48cfb0f7bfcd470af54989b13a007753dfbc58502a9fc",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
