@@ -100,6 +100,8 @@ internal static partial class ValuesBarExecution
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
             or StatisticalVolatility or VolatilityQualityIndex
             or VolatilityRatio or VolatilitySwitchIndicator
+            or VolatilityStop { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
+            or WellesWilderVolatilitySystem { Factor: > double.NegativeInfinity and < double.PositiveInfinity }
             or CloseToCloseVolatility or DownsideDeviation
             or PrimeNumberOscillator or PrimeNumberBands
             or EfficientTrendStepChannel
@@ -340,6 +342,8 @@ internal static partial class ValuesBarExecution
         ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
         StatisticalVolatility volatility => new GeneratedStatisticalVolatilityState(volatility.Length1, volatility.Length2),
         VolatilityQualityIndex volatility => new GeneratedVolatilityQualityState(volatility.FastLength, volatility.SlowLength),
+        VolatilityStop volatility => new GeneratedVolatilityStopState(volatility.Length, volatility.Multiplier),
+        WellesWilderVolatilitySystem volatility => new GeneratedWilderVolatilityState(volatility.Length1, volatility.Length2, volatility.Factor),
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
         VolatilitySwitchIndicator volatility => new GeneratedVolatilitySwitchState(volatility.Length),
         CloseToCloseVolatility volatility => new GeneratedCloseVolatilityState(Math.Max(1, volatility.Length), count),
@@ -3099,6 +3103,22 @@ internal static partial class ValuesBarExecution
             outputs[0] = point.Line; outputs[1] = point.Fast; outputs[2] = point.Slow;
         }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedVolatilityStopState(int length, double multiplier) : IIndicatorState, IDisposable
+    {
+        private readonly VolatilityStopWindow _window = new(length, multiplier);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedWilderVolatilityState(int trend, int range, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly WilderVolatilityWindow _window = new(MovingAvgType.ExponentialMovingAverage, trend, range, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedVolatilityRatioState(int length) : IIndicatorState
