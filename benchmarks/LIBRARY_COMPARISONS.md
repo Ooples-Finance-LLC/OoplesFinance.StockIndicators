@@ -18,11 +18,11 @@ Verified implementation batches currently cover Wilder aliases, price averages, 
 
 Nineteen immutable candidates provide 480 prepared timing cases. Their queue waits for the existing shared-rollout queue and a guarded natural quiet window. No measurements for these candidates have been archived, and no latency or allocation improvement is claimed. The shared fixture lifecycle has 161 selected comparator cases passing, including 12 BenchmarkDotNet discovery cases covering all 280 timing combinations; 201 selected generated-state cases and 100 local GPU cases also passed ([maintenance evidence](results/remaining-indicators/fixture-maintenance.json)). The separate Kvo/KlingerVolumeOscillator/UltimateOscillator candidate has 38 focused unit and 100 GPU cases passing; its first fixture run aborted after 23 passes, and five further cases passed on resumption and two remaining cases are being completed separately before it enters the timing queue. Existing competitor evidence is retained; incompatible startup conventions are not substituted as baselines. Remaining implementation, measurement review, and full-inventory qualification are still open.
 
-## Shared rollout status (2026-10-15)
+## Shared rollout status (2026-10-16)
 
-The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 267 with recorded native comparisons, 119 with builder-only measurements, and 15 snapshot-only mappings. Of the 267 native-comparison mappings, 243 have both standard sizes in their current catalog rows; 24 lack either 1k or 10k coverage. These are coverage counts, not speedup counts. Two stale KAMA qualification labels now agree with their latest builder-only rows; historical native measurements remain retained. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
+The rollout is **incomplete**. The [saved catalog](results/shared-rollout/catalog.json.gz) covers 401 mappings: 269 with recorded native comparisons, 117 with builder-only measurements, and 15 snapshot-only mappings. Of the 269 native-comparison mappings, 245 have both standard sizes in their current catalog rows; 24 lack either 1k or 10k coverage. These are coverage counts, not speedup counts. Two stale KAMA qualification labels now agree with their latest builder-only rows; historical native measurements remain retained. Historical evidence records 102 mappings with clear wins at both 1,000 and 10,000 bars in Full and LatestOnly. The earlier count of 106 also includes 4 mappings with only one recorded size. Neither count proves current-head performance.
 
-All 134 catalog-label gaps have prepared comparisons: 119 builder-only mappings and 15 snapshot mappings. A supplemental audit also identified the 24 partial-size native mappings: Connors fills one through its own candidate, and eight additional fixtures cover the other 23 with 92 missing-size CPU cases. All 23 fixture cases and 100 GPU cases passed. The queue now has 56 preserved stages. The [initial queue audit](results/shared-rollout/prepared-queue-coverage.json) covers its first 46 stages; the [size audit and validation](results/shared-rollout/missing-native-sizes/contracts/summary.json) records the additional coverage and the 29 saved reports checked for reuse. Previously measured native sizes are excluded from the new stages. No queued stage has been archived yet. Fixture preparation covers these gaps; measurements, result review and qualification remain unfinished.
+All 132 remaining catalog-label gaps have prepared comparisons: 117 builder-only mappings and 15 snapshot mappings. A supplemental audit also identified the 24 partial-size native mappings: Connors fills one through its own candidate, and eight additional fixtures cover the other 23 with 92 missing-size CPU cases. All 23 fixture cases and 100 GPU cases passed. The queue now has 56 preserved stages. The [initial queue audit](results/shared-rollout/prepared-queue-coverage.json) covers its first 46 stages; the [size audit and validation](results/shared-rollout/missing-native-sizes/contracts/summary.json) records the additional coverage and the 29 saved reports checked for reuse. Previously measured native sizes are excluded from the new stages. Five queued stages are archived: pivot columns, Rickshaw, Asin, SMA and Skender RSI/ADX. The two newly cataloged Skender mappings are measured gaps, with no clear latency wins; cross-run worker comparisons remain separate from same-run qualification. Fixture preparation covers these gaps; measurements, result review and qualification remain unfinished.
 
 ### Tillson polynomial candidate (2026-10-15)
 
@@ -4341,3 +4341,72 @@ Five Ehlers adaptive V2 RSI, stochastic, commodity and Fisher facades now share 
 
 
 The preserved autocorrelation, Adaptive V1 and Adaptive V2 candidates are combined in one shared-execution tree. Three focused mixed-root cases, 170 discovery cases, 100 local GPU cases and four inventory checks passed on the integrated source. Existing independent numerical and parity evidence is retained from each verified candidate; no expensive parity or competitor timings were replayed. Exact candidate references and fresh checks are recorded in results/remaining-indicators/adaptive-integration-verification.json. Performance qualification remains pending.
+
+### Preserved pivot columns against the cached baseline (2026-10-16)
+
+The preserved 033e31ab pivot-column candidate completed the four builder measurements with no detected interference. The saved native measurements were reused on matching recorded hardware/runtime. All four current builder confidence intervals are below the saved fastest-native interval. These are cross-run comparisons, not same-run qualification; the two interrupted attempts are excluded.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 127.602 | 139,236 | 0.269 | 0.817 |
+| 1,000 | LatestOnly | 119.624 | 90,487 | 0.259 | 0.766 |
+| 10,000 | Full | 1,088.500 | 1,219,718 | 0.228 | 0.606 |
+| 10,000 | LatestOnly | 1,061.522 | 738,594 | 0.225 | 0.591 |
+
+Evidence: `results/shared-rollout/rolling-pivot-shared-cpu/reused-baseline-columns/` contains raw timing, cached-baseline comparisons, immutable candidate hashes and quiet-process receipts. No native or competitor timing was repeated.
+
+### Preserved Rickshaw workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. The current means are 0.202-0.428 times the saved builder means. Only 10k LatestOnly has a confidence interval below the saved fastest-native interval; 1k Full remains slower, and the other two cases do not establish a latency win. The native baseline was reused, so comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: |
+| 1,000 | Full | 34.323 | 61,237 | 1.448 |
+| 1,000 | LatestOnly | 23.806 | 12,203 | 1.005 |
+| 10,000 | Full | 210.944 | 565,628 | 0.994 |
+| 10,000 | LatestOnly | 158.305 | 84,215 | 0.746 |
+
+Evidence: `results/shared-rollout/rickshaw-shared-cpu/reused-baseline-workers/`. Preserve the 1k Full gap and the two inconclusive cases for further optimization; this result does not qualify every Rickshaw workload as faster than native.
+
+### Preserved Asin workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. All four remain slower than the cached fastest native mean; none establishes a performance win. Native measurements were reused on matching recorded hardware/runtime, so these are cross-run comparisons.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 17.160 | 66,567 | 1.009 | 3.327 |
+| 1,000 | LatestOnly | 11.957 | 17,971 | 0.913 | 2.318 |
+| 10,000 | Full | 89.567 | 642,974 | 0.913 | 3.041 |
+| 10,000 | LatestOnly | 45.931 | 161,988 | 1.192 | 1.559 |
+
+Evidence: `results/shared-rollout/asin-shared-cpu/reused-baseline-workers/`. Recording accepts a missing final process command line only after matching the previously proven PID, creation time and monotonic CPU total; changed identities, unexpected commands and background CPU limits remain enforced. The completed measurement was recorded without rerunning it.
+
+### Preserved SMA workers against the cached baseline (2026-10-16)
+
+Four builder measurements completed without detected interference. All four remain slower than the saved fastest TALib native mean and none establishes a latency win. Identical builder code and inputs are timed once under the TALib operation label; cached native results are reused on matching recorded hardware/runtime. Comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 9.615 | 57,741 | 1.134 | 3.884 |
+| 1,000 | LatestOnly | 6.746 | 9,035 | 1.019 | 2.725 |
+| 10,000 | Full | 66.570 | 562,618 | 0.890 | 5.757 |
+| 10,000 | LatestOnly | 20.302 | 81,631 | 1.035 | 1.756 |
+
+Evidence: `results/shared-rollout/sma-cpu/reused-baseline-workers/`. These gaps remain open; no competitor measurement was repeated.
+
+### Skender RSI/ADX first direct-native baseline (2026-10-16)
+
+All 16 native/builder cases completed in one run without detected interference. Native serial and full-prefix parallel results are now cached for reuse. Every builder case remains slower than the fastest native mean; no workload qualifies as a latency win. The interrupted first attempt is excluded.
+
+| Operation | Bars | Builder history | Mean (us) | Managed bytes | Builder / fastest native |
+| --- | ---: | --- | ---: | ---: | ---: |
+| Skender.GetRsi | 1,000 | Full | 243.886 | 66,401 | 4.149 |
+| Skender.GetRsi | 1,000 | LatestOnly | 225.026 | 17,643 | 3.828 |
+| Skender.GetRsi | 10,000 | Full | 2,403.441 | 642,914 | 2.650 |
+| Skender.GetRsi | 10,000 | LatestOnly | 2,379.979 | 161,784 | 2.624 |
+| Skender.GetAdx | 1,000 | Full | 1,475.513 | 116,590 | 12.400 |
+| Skender.GetAdx | 1,000 | LatestOnly | 1,715.316 | 67,834 | 14.415 |
+| Skender.GetAdx | 10,000 | Full | 16,911.649 | 1,126,086 | 11.838 |
+| Skender.GetAdx | 10,000 | LatestOnly | 16,881.285 | 644,989 | 11.817 |
+
+Evidence: `results/shared-rollout/skender-strength/first-native-baseline/`. Comparisons are from the same run on the preserved 2e533ff2 candidate. RSI and ADX latency gaps remain open; retain these native baselines when measuring later candidates.

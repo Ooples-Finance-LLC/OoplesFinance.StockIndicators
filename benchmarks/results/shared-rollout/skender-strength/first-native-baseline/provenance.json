@@ -1,0 +1,6 @@
+{
+  "base_commit": "2e533ff229a266ef6b389cff9d1c3c53307f77f8",
+  "purpose": "First direct-native serial and full-prefix parallel baselines; preserve once and reuse. All four arms measured in one run. Catalog promotion requires separate review.",
+  "monitor_limitations": "Process identity and CPU samples cannot exclude brief unobserved activity or non-CPU contention.",
+  "validation": "19 comparator and 100 GPU cases passed, with all 356 affected cases passing again after shared native support consolidation; no production source changes."
+}

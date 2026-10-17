@@ -1,0 +1,18 @@
+{
+  "base_commit": "29c34f2391930ba0194f0721be2771ae5aa679c8",
+  "source_files_sha256": {
+    "src/Indicators/RickshawManCandle.cs": "cf245a029f7e90794a0efbe69fb9acbae23cd8b1f4f20eaaa4fc93fb604d3da6",
+    "src/Indicators/RickshawGridState.cs": "a899dfe1d74e1439466506513caf72ae42a49cfc364f5b9d3a111fbad8a1d247",
+    "src/Indicators/ValuesBarExecution.Rickshaw.cs": "4aefbe7300928a69a40234a04325663c088d163ced52732fe48b78ec31222b0a",
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs": "6253f42dbc02b13ab90b070ab872c0f7bfbce170bad425d97710b801dea04418",
+    "src/Indicators/ValuesBarExecution.BoundedBatch.cs": "c1aea8d7c38efaf63d5bcd7db9f774fc29adbc72a1600bbdd9346e55513c1752"
+  },
+  "binary_sha256": {
+    "OoplesFinance.StockIndicators.dll": "494e7388d19759fd10a602c12c26fcd18b9a989eb2cb302237b72b0935453536",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "6ce7e1712c28f95707550fdb89dc4f606852c45264ff6c05cbc36256de013ad9"
+  },
+  "saved_baseline": "benchmarks/results/shared-rollout/rickshaw-shared-cpu/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRickshawBenchmarks-report-full-compressed.json",
+  "filter": "*SharedRickshawBenchmarks*Builder*",
+  "interpretation": "Saved-baseline cross-run comparison, not same-run qualification. Native methods were not timed; existing setup correctness checks still execute. Fixture inputs, output ownership, native methods and worker settings are unchanged. Same recorded runtime and hardware. The monitor includes .NET hosts, reusable MSBuild nodes, compiler processes and their live descendants. Existing processes were permitted only after at least 60 seconds of low CPU activity. Combined background CPU was limited to 1% of one logical core plus 0.1 CPU seconds of timer allowance, checked across each consecutive sample and the entire window. New process identities or activity above that bound invalidate the run. Process identities and CPU totals were sampled every ten seconds and at completion. Brief unobserved activity and non-CPU contention cannot be excluded.",
+  "validation": "18 focused unit, 6 Rickshaw comparator and 100 local GPU cases passed with zero skips."
+}
