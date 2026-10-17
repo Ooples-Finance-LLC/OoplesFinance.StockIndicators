@@ -2534,7 +2534,13 @@
       "options": [
         "EhlersMedianAverageAdaptiveFilterSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersMedianAverageAdaptiveFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/median-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersMesaPredictIndicatorV1",
@@ -2631,14 +2637,26 @@
       "options": [
         "EhlersRecursiveMedianFilterSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersRecursiveMedianFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/median-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersRecursiveMedianOscillator",
       "options": [
         "EhlersRecursiveMedianOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersRecursiveMedianOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/median-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersReflexIndicator",
@@ -10102,6 +10120,7 @@
     "benchmarks/results/remaining-indicators/keltnerchannels-contracts.json": "5fb932ab524ad3414f8c18e5eca9b94deb28408266d9f40b26b6e01763cfb227",
     "benchmarks/results/remaining-indicators/laguerre-contracts.json": "2718bb13a5a667fabb6789e6a5816b79c155eb08eec10f5a5c59858057d6b267",
     "benchmarks/results/remaining-indicators/leastsquares-contracts.json": "7e007c555d499b0bccb58e0205ae1d2d9a133a36b3e651d0160039a8c3d0337e",
+    "benchmarks/results/remaining-indicators/median-contracts.json": "b18775b513e4c448d9c1873727276e24b1162a57aeaf82856d0596236c745af1",
     "benchmarks/results/remaining-indicators/moneyflowpercent-contracts.json": "7fe650d2ef69da7a28d6f133eeda224b7701ba490cd24be0b9aca9bfba5a54e6",
     "benchmarks/results/remaining-indicators/onelc-contracts.json": "37585e178c05f37e7d3660483fe89469d00df864824585ca5c83955f9984571b",
     "benchmarks/results/remaining-indicators/openclose-contracts.json": "8f247f405099edc945ebf4a999600d70f8d288601d219434b212ba9dcda77d12",
@@ -10381,7 +10400,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "5c0f2f27d1d1a4be51258c253aece0ad6a1f3b640cdd535d253ddd2a2e1ce2e8",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "fe941b2c7dfbf8caf12422e803d55d75244f9133da354e6997d991947bf227e0",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
