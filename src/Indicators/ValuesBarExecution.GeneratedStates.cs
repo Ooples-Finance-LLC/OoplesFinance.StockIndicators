@@ -143,6 +143,10 @@ internal static partial class ValuesBarExecution
             or EhlersCorrelationTrendIndicator or EhlersCorrelationCycleIndicator or EhlersCorrelationAngleIndicator or EhlersMarketStateIndicator
             or EhlersHurstCoefficient or EhlersSpearmanRankIndicator
             or EhlersNoiseEliminationTechnology { Length: < int.MaxValue }
+            or EhlersAdaptiveRsiFisherTransformV1
+            or EhlersAdaptiveRelativeStrengthIndexV1 { CycPart: > 0 and < double.PositiveInfinity }
+            or EhlersAdaptiveStochasticIndicatorV1 { CycPart: > 0 and < double.PositiveInfinity }
+            or EhlersAdaptiveCommodityChannelIndexV1 { CycPart: > 0 and < double.PositiveInfinity, Constant: > 0 and < double.PositiveInfinity }
             or EhlersEvenBetterSineWaveIndicator
             or EhlersReverseEmaIndicatorV1 { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
             or EhlersReverseEmaIndicatorV2 { TrendAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity, CycleAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
@@ -455,6 +459,10 @@ internal static partial class ValuesBarExecution
         EhlersHurstCoefficient hurst => new GeneratedHurstCoefficientState(hurst.Length1, hurst.Length2),
         EhlersNoiseEliminationTechnology noise => new GeneratedNoiseEliminationState(noise.Length),
         EhlersSpearmanRankIndicator rank => new GeneratedChronologicalSpearmanState(rank.Length),
+        EhlersAdaptiveRelativeStrengthIndexV1 rsi => new GeneratedAdaptiveRsiV1State(rsi.CycPart, false),
+        EhlersAdaptiveRsiFisherTransformV1 => new GeneratedAdaptiveRsiV1State(.5, true),
+        EhlersAdaptiveStochasticIndicatorV1 stochastic => new GeneratedAdaptiveRangeV1State(stochastic.CycPart, false, .015),
+        EhlersAdaptiveCommodityChannelIndexV1 commodity => new GeneratedAdaptiveRangeV1State(commodity.CycPart, true, commodity.Constant),
         EhlersEvenBetterSineWaveIndicator sine => new GeneratedEvenBetterSineState(sine.Length1, sine.Length2),
         EhlersReverseEmaIndicatorV1 reverse => new GeneratedReverseEmaState(reverse.Alpha),
         EhlersReverseEmaIndicatorV2 reverse => new GeneratedReverseEmaPairState(reverse.TrendAlpha, reverse.CycleAlpha),
@@ -3606,6 +3614,33 @@ internal static partial class ValuesBarExecution
             return result;
         }
         public void Dispose() => _values.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveRsiV1State(double fraction, bool fisher) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveRsiV1Window _window = new(fraction, fisher);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Value;
+            if (!fisher) outputs[1] = value.Average;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAdaptiveRangeV1State(double fraction, bool commodity, double constant) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveRangeV1Window _window = new(fraction, commodity, constant);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var price = commodity ? CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close) : bar.Close;
+            var value = _window.Next(price, bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Value;
+            outputs[1] = value.Average;
+        }
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedEvenBetterSineState(int high, int low) : IMultiOutputState, IDisposable
