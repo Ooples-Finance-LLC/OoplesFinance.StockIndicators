@@ -4305,3 +4305,6 @@ Ehlers Simple Derivative, Simple Clip, Simple Window and Triple Delay Detrender 
 
 
 Ehlers Stochastic Center of Gravity, Stochastic, Stochastic Cyber Cycle and Relative Vigor now reuse exact incremental kernels in shared execution. Hidden roofing periods, cyber alpha clamping including infinities, NaN fallback, wide candle ratios, related output slots, components/source fallback and lifecycle are preserved. Validation: 73 unit cases, 16 parity cases, 159 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Modified RSI, Modified Stochastic, Rocket RSI and Moving Average Difference now reuse exact incremental kernels in shared execution. Independent periods, wide arithmetic, related outputs, finite Rocket option eligibility, components/source fallback and lifecycle are preserved. Validation: 88 unit cases, 16 parity cases, 160 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
