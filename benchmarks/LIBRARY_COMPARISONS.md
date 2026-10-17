@@ -4317,3 +4317,6 @@ Ehlers Universal Oscillator, Universal Trading Filter and Snake Universal Tradin
 
 
 Ehlers Voss Predictive Filter now publishes prediction and filter outputs together through its exact incremental kernel. Phase rescue and overflow fallback, prediction-order clamps, startup, source selection and lifecycle are preserved. Validation: 29 unit cases, four parity cases, 163 discovery cases, 100 local GPU cases and four inventory checks passed. Eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers reverse EMA V1/V2 and Even Better Sine Wave now reuse exact incremental kernels in shared execution. Independent cycle/trend outputs, alpha clamps including infinity, NaN fallback, sine normalization, source selection and lifecycle are preserved. Validation: 30 unit cases, 12 parity cases, 164 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

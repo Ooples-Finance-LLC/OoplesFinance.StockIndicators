@@ -128,6 +128,9 @@ internal static partial class ValuesBarExecution
             or EhlersRocketRelativeStrengthIndex { ObosLevel: > double.NegativeInfinity and < double.PositiveInfinity, Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or Frama { Length: < int.MaxValue } or EhlersFrama { Length: < int.MaxValue }
             or FisherTransform or EhlersFisherTransform or EhlersInverseFisherTransform or EhlersRelativeStrengthIndexInverseFisherTransform
+            or EhlersEvenBetterSineWaveIndicator
+            or EhlersReverseEmaIndicatorV1 { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
+            or EhlersReverseEmaIndicatorV2 { TrendAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity, CycleAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
             or EhlersUniversalOscillator
             or EhlersUniversalTradingFilter { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or EhlersSnakeUniversalTradingFilter { Bw: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -430,6 +433,9 @@ internal static partial class ValuesBarExecution
         EhlersFisherTransform oscillator => new GeneratedFisherState(oscillator.Length),
         EhlersInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, 9, count),
         EhlersRelativeStrengthIndexInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, oscillator.SignalLength, count),
+        EhlersEvenBetterSineWaveIndicator sine => new GeneratedEvenBetterSineState(sine.Length1, sine.Length2),
+        EhlersReverseEmaIndicatorV1 reverse => new GeneratedReverseEmaState(reverse.Alpha),
+        EhlersReverseEmaIndicatorV2 reverse => new GeneratedReverseEmaPairState(reverse.TrendAlpha, reverse.CycleAlpha),
         EhlersUniversalOscillator oscillator => new GeneratedUniversalOscillatorState(oscillator.Length),
         EhlersUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Mult, false),
         EhlersSnakeUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Bw, true),
@@ -3524,6 +3530,35 @@ internal static partial class ValuesBarExecution
             return Math.Tanh(_average.Next(new StrengthValue(value), true).Mantissa);
         }
         public void Dispose() { _rsi.Dispose(); _average.Dispose(); }
+    }
+
+    private sealed class GeneratedEvenBetterSineState(int high, int low) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.EvenBetterSineWaveKernel _window = new(high, low);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedReverseEmaState(double alpha) : IMultiOutputState, IDisposable
+    {
+        private readonly ReverseEmaWindow _window = new(alpha);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedReverseEmaPairState(double trend, double cycle) : IMultiOutputState, IDisposable
+    {
+        private readonly ReverseEmaWindow _trend = new(trend), _cycle = new(cycle);
+        public void Reset() { _trend.Reset(); _cycle.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var trendValue = _trend.Next(bar.Close, true);
+            outputs[0] = _cycle.Next(bar.Close, true);
+            outputs[1] = trendValue;
+        }
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedUniversalOscillatorState(int length) : IMultiOutputState, IDisposable
