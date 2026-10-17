@@ -109,6 +109,8 @@ internal static partial class ValuesBarExecution
             or ErgodicCandlestickOscillator or ErgodicMovingAverageConvergenceDivergence
             or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
             or EhlersAllPassPhaseShifter or EhlersCenterOfGravityOscillator or EhlersCenterofGravityOscillator or EhlersChebyshevLowPassFilter
+            or EhlersKaufmanAdaptiveMovingAverage
+            or EhlersSimpleCycleIndicator { Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
             or EhlersFilter or EhlersAverageErrorFilter or EhlersDistanceCoefficientFilter or EhlersReflexIndicator or EhlersTrendflexIndicator
             or EhlersDeviationScaledMovingAverage { Length: <= 1_073_741_823 }
             or EhlersFisherizedDeviationScaledOscillator or EhlersDeviationScaledSuperSmoother
@@ -387,6 +389,8 @@ internal static partial class ValuesBarExecution
         EhlersCenterOfGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
         EhlersCenterofGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
         EhlersChebyshevLowPassFilter => new GeneratedChebyshevWaveState(),
+        EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
+        EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
         EhlersFilter filter => new GeneratedEhlersDistanceState(filter.Length),
         EhlersAverageErrorFilter filter => new GeneratedAverageErrorState(filter.Length),
         EhlersDistanceCoefficientFilter filter => new GeneratedDistanceCoefficientState(filter.Length),
@@ -3306,6 +3310,22 @@ internal static partial class ValuesBarExecution
             for (var wave = 0; wave < _windows.Length; wave++) outputs[wave] = _windows[wave].Next(bar.Close, true);
         }
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedEhlersKaufmanState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly EhlersKaufmanWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedSimpleCycleIndicatorState(double alpha) : IIndicatorState, IDisposable
+    {
+        private readonly SimpleCycleIndicatorWindow _window = new(alpha);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedEhlersDistanceState(int length) : IIndicatorState, IDisposable

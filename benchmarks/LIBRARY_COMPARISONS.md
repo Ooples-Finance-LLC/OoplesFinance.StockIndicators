@@ -4293,3 +4293,6 @@ Five Ehlers filters (Filter, Average Error, Distance Coefficient, Reflex and Tre
 
 
 Ehlers All-Pass Phase Shifter, both Center of Gravity aliases and all nine Chebyshev Low-Pass outputs now reuse exact kernels in shared execution. Phase option clamping/hidden q, alias defaults, ignored Chebyshev options, output slots, source/component fallback and lifecycle are preserved. Validation: 52 unit cases, 16 parity cases, 155 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Kaufman Adaptive Moving Average and Simple Cycle now reuse exact incremental kernels in shared execution. Travel/gain arithmetic, cycle startup, wide coefficients, nonfinite-alpha fallback, clamped periods, sources and lifecycle are preserved. Validation: 25 unit cases, 8 parity cases, 156 discovery cases, 100 local GPU cases and four inventory checks passed. Sixteen timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
