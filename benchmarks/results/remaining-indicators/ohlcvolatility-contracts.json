@@ -32,6 +32,24 @@
       "failed_cases": 2,
       "trx_sha256": "5b95f45b8b91b62db84f0e03f734ad6e217552e1264b4af44225c16324bf56be",
       "interpretation": "The unfillable-window shortcut initially suppressed checked-arithmetic overflow for extreme Parkinson and Yang-Zhang periods. Those ranges now retain the legacy fallback. Boundary cases were added and all affected checks rerun on corrected production."
+    },
+    "integration": {
+      "base": "dd83e2a1",
+      "integrated_candidate": "76d94249",
+      "evidence": [
+        {
+          "file": "wave-ohlc-integration-unit.trx.gz",
+          "passed_cases": 49,
+          "trx_sha256": "40599b60185aee26829f8a5a5ab3a5b91adc4e99a132411afc36aa60d0c94905"
+        },
+        {
+          "file": "wave-ohlc-integration-fixture.trx.gz",
+          "passed_cases": 162,
+          "trx_sha256": "2f6d09b872653257c64c67ee3edb55edbe73402d884c0ae7cad147034483b6c5"
+        }
+      ],
+      "gpu_source_sha256": "76191232e5cc7548340bc5a6dc8fd583f573b97be5d947126926561e860ef3a4",
+      "interpretation": "Integrated Wave state matches the preserved candidate exactly. Prior generated states and the domain prepass remain unchanged. Revalidated 9 Wave and 40 OHLC unit cases, 16 parity and 146 discovery cases, and 100 GPU cases. The five unchanged Wave numerical cases retain their original archived evidence."
     }
   },
   "benchmark_fixture": {
