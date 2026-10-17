@@ -4410,3 +4410,11 @@ All 16 native/builder cases completed in one run without detected interference. 
 | Skender.GetAdx | 10,000 | LatestOnly | 16,881.285 | 644,989 | 11.817 |
 
 Evidence: `results/shared-rollout/skender-strength/first-native-baseline/`. Comparisons are from the same run on the preserved 2e533ff2 candidate. RSI and ADX latency gaps remain open; retain these native baselines when measuring later candidates.
+
+### Remaining-indicator evidence checkpoint (2026-10-17)
+
+The delivered [inventory](results/remaining-indicators/inventory.json) now records historical contract receipts for 399 of 830 batch formulas; 431 retain `pending-assessment`. These are formula-coverage counts, not performance wins or a count of distinct public facades. Pending rows still need reconciliation against inherited work, and local staged candidates are not counted as delivered verification.
+
+The latest [adaptive integration evidence](results/remaining-indicators/adaptive-integration-verification.json) combines autocorrelation and Adaptive V1/V2 execution: three fresh mixed-root tests, 170 discovery cases, 100 local GPU cases and four inventory checks passed. Its per-family numerical/parity results are reused from the preserved candidates named in that receipt. The subsequent base merge changed report/evidence files and the archived-verifier duplication exclusion, with no production or test changes.
+
+Earlier candidate counts and fixture-progress notes above describe their recorded checkpoints. They do not establish current whole-library readiness. Performance qualification remains pending; existing native competitor baselines are retained for reuse, and this update adds no timing measurements or speedup claims.
