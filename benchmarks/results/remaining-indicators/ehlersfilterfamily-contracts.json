@@ -1,0 +1,45 @@
+{
+  "batch": "ehlers-filter-family-shared-execution",
+  "types": [
+    "EhlersFilter",
+    "EhlersAverageErrorFilter",
+    "EhlersDistanceCoefficientFilter",
+    "EhlersReflexIndicator",
+    "EhlersTrendflexIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact distance, average-error, coefficient and reflex/trendflex windows; preserve hidden lag five, finite input validation, period clamping, source fallback, warmup and lifecycle.",
+  "verification": {
+    "unit_passed": 63,
+    "fixture_passed": 20,
+    "discovery_passed": 154,
+    "gpu_passed": 100,
+    "contract_methods": 1495,
+    "hosted_methods": 1483,
+    "evidence": [
+      {
+        "file": "ehlersfilterfamily-unit.trx.gz",
+        "passed_cases": 63,
+        "trx_sha256": "bae841a708439b48e7cbc68c3b3393151e164c2467b7df8bce3dfdea7426a281"
+      },
+      {
+        "file": "ehlersfilterfamily-fixture.trx.gz",
+        "passed_cases": 174,
+        "trx_sha256": "616b5460b52e51972224bbbaf473952afe8c6822d20617d097093e20cbafe95b"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersFilterFamilyBenchmarks",
+    "cases": 40,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersFilter",
+      "EhlersAverageErrorFilter",
+      "EhlersDistanceCoefficientFilter",
+      "EhlersReflexIndicator",
+      "EhlersTrendflexIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

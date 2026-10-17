@@ -1903,7 +1903,13 @@
       "options": [
         "EhlersAverageErrorFilterSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAverageErrorFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersfilterfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersBandPassFilterV1",
@@ -2148,7 +2154,13 @@
       "options": [
         "EhlersDistanceCoefficientFilterSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersDistanceCoefficientFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersfilterfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersDominantCycleTunedBypassFilter",
@@ -2210,7 +2222,13 @@
       "options": [
         "EhlersFilterSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersFilterSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersfilterfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersFiniteImpulseResponseFilter",
@@ -2694,7 +2712,15 @@
         "EhlersReflexIndicatorSpecOptions",
         "EhlersReflexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersReflexIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersfilterfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": [
+        "EhlersReflexSpecOptions"
+      ]
     },
     {
       "indicator": "EhlersRelativeStrengthIndexInverseFisherTransform",
@@ -2946,7 +2972,15 @@
         "EhlersTrendflexIndicatorSpecOptions",
         "EhlersTrendflexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersTrendflexIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersfilterfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": [
+        "EhlersTrendflexSpecOptions"
+      ]
     },
     {
       "indicator": "EhlersTriangleMovingAverage",
@@ -10231,6 +10265,7 @@
     "benchmarks/results/remaining-indicators/donchianwidth-contracts.json": "92d60aa879465b53fcaab207904499ae882241bd08c78505cc3fe49fde2a73b2",
     "benchmarks/results/remaining-indicators/doublerecurrence-contracts.json": "28fd27a3f19ae108a385564ccb4d5b5833812382654c70315b8613b605c9c6cd",
     "benchmarks/results/remaining-indicators/ehlersfilter-contracts.json": "eeec1b23fc1c3ce3a7a9c4382da4804f23247f19eb054d90022dcc95efdd854a",
+    "benchmarks/results/remaining-indicators/ehlersfilterfamily-contracts.json": "f924325a9804f7706197e2b8199644a00b13ddd5923f209be75afe5e4e339cd5",
     "benchmarks/results/remaining-indicators/emagap-contracts.json": "d3a7d421e76aafa2981e666408382c4114495c06c255b634a80ac5640dfd3202",
     "benchmarks/results/remaining-indicators/ergodicadaptiveselection-contracts.json": "f2c91ad2408a44a08d6f9629aaa2ba13a5ab77e3296ea1e43bcee1c5fe325f8b",
     "benchmarks/results/remaining-indicators/ergodicfamily-contracts.json": "7e40b02f778f42ce913b8af935842e4d0145aca93ae80fec072b86eb72a4acb8",
@@ -10307,7 +10342,7 @@
     "benchmarks/results/remaining-indicators/variablelength-contracts.json": "fed51af6af609d4f6d0c294f545183638cd88fbc6820e4296cdc11bb31ff0acc",
     "benchmarks/results/remaining-indicators/verticalaverage-contracts.json": "b04dffeef1c3f9dc0f94e7d1acc82271334f72bd90779cff57b80a5e7fe8078d",
     "benchmarks/results/remaining-indicators/verticalhorizontal-contracts.json": "c40cc49677391800509e476758328f867d96d8d9b3e99fe0530d1d4308b2b472",
-    "benchmarks/results/remaining-indicators/vervoortmodified-contracts.json": "63caaab7599e12cc5e5b31ab69780fd3e6bdcec94c89a97eea3030e0b88ab8f2",
+    "benchmarks/results/remaining-indicators/vervoortmodified-contracts.json": "3821a4740e66846f41cac4819e303a55ec1655ffd5c9217e9c6659ceb69010c4",
     "benchmarks/results/remaining-indicators/vervoortvolatility-contracts.json": "9abf14f7f0b2e7e6b0a57d52de3895805f2a2b5074d00157335d59d60219bc97",
     "benchmarks/results/remaining-indicators/volatilitybands-contracts.json": "926df27339bf65bc27dc6557d8a2d30c85727cbbe9011699ad89caa44822801c",
     "benchmarks/results/remaining-indicators/volatilitygeometry-contracts.json": "1cea8a81219495a9cfa9dad26110988d29f9e42113c3db84641bbb1fe05626d5",
@@ -10536,7 +10571,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "48c1953302875567bbce7da0342e177ccbca2417438e692a8c86fbbb41aa14df",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "398defb75c00579aaad88a40afd7e9051ae08df90cf74b01bc461f4db046e4eb",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
