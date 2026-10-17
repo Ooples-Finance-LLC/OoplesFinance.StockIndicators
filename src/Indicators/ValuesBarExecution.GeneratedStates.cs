@@ -98,6 +98,7 @@ internal static partial class ValuesBarExecution
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or FractalChaosBands or FractalChaosOscillator
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
+            or PrimeNumberOscillator or PrimeNumberBands
             or EfficientTrendStepChannel
             or LinearChannels { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or VervoortVolatilityBands { DevMult: > double.NegativeInfinity and < double.PositiveInfinity, LowBandMult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -334,6 +335,8 @@ internal static partial class ValuesBarExecution
         ProjectionBands channel => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBands, channel.Length),
         ProjectionOscillator oscillator => new GeneratedProjectionFamilyState(IndicatorName.ProjectionOscillator, oscillator.Length),
         ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
+        PrimeNumberOscillator oscillator => new GeneratedPrimeOscillatorState(oscillator.Length),
+        PrimeNumberBands channel => new GeneratedPrimeBandState(channel.Length),
         EfficientTrendStepChannel channel => new GeneratedEfficientTrendStepState(channel.Length, channel.FastLength, channel.SlowLength, count),
         LinearChannels channel => new GeneratedLinearChannelState(Math.Max(1, channel.Length), channel.Mult),
         VervoortVolatilityBands channel => new GeneratedVervoortVolatilityState(channel.Length1, channel.Length2, channel.DevMult, channel.LowBandMult),
@@ -1068,6 +1071,44 @@ internal static partial class ValuesBarExecution
         return false;
     }
 
+    private static void ValidatePrimeGraphInput(Bar[] source, IReadOnlyList<IIndicator> indicators, CancellationToken cancellation)
+    {
+        // Raw-input errors precede every domain; domains then follow root order.
+        foreach (var bar in source)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            if (!AllFieldsFinite(in bar)) Validation.IndicatorInputDomain.Finite.Validate(in bar);
+        }
+        foreach (var indicator in indicators)
+        {
+            if (indicator is not (PrimeNumberOscillator or PrimeNumberBands or AbsoluteStrengthIndex)) continue;
+            var domain = Validation.IndicatorInputDomain.For(indicator);
+            foreach (var bar in source)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                domain.Validate(in bar);
+            }
+        }
+    }
+
+    private sealed class GeneratedPrimeOscillatorState(int length) : IIndicatorState
+    {
+        private readonly PrimeOffsetWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedPrimeBandState(int length) : IMultiOutputState
+    {
+        private readonly PrimeBandWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var pair = _window.Next(bar.High, bar.Low, true);
+            outputs[0] = pair.Upper; outputs[1] = pair.Lower;
+        }
+    }
+
     private sealed class GeneratedEfficientTrendStepState(int length, int fast, int slow, int count) : IMultiOutputState, IDisposable
     {
         private readonly EfficientTrendStepWindow _window = new(length, fast, slow, count);
@@ -1169,7 +1210,9 @@ internal static partial class ValuesBarExecution
         {
             Streaming.StreamingFractal.Find(_highs, _lows, bar.High, bar.Low, out var up, out var down);
             var upper = up ?? _upper; var lower = down ?? _lower;
+#pragma warning disable S1244 // Legacy oscillator detects exact numeric boundary changes, including equal signed zeros.
             if (oscillator) outputs[0] = upper != _upper ? 1 : lower != _lower ? -1 : 0;
+#pragma warning restore S1244
             else
             {
                 var midpoint = new ExactMeanAccumulator(); midpoint.Add(upper); midpoint.Add(lower);
