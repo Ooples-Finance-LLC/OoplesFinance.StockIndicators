@@ -4326,3 +4326,6 @@ Ehlers Truncated Band Pass Filter now reuses its exact incremental kernel in sha
 
 
 Ehlers correlation trend, cycle, angle and market-state indicators now reuse exact correlation kernels in shared execution. Both cycle axes publish together; angle unwrapping and market-state decisions stream without full intermediate histories. Zero padding, normalization, sources and lifecycle are preserved. Validation: 49 unit cases, 16 parity cases, 166 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Hurst coefficient, noise elimination and Spearman rank indicators now reuse exact kernels and chronological scratch buffers in shared execution. Zero padding, ties, independent Hurst periods, noise scratch-overflow fallback, selected sources and lifecycle are preserved. Validation: 46 unit cases, 12 parity cases, 167 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
