@@ -143,6 +143,9 @@ internal static partial class ValuesBarExecution
             or EhlersCorrelationTrendIndicator or EhlersCorrelationCycleIndicator or EhlersCorrelationAngleIndicator or EhlersMarketStateIndicator
             or EhlersHurstCoefficient or EhlersSpearmanRankIndicator
             or EhlersNoiseEliminationTechnology { Length: < int.MaxValue }
+            or EhlersAutoCorrelationIndicator or EhlersAutoCorrelationPeriodogram
+            or EhlersAdaptiveBandPassFilter { Bw: >= 0 and < double.PositiveInfinity }
+            or EhlersZeroCrossingsDominantCycle { Bw: >= 0 and < double.PositiveInfinity }
             or EhlersEvenBetterSineWaveIndicator
             or EhlersReverseEmaIndicatorV1 { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
             or EhlersReverseEmaIndicatorV2 { TrendAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity, CycleAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
@@ -455,6 +458,10 @@ internal static partial class ValuesBarExecution
         EhlersHurstCoefficient hurst => new GeneratedHurstCoefficientState(hurst.Length1, hurst.Length2),
         EhlersNoiseEliminationTechnology noise => new GeneratedNoiseEliminationState(noise.Length),
         EhlersSpearmanRankIndicator rank => new GeneratedChronologicalSpearmanState(rank.Length),
+        EhlersAutoCorrelationIndicator correlation => new GeneratedRoofAutocorrelationState(correlation.Length1, correlation.Length2),
+        EhlersAutoCorrelationPeriodogram spectrum => new GeneratedAutocorrelationSpectrumState(spectrum.Length1, spectrum.Length2, spectrum.Length3),
+        EhlersAdaptiveBandPassFilter band => new GeneratedAdaptiveBandPassState(band.Length1, band.Length2, band.Length3, band.Bw),
+        EhlersZeroCrossingsDominantCycle cycle => new GeneratedZeroCrossingCycleState(cycle.Length, cycle.Bw),
         EhlersEvenBetterSineWaveIndicator sine => new GeneratedEvenBetterSineState(sine.Length1, sine.Length2),
         EhlersReverseEmaIndicatorV1 reverse => new GeneratedReverseEmaState(reverse.Alpha),
         EhlersReverseEmaIndicatorV2 reverse => new GeneratedReverseEmaPairState(reverse.TrendAlpha, reverse.CycleAlpha),
@@ -3606,6 +3613,43 @@ internal static partial class ValuesBarExecution
             return result;
         }
         public void Dispose() => _values.Dispose();
+    }
+
+    private sealed class GeneratedRoofAutocorrelationState(int length, int smooth) : IIndicatorState, IDisposable
+    {
+        private readonly RoofAutocorrelationWindow _window = new(length, smooth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAutocorrelationSpectrumState(int upper, int lower, int firstLag) : IIndicatorState, IDisposable
+    {
+        private readonly AutocorrelationSpectrumWindow _window = new(upper, lower, firstLag);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAdaptiveBandPassState(int upper, int lower, int firstLag, double bandwidth) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveBandPassWindow _window = new(upper, lower, firstLag, bandwidth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Value;
+            outputs[1] = value.Trigger;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedZeroCrossingCycleState(int length, double bandwidth) : IIndicatorState, IDisposable
+    {
+        private readonly ZeroCrossingCycleWindow _window = new(length, bandwidth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedEvenBetterSineState(int high, int low) : IMultiOutputState, IDisposable
