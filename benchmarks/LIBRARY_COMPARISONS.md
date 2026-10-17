@@ -4329,3 +4329,6 @@ Ehlers correlation trend, cycle, angle and market-state indicators now reuse exa
 
 
 Ehlers Hurst coefficient, noise elimination and Spearman rank indicators now reuse exact kernels and chronological scratch buffers in shared execution. Zero padding, ties, independent Hurst periods, noise scratch-overflow fallback, selected sources and lifecycle are preserved. Validation: 46 unit cases, 12 parity cases, 167 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Four Ehlers adaptive V1 RSI, Fisher, stochastic and commodity facades now reuse exact MAMA-cycle kernels in shared execution. Paired outputs, hidden Fisher fraction, positive parameter validation, CCI typical-price versus close-cycle inputs, sources and lifecycle are preserved. Validation: 35 unit cases, 16 parity cases, 168 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

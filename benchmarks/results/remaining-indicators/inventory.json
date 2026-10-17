@@ -1784,7 +1784,13 @@
       "options": [
         "EhlersAdaptiveCommodityChannelIndexV1SpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAdaptiveCommodityChannelIndexV1SpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptivev1-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveCommodityChannelIndexV2",
@@ -1818,7 +1824,13 @@
       "options": [
         "EhlersAdaptiveRelativeStrengthIndexV1SpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAdaptiveRelativeStrengthIndexV1SpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptivev1-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveRelativeStrengthIndexV2",
@@ -1832,7 +1844,13 @@
       "options": [
         "EhlersAdaptiveRsiFisherTransformV1SpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAdaptiveRsiFisherTransformV1SpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptivev1-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveRsiFisherTransformV2",
@@ -1846,7 +1864,13 @@
       "options": [
         "EhlersAdaptiveStochasticIndicatorV1SpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersAdaptiveStochasticIndicatorV1SpecOptions": [
+          "benchmarks/results/remaining-indicators/adaptivev1-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersAdaptiveStochasticIndicatorV2",
@@ -10457,6 +10481,7 @@
     "benchmarks/results/remaining-indicators/adaptivelaguerre-contracts.json": "d15e91c082d7554c57ab5c75a4c81faca0806082a59a2743a3c2c66e161b683e",
     "benchmarks/results/remaining-indicators/adaptivepair-contracts.json": "ce687718266f0d036ab024420f07ef79a8551463157450795f63bf450cfb8f5c",
     "benchmarks/results/remaining-indicators/adaptiverange-contracts.json": "52a4a36b67d2632a5efca47cc7835aa5811bf3170cc12c02ccd60ea039e98535",
+    "benchmarks/results/remaining-indicators/adaptivev1-contracts.json": "09f8ce4e1fdc1c0a9d1c7346b4e1df9f636a802784ce3788e1f93268affaad34",
     "benchmarks/results/remaining-indicators/adaptivevalueonly-contracts.json": "e1267db76f60e2d7ce61c0db98e96af8d05a3e146fe67d3604f701b6eb121608",
     "benchmarks/results/remaining-indicators/adaptivezone-contracts.json": "7287bf1bbb5fd093f928fdc22665b1d962d7d6c081db067f105f2ed2541a671c",
     "benchmarks/results/remaining-indicators/ahrensalpha-contracts.json": "ff5fb84db1816bd6217db8567463d5387826aa83094eb3c2c92aae6333fdacd1",
@@ -10817,7 +10842,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "df934aa21d0d80fd17d8c95965ac17842ae05c19ec6efedeb521e6c23bc85bf6",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "1ab020e18e6dfc48af562a6419d66918d37a65ee5fb22e91c69266178331a122",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
