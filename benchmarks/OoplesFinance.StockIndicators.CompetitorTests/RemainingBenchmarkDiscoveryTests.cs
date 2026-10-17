@@ -10,6 +10,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingRelativeVolatilityBenchmarks), 40)]
     [InlineData(typeof(RemainingVolatilityIndexBenchmarks), 16)]
     [InlineData(typeof(RemainingMedianBenchmarks), 24)]
+    [InlineData(typeof(RemainingVolatilityGeometryBenchmarks), 24)]
     [InlineData(typeof(RemainingVolatilityStopBenchmarks), 16)]
     [InlineData(typeof(RemainingStatisticalQualityBenchmarks), 16)]
     [InlineData(typeof(RemainingRatioSwitchBenchmarks), 16)]

@@ -1004,7 +1004,13 @@
       "options": [
         "ClosedFormDistanceVolatilitySpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ClosedFormDistanceVolatilitySpecOptions": [
+          "benchmarks/results/remaining-indicators/volatilitygeometry-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "CoefficientOfVariation",
@@ -6420,7 +6426,13 @@
       "options": [
         "StandardDeviationVolatilitySpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "StandardDeviationVolatilitySpecOptions": [
+          "benchmarks/results/remaining-indicators/volatilitygeometry-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StandardError",
@@ -7142,7 +7154,13 @@
       "options": [
         "TypicalPriceVolatilitySpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TypicalPriceVolatilitySpecOptions": [
+          "benchmarks/results/remaining-indicators/volatilitygeometry-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "UberTrendIndicator",
@@ -10176,6 +10194,7 @@
     "benchmarks/results/remaining-indicators/verticalhorizontal-contracts.json": "c40cc49677391800509e476758328f867d96d8d9b3e99fe0530d1d4308b2b472",
     "benchmarks/results/remaining-indicators/vervoortvolatility-contracts.json": "9abf14f7f0b2e7e6b0a57d52de3895805f2a2b5074d00157335d59d60219bc97",
     "benchmarks/results/remaining-indicators/volatilitybands-contracts.json": "926df27339bf65bc27dc6557d8a2d30c85727cbbe9011699ad89caa44822801c",
+    "benchmarks/results/remaining-indicators/volatilitygeometry-contracts.json": "1cea8a81219495a9cfa9dad26110988d29f9e42113c3db84641bbb1fe05626d5",
     "benchmarks/results/remaining-indicators/volatilityindex-contracts.json": "255f838295db08ee817df02bac82450d786136b7de34b6c12dcfc5b7de19a809",
     "benchmarks/results/remaining-indicators/volatilitystops-contracts.json": "67156f8f4a1a14a988f74563e87f1ca7d0d2d297682dcd1ca8fb907274c3e07c",
     "benchmarks/results/remaining-indicators/volume-contracts.json": "1e80ae57d2f76d8978e29acfecc682a114126173f7f51d34dc6aa7d36a327ad2",
@@ -10400,7 +10419,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "fe941b2c7dfbf8caf12422e803d55d75244f9133da354e6997d991947bf227e0",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "99b4410db2885eb343d4f10f6e12bf1909ad95f286776aa36793d8a5250935cf",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
@@ -10435,7 +10454,7 @@
     "src/Indicators/ValuesBarExecution.VolumeWeightedPrice.cs": "d81fd156c5e6a28467bb3a50d8c532ba788f154785bd0a946c4de4c000f3923b",
     "src/Indicators/ValuesBarExecution.Vortex.cs": "9eade6cecbb89bb9ea2388202af602774069734f55d0d90f6b54b11c507d14aa",
     "src/Indicators/ValuesBarExecution.WeightedChain.cs": "d3abb48e5e9c0978e93556119e4df70ddc754a24c548a93f476fb8cee5d14dc2",
-    "src/Indicators/ValuesBarExecution.cs": "10afb304262e455ca434260ca688c4b620da7d9849fda5c75e5c8ad26a19bddb",
+    "src/Indicators/ValuesBarExecution.cs": "382b39a288715f9efe1b1a86b082f31b47b7e542aa14e7c72ca85f3adb6bdc86",
     "src/Indicators/VariablePeriodClassicAverage.cs": "40f099b88deb13e4643e67f6695c2c7835673232724e6c4a2fc62d284501e000",
     "src/Indicators/VolatilityStopSnapshot.cs": "2c63b0980e2efcc292dfac8d601a142ca073e7f3ee6a72fa3f3dfb09c0e8691e",
     "src/Indicators/VolumeConditionedIndex.cs": "beb2d61788972ea12c3d691c9de87ec39ceb1d3b01cb2e5c61f9b3621e63bf60",

@@ -78,7 +78,7 @@ internal static partial class ValuesBarExecution
                 && UsesVolumeFlowCustomRange(source, cancellation);
             bool valueChartCustomRange = indicators.Any(i => i is ValueChartIndicator)
                 && UsesValueChartCustomRange(source, cancellation);
-            if (indicators.Any(i => i is PrimeNumberOscillator or PrimeNumberBands))
+            if (indicators.Any(i => i is PrimeNumberOscillator or PrimeNumberBands or ClosedFormDistanceVolatility))
                 ValidatePrimeGraphInput(source, indicators, cancellation);
             else if (indicators.Any(i => i is AbsoluteStrengthIndex))
                 ValidateAbsoluteStrengthInput(source, cancellation);

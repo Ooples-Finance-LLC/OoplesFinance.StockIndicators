@@ -100,6 +100,7 @@ internal static partial class ValuesBarExecution
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
             or StatisticalVolatility or VolatilityQualityIndex
             or VolatilityRatio or VolatilitySwitchIndicator
+            or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
             or EhlersRecursiveMedianFilter or EhlersRecursiveMedianOscillator
             or EhlersMedianAverageAdaptiveFilter { Threshold: > double.NegativeInfinity and < double.PositiveInfinity }
             or VolatilityIndexDynamicAverageIndicator { Alpha1: >= 0 and < double.PositiveInfinity, Alpha2: >= 0 and < double.PositiveInfinity }
@@ -356,6 +357,9 @@ internal static partial class ValuesBarExecution
         RelativeVolatilityIndexHigh volatility => new GeneratedSeededRelativeVolatilityState(true, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         RelativeVolatilityIndexLow volatility => new GeneratedSeededRelativeVolatilityState(false, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
+        TypicalPriceVolatility volatility => new GeneratedTypicalVolatilityState(Math.Max(1, volatility.Length), count),
+        StandardDeviationVolatility volatility => new GeneratedResidualVolatilityState(volatility.Length),
+        ClosedFormDistanceVolatility volatility => new GeneratedClosedDistanceState(volatility.Length),
         EhlersRecursiveMedianFilter median => new GeneratedRecursiveMedianState(median.Length),
         EhlersRecursiveMedianOscillator median => new GeneratedRecursiveMedianOscillatorState(median.Length1, median.Length2, median.Length3),
         EhlersMedianAverageAdaptiveFilter median => new GeneratedMedianAdaptiveState(median.Length, median.Threshold),
@@ -1110,7 +1114,7 @@ internal static partial class ValuesBarExecution
         }
         foreach (var indicator in indicators)
         {
-            if (indicator is not (PrimeNumberOscillator or PrimeNumberBands or AbsoluteStrengthIndex)) continue;
+            if (indicator is not (PrimeNumberOscillator or PrimeNumberBands or AbsoluteStrengthIndex or ClosedFormDistanceVolatility)) continue;
             var domain = Validation.IndicatorInputDomain.For(indicator);
             foreach (var bar in source)
             {
@@ -3197,6 +3201,37 @@ internal static partial class ValuesBarExecution
         private readonly MedianAdaptiveWindow _window = new(length, threshold);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedTypicalVolatilityState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactTypicalVolatilityWindow? _window = length <= count ? new(length) : null;
+        public void Reset() => _window?.Reset();
+        public double Update(in Bar bar) => _window?.Next(bar.High, bar.Low, bar.Close, true) ?? 0;
+        public void Dispose() => _window?.Dispose();
+    }
+
+    // AnnualizationFactor is ignored by the legacy residual-volatility facade.
+    private sealed class GeneratedResidualVolatilityState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly ResidualVolatilityWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Deviation;
+            outputs[1] = point.Variance;
+            outputs[2] = point.SignalLine;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedClosedDistanceState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly ClosedFormDistanceWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedVolatilityRatioState(int length) : IIndicatorState
