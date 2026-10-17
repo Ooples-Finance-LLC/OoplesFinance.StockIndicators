@@ -108,6 +108,7 @@ internal static partial class ValuesBarExecution
             or ErgodicCommoditySelectionIndex { PointValue: > double.NegativeInfinity and < double.PositiveInfinity }
             or ErgodicCandlestickOscillator or ErgodicMovingAverageConvergenceDivergence
             or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
+            or EhlersAllPassPhaseShifter or EhlersCenterOfGravityOscillator or EhlersCenterofGravityOscillator or EhlersChebyshevLowPassFilter
             or EhlersFilter or EhlersAverageErrorFilter or EhlersDistanceCoefficientFilter or EhlersReflexIndicator or EhlersTrendflexIndicator
             or EhlersDeviationScaledMovingAverage { Length: <= 1_073_741_823 }
             or EhlersFisherizedDeviationScaledOscillator or EhlersDeviationScaledSuperSmoother
@@ -382,6 +383,10 @@ internal static partial class ValuesBarExecution
         ErgodicPercentagePriceOscillator oscillator => new GeneratedEmaGapSignalState(32, oscillator.Length, 5, percentage: true),
         ErgodicTrueStrengthIndexV2 strength => new GeneratedErgodicStrengthPairState([strength.Length1, strength.Length2, strength.Length3], [strength.Length4, strength.Length5, strength.Length6], strength.SignalLength, count),
         ErgodicMeanDeviationIndicator deviation => new GeneratedErgodicDeviationState(deviation.Length1, deviation.Length2, deviation.Length3, deviation.SignalLength),
+        EhlersAllPassPhaseShifter filter => new GeneratedAllPassPhaseState(Math.Max(1, filter.Length)),
+        EhlersCenterOfGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
+        EhlersCenterofGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
+        EhlersChebyshevLowPassFilter => new GeneratedChebyshevWaveState(),
         EhlersFilter filter => new GeneratedEhlersDistanceState(filter.Length),
         EhlersAverageErrorFilter filter => new GeneratedAverageErrorState(filter.Length),
         EhlersDistanceCoefficientFilter filter => new GeneratedDistanceCoefficientState(filter.Length),
@@ -3274,6 +3279,33 @@ internal static partial class ValuesBarExecution
         private readonly MedianAdaptiveWindow _window = new(length, threshold);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedAllPassPhaseState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly AllPassPhaseWindow _window = new(length, .5);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedCenterGravityState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly CenterGravityWindow _window = new(length, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChebyshevWaveState : IMultiOutputState, IDisposable
+    {
+        private readonly ChebyshevWaveWindow[] _windows = Enumerable.Range(0, 9).Select(wave => new ChebyshevWaveWindow(wave)).ToArray();
+        public void Reset() { foreach (var window in _windows) window.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            for (var wave = 0; wave < _windows.Length; wave++) outputs[wave] = _windows[wave].Next(bar.Close, true);
+        }
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedEhlersDistanceState(int length) : IIndicatorState, IDisposable

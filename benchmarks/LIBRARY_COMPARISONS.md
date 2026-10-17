@@ -4290,3 +4290,6 @@ Vervoort Modified integration retains the preserved exact state, helpers and who
 
 
 Five Ehlers filters (Filter, Average Error, Distance Coefficient, Reflex and Trendflex) now reuse exact incremental kernels in shared execution. The hidden five-bar lag, period clamping, extreme arithmetic, source fallback, warmup and lifecycle are preserved. Validation: 63 unit cases, 20 parity cases, 154 discovery cases, 100 local GPU cases and four inventory checks passed. Forty timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers All-Pass Phase Shifter, both Center of Gravity aliases and all nine Chebyshev Low-Pass outputs now reuse exact kernels in shared execution. Phase option clamping/hidden q, alias defaults, ignored Chebyshev options, output slots, source/component fallback and lifecycle are preserved. Validation: 52 unit cases, 16 parity cases, 155 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
