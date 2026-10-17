@@ -126,6 +126,7 @@ internal static partial class ValuesBarExecution
             or EfficientTrendStepChannel
             or LinearChannels { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or VervoortVolatilityBands { DevMult: > double.NegativeInfinity and < double.PositiveInfinity, LowBandMult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or VervoortModifiedBollingerBandIndicator { StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
             or UniChannel { UbFac: > double.NegativeInfinity and < double.PositiveInfinity, LbFac: > double.NegativeInfinity and < double.PositiveInfinity }
             or PseudoPolynomialChannel { Morph: > double.NegativeInfinity and < double.PositiveInfinity }
             or HurstCycleChannel { FastMult: > double.NegativeInfinity and < double.PositiveInfinity, SlowMult: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -185,7 +186,7 @@ internal static partial class ValuesBarExecution
             or _1LCLeastSquaresMovingAverage { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod }
             or Lsma or LinReg or LinearChannelMiddle or LinRegSlope or LinearRegressionSlope or LinRegIntercept or LinearRegressionIntercept or LinearRegressionLine;
 
-    private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange) => indicator switch
+    private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
         HighestHigh high when high.Length >= count => new PrefixPriceExtremeState(true),
         LowestLow low when low.Length >= count => new PrefixPriceExtremeState(false),
@@ -402,6 +403,7 @@ internal static partial class ValuesBarExecution
         EfficientTrendStepChannel channel => new GeneratedEfficientTrendStepState(channel.Length, channel.FastLength, channel.SlowLength, count),
         LinearChannels channel => new GeneratedLinearChannelState(Math.Max(1, channel.Length), channel.Mult),
         VervoortVolatilityBands channel => new GeneratedVervoortVolatilityState(channel.Length1, channel.Length2, channel.DevMult, channel.LowBandMult),
+        VervoortModifiedBollingerBandIndicator channel => new GeneratedVervoortModifiedState(channel.Length1, channel.Length2, channel.SmoothLength, channel.StdDevMult, vervoortModifiedCustomRange),
         UniChannel channel => new GeneratedUniChannelState(Math.Max(1, channel.Length), channel.UbFac, channel.LbFac, channel.Type1, count),
         PseudoPolynomialChannel channel => new GeneratedPseudoPolynomialState(channel.Length, channel.Morph, count),
         ExtendedRecursiveBands channel => new GeneratedExtendedBandState(channel.Length),
@@ -1203,6 +1205,42 @@ internal static partial class ValuesBarExecution
             outputs[0] = _upper; outputs[1] = _lower;
             _older = _previous; _previous = center; _history = Math.Min(2, _history + 1);
         }
+    }
+
+    private static bool UsesVervoortModifiedCustomRange(Bar[] source, CancellationToken cancellation)
+    {
+        foreach (var bar in source)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            if (!AllFieldsFinite(in bar)) return false;
+#pragma warning disable S1244 // Preserve legacy whole-series numeric equality, including equal signed zeros.
+            if (PriceMean.Of(bar.Open, bar.High, bar.Low, bar.Close) != bar.Close) return true;
+#pragma warning restore S1244
+        }
+        return false;
+    }
+
+    private sealed class GeneratedVervoortModifiedState(int band, int outer, int smooth, double multiplier, bool customRange) : IMultiOutputState, IDisposable
+    {
+        private readonly VervoortModifiedWindow _window = new(MovingAvgType.TripleExponentialMovingAverage, band, outer, smooth, multiplier);
+        private double _previousTypical;
+        private bool _started;
+        public void Reset() { _window.Reset(); _previousTypical = 0; _started = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var namedPrice = PriceMean.Of(bar.Open, bar.High, bar.Low, bar.Close);
+            var high = bar.High; var low = bar.Low;
+            if (customRange && !CalculationsHelper.IsWithinBarRange(namedPrice, low, high))
+            {
+                var previous = _started ? _previousTypical : namedPrice;
+                high = Math.Max(previous, namedPrice); low = Math.Min(previous, namedPrice);
+            }
+            var mean = new ExactMeanAccumulator(); mean.Add(bar.Open); mean.Add(high); mean.Add(low); mean.Add(bar.Close);
+            var value = _window.Next(mean.Mean(4), high, low, true);
+            outputs[0] = value.Upper; outputs[1] = 50; outputs[2] = value.Lower; outputs[3] = value.Percent;
+            _previousTypical = namedPrice; _started = true;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedVervoortVolatilityState(int length1, int length2, double deviation, double lowerMultiplier) : IMultiOutputState, IDisposable

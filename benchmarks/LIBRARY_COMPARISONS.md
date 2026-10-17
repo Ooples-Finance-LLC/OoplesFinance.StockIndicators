@@ -4280,3 +4280,10 @@ Ergodic Candlestick, MACD, Percentage Price and True Strength v2 now compute rel
 
 
 Adaptive Ergodic Candlestick and Ergodic Commodity Selection now compute related outputs together through their exact incremental kernels. Adaptive seeding, wide point-value quotients, nonfinite-point fallback, original fields, sources/components and ownership are preserved. Validation: 51 unit cases, 8 parity cases, 152 discovery cases, 100 local GPU cases and four inventory tests passed. Sixteen timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.
+
+
+Vervoort Modified Bollinger Band Indicator now computes four outputs together through its exact kernel. Rounded exact OHLC input, TEMA stages, two population deviations, fixed middle50, percent threshold, observed histories and explicit average/source fallback are preserved. Validation: 99 focused unit cases, 4 parity cases, 135 discovery cases, 100 local GPU cases and 4 inventory tests passed. The two 10k parity cases are independently schedulable methods with unchanged assertions. Eight timing cases are prepared; measured performance qualification remains pending.
+Initial unit failures exposed missing whole-series OHLC equality routing and per-bar range replacement. The corrected state preserves both and recomputes its exact mean using adjusted bounds. Initial failed unit and deliberately aborted obsolete parity runs are archived; corrected production received fresh verification.
+
+
+Vervoort Modified integration retains the preserved exact state, helpers and whole-series range prepass while preserving newer graph-domain validation. Thirteen focused unit cases (including mixed-root and domain-order checks), 153 discovery cases, 100 local GPU cases and four inventory checks passed. The archived 99-unit/four-parity candidate evidence is reused; expensive completed suites were not replayed. Its eight preserved timing cases remain queued.
