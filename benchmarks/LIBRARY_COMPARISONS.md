@@ -4277,3 +4277,6 @@ Ehlers deviation and residual-pair integration: 46 focused unit cases, 20 parity
 
 
 Ergodic Candlestick, MACD, Percentage Price and True Strength v2 now compute related outputs together through shared exact candle, EMA-gap and strength kernels. Hidden periods, independent strength triples and output slots, overflowing signal tails, original fields, sources/components and ownership are preserved. Validation: 77 unit cases, 16 parity cases, 151 discovery cases, 100 local GPU cases and four inventory tests passed. Thirty-two timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.
+
+
+Adaptive Ergodic Candlestick and Ergodic Commodity Selection now compute related outputs together through their exact incremental kernels. Adaptive seeding, wide point-value quotients, nonfinite-point fallback, original fields, sources/components and ownership are preserved. Validation: 51 unit cases, 8 parity cases, 152 discovery cases, 100 local GPU cases and four inventory tests passed. Sixteen timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.

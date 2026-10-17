@@ -104,6 +104,8 @@ internal static partial class ValuesBarExecution
             or GarmanKlassVolatility
             or HistoricalVolatilityPercentile
             or StandardErrorCore or ErgodicMeanDeviationIndicator
+            or AdaptiveErgodicCandlestickOscillator
+            or ErgodicCommoditySelectionIndex { PointValue: > double.NegativeInfinity and < double.PositiveInfinity }
             or ErgodicCandlestickOscillator or ErgodicMovingAverageConvergenceDivergence
             or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
             or EhlersDeviationScaledMovingAverage { Length: <= 1_073_741_823 }
@@ -371,6 +373,8 @@ internal static partial class ValuesBarExecution
         GarmanKlassVolatility volatility => new GeneratedGarmanKlassState(volatility.Length, count),
         HistoricalVolatilityPercentile volatility => new GeneratedHistoricalRankState(volatility.Length, volatility.AnnualLength),
         StandardErrorCore error => new GeneratedMeanErrorState(error.Length, count),
+        AdaptiveErgodicCandlestickOscillator candle => new GeneratedAdaptiveErgodicCandleState(candle.SmoothLength, candle.StochLength, candle.SignalLength, count),
+        ErgodicCommoditySelectionIndex selection => new GeneratedErgodicSelectionState(selection.Length, selection.SmoothLength, selection.PointValue),
         ErgodicCandlestickOscillator candle => new GeneratedErgodicCandleState(candle.Length, count),
         ErgodicMovingAverageConvergenceDivergence oscillator => new GeneratedEmaGapSignalState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
         ErgodicPercentagePriceOscillator oscillator => new GeneratedEmaGapSignalState(32, oscillator.Length, 5, percentage: true),
@@ -3276,6 +3280,30 @@ internal static partial class ValuesBarExecution
             outputs[1] = value; outputs[2] = _signal.Next(new StrengthValue(value), true).Mantissa;
         }
         public void Dispose() { _first.Dispose(); _second.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedAdaptiveErgodicCandleState(int smooth, int stochastic, int signal, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveCandleWindow _window = new(MovingAvgType.ExponentialMovingAverage, smooth, stochastic, signal, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Eco.Publish(); outputs[1] = point.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedErgodicSelectionState(int length, int smooth, double pointValue) : IMultiOutputState, IDisposable
+    {
+        private readonly ErgodicSelectionWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, smooth, pointValue);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedMeanErrorState(int length, int count) : IIndicatorState, IDisposable
