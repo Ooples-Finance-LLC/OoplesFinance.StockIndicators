@@ -109,6 +109,7 @@ internal static partial class ValuesBarExecution
             or ErgodicCandlestickOscillator or ErgodicMovingAverageConvergenceDivergence
             or ErgodicPercentagePriceOscillator or ErgodicTrueStrengthIndexV2
             or EhlersAllPassPhaseShifter or EhlersCenterOfGravityOscillator or EhlersCenterofGravityOscillator or EhlersChebyshevLowPassFilter
+            or EhlersAMDetector
             or EhlersKaufmanAdaptiveMovingAverage
             or EhlersSimpleCycleIndicator { Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
             or EhlersFilter or EhlersAverageErrorFilter or EhlersDistanceCoefficientFilter or EhlersReflexIndicator or EhlersTrendflexIndicator
@@ -389,6 +390,7 @@ internal static partial class ValuesBarExecution
         EhlersCenterOfGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
         EhlersCenterofGravityOscillator filter => new GeneratedCenterGravityState(filter.Length, count),
         EhlersChebyshevLowPassFilter => new GeneratedChebyshevWaveState(),
+        EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
         EhlersFilter filter => new GeneratedEhlersDistanceState(filter.Length),
@@ -3310,6 +3312,19 @@ internal static partial class ValuesBarExecution
             for (var wave = 0; wave < _windows.Length; wave++) outputs[wave] = _windows[wave].Next(bar.Close, true);
         }
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedAmDetectorState(int envelope, int smooth) : IMultiOutputState, IDisposable
+    {
+        private readonly AmDetectorWindow _window = new(MovingAvgType.SimpleMovingAverage, envelope, smooth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Open, bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedEhlersKaufmanState(int length) : IIndicatorState, IDisposable
