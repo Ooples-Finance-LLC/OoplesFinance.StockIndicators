@@ -4268,3 +4268,9 @@ Historical Volatility Percentile now computes rank and signal together with the 
 
 
 The Ehlers deviation-scaled moving average, Fisherized deviation-scaled oscillator and deviation-scaled super smoother now reuse exact incremental kernels through shared execution. Doubled-period overflow fallback, fixed hidden slow periods, Fisher hold behavior, ignored Poles, sources/components and ownership are preserved. Validation: 40 unit cases, 12 parity cases, 149 discovery cases, 100 local GPU cases and four inventory tests passed. Twenty-four timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.
+
+
+Standard Error of the Mean and Ergodic Mean Deviation now reuse exact incremental kernels through shared execution. Ergodic value and signal are computed together; unfillable mean-error windows avoid allocation. Period clamping, wide intermediate residuals, sources/components and ownership are preserved. Validation: 36 unit cases, 8 parity cases, 149 discovery cases, 100 local GPU cases and four inventory tests passed. Sixteen timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers deviation and residual-pair integration: 46 focused unit cases, 20 parity cases, 150 discovery cases, 100 local GPU cases and 4 inventory tests passed. Cross-batch mixed-root behavior is covered; unchanged independent numerical cases retain their archived evidence. Preserved timing candidates remain queued; this integration introduces no measured performance claim.
