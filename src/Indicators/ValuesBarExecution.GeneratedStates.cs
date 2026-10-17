@@ -98,6 +98,7 @@ internal static partial class ValuesBarExecution
             or FlaggingBands or ExtendedRecursiveBands or MotionToAttractionChannels or VolumeAdaptiveBands
             or FractalChaosBands or FractalChaosOscillator
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
+            or StatisticalVolatility or VolatilityQualityIndex
             or CloseToCloseVolatility or DownsideDeviation
             or PrimeNumberOscillator or PrimeNumberBands
             or EfficientTrendStepChannel
@@ -336,6 +337,8 @@ internal static partial class ValuesBarExecution
         ProjectionBands channel => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBands, channel.Length),
         ProjectionOscillator oscillator => new GeneratedProjectionFamilyState(IndicatorName.ProjectionOscillator, oscillator.Length),
         ProjectionBandwidth bandwidth => new GeneratedProjectionFamilyState(IndicatorName.ProjectionBandwidth, bandwidth.Length),
+        StatisticalVolatility volatility => new GeneratedStatisticalVolatilityState(volatility.Length1, volatility.Length2),
+        VolatilityQualityIndex volatility => new GeneratedVolatilityQualityState(volatility.FastLength, volatility.SlowLength),
         CloseToCloseVolatility volatility => new GeneratedCloseVolatilityState(Math.Max(1, volatility.Length), count),
         DownsideDeviation deviation => new GeneratedDownsideDeviationState(Math.Max(1, deviation.Length), count),
         PrimeNumberOscillator oscillator => new GeneratedPrimeOscillatorState(oscillator.Length),
@@ -3069,6 +3072,30 @@ internal static partial class ValuesBarExecution
             outputs[1] = _signal?.Next(value, true) ?? 0;
         }
         public void Dispose() { _line?.Dispose(); _signal?.Dispose(); }
+    }
+
+    private sealed class GeneratedStatisticalVolatilityState(int length, int annual) : IMultiOutputState, IDisposable
+    {
+        private readonly StatisticalVolatilityWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, annual);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVolatilityQualityState(int fast, int slow) : IMultiOutputState, IDisposable
+    {
+        private readonly VolatilityQualityWindow _window = new(MovingAvgType.SimpleMovingAverage, fast, slow);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.Fast; outputs[2] = point.Slow;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedCloseVolatilityState(int period, int count) : IIndicatorState, IDisposable
