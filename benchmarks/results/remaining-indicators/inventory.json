@@ -2655,14 +2655,26 @@
       "options": [
         "EhlersModifiedRelativeStrengthIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersModifiedRelativeStrengthIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersmodifiedmomentum-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersModifiedStochasticIndicator",
       "options": [
         "EhlersModifiedStochasticIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersModifiedStochasticIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersmodifiedmomentum-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersMotherOfAdaptiveMovingAverages",
@@ -2677,7 +2689,13 @@
       "options": [
         "EhlersMovingAverageDifferenceIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersMovingAverageDifferenceIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersmodifiedmomentum-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersNoiseEliminationTechnology",
@@ -2801,7 +2819,13 @@
       "options": [
         "EhlersRocketRelativeStrengthIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersRocketRelativeStrengthIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/ehlersmodifiedmomentum-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersRoofingFilterIndicator",
@@ -10355,6 +10379,7 @@
     "benchmarks/results/remaining-indicators/ehlersfilter-contracts.json": "eeec1b23fc1c3ce3a7a9c4382da4804f23247f19eb054d90022dcc95efdd854a",
     "benchmarks/results/remaining-indicators/ehlersfilterfamily-contracts.json": "f924325a9804f7706197e2b8199644a00b13ddd5923f209be75afe5e4e339cd5",
     "benchmarks/results/remaining-indicators/ehlerskaufmancycle-contracts.json": "d98f0cff233c69b23a041ce2dfdab0a3ae7548d259b3f65cd4be69baaf1f8a14",
+    "benchmarks/results/remaining-indicators/ehlersmodifiedmomentum-contracts.json": "95ac477269ac592f7aab399ad253a6929e16509f373015184f5f95d15dd4ed9f",
     "benchmarks/results/remaining-indicators/ehlersphasegravity-contracts.json": "1f6f3c76c86cfa849e79a2b27460d4c71e0f7ea320a8aa7a4a5747fae1046b8c",
     "benchmarks/results/remaining-indicators/ehlerssimplefamily-contracts.json": "59cabcad8e39084db4b5c2fc5a9c0630687406f0e8016c9d0eaf9f50dd82b8eb",
     "benchmarks/results/remaining-indicators/ehlersstochasticvigor-contracts.json": "54d00b6710ef2b9f82892730f90fb69b732d87462b0259ff5fa224e472019cdc",
@@ -10663,7 +10688,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "3e4d48b70b09d37df213ac28db31574f7897e70edf82cc9728fb61ab184a227b",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "5fc0849c1d80806fdd032dfda680ab01037cf856bfe2e389e9b36c57d59de73d",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

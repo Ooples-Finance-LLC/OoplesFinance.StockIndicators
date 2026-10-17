@@ -112,6 +112,8 @@ internal static partial class ValuesBarExecution
             or EhlersSimpleDerivIndicator or EhlersSimpleClipIndicator or EhlersSimpleWindowIndicator or EhlersTripleDelayLineDetrender
             or EhlersStochasticCenterOfGravityOscillator or EhlersStochastic or EhlersRelativeVigorIndex
             or EhlersStochasticCyberCycle { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
+            or EhlersModifiedRelativeStrengthIndex or EhlersModifiedStochasticIndicator or EhlersMovingAverageDifferenceIndicator
+            or EhlersRocketRelativeStrengthIndex { ObosLevel: > double.NegativeInfinity and < double.PositiveInfinity, Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or EhlersAMDetector
             or EhlersKaufmanAdaptiveMovingAverage
             or EhlersSimpleCycleIndicator { Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -401,6 +403,10 @@ internal static partial class ValuesBarExecution
         EhlersStochastic oscillator => new GeneratedRoofingStochasticState(oscillator.Length),
         EhlersStochasticCyberCycle oscillator => new GeneratedStochasticCyberState(oscillator.Length, Math.Max(.01, Math.Min(.99, oscillator.Alpha))),
         EhlersRelativeVigorIndex oscillator => new GeneratedEhlersVigorState(oscillator.Length, oscillator.SignalLength, count),
+        EhlersModifiedRelativeStrengthIndex oscillator => new GeneratedModifiedRsiState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
+        EhlersModifiedStochasticIndicator oscillator => new GeneratedModifiedStochasticState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
+        EhlersRocketRelativeStrengthIndex oscillator => new GeneratedRocketRsiState(oscillator.Length1, oscillator.Length2, oscillator.Mult),
+        EhlersMovingAverageDifferenceIndicator oscillator => new GeneratedAverageDifferenceState(oscillator.FastLength, oscillator.SlowLength, count),
         EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
@@ -3416,6 +3422,43 @@ internal static partial class ValuesBarExecution
             outputs[0] = value.Value;
             outputs[1] = value.Signal;
         }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedModifiedRsiState(int upper, int lower, int length) : IMultiOutputState, IDisposable
+    {
+        private readonly ModifiedRsiWindow _window = new(upper, lower, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedModifiedStochasticState(int upper, int lower, int length) : IIndicatorState, IDisposable
+    {
+        private readonly RoofingStochasticWindow _window = new(MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, upper, lower, length, true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRocketRsiState(int length, int smooth, double multiplier) : IIndicatorState, IDisposable
+    {
+        private readonly RocketRsiWindow _window = new(MovingAvgType.Ehlers2PoleSuperSmootherFilterV2, length, smooth, multiplier);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAverageDifferenceState(int fast, int slow, int count) : IIndicatorState, IDisposable
+    {
+        private readonly AverageGapWindow _window = new(MovingAvgType.WeightedMovingAverage, fast, slow, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
     }
 
