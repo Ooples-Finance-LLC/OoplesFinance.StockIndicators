@@ -4259,3 +4259,6 @@ The initial unit run exposed an incorrect independent test expectation: length1 
 
 
 Volatility Wave and OHLC integration: 49 focused unit cases, 16 parity cases, 146 discovery cases, 100 local GPU cases and 4 inventory tests passed. The unchanged Wave numerical cases retain their archived evidence. Preserved timing candidates remain queued; this integration introduces no measured performance claim.
+
+
+Garman-Klass volatility now caches stable candle terms, retains oldest-first floating-point folds, and computes volatility and its exact weighted seven-bar signal together. Period clamping, original fields, component/source fallback and ownership are preserved. Validation: 56 unit cases including OHLC helper regression coverage, 16 parity cases, 147 discovery cases, 100 local GPU cases and four inventory tests passed. Eight timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.

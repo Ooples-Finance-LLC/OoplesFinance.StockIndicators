@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Helpers;
 // A rolling subtraction would change output bits after the first expiry.
 internal sealed class OhlcVolatilityWindow : IDisposable
 {
-    internal enum Estimator { Parkinson, RogersSatchell, YangZhang }
+    internal enum Estimator { Parkinson, RogersSatchell, YangZhang, GarmanKlass }
     private readonly Estimator _estimator;
     private readonly int _length;
     private readonly PooledRingBuffer<Terms>? _window;
@@ -45,6 +45,12 @@ internal sealed class OhlcVolatilityWindow : IDisposable
             var log = bar.Low != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Low) : 0;
             terms = new(log * log, 0, 0, false, false);
         }
+        else if (_estimator == Estimator.GarmanKlass)
+        {
+            var hl = bar.Low != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Low) : 0;
+            var co = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.Close, bar.Open) : 0;
+            terms = new(0.5 * hl * hl - (2 * Math.Log(2) - 1) * co * co, 0, 0, false, false);
+        }
         else
         {
             var hc = bar.Close != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Close) : 0;
@@ -72,7 +78,8 @@ internal sealed class OhlcVolatilityWindow : IDisposable
             if (point.HasIntraday) intradayMean += point.Intraday;
         }
         if (_estimator == Estimator.Parkinson) return Math.Sqrt(_factor * rangeSum) * _annual;
-        if (_estimator == Estimator.RogersSatchell) return Math.Sqrt(Math.Max(0, rangeSum / _length)) * _annual;
+        if (_estimator is Estimator.RogersSatchell or Estimator.GarmanKlass)
+            return Math.Sqrt(Math.Max(0, rangeSum / _length)) * _annual;
 
         overnightMean /= _length;
         intradayMean /= _length;
