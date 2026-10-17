@@ -4323,3 +4323,6 @@ Ehlers reverse EMA V1/V2 and Even Better Sine Wave now reuse exact incremental k
 
 
 Ehlers Truncated Band Pass Filter now reuses its exact incremental kernel in shared execution. Phase rescue and overflow fallback, independent cutoff, source selection and lifecycle are preserved. Validation: 28 unit cases, four parity cases, 165 discovery cases, 100 local GPU cases and four inventory checks passed. Eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers correlation trend, cycle, angle and market-state indicators now reuse exact correlation kernels in shared execution. Both cycle axes publish together; angle unwrapping and market-state decisions stream without full intermediate histories. Zero padding, normalization, sources and lifecycle are preserved. Validation: 49 unit cases, 16 parity cases, 166 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

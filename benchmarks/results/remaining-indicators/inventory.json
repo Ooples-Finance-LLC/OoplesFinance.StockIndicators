@@ -2031,21 +2031,39 @@
       "options": [
         "EhlersCorrelationAngleIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersCorrelationAngleIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/correlationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersCorrelationCycleIndicator",
       "options": [
         "EhlersCorrelationCycleIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersCorrelationCycleIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/correlationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersCorrelationTrendIndicator",
       "options": [
         "EhlersCorrelationTrendIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersCorrelationTrendIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/correlationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersCyberCycle",
@@ -2640,7 +2658,13 @@
       "options": [
         "EhlersMarketStateIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "EhlersMarketStateIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/correlationfamily-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "EhlersMedianAverageAdaptiveFilter",
@@ -10445,6 +10469,7 @@
     "benchmarks/results/remaining-indicators/composed-contracts.json": "c4d8bac264a40537f0cba0270016bb25a1712d58628b5de9d11ba590567979f2",
     "benchmarks/results/remaining-indicators/conditional-contracts.json": "ccabdedec1fecacdf1afe5950f1f38ed4b72b270e2f978d824709462ba1980ad",
     "benchmarks/results/remaining-indicators/contractextrema-contracts.json": "6c5739342dfd8269f9aac1d6d1c2de830db0bde41c5942ff0d649532df86d562",
+    "benchmarks/results/remaining-indicators/correlationfamily-contracts.json": "341d50777626ff0a8160e42904c16faa0bbd7883ef5818f102b22b6dace31e0d",
     "benchmarks/results/remaining-indicators/cumulative-contracts.json": "df22718d18ef29454a49ac78faa6619c8d0054f92c2490cd5d8d865dd6f9bc08",
     "benchmarks/results/remaining-indicators/cycletrend-contracts.json": "eb798f32e5e030d78860e763f109a058090e9f9e67fddd1abbb3766f5344a07d",
     "benchmarks/results/remaining-indicators/dayrange-contracts.json": "83ddfd65894f1b617f6f7ab62637d235ee8fab3428accba1b203bc39db1ad43c",
@@ -10773,7 +10798,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2148d62d8654beff651ecb69832559e8ac154c50d681516f7c2cca1b345cace0",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "bf0e4a6755d26900d664f9e593193887a9defb92c9e11baa230e84c64a6fefd6",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",

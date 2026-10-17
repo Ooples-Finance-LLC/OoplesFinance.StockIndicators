@@ -140,6 +140,7 @@ internal static partial class ValuesBarExecution
             or EhlersRocketRelativeStrengthIndex { ObosLevel: > double.NegativeInfinity and < double.PositiveInfinity, Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or Frama { Length: < int.MaxValue } or EhlersFrama { Length: < int.MaxValue }
             or FisherTransform or EhlersFisherTransform or EhlersInverseFisherTransform or EhlersRelativeStrengthIndexInverseFisherTransform
+            or EhlersCorrelationTrendIndicator or EhlersCorrelationCycleIndicator or EhlersCorrelationAngleIndicator or EhlersMarketStateIndicator
             or EhlersEvenBetterSineWaveIndicator
             or EhlersReverseEmaIndicatorV1 { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
             or EhlersReverseEmaIndicatorV2 { TrendAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity, CycleAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
@@ -445,6 +446,10 @@ internal static partial class ValuesBarExecution
         EhlersFisherTransform oscillator => new GeneratedFisherState(oscillator.Length),
         EhlersInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, 9, count),
         EhlersRelativeStrengthIndexInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, oscillator.SignalLength, count),
+        EhlersCorrelationTrendIndicator correlation => new GeneratedCorrelationState(correlation.Length, CorrelationKind.Trend),
+        EhlersCorrelationCycleIndicator correlation => new GeneratedCorrelationState(correlation.Length, CorrelationKind.Cycle),
+        EhlersCorrelationAngleIndicator correlation => new GeneratedCorrelationState(correlation.Length, CorrelationKind.Angle),
+        EhlersMarketStateIndicator correlation => new GeneratedCorrelationState(correlation.Length, CorrelationKind.MarketState),
         EhlersEvenBetterSineWaveIndicator sine => new GeneratedEvenBetterSineState(sine.Length1, sine.Length2),
         EhlersReverseEmaIndicatorV1 reverse => new GeneratedReverseEmaState(reverse.Alpha),
         EhlersReverseEmaIndicatorV2 reverse => new GeneratedReverseEmaPairState(reverse.TrendAlpha, reverse.CycleAlpha),
@@ -3543,6 +3548,26 @@ internal static partial class ValuesBarExecution
             return Math.Tanh(_average.Next(new StrengthValue(value), true).Mantissa);
         }
         public void Dispose() { _rsi.Dispose(); _average.Dispose(); }
+    }
+
+    private enum CorrelationKind { Trend, Cycle, Angle, MarketState }
+
+    private sealed class GeneratedCorrelationState(int length, CorrelationKind kind) : IMultiOutputState, IDisposable
+    {
+        private readonly EhlersCorrelationWindow _window = new(length, kind == CorrelationKind.Trend);
+        private double _previousAngle;
+        public void Reset() { _window.Reset(); _previousAngle = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            if (kind == CorrelationKind.Trend) { outputs[0] = value.Real; return; }
+            if (kind == CorrelationKind.Cycle) { outputs[0] = value.Real; outputs[1] = value.Imag; return; }
+            var angle = EhlersCorrelationPhase.Angle(value.Real, value.Imag);
+            angle = _previousAngle - angle < 270 && angle < _previousAngle ? _previousAngle : angle;
+            outputs[0] = kind == CorrelationKind.MarketState ? EhlersCorrelationPhase.MarketState(angle, _previousAngle) : angle;
+            _previousAngle = angle;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedEvenBetterSineState(int high, int low) : IMultiOutputState, IDisposable
