@@ -143,6 +143,9 @@ internal static partial class ValuesBarExecution
             or EhlersCorrelationTrendIndicator or EhlersCorrelationCycleIndicator or EhlersCorrelationAngleIndicator or EhlersMarketStateIndicator
             or EhlersHurstCoefficient or EhlersSpearmanRankIndicator
             or EhlersNoiseEliminationTechnology { Length: < int.MaxValue }
+            or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
+            or EhlersAdaptiveCenterOfGravityOscillator
+            or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
             or EhlersAdaptiveRsiFisherTransformV1
             or EhlersAdaptiveRelativeStrengthIndexV1 { CycPart: > 0 and < double.PositiveInfinity }
             or EhlersAdaptiveStochasticIndicatorV1 { CycPart: > 0 and < double.PositiveInfinity }
@@ -460,6 +463,9 @@ internal static partial class ValuesBarExecution
         EhlersNoiseEliminationTechnology noise => new GeneratedNoiseEliminationState(noise.Length),
         EhlersSpearmanRankIndicator rank => new GeneratedChronologicalSpearmanState(rank.Length),
         EhlersAdaptiveRelativeStrengthIndexV1 rsi => new GeneratedAdaptiveRsiV1State(rsi.CycPart, false),
+        EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
+        EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
+        EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
         EhlersAdaptiveRsiFisherTransformV1 => new GeneratedAdaptiveRsiV1State(.5, true),
         EhlersAdaptiveStochasticIndicatorV1 stochastic => new GeneratedAdaptiveRangeV1State(stochastic.CycPart, false, .015),
         EhlersAdaptiveCommodityChannelIndexV1 commodity => new GeneratedAdaptiveRangeV1State(commodity.CycPart, true, commodity.Constant),
@@ -3614,6 +3620,40 @@ internal static partial class ValuesBarExecution
             return result;
         }
         public void Dispose() => _values.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveCyberWindow _window = new(length, alpha);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Cycle;
+            outputs[1] = value.Period;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAdaptiveGravityState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly AdaptiveGravityWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedSmoothedAdaptiveMomentumState(int first, int second, MovingAvgType average) : IMultiOutputState, IDisposable
+    {
+        private readonly SmoothedAdaptiveMomentumWindow _window = new(first, second, average);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedAdaptiveRsiV1State(double fraction, bool fisher) : IMultiOutputState, IDisposable
