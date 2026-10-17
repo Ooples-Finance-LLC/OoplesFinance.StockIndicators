@@ -146,6 +146,12 @@ internal static partial class ValuesBarExecution
             or EhlersAutoCorrelationIndicator or EhlersAutoCorrelationPeriodogram
             or EhlersAdaptiveBandPassFilter { Bw: >= 0 and < double.PositiveInfinity }
             or EhlersZeroCrossingsDominantCycle { Bw: >= 0 and < double.PositiveInfinity }
+            or EhlersAdaptiveRsiFisherTransformV1
+            or EhlersAdaptiveRelativeStrengthIndexV1 { CycPart: > 0 and < double.PositiveInfinity }
+            or EhlersAdaptiveStochasticIndicatorV1 { CycPart: > 0 and < double.PositiveInfinity }
+            or EhlersAdaptiveCommodityChannelIndexV1 { CycPart: > 0 and < double.PositiveInfinity, Constant: > 0 and < double.PositiveInfinity }
+            or EhlersAdaptiveRelativeStrengthIndexV2 or EhlersAdaptiveRsiFisherTransformV2
+            or EhlersAdaptiveStochasticIndicatorV2 or EhlersAdaptiveStochasticInverseFisherTransform or EhlersAdaptiveCommodityChannelIndexV2
             or EhlersEvenBetterSineWaveIndicator
             or EhlersReverseEmaIndicatorV1 { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
             or EhlersReverseEmaIndicatorV2 { TrendAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity, CycleAlpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
@@ -462,6 +468,15 @@ internal static partial class ValuesBarExecution
         EhlersAutoCorrelationPeriodogram spectrum => new GeneratedAutocorrelationSpectrumState(spectrum.Length1, spectrum.Length2, spectrum.Length3),
         EhlersAdaptiveBandPassFilter band => new GeneratedAdaptiveBandPassState(band.Length1, band.Length2, band.Length3, band.Bw),
         EhlersZeroCrossingsDominantCycle cycle => new GeneratedZeroCrossingCycleState(cycle.Length, cycle.Bw),
+        EhlersAdaptiveRelativeStrengthIndexV1 rsi => new GeneratedAdaptiveRsiV1State(rsi.CycPart, false),
+        EhlersAdaptiveRsiFisherTransformV1 => new GeneratedAdaptiveRsiV1State(.5, true),
+        EhlersAdaptiveStochasticIndicatorV1 stochastic => new GeneratedAdaptiveRangeV1State(stochastic.CycPart, false, .015),
+        EhlersAdaptiveCommodityChannelIndexV1 commodity => new GeneratedAdaptiveRangeV1State(commodity.CycPart, true, commodity.Constant),
+        EhlersAdaptiveRelativeStrengthIndexV2 rsi => new GeneratedAdaptiveRsiV2State(rsi.Length1, rsi.Length2, rsi.Length3, false),
+        EhlersAdaptiveRsiFisherTransformV2 fisher => new GeneratedAdaptiveRsiV2State(fisher.Length1, fisher.Length2, fisher.Length3, true),
+        EhlersAdaptiveStochasticIndicatorV2 stochastic => new GeneratedAdaptiveRangeV2State(stochastic.Length1, stochastic.Length2, stochastic.Length3, false, false),
+        EhlersAdaptiveStochasticInverseFisherTransform fisher => new GeneratedAdaptiveRangeV2State(fisher.Length1, fisher.Length2, fisher.Length3, false, true),
+        EhlersAdaptiveCommodityChannelIndexV2 commodity => new GeneratedAdaptiveRangeV2State(commodity.Length1, commodity.Length2, commodity.Length3, true, false),
         EhlersEvenBetterSineWaveIndicator sine => new GeneratedEvenBetterSineState(sine.Length1, sine.Length2),
         EhlersReverseEmaIndicatorV1 reverse => new GeneratedReverseEmaState(reverse.Alpha),
         EhlersReverseEmaIndicatorV2 reverse => new GeneratedReverseEmaPairState(reverse.TrendAlpha, reverse.CycleAlpha),
@@ -3650,6 +3665,71 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
         public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAdaptiveRsiV1State(double fraction, bool fisher) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveRsiV1Window _window = new(fraction, fisher);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Value;
+            if (!fisher) outputs[1] = value.Average;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAdaptiveRangeV1State(double fraction, bool commodity, double constant) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveRangeV1Window _window = new(fraction, commodity, constant);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var price = commodity ? CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close) : bar.Close;
+            var value = _window.Next(price, bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Value;
+            outputs[1] = value.Average;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedAdaptiveRsiV2State(int upper, int lower, int firstLag, bool fisher) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveRsiV2Window _window = new(upper, lower, firstLag, MovingAvgType.ExponentialMovingAverage);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            if (fisher)
+            {
+                var transformed = 2 * (value.Value - .5);
+                var amplified = MathHelper.MinOrMax(1.5 * transformed, .999, -.999);
+                outputs[0] = .5 * Math.Log((1 + amplified) / (1 - amplified));
+            }
+            else { outputs[0] = value.Value; outputs[1] = value.Average; }
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveRangeV2State(int upper, int lower, int firstLag, bool commodity, bool inverseFisher) : IMultiOutputState, IDisposable
+    {
+        private readonly AdaptiveRangeV2Window _window = new(upper, lower, firstLag, MovingAvgType.ExponentialMovingAverage, commodity);
+        private double _previousInverse;
+        public void Reset() { _window.Reset(); _previousInverse = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            if (inverseFisher)
+            {
+                var inverse = Math.Tanh(6 * (value.Value - .5));
+                outputs[0] = inverse;
+                outputs[1] = .9 * _previousInverse;
+                _previousInverse = inverse;
+            }
+            else { outputs[0] = value.Value; outputs[1] = value.Average; }
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedEvenBetterSineState(int high, int low) : IMultiOutputState, IDisposable

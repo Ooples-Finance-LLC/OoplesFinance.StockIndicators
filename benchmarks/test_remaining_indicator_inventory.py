@@ -1,5 +1,6 @@
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from build_remaining_indicator_inventory import enum_members, inventory, source_text
 
@@ -24,7 +25,9 @@ class RemainingInventoryTests(unittest.TestCase):
                          len({row['type'] for row in report['handwritten_facades']}))
 
     def test_receipt_does_not_hide_unassessed_alias_or_claim_performance(self):
-        report = inventory(Path(__file__).resolve().parents[1])
+        with patch('build_remaining_indicator_inventory.contract_receipts',
+                   return_value={'MidRangeSpecOptions': ['fixture-contracts.json']}):
+            report = inventory(Path(__file__).resolve().parents[1])
         median = next(row for row in report['batch_formulas'] if row['indicator'] == 'MedianPrice')
         self.assertIn('MidRangeSpecOptions', median['contract_receipts'])
         self.assertIn('MedianPriceSpecOptions', median['options_without_receipts'])
