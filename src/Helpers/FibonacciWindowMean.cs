@@ -7,11 +7,14 @@ internal sealed class FibonacciWindowMean : IDisposable
     private readonly PooledRingBuffer<double> _values;
     private readonly BigInteger _newest, _previous;
     private readonly ExactMeanAccumulator _denominator;
+    private readonly int _length;
+    private ExactMeanAccumulator _weighted, _previousWeighted;
 
-    internal FibonacciWindowMean(int length)
+    internal FibonacciWindowMean(int length, int capacityHint = int.MaxValue)
     {
-        _values = new PooledRingBuffer<double>(Math.Max(1, length));
-        var pair = Pair(_values.Capacity);
+        _length = Math.Max(1, length);
+        _values = new PooledRingBuffer<double>(Math.Min(_length, Math.Max(1, capacityHint)));
+        var pair = Pair(_length);
         _newest = pair.Current;
         _previous = pair.Next - pair.Current;
         _denominator.Add(1, pair.Current + pair.Next - 1);
@@ -52,19 +55,25 @@ internal sealed class FibonacciWindowMean : IDisposable
 
     internal double Next(double value, bool commit)
     {
-        var weight = _newest;
-        var previous = _previous;
-        var sum = new ExactMeanAccumulator();
-        for (var lag = 0; lag < _values.Capacity && lag <= _values.Count; lag++)
+        // A uses F(L)..F(1); B uses F(L-1)..F(0). Shifting the window
+        // gives A' = B + F(L)*value and B' = A-B + F(L-1)*value-expired.
+        // Both sums remain exact; only the published quotient is rounded.
+        var weighted = _previousWeighted;
+        weighted.Add(value, _newest);
+        var previousWeighted = _weighted;
+        previousWeighted.Subtract(_previousWeighted);
+        previousWeighted.Add(value, _previous);
+        if (_values.Count == _length) previousWeighted.Add(_values[0], -1);
+        var result = weighted.Ratio(_denominator);
+        if (commit)
         {
-            sum.Add(lag == 0 ? value : _values[_values.Count - lag], weight);
-            (weight, previous) = (previous, weight - previous);
+            _weighted = weighted;
+            _previousWeighted = previousWeighted;
+            _values.TryAdd(value, out _);
         }
-        var result = sum.Ratio(_denominator);
-        if (commit) _values.TryAdd(value, out _);
         return result;
     }
 
-    internal void Reset() => _values.Clear();
+    internal void Reset() { _values.Clear(); _weighted = _previousWeighted = default; }
     public void Dispose() => _values.Dispose();
 }

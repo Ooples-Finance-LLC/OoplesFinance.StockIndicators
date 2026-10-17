@@ -1,0 +1,37 @@
+{
+  "batch": "truncated-band-pass-shared-execution",
+  "types": [
+    "EhlersTruncatedBandPassFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact truncated band-pass kernel; preserve phase rescue, overflow fallback, independent cutoff, source selection and lifecycle.",
+  "verification": {
+    "unit_passed": 28,
+    "fixture_passed": 4,
+    "discovery_passed": 165,
+    "gpu_passed": 100,
+    "contract_methods": 1506,
+    "hosted_methods": 1494,
+    "evidence": [
+      {
+        "file": "truncatedband-unit.trx.gz",
+        "passed_cases": 28,
+        "trx_sha256": "8cbeedabaae81602468554105cfd25e2f51cfc94bc784fb6140d7e523646ff4c"
+      },
+      {
+        "file": "truncatedband-fixture.trx.gz",
+        "passed_cases": 169,
+        "trx_sha256": "3cc3a1ffc5783c7a587d5d8464000b6e74eb5f6c29c21dce0843da5aab2bd6bf"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTruncatedBandBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersTruncatedBandPassFilter"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

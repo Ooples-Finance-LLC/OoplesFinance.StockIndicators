@@ -1,0 +1,39 @@
+{
+  "batch": "volatility-index-shared-execution",
+  "types": [
+    "VolatilityIndexDynamicAverageIndicator",
+    "ChandeVolatilityIndexDynamicAverageIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute both VIDYA recursive outputs together using the exact existing volatility normalization kernel. Preserve both aliases, EMA defaults, nonnegative finite gains, extrapolation, seed and unfillable startup, original fields, source/component fallback and ownership.",
+  "verification": {
+    "unit_passed": 27,
+    "fixture_passed": 8,
+    "discovery_passed": 142,
+    "gpu_passed": 100,
+    "contract_methods": 1481,
+    "hosted_methods": 1469,
+    "evidence": [
+      {
+        "file": "volatilityindex-unit.trx.gz",
+        "passed_cases": 27,
+        "trx_sha256": "67d2b0dd5584ab64d3d80d2828e9db30c3ebd8c7302b8f9eb2babc65b9c11d6f"
+      },
+      {
+        "file": "volatilityindex-fixture.trx.gz",
+        "passed_cases": 150,
+        "trx_sha256": "5cdcb0adbfcac303c009691872bf77624097f0a1c72e576051dc5a51b38b0403"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolatilityIndexBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VolatilityIndexDynamicAverageIndicator",
+      "ChandeVolatilityIndexDynamicAverageIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

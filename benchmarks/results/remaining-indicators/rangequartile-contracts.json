@@ -1,0 +1,39 @@
+{
+  "batch": "range-quartile-bands-shared-execution",
+  "types": [
+    "InterquartileRangeBands",
+    "RangeBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse observed nearest-rank quartiles and extrema of rounded SMA centers with exact band arithmetic. Compute three outputs together with input-bounded storage while preserving startup, multiplier boundaries, clamps, original fields, fallback and ownership.",
+  "verification": {
+    "unit_passed": 50,
+    "fixture_passed": 8,
+    "discovery_passed": 124,
+    "gpu_passed": 100,
+    "contract_methods": 1463,
+    "hosted_methods": 1451,
+    "evidence": [
+      {
+        "file": "rangequartile-unit.trx.gz",
+        "passed_cases": 50,
+        "trx_sha256": "a260694a9fa9feb6fee03d54701e821ab76efc0ad58df96b946a4076b780ace1"
+      },
+      {
+        "file": "rangequartile-fixture.trx.gz",
+        "passed_cases": 132,
+        "trx_sha256": "b9f1eee771d53b6cbfbddc2d4e196f222211dcee9475c5cea5e7995ca5aecdb3"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRangeQuartileBandBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "InterquartileRangeBands",
+      "RangeBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

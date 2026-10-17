@@ -1,0 +1,37 @@
+{
+  "batch": "generated-roc-momentum",
+  "types": [
+    "Roc",
+    "Momentum"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Bounded lag storage and existing exact rounded ratios; momentum computes its primary and weighted signal together, preserving the invalid dependent suffix. Default plain configurations only.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 42,
+    "fixture_passed": 8,
+    "gpu_passed": 100,
+    "contract_methods": 1336,
+    "hosted_methods": 1324,
+    "unit_trx_sha256": "c53ca6e48c20f3a9f051fbdc3f67c19922acb888d71ce0b8360f10b29d1ef7b2",
+    "fixture_trx_sha256": "cea9dd5efa54bfe616d721bbe3887c4445b98a3a554d141af31f4c9f2f690917"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRatioBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

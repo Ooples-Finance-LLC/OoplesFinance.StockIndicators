@@ -1,0 +1,41 @@
+{
+  "batch": "trend-roc-channels-shared-execution",
+  "types": [
+    "TrendTraderBands",
+    "StandardDeviationChannel",
+    "RateOfChangeBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse weighted trend-stop bands, exact partial regression/full-window deviation and smoothed ROC bands. Bound retained history while preserving startup, signed zero, component/source fallback, validation and ownership.",
+  "verification": {
+    "unit_passed": 169,
+    "fixture_passed": 12,
+    "discovery_passed": 128,
+    "gpu_passed": 100,
+    "contract_methods": 1467,
+    "hosted_methods": 1455,
+    "evidence": [
+      {
+        "file": "trendrocchannels-unit.trx.gz",
+        "passed_cases": 169,
+        "trx_sha256": "ec65e86e8e82ab8aad6ab0e549728c421a2a1565f2a186a185df58ea80cc9733"
+      },
+      {
+        "file": "trendrocchannels-fixture.trx.gz",
+        "passed_cases": 140,
+        "trx_sha256": "6436c9960d518b82ed34bbc0a83b42f2e07538e99f05f54ed7353f65c768d386"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTrendRocChannelBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TrendTraderBands",
+      "StandardDeviationChannel",
+      "RateOfChangeBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

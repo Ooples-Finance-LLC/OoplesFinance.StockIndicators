@@ -1,0 +1,40 @@
+{
+  "batch": "generated-pole-filters",
+  "types": [
+    "Ehlers2PoleButterworthFilterV1",
+    "Ehlers2PoleButterworthFilterV2",
+    "Ehlers2PoleSuperSmootherFilterV1",
+    "Ehlers2PoleSuperSmootherFilterV2",
+    "Ehlers3PoleButterworthFilterV1",
+    "Ehlers3PoleButterworthFilterV2",
+    "Ehlers3PoleSuperSmootherFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing exact TwoPoleWindow and ThreePoleWindow kernels through shared owned execution across seven Butterworth and Super Smoother facades. Preserve every variant coefficient, binomial input term, startup branch, min-period clamp and staged rounding.",
+  "verification": {
+    "unit_passed": 315,
+    "fixture_passed": 28,
+    "discovery_passed": 38,
+    "gpu_passed": 100,
+    "contract_methods": 1373,
+    "hosted_methods": 1361,
+    "evidence": [
+      {
+        "file": "polefilter-unit.trx.gz",
+        "passed_cases": 315,
+        "trx_sha256": "22950d99250ffac9f9080dada628d08aaaa14120e3c6f3ea29e1b7f856593ccc"
+      },
+      {
+        "file": "polefilter-fixture.trx.gz",
+        "passed_cases": 66,
+        "trx_sha256": "2e584d34dff85e218283d530b2a0a361c9b964e3dc05be6ddf541a35d00a9bdb"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingPoleFilterBenchmarks",
+    "cases": 56,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

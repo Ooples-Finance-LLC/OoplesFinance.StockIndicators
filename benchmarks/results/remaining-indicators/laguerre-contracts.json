@@ -1,0 +1,35 @@
+{
+  "batch": "generated-laguerre",
+  "types": [
+    "EhlersLaguerreFilter",
+    "EhlersLaguerreRsi"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing Laguerre Filter and RSI kernels in shared owned-bar execution with identical period-derived coefficients, staged rounding, startup and reset semantics.",
+  "verification": {
+    "unit_passed": 91,
+    "fixture_passed": 8,
+    "discovery_passed": 29,
+    "gpu_passed": 100,
+    "contract_methods": 1364,
+    "hosted_methods": 1352,
+    "evidence": [
+      {
+        "file": "laguerre-unit.trx.gz",
+        "passed_cases": 91,
+        "trx_sha256": "fcdf54fc07808111475f0666ebaa053e98651d5fe9fd75343f445c8e675231a5"
+      },
+      {
+        "file": "laguerre-fixture.trx.gz",
+        "passed_cases": 37,
+        "trx_sha256": "48043b3845174dc472ed8596a029ed08947eca66bb4ab643ba0055ddbfadd8d7"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingLaguerreBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

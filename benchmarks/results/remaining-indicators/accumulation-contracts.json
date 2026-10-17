@@ -1,0 +1,37 @@
+{
+  "batch": "generated-accumulation-and-ease",
+  "types": [
+    "AccumulationDistributionLine",
+    "EaseOfMovement",
+    "WilliamsAccumulationDistribution",
+    "SmoothedWilliamsAccumulationDistribution"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact money-flow and Williams accumulation helpers, compute line/signal together and bound the smoothed Williams SMA by owned input count. Parameterize the existing ease state by its finite divisor; nonfinite divisors and custom averages retain legacy execution. Legacy smoothed-Williams parity is tested through period4096 to avoid enormous legacy allocations.",
+  "verification": {
+    "unit_passed": 51,
+    "fixture_passed": 16,
+    "discovery_passed": 26,
+    "gpu_passed": 100,
+    "contract_methods": 1361,
+    "hosted_methods": 1349,
+    "evidence": [
+      {
+        "file": "accumulation-unit.trx.gz",
+        "passed_cases": 51,
+        "trx_sha256": "7fd625361b90b90af1eddc823eb47ef9810a413643871f74a7e5df6b1f233e2c"
+      },
+      {
+        "file": "accumulation-fixture.trx.gz",
+        "passed_cases": 42,
+        "trx_sha256": "28a8ada989f02cbfb059baef7d02413ebce87e1f133fa63fbe3f3cba29e988a0"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAccumulationBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,45 @@
+{
+  "batch": "relative-volatility-family-shared-execution",
+  "types": [
+    "RelativeVolatilityIndex",
+    "RviVolatility",
+    "RelativeVolatilityIndexV2",
+    "RelativeVolatilityIndexHigh",
+    "RelativeVolatilityIndexLow"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact population deviations and directional smoothers for V1/V2 plus aliases, preserve distinct seeded High/Low recurrence and original fields, and avoid unfillable deviation allocations while retaining variant startup and zero-denominator rules. Preserve clamps, sources, components, ownership and cancellation.",
+  "verification": {
+    "unit_passed": 71,
+    "fixture_passed": 20,
+    "discovery_passed": 141,
+    "gpu_passed": 100,
+    "contract_methods": 1480,
+    "hosted_methods": 1468,
+    "evidence": [
+      {
+        "file": "relativevolatility-unit.trx.gz",
+        "passed_cases": 71,
+        "trx_sha256": "e4d51dbbf2739bee34a172347d7aa16562068620cbf228096098c317b45f2d63"
+      },
+      {
+        "file": "relativevolatility-fixture.trx.gz",
+        "passed_cases": 161,
+        "trx_sha256": "dae6ae9c21bebf97ab17d1ee53f6e8243a9a147d922c9f187a3342773fc88bb9"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRelativeVolatilityBenchmarks",
+    "cases": 40,
+    "status": "prepared-not-measured",
+    "operations": [
+      "RelativeVolatilityIndex",
+      "RviVolatility",
+      "RelativeVolatilityIndexV2",
+      "RelativeVolatilityIndexHigh",
+      "RelativeVolatilityIndexLow"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

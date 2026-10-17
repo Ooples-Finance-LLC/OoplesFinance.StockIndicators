@@ -1,0 +1,41 @@
+{
+  "batch": "range-channels-shared-execution",
+  "types": [
+    "AverageTrueRangeChannel",
+    "StollerAverageRangeChannels",
+    "KeltnerChannelWidth"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact SMA range-channel and EMA/Wilder width kernels with bounded storage. Preserve rounded ATR-channel boundaries and fourth average output, Stoller bands, ignored width average option, finite multipliers, clamps, original fields and fallback contracts.",
+  "verification": {
+    "unit_passed": 280,
+    "fixture_passed": 12,
+    "discovery_passed": 119,
+    "gpu_passed": 100,
+    "contract_methods": 1458,
+    "hosted_methods": 1446,
+    "evidence": [
+      {
+        "file": "rangechannels-unit.trx.gz",
+        "passed_cases": 280,
+        "trx_sha256": "4877739ce7b8eb500a95649db623c14c27c392e03d9b8ce7b73df6b2f2f12e4b"
+      },
+      {
+        "file": "rangechannels-fixture.trx.gz",
+        "passed_cases": 131,
+        "trx_sha256": "937f7e08c585e9ccf2db806754d2d9856035304ebdd4d98e5a46438b44e88048"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRangeChannelBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AverageTrueRangeChannel",
+      "StollerAverageRangeChannels",
+      "KeltnerChannelWidth"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

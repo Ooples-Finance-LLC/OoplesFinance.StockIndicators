@@ -1,0 +1,35 @@
+{
+  "batch": "generated-adaptive-ema-and-conditional-seed-storage",
+  "types": [
+    "AdaptiveEma",
+    "AdaptiveExponentialMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact adaptive EMA kernel through shared execution with input-bounded history and original candle high/low. Avoid renting the unused full-series seed when no custom or unsupported average is active; retain external seed disposal and fallback contracts.",
+  "verification": {
+    "unit_passed": 93,
+    "fixture_passed": 8,
+    "discovery_passed": 58,
+    "gpu_passed": 100,
+    "contract_methods": 1393,
+    "hosted_methods": 1381,
+    "evidence": [
+      {
+        "file": "adaptiveema-unit.trx.gz",
+        "passed_cases": 93,
+        "trx_sha256": "670f892e024e855910c3a3cbe32b98ae94204809a76a03b00ff16772616371a0"
+      },
+      {
+        "file": "adaptiveema-fixture.trx.gz",
+        "passed_cases": 66,
+        "trx_sha256": "df56af641f1eb33341e8a2fabb48b3233f21f7bda8aecfff1e0c563e0e076a1e"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveEmaBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

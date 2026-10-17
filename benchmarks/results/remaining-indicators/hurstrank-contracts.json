@@ -1,0 +1,41 @@
+{
+  "batch": "ehlers-hurst-rank-shared-execution",
+  "types": [
+    "EhlersHurstCoefficient",
+    "EhlersNoiseEliminationTechnology",
+    "EhlersSpearmanRankIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Hurst and noise kernels and chronological Spearman scratch buffers; preserve padding, ties, independent periods, overflow fallback, sources and lifecycle.",
+  "verification": {
+    "unit_passed": 46,
+    "fixture_passed": 12,
+    "discovery_passed": 167,
+    "gpu_passed": 100,
+    "contract_methods": 1508,
+    "hosted_methods": 1496,
+    "evidence": [
+      {
+        "file": "hurstrank-unit.trx.gz",
+        "passed_cases": 46,
+        "trx_sha256": "ad25673f6b22fb00c8278a7c69328d53b25ac1da3205bf841dd27997ca6698c0"
+      },
+      {
+        "file": "hurstrank-fixture.trx.gz",
+        "passed_cases": 179,
+        "trx_sha256": "ae12e865cd744ea2d361f9418e8dc58d3b6e5f78141fe8163e9b5a7eaea69b70"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingHurstRankBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersHurstCoefficient",
+      "EhlersNoiseEliminationTechnology",
+      "EhlersSpearmanRankIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

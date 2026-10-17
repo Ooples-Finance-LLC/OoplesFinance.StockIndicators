@@ -1,0 +1,37 @@
+{
+  "batch": "better-volume-value-only-shared-execution",
+  "types": [
+    "BetterVolumeIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Use a fixed value-only BetterVolumeWindow mode in shared execution. Skip signal metric arrays, metric deques and range-history updates while preserving exact published upward volume and previous-close state. Default callers retain full signals. Frozen b0b88694 kernel comparisons cover default signals, previews, resets and extremes.",
+  "verification": {
+    "unit_passed": 102,
+    "fixture_passed": 4,
+    "discovery_passed": 69,
+    "gpu_passed": 100,
+    "contract_methods": 1404,
+    "hosted_methods": 1392,
+    "evidence": [
+      {
+        "file": "bettervolume-unit.trx.gz",
+        "passed_cases": 102,
+        "trx_sha256": "c952c81d9256ec1ca0d9d013daaa1458527354d118d7e081e990810452b7c906"
+      },
+      {
+        "file": "bettervolume-fixture.trx.gz",
+        "passed_cases": 73,
+        "trx_sha256": "1c2e799570654b043c7ef42dd1beb9d3748da41cc9577a695c9da91c5fefe65e"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingBetterVolumeBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "BetterVolumeIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

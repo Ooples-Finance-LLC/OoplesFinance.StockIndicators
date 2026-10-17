@@ -1,0 +1,36 @@
+{
+  "batch": "generated-weighted-lag-averages",
+  "types": [
+    "Alma",
+    "JsaMovingAverage",
+    "SelfWeightedMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Shared execution reuses ALMA, JSA and Self Weighted kernels. Bound owned ALMA history by input count while retaining original-period Gaussian coefficients and fixed .85/6 defaults. Avoid JSA lag history when the source cannot reach the original period, preserving its zero-prior mean startup. Self Weighted retains observed-history exact ratios.",
+  "verification": {
+    "unit_passed": 90,
+    "fixture_passed": 12,
+    "discovery_passed": 47,
+    "gpu_passed": 100,
+    "contract_methods": 1382,
+    "hosted_methods": 1370,
+    "evidence": [
+      {
+        "file": "weightedlag-unit.trx.gz",
+        "passed_cases": 90,
+        "trx_sha256": "52a8b2fcbe4787918bf27314acd70f2319699b9782afb74a37fd2ca3fc90a0c4"
+      },
+      {
+        "file": "weightedlag-fixture.trx.gz",
+        "passed_cases": 59,
+        "trx_sha256": "74be59e823dfa985605add5f8be35dadc38797a3ad830f2ec1bc8890ccc05191"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWeightedLagBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

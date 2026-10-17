@@ -1,0 +1,41 @@
+{
+  "batch": "candle-kernel-shared-execution",
+  "types": [
+    "Qstick",
+    "DailyAveragePriceDelta",
+    "DrunkardWalk"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing exact kernels for Qstick, Daily Average Price Delta and Drunkard Walk. Compute paired outputs together while retaining original candle fields, staged arithmetic, newest Drunkard extremum ties, independent facade clamps/warmup, ignored Drunkard Length2 formula semantics and component/source fallback.",
+  "verification": {
+    "unit_passed": 295,
+    "fixture_passed": 12,
+    "discovery_passed": 111,
+    "gpu_passed": 100,
+    "contract_methods": 1450,
+    "hosted_methods": 1438,
+    "evidence": [
+      {
+        "file": "candlekernels-unit.trx.gz",
+        "passed_cases": 295,
+        "trx_sha256": "602c9c8ac28c8b851479508ec9cf39ef3fcb2681ea8188f4b9c8f34e57a19b23"
+      },
+      {
+        "file": "candlekernels-fixture.trx.gz",
+        "passed_cases": 123,
+        "trx_sha256": "700660f61d788711fe9d43026bb0fe1ef726a822cfd30ee4dafa5918b2369ad4"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingCandleKernelBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "Qstick",
+      "DailyAveragePriceDelta",
+      "DrunkardWalk"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
