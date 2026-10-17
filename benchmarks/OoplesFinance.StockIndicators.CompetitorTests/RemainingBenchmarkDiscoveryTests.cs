@@ -8,6 +8,8 @@ public sealed class RemainingBenchmarkDiscoveryTests
 {
     [Theory]
     [InlineData(typeof(RemainingAutocorrelationFamilyBenchmarks), 32)]
+    [InlineData(typeof(RemainingAdaptiveV1Benchmarks), 32)]
+    [InlineData(typeof(RemainingAdaptiveV2Benchmarks), 40)]
     [InlineData(typeof(RemainingHurstRankBenchmarks), 24)]
     [InlineData(typeof(RemainingCorrelationFamilyBenchmarks), 32)]
     [InlineData(typeof(RemainingTruncatedBandBenchmarks), 8)]

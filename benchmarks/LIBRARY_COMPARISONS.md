@@ -4332,3 +4332,12 @@ Ehlers Hurst coefficient, noise elimination and Spearman rank indicators now reu
 
 
 Ehlers autocorrelation, periodogram, adaptive band-pass and zero-crossing cycle indicators now reuse exact incremental kernels in shared execution. Adaptive outputs publish together; lag clamps, bandwidth validation, selected sources and lifecycle are preserved. Validation: 73 unit cases, 16 parity cases, 168 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Four Ehlers adaptive V1 RSI, Fisher, stochastic and commodity facades now reuse exact MAMA-cycle kernels in shared execution. Paired outputs, hidden Fisher fraction, positive parameter validation, CCI typical-price versus close-cycle inputs, sources and lifecycle are preserved. Validation: 35 unit cases, 16 parity cases, 168 discovery cases, 100 local GPU cases and four inventory checks passed. Thirty-two timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Five Ehlers adaptive V2 RSI, stochastic, commodity and Fisher facades now share exact incremental execution. Related outputs publish together and Fisher transforms stream without full intermediate histories. Transform arithmetic, inverse-Fisher signal lag, periods, explicit averages/sources and lifecycle are preserved. Validation: 95 unit cases, 20 parity cases, 168 discovery cases, 100 local GPU cases and four inventory checks passed. Forty timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+The preserved autocorrelation, Adaptive V1 and Adaptive V2 candidates are combined in one shared-execution tree. Three focused mixed-root cases, 170 discovery cases, 100 local GPU cases and four inventory checks passed on the integrated source. Existing independent numerical and parity evidence is retained from each verified candidate; no expensive parity or competitor timings were replayed. Exact candidate references and fresh checks are recorded in results/remaining-indicators/adaptive-integration-verification.json. Performance qualification remains pending.

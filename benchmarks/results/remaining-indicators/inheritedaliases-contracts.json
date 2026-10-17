@@ -1,0 +1,101 @@
+{
+  "batch": "inherited-alias-unit-evidence-reconciliation",
+  "types": [
+    "Adl",
+    "MedianPrice",
+    "TypicalPrice",
+    "FullTypicalPrice"
+  ],
+  "status": "historical-unit-contracts-reconciled-performance-pending",
+  "implementation": "Record previously omitted alias coverage from existing passing unit runs. No production change or test replay.",
+  "verification": {
+    "evidence": [
+      {
+        "types": [
+          "Adl"
+        ],
+        "file": "inheritedcore-unit.trx.gz",
+        "trx_sha256": "af854c9c1964c8213edc7644d99a298c9b2f46042465bed4245b4f339bbbee5b",
+        "historical_commit": "ab4c32b03d785c212ecde246b9cc2370c0da6688",
+        "class": "SharedRecursiveStateTests",
+        "class_cases_passed": 8,
+        "test_names": [
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesPreserveSubnormalSignsWideValuesAndInputPrecedence",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesRetainCancellationCompositionAndGpuRejection",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesPreserveAllOutputsStartupAndOwnedHistory(period: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesPreserveAllOutputsStartupAndOwnedHistory(period: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesPreserveAllOutputsStartupAndOwnedHistory(period: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesPreserveAllOutputsStartupAndOwnedHistory(period: -3)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesPreserveAllOutputsStartupAndOwnedHistory(period: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedRecursiveStateTests.RecursiveStatesPreserveAllOutputsStartupAndOwnedHistory(period: 3)"
+        ],
+        "unchanged_sources_sha256": {
+          "tests/ModelsTests/SharedRecursiveStateTests.cs": "fbb5abebc6562cb94d5b4ba83e565c68b6f3f6810a4ab8a6bd317f2e526a5513",
+          "src/Helpers/MoneyFlowAccumulationWindow.cs": "48b94b959f687fc7527812d287b1029bba396a89e2f4a12b6d7ffb299f8269a5",
+          "src/Helpers/RocBankWindow.cs": "869e0a1481dd550ba3ca8d6a3572917702cdd7249be72354f9d5e6ed183bb813"
+        },
+        "unchanged_adl_state_sha256": "4b927362e169fbbbda5b43fbb763fb5b879beed02599ad59dca9b92ea0bf9553"
+      },
+      {
+        "types": [
+          "MedianPrice",
+          "TypicalPrice",
+          "FullTypicalPrice"
+        ],
+        "file": "inheritedaliases-price-unit.trx.gz",
+        "trx_sha256": "b18a900d378a951fe9e788a47cc5f3228fdd2f7f49c72ca9c88c793726556c06",
+        "historical_commit": "48dc2ab964ae7b9be0394b7de3613706a56a2f7e",
+        "class": "SharedPriceProjectionTests",
+        "class_cases_passed": 41,
+        "test_names": [
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 6, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 2, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 3, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 0, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 3, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 1, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 2)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 0, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 7, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 4, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 6, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 5)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 6, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 7, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 5, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.MixedRequestsAndLaterLegacyBuildPreserveOwnedData",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 4, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 5, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 1, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 0, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 3, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 7, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 3)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 4, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 4, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 1, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 2, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 2, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 6)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 3, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 2, length: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 7)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 7, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 0, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 5, length: 1)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 6, length: 20)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 5, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 0)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.GeneratedProjectionsPreserveEvaluatorBitsHistoryAndWarmupMetadata(operation: 1, length: 2147483647)",
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedPriceProjectionTests.ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(operation: 4)"
+        ],
+        "unchanged_sources_sha256": {
+          "tests/ModelsTests/SharedPriceProjectionTests.cs": "21b8a5bc832ca564599baa54e917b69aef6a29fd25261dab877c03e9ebd31ad1",
+          "src/Indicators/ValuesBarExecution.PriceProjection.cs": "9e882b00dfa44a6b44946f0be15cff695d8876c3291a61b9e423c08d1faefad0"
+        }
+      }
+    ]
+  },
+  "qualification": "Historical unit evidence only. Class counts include other roots tested by those classes. This receipt adds no current-head test result, GPU result, parity fixture result or measured performance claim. Existing benchmark evidence and timing queues remain separate."
+}
