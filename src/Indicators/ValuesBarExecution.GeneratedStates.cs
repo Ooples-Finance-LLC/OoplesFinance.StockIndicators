@@ -116,6 +116,9 @@ internal static partial class ValuesBarExecution
             or EhlersRocketRelativeStrengthIndex { ObosLevel: > double.NegativeInfinity and < double.PositiveInfinity, Mult: > double.NegativeInfinity and < double.PositiveInfinity }
             or Frama { Length: < int.MaxValue } or EhlersFrama { Length: < int.MaxValue }
             or FisherTransform or EhlersFisherTransform or EhlersInverseFisherTransform or EhlersRelativeStrengthIndexInverseFisherTransform
+            or EhlersUniversalOscillator
+            or EhlersUniversalTradingFilter { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or EhlersSnakeUniversalTradingFilter { Bw: > double.NegativeInfinity and < double.PositiveInfinity }
             or EhlersAMDetector
             or EhlersKaufmanAdaptiveMovingAverage
             or EhlersSimpleCycleIndicator { Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -415,6 +418,9 @@ internal static partial class ValuesBarExecution
         EhlersFisherTransform oscillator => new GeneratedFisherState(oscillator.Length),
         EhlersInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, 9, count),
         EhlersRelativeStrengthIndexInverseFisherTransform oscillator => new GeneratedInverseRsiFisherState(oscillator.Length, oscillator.SignalLength, count),
+        EhlersUniversalOscillator oscillator => new GeneratedUniversalOscillatorState(oscillator.Length),
+        EhlersUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Mult, false),
+        EhlersSnakeUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Bw, true),
         EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
@@ -3505,6 +3511,33 @@ internal static partial class ValuesBarExecution
             return Math.Tanh(_average.Next(new StrengthValue(value), true).Mantissa);
         }
         public void Dispose() { _rsi.Dispose(); _average.Dispose(); }
+    }
+
+    private sealed class GeneratedUniversalOscillatorState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly UniversalOscillatorWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line;
+            outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedUniversalTradingState(int length, int rms, double parameter, bool snake) : IMultiOutputState, IDisposable
+    {
+        private readonly UniversalTradingWindow _window = new(MovingAvgType.EhlersHannMovingAverage, length, rms, parameter, snake);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = snake ? value.Upper : value.Line;
+            outputs[1] = snake ? value.Line : value.Upper;
+            outputs[2] = value.Lower;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAmDetectorState(int envelope, int smooth) : IMultiOutputState, IDisposable
