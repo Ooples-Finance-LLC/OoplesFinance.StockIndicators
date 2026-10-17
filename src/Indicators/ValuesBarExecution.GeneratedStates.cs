@@ -103,6 +103,8 @@ internal static partial class ValuesBarExecution
             or VolatilityWaveMovingAverage
             or GarmanKlassVolatility
             or HistoricalVolatilityPercentile
+            or EhlersDeviationScaledMovingAverage { Length: <= 1_073_741_823 }
+            or EhlersFisherizedDeviationScaledOscillator or EhlersDeviationScaledSuperSmoother
             or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
             or ParkinsonVolatility { Length: > 0 and <= 536_870_911 } or RogersSatchellVolatility { Length: > 0 }
             or YangZhangVolatility { Length: < int.MaxValue }
@@ -365,6 +367,9 @@ internal static partial class ValuesBarExecution
         VolatilityWaveMovingAverage average => new GeneratedVolatilityWaveState(average.Length),
         GarmanKlassVolatility volatility => new GeneratedGarmanKlassState(volatility.Length, count),
         HistoricalVolatilityPercentile volatility => new GeneratedHistoricalRankState(volatility.Length, volatility.AnnualLength),
+        EhlersDeviationScaledMovingAverage average => new GeneratedDeviationScaledState(average.Length, DeviationScaledWindow.ResolveSlow(average.Length), false),
+        EhlersFisherizedDeviationScaledOscillator oscillator => new GeneratedDeviationScaledState(oscillator.Length, 40, true),
+        EhlersDeviationScaledSuperSmoother average => new GeneratedDeviationSuperState(average.Length),
         TypicalPriceVolatility volatility => new GeneratedTypicalVolatilityState(Math.Max(1, volatility.Length), count),
         ParkinsonVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.Parkinson, volatility.Length, count),
         RogersSatchellVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.RogersSatchell, volatility.Length, count),
@@ -3212,6 +3217,29 @@ internal static partial class ValuesBarExecution
         private readonly MedianAdaptiveWindow _window = new(length, threshold);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedDeviationScaledState(int fast, int slow, bool fisher) : IIndicatorState, IDisposable
+    {
+        private readonly DeviationScaledWindow _window = new(fast, slow);
+        private double _previous;
+        public void Reset() { _window.Reset(); _previous = 0; }
+        public double Update(in Bar bar)
+        {
+            var value = _window.Next(bar.Close, true, out _);
+            if (!fisher) return value;
+            if (Math.Abs(value) < 2) _previous = FisherArithmetic.Transform(value / 2);
+            return _previous;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedDeviationSuperState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly DeviationSuperSmootherWindow _window = new(MovingAvgType.EhlersHannMovingAverage, length, 50);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedHistoricalRankState(int length, int annualLength) : IMultiOutputState, IDisposable

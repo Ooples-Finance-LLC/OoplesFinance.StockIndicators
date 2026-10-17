@@ -4265,3 +4265,6 @@ Garman-Klass volatility now caches stable candle terms, retains oldest-first flo
 
 
 Historical Volatility Percentile now computes rank and signal together with the existing rolling sums, strict rank boundary and exact EMA recurrence. Clamped periods, warmup, source/component fallback and ownership are preserved. Validation: 18 unit cases, 4 parity cases, 148 discovery cases, 100 local GPU cases and four inventory tests passed. Eight timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.
+
+
+The Ehlers deviation-scaled moving average, Fisherized deviation-scaled oscillator and deviation-scaled super smoother now reuse exact incremental kernels through shared execution. Doubled-period overflow fallback, fixed hidden slow periods, Fisher hold behavior, ignored Poles, sources/components and ownership are preserved. Validation: 40 unit cases, 12 parity cases, 149 discovery cases, 100 local GPU cases and four inventory tests passed. Twenty-four timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.

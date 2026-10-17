@@ -1,0 +1,41 @@
+{
+  "batch": "ehlers-deviation-shared-execution",
+  "types": [
+    "EhlersDeviationScaledMovingAverage",
+    "EhlersFisherizedDeviationScaledOscillator",
+    "EhlersDeviationScaledSuperSmoother"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact deviation-scaled kernels for the moving average, Fisherized oscillator and super smoother. Preserve doubled-period overflow fallback, fixed hidden slow periods, Fisher hold behavior, ignored Poles, original fields, sources/components and ownership.",
+  "verification": {
+    "unit_passed": 40,
+    "fixture_passed": 12,
+    "discovery_passed": 149,
+    "gpu_passed": 100,
+    "contract_methods": 1488,
+    "hosted_methods": 1476,
+    "evidence": [
+      {
+        "file": "deviationfamily-unit.trx.gz",
+        "passed_cases": 40,
+        "trx_sha256": "1ee2e46d1126aa5c1bbef162cd0552c1e215c5b8968dcf316c04e6d5bfc4d326"
+      },
+      {
+        "file": "deviationfamily-fixture.trx.gz",
+        "passed_cases": 161,
+        "trx_sha256": "e61c29eabacc01d74c263d2a5cdc9cc2b05220f070204af0bc8791797744aef0"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDeviationFamilyBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersDeviationScaledMovingAverage",
+      "EhlersFisherizedDeviationScaledOscillator",
+      "EhlersDeviationScaledSuperSmoother"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
