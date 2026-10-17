@@ -8,6 +8,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
 {
     [Theory]
     [InlineData(typeof(RemainingRelativeVolatilityBenchmarks), 40)]
+    [InlineData(typeof(RemainingVolatilityWaveBenchmarks), 8)]
     [InlineData(typeof(RemainingVolatilityIndexBenchmarks), 16)]
     [InlineData(typeof(RemainingMedianBenchmarks), 24)]
     [InlineData(typeof(RemainingVolatilityGeometryBenchmarks), 24)]

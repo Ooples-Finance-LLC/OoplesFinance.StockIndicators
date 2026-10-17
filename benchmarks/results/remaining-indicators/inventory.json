@@ -7557,7 +7557,13 @@
       "options": [
         "VolatilityWaveMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VolatilityWaveMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/volatilitywave-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VolumeAccumulationOscillator",
@@ -10216,6 +10222,7 @@
     "benchmarks/results/remaining-indicators/volatilitygeometry-contracts.json": "1cea8a81219495a9cfa9dad26110988d29f9e42113c3db84641bbb1fe05626d5",
     "benchmarks/results/remaining-indicators/volatilityindex-contracts.json": "255f838295db08ee817df02bac82450d786136b7de34b6c12dcfc5b7de19a809",
     "benchmarks/results/remaining-indicators/volatilitystops-contracts.json": "67156f8f4a1a14a988f74563e87f1ca7d0d2d297682dcd1ca8fb907274c3e07c",
+    "benchmarks/results/remaining-indicators/volatilitywave-contracts.json": "ecba571cfb86023410eb2972e4b87a4a22839883c64a81a163addb1803f07a7a",
     "benchmarks/results/remaining-indicators/volume-contracts.json": "1e80ae57d2f76d8978e29acfecc682a114126173f7f51d34dc6aa7d36a327ad2",
     "benchmarks/results/remaining-indicators/volumeadjusted-contracts.json": "97f74b034b1ca2b8cb1b1d61728f09306b41dfd8944c220961fd743d7a0a6233",
     "benchmarks/results/remaining-indicators/volumealias-contracts.json": "19020aca691f72ae8cde5ba154f47ca1fb0d25edda731ccc20f7ca08dcefe4fb",
@@ -10438,7 +10445,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2c7f6f956841335f5a8fc3ff73172b1bed9c836c7a0f3d2cef9861362c766ebd",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "233c6a12a4687233b3d772c4e1d9d4c4e435a3a7f2af5d82503664fbeaacee03",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
