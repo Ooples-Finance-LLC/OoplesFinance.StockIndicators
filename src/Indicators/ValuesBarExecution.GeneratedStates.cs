@@ -101,6 +101,7 @@ internal static partial class ValuesBarExecution
             or StatisticalVolatility or VolatilityQualityIndex
             or VolatilityRatio or VolatilitySwitchIndicator
             or VolatilityWaveMovingAverage
+            or GarmanKlassVolatility
             or TypicalPriceVolatility or StandardDeviationVolatility or ClosedFormDistanceVolatility
             or ParkinsonVolatility { Length: > 0 and <= 536_870_911 } or RogersSatchellVolatility { Length: > 0 }
             or YangZhangVolatility { Length: < int.MaxValue }
@@ -361,6 +362,7 @@ internal static partial class ValuesBarExecution
         RelativeVolatilityIndexLow volatility => new GeneratedSeededRelativeVolatilityState(false, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
         VolatilityWaveMovingAverage average => new GeneratedVolatilityWaveState(average.Length),
+        GarmanKlassVolatility volatility => new GeneratedGarmanKlassState(volatility.Length, count),
         TypicalPriceVolatility volatility => new GeneratedTypicalVolatilityState(Math.Max(1, volatility.Length), count),
         ParkinsonVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.Parkinson, volatility.Length, count),
         RogersSatchellVolatility volatility => new GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator.RogersSatchell, volatility.Length, count),
@@ -3208,6 +3210,20 @@ internal static partial class ValuesBarExecution
         private readonly MedianAdaptiveWindow _window = new(length, threshold);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedGarmanKlassState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly OhlcVolatilityWindow _window = new(OhlcVolatilityWindow.Estimator.GarmanKlass, Math.Max(1, length), count);
+        private readonly StrengthAverage _signal = new(MovingAvgType.WeightedMovingAverage, 7, count);
+        public void Reset() { _window.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(in bar);
+            outputs[0] = value;
+            outputs[1] = _signal.Next(new StrengthValue(value), true).Mantissa;
+        }
+        public void Dispose() { _window.Dispose(); _signal.Dispose(); }
     }
 
     private sealed class GeneratedOhlcVolatilityState(OhlcVolatilityWindow.Estimator estimator, int length, int count) : IIndicatorState, IDisposable
