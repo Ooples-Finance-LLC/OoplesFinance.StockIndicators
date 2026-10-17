@@ -4320,3 +4320,6 @@ Ehlers Voss Predictive Filter now publishes prediction and filter outputs togeth
 
 
 Ehlers reverse EMA V1/V2 and Even Better Sine Wave now reuse exact incremental kernels in shared execution. Independent cycle/trend outputs, alpha clamps including infinity, NaN fallback, sine normalization, source selection and lifecycle are preserved. Validation: 30 unit cases, 12 parity cases, 164 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.
+
+
+Ehlers Truncated Band Pass Filter now reuses its exact incremental kernel in shared execution. Phase rescue and overflow fallback, independent cutoff, source selection and lifecycle are preserved. Validation: 28 unit cases, four parity cases, 165 discovery cases, 100 local GPU cases and four inventory checks passed. Eight timing cases are prepared; quiet-window qualification remains pending and no competitor timings were rerun.

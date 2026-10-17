@@ -24,8 +24,20 @@ internal static partial class ValuesBarExecution
         return double.IsFinite(exact.Mean(length));
     }
 
+    private static bool IsTruncatedBandShared(EhlersTruncatedBandPassFilter filter)
+    {
+        if (!double.IsFinite(filter.Bw)) return false;
+        var length = Math.Max(1, filter.Length1);
+        var phase = filter.Bw * 2 * Math.PI / length;
+        if (!double.IsInfinity(phase)) return true;
+        var exact = new ExactMeanAccumulator();
+        exact.AddProduct(filter.Bw, 2 * Math.PI);
+        return double.IsFinite(exact.Mean(length));
+    }
+
     private static bool IsGeneratedState(IIndicator indicator) =>
         IsDemarkCountState(indicator) ||
+        indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
@@ -440,6 +452,7 @@ internal static partial class ValuesBarExecution
         EhlersUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Mult, false),
         EhlersSnakeUniversalTradingFilter filter => new GeneratedUniversalTradingState(filter.Length1, filter.Length2, filter.Bw, true),
         EhlersVossPredictiveFilter filter => new GeneratedVossState(filter.Length, filter.Predict, filter.Bw),
+        EhlersTruncatedBandPassFilter filter => new GeneratedTruncatedBandState(filter.Length1, filter.Length2, filter.Bw),
         EhlersAMDetector detector => new GeneratedAmDetectorState(detector.Length1, detector.Length2),
         EhlersKaufmanAdaptiveMovingAverage filter => new GeneratedEhlersKaufmanState(filter.Length),
         EhlersSimpleCycleIndicator cycle => new GeneratedSimpleCycleIndicatorState(cycle.Alpha),
@@ -3586,6 +3599,14 @@ internal static partial class ValuesBarExecution
             outputs[2] = value.Lower;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTruncatedBandState(int length, int cutoff, double bandwidth) : IMultiOutputState, IDisposable
+    {
+        private readonly TruncatedBandPassWindow _window = new(length, cutoff, bandwidth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => outputs[0] = _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedVossState(int length, double predict, double bandwidth) : IMultiOutputState, IDisposable
