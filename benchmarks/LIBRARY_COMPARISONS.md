@@ -4274,3 +4274,6 @@ Standard Error of the Mean and Ergodic Mean Deviation now reuse exact incrementa
 
 
 Ehlers deviation and residual-pair integration: 46 focused unit cases, 20 parity cases, 150 discovery cases, 100 local GPU cases and 4 inventory tests passed. Cross-batch mixed-root behavior is covered; unchanged independent numerical cases retain their archived evidence. Preserved timing candidates remain queued; this integration introduces no measured performance claim.
+
+
+Ergodic Candlestick, MACD, Percentage Price and True Strength v2 now compute related outputs together through shared exact candle, EMA-gap and strength kernels. Hidden periods, independent strength triples and output slots, overflowing signal tails, original fields, sources/components and ownership are preserved. Validation: 77 unit cases, 16 parity cases, 151 discovery cases, 100 local GPU cases and four inventory tests passed. Thirty-two timing cases are prepared; performance qualification remains pending and no competitor timings were rerun.
