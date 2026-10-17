@@ -100,6 +100,8 @@ internal static partial class ValuesBarExecution
             or ProjectionBands or ProjectionOscillator or ProjectionBandwidth
             or StatisticalVolatility or VolatilityQualityIndex
             or VolatilityRatio or VolatilitySwitchIndicator
+            or VolatilityIndexDynamicAverageIndicator { Alpha1: >= 0 and < double.PositiveInfinity, Alpha2: >= 0 and < double.PositiveInfinity }
+            or ChandeVolatilityIndexDynamicAverageIndicator { Alpha1: >= 0 and < double.PositiveInfinity, Alpha2: >= 0 and < double.PositiveInfinity }
             or RelativeVolatilityIndex or RviVolatility or RelativeVolatilityIndexV2
             or RelativeVolatilityIndexHigh or RelativeVolatilityIndexLow
             or VolatilityStop { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
@@ -352,6 +354,8 @@ internal static partial class ValuesBarExecution
         RelativeVolatilityIndexHigh volatility => new GeneratedSeededRelativeVolatilityState(true, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         RelativeVolatilityIndexLow volatility => new GeneratedSeededRelativeVolatilityState(false, Math.Max(1, volatility.Length), Math.Max(1, volatility.StdDevLength), count),
         VolatilityRatio volatility => new GeneratedVolatilityRatioState(volatility.Length),
+        VolatilityIndexDynamicAverageIndicator average => new GeneratedVolatilityIndexState(average.Length, average.Alpha1, average.Alpha2),
+        ChandeVolatilityIndexDynamicAverageIndicator average => new GeneratedVolatilityIndexState(average.Length, average.Alpha1, average.Alpha2),
         VolatilitySwitchIndicator volatility => new GeneratedVolatilitySwitchState(volatility.Length),
         CloseToCloseVolatility volatility => new GeneratedCloseVolatilityState(Math.Max(1, volatility.Length), count),
         DownsideDeviation deviation => new GeneratedDownsideDeviationState(Math.Max(1, deviation.Length), count),
@@ -3153,6 +3157,19 @@ internal static partial class ValuesBarExecution
             return _seen++ < length ? 0 : 50;
         }
         public void Dispose() => _window?.Dispose();
+    }
+
+    private sealed class GeneratedVolatilityIndexState(int length, double alpha1, double alpha2) : IMultiOutputState, IDisposable
+    {
+        private readonly VolatilityIndexWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, alpha1, alpha2);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.First;
+            outputs[1] = point.Second;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedVolatilityRatioState(int length) : IIndicatorState
