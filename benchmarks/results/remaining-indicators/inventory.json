@@ -6417,7 +6417,13 @@
       "options": [
         "StatisticalVolatilitySpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "StatisticalVolatilitySpecOptions": [
+          "benchmarks/results/remaining-indicators/statisticalquality-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StiffnessIndicator",
@@ -7412,7 +7418,13 @@
       "options": [
         "VolatilityQualityIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VolatilityQualityIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/statisticalquality-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VolatilityRatio",
@@ -10057,6 +10069,7 @@
     "benchmarks/results/remaining-indicators/scalperhurst-contracts.json": "49088bf1bbcab08c416cec9ae693854076266a6aa5ad662fdc18489fcb6d9572",
     "benchmarks/results/remaining-indicators/specialaverage-contracts.json": "2dfe676fa89b1943d6373b248182426168a70f6779acea994b0f5d5fb1475215",
     "benchmarks/results/remaining-indicators/standardizedscore-contracts.json": "d1240f8ebf536e3f97147ca9827b2ae966fed47f33b80b637d16fe52de45658c",
+    "benchmarks/results/remaining-indicators/statisticalquality-contracts.json": "96e68e031f9e8ca0bf2f269dbb83029e9a0b924a396b09a2743a4d3f1fe1b624",
     "benchmarks/results/remaining-indicators/steppedchannels-contracts.json": "10445eca5bf5ca141e192a68d4f2972ff57a1b4d19b10c52718b80f4d3b80e70",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
     "benchmarks/results/remaining-indicators/symmetric-contracts.json": "166810cfd981551049dc64f6c3037477b1bfce8487feb4e7fe8c00d718cb43a9",
@@ -10301,7 +10314,7 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "aac394c26ccd4852a7a92c271e3c6923da62fd5eb1963db9809b8be3540a9885",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "5c147f51a351b5e7b62dafe5bbb2cc6bda81f261328ea63d94289159cb2b0097",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
