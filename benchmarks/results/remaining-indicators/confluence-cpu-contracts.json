@@ -1,0 +1,32 @@
+{
+  "batch": "confluence-shared-execution",
+  "types": [
+    "ConfluenceIndicator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 17,
+    "parity_passed": 4,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "confluence-unit-verified.trx.gz",
+        "passed_cases": 17,
+        "trx_sha256": "edfac72412eaafab6abddced7ae9c72d533283113c9316ed06ba266df2eb2e3d"
+      },
+      {
+        "file": "confluence-parity-verified.trx.gz",
+        "passed_cases": 4,
+        "trx_sha256": "a3ae33ed2fb66d2dc021b5d990f99aa9b934505f218c86504129f7a28e587f8d"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}
