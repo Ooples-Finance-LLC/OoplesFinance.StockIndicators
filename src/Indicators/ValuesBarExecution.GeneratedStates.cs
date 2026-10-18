@@ -227,6 +227,9 @@ internal static partial class ValuesBarExecution
             or EfficientAutoLine { FastAlpha: >= -double.MaxValue and <= double.MaxValue, SlowAlpha: >= -double.MaxValue and <= double.MaxValue }
             or EarningSupportResistanceLevels or ElderMarketThermometer { MaType: null, SecondAverage: null }
             or ElderImpulseSystem or ElderRayIndex { MaType: null }
+            or EndPointMovingAverage
+            or ElliottWaveOscillator { MaType: null, SecondAverage: null, ThirdAverage: null } or EmaWaveIndicator
+            or EnhancedIndex { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -685,6 +688,10 @@ internal static partial class ValuesBarExecution
         ElderMarketThermometer thermometer => new GeneratedElderThermometerState(thermometer.Length),
         ElderImpulseSystem impulse => new GeneratedElderImpulseState(impulse.Length),
         ElderRayIndex ray => new GeneratedElderRayState(ray.Length),
+        EndPointMovingAverage average => new GeneratedEndPointState(Math.Max(1, average.Length), count),
+        ElliottWaveOscillator wave => new GeneratedElliottWaveState(Math.Max(1, wave.FastLength), Math.Max(1, wave.SlowLength), count),
+        EmaWaveIndicator wave => new GeneratedEmaWaveState(wave.Length1, wave.Length2, wave.Length3, wave.SmoothLength, count),
+        EnhancedIndex index => new GeneratedEnhancedIndexState(index.Length, index.SignalLength),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5184,6 +5191,63 @@ internal static partial class ValuesBarExecution
             _previousClose = bar.Close; _started = true;
             return high - average;
         }
+    }
+
+    private sealed class GeneratedEndPointState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PooledRingBuffer<double> _history = new(Math.Min(length, Math.Max(1, count)));
+        private readonly System.Numerics.BigInteger _divisor = new System.Numerics.BigInteger(length) * (length - 7L) / 2;
+        private ExactMeanAccumulator _sum, _weighted;
+        public void Reset() { _history.Clear(); _sum = _weighted = default; }
+        public double Update(in Bar bar)
+        {
+            var expired = _history.Count == length ? _history[0] : 0;
+            _weighted.Subtract(_sum);
+            _weighted.Add(expired, 4);
+            _weighted.Add(bar.Close, length - 4L);
+            _sum.Add(expired, -1); _sum.Add(bar.Close);
+            _history.TryAdd(bar.Close, out _);
+            var denominator = new ExactMeanAccumulator(); denominator.Add(1, _divisor);
+            return _weighted.Ratio(denominator);
+        }
+        public void Dispose() => _history.Dispose();
+    }
+
+    private sealed class GeneratedElliottWaveState(int fast, int slow, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _fast = fast <= count ? new(fast) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _slow = slow <= count ? new(slow) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _signal = fast <= count ? new(fast) : null;
+        private bool _invalid;
+        public void Reset() { _fast?.Reset(); _slow?.Reset(); _signal?.Reset(); _invalid = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var line = (_fast?.Next(bar.Close, true) ?? 0) - (_slow?.Next(bar.Close, true) ?? 0);
+            _invalid |= double.IsInfinity(line);
+            var signal = _invalid ? double.NaN : _signal?.Next(line, true) ?? 0;
+            outputs[0] = line; outputs[1] = signal; outputs[2] = line - signal;
+        }
+        public void Dispose() { _fast?.Dispose(); _slow?.Dispose(); _signal?.Dispose(); }
+    }
+
+    private sealed class GeneratedEmaWaveState(int first, int second, int third, int smooth, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly ResidualAverageWindow _a = new(MovingAvgType.ExponentialMovingAverage, first, MovingAvgType.SimpleMovingAverage, [smooth], count);
+        private readonly ResidualAverageWindow _b = new(MovingAvgType.ExponentialMovingAverage, second, MovingAvgType.SimpleMovingAverage, [smooth], count);
+        private readonly ResidualAverageWindow _c = new(MovingAvgType.ExponentialMovingAverage, third, MovingAvgType.SimpleMovingAverage, [smooth], count);
+        public void Reset() { _a.Reset(); _b.Reset(); _c.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        { outputs[0] = _a.Next(bar.Close, true).Value; outputs[1] = _b.Next(bar.Close, true).Value; outputs[2] = _c.Next(bar.Close, true).Value; }
+        public void Dispose() { _a.Dispose(); _b.Dispose(); _c.Dispose(); }
+    }
+
+    private sealed class GeneratedEnhancedIndexState(int length, int signal) : IMultiOutputState, IDisposable
+    {
+        private readonly EnhancedIndexWindow _window = new(MovingAvgType.SimpleMovingAverage, length, signal);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var value = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = value.Line; outputs[1] = value.SignalLine; }
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable

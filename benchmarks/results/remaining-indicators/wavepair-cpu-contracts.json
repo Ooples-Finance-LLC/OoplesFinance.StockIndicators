@@ -1,0 +1,38 @@
+{
+  "batch": "wavepair-shared-execution",
+  "types": [
+    "ElliottWaveOscillator",
+    "EmaWaveIndicator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 52,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "wavepair-unit-verified.trx.gz",
+        "passed_cases": 52,
+        "trx_sha256": "95b409855b7e4644ecf178cb26c4c0eff118ed8b7c3ce9eb93a5cf23b3e966d3"
+      },
+      {
+        "file": "wavepair-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "ec01406b6379dbdfb48e86fc00d4a87476fa11bbb587d47bb273a6519c658c3f"
+      }
+    ],
+    "context": "Executed in the 4-facade fourth-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313",
+    "test_execution_input_sha256": {
+      "unit": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313",
+      "parity": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "ea992b2cc29f900f0049affd947415e83f3af931"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}
