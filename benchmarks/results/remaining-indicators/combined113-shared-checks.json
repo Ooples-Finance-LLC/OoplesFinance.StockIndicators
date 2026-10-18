@@ -28,12 +28,13 @@
     }
   },
   "discovery_evidence": "combined113-discovery.trx.gz",
-  "gpu_evidence": "../shared-rollout/local-gpu-contracts/receipt.json",
+  "gpu_evidence": "combined113-gpu-contracts.json",
   "known_failed_unit_cases": 3,
   "known_failures_evidence": "combined113-known-macd-failures.trx.gz",
   "pending": [
     "MACD unit-contract failures",
     "raw timing and performance comparison",
     "required hosted checks"
-  ]
+  ],
+  "gpu_trx_evidence": "combined113-gpu.trx.gz"
 }
