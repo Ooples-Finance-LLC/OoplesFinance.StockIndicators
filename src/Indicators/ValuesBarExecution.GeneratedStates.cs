@@ -40,6 +40,7 @@ internal static partial class ValuesBarExecution
         indicator is GroverLlorensActivator { MaType: null } grover && double.IsFinite(grover.Mult) ||
         indicator is HampelFilter hampel && double.IsFinite(hampel.ScalingFactor) ||
         indicator is HawkeyeVolumeIndicator hawkeye && double.IsFinite(hawkeye.Divisor) ||
+        indicator is HerrickPayoffIndex payoff && double.IsFinite(payoff.PointValue) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -742,6 +743,7 @@ internal static partial class ValuesBarExecution
         HawkeyeVolumeIndicator hawkeye => new GeneratedHawkeyeState(hawkeye.Divisor),
         GuppyCountBackLine countBack => new GeneratedCountBackState(countBack.Length, count),
         HirashimaSugitaRS bands => new GeneratedHirashimaState(bands.Length),
+        HerrickPayoffIndex payoff => new GeneratedHerrickState(payoff.PointValue),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5665,6 +5667,14 @@ internal static partial class ValuesBarExecution
         private readonly HirashimaWindow _window = new(MovingAvgType.WeightedMovingAverage, length);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true, outputs);
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedHerrickState(double pointValue) : IIndicatorState, IDisposable
+    {
+        private readonly HerrickPayoffWindow _window = new(pointValue);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(PriceMean.Of(bar.High, bar.Low), bar.Open, bar.Close, bar.Volume, true).Value;
         public void Dispose() => Reset();
     }
 

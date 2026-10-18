@@ -7,6 +7,7 @@ namespace OoplesFinance.StockIndicators.CompetitorTests;
 public sealed class RemainingBenchmarkDiscoveryTests
 {
     [Theory]
+    [InlineData(typeof(RemainingHerrickBenchmarks), 8)]
     [InlineData(typeof(RemainingHirashimaBenchmarks), 8)]
     [InlineData(typeof(RemainingCountBackBenchmarks), 8)]
     [InlineData(typeof(RemainingHalfHawkeyeBenchmarks), 16)]
