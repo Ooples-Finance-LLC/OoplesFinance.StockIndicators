@@ -207,6 +207,7 @@ internal static partial class ValuesBarExecution
             or SuperSmoother or EhlersSquelchIndicator
             or EhlersVariableIndexDynamicAverage { MaType: null, SecondAverage: null }
             or EhlersSwissArmyKnife { Delta: >= 0 and <= double.MaxValue }
+            or EhlersCombFilterSpectralEstimate { Bw: >= 0 and <= double.MaxValue } or EhlersDominantCycleTunedBypassFilter or EhlersAutoCorrelationReversals { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -629,6 +630,9 @@ internal static partial class ValuesBarExecution
         EhlersVariableIndexDynamicAverage => new GeneratedEhlersVidyaState(),
         EhlersSquelchIndicator squelch => new GeneratedSquelchState(squelch.Length1, squelch.Length2, squelch.Length3),
         EhlersSwissArmyKnife knife => new GeneratedSwissArmyState(knife.Length, knife.Delta),
+        EhlersAutoCorrelationReversals reversal => new GeneratedAutocorrelationReversalState(reversal.Length1, reversal.Length2, reversal.Length3),
+        EhlersCombFilterSpectralEstimate comb => new GeneratedCombSpectrumState(comb.Length1, comb.Length2, comb.Bw),
+        EhlersDominantCycleTunedBypassFilter tuned => new GeneratedTunedBypassState(tuned.MinLength, tuned.MaxLength, Math.Max(3, tuned.Length1), tuned.Length2),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4720,6 +4724,35 @@ internal static partial class ValuesBarExecution
         private readonly SwissArmyWindow _window = new(length, delta);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true).Values.AsSpan().CopyTo(outputs);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAutocorrelationReversalState(int length, int smoothing, int firstLag) : IIndicatorState, IDisposable
+    {
+        private readonly AutocorrelationReversalWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, smoothing, firstLag, true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true, 0).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedCombSpectrumState(int upper, int lower, double bandwidth) : IIndicatorState, IDisposable
+    {
+        private readonly CombSpectrumWindow _window = new(upper, lower, bandwidth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedTunedBypassState(int minimum, int maximum, int cutoff, int median) : IMultiOutputState, IDisposable
+    {
+        private readonly TunedBypassWindow _window = new(minimum, maximum, cutoff, median);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.First;
+            outputs[1] = point.Second;
+        }
         public void Dispose() => _window.Dispose();
     }
 
