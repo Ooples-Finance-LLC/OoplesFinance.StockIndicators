@@ -254,6 +254,7 @@ internal static partial class ValuesBarExecution
             or GuppyCountBackLine { Length: <= 1_073_741_824 }
             or HirashimaSugitaRS { MaType: null }
             or HighLowIndex { MaType: null }
+            or InternalBarStrengthIndicator
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -746,6 +747,7 @@ internal static partial class ValuesBarExecution
         HirashimaSugitaRS bands => new GeneratedHirashimaState(bands.Length),
         HerrickPayoffIndex payoff => new GeneratedHerrickState(payoff.PointValue),
         HighLowIndex index => new GeneratedHighLowIndexState(Math.Max(1, index.Length), count),
+        InternalBarStrengthIndicator strength => new GeneratedInternalBarState(strength.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5699,6 +5701,18 @@ internal static partial class ValuesBarExecution
             return _ema.GetNext(total == 0 ? 0 : 100 * advances / total, true);
         }
         public void Dispose() { _high.Dispose(); _low.Dispose(); _advances.Dispose(); _declines.Dispose(); }
+    }
+
+    private sealed class GeneratedInternalBarState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly InternalBarStrengthWindow _window = new(length, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
