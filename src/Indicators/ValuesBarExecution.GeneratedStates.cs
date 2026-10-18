@@ -257,6 +257,7 @@ internal static partial class ValuesBarExecution
             or InternalBarStrengthIndicator
             or Inertia
             or InertiaIndicator { MaType: null }
+            or HybridConvolutionFilter { Length: < int.MaxValue }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -752,6 +753,7 @@ internal static partial class ValuesBarExecution
         InternalBarStrengthIndicator strength => new GeneratedInternalBarState(strength.Length),
         Inertia inertia => new GeneratedInertiaState(inertia.SmoothLength, inertia.RviLength),
         InertiaIndicator inertia => new GeneratedInertiaState(inertia.Length, 14),
+        HybridConvolutionFilter filter => new GeneratedHybridState(Math.Max(1, filter.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5727,6 +5729,42 @@ internal static partial class ValuesBarExecution
         public void Reset() { _high.Reset(); _low.Reset(); _regression.Reset(); }
         public double Update(in Bar bar) => _regression.Next(Helpers.RelativeVolatilityWindow.Mean(_high.Next(bar.High, true), _low.Next(bar.Low, true)), true);
         public void Dispose() { _high.Dispose(); _low.Dispose(); _regression.Reset(); }
+    }
+
+    private sealed class GeneratedHybridState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<double> _values;
+        private readonly (double Sign, double Difference)[] _weights;
+        private double _previous;
+        private bool _started;
+        public GeneratedHybridState(int length, int count)
+        {
+            _length = length; _values = new(Math.Min(length, Math.Max(1, count)));
+            _weights = new (double, double)[Math.Min(length, 256)];
+            for (var j = 1; j <= _weights.Length; j++) _weights[j - 1] = Weight(j);
+        }
+        private (double Sign, double Difference) Weight(int j)
+        {
+            var sign = 0.5 * (1 - Math.Cos((double)j / _length * Math.PI));
+            var difference = sign - (0.5 * (1 - Math.Cos((double)(j - 1) / _length * Math.PI)));
+            return (sign, difference);
+        }
+        public void Reset() { _values.Clear(); _previous = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            var previous = _started ? _previous : bar.Close;
+            double value = 0;
+            for (var j = 1; j <= _length; j++)
+            {
+                var weight = j <= _weights.Length ? _weights[j - 1] : Weight(j);
+                var prior = Streaming.EhlersStreamingWindow.GetOffsetValue(_values, bar.Close, j - 1);
+                value += ((weight.Sign * previous) + ((1 - weight.Sign) * prior)) * weight.Difference;
+            }
+            _values.TryAdd(bar.Close, out _); _previous = value; _started = true;
+            return value;
+        }
+        public void Dispose() => _values.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
