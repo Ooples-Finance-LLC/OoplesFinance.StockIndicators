@@ -37,6 +37,8 @@ internal static partial class ValuesBarExecution
 
     private static bool IsGeneratedState(IIndicator indicator) =>
         IsDemarkCountState(indicator) ||
+        indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
+        indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
@@ -230,6 +232,9 @@ internal static partial class ValuesBarExecution
             or EndPointMovingAverage
             or ElliottWaveOscillator { MaType: null, SecondAverage: null, ThirdAverage: null } or EmaWaveIndicator
             or EnhancedIndex { MaType: null }
+            or FallingRisingFilter
+            or FastSlowKurtosisOscillator or FastSlowRsiOscillator or FastSlowStochasticOscillator
+            or FastSlowDegreeOscillator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -692,6 +697,13 @@ internal static partial class ValuesBarExecution
         ElliottWaveOscillator wave => new GeneratedElliottWaveState(Math.Max(1, wave.FastLength), Math.Max(1, wave.SlowLength), count),
         EmaWaveIndicator wave => new GeneratedEmaWaveState(wave.Length1, wave.Length2, wave.Length3, wave.SmoothLength, count),
         EnhancedIndex index => new GeneratedEnhancedIndexState(index.Length, index.SignalLength),
+        FallingRisingFilter filter => new GeneratedFallingRisingState(filter.Length),
+        FXSniperIndicator sniper => new GeneratedFxSniperState(sniper.CciLength, sniper.T3Length, sniper.B),
+        FastSlowKurtosisOscillator kurtosis => new GeneratedFastSlowKurtosisState(kurtosis.Length, .03),
+        FastandSlowKurtosisOscillator kurtosis => new GeneratedFastSlowKurtosisState(kurtosis.Length, kurtosis.Ratio),
+        FastSlowRsiOscillator => new GeneratedFastSlowCompositeState(true),
+        FastSlowStochasticOscillator => new GeneratedFastSlowCompositeState(false),
+        FastSlowDegreeOscillator degree => new GeneratedFastSlowDegreeState(degree.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5247,6 +5259,49 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         { var value = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = value.Line; outputs[1] = value.SignalLine; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFallingRisingState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly FallingRisingWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Line;
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedFxSniperState(int cciLength, int t3Length, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly FxSniperWindow _window = new(MovingAvgType.SimpleMovingAverage, cciLength, t3Length, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close), true).Line;
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFastSlowKurtosisState(int length, double ratio) : IMultiOutputState, IDisposable
+    {
+        private readonly FastSlowKurtosisWindow _window = new(length, ratio, MovingAvgType.WeightedMovingAverage);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.Signal; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFastSlowCompositeState(bool rsi) : IMultiOutputState, IDisposable
+    {
+        private readonly FastSlowCompositeWindow _window = new(rsi, MovingAvgType.WeightedMovingAverage, 3, 6, 9, rsi ? 6 : 9);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFastSlowDegreeState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly FastSlowDegreeWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 3, 2, 14);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; outputs[2] = point.Histogram; }
         public void Dispose() { Reset(); _window.Dispose(); }
     }
 
